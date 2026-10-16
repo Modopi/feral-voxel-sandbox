@@ -20,7 +20,11 @@ const makePart = (
   count: dims[0] * dims[1] * dims[2],
 });
 function species(name, cell, color, predator = false, small = false) {
-  const s = small ? 0.72 : 1;
+  const leg = small ? 0.25 : 0.5,
+    body = small ? 0.4 : 0.78,
+    head = small ? 0.57 : 1.08,
+    ear = small ? 0.78 : 1.45,
+    s = small ? 0.55 : 1;
   return {
     name,
     cell,
@@ -30,8 +34,8 @@ function species(name, cell, color, predator = false, small = false) {
     parts: [
       makePart(
         "몸통",
-        [0, 0.95 * s, 0],
-        small ? [4, 3, 6] : [4, 3, 5],
+        [0, body, 0],
+        [4, 2, small ? 5 : 4],
         cell,
         color,
         "core",
@@ -39,22 +43,22 @@ function species(name, cell, color, predator = false, small = false) {
       ),
       makePart(
         "머리",
-        [0, 1.38 * s, -0.62 * s],
-        [3, 3, 3],
+        [0, head, -0.53 * s],
+        [2, 2, 2],
         cell,
         predator ? 0xd4a273 : 0xa4c899,
         "head",
       ),
       ...[
-        [-0.35, 0.64, -0.4],
-        [0.35, 0.64, -0.4],
-        [-0.35, 0.64, 0.4],
-        [0.35, 0.64, 0.4],
+        [-0.35, leg, -0.32],
+        [0.35, leg, -0.32],
+        [-0.35, leg, 0.32],
+        [0.35, leg, 0.32],
       ].map((p, i) =>
         makePart(
           ["왼쪽 앞다리", "오른쪽 앞다리", "왼쪽 뒷다리", "오른쪽 뒷다리"][i],
-          p.map((v) => v * s),
-          [1, 3, 1],
+          [p[0] * s, p[1], p[2] * s],
+          [1, 2, 1],
           cell,
           predator ? 0x705148 : 0x537767,
           "leg",
@@ -64,8 +68,8 @@ function species(name, cell, color, predator = false, small = false) {
       ),
       makePart(
         "꼬리",
-        [0, 1.03 * s, 0.8 * s],
-        [1, 1, 3],
+        [0, body, 0.65 * s],
+        [1, 1, 2],
         cell,
         predator ? 0xe7bc88 : 0x6f9c85,
         "tail",
@@ -73,9 +77,9 @@ function species(name, cell, color, predator = false, small = false) {
       ...[-1, 1].map((x, i) =>
         makePart(
           i ? "오른쪽 귀" : "왼쪽 귀",
-          [x * 0.22 * s, 1.9 * s, -0.66 * s],
-          [1, 2, 1],
-          cell,
+          [x * 0.18 * s, ear, -0.53 * s],
+          [1, small ? 1 : 2, 1],
+          0.125,
           predator ? 0x6b4842 : 0xd8d4aa,
           "ear",
           1,
@@ -150,6 +154,8 @@ export class Ecology {
     this.tick = 0;
     this.birthBudget = 0;
     this.debris = [];
+    this.onVoxel = null;
+    this.onDeath = () => {};
   }
   spawn(type, x, z) {
     if (this.entities.length >= 3200) return null;
@@ -183,6 +189,10 @@ export class Ecology {
     for (let i = 0; i < n; i++) {
       let x = 8 + this.world.random() * (SIZE - 16),
         z = 8 + this.world.random() * (SIZE - 16);
+      if (Math.hypot(x - 77.5, z - 84.5) < 6) {
+        x = 30 + this.world.random() * 30;
+        z = 35 + this.world.random() * 25;
+      }
       if (this.world.surface(x, z) <= 9) {
         x = 20 + this.world.random() * 57;
       }
@@ -218,6 +228,7 @@ export class Ecology {
     e.dead = true;
     e.energy = 0;
     this.world.reactions.deaths++;
+    this.onDeath(e);
     const i = clamp(e.x | 0, 0, SIZE - 1) + clamp(e.z | 0, 0, SIZE - 1) * SIZE;
     this.world.nutrients[i] = clamp(this.world.nutrients[i] + 0.35, 0, 1);
     this.world.event(SPECIES[e.type].name + " → 토양 영양분", [e.x, e.y, e.z]);
@@ -329,6 +340,9 @@ export class Ecology {
     // Movement is integrated for every entity; distant decisions run at a lower rate.
     for (const e of this.entities) {
       if (e.dead) continue;
+      e.px = e.x;
+      e.py = e.y;
+      e.pz = e.z;
       const d2 = (e.x - camera.x) ** 2 + (e.z - camera.z) ** 2,
         interval = d2 < 900 ? 0.25 : d2 < 3600 ? 1 : 3;
       if (time - e.lastThink >= interval) {
@@ -447,6 +461,10 @@ export class Ecology {
     }
     return hit;
   }
+  emitDebris(d) {
+    if (this.onVoxel) this.onVoxel(d);
+    else this.debris.push(d);
+  }
   detach(e, pi, time) {
     if (e.lost & (1 << pi)) return;
     const p = SPECIES[e.type].parts[pi];
@@ -455,7 +473,7 @@ export class Ecology {
       if (!e.damage[pi] || e.damage[pi][j]) {
         if (this.debris.length >= 350) break;
         const v = toWorld(e, p, pi, cellPosition(p, j), time);
-        this.debris.push({
+        this.emitDebris({
           x: v[0],
           y: v[1],
           z: v[2],
@@ -495,7 +513,7 @@ export class Ecology {
         removed++;
         if (this.debris.length < 350) {
           const w = toWorld(e, p, pi, q, time);
-          this.debris.push({
+          this.emitDebris({
             x: w[0],
             y: w[1],
             z: w[2],
@@ -561,6 +579,19 @@ export class Ecology {
       if (dam[j] && !keep.has(j)) {
         dam[j] = 0;
         removed++;
+        const w = toWorld(e, p, pi, cellPosition(p, j), time);
+        this.emitDebris({
+          x: w[0],
+          y: w[1],
+          z: w[2],
+          vx: 0,
+          vy: 1,
+          vz: 0,
+          life: 5,
+          rx: 0,
+          cell: p.cell,
+          color: p.color,
+        });
       }
     e.energy -= removed * 1.8;
     e.fear = 6;
@@ -598,7 +629,17 @@ export class Ecology {
     this.entities = s.entities.map((e) => ({
       ...e,
       damage: Object.fromEntries(
-        Object.entries(e.damage).map(([k, v]) => [k, new Uint8Array(v)]),
+        Object.entries(e.damage).map(([k, v]) => [
+          k,
+          (() => {
+            const n = SPECIES[e.type].parts[k]?.count || v.length;
+            if (n === v.length) return new Uint8Array(v);
+            const intact = v.filter(Boolean).length / v.length,
+              arr = new Uint8Array(n).fill(1);
+            arr.fill(0, 0, Math.round(n * (1 - intact)));
+            return arr;
+          })(),
+        ]),
       ),
     }));
     this.rehash();

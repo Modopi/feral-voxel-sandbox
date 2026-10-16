@@ -1115,3 +1115,262 @@ footer {
     font-size: 8px;
   }
 }
+
+/* Compact action HUD and resource progression. */
+#inventoryBtn {
+  margin-left: auto;
+  position: relative;
+  font-size: 25px;
+  background: #16392bc9;
+}
+#menuBtn {
+  margin-left: 0;
+}
+.bagButton small {
+  position: absolute;
+  bottom: 1px;
+  right: 4px;
+  font-size: 8px;
+  color: var(--gold);
+}
+.rangeButton {
+  position: absolute;
+  left: 50%;
+  bottom: 128px;
+  transform: translateX(-50%);
+  background: #19392edb;
+  border: 1px solid #dfbc7066;
+  color: var(--gold);
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 10px;
+  min-height: 32px;
+  pointer-events: auto !important;
+}
+.rangeButton:active {
+  transform: translateX(-50%) scale(0.98);
+}
+#discovery strong {
+  font-size: 21px;
+}
+#radar {
+  opacity: 0.83;
+}
+#pauseScreen .panel {
+  max-width: 860px;
+}
+.tabs {
+  gap: 15px;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.tabs button {
+  flex-shrink: 0;
+}
+.bagHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+.bagHeader b {
+  font-size: 14px;
+}
+.bagHeader p {
+  font-size: 10px;
+  margin: 6px 0 14px;
+}
+.bagHeader > span {
+  font-size: 10px;
+  color: var(--gold);
+}
+.bagLayout {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 22px;
+}
+#inventoryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+}
+.itemSlot {
+  position: relative;
+  height: 72px;
+  background: #bed3ab0b;
+  border: 1px solid #b8cca526;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+.itemSlot > span {
+  font-size: 24px;
+  line-height: 25px;
+}
+.itemSlot > b {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  font-size: 11px;
+  color: #efdfb3;
+}
+.itemSlot > small {
+  font-size: 9px;
+  color: #b6c7a9;
+}
+.itemSlot.equipped {
+  border-color: var(--gold);
+  background: #dec17b17;
+}
+.recipe {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #bad0a51a;
+}
+.recipe b {
+  display: block;
+  font-size: 12px;
+  color: #ece5c7;
+}
+.recipe small {
+  display: block;
+  font-size: 9px;
+  color: #b8c8ad;
+  line-height: 1.7;
+  margin-top: 4px;
+}
+.recipe p {
+  font-size: 9px;
+  margin: 4px 0 0;
+  color: var(--gold);
+}
+.recipe button {
+  min-width: 58px;
+  min-height: 38px;
+  padding: 8px 12px;
+  font-size: 10px;
+}
+.recipe button:disabled {
+  background: #79917629;
+  color: #91a98a;
+  opacity: 0.65;
+  cursor: default;
+}
+.bagGuide {
+  font-size: 10px;
+}
+.bagHeader {
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 14px;
+}
+@media (max-height: 520px) {
+  .rangeButton {
+    bottom: 120px;
+    padding: 7px 13px;
+    font-size: 9px;
+  }
+  .bagLayout {
+    gap: 16px;
+  }
+  .itemSlot {
+    height: 61px;
+  }
+  .itemSlot > span {
+    font-size: 21px;
+  }
+  .itemSlot > small {
+    font-size: 8px;
+  }
+  .recipe {
+    padding: 8px 0;
+  }
+  .bagHeader p {
+    margin-bottom: 10px;
+  }
+  #pauseScreen .panel {
+    padding: 17px 24px;
+  }
+  .tabs {
+    margin: 8px 0 14px;
+  }
+  #radar {
+    width: 88px;
+    right: 18px;
+    top: 72px;
+  }
+  #map {
+    width: 74px;
+    height: 74px;
+  }
+}
+@media (orientation: portrait) {
+  header {
+    gap: 9px;
+  }
+  .telemetry {
+    gap: 5px;
+    font-size: 8px;
+  }
+  .brand small {
+    font-size: 7px;
+  }
+  .icon-button {
+    width: 40px;
+    height: 40px;
+  }
+  .rangeButton {
+    bottom: 118px;
+  }
+  .bagLayout {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .bagHeader {
+    align-items: start;
+  }
+  .bagHeader p {
+    max-width: 240px;
+    font-size: 9px;
+  }
+  .bagHeader > span {
+    font-size: 8px;
+    white-space: nowrap;
+  }
+  #inventoryGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .tabs {
+    gap: 10px;
+  }
+  .tabs button {
+    font-size: 10px;
+  }
+  .recipe {
+    padding: 12px 0;
+  }
+}
+
+.screen {
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+.tabs {
+  touch-action: pan-x;
+}
+.panelTop {
+  position: sticky;
+  top: 0;
+  background: #142d28;
+  z-index: 3;
+  padding: 4px 0 8px;
+}
+input[type="range"] {
+  touch-action: pan-x;
+}

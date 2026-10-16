@@ -15,10 +15,11 @@ export const B = {
   BASALT: 8,
   LAVA: 9,
   ASH: 10,
+  PLANK: 11,
 };
 export const COLORS = [
   0, 0x729b4c, 0x8b654b, 0x8c9698, 0xd6bc80, 0x805738, 0x4d8147, 0x66bbb4,
-  0x424e58, 0xf77b2e, 0x4d4746,
+  0x424e58, 0xf77b2e, 0x4d4746, 0xc5a071,
 ];
 export const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 export function hash(x, z, s = 0) {
@@ -49,6 +50,7 @@ export class World {
     this.fluids = new Map();
     this.burning = new Map();
     this.edits = new Map();
+    this.subcells = new Map();
     this.dirty = new Set();
     this.flowCursor = 0;
     this.ecoCursor = 0;
@@ -93,7 +95,8 @@ export class World {
     z |= 0;
     if (!this.inside(x, y, z) || y === 0) return false;
     const i = this.index(x, y, z);
-    if (this.blocks[i] === v) return false;
+    if (this.blocks[i] === v && !this.subcells.has(i)) return false;
+    this.subcells.delete(i);
     this.blocks[i] = v;
     if (record) this.edits.set(i, v);
     if (v) this.fluids.delete(i);
@@ -127,9 +130,163 @@ export class World {
       }
   }
   surface(x, z) {
-    x = clamp(x | 0, 0, SIZE - 1);
-    z = clamp(z | 0, 0, SIZE - 1);
-    return this.ground[x + z * SIZE] + 1;
+    const xx = clamp(Math.floor(x), 0, SIZE - 1),
+      zz = clamp(Math.floor(z), 0, SIZE - 1),
+      top = this.ground[xx + zz * SIZE];
+    if (!this.subcells.has(this.index(xx, top, zz))) return top + 1;
+    const hx = clamp(Math.floor(x * 2), 0, SIZE * 2 - 1),
+      hz = clamp(Math.floor(z * 2), 0, SIZE * 2 - 1);
+    for (let hy = top * 2 + 1; hy >= 0; hy--) {
+      const b = this.getCell(hx, hy, hz);
+      if (b && b !== B.WOOD && b !== B.LEAF) return (hy + 1) * 0.5;
+    }
+    return 0;
+  }
+  // Only edited one-metre cells allocate eight half-metre children.
+  getCell(hx, hy, hz) {
+    if (hy < 0) return B.BASALT;
+    if (
+      hx < 0 ||
+      hz < 0 ||
+      hx >= SIZE * 2 ||
+      hz >= SIZE * 2 ||
+      hy >= HEIGHT * 2
+    )
+      return 0;
+    const i = this.index(hx >> 1, hy >> 1, hz >> 1),
+      fine = this.subcells.get(i);
+    return fine
+      ? fine[(hx & 1) + ((hy & 1) << 1) + ((hz & 1) << 2)]
+      : this.blocks[i];
+  }
+  meshCell(x, y, z) {
+    if (!this.inside(x, y, z)) return this.get(x, y, z);
+    return this.subcells.has(this.index(x, y, z)) ? 0 : this.get(x, y, z);
+  }
+  setCell(hx, hy, hz, value) {
+    if (
+      hx < 0 ||
+      hz < 0 ||
+      hy < 2 ||
+      hx >= SIZE * 2 ||
+      hz >= SIZE * 2 ||
+      hy >= HEIGHT * 2
+    )
+      return false;
+    const x = hx >> 1,
+      y = hy >> 1,
+      z = hz >> 1,
+      i = this.index(x, y, z),
+      j = (hx & 1) + ((hy & 1) << 1) + ((hz & 1) << 2);
+    let fine = this.subcells.get(i);
+    if (!fine) {
+      if (this.blocks[i] === value) return false;
+      fine = new Uint8Array(8).fill(this.blocks[i]);
+      this.subcells.set(i, fine);
+    }
+    if (fine[j] === value) return false;
+    fine[j] = value;
+    if (fine.every((v) => v === fine[0])) {
+      this.subcells.delete(i);
+      this.blocks[i] = fine[0];
+    } else this.blocks[i] = fine.find((v) => v !== 0) || 0;
+    this.edits.set(i, this.blocks[i]);
+    this.fluids.delete(i);
+    this.mark(x, z);
+    this.rescan(x, z);
+    return true;
+  }
+  miningRegion(hit, size = 1) {
+    const n = Math.round(size * 2),
+      start =
+        n === 1
+          ? [hit.hx, hit.hy, hit.hz]
+          : [
+              Math.floor(hit.hx / 2) * 2 - (n === 4 ? 1 : 0),
+              Math.floor(hit.hy / 2) * 2 - (n === 4 ? 1 : 0),
+              Math.floor(hit.hz / 2) * 2 - (n === 4 ? 1 : 0),
+            ];
+    return { start, n, size };
+  }
+  mine(hit, size = 1) {
+    const r = this.miningRegion(hit, size),
+      counts = new Map();
+    let removed = 0;
+    for (let dz = 0; dz < r.n; dz++)
+      for (let dy = 0; dy < r.n; dy++)
+        for (let dx = 0; dx < r.n; dx++) {
+          const x = r.start[0] + dx,
+            y = r.start[1] + dy,
+            z = r.start[2] + dz,
+            b = this.getCell(x, y, z);
+          if (!b || b === B.LAVA || y < 2) continue;
+          if (this.setCell(x, y, z, 0)) {
+            counts.set(b, (counts.get(b) || 0) + 1);
+            removed++;
+          }
+        }
+    return { removed, counts, region: r };
+  }
+  placeCells(start, size, material) {
+    const n = Math.round(size * 2);
+    for (let z = 0; z < n; z++)
+      for (let y = 0; y < n; y++)
+        for (let x = 0; x < n; x++) {
+          const hx = start[0] + x,
+            hy = start[1] + y,
+            hz = start[2] + z;
+          if (
+            hx < 0 ||
+            hz < 0 ||
+            hy < 2 ||
+            hx >= SIZE * 2 ||
+            hz >= SIZE * 2 ||
+            hy >= HEIGHT * 2 ||
+            this.getCell(hx, hy, hz)
+          )
+            return false;
+        }
+    for (let z = 0; z < n; z++)
+      for (let y = 0; y < n; y++)
+        for (let x = 0; x < n; x++)
+          this.setCell(start[0] + x, start[1] + y, start[2] + z, material);
+    return true;
+  }
+  raycast(origin, dir, max = 7) {
+    const o = [origin.x, origin.y, origin.z],
+      d = [dir.x, dir.y, dir.z],
+      cell = o.map((v) => Math.floor(v * 2)),
+      step = d.map((v) => (v >= 0 ? 1 : -1)),
+      tDelta = d.map((v) => (v ? Math.abs(0.5 / v) : Infinity)),
+      tMax = d.map((v, k) =>
+        v ? ((cell[k] + (v >= 0 ? 1 : 0)) * 0.5 - o[k]) / v : Infinity,
+      );
+    let t = 0,
+      normal = [0, 0, 0];
+    for (let iter = 0; iter < 160 && t <= max; iter++) {
+      const b = this.getCell(...cell);
+      if (b)
+        return {
+          x: cell[0] >> 1,
+          y: cell[1] >> 1,
+          z: cell[2] >> 1,
+          hx: cell[0],
+          hy: cell[1],
+          hz: cell[2],
+          b,
+          distance: t,
+          point: o.map((v, k) => v + d[k] * t),
+          normal,
+        };
+      let axis = tMax[0] < tMax[1] ? 0 : 1;
+      if (tMax[2] < tMax[axis]) axis = 2;
+      t = tMax[axis];
+      cell[axis] += step[axis];
+      tMax[axis] += tDelta[axis];
+      normal = [0, 0, 0];
+      normal[axis] = -step[axis];
+    }
+    return null;
   }
   generate() {
     for (let z = 0; z < SIZE; z++)
@@ -169,7 +326,7 @@ export class World {
       for (let x = 5; x < SIZE - 5; x++)
         if (
           x < 125 &&
-          Math.hypot(x - 77, z - 84) > 8 &&
+          Math.hypot(x - 77, z - 84) > 11 &&
           hash(x, z, this.seed + 87) > 0.992 &&
           this.ground[x + z * SIZE] > SEA + 2
         ) {
@@ -189,8 +346,8 @@ export class World {
         }
     // Flat, clear landing patch with a safe two-block head space.
     const landing = this.ground[77 + 84 * SIZE];
-    for (let z = 81; z <= 87; z++)
-      for (let x = 74; x <= 80; x++) {
+    for (let z = 78; z <= 90; z++)
+      for (let x = 71; x <= 81; x++) {
         for (let y = 1; y < HEIGHT; y++)
           this.blocks[this.index(x, y, z)] =
             y < landing - 2
@@ -204,6 +361,25 @@ export class World {
         for (let y = landing + 1; y < HEIGHT; y++)
           this.fluids.delete(this.index(x, y, z));
       }
+    // A half-metre stair path links the open landing to the river bank.
+    for (let x = 80; x <= 86; x++)
+      for (let z = 82; z <= 86; z++) {
+        const top = landing + 1 - (x - 80) * 0.5,
+          full = Math.floor(top);
+        for (let y = 1; y < HEIGHT; y++)
+          this.blocks[this.index(x, y, z)] =
+            y < full ? (y === full - 1 ? B.GRASS : B.DIRT) : 0;
+        this.ground[x + z * SIZE] = full - 1;
+        for (let y = full; y < HEIGHT; y++)
+          this.fluids.delete(this.index(x, y, z));
+        if (top !== full)
+          for (let dx = 0; dx < 2; dx++)
+            for (let dz = 0; dz < 2; dz++)
+              this.setCell(x * 2 + dx, full * 2, z * 2 + dz, B.GRASS);
+      }
+    for (let z = 83; z <= 86; z++)
+      for (let x = 76; x <= 77; x++)
+        this.blocks[this.index(x, landing, z)] = B.PLANK;
     // Ruin / volcanic test site; no continuous source creates free fluid mass.
     this.landmarks = [
       { x: 77, z: 81, name: "초록 능선" },
@@ -251,7 +427,7 @@ export class World {
     if (!this.inside(x, y, z)) return;
     const i = this.index(x, y, z),
       b = this.get(x, y, z);
-    if ([B.GRASS, B.WOOD, B.LEAF].includes(b) && !this.burning.has(i))
+    if ([B.GRASS, B.WOOD, B.LEAF, B.PLANK].includes(b) && !this.burning.has(i))
       this.burning.set(i, { life: b === B.WOOD ? 8 : b === B.LEAF ? 3 : 4 });
   }
   fluidStep(budget = 360) {
@@ -328,7 +504,7 @@ export class World {
         if (
           f.a > 0.04 &&
           f.a / f.v > 0.3 &&
-          [B.DIRT, B.GRASS, B.WOOD, B.LEAF].includes(b) &&
+          [B.DIRT, B.GRASS, B.WOOD, B.LEAF, B.PLANK].includes(b) &&
           this.random() < 0.025
         ) {
           this.set(xx, yy, zz, B.AIR);
@@ -415,6 +591,7 @@ export class World {
       time: this.time,
       rngState: this.rngState,
       edits: [...this.edits],
+      subcells: [...this.subcells].map(([i, v]) => [i, Array.from(v)]),
       fluids: [...this.fluids].map(([i, f]) => [
         i,
         +f.v.toFixed(5),
@@ -432,6 +609,14 @@ export class World {
     for (const [i, v] of s.edits || []) {
       const [x, y, z] = this.decode(i);
       this.set(x, y, z, v);
+    }
+    for (const [i, values] of s.subcells || []) {
+      if (Array.isArray(values) && values.length === 8) {
+        this.subcells.set(i, new Uint8Array(values));
+        const [x, y, z] = this.decode(i);
+        this.mark(x, z);
+        this.rescan(x, z);
+      }
     }
     if (s.fluids)
       this.fluids = new Map(s.fluids.map(([i, v, a]) => [i, { v, a }]));

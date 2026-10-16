@@ -33,7 +33,7 @@ if [[ ! -f signing/prototype.keystore ]]; then
  keytool -genkeypair -keystore signing/prototype.keystore -alias feral -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android -dname 'CN=FERAL Prototype,O=KGB,C=KR'
 fi
 "$FERAL_BT/zipalign" -f -p 4 build/unsigned.apk build/aligned.apk
-"$FERAL_BT/apksigner" sign --ks signing/prototype.keystore --ks-key-alias feral --ks-pass pass:android --key-pass pass:android --out build/Feral-0.1-android.apk build/aligned.apk
-"$FERAL_BT/apksigner" verify --verbose build/Feral-0.1-android.apk
-"$FERAL_BT/zipalign" -c -p 4 build/Feral-0.1-android.apk
-printf 'APK ready: %s/build/Feral-0.1-android.apk\n' "$PWD"
+"$FERAL_BT/apksigner" sign --ks signing/prototype.keystore --ks-key-alias feral --ks-pass pass:android --key-pass pass:android --out build/Feral-0.2-android.apk build/aligned.apk
+"$FERAL_BT/apksigner" verify --verbose build/Feral-0.2-android.apk
+"$FERAL_BT/zipalign" -c -p 4 build/Feral-0.2-android.apk
+printf 'APK ready: %s/build/Feral-0.2-android.apk\n' "$PWD"

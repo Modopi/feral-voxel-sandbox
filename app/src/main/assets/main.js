@@ -1,13 +1,37 @@
 import { World, B, SIZE, HEIGHT, COLORS, clamp } from "./world.js";
 import { Ecology, SPECIES } from "./entities.js";
 import { View, T } from "./render.js";
+import {
+  CharacterController,
+  FIXED_DT,
+  EYE_HEIGHT,
+  BODY_HEIGHT,
+  BODY_RADIUS,
+} from "./physics.js";
+import {
+  Inventory,
+  Pickups,
+  ITEMS,
+  RECIPES,
+  resourceForBlock,
+} from "./inventory.js";
+let inventory = new Inventory(),
+  loot = new Pickups(),
+  controller,
+  miningSize = 1,
+  buildSize = 1,
+  buildMaterial = "dirt",
+  physicsAccum = 0,
+  physicsTick = 0,
+  lastInventoryRevision = -1,
+  collectedMessage = 0;
 const $ = (id) => document.getElementById(id),
   storageKey = "feral.world.v1";
 const tools = [
   ["◈", "관찰", "관찰 렌즈", "생태와 신체 상태 읽기"],
   ["⌁", "펄스", "복셀 펄스", "개체의 복셀을 정밀하게 깎기"],
-  ["⌑", "채굴", "지형 절삭기", "조준한 1 m 블록 제거"],
-  ["▣", "건축", "흙 블록", "조준한 표면에 1 m 블록 놓기"],
+  ["⌑", "채굴", "곡괭이", "한 번에 1 m 블록 채굴 · B로 범위 변경"],
+  ["▣", "건축", "블록 건축", "가방의 재료를 사용 · B로 크기 변경"],
   ["≈", "물", "물 분사기", "물을 붓고 흐름 만들기 · 소화"],
   ["♨", "불", "점화기", "풀과 나무에 불 붙이기"],
   ["⚗", "산", "산 용액", "흙·나무 부식 · 물에 희석"],
@@ -127,6 +151,7 @@ function selectTool(n) {
   $("toolName").textContent = tools[selected][2];
   $("toolHelp").textContent = tools[selected][3];
   $("actBtn").firstChild.textContent = tools[selected][0];
+  updateToolLabel();
 }
 for (let i = 0; i < tools.length; i++) {
   const b = document.createElement("button");
@@ -141,125 +166,233 @@ function home() {
   Object.assign(player, {
     x: 77.5,
     z: 84.5,
-    y: world.surface(77, 84) + 0.02,
+    y: world.surface(77.5, 84.5),
     yaw: -0.5,
-    pitch: -0.08,
+    pitch: -0.1,
     vy: 0,
     flying: false,
+    grounded: true,
   });
+  controller?.reset();
   $("flyBtn").classList.remove("enabled");
 }
-function collision(x, y, z) {
-  const r = 0.27;
-  for (const xx of [x - r, x + r])
-    for (const zz of [z - r, z + r])
-      for (const yy of [y + 0.05, y + 0.85, y + 1.64])
-        if (world.get(Math.floor(xx), Math.floor(yy), Math.floor(zz)))
-          return true;
-  return false;
+function inputState() {
+  return {
+    forward: (keys.has("KeyW") ? 1 : 0) - (keys.has("KeyS") ? 1 : 0) - joy.y,
+    side: (keys.has("KeyD") ? 1 : 0) - (keys.has("KeyA") ? 1 : 0) + joy.x,
+    jump: keys.has("Space"),
+    up: keys.has("KeyE"),
+    down: keys.has("KeyQ"),
+    sprint: keys.has("ShiftLeft"),
+  };
 }
-function movement(dt) {
-  let forward = (keys.has("KeyW") ? 1 : 0) - (keys.has("KeyS") ? 1 : 0) - joy.y,
-    side = (keys.has("KeyD") ? 1 : 0) - (keys.has("KeyA") ? 1 : 0) + joy.x;
-  const l = Math.max(1, Math.hypot(forward, side));
-  forward /= l;
-  side /= l;
-  const speed = (keys.has("ShiftLeft") ? 7.3 : 4.5) * (player.flying ? 1.8 : 1),
-    s = Math.sin(player.yaw),
-    c = Math.cos(player.yaw),
-    dx = (-s * forward + c * side) * speed * dt,
-    dz = (-c * forward - s * side) * speed * dt;
-  if (player.flying) {
-    player.x += dx;
-    player.z += dz;
-    player.y +=
-      ((keys.has("Space") || keys.has("KeyE") ? 1 : 0) -
-        (keys.has("KeyQ") ? 1 : 0) +
-        Math.sin(player.pitch) * forward) *
-      speed *
-      dt;
-    player.y = clamp(player.y, 1, HEIGHT + 12);
-    player.vy = 0;
-  } else {
-    for (const [axis, delta] of [
-      ["x", dx],
-      ["z", dz],
-    ]) {
-      const xx = axis === "x" ? player.x + delta : player.x,
-        zz = axis === "z" ? player.z + delta : player.z;
-      if (!collision(xx, player.y, zz)) player[axis] += delta;
-      else if (player.grounded && !collision(xx, player.y + 1.01, zz)) {
-        player[axis] += delta;
-        player.y += 1.01;
-      }
-    }
-    if (keys.has("Space") && player.grounded) {
-      player.vy = 6.8;
-      player.grounded = false;
-    }
-    player.vy -= dt * 18;
-    const ny = player.y + player.vy * dt;
-    if (!collision(player.x, ny, player.z)) {
-      player.y = ny;
-      player.grounded = false;
-    } else {
-      if (player.vy < 0) {
-        player.y = Math.ceil(ny - 0.05) + 0.001;
-        player.grounded = true;
-      }
-      player.vy = 0;
-    }
-  }
-  player.x = clamp(player.x, 0.5, SIZE - 0.5);
-  player.z = clamp(player.z, 0.5, SIZE - 0.5);
-  if (player.y < 0.5) home();
-  view.camera.position.set(player.x, player.y + 1.66, player.z);
+function renderCamera(alpha) {
+  const p = controller.render(alpha);
+  view.camera.position.set(p.x, p.y, p.z);
   view.camera.rotation.set(player.pitch, player.yaw, 0, "YXZ");
-  if (Math.abs(forward) + Math.abs(side) > 0.1 && player.grounded) {
-    walkSound += dt;
-    if (walkSound > 0.43) {
-      sound("step");
-      walkSound = 0;
-    }
-  }
-  return Math.abs(forward) + Math.abs(side);
+  view.camera.updateMatrixWorld(true);
 }
-function blockRay(max = 8) {
-  const o = view.camera.position,
-    d = new T.Vector3();
+function blockRay(max = 6.5) {
+  const d = new T.Vector3();
   view.camera.getWorldDirection(d);
-  let prev = null,
-    lastCell = "";
-  for (let t = 0.05; t < max; t += 0.035) {
-    const x = Math.floor(o.x + d.x * t),
-      y = Math.floor(o.y + d.y * t),
-      z = Math.floor(o.z + d.z * t),
-      key = x + "," + y + "," + z;
-    if (key === lastCell) continue;
-    lastCell = key;
-    const b = world.get(x, y, z);
-    if (b)
-      return {
-        x,
-        y,
-        z,
-        b,
-        distance: t,
-        prev,
-        point: [o.x + d.x * t, o.y + d.y * t, o.z + d.z * t],
-      };
-    prev = [x, y, z];
+  return world.raycast(view.camera.position, d, max);
+}
+function bindDrops() {
+  world.event = event;
+  eco.onVoxel = (d) => loot.spawn("bio", 1, d.x, d.y, d.z, d);
+  eco.onDeath = (e) => {
+    loot.spawn(
+      e.type === 2 ? "crystal" : "essence",
+      e.type === 1 ? 3 : 1,
+      e.x,
+      e.y + 0.3,
+      e.z,
+    );
+    loot.spawn("bio", e.type === 1 ? 8 : 4, e.x + 0.15, e.y + 0.3, e.z);
+  };
+  loot.onCollect = (id, n) => {
+    if (world.time - collectedMessage > 0.3) {
+      toast("수집 +" + n + " " + ITEMS[id].name);
+      collectedMessage = world.time;
+    }
+  };
+}
+function updateToolLabel() {
+  if (!$("rangeBtn")) return;
+  const material = ITEMS[buildMaterial];
+  $("rangeBtn").textContent =
+    selected === 3
+      ? "건축 " + buildSize + " m ↻"
+      : "채굴 " + miningSize + " m ↻";
+  $("rangeBtn").classList.toggle("hidden", selected !== 2 && selected !== 3);
+  if (selected === 2) {
+    $("toolName").textContent =
+      (miningSize === 0.5
+        ? "정밀 끌"
+        : miningSize === 2
+          ? "채굴 해머"
+          : "곡괭이") +
+      " · " +
+      miningSize +
+      " m";
+    $("toolHelp").textContent =
+      "한 번에 " +
+      (miningSize === 0.5 ? "⅛" : miningSize === 2 ? "8" : "1") +
+      " m³ · 바닥의 자원 자동 수집";
+  } else if (selected === 3) {
+    $("toolName").textContent = material.name + " · " + buildSize + " m";
+    $("toolHelp").textContent =
+      "보유 " +
+      inventory.count(buildMaterial) +
+      " · 설치 비용 " +
+      (buildSize === 1 ? 8 : 1) +
+      " 조각";
   }
-  return null;
+  $("hint").textContent = "키 1.5 m · 지형 1 / 0.5 m";
+}
+function cycleRange() {
+  if (selected === 3) buildSize = buildSize === 1 ? 0.5 : 1;
+  else {
+    const sizes = inventory.unlocks.has("hammer") ? [0.5, 1, 2] : [0.5, 1];
+    miningSize = sizes[(sizes.indexOf(miningSize) + 1) % sizes.length];
+    if (selected !== 2) selectTool(2);
+  }
+  updateToolLabel();
+  sound("scan");
+}
+function refreshInventory() {
+  if (!$("inventoryGrid")) return;
+  const grid = $("inventoryGrid");
+  grid.replaceChildren();
+  for (const [id, item] of Object.entries(ITEMS)) {
+    const b = document.createElement("button");
+    b.className = "itemSlot" + (id === buildMaterial ? " equipped" : "");
+    b.innerHTML =
+      '<span style="color:#' +
+      item.color.toString(16).padStart(6, "0") +
+      '">' +
+      item.icon +
+      "</span><b>" +
+      inventory.count(id) +
+      "</b><small>" +
+      item.name +
+      "</small>";
+    b.title = item.block ? "눌러 건축 재료로 선택" : "제작 재료";
+    b.onclick = () => {
+      if (item.block) {
+        buildMaterial = id;
+        selectTool(3);
+        refreshInventory();
+        toast(item.name + " 건축 재료 선택");
+      }
+    };
+    grid.append(b);
+  }
+  const recipes = $("recipeList");
+  recipes.replaceChildren();
+  for (const recipe of RECIPES) {
+    const row = document.createElement("div");
+    row.className = "recipe";
+    const text = document.createElement("div");
+    text.innerHTML =
+      "<b>" +
+      recipe.name +
+      "</b><small>" +
+      recipe.description +
+      "</small><p>" +
+      Object.entries(recipe.cost)
+        .map(([id, n]) => ITEMS[id].name + " " + inventory.count(id) + "/" + n)
+        .join(" · ") +
+      "</p>";
+    const button = document.createElement("button");
+    button.className = "primary";
+    button.textContent =
+      recipe.unlock && inventory.unlocks.has(recipe.unlock) ? "보유" : "제작";
+    button.disabled = !inventory.canCraft(recipe);
+    button.onclick = () => craft(recipe.id);
+    row.append(text, button);
+    recipes.append(row);
+  }
+  $("bagTotal").textContent =
+    Object.values(inventory.items).reduce((a, b) => a + b, 0) +
+    " 조각 · 수집 " +
+    loot.collected;
+  $("bagCount").textContent = Object.values(inventory.items).reduce(
+    (a, b) => a + b,
+    0,
+  );
+  lastInventoryRevision = inventory.revision;
+}
+function craft(id) {
+  const ok = inventory.craft(id);
+  if (ok) {
+    if (id === "hammer") {
+      miningSize = 2;
+      selectTool(2);
+    }
+    toast(RECIPES.find((r) => r.id === id).name + " 제작 완료");
+    sound("scan");
+  } else toast("제작 재료가 부족하거나 이미 보유한 도구입니다.");
+  refreshInventory();
+  updateToolLabel();
+  return ok;
+}
+function openBag() {
+  pause(true);
+  document.querySelector('[data-tab="bag"]').click();
+  refreshInventory();
+}
+function buildTarget(hit) {
+  if (!hit) return null;
+  const n = buildSize === 1 ? 2 : 1;
+  let start;
+  if (n === 1)
+    start = [
+      hit.hx + hit.normal[0],
+      hit.hy + hit.normal[1],
+      hit.hz + hit.normal[2],
+    ];
+  else {
+    const p = hit.point.map((v, i) => v + hit.normal[i] * 0.01);
+    start = p.map((v) => Math.floor(v) * 2);
+  }
+  return { start, n, size: buildSize };
+}
+function intersectsPlayer(start, size) {
+  const a = start.map((v) => v * 0.5);
+  return (
+    a[0] < player.x + BODY_RADIUS &&
+    a[0] + size > player.x - BODY_RADIUS &&
+    a[2] < player.z + BODY_RADIUS &&
+    a[2] + size > player.z - BODY_RADIUS &&
+    a[1] < player.y + BODY_HEIGHT &&
+    a[1] + size > player.y
+  );
+}
+function harvest(hit, size) {
+  const r = world.mine(hit, size);
+  if (!r.removed) {
+    toast("기반암과 용암은 채굴할 수 없습니다.");
+    return false;
+  }
+  const p = hit.point.map((v, i) => v + hit.normal[i] * 0.2);
+  for (const [b, n] of r.counts) {
+    const item = resourceForBlock(b);
+    if (item) loot.spawn(item, n, ...p);
+    if (b === B.GRASS && n >= 4) loot.spawn("seed", 1, ...p);
+  }
+  view.rebuild(5);
+  sound("pulse");
+  return true;
 }
 function target() {
-  const block = blockRay(9),
+  const block = blockRay(6.5),
     d = new T.Vector3();
   view.camera.getWorldDirection(d);
   const ent = eco.ray(
     view.camera.position,
     d,
-    Math.min(9, block?.distance || 9),
+    Math.min(6.5, block?.distance || 6.5),
     world.time,
   );
   return { block, ent };
@@ -270,64 +403,67 @@ function use() {
   view.toolKick = 1;
   if (selected === 0) {
     if (ent) {
-      const e = ent.entity,
-        p = SPECIES[e.type].parts[ent.part];
+      const e = ent.entity;
       toast(
         SPECIES[e.type].name +
           " · " +
-          p.name +
+          SPECIES[e.type].parts[ent.part].name +
           " · 에너지 " +
           Math.round(e.energy) +
           " · 다리 " +
           eco.legs(e) +
           "/4",
       );
-    } else if (block) {
-      const f = world.fluids.get(world.index(block.x, block.y + 1, block.z));
+    } else if (block)
       toast(
-        "식생 " +
-          Math.round(world.plants[block.x + block.z * SIZE] * 100) +
-          "% · 토양 " +
-          Math.round(world.nutrients[block.x + block.z * SIZE] * 100) +
-          "%" +
-          (f ? " · 용액 산도 " + Math.round((f.a / f.v) * 100) + "%" : ""),
+        "지형 " +
+          (world.subcells.has(world.index(block.x, block.y, block.z))
+            ? "0.5"
+            : "1") +
+          " m · 거리 " +
+          block.distance.toFixed(2) +
+          " m · 플레이어 1.5 m",
       );
-    } else toast("가까운 생명이나 지표를 조준하세요.");
+    else toast("6.5 m 이내의 생명이나 지표를 관찰하세요.");
     sound("scan");
     return;
   }
   if (selected === 1) {
-    sound("pulse");
     if (ent) {
-      const n = eco.damageHit(ent, world.time);
-      event(
-        SPECIES[ent.entity.type].name +
-          " · " +
-          SPECIES[ent.entity.type].parts[ent.part].name +
-          " −" +
-          n +
-          " voxel",
-        ent.point,
+      eco.damageHit(
+        ent,
+        world.time,
+        inventory.unlocks.has("pulse") ? 0.3 : 0.18,
       );
-    } else if (block) {
-      world.set(block.x, block.y, block.z, 0);
-    }
+      sound("pulse");
+    } else if (block) harvest(block, 0.5);
     return;
   }
   if (!block) {
-    toast("9 m 이내의 표면을 조준하세요.");
+    toast("6.5 m 이내의 표면을 조준하세요.");
     return;
   }
-  const [x, y, z] = block.prev || [block.x, block.y + 1, block.z];
-  if (selected === 2) {
-    world.set(block.x, block.y, block.z, 0);
-    sound("pulse");
-  }
+  const outward = block.point.map((v, i) => v + block.normal[i] * 0.06),
+    [x, y, z] = outward.map(Math.floor);
+  if (selected === 2) harvest(block, miningSize);
   if (selected === 3) {
-    if (!collisionBlockPlayer(x, y, z)) {
-      world.set(x, y, z, B.DIRT);
+    const r = buildTarget(block),
+      cost = r.n ** 3;
+    if (inventory.count(buildMaterial) < cost) {
+      toast(
+        ITEMS[buildMaterial].name + " " + cost + "개 필요 · 가방에서 재료 확인",
+      );
+      return;
+    }
+    if (intersectsPlayer(r.start, r.size)) {
+      toast("캐릭터와 겹치는 곳에는 설치할 수 없습니다.");
+      return;
+    }
+    if (world.placeCells(r.start, r.size, ITEMS[buildMaterial].block)) {
+      inventory.take(buildMaterial, cost);
+      view.rebuild(5);
       sound("step");
-    } else toast("플레이어와 겹치는 곳에는 놓을 수 없습니다.");
+    } else toast("빈 공간을 조준하세요.");
   }
   if (selected === 4) {
     world.pour(x, y, z, 5, 0);
@@ -342,6 +478,10 @@ function use() {
     sound("water");
   }
   if (selected === 7) {
+    if (!inventory.take("seed", 1)) {
+      toast("씨앗이 필요합니다. 풀을 채굴하거나 섬유로 제작하세요.");
+      return;
+    }
     for (
       let zz = Math.max(0, block.z - 2);
       zz <= Math.min(SIZE - 1, block.z + 2);
@@ -352,14 +492,14 @@ function use() {
         xx <= Math.min(SIZE - 1, block.x + 2);
         xx++
       ) {
-        const yy = world.surface(xx, zz) - 1;
+        const yy = Math.floor(world.surface(xx + 0.25, zz + 0.25) - 0.01);
         if ([B.DIRT, B.ASH, B.GRASS].includes(world.get(xx, yy, zz))) {
           world.set(xx, yy, zz, B.GRASS);
           world.plants[xx + zz * SIZE] = 1;
           world.nutrients[xx + zz * SIZE] = 1;
         }
       }
-    toast("이 땅에 다시 풀이 자랍니다.");
+    toast("씨앗 −1 · 식생 복원");
     sound("scan");
   }
   if (selected === 8) {
@@ -369,19 +509,13 @@ function use() {
     toast(SPECIES[type].name + " 생성");
     sound("scan");
   }
+  updateToolLabel();
   view.environment(world.time, true);
-}
-function collisionBlockPlayer(x, y, z) {
-  return (
-    Math.abs(player.x - x - 0.5) < 0.8 &&
-    Math.abs(player.z - z - 0.5) < 0.8 &&
-    y < player.y + 1.7 &&
-    y + 1 > player.y
-  );
 }
 function setFlying() {
   player.flying = !player.flying;
   player.vy = 0;
+  controller?.reset();
   $("flyBtn").classList.toggle("enabled", player.flying);
   toast(
     player.flying ? "비행 · 위아래를 보며 이동 / ↑ 상승" : "걷기 · 중력 활성",
@@ -403,19 +537,40 @@ function pause(force) {
   if (paused) {
     document.exitPointerLock?.();
     updatePanels();
-  } else last = performance.now();
+    refreshInventory();
+  } else {
+    last = performance.now();
+    physicsAccum = 0;
+    controller.reset(true);
+    fpsFrames = 0;
+    fpsTime = 0;
+  }
 }
 function start(load = false) {
   if (!ready) return;
   try {
     if (load) {
       const s = JSON.parse(localStorage.getItem(storageKey));
-      if (s && s.version === 1) {
+      if (s && [1, 2].includes(s.version)) {
         world = new World(s.world.seed);
         world.generate();
         world.load(s.world);
         eco = new Ecology(world);
         eco.load(s.eco);
+        inventory = new Inventory();
+        if (s.inventory) inventory.load(s.inventory);
+        loot = new Pickups();
+        if (s.loot) loot.load(s.loot);
+        miningSize =
+          s.miningSize === 2 && inventory.unlocks.has("hammer")
+            ? 2
+            : s.miningSize === 0.5
+              ? 0.5
+              : 1;
+        buildMaterial = ITEMS[s.buildMaterial]?.block
+          ? s.buildMaterial
+          : "dirt";
+        buildSize = s.buildSize === 0.5 ? 0.5 : 1;
         view.world = world;
         world.event = event;
         playTime = s.playTime || 0;
@@ -424,12 +579,20 @@ function start(load = false) {
         $("flyBtn").classList.toggle("enabled", player.flying);
       } else home();
     } else home();
+    controller = new CharacterController(world, player);
+    controller.recover();
+    physicsAccum = 0;
+    physicsTick = 0;
+    bindDrops();
+    renderCamera(1);
+    updateToolLabel();
+    refreshInventory();
     running = true;
     paused = false;
     $("titleScreen").classList.add("hidden");
     $("hud").classList.remove("hidden");
     $("pauseScreen").classList.add("hidden");
-    if (!load) toast("이끼사슴을 찾아 관찰해 보세요. 1~9 도구 선택");
+    if (!load) toast("곡괭이로 채굴 → 가까이 가서 수집 → 가방에서 제작");
     sound("scan");
     last = performance.now();
     if (!window.AndroidApp)
@@ -447,7 +610,12 @@ function save(quiet = false) {
   if (!running || !world) return false;
   try {
     const s = {
-      version: 1,
+      version: 2,
+      inventory: inventory.save(),
+      loot: loot.save(),
+      miningSize,
+      buildMaterial,
+      buildSize,
       world: world.save(),
       eco: eco.save(),
       player,
@@ -536,6 +704,7 @@ function discover() {
   $("biome").textContent = closest.name;
 }
 function updatePanels() {
+  refreshInventory();
   if (!world) return;
   const s = eco.stats(),
     r = world.reactions,
@@ -582,19 +751,86 @@ function setPopulation(n = 3000) {
     "3,000 개체 배치 완료. 탐험을 재개하면 프레임을 수집합니다.";
   toast("3,000 개체 실험 시작 · FPS는 기기별로 달라집니다.");
 }
+function fixedStep(input = inputState()) {
+  world.time += FIXED_DT;
+  const moving = controller.step(FIXED_DT, input);
+  if (player.y < 0.25) home();
+  physicsTick++;
+  if (physicsTick % 2 === 0) eco.update(FIXED_DT * 2, player, world.time);
+  loot.update(FIXED_DT, world, player, inventory);
+  flowAccum += FIXED_DT;
+  if (flowAccum >= 0.133333) {
+    world.fluidStep(view.quality === "low" ? 240 : 480);
+    world.chemistryStep(flowAccum);
+    world.ecosystemStep(flowAccum);
+    flowAccum = 0;
+  }
+  if (moving > 0.1 && player.grounded) {
+    walkSound += FIXED_DT;
+    if (walkSound > 0.46) {
+      sound("step");
+      walkSound = 0;
+    }
+  }
+  return moving;
+}
+function updateAim() {
+  const { block, ent } = target();
+  if (ent) {
+    $("target").innerHTML =
+      "<b>" +
+      SPECIES[ent.entity.type].name +
+      "</b> · " +
+      SPECIES[ent.entity.type].parts[ent.part].name +
+      "<br>" +
+      SPECIES[ent.entity.type].cell * 100 +
+      " cm 복셀 · 다리 " +
+      eco.legs(ent.entity) +
+      "/4";
+    view.highlight.visible = false;
+  } else if (block) {
+    const names = [
+      "",
+      "풀밭",
+      "흙",
+      "돌",
+      "모래",
+      "원목",
+      "잎",
+      "광석",
+      "현무암",
+      "용암",
+      "재",
+      "목재",
+    ];
+    $("target").textContent =
+      (names[block.b] || "블록") + " · " + block.distance.toFixed(1) + " m";
+    view.highlight.visible = selected === 2 || selected === 3;
+    const r =
+      selected === 3
+        ? buildTarget(block)
+        : world.miningRegion(block, miningSize);
+    view.highlight.scale.setScalar(r.size + 0.006);
+    view.highlight.position.set(...r.start.map((v) => v * 0.5 + r.size * 0.5));
+    view.highlight.material.color.setHex(selected === 3 ? 0x9cdaa1 : 0xf5d78c);
+  } else {
+    $("target").textContent = "";
+    view.highlight.visible = false;
+  }
+}
 function frame(now) {
   requestAnimationFrame(frame);
   if (!view) return;
   const realDt = Math.max(0.001, (now - last) / 1000 || 0.016),
-    dt = Math.min(0.08, realDt);
+    dt = Math.min(0.15, realDt);
   last = now;
-  fpsFrames++;
-  fpsTime += realDt;
-  if (fpsTime > 1) {
-    fps = fpsFrames / fpsTime;
-    fpsTime = 0;
-    fpsFrames = 0;
-    if (running && !paused) {
+  if (running && !paused) {
+    fpsFrames++;
+    fpsTime += realDt;
+    if (fpsTime > 1) {
+      fps = fpsFrames / fpsTime;
+      fpsFrames = 0;
+      fpsTime = 0;
       $("fps").textContent = fps.toFixed(0) + " FPS";
       if (benchmarkStart) {
         benchmarkSamples.push(fps);
@@ -610,7 +846,7 @@ function frame(now) {
       ready = true;
       $("startBtn").disabled = false;
       $("startBtn").querySelector("span").textContent = "탐험 시작";
-      $("loadStatus").textContent = "오프라인 월드 준비 완료 · 가로 화면 권장";
+      $("loadStatus").textContent = "월드 준비 완료 · 채굴·수집·제작";
       if (localStorage.getItem(storageKey)) {
         $("continueBtn").classList.remove("hidden");
         $("startBtn").querySelector("span").textContent = "새로운 탐험";
@@ -620,60 +856,30 @@ function frame(now) {
   }
   let moving = 0;
   if (running && !paused && ready) {
+    physicsAccum = Math.min(0.1333333, physicsAccum + dt);
+    let steps = 0;
+    while (physicsAccum >= FIXED_DT && steps++ < 8) {
+      moving = fixedStep();
+      physicsAccum -= FIXED_DT;
+    }
+    renderCamera(physicsAccum / FIXED_DT);
     playTime += dt;
-    world.time += dt;
-    simAccum += dt;
-    flowAccum += dt;
     saveTimer += dt;
     hudTimer += dt;
     actionCooldown -= dt;
-    moving = movement(dt);
     if (actionHeld && actionCooldown <= 0) {
       use();
-      actionCooldown = selected === 1 ? 0.18 : selected === 2 ? 0.16 : 0.45;
+      actionCooldown =
+        selected === 1
+          ? 0.18
+          : selected === 2
+            ? miningSize === 2
+              ? 0.65
+              : 0.28
+            : 0.4;
     }
-    if (simAccum >= 1 / 30) {
-      eco.update(simAccum, view.camera.position, world.time);
-      simAccum = 0;
-    }
-    if (flowAccum > 0.13) {
-      world.fluidStep(view.quality === "low" ? 240 : 480);
-      world.chemistryStep(flowAccum);
-      world.ecosystemStep(flowAccum);
-      flowAccum = 0;
-    }
-    if (hudTimer > 0.35) {
-      const { block, ent } = target();
-      if (ent) {
-        $("target").innerHTML =
-          `<b>${SPECIES[ent.entity.type].name}</b> · ${SPECIES[ent.entity.type].parts[ent.part].name}<br>${SPECIES[ent.entity.type].cell * 100} cm 복셀 · 다리 ${eco.legs(ent.entity)}/4`;
-        view.highlight.visible = false;
-      } else if (block) {
-        const names = [
-          "",
-          "풀밭",
-          "흙",
-          "암석",
-          "모래",
-          "나무",
-          "잎",
-          "광석",
-          "현무암",
-          "용암",
-          "재",
-        ];
-        $("target").innerHTML =
-          (names[block.b] || "블록") + " · " + block.distance.toFixed(1) + " m";
-        view.highlight.visible = selected > 1;
-        view.highlight.position.set(
-          block.x + 0.5,
-          block.y + 0.5,
-          block.z + 0.5,
-        );
-      } else {
-        $("target").textContent = "";
-        view.highlight.visible = false;
-      }
+    if (hudTimer > 0.2) {
+      updateAim();
       $("population").textContent =
         eco.stats().total.toLocaleString() + " 개체";
       const h = 8 + world.time / 60;
@@ -686,6 +892,14 @@ function frame(now) {
         String(Math.floor((h % 1) * 60)).padStart(2, "0");
       map();
       discover();
+      if (inventory.revision !== lastInventoryRevision) {
+        $("bagCount").textContent = Object.values(inventory.items).reduce(
+          (a, b) => a + b,
+          0,
+        );
+        lastInventoryRevision = inventory.revision;
+        updateToolLabel();
+      }
       hudTimer = 0;
     }
     if (saveTimer > 30) {
@@ -698,17 +912,38 @@ function frame(now) {
     view.camera.position.set(85 + Math.sin(a) * 2, 25, 98);
     view.camera.lookAt(74, 13, 58);
   }
-  // Keep paused geometry intact while avoiding simulation or GPU work in background.
   if (!paused) {
-    view.entities(eco, world.time);
+    view.entities(
+      eco,
+      world.time,
+      ((physicsTick % 2) + physicsAccum / FIXED_DT) / 2,
+    );
     view.environment(world.time);
+    view.pickups(loot, world.time);
     view.draw(world.time, dt, moving);
   }
   if (window.FERAL) window.FERAL.ready = ready;
 }
 function refreshAPI() {
   window.FERAL = {
-    version: "0.1",
+    version: "0.2",
+    controller,
+    inventory,
+    loot,
+    craft,
+    cycleRange,
+    openBag,
+    get miningSize() {
+      return miningSize;
+    },
+    get buildSize() {
+      return buildSize;
+    },
+    get buildMaterial() {
+      return buildMaterial;
+    },
+    fixedStep,
+    renderCamera,
     ready,
     world,
     ecology: eco,
@@ -730,8 +965,9 @@ function refreshAPI() {
       paused,
     }),
     setCamera: (x, y, z, yaw, pitch) => {
-      Object.assign(player, { x, y: y - 1.66, z, yaw, pitch, vy: 0 });
-      movement(0.001);
+      Object.assign(player, { x, y: y - EYE_HEIGHT, z, yaw, pitch, vy: 0 });
+      controller.reset();
+      renderCamera(1);
     },
   };
 }
@@ -745,6 +981,8 @@ $("homeBtn").onclick = () => {
   pause(false);
 };
 $("flyBtn").onclick = setFlying;
+$("inventoryBtn").onclick = openBag;
+$("rangeBtn").onclick = cycleRange;
 $("newBtn").onclick = () => $("resetConfirm").classList.remove("hidden");
 $("cancelReset").onclick = () => $("resetConfirm").classList.add("hidden");
 $("confirmReset").onclick = () => {
@@ -781,6 +1019,7 @@ function persistSettings() {
   localStorage.setItem(
     "feral.settings",
     JSON.stringify({
+      layoutVersion: 2,
       quality: $("quality").value,
       sensitivity: $("sensitivity").value,
       fov: $("fov").value,
@@ -871,7 +1110,10 @@ canvas.addEventListener("pointerdown", (e) => {
     if (document.pointerLockElement === canvas) {
       actionHeld = true;
       actionCooldown = 0;
-    } else canvas.requestPointerLock?.();
+    } else
+      canvas
+        .requestPointerLock?.()
+        ?.catch?.(() => toast("클릭 후 마우스 시점을 사용할 수 있습니다."));
     return;
   }
   look.id = e.pointerId;
@@ -904,12 +1146,18 @@ canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 window.addEventListener("keydown", (e) => {
   if (["Space", "Tab", "ArrowUp", "ArrowDown"].includes(e.code))
     e.preventDefault();
+  if (["KeyI", "Tab"].includes(e.code) && running && !e.repeat) {
+    if (paused) pause(false);
+    else openBag();
+    return;
+  }
   if (e.code === "Escape") {
     pause();
     return;
   }
   if (!running || paused) return;
   keys.add(e.code);
+  if (e.code === "KeyB" && !e.repeat) cycleRange();
   if (e.code === "KeyF" && !e.repeat) setFlying();
   if (/^Digit[1-9]$/.test(e.code)) selectTool(+e.code.slice(-1) - 1);
 });
@@ -947,7 +1195,9 @@ try {
   world.generate();
   world.event = event;
   eco = new Ecology(world);
-  eco.populate(420);
+  eco.populate(160);
+  controller = new CharacterController(world, player);
+  bindDrops();
   view = new View(canvas, world);
   view.camera.position.set(85, 25, 98);
   view.camera.lookAt(74, 13, 58);
@@ -955,7 +1205,7 @@ try {
   if (settings) {
     $("quality").value = settings.quality || "balanced";
     $("sensitivity").value = settings.sensitivity || 80;
-    $("fov").value = settings.fov || 76;
+    $("fov").value = settings.layoutVersion === 2 ? settings.fov || 82 : 82;
     $("sound").checked = settings.sound !== false;
     $("leftHand").checked = !!settings.leftHand;
     sensitivity = $("sensitivity").value / 100;
@@ -965,6 +1215,7 @@ try {
     view.camera.fov = +$("fov").value;
     view.camera.updateProjectionMatrix();
   }
+  selectTool(2);
   refreshAPI();
   requestAnimationFrame(frame);
 } catch (e) {

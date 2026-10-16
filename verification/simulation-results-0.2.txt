@@ -1,0 +1,38 @@
+✔ regression: old five-centimetre foot gap oscillates; swept support stays constant (13.867802ms)
+✔ stationary floor contact is stable under irregular rendered frame intervals (2.175884ms)
+✔ jump lands once on exact ground without subsequent floor bounce (6.382327ms)
+✔ removing the support causes a real fall; half-metre platforms stop it exactly (4.315874ms)
+✔ half-metre stair climb fits the full 1.5 metre body (2.014835ms)
+✔ a solid one-metre wall blocks walking and a low ceiling blocks jumping (1.738065ms)
+✔ half-cell edits preserve the other seven children and collapse uniform cells (0.840896ms)
+✔ tools remove 0.125, 1 and 8 cubic metres on filled terrain (2.627453ms)
+✔ ray picking and visible half-cell mesh agree on the excavated boundary (10.931637ms)
+✔ save and load preserve fine terrain and half-height support (8.367778ms)
+✔ crafting is atomic: missing resources never disappear and outputs are exact (0.444609ms)
+✔ resource collection enables crafted tools and an unlock cannot be charged twice (0.148801ms)
+✔ mined drops remain until approached, then collect only once (0.734368ms)
+✔ voxel damage routes collectable fragments; death yields a separate reward once (1.935117ms)
+✔ inventory, crafted unlocks and uncollected drops survive serialization (0.312032ms)
+✔ seed gives identical terrain and one metre cells (34.052162ms)
+✔ both quarter and eighth metre creatures are defined (0.224142ms)
+✔ fluid movement conserves volume and acid mass in a sealed basin (10.283025ms)
+✔ mixing clean water dilutes acid without destroying solute (11.299592ms)
+✔ water and lava form basalt and account for steam (1.941967ms)
+✔ burning wood consumes fuel and completes (1.750384ms)
+✔ voxel damage severs a limb and changes locomotion capability (1.520482ms)
+✔ head detachment propagates to attached ears (0.993131ms)
+✔ grazing consumes vegetation and returns energy (0.709652ms)
+✔ predation transfers energy and death returns soil nutrients (0.531237ms)
+✔ well fed mature creatures reproduce within population budget (0.369397ms)
+✔ save roundtrip preserves terrain, fluid, population and severed parts (49.540821ms)
+✔ 3000 entities tick with finite positions and bounded population (67.97915ms)
+✔ water extinguishes a burning wooden cell (0.394014ms)
+✔ concentrated acid consumes reagent while corroding organic material (0.42529ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 267.158684

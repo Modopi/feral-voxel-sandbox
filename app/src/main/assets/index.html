@@ -23,6 +23,13 @@
           ><span class="divider"></span><span id="fps">— FPS</span
           ><span id="population">— 개체</span>
         </div>
+        <button
+          id="inventoryBtn"
+          class="icon-button bagButton"
+          aria-label="가방과 제작"
+        >
+          ▦<small id="bagCount">28</small>
+        </button>
         <button id="menuBtn" class="icon-button" aria-label="메뉴">☰</button>
       </header>
       <div id="discovery">
@@ -53,6 +60,7 @@
         <span id="toolName">관찰 렌즈</span
         ><small id="toolHelp">생태와 신체 상태 읽기</small>
       </div>
+      <button id="rangeBtn" class="rangeButton">채굴 1 m ↻</button>
       <nav id="hotbar" aria-label="도구 선택"></nav>
       <footer>
         <span id="worldTime">DAY 01 · 08:00</span
@@ -85,7 +93,9 @@
         <div>
           <b>01</b
           ><span
-            >한 세계, 세 가지 크기<small>1 m / 0.25 m / 0.125 m</small></span
+            >한 세계, 세 가지 크기<small
+              >1 m / 0.5 m / 0.25 m / 0.125 m</small
+            ></span
           >
         </div>
         <div>
@@ -105,7 +115,7 @@
       </div>
       <div class="titleFooter">
         <span>TOUCH TO EXPLORE / LANDSCAPE RECOMMENDED</span
-        ><span>PROTOTYPE 0.1</span>
+        ><span>PROTOTYPE 0.2</span>
       </div>
     </div>
     <div id="pauseScreen" class="screen hidden">
@@ -120,11 +130,32 @@
           </button>
         </div>
         <div class="tabs">
-          <button data-tab="world" class="active">탐험</button
+          <button data-tab="bag">가방·제작</button
+          ><button data-tab="world" class="active">탐험</button
           ><button data-tab="life">생태계</button
           ><button data-tab="settings">환경 설정</button
           ><button data-tab="help">조작 안내</button>
         </div>
+        <section data-panel="bag" class="hidden">
+          <div class="bagHeader">
+            <div>
+              <b>채집품과 장비</b>
+              <p>흙·돌·원목 조각 8개 = 1 m³ · 재료를 눌러 건축에 사용</p>
+            </div>
+            <span id="bagTotal">0 조각</span>
+          </div>
+          <div class="bagLayout">
+            <div>
+              <div id="inventoryGrid"></div>
+              <p class="bagGuide">
+                바닥의 드롭에 가까이 가면 자동 수집합니다.<br />1 m 곡괭이와 0.5
+                m 정밀 끌은 기본 장비입니다.<br />플레이 중 범위 버튼 또는 B로
+                크기를 변경하세요.
+              </p>
+            </div>
+            <div id="recipeList"></div>
+          </div>
+        </section>
         <section data-panel="world">
           <div class="metricGrid">
             <div><span>발견한 장소</span><b id="foundCount">0 / 5</b></div>
@@ -195,7 +226,7 @@
               value="80" /></label
           ><label class="setting"
             >시야각
-            <input id="fov" type="range" min="60" max="100" value="76" /></label
+            <input id="fov" type="range" min="60" max="100" value="82" /></label
           ><label class="setting"
             >도구 소리 <input id="sound" type="checkbox" checked /></label
           ><label class="setting"
@@ -219,8 +250,8 @@
               <b>키보드 / 마우스</b>
               <p>
                 WASD: 이동 · Shift: 달리기<br />마우스: 시점 · 클릭: 사용<br />Space:
-                점프 · F: 비행<br />1~9: 도구 · Esc: 메뉴<br />비행 중 Q: 하강 /
-                E: 상승
+                점프 · F: 비행<br />I / Tab: 가방 · B: 범위<br />1~9: 도구 ·
+                Esc: 메뉴<br />비행 중 Q: 하강 / E: 상승
               </p>
             </div>
           </div>
@@ -231,13 +262,15 @@
             바뀝니다.
           </p>
           <p>
-            물·산 도구는 재료를 추가합니다. 유체는 셀 사이에서 양을 보존하며
-            흐릅니다. 일반 유체 역학·분자 화학·완전한 래그돌을 구현한 버전은
-            아닙니다.
+            채굴한 자원과 몹의 복셀은 가까이 가면 가방에 들어옵니다. 가방에서
+            재료를 가공하거나 해머·강화 펄스를 제작합니다. 건축과 씨앗은 보유
+            재료를 소모합니다. 물·산 도구는 샌드박스 방식으로 재료를 추가합니다.
+            유체는 셀 사이에서 양을 보존하며 흐릅니다. 일반 유체 역학·분자
+            화학·완전한 래그돌을 구현한 버전은 아닙니다.
           </p>
         </section>
         <div class="panelFooter">
-          <span>FERAL 0.1 / 생태 복셀 프로토타입</span
+          <span>FERAL 0.2 / 생태 복셀 프로토타입</span
           ><button id="backToGame" class="textButton">탐험 계속 →</button>
         </div>
       </div>

@@ -19,7 +19,7 @@ export function chunkGeometry(w, cx, cz) {
     origin = [cx * CHUNK, 0, cz * CHUNK],
     mask = new Int16Array(CHUNK * HEIGHT),
     color = new T.Color();
-  const at = (v) => w.get(v[0] + origin[0], v[1], v[2] + origin[2]);
+  const at = (v) => w.meshCell(v[0] + origin[0], v[1], v[2] + origin[2]);
   for (let d = 0; d < 3; d++) {
     const u = (d + 1) % 3,
       v = (d + 2) % 3,
@@ -33,8 +33,8 @@ export function chunkGeometry(w, cx, cz) {
           const a =
               x[d] >= 0
                 ? at(x)
-                : w.get(x[0] + origin[0], x[1], x[2] + origin[2]),
-            b = w.get(
+                : w.meshCell(x[0] + origin[0], x[1], x[2] + origin[2]),
+            b = w.meshCell(
               x[0] + q[0] + origin[0],
               x[1] + q[1],
               x[2] + q[2] + origin[2],
@@ -92,6 +92,49 @@ export function chunkGeometry(w, cx, cz) {
         }
     }
   }
+  for (const [i, cells] of w.subcells) {
+    const [bx, by, bz] = w.decode(i);
+    if (bx >> 4 !== cx || bz >> 4 !== cz) continue;
+    for (let j = 0; j < 8; j++) {
+      const mat = cells[j];
+      if (!mat) continue;
+      const h = [
+        bx * 2 + (j & 1),
+        by * 2 + ((j >> 1) & 1),
+        bz * 2 + ((j >> 2) & 1),
+      ];
+      for (let d = 0; d < 3; d++)
+        for (const sign of [-1, 1]) {
+          const next = h.slice();
+          next[d] += sign;
+          if (w.getCell(...next)) continue;
+          const u = (d + 1) % 3,
+            v = (d + 2) % 3,
+            start = h.map((k) => k * 0.5);
+          if (sign > 0) start[d] += 0.5;
+          const du = [0, 0, 0],
+            dv = [0, 0, 0];
+          du[u] = 0.5;
+          dv[v] = 0.5;
+          const corners = [
+              start,
+              start.map((a, k) => a + du[k]),
+              start.map((a, k) => a + du[k] + dv[k]),
+              start.map((a, k) => a + dv[k]),
+            ],
+            order = sign > 0 ? [0, 1, 2, 0, 2, 3] : [0, 3, 2, 0, 2, 1],
+            normal = [0, 0, 0];
+          normal[d] = sign;
+          color.setHex(COLORS[mat]);
+          const shade = d === 1 ? (sign > 0 ? 1 : 0.6) : d === 0 ? 0.84 : 0.72;
+          for (const k of order) {
+            positions.push(...corners[k]);
+            normals.push(...normal);
+            colors.push(color.r * shade, color.g * shade, color.b * shade);
+          }
+        }
+    }
+  }
   return geometry(positions, normals, colors);
 }
 export class View {
@@ -107,7 +150,7 @@ export class View {
     this.renderer.outputColorSpace = T.SRGBColorSpace;
     this.scene = new T.Scene();
     this.scene.fog = new T.Fog(0xb2d5cf, 48, 112);
-    this.camera = new T.PerspectiveCamera(76, 1, 0.06, 150);
+    this.camera = new T.PerspectiveCamera(82, 1, 0.04, 150);
     this.camera.rotation.order = "YXZ";
     this.scene.add(this.camera);
     this.scene.add(new T.HemisphereLight(0xe7f3de, 0x596b59, 2.1));
@@ -216,6 +259,16 @@ export class View {
     this.highlight.scale.setScalar(1.007);
     this.highlight.visible = false;
     this.scene.add(this.highlight);
+    this.pickupMesh = new T.InstancedMesh(
+      this.cube,
+      new T.MeshLambertMaterial({ emissive: 0x182317 }),
+      600,
+    );
+    this.pickupMesh.count = 0;
+    this.pickupMesh.frustumCulled = false;
+    this.scene.add(this.pickupMesh);
+    this.forward = new T.Vector3();
+    this.creatureRenderFrame = 0;
     this.o = new T.Object3D();
     this.color = new T.Color();
     this.nearCount = 0;
@@ -242,6 +295,9 @@ export class View {
     add(0x263a35, 0.37, -0.4, -0.42, 0.1, 0.23, 0.1);
     add(0x82e6be, 0.37, -0.215, -0.62, 0.1, 0.027, 0.05);
     add(0x586457, 0.37, -0.49, -0.3, 0.16, 0.2, 0.28);
+    this.tool.scale.setScalar(0.58);
+    this.tool.position.set(0.18, -0.12, -0.22);
+    this.toolBase = { y: -0.12, z: -0.22 };
     this.toolKick = 0;
   }
   resize() {
@@ -299,14 +355,17 @@ export class View {
     mesh.setColorAt(index, this.color);
     return true;
   }
-  entities(eco, time) {
+  entities(eco, time, alpha = 1) {
     let near = 0,
       far = 0,
       detail = 0;
     const cam = this.camera.position,
+      forward = this.camera.getWorldDirection(this.forward),
       visible = eco.entities.filter(
         (e) =>
-          !e.dead && (e.x - cam.x) ** 2 + (e.z - cam.z) ** 2 < this.radius ** 2,
+          !e.dead &&
+          (e.x - cam.x) ** 2 + (e.z - cam.z) ** 2 < this.radius ** 2 &&
+          (e.x - cam.x) * forward.x + (e.z - cam.z) * forward.z > -4,
       );
     visible.sort(
       (a, b) =>
@@ -315,7 +374,19 @@ export class View {
         (b.x - cam.x) ** 2 -
         (b.z - cam.z) ** 2,
     );
-    for (const e of visible) {
+    for (const entity of visible) {
+      const e = {
+        ...entity,
+        x:
+          (entity.px ?? entity.x) +
+          (entity.x - (entity.px ?? entity.x)) * alpha,
+        y:
+          (entity.py ?? entity.y) +
+          (entity.y - (entity.py ?? entity.y)) * alpha,
+        z:
+          (entity.pz ?? entity.z) +
+          (entity.z - (entity.pz ?? entity.z)) * alpha,
+      };
       const sp = SPECIES[e.type],
         dist = Math.hypot(e.x - cam.x, e.z - cam.z),
         fine = dist < 23 && detail++ < this.detailLimit;
@@ -449,7 +520,8 @@ export class View {
         const i = x + z * SIZE,
           h = w.surface(x, z),
           v = w.plants[i];
-        if (v < 0.28 || w.get(x, h - 1, z) !== B.GRASS) continue;
+        if (v < 0.28 || w.get(x, Math.floor(h - 0.001), z) !== B.GRASS)
+          continue;
         const scale = 0.12 + v * 0.28;
         this.instance(
           this.grassMesh,
@@ -467,12 +539,33 @@ export class View {
     if (this.grassMesh.instanceColor)
       this.grassMesh.instanceColor.needsUpdate = true;
   }
+  pickups(loot, time) {
+    let n = 0;
+    for (const d of loot.items) {
+      if (n >= 600) break;
+      const glow = d.settled ? Math.sin(time * 2 + d.id) * 0.025 : 0;
+      this.instance(
+        this.pickupMesh,
+        n++,
+        [d.x, d.y + glow, d.z],
+        [d.cell, d.cell, d.cell],
+        d.color,
+        d.rx,
+        d.rx * 0.7,
+      );
+    }
+    this.pickupMesh.count = n;
+    this.pickupMesh.instanceMatrix.needsUpdate = true;
+    if (this.pickupMesh.instanceColor)
+      this.pickupMesh.instanceColor.needsUpdate = true;
+  }
   draw(time, dt, moving = 0) {
     const day = 0.5 + Math.sin(time / 160) * 0.5;
     this.sunLight.intensity = 1.2 + day * 1.4;
     this.toolKick = Math.max(0, this.toolKick - dt * 6);
-    this.tool.position.z = this.toolKick * 0.09;
-    this.tool.position.y = Math.sin(time * 9) * 0.008 * moving;
+    this.tool.position.z = this.toolBase.z + this.toolKick * 0.035;
+    this.tool.position.y =
+      this.toolBase.y + Math.sin(time * 9) * 0.0025 * moving;
     this.tool.rotation.x = this.toolKick * 0.12;
     this.renderer.render(this.scene, this.camera);
   }

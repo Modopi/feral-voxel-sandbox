@@ -83,7 +83,7 @@ test("voxel damage severs a limb and changes locomotion capability", () => {
     p = SPECIES[0].parts[2];
   const pt = toWorld(mob, p, 2, cellPosition(p, 1), 0);
   const count = e.damageHit({ entity: mob, part: 2, point: pt }, 0, 0.3);
-  assert.equal(count, 3);
+  assert.equal(count, 2);
   assert.equal(e.legs(mob), 3);
   assert.ok(mob.lost & (1 << 2));
   assert.equal(occupied(mob, 2, 0), false);
