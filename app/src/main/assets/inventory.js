@@ -1,6 +1,8 @@
+import { GEAR } from "./equipment.js";
 import { B, clamp } from "./world.js";
 import { solidAt } from "./physics.js";
 export const ITEMS = {
+  arrow: { name: "화살", icon: "➶", color: 0xd5c59a },
   food: { frontier: true, name: "야전 식량", icon: "◒", color: 0xd9b76c },
   iron: { frontier: true, name: "합금", icon: "▰", color: 0xb8c4cf },
   knowledge: { frontier: true, name: "연구 기록", icon: "▱", color: 0x9bdad0 },
@@ -19,6 +21,26 @@ export const ITEMS = {
   resin: { name: "생체 수지", icon: "◉", color: 0xe4bc75 },
 };
 export const RECIPES = [
+  {
+    id: "arrows",
+    name: "화살 × 12",
+    description: "활·석궁 한 발당 1개 소비",
+    cost: { stone: 2, wood: 2, fiber: 1 },
+    give: { arrow: 12 },
+  },
+  ...Object.entries(GEAR)
+    .filter(([, g]) => g.cost)
+    .map(([id, g]) => ({
+      id,
+      name: g.name,
+      description:
+        g.slot === "weapon"
+          ? `피해 ${g.damage} · 사거리 ${g.range}m · ${g.cooldown}초 · 내구 ${g.durability}${g.ammo ? " · 화살 필요" : ""}`
+          : `${g.affinity === "rock" ? "돌·광석" : g.affinity === "wood" ? "나무" : "흙·모래"} 채굴 ${g.power}배 · 내구 ${g.durability}`,
+      cost: g.cost,
+      unlock: id,
+      frontier: g.frontier,
+    })),
   {
     id: "food",
     name: "야전 식량 × 3",
@@ -149,6 +171,8 @@ export function resourceForBlock(b) {
 }
 export class Inventory {
   constructor(starter = true) {
+    this.equipment = { weapon: "pulse", tool: "pick" };
+    this.wear = {};
     this.items = starter ? { dirt: 16, wood: 4, stone: 4, seed: 4 } : {};
     this.unlocks = new Set();
     this.revision = 0;
@@ -187,11 +211,45 @@ export class Inventory {
     for (const [k, n] of Object.entries(r.cost)) this.take(k, n);
     for (const [k, n] of Object.entries(r.give || {})) this.add(k, n);
     if (r.unlock) this.unlocks.add(r.unlock);
+    if (GEAR[id]) {
+      this.wear[id] = GEAR[id].durability;
+      this.equipment[GEAR[id].slot] = id;
+    }
+    this.revision++;
+    return true;
+  }
+  equip(id) {
+    if (!GEAR[id] || !this.unlocks.has(id) || !(this.wear[id] > 0))
+      return false;
+    this.equipment[GEAR[id].slot] = id;
+    this.revision++;
+    return true;
+  }
+  repair(id) {
+    const g = GEAR[id];
+    if (
+      !g?.durability ||
+      !this.unlocks.has(id) ||
+      this.wear[id] >= g.durability
+    )
+      return false;
+    const cost = Object.fromEntries(
+      Object.entries(g.cost).map(([k, n]) => [k, Math.ceil(n / 2)]),
+    );
+    if (!Object.entries(cost).every(([k, n]) => this.count(k) >= n))
+      return false;
+    for (const [k, n] of Object.entries(cost)) this.take(k, n);
+    this.wear[id] = g.durability;
     this.revision++;
     return true;
   }
   save() {
-    return { items: this.items, unlocks: [...this.unlocks] };
+    return {
+      items: this.items,
+      unlocks: [...this.unlocks],
+      equipment: { ...this.equipment },
+      wear: { ...this.wear },
+    };
   }
   load(s) {
     this.items = {};
@@ -201,11 +259,23 @@ export class Inventory {
     this.unlocks = new Set(
       (s?.unlocks || []).filter((k) => RECIPES.some((r) => r.unlock === k)),
     );
+    this.wear = {};
+    this.equipment = { weapon: "pulse", tool: "pick" };
+    for (const [id, g] of Object.entries(GEAR))
+      if (g.durability && this.unlocks.has(id)) {
+        this.wear[id] = Number.isFinite(s.wear?.[id])
+          ? clamp(Math.floor(s.wear[id]), 0, g.durability)
+          : g.durability;
+        if (s.equipment?.[g.slot] === id && this.wear[id] > 0)
+          this.equipment[g.slot] = id;
+      }
     this.revision++;
   }
 }
 export class Pickups {
   constructor() {
+    this.equipment = { weapon: "pulse", tool: "pick" };
+    this.wear = {};
     this.items = [];
     this.nextId = 1;
     this.collected = 0;

@@ -1,0 +1,16 @@
+{
+  "combat": {
+    "hp": 50,
+    "max": 72,
+    "arrows": 11,
+    "before": 12,
+    "wear": 139,
+    "dead": false
+  },
+  "viewports": [
+    "900x412",
+    "412x900",
+    "360x640"
+  ],
+  "errors": []
+}

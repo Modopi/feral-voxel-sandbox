@@ -83,11 +83,17 @@ const assert = require("node:assert/strict");
     const before = f.inventory.count("dirt");
     f.selectTool(2);
     aim(79.25, 11.99, 84.25);
-    f.use();
+    for (let n = 0; n < 3; n++) {
+      f.world.time += 0.21;
+      f.use();
+    }
     const coarseRemoved = f.world.getCell(158, 23, 168) === 0;
     f.cycleRange();
     aim(78.25, 11.99, 84.25);
-    f.use();
+    for (let n = 0; n < 2; n++) {
+      f.world.time += 0.21;
+      f.use();
+    }
     const halfRemoved = f.world.getCell(156, 23, 168) === 0,
       neighborIntact = f.world.getCell(157, 23, 168) !== 0;
     f.setCamera(78.8, 13.36, 84.7, 0, 0);

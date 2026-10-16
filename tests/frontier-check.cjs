@@ -108,8 +108,9 @@ const fs = require("node:fs");
       f.setCamera(b.x, y + 1.8, b.z + 5, 0, 0);
       f.selectTool(1);
       let hits = 0;
-      for (let n = 0; n < 12 && !b.defeated; n++) {
-        f.frontier.attackClock = 0;
+      for (let n = 0; n < 24 && !b.defeated; n++) {
+        for (let t = 0; t < 36; t++) f.fixedStep({});
+        f.setCamera(b.x, f.world.surface(b.x, b.z) + 1.8, b.z + 5, 0, 0);
         f.use();
         hits++;
       }

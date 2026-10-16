@@ -1,3 +1,4 @@
+import { activeGear } from "../equipment.js";
 import { T } from "../render.js";
 import { FACTIONS } from "./model.js";
 import { FrontierMotion } from "./motion.js";
@@ -269,10 +270,9 @@ export class FrontierView {
       delta = center.sub(origin),
       along = delta.dot(dir);
     const range =
-      (s.riding && s.machine && evaluate(s.machine).weapons > 0) ||
-      inv.unlocks.has("ballistics")
+      s.riding && s.machine && evaluate(s.machine).weapons > 0
         ? 22
-        : 6.5;
+        : activeGear(inv, "weapon").range;
     if (
       along < 0 ||
       along > range ||
@@ -289,6 +289,11 @@ export class FrontierView {
       this.hud();
     } else if (this.c.model.riding && !this.c.inventory.count("stone"))
       this.c.toast("포탑 탄약은 돌 조각입니다.");
+    else if (
+      activeGear(this.c.inventory, "weapon").ammo &&
+      !this.c.inventory.count("arrow")
+    )
+      this.c.toast("화살이 필요합니다. 가방에서 제작하세요.");
     return true;
   }
   key(code) {
@@ -400,7 +405,10 @@ export class FrontierView {
           : "상호작용 ";
     $("biome").textContent = s.info.name;
     $("flyBtn").classList.toggle("enabled", s.airborne);
-    $("flyBtn").classList.toggle("hidden", !s.riding || !this.c.inventory.unlocks.has("aviation"));
+    $("flyBtn").classList.toggle(
+      "hidden",
+      !s.riding || !this.c.inventory.unlocks.has("aviation"),
+    );
   }
   feedback(message) {
     $("frontierFeedback").textContent = message;

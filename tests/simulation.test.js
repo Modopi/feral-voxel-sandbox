@@ -115,7 +115,7 @@ test("predation transfers energy and death returns soil nutrients", () => {
     p = eco.spawn(1, 12, 12),
     prey = eco.spawn(0, 12.5, 12);
   p.energy = 30;
-  prey.energy = 1;
+  prey.hp = 1; // Predation damages health, independently of nutrition.
   eco.rehash();
   eco.think(p, 0.5);
   assert.equal(prey.dead, true);

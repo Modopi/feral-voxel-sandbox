@@ -170,6 +170,8 @@ export class Ecology {
       phase: w.random() * 7,
       moving: 1,
       speed: type === 1 ? 2.2 : type === 2 ? 0.7 : 1.2,
+      hp: [48, 72, 32][type],
+      maxHP: [48, 72, 32][type],
       energy: 60 + w.random() * 40,
       age: w.random() * 60,
       lost: 0,
@@ -223,15 +225,25 @@ export class Ecology {
       }
     return a;
   }
-  kill(e) {
+  hurt(e, amount, cause = "체력 소진") {
+    if (e.dead || !Number.isFinite(amount) || amount <= 0) return;
+    e.hp = Math.max(0, e.hp - amount);
+    if (e.hp <= 0) this.kill(e, cause);
+  }
+  kill(e, cause = "체력 소진") {
     if (e.dead) return;
     e.dead = true;
+    e.hp = 0;
+    e.deathCause = cause;
     e.energy = 0;
     this.world.reactions.deaths++;
     this.onDeath(e);
     const i = clamp(e.x | 0, 0, SIZE - 1) + clamp(e.z | 0, 0, SIZE - 1) * SIZE;
     this.world.nutrients[i] = clamp(this.world.nutrients[i] + 0.35, 0, 1);
-    this.world.event(SPECIES[e.type].name + " → 토양 영양분", [e.x, e.y, e.z]);
+    this.world.event(
+      SPECIES[e.type].name + " 사망 · " + cause + " → 토양 영양분",
+      [e.x, e.y, e.z],
+    );
   }
   legs(e) {
     let n = 0;
@@ -242,8 +254,17 @@ export class Ecology {
     const w = this.world;
     e.age += dt;
     e.energy -= dt * (e.type === 1 ? 0.33 : 0.13);
-    if (e.energy <= 0 || e.lost & 1) {
-      this.kill(e);
+    if (e.hp <= 0 || e.energy <= 0 || e.lost & 3) {
+      this.kill(
+        e,
+        e.lost & 1
+          ? "몸통 파괴"
+          : e.lost & 2
+            ? "머리 파괴"
+            : e.hp <= 0
+              ? "체력 소진"
+              : "굶주림",
+      );
       return;
     }
     let dx = e.targetX - e.x,
@@ -270,7 +291,7 @@ export class Ecology {
       e.targetX = prey.x;
       e.targetZ = prey.z;
       if (dist < 1.9) {
-        prey.energy -= dt * 18;
+        this.hurt(prey, dt * 18, "포식자 공격");
         e.energy = clamp(e.energy + dt * 8, 0, 150);
         if (prey.energy <= 0) this.kill(prey);
       }
@@ -307,7 +328,7 @@ export class Ecology {
     const burn = w.burning.has(w.index(e.x | 0, (e.y - 1) | 0, e.z | 0)),
       f = w.fluids.get(w.index(e.x | 0, e.y | 0, e.z | 0));
     if (burn || f?.a > 0.1) {
-      e.energy -= dt * 10;
+      this.hurt(e, dt * 10, burn ? "화상" : "산성 피해");
       e.fear = 3;
       e.targetX = clamp(e.x + (w.random() - 0.5) * 12, 2, SIZE - 3);
       e.targetZ = clamp(e.z + (w.random() - 0.5) * 12, 2, SIZE - 3);
@@ -488,14 +509,16 @@ export class Ecology {
       }
     for (let k = 0; k < SPECIES[e.type].parts.length; k++)
       if (SPECIES[e.type].parts[k].parent === pi) this.detach(e, k, time);
-    if (p.role === "core") this.kill(e);
+    if (p.role === "core" || p.role === "head")
+      this.kill(e, p.role === "core" ? "몸통 파괴" : "머리 파괴");
     this.world.event(SPECIES[e.type].name + " · " + p.name + " 분리", [
       e.x,
       e.y,
       e.z,
     ]);
   }
-  damageHit(hit, time, radius = 0.28) {
+  damageHit(hit, time, radius = 0.28, damage = 12) {
+    if (hit.entity.dead) return 0;
     const e = hit.entity,
       pi = hit.part,
       p = SPECIES[e.type].parts[pi];
@@ -507,7 +530,8 @@ export class Ecology {
       const q = cellPosition(p, j);
       if (
         dam[j] &&
-        Math.hypot(q[0] - v[0], q[1] - v[1], q[2] - v[2]) < radius
+        (j === hit.voxel ||
+          Math.hypot(q[0] - v[0], q[1] - v[1], q[2] - v[2]) < radius)
       ) {
         dam[j] = 0;
         removed++;
@@ -593,7 +617,12 @@ export class Ecology {
           color: p.color,
         });
       }
-    e.energy -= removed * 1.8;
+    if (removed)
+      this.hurt(
+        e,
+        damage * (p.role === "head" ? 1.5 : 1),
+        p.role === "head" ? "머리 치명타" : "공격 피해",
+      );
     e.fear = 6;
     e.targetX = clamp(e.x + (this.world.random() - 0.5) * 16, 2, SIZE - 3);
     e.targetZ = clamp(e.z + (this.world.random() - 0.5) * 16, 2, SIZE - 3);
@@ -628,6 +657,10 @@ export class Ecology {
     this.nextId = s.nextId;
     this.entities = s.entities.map((e) => ({
       ...e,
+      maxHP: [48, 72, 32][e.type],
+      hp: Number.isFinite(e.hp)
+        ? clamp(e.hp, 0, [48, 72, 32][e.type])
+        : [48, 72, 32][e.type],
       damage: Object.fromEntries(
         Object.entries(e.damage).map(([k, v]) => [
           k,

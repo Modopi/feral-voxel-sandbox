@@ -300,6 +300,59 @@ export class View {
     this.toolBase = { y: -0.12, z: -0.22 };
     this.toolKick = 0;
   }
+  setEquipment(id) {
+    if (this.equipmentId === id) return;
+    this.equipmentId = id;
+    if (!this.originalTool) this.originalTool = [...this.tool.children];
+    for (const mesh of [...this.tool.children]) {
+      this.tool.remove(mesh);
+      if (!this.originalTool.includes(mesh)) mesh.material.dispose();
+    }
+    if (id === "pulse" || id === "utility") {
+      this.tool.add(...this.originalTool);
+      return;
+    }
+    const metal =
+      id.includes("iron") || ["sword", "battleaxe", "crystalbow"].includes(id)
+        ? 0xb6d6d3
+        : 0x8c9b9c;
+    const add = (color, x, y, z, sx, sy, sz) => {
+      const mesh = new T.Mesh(this.cube, new T.MeshLambertMaterial({ color }));
+      mesh.position.set(x, y, z);
+      mesh.scale.set(sx, sy, sz);
+      this.tool.add(mesh);
+      return mesh;
+    };
+    add(0x76563a, 0.37, -0.34, -0.51, 0.065, 0.42, 0.065);
+    if (id === "bow" || id === "crystalbow") {
+      add(0xba8b50, 0.37, -0.12, -0.58, 0.055, 0.4, 0.06);
+      add(0xba8b50, 0.37, -0.52, -0.58, 0.055, 0.35, 0.06);
+      add(0xe4dac0, 0.37, -0.3, -0.45, 0.015, 0.75, 0.015);
+      add(metal, 0.37, -0.3, -0.76, 0.025, 0.025, 0.65);
+      if (id === "crystalbow")
+        add(0x6bccd4, 0.37, -0.28, -0.62, 0.42, 0.06, 0.08);
+    } else if (id === "sword" || id === "spear") {
+      add(
+        metal,
+        0.37,
+        0.04,
+        -0.52,
+        id === "spear" ? 0.065 : 0.12,
+        id === "spear" ? 0.65 : 0.5,
+        0.045,
+      );
+      add(0xc4a15a, 0.37, -0.18, -0.51, 0.26, 0.045, 0.08);
+    } else if (id === "axe" || id === "battleaxe") {
+      add(metal, 0.43, -0.09, -0.52, 0.28, 0.21, 0.07);
+    } else if (id === "shovel") {
+      add(metal, 0.37, -0.04, -0.52, 0.2, 0.24, 0.04);
+    } else if (id === "club") {
+      add(metal, 0.37, -0.06, -0.52, 0.18, 0.28, 0.18);
+    } else {
+      add(metal, 0.37, -0.08, -0.52, 0.48, 0.08, 0.09);
+      add(metal, 0.58, -0.14, -0.52, 0.06, 0.17, 0.09);
+    }
+  }
   resize() {
     const width = innerWidth,
       height = innerHeight;

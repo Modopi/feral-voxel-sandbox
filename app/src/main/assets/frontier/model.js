@@ -1,3 +1,4 @@
+import { activeGear, spendGear } from "../equipment.js";
 // Frontier rules. No DOM, renderer or storage access: every action is explicit.
 import { hash, clamp } from "../world.js";
 import {
@@ -408,14 +409,19 @@ export class Frontier {
   }
   attack(inv) {
     if (this.attackClock > 0) return false;
-    this.attackClock = this.riding ? 0.8 : 0.45;
+    this.attackClock = this.riding ? 0.8 : activeGear(inv, "weapon").cooldown;
     const f = this.machine && evaluate(this.machine);
     if (this.riding && f.weapons > 0) {
       if (!inv.take("stone", 1)) return false;
       return this.hitBoss(30 * f.weapons, inv);
     }
+    const gear = activeGear(inv, "weapon");
+    if (!spendGear(inv, "weapon")) return false;
     return this.hitBoss(
-      (inv.unlocks.has("blade") ? 24 : 12) + Math.min(10, this.level - 1) * 2,
+      (gear.name === "기본 펄스" && inv.unlocks.has("blade")
+        ? 24
+        : gear.damage) +
+        Math.min(10, this.level - 1) * 2,
       inv,
     );
   }

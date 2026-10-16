@@ -1,3 +1,13 @@
+import {
+  GEAR,
+  activeGear,
+  gearId,
+  spendGear,
+  miningWork,
+  MiningProgress,
+} from "./equipment.js";
+const miningProgress = new MiningProgress();
+let nextStrike = 0;
 import { currentWorld, saveKey } from "./world-slots.js";
 const activeWorld = currentWorld(
   localStorage,
@@ -161,6 +171,7 @@ function event(s, p) {
 }
 function selectTool(n) {
   if (frontierState && [4, 5, 6, 8].includes(n)) return;
+  miningProgress.reset();
   selected = (n + tools.length) % tools.length;
   document
     .querySelectorAll(".slot")
@@ -265,6 +276,27 @@ function updateToolLabel() {
       (buildSize === 1 ? 8 : 1) +
       " 조각";
   }
+  if (selected === 1 || selected === 2) {
+    const slot = selected === 1 ? "weapon" : "tool",
+      g = activeGear(inventory, slot);
+    $("toolName").textContent =
+      g.name + (selected === 2 ? ` · ${miningSize}m` : "");
+    $("toolHelp").textContent =
+      (selected === 1
+        ? `피해 ${g === GEAR.pulse && inventory.unlocks.has("blade") ? 24 : g.damage} · ${g.range}m · ${g.cooldown}초`
+        : "누르고 채굴 · 재질에 맞는 도구를 가방에서 장착") +
+      (g.durability
+        ? ` · 내구 ${inventory.wear[gearId(inventory, slot)]}/${g.durability}`
+        : "") +
+      (g.ammo ? ` · 화살 ${inventory.count(g.ammo)}` : "");
+  }
+  view?.setEquipment(
+    selected === 1
+      ? gearId(inventory, "weapon")
+      : selected === 2
+        ? gearId(inventory, "tool")
+        : "utility",
+  );
   $("hint").textContent = "키 1.5 m · 지형 1 / 0.5 m";
 }
 function cycleRange() {
@@ -344,6 +376,38 @@ function refreshInventory() {
     button.disabled = !inventory.canCraft(recipe);
     button.onclick = () => craft(recipe.id);
     row.append(text, button);
+    if (GEAR[recipe.id] && inventory.unlocks.has(recipe.id)) {
+      const g = GEAR[recipe.id],
+        equip = document.createElement("button"),
+        repair = document.createElement("button");
+      equip.textContent =
+        (gearId(inventory, g.slot) === recipe.id ? "장착 중" : "장착") +
+        ` · ${inventory.wear[recipe.id]}/${g.durability}`;
+      equip.disabled = !inventory.wear[recipe.id];
+      equip.onclick = () => {
+        inventory.equip(recipe.id);
+        selectTool(g.slot === "weapon" ? 1 : 2);
+        refreshInventory();
+      };
+      repair.textContent = "수리";
+      repair.title = Object.entries(g.cost)
+        .map(([k, n]) => `${ITEMS[k].name} ${Math.ceil(n / 2)}`)
+        .join(" · ");
+      repair.disabled = inventory.wear[recipe.id] >= g.durability;
+      repair.onclick = () => {
+        toast(
+          inventory.repair(recipe.id)
+            ? "내구도 회복"
+            : "수리 재료 부족 · 제작 재료의 절반 필요",
+        );
+        refreshInventory();
+        updateToolLabel();
+      };
+      const actions = document.createElement("div");
+      actions.className = "gearActions";
+      actions.append(equip, repair);
+      row.append(actions);
+    }
     recipes.append(row);
   }
   $("bagTotal").textContent =
@@ -359,6 +423,7 @@ function refreshInventory() {
 function craft(id) {
   const ok = inventory.craft(id);
   if (ok) {
+    if (GEAR[id]) selectTool(GEAR[id].slot === "weapon" ? 1 : 2);
     if (id === "hammer") {
       miningSize = 2;
       selectTool(2);
@@ -423,20 +488,32 @@ function harvest(hit, size) {
   return true;
 }
 function target() {
-  const block = blockRay(6.5),
+  const range = selected === 1 ? activeGear(inventory, "weapon").range : 6.5;
+  const block = blockRay(range),
     d = new T.Vector3();
   view.camera.getWorldDirection(d);
   const ent = eco.ray(
     view.camera.position,
     d,
-    Math.min(6.5, block?.distance || 6.5),
+    Math.min(range, block?.distance || range),
     world.time,
   );
   return { block, ent };
 }
 function use() {
   if (!running || paused) return;
-  if (frontierUI?.use(selected)) return;
+  if (world.time < nextStrike) return;
+  nextStrike =
+    world.time +
+    (selected === 1
+      ? activeGear(inventory, "weapon").cooldown
+      : selected === 2
+        ? 0.18
+        : 0.3);
+  if (frontierUI?.use(selected)) {
+    updateToolLabel();
+    return;
+  }
   const { block, ent } = target();
   view.toolKick = 1;
   if (selected === 0) {
@@ -446,7 +523,7 @@ function use() {
         SPECIES[e.type].name +
           " · " +
           SPECIES[e.type].parts[ent.part].name +
-          " · 에너지 " +
+          ` · 체력 ${Math.ceil(e.hp)}/${e.maxHP} · 머리·몸통 파괴 또는 HP 0이면 사망 · 에너지 ` +
           Math.round(e.energy) +
           " · 다리 " +
           eco.legs(e) +
@@ -468,13 +545,35 @@ function use() {
   }
   if (selected === 1) {
     if (ent) {
+      const g = activeGear(inventory, "weapon"),
+        before = ent.entity.hp;
+      if (!spendGear(inventory, "weapon")) {
+        toast("화살이 필요합니다. 가방에서 제작하세요.");
+        return;
+      }
       eco.damageHit(
         ent,
         world.time,
-        inventory.unlocks.has("pulse") ? 0.3 : 0.18,
+        g === GEAR.pulse && inventory.unlocks.has("pulse") ? 0.3 : g.radius,
+        g === GEAR.pulse && inventory.unlocks.has("blade") ? 24 : g.damage,
+      );
+      const e = ent.entity;
+      toast(
+        e.dead
+          ? `${SPECIES[e.type].name} 처치 · ${e.deathCause}`
+          : `피해 ${Math.ceil(before - e.hp)} · 체력 ${Math.ceil(e.hp)}/${e.maxHP}${ent.part === 1 ? " · 머리 치명타" : ""}`,
+      );
+      document.getElementById("crosshair")?.animate(
+        [
+          { transform: "scale(1.7)", color: "#ffbc87" },
+          { transform: "scale(1)", color: "#fff" },
+        ],
+        { duration: 220 },
       );
       sound("pulse");
-    } else if (block) harvest(block, 0.5);
+      updateToolLabel();
+      updateAim();
+    } else if (block) toast("지형은 채굴 도구(3번)로 부수세요.");
     return;
   }
   if (!block) {
@@ -483,7 +582,19 @@ function use() {
   }
   const outward = block.point.map((v, i) => v + block.normal[i] * 0.06),
     [x, y, z] = outward.map(Math.floor);
-  if (selected === 2) harvest(block, miningSize);
+  if (selected === 2) {
+    const g = activeGear(inventory, "tool");
+    const key = `${block.hx},${block.hy},${block.hz}:${miningSize}:${gearId(inventory, "tool")}`;
+    if (
+      miningProgress.strike(key, world.time, miningWork(block.b, miningSize, g))
+    ) {
+      if (harvest(block, miningSize)) spendGear(inventory, "tool");
+      miningProgress.reset();
+    } else {
+      sound("step");
+      updateAim();
+    }
+  }
   if (selected === 3) {
     const r = buildTarget(block),
       cost = r.n ** 3;
@@ -569,6 +680,7 @@ function stopInput() {
   joy.id = null;
   look.id = null;
   actionHeld = false;
+  miningProgress.reset();
   $("knob").style.transform = "";
 }
 function pause(force) {
@@ -628,6 +740,8 @@ function start(load = false) {
     controller.recover();
     physicsAccum = 0;
     physicsTick = 0;
+    nextStrike = 0;
+    miningProgress.reset();
     bindDrops();
     renderCamera(1);
     updateToolLabel();
@@ -896,16 +1010,9 @@ function fixedStep(input = inputState()) {
 function updateAim() {
   const { block, ent } = target();
   if (ent) {
+    const e = ent.entity;
     $("target").innerHTML =
-      "<b>" +
-      SPECIES[ent.entity.type].name +
-      "</b> · " +
-      SPECIES[ent.entity.type].parts[ent.part].name +
-      "<br>" +
-      SPECIES[ent.entity.type].cell * 100 +
-      " cm 복셀 · 다리 " +
-      eco.legs(ent.entity) +
-      "/4";
+      `<b>${SPECIES[e.type].name}</b> · ${SPECIES[e.type].parts[ent.part].name}<br>HP ${Math.ceil(e.hp)}/${e.maxHP} · 다리 ${eco.legs(e)}/4<br><small>HP 0 또는 머리·몸통 파괴 → 사망</small><progress class="targetHealth" max="${e.maxHP}" value="${e.hp}"></progress>`;
     view.highlight.visible = false;
   } else if (block) {
     const names = [
@@ -923,7 +1030,25 @@ function updateAim() {
       "목재",
     ];
     $("target").textContent =
-      (names[block.b] || "블록") + " · " + block.distance.toFixed(1) + " m";
+      (names[block.b] || "블록") +
+      " · " +
+      block.distance.toFixed(1) +
+      " m" +
+      (selected === 2
+        ? ` · 파괴 ${world.time - miningProgress.last < 0.6 && miningProgress.key === `${block.hx},${block.hy},${block.hz}:${miningSize}:${gearId(inventory, "tool")}` ? Math.floor(miningProgress.ratio * 100) : 0}% · 길게 누르기`
+        : "");
+    if (selected === 2) {
+      const progress = document.createElement("progress");
+      progress.className = "targetHealth";
+      progress.max = 1;
+      progress.value =
+        world.time - miningProgress.last < 0.6 &&
+        miningProgress.key ===
+          `${block.hx},${block.hy},${block.hz}:${miningSize}:${gearId(inventory, "tool")}`
+          ? miningProgress.ratio
+          : 0;
+      $("target").append(progress);
+    }
     view.highlight.visible = selected === 2 || selected === 3;
     const r =
       selected === 3
@@ -992,11 +1117,9 @@ function frame(now) {
       use();
       actionCooldown =
         selected === 1
-          ? 0.18
+          ? activeGear(inventory, "weapon").cooldown
           : selected === 2
-            ? miningSize === 2
-              ? 0.65
-              : 0.28
+            ? 0.2
             : 0.4;
     }
     if (hudTimer > 0.2) {

@@ -105,3 +105,19 @@ body.menuOpen #hud { visibility: hidden; }
   #hud .rangeButton { left: auto; right: 16px; bottom: 82px; transform: none; min-width: 118px; }
   #hud .rangeButton:active { transform: scale(.98); }
 }
+
+/* Equipment actions stay readable in the compact field crafting ledger. */
+.gearActions { grid-column: 1 / -1; display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.gearActions button { min-height: 38px; padding: 6px 12px; color: #ecdfc4; background: #283b36; border: 1px solid #668273; }
+.gearActions button:disabled { opacity: .45; }
+.targetHealth { display: block; width: 160px; height: 6px; margin: 7px auto; accent-color: #e6a16f; }
+#hud #target { top: auto; bottom: 140px; transform: translateX(-50%); }
+@media (orientation: landscape) {
+  #hud #toast { top: 90px; bottom: auto; max-width: 42vw; }
+}
+@media (orientation: portrait) {
+  #hud #target { bottom: 180px; max-width: calc(100vw - 48px); width: max-content; }
+}
+@media (orientation: landscape) {
+  #hud #target { left: auto; right: 120px; bottom: 130px; transform: none; max-width: 240px; }
+}
