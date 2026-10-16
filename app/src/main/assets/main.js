@@ -25,6 +25,7 @@ let inventory = new Inventory(),
   miningSize = 1,
   buildSize = 1,
   buildMaterial = "dirt",
+  inspectedItem = "dirt",
   physicsAccum = 0,
   physicsTick = 0,
   lastInventoryRevision = -1,
@@ -271,7 +272,10 @@ function refreshInventory() {
   grid.replaceChildren();
   for (const [id, item] of Object.entries(ITEMS)) {
     const b = document.createElement("button");
-    b.className = "itemSlot" + (id === buildMaterial ? " equipped" : "");
+    b.className = "itemSlot" + (id === inspectedItem ? " equipped" : "");
+    b.dataset.item = id;
+    b.setAttribute("aria-pressed", String(id === inspectedItem));
+    b.setAttribute("aria-label", item.name + " · " + inventory.count(id) + "개");
     b.innerHTML =
       '<span style="color:#' +
       item.color.toString(16).padStart(6, "0") +
@@ -284,15 +288,19 @@ function refreshInventory() {
       "</small>";
     b.title = item.block ? "눌러 건축 재료로 선택" : "제작 재료";
     b.onclick = () => {
+      inspectedItem = id;
       if (item.block) {
         buildMaterial = id;
         selectTool(3);
-        refreshInventory();
         toast(item.name + " 건축 재료 선택");
       }
+      refreshInventory();
+      grid.querySelector(`[data-item="${id}"]`)?.focus({ preventScroll: true });
     };
     grid.append(b);
   }
+  const item = ITEMS[inspectedItem];
+  $("itemDetail").innerHTML = `<span class="detailGlyph">${item.icon}</span><div><h3>${item.name} <small>× ${inventory.count(inspectedItem)}</small></h3><p>${item.block ? (inspectedItem === buildMaterial ? "건축 재료 선택됨 · 탐험으로 돌아가 설치하세요." : "슬롯을 누르면 건축 재료로 선택합니다.") : "제작 재료 · 현장 제작 목록에서 사용처를 확인하세요."}</p></div>`;
   const recipes = $("recipeList");
   recipes.replaceChildren();
   for (const recipe of RECIPES) {
@@ -335,7 +343,10 @@ function craft(id) {
       miningSize = 2;
       selectTool(2);
     }
-    toast(RECIPES.find((r) => r.id === id).name + " 제작 완료");
+    const recipe = RECIPES.find((r) => r.id === id);
+    if (recipe.give) inspectedItem = Object.keys(recipe.give)[0];
+    $("craftFeedback").textContent = recipe.name + " 제작 완료";
+    toast(recipe.name + " 제작 완료");
     sound("scan");
   } else toast("제작 재료가 부족하거나 이미 보유한 도구입니다.");
   refreshInventory();
@@ -539,6 +550,7 @@ function pause(force) {
   paused = force ?? !paused;
   stopInput();
   $("pauseScreen").classList.toggle("hidden", !paused);
+  document.body.classList.toggle("menuOpen", paused);
   if (paused) {
     document.exitPointerLock?.();
     updatePanels();
@@ -980,7 +992,10 @@ function refreshAPI() {
 }
 $("startBtn").onclick = () => { if (localStorage.getItem(storageKey)) location.href="worlds.html"; else start(false); };
 $("continueBtn").onclick = () => start(true);
-$("menuBtn").onclick = () => pause(true);
+$("menuBtn").onclick = () => {
+  pause(true);
+  document.querySelector('[data-tab="world"]').click();
+};
 $("resumeBtn").onclick = $("backToGame").onclick = () => pause(false);
 $("worldListBtn").onclick = (e) => { if (!save(true)) e.preventDefault(); };
 $("saveBtn").onclick = () => save();
@@ -1013,6 +1028,8 @@ $("stressBtn").onclick = () => {
 };
 for (const b of document.querySelectorAll("[data-tab]"))
   b.onclick = () => {
+    $("pauseScreen").classList.toggle("inventoryMode", b.dataset.tab === "bag");
+    $("panelTitle").textContent = b.dataset.tab === "bag" ? "가방 · 제작" : "탐험 메뉴";
     document
       .querySelectorAll("[data-tab]")
       .forEach((x) => x.classList.toggle("active", x === b));

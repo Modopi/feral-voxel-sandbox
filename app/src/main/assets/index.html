@@ -6,9 +6,11 @@
       name="viewport"
       content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"
     />
+    <link rel="icon" href="data:," />
     <meta name="theme-color" content="#162c28" />
     <title>FERAL — 살아 있는 복셀</title>
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="field-ui.css" />
   </head>
   <body>
     <canvas id="world"></canvas>
@@ -124,7 +126,7 @@
         <div class="panelTop">
           <div>
             <span class="eyebrow">FIELD STATION</span>
-            <h2>잠시, 관측소에서.</h2>
+            <h2 id="panelTitle">탐험 메뉴</h2>
           </div>
           <button id="resumeBtn" class="icon-button" aria-label="계속">
             ×
@@ -133,7 +135,7 @@
         <div class="tabs">
           <button data-tab="bag">가방·제작</button
           ><button data-tab="world" class="active">탐험</button
-          ><button data-tab="life">생태계</button
+          ><button data-tab="life">개발 · 생태</button
           ><button data-tab="settings">환경 설정</button
           ><button data-tab="help">조작 안내</button
           ><button data-tab="updates">업데이트 <small id="updateBadge">v0.2.5</small></button>
@@ -141,21 +143,18 @@
         <section data-panel="bag" class="hidden">
           <div class="bagHeader">
             <div>
-              <b>채집품과 장비</b>
-              <p>흙·돌·원목 조각 8개 = 1 m³ · 재료를 눌러 건축에 사용</p>
+              <b>소지품</b>
+              <p>재료 선택 → 건축 준비 · 제작 → 장비와 자원 확보</p>
             </div>
             <span id="bagTotal">0 조각</span>
           </div>
           <div class="bagLayout">
             <div>
               <div id="inventoryGrid"></div>
-              <p class="bagGuide">
-                바닥의 드롭에 가까이 가면 자동 수집합니다.<br />1 m 곡괭이와 0.5
-                m 정밀 끌은 기본 장비입니다.<br />플레이 중 범위 버튼 또는 B로
-                크기를 변경하세요.
-              </p>
+              <div id="itemDetail" class="itemDetail" aria-live="polite"></div>
+              <p class="bagGuide">떨어진 자원은 가까이에서 자동 수집 · 블록 조각 8개 = 1 m³</p>
             </div>
-            <div id="recipeList"></div>
+            <div class="crafting"><h3>현장 제작 <span>도구 · 가공</span></h3><div id="recipeList"></div><p id="craftFeedback" role="status"></p></div>
           </div>
         </section>
         <section data-panel="world">
