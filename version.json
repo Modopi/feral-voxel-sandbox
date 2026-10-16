@@ -1,0 +1,7 @@
+{
+  "version": "0.2.5",
+  "versionCode": 205,
+  "minNativeCode": 205,
+  "saveSchema": 2,
+  "channel": "stable"
+}

@@ -1,0 +1,28 @@
+PASS valid RSA signature accepted
+PASS changed metadata rejected
+PASS native requirement enforced
+PASS downgrade rejected
+PASS failed version rejected
+PASS download never activates running code
+PASS new version enters trial
+PASS trial activation persisted
+PASS complete version directory selected
+PASS unacknowledged process exit rolls back
+PASS pre-update save backup preserved
+PASS interrupted save restoration retried
+PASS failed package cannot loop on every launch
+PASS acknowledged version survives restart
+PASS incorrect runtime acknowledgement rejected
+PASS rollback chooses last healthy downloaded version
+PASS zip traversal rejected
+PASS bad extraction leaves active version intact
+PASS per-file corruption rejected
+PASS expanded-byte budget enforced
+PASS archive corruption rejected
+PASS missing file rejected
+PASS relative escape rejected
+PASS absolute path rejected
+PASS Windows separator rejected
+PASS empty path component rejected
+PASS newer installed APK supersedes old game bundle
+Native updater checks: 27

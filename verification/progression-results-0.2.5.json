@@ -1,0 +1,61 @@
+{
+  "floor": {
+    "footRange": 0,
+    "cameraRange": 0,
+    "eye": 1.3599999999999994
+  },
+  "mining": {
+    "before": 16,
+    "after": 25,
+    "coarseRemoved": true,
+    "halfRemoved": true,
+    "neighborIntact": true,
+    "collected": 10
+  },
+  "combat": {
+    "fragments": 1,
+    "collected": 1
+  },
+  "hammer": {
+    "owned": true,
+    "size": 2
+  },
+  "building": {
+    "before": 25,
+    "after": 24,
+    "placed": 2,
+    "size": 0.5
+  },
+  "beforeSave": {
+    "dirt": 24,
+    "plank": 0,
+    "subcells": 17,
+    "inventory": {
+      "items": {
+        "dirt": 24,
+        "wood": 2,
+        "stone": 4,
+        "seed": 5,
+        "plank": 0,
+        "bio": 1,
+        "resin": 0
+      },
+      "unlocks": [
+        "hammer"
+      ]
+    }
+  },
+  "restored": {
+    "dirt": 24,
+    "plank": 0,
+    "subcells": 17,
+    "hammer": true,
+    "cell": 2
+  },
+  "legacy": {
+    "running": true,
+    "dirt": 16,
+    "finite": true
+  },
+  "errors": []
+}

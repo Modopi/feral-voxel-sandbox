@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")"
+node tools/version.mjs --check
+FERAL_VERSION="$(node -p 'JSON.parse(require("fs").readFileSync("version.json","utf8")).version')"
+FERAL_APK="build/Feral-$FERAL_VERSION-android.apk"
 FERAL_SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-../toolchain/sdk}}"
 if [[ -d "$FERAL_SDK/build-tools" ]]; then
  FERAL_BT="$(find "$FERAL_SDK/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
@@ -16,10 +19,11 @@ if [[ ! -x "$FERAL_BT/aapt2" || ! -f "$FERAL_JAR" ]]; then
  echo 'Android SDK 35 / Build Tools 35.0.0 required. Set ANDROID_HOME.' >&2
  exit 1
 fi
+rm -rf build/classes build/dex
 mkdir -p build/classes build/dex signing
 "$FERAL_BT/aapt2" compile --dir app/src/main/res -o build/resources.zip
 "$FERAL_BT/aapt2" link -o build/base.apk -I "$FERAL_JAR" --manifest app/src/main/AndroidManifest.xml -R build/resources.zip -A app/src/main/assets --auto-add-overlay
-java com.sun.tools.javac.Main -source 8 -target 8 -Xlint:-options -encoding UTF-8 -classpath "$FERAL_JAR" -d build/classes app/src/main/java/com/kgb/feral/MainActivity.java
+java com.sun.tools.javac.Main -source 8 -target 8 -Xlint:-options -encoding UTF-8 -classpath "$FERAL_JAR" -d build/classes app/src/main/java/com/kgb/feral/*.java
 FERAL_CLASSES=()
 while IFS= read -r FERAL_CLASS; do FERAL_CLASSES+=("$FERAL_CLASS"); done < <(find build/classes -name '*.class' -type f)
 "$FERAL_BT/d8" --lib "$FERAL_JAR" --min-api 26 --output build/dex "${FERAL_CLASSES[@]}"
@@ -33,7 +37,7 @@ if [[ ! -f signing/prototype.keystore ]]; then
  keytool -genkeypair -keystore signing/prototype.keystore -alias feral -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android -dname 'CN=FERAL Prototype,O=KGB,C=KR'
 fi
 "$FERAL_BT/zipalign" -f -p 4 build/unsigned.apk build/aligned.apk
-"$FERAL_BT/apksigner" sign --ks signing/prototype.keystore --ks-key-alias feral --ks-pass pass:android --key-pass pass:android --out build/Feral-0.2-android.apk build/aligned.apk
-"$FERAL_BT/apksigner" verify --verbose build/Feral-0.2-android.apk
-"$FERAL_BT/zipalign" -c -p 4 build/Feral-0.2-android.apk
-printf 'APK ready: %s/build/Feral-0.2-android.apk\n' "$PWD"
+"$FERAL_BT/apksigner" sign --ks signing/prototype.keystore --ks-key-alias feral --ks-pass pass:android --key-pass pass:android --out "$FERAL_APK" build/aligned.apk
+"$FERAL_BT/apksigner" verify --verbose "$FERAL_APK"
+"$FERAL_BT/zipalign" -c -p 4 "$FERAL_APK"
+printf 'APK ready: %s/%s\n' "$PWD" "$FERAL_APK"

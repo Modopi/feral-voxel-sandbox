@@ -1,6 +1,14 @@
-# FERAL 0.2 — 살아 있는 복셀
+# FERAL 0.2.5 — 살아 있는 복셀
 
 Android에서 오프라인으로 탐험·채굴·전투·수집·제작을 연결하는 1인칭 복셀 샌드박스 프로토타입.
+
+## 0.2.5: 버전 배포와 자동 업데이트
+
+0.2.5 APK부터 비공개 GitHub의 서명된 게임 업데이트를 받습니다. 메뉴 → 업데이트 → GitHub 연결에서 저장소 한정 **Contents: Read-only** fine-grained 토큰을 한 번 등록하세요. 토큰은 Android Keystore로 암호화하며 게임 코드에 노출하지 않습니다. 연결 없이도 오프라인 플레이가 가능합니다.
+
+새 버전은 실행할 때 확인·다운로드하고 다음 실행에 적용합니다. **저장 후 적용**으로 즉시 재시작할 수 있습니다. 서명·파일 해시·경로·크기를 검증하고, 시작 성공 전 실패하면 이전 게임과 저장으로 복구합니다. 네이티브 기능 변경은 새 APK 설치가 필요합니다.
+
+버전의 기준은 `version.json`입니다. `node tools/version.mjs`로 관련 파일을 맞추고 CHANGELOG를 갱신한 뒤 검증된 변경을 main에 반영하면 GitHub Actions가 버전별 Release와 업데이트 채널을 배포합니다. 절차와 복구 범위는 [docs/RELEASING.md](docs/RELEASING.md), 개발 규칙은 [AGENTS.md](AGENTS.md)에 기록했습니다.
 
 ## 0.2 변경
 
@@ -13,11 +21,11 @@ Android에서 오프라인으로 탐험·채굴·전투·수집·제작을 연�
 
 ## 설치와 업데이트
 
-`Feral-0.2-android.apk`를 Android 기기에서 열어 설치합니다. Android 8.0 이상과 WebGL 2를 지원하는 최신 Android System WebView가 필요합니다. 0.1과 같은 applicationId와 시험 서명 키를 사용하며 versionCode를 2로 올렸습니다. 기존 앱을 지우지 않고 업데이트 설치하면 저장을 유지할 수 있습니다.
+`Feral-0.2.5-android.apk`를 Android 기기에서 열어 설치합니다. Android 8.0 이상과 WebGL 2를 지원하는 최신 Android System WebView가 필요합니다. 0.1과 같은 applicationId와 시험 서명 키를 사용하며 versionCode를 205로 올렸습니다. 기존 앱을 지우지 않고 업데이트 설치하면 저장을 유지할 수 있습니다.
 
 0.1 저장도 이어서 읽습니다. 기존 지형 수정·개체·분리된 신체 상태를 유지하고 가방에 시작 재료를 지급합니다. 축소된 몹에서 기존 부위의 손상 복셀 수가 달라지면 남은 비율에 맞춰 옮깁니다. 앱 데이터 삭제·앱 제거 시 저장은 삭제됩니다.
 
-외부 서버·로그인·네트워크 자산이 없으며 인터넷·저장소·위치 권한을 요청하지 않습니다.
+게임 자산을 APK에 포함합니다. 0.2.5부터 업데이트 통신을 위한 인터넷 권한만 추가했으며 저장소·위치 권한은 요청하지 않습니다. 토큰 연결 후 업데이트가 가능하고, 연결하지 않아도 현재 버전을 실행할 수 있습니다.
 
 ## 조작과 자원 흐름
 
@@ -71,6 +79,10 @@ Android에서 오프라인으로 탐험·채굴·전투·수집·제작을 연�
 | `app/src/main/assets/entities.js` | 복셀 신체·생태·손상·전리품 |
 | `app/src/main/assets/render.js` | 청크 메시·인스턴싱·거리 상세도 |
 | `app/src/main/assets/main.js` | 입력·프레임 루프·도구·저장·UI |
+| `app/src/main/assets/updates.js` | 버전·연결·자동 확인·적용 화면 |
+| `app/src/main/java/com/kgb/feral/UpdateCore.java` | 서명·파일 검증·적용·시작 실패 복구 |
+| `app/src/main/java/com/kgb/feral/UpdateManager.java` | GitHub 다운로드·네이티브 토큰 관리 |
+| `version.json`, `tools/`, `.github/workflows/` | 버전 기준·서명 패키지·자동 배포 |
 | `tests/` | 물리 회귀·자원 흐름·브라우저 검증 |
 | `verification/` | 실제 검증 결과 |
 
@@ -81,7 +93,7 @@ export ANDROID_HOME=/absolute/path/to/Android/sdk
 bash build-apk.sh
 ```
 
-결과는 `build/Feral-0.2-android.apk`입니다. 제공한 Gradle 프로젝트도 사용할 수 있습니다(Gradle 8.9 / AGP 8.7.3). `signing/prototype.keystore`는 재빌드용 공유 시험 키이며 배포용 서명은 별도로 관리해야 합니다.
+결과는 `build/Feral-0.2.5-android.apk`입니다. 제공한 Gradle 프로젝트도 사용할 수 있습니다(Gradle 8.9 / AGP 8.7.3). `signing/prototype.keystore`는 재빌드용 공유 시험 키이며 배포용 서명은 별도로 관리해야 합니다.
 
 웹에서 실행하려면 다음 서버를 시작하고 `http://localhost:8080`을 엽니다. APK에는 서버가 필요 없습니다.
 
@@ -95,6 +107,7 @@ node --test tests/*.test.js
 ```bash
 FERAL_CHROME=/absolute/path/to/chrome node tests/browser-check.cjs
 FERAL_CHROME=/absolute/path/to/chrome node tests/progression-check.cjs
+FERAL_CHROME=/absolute/path/to/chrome node tests/updates-ui-check.cjs
 ```
 
 Three.js r170을 로컬에 포함했으며 MIT 라이선스는 `app/src/main/assets/vendor/THREE-LICENSE.txt`에 있습니다.

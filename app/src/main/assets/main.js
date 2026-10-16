@@ -1,6 +1,8 @@
 import { World, B, SIZE, HEIGHT, COLORS, clamp } from "./world.js";
 import { Ecology, SPECIES } from "./entities.js";
 import { View, T } from "./render.js";
+import { VERSION } from "./version.js";
+import { initUpdates } from "./updates.js";
 import {
   CharacterController,
   FIXED_DT,
@@ -88,6 +90,7 @@ function toast(s) {
   toastTimer = setTimeout(() => $("toast").classList.remove("show"), 2600);
 }
 function reportError(err) {
+  window.FeralUpdates?.failed();
   console.error(err);
   $("errorScreen").classList.remove("hidden");
   $("errorText").textContent =
@@ -923,10 +926,11 @@ function frame(now) {
     view.draw(world.time, dt, moving);
   }
   if (window.FERAL) window.FERAL.ready = ready;
+  window.FeralUpdates?.frame(ready, now);
 }
 function refreshAPI() {
   window.FERAL = {
-    version: "0.2",
+    version: VERSION.version,
     controller,
     inventory,
     loot,
@@ -1190,6 +1194,9 @@ window.FeralNative = {
   },
   save: () => save(true),
 };
+window.FeralUpdates = initUpdates({
+  beforeApply: () => !running || save(true),
+});
 try {
   world = new World();
   world.generate();

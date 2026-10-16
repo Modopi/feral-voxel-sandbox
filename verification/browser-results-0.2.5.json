@@ -1,0 +1,107 @@
+{
+  "initial": {
+    "counts": [
+      132,
+      15,
+      21
+    ],
+    "total": 168,
+    "injured": 0,
+    "drawCalls": 58,
+    "triangles": 61116,
+    "nearVoxels": 648,
+    "farParts": 707,
+    "visibleEntities": 85,
+    "fps": 5.229213874846633,
+    "time": 1.0666666666666678,
+    "discovered": [
+      "초록 능선"
+    ],
+    "running": true,
+    "paused": false,
+    "player": {
+      "x": 77.5,
+      "y": 12,
+      "z": 84.5,
+      "yaw": -0.5,
+      "pitch": -0.1,
+      "vy": 0,
+      "grounded": true,
+      "flying": false
+    },
+    "surface": 12
+  },
+  "moved": {
+    "x": 76.19438548719808,
+    "y": 12,
+    "z": 82.94991983377031,
+    "yaw": 0.7,
+    "pitch": -0.15,
+    "vy": 0,
+    "grounded": true,
+    "flying": false
+  },
+  "touch": {
+    "x": 76.19438548719808,
+    "y": 12,
+    "z": 82.94991983377031,
+    "yaw": 0.82,
+    "pitch": -0.22199999999999998,
+    "vy": 0,
+    "grounded": true,
+    "flying": false
+  },
+  "damage": {
+    "damage": 1,
+    "lost": 0
+  },
+  "saveSize": 377238,
+  "stress": {
+    "counts": [
+      2342,
+      251,
+      392
+    ],
+    "total": 2985,
+    "injured": 1,
+    "drawCalls": 61,
+    "triangles": 207364,
+    "nearVoxels": 1319,
+    "farParts": 12142,
+    "visibleEntities": 1310,
+    "fps": 5.807200929152154,
+    "time": 6.183333333333317,
+    "discovered": [
+      "초록 능선"
+    ],
+    "running": true,
+    "paused": false
+  },
+  "restored": {
+    "counts": [
+      2331,
+      252,
+      392
+    ],
+    "total": 2975,
+    "injured": 1,
+    "drawCalls": 61,
+    "triangles": 205396,
+    "nearVoxels": 1319,
+    "farParts": 12139,
+    "visibleEntities": 1311,
+    "fps": 0,
+    "time": 7.183333333333313,
+    "discovered": [
+      "초록 능선"
+    ],
+    "running": true,
+    "paused": false
+  },
+  "settings": {
+    "quality": "low",
+    "leftHand": true
+  },
+  "errors": [],
+  "warnings": []
+}

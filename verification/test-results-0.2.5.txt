@@ -1,0 +1,42 @@
+✔ regression: old five-centimetre foot gap oscillates; swept support stays constant (15.341131ms)
+✔ stationary floor contact is stable under irregular rendered frame intervals (3.048607ms)
+✔ jump lands once on exact ground without subsequent floor bounce (2.505422ms)
+✔ removing the support causes a real fall; half-metre platforms stop it exactly (10.925469ms)
+✔ half-metre stair climb fits the full 1.5 metre body (3.706542ms)
+✔ a solid one-metre wall blocks walking and a low ceiling blocks jumping (1.479632ms)
+✔ half-cell edits preserve the other seven children and collapse uniform cells (0.523892ms)
+✔ tools remove 0.125, 1 and 8 cubic metres on filled terrain (5.579347ms)
+✔ ray picking and visible half-cell mesh agree on the excavated boundary (20.45012ms)
+✔ save and load preserve fine terrain and half-height support (10.121437ms)
+✔ crafting is atomic: missing resources never disappear and outputs are exact (0.442235ms)
+✔ resource collection enables crafted tools and an unlock cannot be charged twice (0.147939ms)
+✔ mined drops remain until approached, then collect only once (2.171036ms)
+✔ voxel damage routes collectable fragments; death yields a separate reward once (2.253899ms)
+✔ inventory, crafted unlocks and uncollected drops survive serialization (0.365521ms)
+✔ release publication happens before stable advances and failed uploads do not advance it (67.126088ms)
+✔ seed gives identical terrain and one metre cells (48.16508ms)
+✔ both quarter and eighth metre creatures are defined (0.341375ms)
+✔ fluid movement conserves volume and acid mass in a sealed basin (20.551876ms)
+✔ mixing clean water dilutes acid without destroying solute (5.243269ms)
+✔ water and lava form basalt and account for steam (1.411702ms)
+✔ burning wood consumes fuel and completes (1.463869ms)
+✔ voxel damage severs a limb and changes locomotion capability (1.12706ms)
+✔ head detachment propagates to attached ears (0.580009ms)
+✔ grazing consumes vegetation and returns energy (0.755239ms)
+✔ predation transfers energy and death returns soil nutrients (0.597956ms)
+✔ well fed mature creatures reproduce within population budget (0.416077ms)
+✔ save roundtrip preserves terrain, fluid, population and severed parts (59.141973ms)
+✔ 3000 entities tick with finite positions and bounded population (150.125216ms)
+✔ water extinguishes a burning wooden cell (1.676675ms)
+✔ concentrated acid consumes reagent while corroding organic material (0.409216ms)
+✔ actual release bundle matches the pinned Android verification key and payload (1871.944199ms)
+✔ native package verification, activation, interrupted startup and save rollback (1364.790476ms)
+✔ version files agree with authoritative version.json (72.251688ms)
+ℹ tests 34
+ℹ suites 0
+ℹ pass 34
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2001.717089

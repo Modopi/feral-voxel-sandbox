@@ -1,0 +1,14 @@
+{
+  "gameVersion": "0.2.5",
+  "healthAck": [
+    205
+  ],
+  "githubConnect": true,
+  "check": true,
+  "automaticToggle": true,
+  "pendingVersion": "0.2.6",
+  "savesBeforeApply": true,
+  "saveFailureBlocksApply": true,
+  "errors": [],
+  "webPreviewDisabled": true
+}
