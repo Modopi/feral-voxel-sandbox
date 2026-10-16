@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="field-ui.css" />
     <link rel="stylesheet" href="frontier/style.css" />
   <link rel="stylesheet" href="survival-ui.css" />
+    <link rel="stylesheet" href="game-ui.css" />
   </head>
   <body>
     <canvas id="world"></canvas>
@@ -143,6 +144,7 @@
           ><button data-tab="help">조작 안내</button
           ><button data-tab="updates">업데이트 <small id="updateBadge">v0.2.5</small></button>
         </div>
+        <div class="menuContents">
         <section data-panel="bag" class="hidden">
           <div class="bagHeader">
             <div>
@@ -293,6 +295,7 @@
             앱 0.3.2부터 로그인이나 토큰 없이 공개 배포 버전을 조회하고 내려받습니다.</p>
           <p class="updateHelp">최근 확인: <span id="updateLastCheck">아직 확인하지 않음</span></p>
         </section>
+        </div>
         <div class="panelFooter">
           <span><span data-game-version>FERAL 0.3.1</span> / 생태 복셀 프로토타입</span
           ><button id="backToGame" class="textButton">탐험 계속 →</button>

@@ -997,8 +997,14 @@ function updateAim() {
   const aimAction = actionHeld && !ent ? 2 : selected;
   if (ent) {
     const e = ent.entity;
-    $("target").innerHTML =
-      `<b>${SPECIES[e.type].name}</b> · ${SPECIES[e.type].parts[ent.part].name}<br>HP ${Math.ceil(e.hp)}/${e.maxHP} · ${e.behavior || "배회"}<br><small>HP 0 또는 머리·몸통 파괴 → 사망</small><progress class="targetHealth" max="${e.maxHP}" value="${e.hp}"></progress>`;
+    view.worldUI.set("focus", {
+      title: `${SPECIES[e.type].name} · ${SPECIES[e.type].parts[ent.part].name}`,
+      detail: `HP ${Math.ceil(e.hp)} / ${e.maxHP} · ${e.behavior || "배회"}`,
+      hint: "HP 0 · 머리 / 몸통 파괴 시 사망", value: Math.ceil(e.hp), max: e.maxHP,
+      color: e.type === 1 ? "#efb484" : "#b4ddbe",
+      maxDistance: selected === 1 ? activeGear(inventory, "weapon").range + 1 : 8,
+      follow: () => e.dead ? null : { x: e.x, y: e.y + 1.25 * SPECIES[e.type].s, z: e.z },
+    });
     view.highlight.visible = false;
   } else if (block) {
     const names = [
@@ -1015,26 +1021,17 @@ function updateAim() {
       "재",
       "목재",
     ];
-    $("target").textContent =
-      (names[block.b] || "블록") +
-      " · " +
-      block.distance.toFixed(1) +
-      " m" +
-      (aimAction === 2
-        ? ` · 파괴 ${world.time - miningProgress.last < 0.6 && miningProgress.key === `${block.hx},${block.hy},${block.hz}:${miningSize}:${gearId(inventory, "tool")}` ? Math.floor(miningProgress.ratio * 100) : 0}% · 길게 누르기`
-        : "");
-    if (aimAction === 2) {
-      const progress = document.createElement("progress");
-      progress.className = "targetHealth";
-      progress.max = 1;
-      progress.value =
-        world.time - miningProgress.last < 0.6 &&
-        miningProgress.key ===
-          `${block.hx},${block.hy},${block.hz}:${miningSize}:${gearId(inventory, "tool")}`
-          ? miningProgress.ratio
-          : 0;
-      $("target").append(progress);
-    }
+    const ratio = world.time - miningProgress.last < 0.6 &&
+      miningProgress.key === `${block.hx},${block.hy},${block.hz}:${miningSize}:${gearId(inventory, "tool")}`
+      ? miningProgress.ratio : 0;
+    view.worldUI.set("focus", {
+      title: names[block.b] || "블록",
+      detail: aimAction === 2 ? `채굴 ${Math.floor(ratio * 100)}% · ${activeGear(inventory, "tool").name}` : `${block.distance.toFixed(1)} m`,
+      hint: aimAction === 2 ? "공격 · 캐기를 길게 누르세요" : aimAction === 3 ? "사용으로 블록 설치" : "도구를 들고 상호작용",
+      value: ratio, max: aimAction === 2 ? 1 : 0, color: "#e5d6a1",
+      position: { x: block.hx * 0.5 + 0.25 + block.normal[0] * 0.33, y: block.hy * 0.5 + 0.25 + block.normal[1] * 0.33, z: block.hz * 0.5 + 0.25 + block.normal[2] * 0.33 },
+      maxDistance: 8,
+    });
     view.highlight.visible = aimAction === 2 || aimAction === 3;
     const r =
       aimAction === 3
@@ -1044,7 +1041,7 @@ function updateAim() {
     view.highlight.position.set(...r.start.map((v) => v * 0.5 + r.size * 0.5));
     view.highlight.material.color.setHex(aimAction === 3 ? 0x9cdaa1 : 0xf5d78c);
   } else {
-    $("target").textContent = "";
+    view.worldUI.set("focus", null);
     view.highlight.visible = false;
   }
 }

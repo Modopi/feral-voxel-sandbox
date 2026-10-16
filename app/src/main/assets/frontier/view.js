@@ -1,4 +1,5 @@
-import { activeGear } from "../equipment.js";
+import { activeGear, gearId } from "../equipment.js";
+import { itemArt } from "../item-art.js";
 import { T } from "../render.js";
 import { FACTIONS } from "./model.js";
 import { FrontierMotion } from "./motion.js";
@@ -13,6 +14,16 @@ const escape = (s) =>
       ],
   );
 const distance = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
+const avatar = `<div class="voxelAvatar" aria-hidden="true"><i class="head"></i><i class="body"></i><i class="arm a"></i><i class="arm b"></i><i class="leg a"></i><i class="leg b"></i></div>`;
+const pips = (kind) => `<div class="pipTrack ${kind}" aria-hidden="true">${"<i><b></b></i>".repeat(10)}</div>`;
+function fillPips(track, value) {
+  const amount = Math.ceil(Math.max(0, Math.min(100, value)) / 5);
+  if (track.dataset.amount === String(amount)) return;
+  track.dataset.amount = amount;
+  [...track.children].forEach((pip, i) => {
+    pip.firstChild.style.width = `${Math.min(2, Math.max(0, amount - i * 2)) * 50}%`;
+  });
+}
 export class FrontierView {
   constructor(ctx) {
     this.c = ctx;
@@ -28,21 +39,21 @@ export class FrontierView {
     this.npcs = [];
     const hud = document.createElement("div");
     hud.id = "frontierHUD";
-    hud.innerHTML = `<div id="vitals"><span id="healthText"></span><meter id="health" min="0" max="100" value="100" aria-label="체력"></meter><small id="hungerText"></small></div>
-      <div id="bossHUD" hidden><b id="bossName"></b><meter id="bossHealth" min="0" max="100" value="100" aria-label="수호자 체력"></meter><span id="bossWarning"></span></div>
-      <div id="waypoint"></div><div id="frontierActions"><button id="journalBtn" aria-label="원정 장부">장부 <small>J</small></button><button id="interactBtn">상호작용 <small>R</small></button></div>`;
+    hud.innerHTML = `<div id="vitals"><span id="healthText" class="srOnly"></span><meter id="health" class="srOnly" min="0" max="100" value="100" aria-label="체력"></meter>${pips("hearts")}<b id="levelHUD"></b>${pips("hunger")}<small id="hungerText" class="srOnly"></small><progress id="experienceHUD" max="80" value="0" aria-label="다음 레벨 경험치"></progress></div>
+      <div id="waypoint"></div><div id="frontierActions"><button id="journalBtn" aria-label="원정 지도"><span aria-hidden="true">▧</span><small>지도</small></button><button id="statusBtn" aria-label="캐릭터 상태"><span aria-hidden="true">♟</span><small>상태</small></button><button id="interactBtn">상호작용 <small>R</small></button></div>`;
     $("hud").append(hud);
     const panel = document.createElement("section");
     panel.id = "frontierPanel";
     panel.hidden = true;
     panel.setAttribute("role", "dialog");
     panel.setAttribute("aria-modal", "true");
-    panel.setAttribute("aria-label", "원정 장부");
-    panel.innerHTML = `<header><div><small>FERAL / FRONTIER</small><h2>원정 장부</h2></div><button id="frontierClose" aria-label="원정 장부 닫기">×</button></header>
-      <nav aria-label="원정 장부 메뉴"><button data-frontier-tab="map">지역·목표</button><button data-frontier-tab="society">공동체</button><button data-frontier-tab="machine">기계</button><button data-frontier-tab="journal">성장·기록</button></nav>
-      <p id="frontierFeedback" role="status" aria-live="polite"></p><div id="frontierContent"></div>`;
+    panel.setAttribute("aria-labelledby", "frontierTitle");
+    panel.innerHTML = `<div class="gameWindow"><header><h2 id="frontierTitle">원정 지도</h2><button id="frontierClose" aria-label="원정 장부 닫기">×</button></header>
+      <nav aria-label="원정 장부 메뉴"><button data-frontier-tab="journal" aria-label="캐릭터 상태"><b aria-hidden="true">♟</b><span>상태</span></button><button data-frontier-tab="map" aria-label="원정 지도"><b aria-hidden="true">▧</b><span>지도</span></button><button data-frontier-tab="society" aria-label="공동체"><b aria-hidden="true">⚑</b><span>마을</span></button><button data-frontier-tab="machine" aria-label="기계 조립"><b aria-hidden="true">⚒</b><span>기계</span></button></nav>
+      <div id="frontierContent"></div><p id="frontierFeedback" role="status" aria-live="polite"></p></div>`;
     document.body.append(panel);
     $("journalBtn").onclick = () => this.open("map");
+    $("statusBtn").onclick = () => this.open("journal");
     $("interactBtn").onclick = () => this.interact();
     $("frontierClose").onclick = () => ctx.pause(false);
     panel
@@ -50,7 +61,7 @@ export class FrontierView {
       .forEach((b) => (b.onclick = () => this.open(b.dataset.frontierTab)));
     panel.addEventListener("keydown", (e) => {
       if (e.key !== "Tab") return;
-      const buttons = [...panel.querySelectorAll("button, select")].filter(
+      const buttons = [...panel.querySelectorAll("button, select, summary")].filter(
         (e) => !e.disabled && e.offsetParent,
       );
       const first = buttons[0],
@@ -89,6 +100,7 @@ export class FrontierView {
     return mesh;
   }
   resetScene() {
+    this.c.view.worldUI.clear();
     this.group.clear();
     this.npcs = [];
     this.revision = -1;
@@ -356,26 +368,32 @@ export class FrontierView {
       `체력 ${Math.ceil(s.hp)} / ${s.maxHP} · Lv.${s.level}`;
     $("health").max = s.maxHP;
     $("health").value = s.hp;
+    fillPips($("vitals").querySelector(".hearts"), s.hp / s.maxHP * 100);
+    fillPips($("vitals").querySelector(".hunger"), s.hunger);
+    $("levelHUD").textContent = s.level;
+    $("experienceHUD").value = s.xp % 80;
     $("hungerText").textContent =
       `포만 ${Math.ceil(s.hunger)} · ${s.riding ? (s.airborne ? "비행 중" : "탑승 중") : "도보"}`;
     const b = s.region.boss,
       near = !b.defeated && distance(p, b) < 28;
-    $("bossHUD").hidden = !near;
-    $("bossName").textContent =
+    const bossName =
       `${["", "이끼 수호자", "구리 거신", "심연 파수꾼"][s.info.tier]} · 위험 ${s.info.tier}`;
-    $("bossHealth").max = b.maxHP;
-    $("bossHealth").value = b.hp;
-    $("bossWarning").textContent =
+    const bossWarning =
       b.warning > 0
         ? "충격파! 붉은 원 밖으로 피하세요"
         : this.bossTarget()
           ? "장착 무기로 공격"
           : "수호자를 조준하세요";
     if (this.bossTarget()) {
-      $("target").textContent =
-        `수호자 ${Math.ceil(b.hp)} / ${b.maxHP} · 장착 무기 공격`;
       this.c.view.highlight.visible = false;
+      this.c.view.worldUI.set("focus", null);
     }
+    this.c.view.worldUI.set("context", near ? {
+      title: bossName,
+      detail: `HP ${Math.ceil(b.hp)} / ${b.maxHP}`, value: Math.ceil(b.hp), max: b.maxHP,
+      hint: bossWarning, color: "#f1b08f", maxDistance: 28,
+      follow: () => b.defeated ? null : { x: b.x, y: this.c.world.surface(b.x, b.z) + 2.8, z: b.z },
+    } : null);
     $("vitals").classList.toggle("hurt", s.hurtClock > 0);
     if (this.waypoint) {
       const dx = this.waypoint.x - p.x,
@@ -396,6 +414,11 @@ export class FrontierView {
         `${arrow} ${this.waypoint.name} · ${Math.round(distance(p, this.waypoint))} m`;
     }
     const village = s.region.villages.find((v) => distance(p, v) < 12);
+    if (village && !near) this.c.view.worldUI.set("context", {
+      title: village.name, detail: `${FACTIONS[village.faction]} · 평판 ${s.reputation[village.faction]}`,
+      hint: "사용 / R · 교역과 대화", color: "#c9db9f", maxDistance: 14, side: -1,
+      position: { x: village.x, y: this.c.world.surface(village.x, village.z) + 2.4, z: village.z },
+    });
     $("interactBtn").firstChild.textContent = village
       ? "교역·대화 "
       : distance(p, s.info.dungeon) < 6
@@ -403,6 +426,8 @@ export class FrontierView {
         : s.riding
           ? "하차 "
           : "상호작용 ";
+    $("interactBtn").hidden = !village && distance(p, s.info.dungeon) >= 6 &&
+      distance(p, { x: 77.5, z: 84.5 }) >= 12 && !s.riding;
     $("biome").textContent = s.info.name;
     $("flyBtn").classList.toggle("enabled", s.airborne);
     $("flyBtn").classList.toggle(
@@ -422,14 +447,17 @@ export class FrontierView {
     $("pauseScreen").classList.add("hidden");
     $("frontierPanel").hidden = false;
     this.tab = tab;
+    $("frontierPanel").dataset.page = tab;
+    $("frontierTitle").textContent = { map: "원정 지도", society: "공동체", machine: "기계 조립", journal: "캐릭터 상태" }[tab];
     $("frontierPanel")
       .querySelectorAll("[data-frontier-tab]")
       .forEach((b) =>
-        b.classList.toggle("active", b.dataset.frontierTab === tab),
+        { b.classList.toggle("active", b.dataset.frontierTab === tab);
+          b.setAttribute("aria-pressed", String(b.dataset.frontierTab === tab)); },
       );
     this.feedback("");
     this.render();
-    $("frontierPanel").scrollTop = 0;
+    $("frontierContent").scrollTop = 0;
     $("frontierClose").focus({ preventScroll: true });
   }
   button(label, fn, id) {
@@ -447,11 +475,9 @@ export class FrontierView {
       root = $("frontierContent");
     root.replaceChildren();
     if (this.tab === "map") {
-      root.innerHTML = `<h3>${escape(s.info.name)} <small>위험 ${s.info.tier} · 방문 ${Object.keys(s.regions).length}지역</small></h3>
-      <p>야영지 또는 지역 가장자리에서 인접 지역 이동 · 식량 1개 소비<br>현재 지역의 지형 수정·생태·전리품은 다시 방문할 때 복원됩니다.</p>
-      <div class="routeGrid"><button data-route="0,-1">↑ 북쪽</button><button data-route="-1,0">← 서쪽</button><span>현재<br>${s.x}, ${s.z}</span><button data-route="1,0">동쪽 →</button><button data-route="0,1">↓ 남쪽</button></div>
-      <h3>탐험 목적지 <small>선택하면 HUD에 거리 표시</small></h3><div id="destinations"></div>
-      <h3>이번 원정의 흐름</h3><ol><li>마을에 원목을 거래해 결정·식량 확보</li><li>유적 중심에서 방어장을 견디고 연구 기록 회수</li><li>합금 무기·갑옷 또는 동력 연구로 성장</li><li>동맹 지원과 직접 만든 기계로 수호자 도전</li><li>인접 지역으로 이동해 더 강한 수호자 탐색</li></ol>`;
+      root.innerHTML = `<div class="mapLayout"><div class="regionMap"><h3>${escape(s.info.name)}</h3><small>위험 ${s.info.tier} · ${Object.keys(s.regions).length}개 지역 발견</small>
+      <div class="routeGrid"><button data-route="0,-1">↑<small>북쪽 지역</small></button><button data-route="-1,0">←<small>서쪽</small></button><span><b>⌂</b><small>${s.x}, ${s.z}</small></span><button data-route="1,0">→<small>동쪽</small></button><button data-route="0,1">↓<small>남쪽 지역</small></button></div>
+      <p>야영지·지역 경계에서 이동<br>식량 1개 필요 · 보유 ${inv.count("food")}</p></div><div class="destinationList"><h3>목적지 표시</h3><div id="destinations"></div><p>목적지를 선택하면 탐험 화면에 방향과 거리를 표시합니다.</p></div></div>`;
       root
         .querySelectorAll("[data-route]")
         .forEach(
@@ -516,9 +542,17 @@ export class FrontierView {
       const wins = Object.values(s.regions).filter(
         (r) => r.boss.defeated,
       ).length;
-      root.innerHTML = `<h3>개척자 Lv.${s.level} <small>경험 ${s.xp} · 다음 단계 ${80 - (s.xp % 80)}</small></h3><p>수호자 ${wins}체 격파 · 유적 핵 ${inv.count("relic")} · 동맹 ${s.allies.length}<br>연구 기록 ${inv.count("knowledge")} · 합금 ${inv.count("iron")} · 식량 ${inv.count("food")}</p><div id="supplies" class="frontierButtons"></div>
-      <h3>성장의 세 경로</h3><ul><li>개인: 합금 무기 → 갑옷 → 원거리 투사체 연구</li><li>기계: 동력 연구 → 차량 설계 → 포탑·회전익 조립</li><li>공동체: 교역 → 지원 → 동맹 → 수호자 전투 지원</li></ul><p>보스는 연구를 가속합니다. 탐험·유적·마을 지원만으로도 모든 기술을 연구할 수 있습니다.</p>
-      <h3>원정 기록</h3><ol>${s.log.map((t) => `<li>${escape(t)}</li>`).join("")}</ol>`;
+      const weapon = activeGear(inv, "weapon"), tool = activeGear(inv, "tool");
+      const armor = inv.unlocks.has("armor");
+      root.innerHTML = `<div class="characterSheet"><div class="characterFigure"><div class="characterStage ${armor ? "armored" : ""}">${avatar}<span>개척자</span></div><div class="equippedSlots"><div title="${escape(weapon.name)}">${itemArt(gearId(inv, "weapon"))}<small>무기</small></div><div title="${escape(tool.name)}">${itemArt(gearId(inv, "tool"))}<small>도구</small></div><div class="armorSlot ${armor ? "equipped" : ""}" title="${armor ? "개척 갑옷 · 피해 35% 감소" : "갑옷 미착용"}"><b>⛨</b><small>${armor ? "갑옷" : "없음"}</small></div></div></div>
+      <div class="characterStats"><div class="characterName"><h3>개척자 <small>LV.</small> ${s.level}</h3><span>${s.riding ? (s.airborne ? "비행 중" : "탑승 중") : "탐험 중"}</span></div>
+      <div class="statMeter hp"><label>체력 <b>${Math.ceil(s.hp)} / ${s.maxHP}</b></label><progress max="${s.maxHP}" value="${s.hp}"></progress></div>
+      <div class="statMeter food"><label>포만 <b>${Math.ceil(s.hunger)} / 100</b></label><progress max="100" value="${s.hunger}"></progress></div>
+      <div class="statMeter xp"><label>경험 <b>${s.xp % 80} / 80</b></label><progress max="80" value="${s.xp % 80}"></progress></div>
+      <dl class="combatStats"><div><dt>${escape(weapon.name)}</dt><dd>공격 ${weapon.damage + (weapon.name === "기본 펄스" && inv.unlocks.has("blade") ? 12 : 0)}</dd></div><div><dt>${armor ? "개척 갑옷" : "기본 의복"}</dt><dd>피해 감소 ${armor ? "35" : "0"}%</dd></div></dl>
+      <div id="supplies" class="supplySlots"></div></div></div>
+      <div class="milestoneStrip"><span>⚑ <b>${s.allies.length}</b> 동맹</span><span>◆ <b>${wins}</b> 수호자</span><span>▧ <b>${inv.count("knowledge")}</b> 연구</span><span>◈ <b>${inv.count("relic")}</b> 유적 핵</span></div>
+      <details class="expeditionLog"><summary>원정 기록 <span>${s.log.length}</span></summary><ol>${s.log.map((t) => `<li>${escape(t)}</li>`).join("") || "<li>첫 원정을 시작했습니다.</li>"}</ol></details>`;
       for (const [label, fn, id] of [
         ["식량 먹기", () => s.consume("food", inv), "eatFood"],
         ["회복약 사용 · H", () => s.consume("medicine", inv), "useMedicine"],
@@ -539,9 +573,8 @@ export class FrontierView {
               : "저장 실패 · 공간을 확인하세요.",
           "frontierSave",
         ],
-      ])
-        $("supplies").append(
-          this.button(
+      ]) {
+        const button = this.button(
             label,
             () => {
               const result = fn();
@@ -549,8 +582,13 @@ export class FrontierView {
               return result;
             },
             id,
-          ),
-        );
+          );
+        button.setAttribute("aria-label", label);
+        const item = id === "eatFood" ? "food" : id === "useMedicine" ? "medicine" : null;
+        button.innerHTML = item ? `${itemArt(item)}<b class="supplyCount">${inv.count(item)}</b><small>${item === "food" ? "먹기" : "회복"}</small>` : `<b aria-hidden="true">${id === "campRest" ? "⌂" : id === "frontierBag" ? "▦" : "▣"}</b><small>${id === "campRest" ? "휴식" : id === "frontierBag" ? "가방" : "저장"}</small>`;
+        if (item) button.disabled = inv.count(item) === 0;
+        $("supplies").append(button);
+      }
     }
   }
   confirmRaid(v) {

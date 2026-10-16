@@ -1,6 +1,6 @@
 {
-  "version": "0.5.1",
-  "versionCode": 501,
+  "version": "0.5.2",
+  "versionCode": 502,
   "minNativeCode": 302,
   "saveSchema": 2,
   "channel": "stable",
