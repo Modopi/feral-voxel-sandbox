@@ -1,6 +1,6 @@
 {
-  "version": "0.4.1",
-  "versionCode": 401,
+  "version": "0.5.0",
+  "versionCode": 500,
   "minNativeCode": 301,
   "saveSchema": 2,
   "channel": "stable",

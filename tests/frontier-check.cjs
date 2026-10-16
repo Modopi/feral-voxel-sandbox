@@ -69,12 +69,10 @@ const fs = require("node:fs");
     assert.match(await page.locator("#frontierFeedback").innerText(), /결정 2/);
     await page.click("#frontierClose");
     await page.click("#inventoryBtn");
-    const craft = async (name) =>
-      page
-        .locator(".recipe")
-        .filter({ hasText: name })
-        .getByRole("button", { name: "제작", exact: true })
-        .click();
+    const craft = async (name) => {
+      await page.getByRole("button", { name, exact: true }).click();
+      await page.locator("#craftOutput").click();
+    };
     await craft("목재 조각 × 4");
     await craft("목재 조각 × 4");
     await page.click("#resumeBtn");

@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="field-ui.css" />
     <link rel="stylesheet" href="frontier/style.css" />
+  <link rel="stylesheet" href="survival-ui.css" />
   </head>
   <body>
     <canvas id="world"></canvas>
@@ -51,6 +52,7 @@
         <div id="stick"><div id="knob"></div></div>
         <span id="stickLabel">MOVE</span>
         <div id="lookHint">오른쪽 화면을 밀어 둘러보기</div>
+        <button id="useBtn" class="round small" aria-label="선택 아이템 사용">▣<small>사용</small></button>
         <button id="jumpBtn" class="round small" aria-label="점프">
           ↑<small>점프</small></button
         ><button id="flyBtn" class="round small" aria-label="비행 전환">
@@ -64,7 +66,7 @@
         ><small id="toolHelp">생태와 신체 상태 읽기</small>
       </div>
       <button id="rangeBtn" class="rangeButton">채굴 1 m ↻</button>
-      <nav id="hotbar" aria-label="도구 선택"></nav>
+      <nav id="hotbar" aria-label="아이템 핫바"></nav>
       <footer>
         <span id="worldTime">DAY 01 · 08:00</span
         ><span id="hint">지형 1 m · 생명 ¼ / ⅛ m</span
@@ -244,28 +246,28 @@
             <div>
               <b>모바일</b>
               <p>
-                왼쪽 스틱: 이동<br />오른쪽 화면 드래그: 시점<br />↑: 점프 /
-                비행 중 상승<br />◇: 비행 전환<br />◎: 선택한 도구 사용
+                왼쪽 스틱: 이동 · 끝까지 밀면 달리기<br />오른쪽 화면 드래그: 시점<br />↑: 점프 /
+                비행 중 상승<br />◇: 비행 전환<br />공격·캐기: 타격/채굴 · 사용: 설치/먹이/소모품
               </p>
             </div>
             <div>
               <b>키보드 / 마우스</b>
               <p>
-                WASD: 이동 · Shift: 달리기<br />마우스: 시점 · 클릭: 사용<br />Space:
-                점프 · F: 비행<br />I / Tab: 가방 · B: 범위<br />1~9: 도구 ·
+                WASD: 이동 · Shift: 달리기<br />마우스: 시점 · 좌클릭: 공격/채굴 · 우클릭: 설치/사용<br />Space:
+                점프 · F: 비행<br />I / Tab: 가방 · B: 범위<br />1~9: 아이템 슬롯 ·
                 Esc: 메뉴<br />비행 중 Q: 하강 / E: 상승
               </p>
             </div>
           </div>
           <p>
             펄스로 복셀을 깎아내면 관절과 신체가 손실됩니다. 다리가 줄면
-            느려지고, 머리를 잃으면 먹을 수 없습니다. 물은 불을 끄고 산을
+            느려지고, 머리·몸통을 잃거나 HP가 0이면 죽습니다. 물은 불을 끄고 산을
             희석합니다. 산은 흙·나무를 부식시키며, 물과 용암은 현무암으로
             바뀝니다.
           </p>
           <p>
             채굴한 자원과 몹의 복셀은 가까이 가면 가방에 들어옵니다. 가방에서
-            재료를 가공하거나 해머·강화 펄스를 제작합니다. 건축과 씨앗은 보유
+            슬롯을 옮기거나 묶음을 나누고, 제작법을 골라 결과 슬롯을 눌러 제작합니다. 건축과 씨앗은 보유
             재료를 소모합니다. 물·산 도구는 샌드박스 방식으로 재료를 추가합니다.
             유체는 셀 사이에서 양을 보존하며 흐릅니다. 일반 유체 역학·분자
             화학·완전한 래그돌을 구현한 버전은 아닙니다.

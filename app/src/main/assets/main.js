@@ -1,3 +1,5 @@
+import { InventoryUI } from "./inventory-ui.js";
+import { itemArt } from "./item-art.js";
 import {
   GEAR,
   activeGear,
@@ -45,24 +47,14 @@ let inventory = new Inventory(),
   miningSize = 1,
   buildSize = 1,
   buildMaterial = "dirt",
-  inspectedItem = "dirt",
+  bagUI = null,
   physicsAccum = 0,
   physicsTick = 0,
   lastInventoryRevision = -1,
   collectedMessage = 0;
 const $ = (id) => document.getElementById(id),
   storageKey = saveKey(activeWorld);
-const tools = [
-  ["◈", "관찰", "관찰 렌즈", "생태와 신체 상태 읽기"],
-  ["⌁", "펄스", "복셀 펄스", "개체의 복셀을 정밀하게 깎기"],
-  ["⌑", "채굴", "곡괭이", "한 번에 1 m 블록 채굴 · B로 범위 변경"],
-  ["▣", "건축", "블록 건축", "가방의 재료를 사용 · B로 크기 변경"],
-  ["≈", "물", "물 분사기", "물을 붓고 흐름 만들기 · 소화"],
-  ["♨", "불", "점화기", "풀과 나무에 불 붙이기"],
-  ["⚗", "산", "산 용액", "흙·나무 부식 · 물에 희석"],
-  ["✿", "씨앗", "생태 복원", "풀과 토양 영양분 복원"],
-  ["⬡", "생명", "개체 생성", "바라보는 곳에 생명 추가"],
-];
+
 let world,
   eco,
   view,
@@ -86,6 +78,8 @@ let world,
   sensitivity = 0.8,
   soundEnabled = true,
   audio,
+  useHeld = false,
+  useCooldown = 0,
   actionHeld = false,
   actionCooldown = 0,
   walkSound = 0,
@@ -169,27 +163,92 @@ function event(s, p) {
     eventLog.length = 0;
   }, 6000);
 }
-function selectTool(n) {
-  if (frontierState && [4, 5, 6, 8].includes(n)) return;
+function heldItem() {
+  return inventory.slots[inventory.selectedSlot]?.id || null;
+}
+function syncHeld() {
+  const id = heldItem();
+  selected =
+    GEAR[id]?.slot === "weapon"
+      ? 1
+      : GEAR[id]?.slot === "tool"
+        ? 2
+        : ITEMS[id]?.block
+          ? 3
+          : id === "seed"
+            ? 7
+            : 0;
+  if (GEAR[id]) inventory.equipment[GEAR[id].slot] = id;
+  if (ITEMS[id]?.block) buildMaterial = id;
   miningProgress.reset();
-  selected = (n + tools.length) % tools.length;
-  document
-    .querySelectorAll(".slot")
-    .forEach((b, i) => b.classList.toggle("selected", i === selected));
-  $("toolName").textContent = tools[selected][2];
-  $("toolHelp").textContent = tools[selected][3];
-  $("actBtn").firstChild.textContent = tools[selected][0];
   updateToolLabel();
+  renderHotbar();
 }
-for (let i = 0; i < tools.length; i++) {
-  const b = document.createElement("button");
-  b.className = "slot";
-  b.setAttribute("aria-label", tools[i][2]);
-  b.innerHTML = `<span class="num">${i + 1}</span><span class="glyph">${tools[i][0]}</span><small>${tools[i][1]}</small>`;
-  b.onclick = () => selectTool(i);
-  $("hotbar").appendChild(b);
+function selectHotbar(n) {
+  inventory.select(n);
+  syncHeld();
 }
-selectTool(0);
+// Compatibility for simulation fixtures and existing developer controls.
+function selectTool(n) {
+  const id =
+    n === 1
+      ? inventory.equipment.weapon
+      : n === 2
+        ? inventory.equipment.tool
+        : n === 3
+          ? buildMaterial
+          : n === 7
+            ? "seed"
+            : null;
+  const index = inventory.slots.findIndex((s) => s?.id === id);
+  if (index >= 0) {
+    if (index >= 9) inventory.move(index, inventory.selectedSlot);
+    selectHotbar(index < 9 ? index : inventory.selectedSlot);
+  } else {
+    selected = n;
+    updateToolLabel();
+  }
+}
+function renderHotbar() {
+  const bar = $("hotbar");
+  bar.replaceChildren();
+  for (let i = 0; i < 9; i++) {
+    const stack = inventory.slots[i],
+      id = stack?.id,
+      b = document.createElement("button");
+    b.className = "slot" + (inventory.selectedSlot === i ? " selected" : "");
+    b.dataset.hotbar = i;
+    b.setAttribute(
+      "aria-label",
+      `핫바 ${i + 1} · ${id ? ITEMS[id].name + " " + stack.count + "개" : "빈 칸"}`,
+    );
+    b.setAttribute("aria-pressed", String(inventory.selectedSlot === i));
+    b.innerHTML =
+      `<span class="num">${i + 1}</span>` +
+      (id
+        ? itemArt(id) +
+          (stack.count > 1 ? `<b class="stackCount">${stack.count}</b>` : "") +
+          (GEAR[id]?.durability
+            ? `<progress class="durability" max="${GEAR[id].durability}" value="${inventory.wear[id] || 0}"></progress>`
+            : "")
+        : "");
+    b.onclick = () => selectHotbar(i);
+    bar.append(b);
+  }
+}
+bagUI = new InventoryUI({
+  get inventory() {
+    return inventory;
+  },
+  get frontier() {
+    return !!frontierState;
+  },
+  craft,
+  toast,
+  changed: syncHeld,
+  renderHotbar,
+});
+renderHotbar();
 function home() {
   Object.assign(player, {
     x: 77.5,
@@ -211,7 +270,7 @@ function inputState() {
     jump: keys.has("Space"),
     up: keys.has("KeyE"),
     down: keys.has("KeyQ"),
-    sprint: keys.has("ShiftLeft"),
+    sprint: keys.has("ShiftLeft") || joy.y < -0.85,
   };
 }
 function renderCamera(alpha) {
@@ -229,6 +288,8 @@ function bindDrops() {
   world.event = event;
   eco.onVoxel = (d) => loot.spawn("bio", 1, d.x, d.y, d.z, d);
   eco.onDeath = (e) => {
+    if (e.type !== 2)
+      loot.spawn("meat", e.type === 0 ? 2 : 1, e.x, e.y + 0.35, e.z);
     loot.spawn(
       e.type === 2 ? "crystal" : "essence",
       e.type === 1 ? 3 : 1,
@@ -246,58 +307,28 @@ function bindDrops() {
   };
 }
 function updateToolLabel() {
-  if (!$("rangeBtn")) return;
-  const material = ITEMS[buildMaterial];
+  const id = heldItem(),
+    g = GEAR[id];
+  $("toolName").textContent = id ? ITEMS[id].name : "빈 손";
+  $("toolHelp").textContent = g?.durability
+    ? `내구 ${inventory.wear[id] || 0}/${g.durability}`
+    : ITEMS[id]?.block
+      ? `보유 ${inventory.count(id)} · 설치 ${buildSize === 1 ? 8 : 1}조각`
+      : "선택한 아이템 사용";
   $("rangeBtn").textContent =
-    selected === 3
-      ? "건축 " + buildSize + " m ↻"
-      : "채굴 " + miningSize + " m ↻";
+    (selected === 3 ? "설치 " + buildSize : "채굴 " + miningSize) + "m ↻";
   $("rangeBtn").classList.toggle("hidden", selected !== 2 && selected !== 3);
-  if (selected === 2) {
-    $("toolName").textContent =
-      (miningSize === 0.5
-        ? "정밀 끌"
-        : miningSize === 2
-          ? "채굴 해머"
-          : "곡괭이") +
-      " · " +
-      miningSize +
-      " m";
-    $("toolHelp").textContent =
-      "한 번에 " +
-      (miningSize === 0.5 ? "⅛" : miningSize === 2 ? "8" : "1") +
-      " m³ · 바닥의 자원 자동 수집";
-  } else if (selected === 3) {
-    $("toolName").textContent = material.name + " · " + buildSize + " m";
-    $("toolHelp").textContent =
-      "보유 " +
-      inventory.count(buildMaterial) +
-      " · 설치 비용 " +
-      (buildSize === 1 ? 8 : 1) +
-      " 조각";
-  }
-  if (selected === 1 || selected === 2) {
-    const slot = selected === 1 ? "weapon" : "tool",
-      g = activeGear(inventory, slot);
-    $("toolName").textContent =
-      g.name + (selected === 2 ? ` · ${miningSize}m` : "");
-    $("toolHelp").textContent =
-      (selected === 1
-        ? `피해 ${g === GEAR.pulse && inventory.unlocks.has("blade") ? 24 : g.damage} · ${g.range}m · ${g.cooldown}초`
-        : "누르고 채굴 · 재질에 맞는 도구를 가방에서 장착") +
-      (g.durability
-        ? ` · 내구 ${inventory.wear[gearId(inventory, slot)]}/${g.durability}`
-        : "") +
-      (g.ammo ? ` · 화살 ${inventory.count(g.ammo)}` : "");
-  }
-  view?.setEquipment(
-    selected === 1
-      ? gearId(inventory, "weapon")
-      : selected === 2
-        ? gearId(inventory, "tool")
-        : "utility",
-  );
-  $("hint").textContent = "키 1.5 m · 지형 1 / 0.5 m";
+  $("actBtn").firstChild.textContent = "⚒";
+  $("actBtn").querySelector("small").textContent = "공격·캐기";
+  $("useBtn").querySelector("small").textContent = ITEMS[id]?.block
+    ? `놓기 ×${buildSize === 1 ? 8 : 1}`
+    : id === "food" || id === "medicine"
+      ? "먹기"
+      : id === "seed"
+        ? "먹이·심기"
+        : "상호작용";
+  view?.setHeldItem(id);
+  $("hint").textContent = "1–9 아이템 · I 가방";
 }
 function cycleRange() {
   if (selected === 3) buildSize = buildSize === 1 ? 0.5 : 1;
@@ -310,133 +341,21 @@ function cycleRange() {
   sound("scan");
 }
 function refreshInventory() {
-  if (!$("inventoryGrid")) return;
-  const grid = $("inventoryGrid");
-  grid.replaceChildren();
-  for (const [id, item] of Object.entries(ITEMS)) {
-    if (item.frontier && !frontierState) continue;
-    const b = document.createElement("button");
-    b.className = "itemSlot" + (id === inspectedItem ? " equipped" : "");
-    b.dataset.item = id;
-    b.setAttribute("aria-pressed", String(id === inspectedItem));
-    b.setAttribute(
-      "aria-label",
-      item.name + " · " + inventory.count(id) + "개",
-    );
-    b.innerHTML =
-      '<span style="color:#' +
-      item.color.toString(16).padStart(6, "0") +
-      '">' +
-      item.icon +
-      "</span><b>" +
-      inventory.count(id) +
-      "</b><small>" +
-      item.name +
-      "</small>";
-    b.title = item.block ? "눌러 건축 재료로 선택" : "제작 재료";
-    b.onclick = () => {
-      inspectedItem = id;
-      if (item.block) {
-        buildMaterial = id;
-        selectTool(3);
-        toast(item.name + " 건축 재료 선택");
-      }
-      refreshInventory();
-      grid.querySelector(`[data-item="${id}"]`)?.focus({ preventScroll: true });
-    };
-    grid.append(b);
-  }
-  const item = ITEMS[inspectedItem];
-  $("itemDetail").innerHTML =
-    `<span class="detailGlyph">${item.icon}</span><div><h3>${item.name} <small>× ${inventory.count(inspectedItem)}</small></h3><p>${item.block ? (inspectedItem === buildMaterial ? "건축 재료 선택됨 · 탐험으로 돌아가 설치하세요." : "슬롯을 누르면 건축 재료로 선택합니다.") : "제작 재료 · 현장 제작 목록에서 사용처를 확인하세요."}</p></div>`;
-  const recipes = $("recipeList");
-  recipes.replaceChildren();
-  for (const recipe of RECIPES) {
-    if (recipe.frontier && !frontierState) continue;
-    const row = document.createElement("div");
-    row.className = "recipe";
-    const text = document.createElement("div");
-    text.innerHTML =
-      "<b>" +
-      recipe.name +
-      "</b><small>" +
-      recipe.description +
-      (recipe.requires && !inventory.unlocks.has(recipe.requires)
-        ? " · 선행 연구 필요"
-        : "") +
-      "</small><p>" +
-      Object.entries(recipe.cost)
-        .map(([id, n]) => ITEMS[id].name + " " + inventory.count(id) + "/" + n)
-        .join(" · ") +
-      "</p>";
-    const button = document.createElement("button");
-    button.className = "primary";
-    button.textContent =
-      recipe.unlock && inventory.unlocks.has(recipe.unlock) ? "보유" : "제작";
-    button.disabled = !inventory.canCraft(recipe);
-    button.onclick = () => craft(recipe.id);
-    row.append(text, button);
-    if (GEAR[recipe.id] && inventory.unlocks.has(recipe.id)) {
-      const g = GEAR[recipe.id],
-        equip = document.createElement("button"),
-        repair = document.createElement("button");
-      equip.textContent =
-        (gearId(inventory, g.slot) === recipe.id ? "장착 중" : "장착") +
-        ` · ${inventory.wear[recipe.id]}/${g.durability}`;
-      equip.disabled = !inventory.wear[recipe.id];
-      equip.onclick = () => {
-        inventory.equip(recipe.id);
-        selectTool(g.slot === "weapon" ? 1 : 2);
-        refreshInventory();
-      };
-      repair.textContent = "수리";
-      repair.title = Object.entries(g.cost)
-        .map(([k, n]) => `${ITEMS[k].name} ${Math.ceil(n / 2)}`)
-        .join(" · ");
-      repair.disabled = inventory.wear[recipe.id] >= g.durability;
-      repair.onclick = () => {
-        toast(
-          inventory.repair(recipe.id)
-            ? "내구도 회복"
-            : "수리 재료 부족 · 제작 재료의 절반 필요",
-        );
-        refreshInventory();
-        updateToolLabel();
-      };
-      const actions = document.createElement("div");
-      actions.className = "gearActions";
-      actions.append(equip, repair);
-      row.append(actions);
-    }
-    recipes.append(row);
-  }
-  $("bagTotal").textContent =
-    Object.values(inventory.items).reduce((a, b) => a + b, 0) +
-    " 조각 · 수집 " +
-    loot.collected;
-  $("bagCount").textContent = Object.values(inventory.items).reduce(
-    (a, b) => a + b,
-    0,
-  );
+  bagUI?.render();
+  $("bagCount").textContent = inventory.slots.filter(Boolean).length;
   lastInventoryRevision = inventory.revision;
 }
 function craft(id) {
   const ok = inventory.craft(id);
-  if (ok) {
-    if (GEAR[id]) selectTool(GEAR[id].slot === "weapon" ? 1 : 2);
-    if (id === "hammer") {
-      miningSize = 2;
-      selectTool(2);
-    }
-    const recipe = RECIPES.find((r) => r.id === id);
-    if (recipe.give) inspectedItem = Object.keys(recipe.give)[0];
-    $("craftFeedback").textContent = recipe.name + " 제작 완료";
-    toast(recipe.name + " 제작 완료");
-    sound("scan");
-  } else toast("제작 재료가 부족하거나 이미 보유한 도구입니다.");
+  toast(
+    ok
+      ? RECIPES.find((r) => r.id === id).name + " 제작 완료 · 빈 슬롯에 보관"
+      : "재료·빈 칸 또는 선행 연구를 확인하세요.",
+  );
+  if (ok) sound("scan");
   frontierState?.provisionMachine(inventory);
   refreshInventory();
-  updateToolLabel();
+  syncHeld();
   return ok;
 }
 function openBag() {
@@ -500,23 +419,63 @@ function target() {
   );
   return { block, ent };
 }
-function use() {
+function use(intent = "selected") {
   if (!running || paused) return;
+  const held = heldItem();
+  const aimed = target();
+  if (
+    intent !== "secondary" &&
+    GEAR[held]?.durability &&
+    !inventory.wear[held]
+  ) {
+    toast("도구가 부서졌습니다. 가방에서 수리하거나 다른 아이템을 선택하세요.");
+    return;
+  }
+  if (intent === "secondary") {
+    if (["food", "medicine"].includes(held)) {
+      if (world.time < nextStrike) return;
+      nextStrike = world.time + 0.5;
+      toast(
+        frontierState
+          ? frontierState.consume(held, inventory)
+          : "개척 원정에서 사용하는 보급품입니다.",
+      );
+      syncHeld();
+      return;
+    }
+    if (held === "seed" && aimed.ent) {
+      if (world.time < nextStrike) return;
+      nextStrike = world.time + 0.5;
+      toast(eco.feed(aimed.ent.entity, inventory, world.time));
+      syncHeld();
+      return;
+    }
+    if (!ITEMS[held]?.block && held !== "seed") {
+      frontierUI?.interact();
+      return;
+    }
+  }
+  let action = selected;
+  if (intent === "primary")
+    action =
+      aimed.ent || (GEAR[held]?.slot === "weapon" && frontierUI?.bossTarget())
+        ? 1
+        : 2;
   if (world.time < nextStrike) return;
   nextStrike =
     world.time +
-    (selected === 1
+    (action === 1
       ? activeGear(inventory, "weapon").cooldown
-      : selected === 2
+      : action === 2
         ? 0.18
         : 0.3);
-  if (frontierUI?.use(selected)) {
+  if (GEAR[held]?.slot === "weapon" && frontierUI?.use(action)) {
     updateToolLabel();
     return;
   }
   const { block, ent } = target();
   view.toolKick = 1;
-  if (selected === 0) {
+  if (action === 0) {
     if (ent) {
       const e = ent.entity;
       toast(
@@ -543,11 +502,19 @@ function use() {
     sound("scan");
     return;
   }
-  if (selected === 1) {
-    if (ent) {
-      const g = activeGear(inventory, "weapon"),
+  if (action === 1) {
+    if (ent && ent.distance <= (GEAR[held]?.range || 3)) {
+      const g =
+          GEAR[held]?.slot === "weapon"
+            ? activeGear(inventory, "weapon")
+            : {
+                damage: GEAR[held]?.slot === "tool" ? 6 : 4,
+                range: 3,
+                radius: 0.12,
+                cooldown: 0.5,
+              },
         before = ent.entity.hp;
-      if (!spendGear(inventory, "weapon")) {
+      if (GEAR[held]?.slot === "weapon" && !spendGear(inventory, "weapon")) {
         toast("화살이 필요합니다. 가방에서 제작하세요.");
         return;
       }
@@ -573,29 +540,35 @@ function use() {
       sound("pulse");
       updateToolLabel();
       updateAim();
-    } else if (block) toast("지형은 채굴 도구(3번)로 부수세요.");
+    } else if (block) toast("대상에 더 가까이 다가가세요.");
     return;
   }
   if (!block) {
     toast("6.5 m 이내의 표면을 조준하세요.");
     return;
   }
+  if (action === 2 && block.distance > 6.5) {
+    toast("6.5m 안에서 채굴하세요.");
+    return;
+  }
   const outward = block.point.map((v, i) => v + block.normal[i] * 0.06),
     [x, y, z] = outward.map(Math.floor);
-  if (selected === 2) {
-    const g = activeGear(inventory, "tool");
+  if (action === 2) {
+    const g =
+      GEAR[held]?.slot === "tool" ? activeGear(inventory, "tool") : GEAR.pick;
     const key = `${block.hx},${block.hy},${block.hz}:${miningSize}:${gearId(inventory, "tool")}`;
     if (
       miningProgress.strike(key, world.time, miningWork(block.b, miningSize, g))
     ) {
-      if (harvest(block, miningSize)) spendGear(inventory, "tool");
+      if (harvest(block, miningSize) && GEAR[held]?.slot === "tool")
+        spendGear(inventory, "tool");
       miningProgress.reset();
     } else {
       sound("step");
       updateAim();
     }
   }
-  if (selected === 3) {
+  if (action === 3) {
     const r = buildTarget(block),
       cost = r.n ** 3;
     if (inventory.count(buildMaterial) < cost) {
@@ -614,19 +587,19 @@ function use() {
       sound("step");
     } else toast("빈 공간을 조준하세요.");
   }
-  if (selected === 4) {
+  if (action === 4) {
     world.pour(x, y, z, 5, 0);
     sound("water");
   }
-  if (selected === 5) {
+  if (action === 5) {
     world.ignite(block.x, block.y, block.z);
     sound("pulse");
   }
-  if (selected === 6) {
+  if (action === 6) {
     world.pour(x, y, z, 3, 0.95);
     sound("water");
   }
-  if (selected === 7) {
+  if (action === 7) {
     if (!inventory.take("seed", 1)) {
       toast("씨앗이 필요합니다. 풀을 채굴하거나 섬유로 제작하세요.");
       return;
@@ -651,7 +624,7 @@ function use() {
     toast("씨앗 −1 · 식생 복원");
     sound("scan");
   }
-  if (selected === 8) {
+  if (action === 8) {
     const type = world.random() < 0.13 ? 1 : world.random() < 0.15 ? 2 : 0;
     eco.spawn(type, x + 0.5, z + 0.5);
     eco.rehash();
@@ -680,6 +653,7 @@ function stopInput() {
   joy.id = null;
   look.id = null;
   actionHeld = false;
+  useHeld = false;
   miningProgress.reset();
   $("knob").style.transform = "";
 }
@@ -740,6 +714,7 @@ function start(load = false) {
     controller.recover();
     physicsAccum = 0;
     physicsTick = 0;
+    syncHeld();
     nextStrike = 0;
     miningProgress.reset();
     bindDrops();
@@ -757,7 +732,7 @@ function start(load = false) {
       toast(
         frontierState
           ? "원정 장부에서 목적지 확인 · 강변 야영지로 이동하세요"
-          : "곡괭이로 채굴 → 가까이 가서 수집 → 가방에서 제작",
+          : "아이템 선택 → 공격·캐기 / 놓기·사용 · 가방에서 제작",
       );
     sound("scan");
     last = performance.now();
@@ -988,6 +963,16 @@ function fixedStep(input = inputState()) {
   const moving = controller.step(FIXED_DT, vehicleInput || input);
   frontierUI?.afterStep(FIXED_DT);
   if (player.y < 0.25) home();
+  eco.context = {
+    player,
+    held: heldItem(),
+    hurt: (amount) => {
+      if (frontierState) {
+        frontierState.damagePlayer(amount, inventory);
+        toast("포식자 공격 −" + amount + " · 거리를 벌리세요");
+      }
+    },
+  };
   physicsTick++;
   if (physicsTick % 2 === 0) eco.update(FIXED_DT * 2, player, world.time);
   loot.update(FIXED_DT, world, player, inventory);
@@ -1009,10 +994,11 @@ function fixedStep(input = inputState()) {
 }
 function updateAim() {
   const { block, ent } = target();
+  const aimAction = actionHeld && !ent ? 2 : selected;
   if (ent) {
     const e = ent.entity;
     $("target").innerHTML =
-      `<b>${SPECIES[e.type].name}</b> · ${SPECIES[e.type].parts[ent.part].name}<br>HP ${Math.ceil(e.hp)}/${e.maxHP} · 다리 ${eco.legs(e)}/4<br><small>HP 0 또는 머리·몸통 파괴 → 사망</small><progress class="targetHealth" max="${e.maxHP}" value="${e.hp}"></progress>`;
+      `<b>${SPECIES[e.type].name}</b> · ${SPECIES[e.type].parts[ent.part].name}<br>HP ${Math.ceil(e.hp)}/${e.maxHP} · ${e.behavior || "배회"}<br><small>HP 0 또는 머리·몸통 파괴 → 사망</small><progress class="targetHealth" max="${e.maxHP}" value="${e.hp}"></progress>`;
     view.highlight.visible = false;
   } else if (block) {
     const names = [
@@ -1034,10 +1020,10 @@ function updateAim() {
       " · " +
       block.distance.toFixed(1) +
       " m" +
-      (selected === 2
+      (aimAction === 2
         ? ` · 파괴 ${world.time - miningProgress.last < 0.6 && miningProgress.key === `${block.hx},${block.hy},${block.hz}:${miningSize}:${gearId(inventory, "tool")}` ? Math.floor(miningProgress.ratio * 100) : 0}% · 길게 누르기`
         : "");
-    if (selected === 2) {
+    if (aimAction === 2) {
       const progress = document.createElement("progress");
       progress.className = "targetHealth";
       progress.max = 1;
@@ -1049,14 +1035,14 @@ function updateAim() {
           : 0;
       $("target").append(progress);
     }
-    view.highlight.visible = selected === 2 || selected === 3;
+    view.highlight.visible = aimAction === 2 || aimAction === 3;
     const r =
-      selected === 3
+      aimAction === 3
         ? buildTarget(block)
         : world.miningRegion(block, miningSize);
     view.highlight.scale.setScalar(r.size + 0.006);
     view.highlight.position.set(...r.start.map((v) => v * 0.5 + r.size * 0.5));
-    view.highlight.material.color.setHex(selected === 3 ? 0x9cdaa1 : 0xf5d78c);
+    view.highlight.material.color.setHex(aimAction === 3 ? 0x9cdaa1 : 0xf5d78c);
   } else {
     $("target").textContent = "";
     view.highlight.visible = false;
@@ -1113,8 +1099,13 @@ function frame(now) {
     saveTimer += dt;
     hudTimer += dt;
     actionCooldown -= dt;
+    useCooldown -= dt;
+    if (useHeld && useCooldown <= 0) {
+      use("secondary");
+      useCooldown = 0.35;
+    }
     if (actionHeld && actionCooldown <= 0) {
-      use();
+      use("primary");
       actionCooldown =
         selected === 1
           ? activeGear(inventory, "weapon").cooldown
@@ -1138,10 +1129,8 @@ function frame(now) {
       map();
       discover();
       if (inventory.revision !== lastInventoryRevision) {
-        $("bagCount").textContent = Object.values(inventory.items).reduce(
-          (a, b) => a + b,
-          0,
-        );
+        syncHeld();
+        $("bagCount").textContent = inventory.slots.filter(Boolean).length;
         lastInventoryRevision = inventory.revision;
         updateToolLabel();
       }
@@ -1207,6 +1196,8 @@ function refreshAPI() {
     pause,
     save,
     selectTool,
+    selectHotbar,
+    heldItem,
     use,
     setPopulation,
     stats: () => ({
@@ -1245,6 +1236,17 @@ $("homeBtn").onclick = () => {
 };
 $("flyBtn").onclick = setFlying;
 $("inventoryBtn").onclick = openBag;
+holdButton(
+  $("useBtn"),
+  () => {
+    useHeld = true;
+    use("secondary");
+    useCooldown = 0.35;
+  },
+  () => {
+    useHeld = false;
+  },
+);
 $("rangeBtn").onclick = cycleRange;
 $("newBtn").onclick = () => $("resetConfirm").classList.remove("hidden");
 $("cancelReset").onclick = () => $("resetConfirm").classList.add("hidden");
@@ -1333,7 +1335,9 @@ holdButton(
   () => {
     if (!paused) {
       actionHeld = true;
-      actionCooldown = 0;
+      use("primary");
+      actionCooldown =
+        selected === 1 ? activeGear(inventory, "weapon").cooldown : 0.2;
     }
   },
   () => (actionHeld = false),
@@ -1373,9 +1377,15 @@ const canvas = $("world");
 canvas.addEventListener("pointerdown", (e) => {
   if (!running || paused) return;
   if (e.pointerType === "mouse") {
+    if (e.button === 2) {
+      use("secondary");
+      return;
+    }
     if (document.pointerLockElement === canvas) {
       actionHeld = true;
-      actionCooldown = 0;
+      use("primary");
+      actionCooldown =
+        selected === 1 ? activeGear(inventory, "weapon").cooldown : 0.2;
     } else
       canvas
         .requestPointerLock?.()
@@ -1408,6 +1418,15 @@ for (const type of ["pointerup", "pointercancel", "lostpointercapture"])
     if (e.pointerType === "mouse") actionHeld = false;
     if (e.pointerId === look.id) look.id = null;
   });
+canvas.addEventListener(
+  "wheel",
+  (e) => {
+    if (!running || paused) return;
+    e.preventDefault();
+    selectHotbar((inventory.selectedSlot + (e.deltaY > 0 ? 1 : 8)) % 9);
+  },
+  { passive: false },
+);
 canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 window.addEventListener("keydown", (e) => {
   if (e.target.closest?.("#frontierPanel") && e.code !== "Escape") return;
@@ -1427,7 +1446,7 @@ window.addEventListener("keydown", (e) => {
   keys.add(e.code);
   if (e.code === "KeyB" && !e.repeat) cycleRange();
   if (e.code === "KeyF" && !e.repeat) setFlying();
-  if (/^Digit[1-9]$/.test(e.code)) selectTool(+e.code.slice(-1) - 1);
+  if (/^Digit[1-9]$/.test(e.code)) selectHotbar(+e.code.slice(-1) - 1);
 });
 window.addEventListener("keyup", (e) => keys.delete(e.code));
 window.addEventListener("blur", () => {
@@ -1445,6 +1464,7 @@ document.addEventListener("visibilitychange", () => {
 window.addEventListener("beforeunload", () => {
   if (running) save(true);
 });
+window.addEventListener("blur", stopInput);
 window.addEventListener("resize", () => view?.resize());
 window.FeralNative = {
   pause: () => {
@@ -1527,7 +1547,7 @@ try {
     view.camera.fov = +$("fov").value;
     view.camera.updateProjectionMatrix();
   }
-  selectTool(2);
+  syncHeld();
   refreshAPI();
   requestAnimationFrame(frame);
 } catch (e) {

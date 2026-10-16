@@ -1,3 +1,4 @@
+import { ITEMS } from "./inventory.js";
 import * as T from "./vendor/three.module.js";
 import { SIZE, HEIGHT, CHUNK, COLORS, B, hash, clamp } from "./world.js";
 import { SPECIES, cellPosition, toWorld, occupied, pose } from "./entities.js";
@@ -299,6 +300,34 @@ export class View {
     this.tool.position.set(0.18, -0.12, -0.22);
     this.toolBase = { y: -0.12, z: -0.22 };
     this.toolKick = 0;
+  }
+  setHeldItem(id) {
+    if (ITEMS[id]?.gear) {
+      if (this.heldCube) {
+        this.camera.remove(this.heldCube);
+        this.heldCube.material.dispose();
+        this.heldCube = null;
+      }
+      this.tool.visible = true;
+      this.setEquipment(id);
+      return;
+    }
+    this.setEquipment("utility");
+    if (this.heldCube) {
+      this.camera.remove(this.heldCube);
+      this.heldCube.material.dispose();
+      this.heldCube = null;
+    }
+    this.tool.visible = false;
+    if (!id) return;
+    this.heldCube = new T.Mesh(
+      this.cube,
+      new T.MeshLambertMaterial({ color: ITEMS[id]?.color || 0x9b7654 }),
+    );
+    this.heldCube.scale.setScalar(ITEMS[id]?.block ? 0.1 : 0.06);
+    this.heldCube.position.set(0.22, -0.17, -0.4);
+    this.heldCube.rotation.set(0.1, 0.6, 0.1);
+    this.camera.add(this.heldCube);
   }
   setEquipment(id) {
     if (this.equipmentId === id) return;
@@ -613,7 +642,8 @@ export class View {
       this.pickupMesh.instanceColor.needsUpdate = true;
   }
   draw(time, dt, moving = 0) {
-    const day = 0.5 + Math.sin(time / 160) * 0.5;
+    const day =
+      0.5 + Math.sin(((((8 + time / 60) % 24) - 6) / 24) * Math.PI * 2) * 0.5;
     this.sunLight.intensity = 1.2 + day * 1.4;
     this.toolKick = Math.max(0, this.toolKick - dt * 6);
     this.tool.position.z = this.toolBase.z + this.toolKick * 0.035;

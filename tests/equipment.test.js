@@ -12,12 +12,14 @@ import { World, B } from "../app/src/main/assets/world.js";
 import { Ecology } from "../app/src/main/assets/entities.js";
 function supplied() {
   const i = new Inventory(false);
-  for (const g of Object.values(GEAR)) for (const k in g.cost) i.add(k, 100);
+  for (const g of Object.values(GEAR))
+    for (const k in g.cost) if (i.count(k) < 40) i.add(k, 40 - i.count(k));
   return i;
 }
 test("gear crafting, ammo, breakage, repair and save restore form a finite loop", () => {
   const i = supplied();
   assert.ok(i.craft("bow"));
+  assert.ok(i.equip("bow"));
   assert.equal(activeGear(i, "weapon"), GEAR.bow);
   assert.equal(spendGear(i, "weapon"), false);
   assert.equal(i.wear.bow, 140);

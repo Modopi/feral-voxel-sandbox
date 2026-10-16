@@ -93,3 +93,7 @@
 ## 0.4.1 전투·도구 — 미배포
 
 게임 0.4.1 / 401, 네이티브 0.3.1 / 301과 최소 네이티브 301은 유지한다. 저장 스키마 2에 체력·장비·내구도 선택 필드를 추가하며 구 저장을 읽을 수 있다. APK 출력은 `build/Feral-0.3.1-android.apk`, 게임 패키지는 `build/release/Feral-0.4.1-update.feral`이다. 기존 Release 자산을 교체하지 않는다. `verification/0.4.1.md`에 검증 결과를 기록한다.
+
+## 0.5.0 아이템 인벤토리·모바일 생존 UI — 미배포
+
+게임 0.5.0 / 500, 네이티브 0.3.1 / 301 및 최소 네이티브 301 유지. 저장 스키마 2에서 인벤토리 슬롯·선택 칸·보관품 필드를 추가했다. 구 저장의 재료와 해금 장비는 슬롯으로 이전하고 용량 초과분은 삭제하지 않는다. APK 출력은 `build/Feral-0.3.1-android.apk`이며 테스트용 사본은 `build/Feral-0.5.0-prototype-native-0.3.1.apk`다. 업데이트 패키지는 `build/release/Feral-0.5.0-update.feral`. 검증과 화면은 `verification/0.5.0.md` 참조. 기존 Release 파일 교체 없음.

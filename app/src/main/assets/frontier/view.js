@@ -369,11 +369,11 @@ export class FrontierView {
       b.warning > 0
         ? "충격파! 붉은 원 밖으로 피하세요"
         : this.bossTarget()
-          ? "펄스 도구로 공격"
+          ? "장착 무기로 공격"
           : "수호자를 조준하세요";
     if (this.bossTarget()) {
       $("target").textContent =
-        `수호자 ${Math.ceil(b.hp)} / ${b.maxHP} · 펄스 공격`;
+        `수호자 ${Math.ceil(b.hp)} / ${b.maxHP} · 장착 무기 공격`;
       this.c.view.highlight.visible = false;
     }
     $("vitals").classList.toggle("hurt", s.hurtClock > 0);

@@ -116,18 +116,10 @@ export class Frontier {
     return this.region;
   }
   canPay(inv, cost, reward = {}) {
-    return (
-      Object.entries(cost).every(([id, n]) => inv.count(id) >= n) &&
-      Object.entries(reward).every(
-        ([id, n]) => inv.count(id) - (cost[id] || 0) + n <= 9999,
-      )
-    );
+    return inv.transaction(cost, reward);
   }
   exchange(inv, cost, reward = {}) {
-    if (!this.canPay(inv, cost, reward)) return false;
-    for (const [id, n] of Object.entries(cost)) inv.take(id, n);
-    for (const [id, n] of Object.entries(reward)) inv.add(id, n);
-    return true;
+    return inv.transaction(cost, reward, true);
   }
   discover(player, inv) {
     const r = this.region;
@@ -142,7 +134,7 @@ export class Frontier {
       ) {
         r.discovered.push(id);
         this.xp += 8;
-        inv.add("knowledge", 2);
+        inv.grant("knowledge", 2);
         this.note(`${name} 발견 · 연구 기록 +2`);
       }
     }
@@ -400,9 +392,9 @@ export class Frontier {
       this.xp += 60 * this.info.tier;
       this.hp = Math.min(this.maxHP, this.hp + 30);
       // A defeated boss is marked first. Rewards cannot be farmed by reopening its menu.
-      inv.add("relic", this.info.tier);
-      inv.add("knowledge", 6 * this.info.tier);
-      inv.add("iron", 5 * this.info.tier);
+      inv.grant("relic", this.info.tier);
+      inv.grant("knowledge", 6 * this.info.tier);
+      inv.grant("iron", 5 * this.info.tier);
       this.note(`수호자 격파 · 유적 핵 +${this.info.tier} · 연구와 합금 획득`);
     }
     return true;
@@ -465,7 +457,7 @@ export class Frontier {
       return "재료·위치·부품 상태를 확인하세요.";
     }
     const delta = s.stock - before;
-    if (delta > 0) inv.add("iron", delta);
+    if (delta > 0) inv.grant("iron", delta);
     else inv.take("iron", -delta);
     s.stock = 0;
     return "설계 변경 완료 · 합금 " + (delta >= 0 ? "+" : "") + delta;

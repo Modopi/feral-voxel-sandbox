@@ -40,26 +40,20 @@ const fs = require("node:fs");
       "삽",
       "벌목 도끼",
     ]) {
-      await page
-        .locator(".recipe")
-        .filter({
-          has: page.locator("b", {
-            hasText: new RegExp("^" + name.replace("×", "×") + "$"),
-          }),
-        })
-        .getByRole("button", { name: "제작", exact: true })
-        .click();
+      await page.getByRole("button", { name, exact: true }).click();
+      await page.click("#craftOutput");
     }
-    const bow = page
-      .locator(".recipe")
-      .filter({ has: page.locator("b", { hasText: "사냥 활" }) });
-    await bow.getByRole("button", { name: /장착/ }).click();
+    const bowIndex = await page.evaluate(() =>
+      FERAL.inventory.slots.findIndex((s) => s?.id === "bow"),
+    );
+    await page.click(`[data-slot="${bowIndex}"]`);
+    await page.click('[data-slot="0"]');
     assert.equal(
       await page.evaluate(() => FERAL.inventory.equipment.weapon),
       "bow",
     );
-    await page.screenshot({ path: "verification/equipment-ledger-0.4.1.png" });
-    await page.click("#backToGame");
+    await page.screenshot({ path: "verification/equipment-ledger-0.5.0.png" });
+    await page.click("#resumeBtn");
     const combat = await page.evaluate(() => {
       const f = FERAL;
       f.ecology.entities = [];
@@ -92,7 +86,7 @@ const fs = require("node:fs");
     assert.equal(combat.arrows, combat.before - 1);
     assert.equal(combat.wear, 139);
     await page.waitForTimeout(250);
-    await page.screenshot({ path: "verification/equipment-combat-0.4.1.png" });
+    await page.screenshot({ path: "verification/equipment-combat-0.5.0.png" });
     await page.reload();
     await page.waitForFunction(
       () => window.FERAL?.ready && FERAL.stats().running,
@@ -109,11 +103,11 @@ const fs = require("node:fs");
       );
       assert.equal(overflow, false);
       await page.screenshot({ path: `build/equipment-${width}.png` });
-      await page.click("#backToGame");
+      await page.click("#resumeBtn");
     }
     assert.deepEqual(errors, []);
     fs.writeFileSync(
-      "verification/equipment-results-0.4.1.json",
+      "verification/equipment-results-0.5.0.json",
       JSON.stringify(
         { combat, viewports: ["900x412", "412x900", "360x640"], errors },
         null,

@@ -111,7 +111,9 @@ export const GEAR = {
 };
 export function activeGear(inv, slot) {
   const id = inv.equipment?.[slot];
-  return GEAR[id]?.slot === slot && inv.unlocks.has(id) && inv.wear[id] > 0
+  return GEAR[id]?.slot === slot &&
+    inv.count(id) > 0 &&
+    (!GEAR[id].durability || inv.wear[id] > 0)
     ? GEAR[id]
     : GEAR[slot === "weapon" ? "pulse" : "pick"];
 }

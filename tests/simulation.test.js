@@ -128,9 +128,13 @@ test("well fed mature creatures reproduce within population budget", () => {
     e = eco.spawn(0, 12, 12);
   e.energy = 145;
   e.age = 35;
+  const mate = eco.spawn(0, 12.5, 12);
+  mate.energy = 145;
+  mate.age = 35;
+  eco.rehash();
   eco.birthBudget = 1;
   eco.think(e, 0.25);
-  assert.equal(eco.entities.length, 2);
+  assert.equal(eco.entities.length, 3);
   assert.equal(w.reactions.births, 1);
 });
 test("save roundtrip preserves terrain, fluid, population and severed parts", () => {

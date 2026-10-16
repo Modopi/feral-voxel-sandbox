@@ -114,16 +114,15 @@ const assert = require("node:assert/strict");
   console.log("MINE_PICKUP", JSON.stringify(mining));
   await page.click("#inventoryBtn");
   await page
-    .locator(".recipe")
-    .filter({ hasText: "목재 조각 × 4" })
-    .getByRole("button", { name: "제작", exact: true })
+    .getByRole("button", { name: "목재 조각 × 4", exact: true })
     .click();
+  await page.click("#craftOutput");
   assert.equal(
     await page.evaluate(() => window.FERAL.inventory.count("plank")),
     4,
   );
   await page.screenshot({ path: "build/v2-inventory.png" });
-  await page.click("#backToGame");
+  await page.click("#resumeBtn");
   const combat = await page.evaluate(() => {
     const f = window.FERAL;
     f.setCamera(77.5, 13.36, 84.5, 0, 0);
@@ -169,24 +168,29 @@ const assert = require("node:assert/strict");
   });
   await page.click("#inventoryBtn");
   await page
-    .locator(".recipe")
-    .filter({ hasText: "생체 수지 × 2" })
-    .getByRole("button", { name: "제작", exact: true })
+    .getByRole("button", { name: "생체 수지 × 2", exact: true })
     .click();
+  await page.click("#craftOutput");
   await page
-    .locator(".recipe")
-    .filter({ hasText: "2 m 채굴 해머" })
-    .getByRole("button", { name: "제작", exact: true })
+    .getByRole("button", { name: "2 m 채굴 해머", exact: true })
     .click();
+  await page.click("#craftOutput");
   const hammer = await page.evaluate(() => ({
     owned: window.FERAL.inventory.unlocks.has("hammer"),
     size: window.FERAL.miningSize,
   }));
   assert.equal(hammer.owned, true);
-  assert.equal(hammer.size, 2);
+  // Unlock adds the range choice; crafting no longer switches the held item.
+  await page.evaluate(() => {
+    FERAL.selectTool(2);
+  });
   await page.screenshot({ path: "build/v2-crafted.png" });
-  await page.locator(".itemSlot").filter({ hasText: "흙 조각" }).click();
-  await page.click("#backToGame");
+  await page.evaluate(() => {
+    const i = FERAL.inventory.slots.findIndex((s) => s?.id === "dirt");
+    if (i >= 9) FERAL.inventory.move(i, 2);
+    FERAL.selectHotbar(i < 9 ? i : 2);
+  });
+  await page.click("#resumeBtn");
   await page.click("#rangeBtn");
   const building = await page.evaluate(() => {
     const f = window.FERAL;
@@ -241,7 +245,7 @@ const assert = require("node:assert/strict");
   await page.setViewportSize({ width: 412, height: 900 });
   await page.screenshot({ path: "build/v2-bag-portrait.png" });
   await page.setViewportSize({ width: 900, height: 412 });
-  await page.click("#backToGame");
+  await page.click("#resumeBtn");
   await page.addInitScript(() => {
     if (sessionStorage.getItem("feral.legacyFixture") === "yes") {
       const s = JSON.parse(localStorage.getItem("feral.world.v1"));
