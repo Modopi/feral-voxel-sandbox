@@ -25,15 +25,15 @@ const assert = require("node:assert/strict");
     const base = "file://" + process.cwd() + "/app/src/main/assets/";
     await page.goto(base + "worlds.html");
     await page.waitForSelector("article");
-    assert.equal(await page.locator("article").count(), 2);
+    assert.equal(await page.locator("article").count(), 3);
     await page.fill("#name", "차량 시험 A");
     await page.selectOption("#type", "machine");
     await page.click("#create button");
-    assert.equal(await page.locator("article").count(), 3);
-    await page.screenshot({ path: "verification/worlds-0.3.0.png" });
+    assert.equal(await page.locator("article").count(), 4);
+    await page.screenshot({ path: "build/legacy-worlds-0.3.0.png" });
     await page
       .locator("article")
-      .nth(2)
+      .filter({ hasText: "차량 시험 A" })
       .getByText("플레이", { exact: true })
       .click();
     await page.waitForFunction(
@@ -59,7 +59,7 @@ const assert = require("node:assert/strict");
       await page.evaluate(() => FERAL_MACHINE.state.blueprint.length),
       9,
     );
-    await page.screenshot({ path: "verification/machine-build-0.3.0.png" });
+    await page.screenshot({ path: "build/legacy-machine-build-0.3.0.png" });
     await page.click("#mode");
     await page.click("#recover");
     const pad = await page.locator('[data-key="ArrowUp"]').boundingBox();
@@ -78,7 +78,7 @@ const assert = require("node:assert/strict");
     );
     await page.click("#mode");
     await page.click("#save");
-    await page.screenshot({ path: "verification/machine-drive-0.3.0.png" });
+    await page.screenshot({ path: "build/legacy-machine-drive-0.3.0.png" });
     await page.reload();
     await page.waitForFunction(() => window.FERAL_MACHINE);
     assert.equal(
@@ -88,7 +88,7 @@ const assert = require("node:assert/strict");
     await page.click("header a");
     await page
       .locator("article")
-      .nth(1)
+      .filter({ hasText: "기계 베타 맵" })
       .getByText("플레이", { exact: true })
       .click();
     await page.waitForFunction(() => window.FERAL_MACHINE);
@@ -98,7 +98,7 @@ const assert = require("node:assert/strict");
     );
     await page.setViewportSize({ width: 412, height: 900 });
     await page.waitForTimeout(500);
-    await page.screenshot({ path: "verification/machine-portrait-0.3.0.png" });
+    await page.screenshot({ path: "build/legacy-machine-portrait-0.3.0.png" });
     await page.setViewportSize({ width: 900, height: 412 });
     await page.click("header a");
     await page.fill("#name", "독립 섬");
@@ -142,14 +142,14 @@ const assert = require("node:assert/strict");
       .getByText("삭제", { exact: true })
       .click();
     await page.click("#deleteNo");
-    assert.equal(await page.locator("article").count(), 4);
+    assert.equal(await page.locator("article").count(), 5);
     await page
       .locator("article")
       .last()
       .getByText("삭제", { exact: true })
       .click();
     await page.click("#deleteYes");
-    assert.equal(await page.locator("article").count(), 3);
+    assert.equal(await page.locator("article").count(), 4);
     assert.deepEqual(errors, []);
     console.log(
       "PASS world creation, independent saves, voxel edit, damage/repair, drive, reload, mobile layouts",

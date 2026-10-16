@@ -1,6 +1,11 @@
 import { B, clamp } from "./world.js";
 import { solidAt } from "./physics.js";
 export const ITEMS = {
+  food: { frontier: true, name: "야전 식량", icon: "◒", color: 0xd9b76c },
+  iron: { frontier: true, name: "합금", icon: "▰", color: 0xb8c4cf },
+  knowledge: { frontier: true, name: "연구 기록", icon: "▱", color: 0x9bdad0 },
+  relic: { frontier: true, name: "유적 핵", icon: "✦", color: 0xffce7a },
+  medicine: { frontier: true, name: "회복약", icon: "+", color: 0xb7d78c },
   dirt: { name: "흙 조각", icon: "▣", color: 0x9b7654, block: B.DIRT },
   stone: { name: "돌 조각", icon: "◆", color: 0x99a5a7, block: B.STONE },
   wood: { name: "원목 조각", icon: "▥", color: 0x9f7849, block: B.WOOD },
@@ -14,6 +19,81 @@ export const ITEMS = {
   resin: { name: "생체 수지", icon: "◉", color: 0xe4bc75 },
 };
 export const RECIPES = [
+  {
+    id: "food",
+    name: "야전 식량 × 3",
+    description: "원정 중 허기를 회복",
+    cost: { fiber: 2, seed: 1 },
+    give: { food: 3 },
+    frontier: true,
+  },
+  {
+    id: "iron",
+    name: "합금 × 3",
+    description: "기계 조립과 무기 제작",
+    cost: { stone: 4, crystal: 1 },
+    give: { iron: 3 },
+    frontier: true,
+  },
+  {
+    id: "medicine",
+    name: "회복약 × 2",
+    description: "체력 45 회복",
+    cost: { fiber: 3, bio: 2 },
+    give: { medicine: 2 },
+    frontier: true,
+  },
+  {
+    id: "blade",
+    name: "합금 무기",
+    description: "펄스 공격력 12 → 24",
+    cost: { iron: 4, plank: 2 },
+    unlock: "blade",
+    frontier: true,
+  },
+  {
+    id: "armor",
+    name: "개척 갑옷",
+    description: "받는 피해 35% 감소",
+    cost: { iron: 5, fiber: 6 },
+    unlock: "armor",
+    frontier: true,
+  },
+  {
+    id: "engineering",
+    name: "동력 연구",
+    description: "기계와 회전익 제작 지식 · 보스 처치 불필요",
+    cost: { knowledge: 6, crystal: 3 },
+    unlock: "engineering",
+    frontier: true,
+  },
+  {
+    id: "rover",
+    name: "기본 차량 설계",
+    description: "차체·모터·바퀴 조립 차량 1대",
+    cost: { iron: 8, plank: 6, resin: 2 },
+    requires: "engineering",
+    unlock: "rover",
+    frontier: true,
+  },
+  {
+    id: "ballistics",
+    name: "투사체 연구",
+    description: "기계 포탑과 원거리 펄스",
+    cost: { knowledge: 8, iron: 4 },
+    unlock: "ballistics",
+    frontier: true,
+  },
+  {
+    id: "aviation",
+    name: "회전익 연구",
+    description: "회전익 2개로 간이 비행 · 고정익은 후속",
+    cost: { knowledge: 12, iron: 6, crystal: 4 },
+    requires: "engineering",
+    unlock: "aviation",
+    frontier: true,
+  },
+
   {
     id: "planks",
     name: "목재 조각 × 4",
@@ -93,6 +173,7 @@ export class Inventory {
   }
   canCraft(recipe) {
     return (
+      (!recipe.requires || this.unlocks.has(recipe.requires)) &&
       !(recipe.unlock && this.unlocks.has(recipe.unlock)) &&
       Object.entries(recipe.cost).every(([id, n]) => this.count(id) >= n) &&
       Object.entries(recipe.give || {}).every(
@@ -118,7 +199,7 @@ export class Inventory {
       if (ITEMS[k] && Number.isFinite(n))
         this.items[k] = clamp(Math.floor(n), 0, 9999);
     this.unlocks = new Set(
-      (s?.unlocks || []).filter((k) => ["hammer", "pulse"].includes(k)),
+      (s?.unlocks || []).filter((k) => RECIPES.some((r) => r.unlock === k)),
     );
     this.revision++;
   }

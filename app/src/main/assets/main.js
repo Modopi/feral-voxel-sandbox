@@ -1,5 +1,15 @@
-import {currentWorld,saveKey} from "./world-slots.js";
-const activeWorld=currentWorld(localStorage,"island",location.search);
+import { currentWorld, saveKey } from "./world-slots.js";
+const activeWorld = currentWorld(
+  localStorage,
+  ["island", "frontier"],
+  location.search,
+);
+import { Frontier } from "./frontier/model.js";
+import { frontierWorld } from "./frontier/terrain.js";
+import { FrontierView } from "./frontier/view.js";
+let frontierState = null,
+  frontierUI = null,
+  regionCache = {};
 import { World, B, SIZE, HEIGHT, COLORS, clamp } from "./world.js";
 import { Ecology, SPECIES } from "./entities.js";
 import { View, T } from "./render.js";
@@ -150,6 +160,7 @@ function event(s, p) {
   }, 6000);
 }
 function selectTool(n) {
+  if (frontierState && [4, 5, 6, 8].includes(n)) return;
   selected = (n + tools.length) % tools.length;
   document
     .querySelectorAll(".slot")
@@ -271,11 +282,15 @@ function refreshInventory() {
   const grid = $("inventoryGrid");
   grid.replaceChildren();
   for (const [id, item] of Object.entries(ITEMS)) {
+    if (item.frontier && !frontierState) continue;
     const b = document.createElement("button");
     b.className = "itemSlot" + (id === inspectedItem ? " equipped" : "");
     b.dataset.item = id;
     b.setAttribute("aria-pressed", String(id === inspectedItem));
-    b.setAttribute("aria-label", item.name + " · " + inventory.count(id) + "개");
+    b.setAttribute(
+      "aria-label",
+      item.name + " · " + inventory.count(id) + "개",
+    );
     b.innerHTML =
       '<span style="color:#' +
       item.color.toString(16).padStart(6, "0") +
@@ -300,10 +315,12 @@ function refreshInventory() {
     grid.append(b);
   }
   const item = ITEMS[inspectedItem];
-  $("itemDetail").innerHTML = `<span class="detailGlyph">${item.icon}</span><div><h3>${item.name} <small>× ${inventory.count(inspectedItem)}</small></h3><p>${item.block ? (inspectedItem === buildMaterial ? "건축 재료 선택됨 · 탐험으로 돌아가 설치하세요." : "슬롯을 누르면 건축 재료로 선택합니다.") : "제작 재료 · 현장 제작 목록에서 사용처를 확인하세요."}</p></div>`;
+  $("itemDetail").innerHTML =
+    `<span class="detailGlyph">${item.icon}</span><div><h3>${item.name} <small>× ${inventory.count(inspectedItem)}</small></h3><p>${item.block ? (inspectedItem === buildMaterial ? "건축 재료 선택됨 · 탐험으로 돌아가 설치하세요." : "슬롯을 누르면 건축 재료로 선택합니다.") : "제작 재료 · 현장 제작 목록에서 사용처를 확인하세요."}</p></div>`;
   const recipes = $("recipeList");
   recipes.replaceChildren();
   for (const recipe of RECIPES) {
+    if (recipe.frontier && !frontierState) continue;
     const row = document.createElement("div");
     row.className = "recipe";
     const text = document.createElement("div");
@@ -312,6 +329,9 @@ function refreshInventory() {
       recipe.name +
       "</b><small>" +
       recipe.description +
+      (recipe.requires && !inventory.unlocks.has(recipe.requires)
+        ? " · 선행 연구 필요"
+        : "") +
       "</small><p>" +
       Object.entries(recipe.cost)
         .map(([id, n]) => ITEMS[id].name + " " + inventory.count(id) + "/" + n)
@@ -349,6 +369,7 @@ function craft(id) {
     toast(recipe.name + " 제작 완료");
     sound("scan");
   } else toast("제작 재료가 부족하거나 이미 보유한 도구입니다.");
+  frontierState?.provisionMachine(inventory);
   refreshInventory();
   updateToolLabel();
   return ok;
@@ -415,6 +436,7 @@ function target() {
 }
 function use() {
   if (!running || paused) return;
+  if (frontierUI?.use(selected)) return;
   const { block, ent } = target();
   view.toolKick = 1;
   if (selected === 0) {
@@ -529,6 +551,10 @@ function use() {
   view.environment(world.time, true);
 }
 function setFlying() {
+  if (frontierUI) {
+    frontierUI.toggleFlight();
+    return;
+  }
   player.flying = !player.flying;
   player.vy = 0;
   controller?.reset();
@@ -551,6 +577,7 @@ function pause(force) {
   stopInput();
   $("pauseScreen").classList.toggle("hidden", !paused);
   document.body.classList.toggle("menuOpen", paused);
+  if (!paused) frontierUI?.close();
   if (paused) {
     document.exitPointerLock?.();
     updatePanels();
@@ -569,11 +596,11 @@ function start(load = false) {
     if (load) {
       const s = JSON.parse(localStorage.getItem(storageKey));
       if (s && [1, 2].includes(s.version)) {
-        world = new World(s.world.seed);
-        world.generate();
+        world = makeWorld(s.world.seed);
         world.load(s.world);
         eco = new Ecology(world);
-        eco.load(s.eco);
+        if (s.eco) eco.load(s.eco);
+        else eco.populate(100);
         inventory = new Inventory();
         if (s.inventory) inventory.load(s.inventory);
         loot = new Pickups();
@@ -593,6 +620,7 @@ function start(load = false) {
         playTime = s.playTime || 0;
         Object.assign(player, s.player);
         discovered = new Set(s.discovered || []);
+        if (s.enterRegion) home();
         $("flyBtn").classList.toggle("enabled", player.flying);
       } else home();
     } else home();
@@ -606,10 +634,17 @@ function start(load = false) {
     refreshInventory();
     running = true;
     paused = false;
+    document.body.classList.remove("menuOpen");
+    frontierUI?.resetScene();
     $("titleScreen").classList.add("hidden");
     $("hud").classList.remove("hidden");
     $("pauseScreen").classList.add("hidden");
-    if (!load) toast("곡괭이로 채굴 → 가까이 가서 수집 → 가방에서 제작");
+    if (!load)
+      toast(
+        frontierState
+          ? "원정 장부에서 목적지 확인 · 강변 야영지로 이동하세요"
+          : "곡괭이로 채굴 → 가까이 가서 수집 → 가방에서 제작",
+      );
     sound("scan");
     last = performance.now();
     if (!window.AndroidApp)
@@ -623,11 +658,76 @@ function start(load = false) {
     console.error(e);
   }
 }
+function makeWorld(seed) {
+  if (frontierState) return frontierWorld(seed, frontierState.info);
+  const w = new World(seed);
+  w.generate();
+  return w;
+}
+function travel(dx, dz) {
+  if (!frontierState || !running) return false;
+  const before = frontierState.save(),
+    beforeInventory = JSON.parse(JSON.stringify(inventory.save()));
+  const runtime = {
+    riding: frontierState.riding,
+    airborne: frontierState.airborne,
+  };
+  const oldKey = frontierState.key;
+  const error = frontierState.move(dx, dz, inventory, player);
+  if (error) {
+    toast(error);
+    frontierUI?.feedback(error);
+    return false;
+  }
+  const destination = regionCache[frontierState.key];
+  const cache = {
+    ...regionCache,
+    [oldKey]: {
+      world: world.save(),
+      eco: eco.save(),
+      loot: loot.save(),
+      discovered: [...discovered],
+    },
+  };
+  delete cache[frontierState.key];
+  const state = {
+    version: 2,
+    campaign: frontierState.save(),
+    regionCache: cache,
+    inventory: inventory.save(),
+    miningSize,
+    buildMaterial,
+    buildSize,
+    playTime,
+    world: destination?.world || { seed: frontierState.info.seed },
+    eco: destination?.eco,
+    loot: destination?.loot,
+    discovered: destination?.discovered || [],
+    enterRegion: true,
+    player: { ...player, flying: false },
+  };
+  try {
+    localStorage.setItem(storageKey, JSON.stringify(state));
+  } catch {
+    frontierState = Frontier.load(before);
+    Object.assign(frontierState, runtime);
+    inventory.load(beforeInventory);
+    const message =
+      "지역 저장 실패 · 공간을 확보하세요. 이동과 식량 소비를 취소했습니다.";
+    toast(message);
+    frontierUI?.feedback(message);
+    return false;
+  }
+  running = false; // Prevent beforeunload from overwriting the committed destination.
+  location.reload();
+  return true;
+}
 function save(quiet = false) {
   if (!running || !world) return false;
   try {
     const s = {
       version: 2,
+      ...(frontierState ? { campaign: frontierState.save(), regionCache } : {}),
       inventory: inventory.save(),
       loot: loot.save(),
       miningSize,
@@ -770,7 +870,9 @@ function setPopulation(n = 3000) {
 }
 function fixedStep(input = inputState()) {
   world.time += FIXED_DT;
-  const moving = controller.step(FIXED_DT, input);
+  const vehicleInput = frontierUI?.beforeStep(input, FIXED_DT);
+  const moving = controller.step(FIXED_DT, vehicleInput || input);
+  frontierUI?.afterStep(FIXED_DT);
   if (player.y < 0.25) home();
   physicsTick++;
   if (physicsTick % 2 === 0) eco.update(FIXED_DT * 2, player, world.time);
@@ -869,7 +971,8 @@ function frame(now) {
         $("startBtn").querySelector("span").textContent = "새로운 탐험";
       }
       refreshAPI();
-      if (new URLSearchParams(location.search).has("world")) start(!!localStorage.getItem(storageKey));
+      if (new URLSearchParams(location.search).has("world"))
+        start(!!localStorage.getItem(storageKey));
     }
   }
   let moving = 0;
@@ -898,6 +1001,7 @@ function frame(now) {
     }
     if (hudTimer > 0.2) {
       updateAim();
+      frontierUI?.hud();
       $("population").textContent =
         eco.stats().total.toLocaleString() + " 개체";
       const h = 8 + world.time / 60;
@@ -938,6 +1042,7 @@ function frame(now) {
     );
     view.environment(world.time);
     view.pickups(loot, world.time);
+    frontierUI?.draw();
     view.draw(world.time, dt, moving);
   }
   if (window.FERAL) window.FERAL.ready = ready;
@@ -946,6 +1051,13 @@ function frame(now) {
 function refreshAPI() {
   window.FERAL = {
     version: VERSION.version,
+    get frontier() {
+      return frontierState;
+    },
+    get frontierUI() {
+      return frontierUI;
+    },
+    travel,
     controller,
     inventory,
     loot,
@@ -990,14 +1102,19 @@ function refreshAPI() {
     },
   };
 }
-$("startBtn").onclick = () => { if (localStorage.getItem(storageKey)) location.href="worlds.html"; else start(false); };
+$("startBtn").onclick = () => {
+  if (localStorage.getItem(storageKey)) location.href = "worlds.html";
+  else start(false);
+};
 $("continueBtn").onclick = () => start(true);
 $("menuBtn").onclick = () => {
   pause(true);
   document.querySelector('[data-tab="world"]').click();
 };
 $("resumeBtn").onclick = $("backToGame").onclick = () => pause(false);
-$("worldListBtn").onclick = (e) => { if (!save(true)) e.preventDefault(); };
+$("worldListBtn").onclick = (e) => {
+  if (!save(true)) e.preventDefault();
+};
 $("saveBtn").onclick = () => save();
 $("homeBtn").onclick = () => {
   home();
@@ -1029,7 +1146,8 @@ $("stressBtn").onclick = () => {
 for (const b of document.querySelectorAll("[data-tab]"))
   b.onclick = () => {
     $("pauseScreen").classList.toggle("inventoryMode", b.dataset.tab === "bag");
-    $("panelTitle").textContent = b.dataset.tab === "bag" ? "가방 · 제작" : "탐험 메뉴";
+    $("panelTitle").textContent =
+      b.dataset.tab === "bag" ? "가방 · 제작" : "탐험 메뉴";
     document
       .querySelectorAll("[data-tab]")
       .forEach((x) => x.classList.toggle("active", x === b));
@@ -1169,6 +1287,7 @@ for (const type of ["pointerup", "pointercancel", "lostpointercapture"])
   });
 canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 window.addEventListener("keydown", (e) => {
+  if (e.target.closest?.("#frontierPanel") && e.code !== "Escape") return;
   if (["Space", "Tab", "ArrowUp", "ArrowDown"].includes(e.code))
     e.preventDefault();
   if (["KeyI", "Tab"].includes(e.code) && running && !e.repeat) {
@@ -1181,6 +1300,7 @@ window.addEventListener("keydown", (e) => {
     return;
   }
   if (!running || paused) return;
+  if (frontierUI && !e.repeat && frontierUI.key(e.code)) return;
   keys.add(e.code);
   if (e.code === "KeyB" && !e.repeat) cycleRange();
   if (e.code === "KeyF" && !e.repeat) setFlying();
@@ -1219,14 +1339,55 @@ window.FeralUpdates = initUpdates({
   beforeApply: () => !running || save(true),
 });
 try {
-  world = new World(activeWorld.seed);
-  world.generate();
+  if (activeWorld.type === "frontier") {
+    const old = JSON.parse(localStorage.getItem(storageKey) || "null");
+    frontierState = old?.campaign
+      ? Frontier.load(old.campaign)
+      : new Frontier(activeWorld.seed);
+    regionCache = old?.regionCache || {};
+    if (!old) {
+      inventory.add("food", 8);
+      inventory.add("medicine", 2);
+      inventory.add("fiber", 6);
+      inventory.add("wood", 8);
+      inventory.add("stone", 8);
+      inventory.add("crystal", 2);
+    }
+    document.body.classList.add("frontier");
+  }
+  world = makeWorld(frontierState ? frontierState.info.seed : activeWorld.seed);
   world.event = event;
   eco = new Ecology(world);
   eco.populate(160);
   controller = new CharacterController(world, player);
   bindDrops();
   view = new View(canvas, world);
+  if (frontierState)
+    frontierUI = new FrontierView({
+      get model() {
+        return frontierState;
+      },
+      get world() {
+        return world;
+      },
+      get inventory() {
+        return inventory;
+      },
+      player,
+      view,
+      pause,
+      toast,
+      home,
+      travel,
+      openBag,
+      save,
+      get running() {
+        return running;
+      },
+      get paused() {
+        return paused;
+      },
+    });
   view.camera.position.set(85, 25, 98);
   view.camera.lookAt(74, 13, 58);
   const settings = JSON.parse(localStorage.getItem("feral.settings") || "null");

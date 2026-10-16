@@ -100,3 +100,8 @@ body.menuOpen #hud { visibility: hidden; }
 @media (orientation: portrait) {
   #hud #toast { bottom: 260px; max-width: calc(100vw - 40px); width: max-content; }
 }
+@media (orientation: portrait) {
+  #hud #toolLabel { left: 16px; right: 155px; bottom: 86px; transform: none; text-align: left; }
+  #hud .rangeButton { left: auto; right: 16px; bottom: 82px; transform: none; min-width: 118px; }
+  #hud .rangeButton:active { transform: scale(.98); }
+}

@@ -25,7 +25,7 @@ function draw() {
       name = document.createElement("b"),
       desc = document.createElement("small");
     name.textContent = w.name;
-    desc.textContent = `${w.type === "machine" ? "BETA · 기계 조립 시험장" : "기본 · 복셀 섬 / 시드 " + w.seed} · ${localStorage.getItem(saveKey(w)) ? "저장 있음" : "새 월드"}`;
+    desc.textContent = `${w.type === "frontier" ? "개척 · 지역 탐험 / 공동체 / 보스" : w.type === "machine" ? "BETA · 기계 조립 시험장" : "기본 · 복셀 섬 / 시드 " + w.seed} · ${localStorage.getItem(saveKey(w)) ? "저장 있음" : "새 월드"}`;
     info.append(name, desc);
     row.append(info);
     for (const [text, fn] of [

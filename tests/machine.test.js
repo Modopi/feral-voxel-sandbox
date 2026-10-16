@@ -106,7 +106,7 @@ test("world slots preserve legacy save and isolate create rename delete", () => 
   const db = store();
   db.setItem("feral.world.v1", "old");
   const list = listWorlds(db);
-  assert.equal(list.length, 2);
+  assert.deepEqual(list.map(w => w.type).sort(), ["frontier", "island", "machine"]);
   assert.equal(saveKey(list[0]), "feral.world.v1");
   const a = createWorld(db, "試験", "machine"),
     b = createWorld(db, "섬 2", "island", 123);

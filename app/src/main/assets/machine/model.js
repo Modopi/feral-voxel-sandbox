@@ -1,6 +1,8 @@
 // 표현 계층에서 독립된 기계 데이터와 고정 시간 시뮬레이션
 export const DT = 1 / 60;
 export const TYPES = Object.freeze({
+  cannon: { label: "포탑", mass: 28, hp: 70, cost: 8, color: 0xc2a178 },
+  rotor: { label: "회전익", mass: 14, hp: 50, cost: 10, color: 0x9ac9ce },
   hull: { label: "차체", mass: 12, hp: 100, cost: 1, color: 0x8ca7a2 },
   motor: { label: "모터", mass: 22, hp: 80, cost: 6, color: 0xffbf58 },
   wheel: { label: "바퀴", mass: 8, hp: 60, cost: 3, color: 0x34404c },
@@ -87,6 +89,8 @@ export function evaluate(s) {
       if (n && !connected.has(n.id)) queue.push(n);
     }
   }
+  let weapons = 0,
+    lift = 0;
   let mass = 0,
     power = 0,
     left = 0,
@@ -98,6 +102,8 @@ export function evaluate(s) {
     radius = Math.max(radius, Math.hypot(p.x * 0.5, p.z * 0.5) + 0.36);
     if (!connected.has(p.id)) continue;
     const health = s.hp[p.id] / TYPES[p.type].hp;
+    if (p.type === "cannon") weapons += health;
+    if (p.type === "rotor") lift += health;
     if (p.type === "motor") power += health * 600;
     if (p.type === "wheel" && p.y === 0) {
       wheels += health;
@@ -108,6 +114,8 @@ export function evaluate(s) {
   const grip = Math.min(1, wheels / 4),
     steering = Math.min(1, left, right);
   return {
+    weapons,
+    lift,
     mass: Math.max(1, mass),
     power,
     grip,
