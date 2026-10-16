@@ -1,0 +1,117 @@
+/* Game windows have fixed frames; only their contents scroll. World labels are WebGL meshes. */
+:root { --game-face:#c6c6bb; --game-dark:#33362f; --game-edge:#5a5e53; --game-light:#f4f4df; }
+.srOnly { position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip-path:inset(50%);white-space:nowrap; }
+#hud #target {display:none;}
+#bossHUD {display:none!important;}
+#hud #toolLabel {bottom:114px;}
+#frontierHUD #vitals {top:auto;bottom:78px;left:50%;transform:translateX(-50%);width:440px;max-width:calc(100vw - 24px);height:30px;padding:0;background:none;border:0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;filter:drop-shadow(1px 2px 0 #181a17);}
+#vitals .pipTrack {display:flex;gap:3px;}
+.pipTrack i {display:block;width:16px;height:16px;background:#302c2d;position:relative;}
+.pipTrack i b {display:block;height:100%;background:#d56559;}
+.pipTrack.hearts i {clip-path:polygon(0 15%,15% 0,40% 0,50% 15%,60% 0,85% 0,100% 15%,100% 50%,50% 100%,0 50%);}
+.pipTrack.hunger i {clip-path:polygon(20% 0,75% 0,100% 30%,100% 65%,70% 100%,0 100%,0 35%);}
+.pipTrack.hunger b {background:#d9ad5c;box-shadow:inset 0 4px #f0cd7f;}
+#levelHUD {font-size:15px;color:#b7e782;line-height:17px;}
+#vitals #experienceHUD {position:absolute;left:0;bottom:0;width:100%;height:5px;appearance:none;border:1px solid #171b16;background:#30372b;}
+#experienceHUD::-webkit-progress-bar {background:#30372b;}#experienceHUD::-webkit-progress-value {background:#9dc55d;}#experienceHUD::-moz-progress-bar {background:#9dc55d;}
+#frontierHUD #vitals.hurt {background:none;filter:drop-shadow(0 0 5px #ff3434);}
+#hud #waypoint {top:68px;left:22px;background:none;padding:0;max-width:210px;font-size:12px;}
+#hud #frontierActions {top:16px;right:140px;left:auto;bottom:auto;gap:6px;}
+#frontierActions #journalBtn,#frontierActions #statusBtn {width:44px;height:44px;padding:1px;min-height:44px;border:2px solid;border-color:#b9c2aa88 #30372eaa #30372eaa #b9c2aa88;background:#273329b3;}
+#frontierActions button>span {display:block;font-size:22px;line-height:25px;}
+#frontierActions button>small {font-size:9px;color:#efebd8;}
+#frontierActions #interactBtn {position:fixed;right:22px;top:76px;min-height:38px;padding:5px 9px;font-size:12px;border:1px solid #aec1a577;background:#1c2b22bb;}
+#frontierActions #interactBtn[hidden] {display:none;}
+#hud #rangeBtn {top:121px;bottom:auto;right:22px;}
+#hud #toast {background:#182019c9;border:0;border-radius:0;padding:5px 9px;}
+#frontierPanel {position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:#080d0870;overflow:hidden;}
+#frontierPanel[hidden] {display:none;}
+.gameWindow {width:min(780px,100%);height:min(470px,100%);display:grid;grid-template-columns:62px minmax(0,1fr);grid-template-rows:46px minmax(0,1fr) 30px;background:var(--game-face);color:#292d27;border:4px solid;border-color:var(--game-light) var(--game-edge) var(--game-edge) var(--game-light);box-shadow:0 0 0 2px #1c211b,6px 7px 0 #0006;}
+#frontierPanel .gameWindow>header {position:static;grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:3px 8px 3px 14px;border-bottom:2px solid #a3a69b;gap:8px;}
+#frontierPanel h2 {font-size:18px;margin:0;color:#30352a;}
+#frontierPanel button,#frontierPanel select,#pauseScreen:not(.inventoryMode) button,#pauseScreen:not(.inventoryMode) a.secondary {border:2px solid;border-color:#eeefdb #616759 #616759 #eeefdb;background:#a7ad9e;color:#252b21;min-height:40px;padding:6px 10px;border-radius:0;font-size:12px;box-shadow:inset 0 0 0 1px #858d79;text-decoration:none;touch-action:manipulation;}
+#frontierPanel button:active,#pauseScreen:not(.inventoryMode) button:active {transform:none;border-color:#616759 #eeefdb #eeefdb #616759;background:#949c89;}
+#frontierPanel #frontierClose {min-height:32px;width:34px;height:32px;font-size:23px;line-height:20px;padding:0;}
+#frontierPanel .gameWindow>nav {display:flex;flex-direction:column;gap:6px;padding:10px 4px;border:0;border-right:2px solid #9a9f90;overflow:auto;}
+#frontierPanel nav button {flex:0 0 auto;min-height:54px;padding:3px;}
+#frontierPanel nav button b {display:block;font-size:23px;line-height:26px;}
+#frontierPanel nav button span {display:block;font-size:10px;}
+#frontierPanel nav button.active {background:#d9d6b1;color:#343623;border-color:#ffffe5 #868466 #868466 #ffffe5;box-shadow:inset 3px 0 #b9a251;}
+#frontierContent {width:100%;min-width:0;min-height:0;overflow:auto;overscroll-behavior:contain;padding:12px 16px;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:#7e8574 #b9beb0;}
+#frontierPanel #frontierFeedback {position:static;grid-column:1/-1;margin:0;padding:5px 12px;background:#adb5a1;border-top:2px solid #999f8e;color:#343c29!important;font-size:11px;line-height:16px;min-height:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#frontierFeedback:empty::before {content:"탐험 일시정지";color:#56614a;}
+#frontierPanel h3 {font-size:15px;margin:0 0 8px;color:#30382b;}
+#frontierPanel h3 small {font-size:11px;color:#59624e;}
+#frontierPanel p,#frontierPanel li {font-size:12px;line-height:1.6;color:#4c5742;margin:8px 0;}
+.characterSheet {display:grid;grid-template-columns:150px minmax(0,1fr);gap:18px;}
+.characterStage {height:166px;background:#343f36;position:relative;display:flex;justify-content:center;align-items:center;border:3px solid;border-color:#777f6c #f1f1de #f1f1de #777f6c;background-image:linear-gradient(0deg,#707a5c55 1px,transparent 1px),linear-gradient(90deg,#707a5c55 1px,transparent 1px);background-size:24px 24px;}
+.characterStage .voxelAvatar {transform:scale(1.35);margin:0;filter:drop-shadow(5px 4px #0005);}
+.characterStage.armored .voxelAvatar .body {background:#a5b6b8;}
+.characterStage>span {position:absolute;bottom:5px;left:0;right:0;text-align:center;color:#e1e3c8;font-size:10px;}
+.equippedSlots {display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:6px;}
+.equippedSlots>div {height:48px;background:#898f7f;border:2px solid;border-color:#636958 #e6e9d5 #e6e9d5 #636958;position:relative;padding:2px 7px 9px;}
+.equippedSlots small {position:absolute;bottom:0;left:0;right:0;text-align:center;font-size:9px;color:#eef1e2;}
+.armorSlot b {display:block;text-align:center;font-size:27px;color:#555e4d;line-height:30px;}.armorSlot.equipped b {color:#d9e4e0;}
+.characterName {display:flex;align-items:center;justify-content:space-between;gap:4px;margin-bottom:9px;}
+#frontierPanel .characterName h3 {font-size:19px;margin:0;}.characterName>span {font-size:10px;color:#56614a;}
+.statMeter {margin-bottom:7px;}.statMeter label {display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;}.statMeter label b {font-weight:normal;font-variant-numeric:tabular-nums;}
+.statMeter progress {display:block;width:100%;height:9px;appearance:none;border:2px solid;border-color:#696e5f #f0f0dd #f0f0dd #696e5f;}
+.statMeter.hp {--fill:#b86354;}.statMeter.food {--fill:#b99c50;}.statMeter.xp {--fill:#79a651;}
+.statMeter progress::-webkit-progress-bar {background:#565d4d;}.statMeter progress::-webkit-progress-value {background:var(--fill);}.statMeter progress::-moz-progress-bar {background:var(--fill);}
+.combatStats {margin:9px 0;display:grid;gap:4px;}.combatStats>div {display:flex;justify-content:space-between;font-size:11px;gap:8px;}.combatStats dd {margin:0;font-weight:bold;}
+.supplySlots {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;}
+#frontierPanel .supplySlots button {height:54px;min-width:0;padding:3px 9px 13px;position:relative;}
+.supplySlots button>small {position:absolute;bottom:2px;left:0;right:0;font-size:10px;}.supplySlots button>b:not(.supplyCount) {font-size:23px;line-height:28px;}.supplyCount {position:absolute;right:4px;top:3px;font-size:11px;color:#fff;text-shadow:1px 1px #333;}
+.milestoneStrip {display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:9px 0;margin-top:9px;border-top:2px solid #9ca58e;font-size:11px;}.milestoneStrip b {font-size:14px;}
+.expeditionLog {font-size:11px;border-top:1px solid #a2aa96;padding-top:6px;}.expeditionLog summary {cursor:pointer;min-height:24px;}.expeditionLog summary span {float:right;}.expeditionLog ol {max-height:110px;overflow:auto;padding-left:20px;margin:0;}
+.mapLayout {display:grid;grid-template-columns:1.1fr 1fr;gap:18px;}.regionMap {background:#8a987c;border:2px solid;border-color:#707d61 #e5ead7 #e5ead7 #707d61;padding:12px;text-align:center;background-image:linear-gradient(#bbc6a329 1px,transparent 1px),linear-gradient(90deg,#bbc6a329 1px,transparent 1px);background-size:22px 22px;}.regionMap>small {font-size:10px;color:#35402b;}
+#frontierPanel .routeGrid {gap:5px;margin:12px auto;max-width:280px;}#frontierPanel .routeGrid button {padding:3px;font-size:20px;min-height:46px;}.routeGrid button small {display:block;font-size:9px;}.routeGrid span b {font-size:28px;display:block;}.routeGrid span small {font-size:10px;display:block;}
+#destinations {display:grid;gap:6px;}#destinations button {text-align:left;width:100%;font-size:11px;}
+.villageRow {border-bottom:2px solid #a4ad95;padding:8px 0 14px;margin-bottom:12px;}.frontierButtons {gap:6px;}#frontierPanel .frontierButtons button {font-size:11px;}.raidConfirm {background:#c2ae94;border:2px solid #8d7152;padding:10px;}
+#pauseScreen:not(.inventoryMode) {display:flex;align-items:center;justify-content:center;background:#080d0870;padding:12px;overflow:hidden;}
+#pauseScreen:not(.inventoryMode) .panel {width:min(700px,100%);height:min(460px,100%);margin:0;display:grid;grid-template-columns:124px minmax(0,1fr);grid-template-rows:44px minmax(0,1fr) 44px;border:4px solid;border-color:var(--game-light) var(--game-edge) var(--game-edge) var(--game-light);background:var(--game-face);color:#30382b;box-shadow:0 0 0 2px #24291e,5px 6px #0005;}
+#pauseScreen:not(.inventoryMode) .panelTop {grid-column:1/-1;padding:4px 9px 4px 13px;border:0;border-bottom:2px solid #a7ae9b;background:none;}
+#pauseScreen:not(.inventoryMode) .panelTop .eyebrow {display:none;}#pauseScreen:not(.inventoryMode) .panelTop h2 {font-size:17px;color:#30382b;margin:0;}
+#pauseScreen:not(.inventoryMode) .panelTop button {width:32px;height:32px;min-width:32px;min-height:32px;padding:0;}
+#pauseScreen:not(.inventoryMode) .tabs {display:flex;flex-direction:column;margin:0;gap:6px;border:0;border-right:2px solid #a4ad95;padding:10px 7px;overflow:auto;}
+#pauseScreen:not(.inventoryMode) .tabs button {flex:none;white-space:normal;text-align:left;font-size:11px;padding:6px;min-height:40px;}
+#pauseScreen:not(.inventoryMode) .tabs button.active {background:#ddd7ae;}
+#pauseScreen:not(.inventoryMode) .tabs button small {display:none;}
+#pauseScreen:not(.inventoryMode) .menuContents {min-width:0;min-height:0;overflow:auto;touch-action:pan-y;padding:14px;}
+#pauseScreen:not(.inventoryMode) p {font-size:12px;line-height:1.6;color:#56614b;margin:8px 0;}
+#pauseScreen:not(.inventoryMode) .metricGrid {gap:8px;margin:0 0 12px;}.metricGrid span {color:inherit;}
+#pauseScreen:not(.inventoryMode) .metricGrid>div {padding:5px;border:0;}
+#pauseScreen:not(.inventoryMode) .metricGrid b {font-size:17px;color:#303a27;}#pauseScreen:not(.inventoryMode) .metricGrid span {font-size:10px;color:#59634d;}
+#pauseScreen:not(.inventoryMode) .buttonRow {display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+#pauseScreen:not(.inventoryMode) .panelFooter {grid-column:1/-1;display:flex;justify-content:space-between;padding:4px 9px;margin:0;border-top:2px solid #a4ad95;}.panelFooter>span {font-size:9px!important;color:#56614a!important;}
+#pauseScreen:not(.inventoryMode) .panelFooter button {min-height:30px;font-size:12px;}
+#pauseScreen:not(.inventoryMode) .setting {font-size:12px;border-bottom:1px solid #a4ad95;min-height:44px;padding:8px 0;}
+#pauseScreen:not(.inventoryMode) .setting select {max-width:58%;background:#9fa990;color:#303a27;border-radius:0;font-size:11px;}
+#pauseScreen:not(.inventoryMode) .setting input[type=range] {max-width:55%;}
+#pauseScreen:not(.inventoryMode) h3 {font-size:15px;margin:8px 0;}
+#pauseScreen.inventoryMode .menuContents {min-height:0;}
+@media (orientation:landscape) and (max-height:540px) {
+  .gameWindow {grid-template-rows:38px minmax(0,1fr) 25px;}#frontierContent {padding:9px 14px;}
+  .characterSheet {grid-template-columns:136px minmax(0,1fr);gap:16px;}.characterStage {height:145px;}.characterStage .voxelAvatar {transform:scale(1.18);}.equippedSlots>div {height:43px;}.characterName {margin-bottom:5px;}.statMeter {margin-bottom:5px;}.combatStats {margin:6px 0;}.milestoneStrip {padding:6px 0;margin-top:6px;}
+  #frontierPanel nav button {min-height:49px;}.supplySlots {gap:5px;}#frontierPanel .supplySlots button {height:49px;}
+  #hud #rangeBtn {top:76px;bottom:auto;right:142px;}
+}
+#frontierPanel .characterName h3 small {display:inline;margin:0;}
+@media (orientation:landscape) { #hud #toast {left:20px;top:100px;bottom:auto;max-width:190px;} }
+@media (orientation:portrait) {
+  #hud #frontierActions {top:66px;right:12px;}#frontierActions #interactBtn {top:120px;right:12px;}
+  #hud #waypoint {top:66px;left:16px;max-width:155px;font-size:10px;}
+  #hud #rangeBtn {top:auto;bottom:294px;right:16px;}
+  #frontierHUD #vitals {bottom:calc((100vw - 48px)/9 + 38px);gap:7px;height:26px;}
+  #vitals .pipTrack {gap:2px;}.pipTrack i {width:12px;height:13px;}#levelHUD {font-size:13px;}
+  .gameWindow {height:min(590px,100%);grid-template-columns:48px minmax(0,1fr);grid-template-rows:42px minmax(0,1fr) 30px;}
+  #frontierContent {padding:12px 10px;}#frontierPanel .gameWindow>nav {padding:8px 3px;gap:7px;}#frontierPanel nav button {min-height:52px;}
+  .characterSheet {grid-template-columns:1fr;gap:12px;}.characterFigure {display:grid;grid-template-columns:1fr 44px;gap:8px;}.characterStage {height:133px;}.characterStage .voxelAvatar {transform:scale(1.1);}.equippedSlots {grid-template-columns:1fr;margin:0;gap:3px;}.equippedSlots>div {height:42px;}
+  .characterName {margin-bottom:8px;}.characterName>span {font-size:9px;}#frontierPanel .characterName h3 {font-size:17px;}.supplySlots {gap:3px;}#frontierPanel .supplySlots button {padding:3px 4px 13px;height:50px;}
+  .milestoneStrip {display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:10px;}.expeditionLog {margin-top:3px;}
+  .mapLayout {grid-template-columns:1fr;gap:14px;}.regionMap {padding:10px;}.routeGrid {max-width:200px!important;}#destinations {gap:6px;}
+  #pauseScreen:not(.inventoryMode) .panel {height:min(560px,100%);grid-template-columns:88px minmax(0,1fr);grid-template-rows:44px minmax(0,1fr) 44px;}
+  #pauseScreen:not(.inventoryMode) .tabs {padding:8px 4px;gap:7px;}#pauseScreen:not(.inventoryMode) .tabs button {font-size:10px;}
+  #pauseScreen:not(.inventoryMode) .menuContents {padding:12px 9px;}#pauseScreen:not(.inventoryMode) .metricGrid {grid-template-columns:1fr;gap:4px;}.metricGrid>div {display:flex;justify-content:space-between;align-items:center;}.metricGrid span {margin:0;}
+  #pauseScreen:not(.inventoryMode) .buttonRow {grid-template-columns:1fr;}#pauseScreen:not(.inventoryMode) .panelFooter>span {max-width:48%;font-size:8px!important;}.helpGrid {grid-template-columns:1fr;gap:10px;}
+}

@@ -1,4 +1,6 @@
 import { currentWorld, saveKey } from "../world-slots.js";
+import { readLayout } from "../hud-layout.js";
+document.documentElement.dataset.uiTheme = readLayout(localStorage).theme;
 const activeWorld = currentWorld(localStorage, "machine", location.search);
 import * as T from "../vendor/three.module.js";
 import {

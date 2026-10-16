@@ -1,4 +1,5 @@
 import { ITEMS } from "./inventory.js";
+import { WorldUI } from "./world-ui.js";
 import * as T from "./vendor/three.module.js";
 import { SIZE, HEIGHT, CHUNK, COLORS, B, hash, clamp } from "./world.js";
 import { SPECIES, cellPosition, toWorld, occupied, pose } from "./entities.js";
@@ -154,6 +155,7 @@ export class View {
     this.camera = new T.PerspectiveCamera(82, 1, 0.04, 150);
     this.camera.rotation.order = "YXZ";
     this.scene.add(this.camera);
+    this.worldUI = new WorldUI(this.scene, this.camera, () => this.world);
     this.scene.add(new T.HemisphereLight(0xe7f3de, 0x596b59, 2.1));
     this.sunLight = new T.DirectionalLight(0xffe3a8, 2.4);
     this.sunLight.position.set(-40, 75, 35);
@@ -650,6 +652,7 @@ export class View {
     this.tool.position.y =
       this.toolBase.y + Math.sin(time * 9) * 0.0025 * moving;
     this.tool.rotation.x = this.toolKick * 0.12;
+    this.worldUI.update();
     this.renderer.render(this.scene, this.camera);
   }
   stats() {

@@ -1,6 +1,7 @@
 const { chromium } = require("playwright");
 const fs = require("node:fs");
 const version = JSON.parse(fs.readFileSync("version.json", "utf8"));
+const nextVersion = version.version.replace(/\d+$/, n => String(Number(n) + 1));
 const assert = require("node:assert/strict");
 (async () => {
   const browser = await chromium.launch({
@@ -25,11 +26,11 @@ const assert = require("node:assert/strict");
   const page = await context.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await page.addInitScript(() => {
+  await page.addInitScript((v) => {
     window.__update = {
-      nativeVersion: "0.3.2",
-      nativeCode: 302,
-      runtimeCode: 501,
+      nativeVersion: v.nativeVersion,
+      nativeCode: v.nativeCode,
+      runtimeCode: v.versionCode,
       publicUpdates: true,
       pendingCode: 0,
       pendingVersion: "",
@@ -58,7 +59,7 @@ const assert = require("node:assert/strict");
       applyUpdate: () => window.__calls.applied++,
       runtimeHealthy: (code) => window.__calls.healthy.push(code),
     };
-  });
+  }, version);
   await page.goto(
     "file://" + process.cwd() + "/app/src/main/assets/index.html",
   );
@@ -98,15 +99,15 @@ const assert = require("node:assert/strict");
   await page.click("#checkUpdates");
   await page.uncheck("#automaticUpdates");
   assert.equal(await page.evaluate(() => window.__update.automatic), false);
-  await page.evaluate(() => {
+  await page.evaluate(({code, next}) => {
     Object.assign(window.__update, {
-      pendingCode: 502,
-      pendingVersion: "0.5.2",
+      pendingCode: code,
+      pendingVersion: next,
       phase: "ready",
-      message: "0.5.2 준비 완료 · 다음 실행에 적용합니다.",
+      message: `${next} 준비 완료 · 다음 실행에 적용합니다.`,
     });
     window.FeralUpdates.refresh();
-  });
+  }, { code: version.versionCode + 1, next: nextVersion });
   assert.equal(await page.locator("#applyUpdate").isVisible(), true);
   await page.click("#applyUpdate");
   assert.equal(await page.evaluate(() => window.__calls.applied), 1);
@@ -143,7 +144,7 @@ const assert = require("node:assert/strict");
     versionSelection: true,
     check: true,
     automaticToggle: true,
-    pendingVersion: "0.5.2",
+    pendingVersion: nextVersion,
     savesBeforeApply: true,
     saveFailureBlocksApply: true,
     errors,

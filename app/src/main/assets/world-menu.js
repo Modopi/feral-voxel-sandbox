@@ -7,6 +7,8 @@ import {
   renameWorld,
 } from "./world-slots.js";
 import { VERSION } from "./version.js";
+import { readLayout } from "./hud-layout.js";
+document.documentElement.dataset.uiTheme = readLayout(localStorage).theme;
 const $ = (id) => document.getElementById(id);
 let deleting, renaming;
 function run(fn) {
@@ -14,6 +16,12 @@ function run(fn) {
     fn();
   } catch (e) {
     $("status").textContent = e.message;
+    const dialog = document.querySelector("dialog[open]");
+    if (dialog) {
+      let error = dialog.querySelector("[role=status]");
+      if (!error) { error = document.createElement("p"); error.setAttribute("role", "status"); dialog.append(error); }
+      error.textContent = e.message;
+    }
   }
 }
 function draw() {
@@ -23,11 +31,15 @@ function draw() {
     const row = document.createElement("article"),
       info = document.createElement("div"),
       name = document.createElement("b"),
-      desc = document.createElement("small");
+      desc = document.createElement("small"),
+      glyph = document.createElement("span");
+    glyph.className = "worldGlyph";
+    glyph.textContent = w.type === "machine" ? "⚙" : w.type === "frontier" ? "⚑" : "◆";
+    glyph.setAttribute("aria-hidden", "true");
     name.textContent = w.name;
     desc.textContent = `${w.type === "frontier" ? "개척 · 지역 탐험 / 공동체 / 보스" : w.type === "machine" ? "BETA · 기계 조립 시험장" : "기본 · 복셀 섬 / 시드 " + w.seed} · ${localStorage.getItem(saveKey(w)) ? "저장 있음" : "새 월드"}`;
     info.append(name, desc);
-    row.append(info);
+    row.append(glyph, info);
     for (const [text, fn] of [
       ["플레이", () => (location.href = worldURL(w))],
       [
@@ -58,6 +70,11 @@ function draw() {
   if (!list.childNodes.length)
     list.textContent = "월드가 없습니다. 아래에서 만들어 주세요.";
 }
+$("newWorld").onclick = () => {
+  $("createDialog").querySelector("[role=status]")?.remove();
+  $("createDialog").showModal(); $("name").focus();
+};
+$("createCancel").onclick = () => $("createDialog").close();
 $("create").onsubmit = (e) => {
   e.preventDefault();
   run(() => {
@@ -68,6 +85,7 @@ $("create").onsubmit = (e) => {
       Number($("seed").value),
     );
     $("name").value = "";
+    $("createDialog").close();
     draw();
   });
 };

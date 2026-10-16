@@ -82,6 +82,7 @@ const assert = require("node:assert/strict");
     }
     const before = f.inventory.count("dirt");
     f.selectTool(2);
+    if (f.miningSize !== 1) f.cycleRange();
     aim(79.25, 11.99, 84.25);
     for (let n = 0; n < 3; n++) {
       f.world.time += 0.21;
@@ -191,7 +192,7 @@ const assert = require("node:assert/strict");
     FERAL.selectHotbar(i < 9 ? i : 2);
   });
   await page.click("#resumeBtn");
-  await page.click("#rangeBtn");
+  assert.equal(await page.evaluate(() => FERAL.buildSize), 0.5);
   const building = await page.evaluate(() => {
     const f = window.FERAL;
     const x = 78.75,

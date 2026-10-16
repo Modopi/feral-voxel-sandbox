@@ -1,4 +1,6 @@
 import { InventoryUI } from "./inventory-ui.js";
+import { HudEditor } from "./hud-editor.js";
+import { DEFAULT_EDIT_SIZE, EDIT_GRID_VERSION, restoreEditGrid, editSizeLabel } from "./edit-grid.js";
 import { itemArt } from "./item-art.js";
 import {
   GEAR,
@@ -44,10 +46,11 @@ import {
 let inventory = new Inventory(),
   loot = new Pickups(),
   controller,
-  miningSize = 1,
-  buildSize = 1,
+  miningSize = DEFAULT_EDIT_SIZE,
+  buildSize = DEFAULT_EDIT_SIZE,
   buildMaterial = "dirt",
   bagUI = null,
+  hudEditor = null,
   physicsAccum = 0,
   physicsTick = 0,
   lastInventoryRevision = -1,
@@ -316,7 +319,7 @@ function updateToolLabel() {
       ? `보유 ${inventory.count(id)} · 설치 ${buildSize === 1 ? 8 : 1}조각`
       : "선택한 아이템 사용";
   $("rangeBtn").textContent =
-    (selected === 3 ? "설치 " + buildSize : "채굴 " + miningSize) + "m ↻";
+    (selected === 3 ? "설치 " : "채굴 ") + editSizeLabel(selected === 3 ? buildSize : miningSize) + " ↻";
   $("rangeBtn").classList.toggle("hidden", selected !== 2 && selected !== 3);
   $("actBtn").firstChild.textContent = "⚒";
   $("actBtn").querySelector("small").textContent = "공격·캐기";
@@ -337,6 +340,7 @@ function cycleRange() {
     miningSize = sizes[(sizes.indexOf(miningSize) + 1) % sizes.length];
     if (selected !== 2) selectTool(2);
   }
+  miningProgress.reset();
   updateToolLabel();
   sound("scan");
 }
@@ -661,7 +665,7 @@ function pause(force) {
   if (!running) return;
   paused = force ?? !paused;
   stopInput();
-  $("pauseScreen").classList.toggle("hidden", !paused);
+  $("pauseScreen").classList.toggle("hidden", !paused || hudEditor?.editing === true);
   document.body.classList.toggle("menuOpen", paused);
   if (!paused) frontierUI?.close();
   if (paused) {
@@ -691,16 +695,10 @@ function start(load = false) {
         if (s.inventory) inventory.load(s.inventory);
         loot = new Pickups();
         if (s.loot) loot.load(s.loot);
-        miningSize =
-          s.miningSize === 2 && inventory.unlocks.has("hammer")
-            ? 2
-            : s.miningSize === 0.5
-              ? 0.5
-              : 1;
+        ({ miningSize, buildSize } = restoreEditGrid(s, inventory.unlocks.has("hammer")));
         buildMaterial = ITEMS[s.buildMaterial]?.block
           ? s.buildMaterial
           : "dirt";
-        buildSize = s.buildSize === 0.5 ? 0.5 : 1;
         view.world = world;
         world.event = event;
         playTime = s.playTime || 0;
@@ -727,6 +725,7 @@ function start(load = false) {
     frontierUI?.resetScene();
     $("titleScreen").classList.add("hidden");
     $("hud").classList.remove("hidden");
+    hudEditor?.apply();
     $("pauseScreen").classList.add("hidden");
     if (!load)
       toast(
@@ -784,6 +783,7 @@ function travel(dx, dz) {
     campaign: frontierState.save(),
     regionCache: cache,
     inventory: inventory.save(),
+    editGridVersion: EDIT_GRID_VERSION,
     miningSize,
     buildMaterial,
     buildSize,
@@ -819,6 +819,7 @@ function save(quiet = false) {
       ...(frontierState ? { campaign: frontierState.save(), regionCache } : {}),
       inventory: inventory.save(),
       loot: loot.save(),
+      editGridVersion: EDIT_GRID_VERSION,
       miningSize,
       buildMaterial,
       buildSize,
@@ -997,8 +998,14 @@ function updateAim() {
   const aimAction = actionHeld && !ent ? 2 : selected;
   if (ent) {
     const e = ent.entity;
-    $("target").innerHTML =
-      `<b>${SPECIES[e.type].name}</b> · ${SPECIES[e.type].parts[ent.part].name}<br>HP ${Math.ceil(e.hp)}/${e.maxHP} · ${e.behavior || "배회"}<br><small>HP 0 또는 머리·몸통 파괴 → 사망</small><progress class="targetHealth" max="${e.maxHP}" value="${e.hp}"></progress>`;
+    view.worldUI.set("focus", {
+      title: `${SPECIES[e.type].name} · ${SPECIES[e.type].parts[ent.part].name}`,
+      detail: `HP ${Math.ceil(e.hp)} / ${e.maxHP} · ${e.behavior || "배회"}`,
+      hint: "HP 0 · 머리 / 몸통 파괴 시 사망", value: Math.ceil(e.hp), max: e.maxHP,
+      color: e.type === 1 ? "#efb484" : "#b4ddbe",
+      maxDistance: selected === 1 ? activeGear(inventory, "weapon").range + 1 : 8,
+      follow: () => e.dead ? null : { x: e.x, y: e.y + 1.25 * SPECIES[e.type].s, z: e.z },
+    });
     view.highlight.visible = false;
   } else if (block) {
     const names = [
@@ -1015,26 +1022,17 @@ function updateAim() {
       "재",
       "목재",
     ];
-    $("target").textContent =
-      (names[block.b] || "블록") +
-      " · " +
-      block.distance.toFixed(1) +
-      " m" +
-      (aimAction === 2
-        ? ` · 파괴 ${world.time - miningProgress.last < 0.6 && miningProgress.key === `${block.hx},${block.hy},${block.hz}:${miningSize}:${gearId(inventory, "tool")}` ? Math.floor(miningProgress.ratio * 100) : 0}% · 길게 누르기`
-        : "");
-    if (aimAction === 2) {
-      const progress = document.createElement("progress");
-      progress.className = "targetHealth";
-      progress.max = 1;
-      progress.value =
-        world.time - miningProgress.last < 0.6 &&
-        miningProgress.key ===
-          `${block.hx},${block.hy},${block.hz}:${miningSize}:${gearId(inventory, "tool")}`
-          ? miningProgress.ratio
-          : 0;
-      $("target").append(progress);
-    }
+    const ratio = world.time - miningProgress.last < 0.6 &&
+      miningProgress.key === `${block.hx},${block.hy},${block.hz}:${miningSize}:${gearId(inventory, "tool")}`
+      ? miningProgress.ratio : 0;
+    view.worldUI.set("focus", {
+      title: names[block.b] || "블록",
+      detail: aimAction === 2 ? `채굴 ${Math.floor(ratio * 100)}% · ${activeGear(inventory, "tool").name}` : `${block.distance.toFixed(1)} m`,
+      hint: aimAction === 2 ? "공격 · 캐기를 길게 누르세요" : aimAction === 3 ? "사용으로 블록 설치" : "도구를 들고 상호작용",
+      value: ratio, max: aimAction === 2 ? 1 : 0, color: "#e5d6a1",
+      position: { x: block.hx * 0.5 + 0.25 + block.normal[0] * 0.33, y: block.hy * 0.5 + 0.25 + block.normal[1] * 0.33, z: block.hz * 0.5 + 0.25 + block.normal[2] * 0.33 },
+      maxDistance: 8,
+    });
     view.highlight.visible = aimAction === 2 || aimAction === 3;
     const r =
       aimAction === 3
@@ -1044,7 +1042,7 @@ function updateAim() {
     view.highlight.position.set(...r.start.map((v) => v * 0.5 + r.size * 0.5));
     view.highlight.material.color.setHex(aimAction === 3 ? 0x9cdaa1 : 0xf5d78c);
   } else {
-    $("target").textContent = "";
+    view.worldUI.set("focus", null);
     view.highlight.visible = false;
   }
 }
@@ -1226,6 +1224,7 @@ $("menuBtn").onclick = () => {
   document.querySelector('[data-tab="world"]').click();
 };
 $("resumeBtn").onclick = $("backToGame").onclick = () => pause(false);
+$("resumeWorld").onclick = () => pause(false);
 $("worldListBtn").onclick = (e) => {
   if (!save(true)) e.preventDefault();
 };
@@ -1316,6 +1315,7 @@ $("sound").onchange = () => {
 $("leftHand").onchange = () => {
   document.body.classList.toggle("leftHand", $("leftHand").checked);
   persistSettings();
+  hudEditor?.apply();
 };
 function holdButton(el, on, off) {
   el.addEventListener("pointerdown", (e) => {
@@ -1429,6 +1429,7 @@ canvas.addEventListener(
 );
 canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 window.addEventListener("keydown", (e) => {
+  if (hudEditor?.editing) return;
   if (e.target.closest?.("#frontierPanel") && e.code !== "Escape") return;
   if (["Space", "Tab", "ArrowUp", "ArrowDown"].includes(e.code))
     e.preventDefault();
@@ -1474,7 +1475,8 @@ window.FeralNative = {
     }
   },
   back: () => {
-    if (running) pause();
+    if (hudEditor?.editing) hudEditor.cancel();
+    else if (running) pause();
   },
   save: () => save(true),
 };
@@ -1547,6 +1549,12 @@ try {
     view.camera.fov = +$("fov").value;
     view.camera.updateProjectionMatrix();
   }
+  hudEditor = new HudEditor({
+    open: () => { pause(true); frontierUI?.close(); $("pauseScreen").classList.add("hidden"); },
+    close: () => { stopInput(); pause(true); document.querySelector('[data-tab="settings"]').click(); },
+  });
+  $("editHudBtn").onclick = () => hudEditor.open();
+  $("editHudShortcut").onclick = () => hudEditor.open();
   syncHeld();
   refreshAPI();
   requestAnimationFrame(frame);

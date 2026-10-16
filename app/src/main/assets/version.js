@@ -1,7 +1,7 @@
 // version.json에서 생성한 배포 정보
 export const VERSION = Object.freeze({
-  "version": "0.5.1",
-  "versionCode": 501,
+  "version": "0.5.3",
+  "versionCode": 503,
   "minNativeCode": 302,
   "saveSchema": 2,
   "channel": "stable",

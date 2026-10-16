@@ -26,9 +26,10 @@ const assert = require("node:assert/strict");
     await page.goto(base + "worlds.html");
     await page.waitForSelector("article");
     assert.equal(await page.locator("article").count(), 3);
+    await page.click("#newWorld");
     await page.fill("#name", "차량 시험 A");
     await page.selectOption("#type", "machine");
-    await page.click("#create button");
+    await page.click("#create button:not([type=button])");
     assert.equal(await page.locator("article").count(), 4);
     await page.screenshot({ path: "build/legacy-worlds-0.3.0.png" });
     await page
@@ -101,10 +102,11 @@ const assert = require("node:assert/strict");
     await page.screenshot({ path: "build/legacy-machine-portrait-0.3.0.png" });
     await page.setViewportSize({ width: 900, height: 412 });
     await page.click("header a");
+    await page.click("#newWorld");
     await page.fill("#name", "독립 섬");
     await page.selectOption("#type", "island");
     await page.fill("#seed", "123");
-    await page.click("#create button");
+    await page.click("#create button:not([type=button])");
     await page.evaluate(() =>
       localStorage.setItem("feral.world.v1", "legacy sentinel"),
     );

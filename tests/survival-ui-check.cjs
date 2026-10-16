@@ -109,7 +109,8 @@ const fs = require("node:fs");
       type: "touchEnd",
       touchPoints: [],
     });
-    assert.equal(await page.evaluate(() => FERAL.world.get(78, 13, 82)), 0);
+    assert.equal(await page.evaluate(() => FERAL.world.getCell(157, 26, 165)), 0);
+    assert.equal(await page.evaluate(() => FERAL.world.getCell(156, 26, 165)), 3);
     assert.ok(await page.evaluate(() => FERAL.inventory.wear.stonepick < 160));
     // Select a real block stack and use the distinct place/use control.
     await page.tap('[data-hotbar="2"]');
@@ -122,7 +123,7 @@ const fs = require("node:fs");
     await page.waitForTimeout(300);
     await page.tap("#useBtn");
     await page.waitForTimeout(100);
-    assert.equal(await page.evaluate(() => FERAL.inventory.count("dirt")), 8);
+    assert.equal(await page.evaluate(() => FERAL.inventory.count("dirt")), 15);
     // Synthetic multitouch via browser input: move, look, and attack at the same time, then cancel.
     await page.tap('[data-hotbar="0"]');
     const stick = await center("#stick");
