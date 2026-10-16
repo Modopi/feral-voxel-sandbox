@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#162c28" />
+    <title>FERAL — 살아 있는 복셀</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <canvas id="world"></canvas>
+    <div class="vignette"></div>
+    <div id="hud" class="hidden">
+      <header>
+        <div class="brand">
+          <b>F<span>Ξ</span>RAL</b><small>살아 있는 복셀</small>
+        </div>
+        <div class="telemetry">
+          <span class="statusdot"></span><span id="biome">초록 능선</span
+          ><span class="divider"></span><span id="fps">— FPS</span
+          ><span id="population">— 개체</span>
+        </div>
+        <button id="menuBtn" class="icon-button" aria-label="메뉴">☰</button>
+      </header>
+      <div id="discovery">
+        <span>FIELD NOTE / 01</span><strong>초록 능선</strong
+        ><small>모든 것은 서로에게 흔적을 남긴다.</small>
+      </div>
+      <div id="radar">
+        <canvas id="map" width="150" height="150"></canvas>
+        <div><span id="coords">000 / 000</span><b>N ↑</b></div>
+      </div>
+      <div id="crosshair"><i></i><i></i><i></i><i></i></div>
+      <div id="target"></div>
+      <div id="events"></div>
+      <div id="toast"></div>
+      <div id="touch">
+        <div id="stick"><div id="knob"></div></div>
+        <span id="stickLabel">MOVE</span>
+        <div id="lookHint">오른쪽 화면을 밀어 둘러보기</div>
+        <button id="jumpBtn" class="round small" aria-label="점프">
+          ↑<small>점프</small></button
+        ><button id="flyBtn" class="round small" aria-label="비행 전환">
+          ◇<small>비행</small></button
+        ><button id="actBtn" class="round action" aria-label="도구 사용">
+          ◎<small>사용</small>
+        </button>
+      </div>
+      <div id="toolLabel">
+        <span id="toolName">관찰 렌즈</span
+        ><small id="toolHelp">생태와 신체 상태 읽기</small>
+      </div>
+      <nav id="hotbar" aria-label="도구 선택"></nav>
+      <footer>
+        <span id="worldTime">DAY 01 · 08:00</span
+        ><span id="hint">지형 1 m · 생명 ¼ / ⅛ m</span
+        ><span id="saveState">LOCAL WORLD</span>
+      </footer>
+    </div>
+    <div id="titleScreen" class="screen">
+      <div class="edition">
+        KGB / EXPERIMENT 001 <span>ANDROID · OFFLINE</span>
+      </div>
+      <div class="titleCopy">
+        <div class="eyebrow">A LIVING VOXEL SANDBOX</div>
+        <h1>F<span>Ξ</span>RAL<span class="period">.</span></h1>
+        <h2>야생에는 빈 공간이 없다.</h2>
+        <p>
+          땅을 깎고, 생명을 관찰하고, 흐름을 바꾸세요.<br />당신이 놓은 한
+          방울도 이 세계의 일부가 됩니다.
+        </p>
+        <div class="startActions">
+          <button id="startBtn" class="primary" disabled>
+            <span>세계를 만드는 중</span><b>→</b></button
+          ><button id="continueBtn" class="secondary hidden">
+            이전 탐험 이어하기 ↗
+          </button>
+        </div>
+        <div id="loadStatus">지형과 생태계를 준비합니다.</div>
+      </div>
+      <div class="specs">
+        <div>
+          <b>01</b
+          ><span
+            >한 세계, 세 가지 크기<small>1 m / 0.25 m / 0.125 m</small></span
+          >
+        </div>
+        <div>
+          <b>02</b
+          ><span
+            >먹고, 쫓고, 다시 자라는 생태<small
+              >초식 · 포식 · 토양 순환</small
+            ></span
+          >
+        </div>
+        <div>
+          <b>03</b
+          ><span
+            >흐르는 물, 번지는 불<small>희석 · 부식 · 현무암 반응</small></span
+          >
+        </div>
+      </div>
+      <div class="titleFooter">
+        <span>TOUCH TO EXPLORE / LANDSCAPE RECOMMENDED</span
+        ><span>PROTOTYPE 0.1</span>
+      </div>
+    </div>
+    <div id="pauseScreen" class="screen hidden">
+      <div class="panel">
+        <div class="panelTop">
+          <div>
+            <span class="eyebrow">FIELD STATION</span>
+            <h2>잠시, 관측소에서.</h2>
+          </div>
+          <button id="resumeBtn" class="icon-button" aria-label="계속">
+            ×
+          </button>
+        </div>
+        <div class="tabs">
+          <button data-tab="world" class="active">탐험</button
+          ><button data-tab="life">생태계</button
+          ><button data-tab="settings">환경 설정</button
+          ><button data-tab="help">조작 안내</button>
+        </div>
+        <section data-panel="world">
+          <div class="metricGrid">
+            <div><span>발견한 장소</span><b id="foundCount">0 / 5</b></div>
+            <div><span>탐험 시간</span><b id="elapsed">00:00</b></div>
+            <div><span>월드 시드</span><b id="seedValue">63026</b></div>
+          </div>
+          <p>
+            160 × 160 × 40 m의 유한한 섬입니다. 5개의 장소를 탐험하고 주변
+            생태의 변화를 관찰하세요.
+          </p>
+          <div class="buttonRow">
+            <button id="saveBtn" class="primary">지금 저장</button
+            ><button id="homeBtn" class="secondary">출발 지점</button
+            ><button id="newBtn" class="secondary danger">새 세계</button>
+          </div>
+          <p id="saveNote">30초마다 자동 저장 · 앱을 종료해도 이어서 탐험</p>
+          <div id="resetConfirm" class="confirm hidden">
+            현재 저장을 지우고 새 섬을 생성합니다.
+            <div class="buttonRow">
+              <button id="confirmReset" class="primary">새로 만들기</button
+              ><button id="cancelReset" class="secondary">취소</button>
+            </div>
+          </div>
+        </section>
+        <section data-panel="life" class="hidden">
+          <div class="speciesRow">
+            <span>◈ 이끼사슴 <b id="herbCount">0</b></span
+            ><span>◆ 구리여우 <b id="predCount">0</b></span
+            ><span>⬡ 청금딱정 <b id="beetleCount">0</b></span>
+          </div>
+          <div class="metricGrid">
+            <div><span>섭식량</span><b id="grazed">0</b></div>
+            <div><span>탄생 / 죽음</span><b id="birthDeath">0 / 0</b></div>
+            <div><span>부식 / 연소</span><b id="reactionCount">0 / 0</b></div>
+          </div>
+          <p>
+            풀 → 초식동물 → 포식자 → 토양 영양분 → 풀. 가까운 개체는 자세히
+            판단하고, 먼 개체는 낮은 빈도로 판단합니다.
+          </p>
+          <div class="buttonRow">
+            <button id="herdBtn" class="secondary">근처에 24마리</button
+            ><button id="stressBtn" class="primary">3,000 개체 실험</button>
+          </div>
+          <p id="benchmarkText">
+            수천 개체는 성능 실험입니다. 실제 기기에서 FPS를 확인하세요.
+          </p>
+          <div class="metricGrid">
+            <div><span>표시 개체</span><b id="visibleCount">0</b></div>
+            <div><span>GPU 삼각형</span><b id="triangleCount">0</b></div>
+            <div><span>평균 FPS</span><b id="benchFps">—</b></div>
+          </div>
+        </section>
+        <section data-panel="settings" class="hidden">
+          <label class="setting"
+            >그래픽
+            <select id="quality">
+              <option value="low">절전 · 짧은 시야</option>
+              <option value="balanced" selected>균형 · 권장</option>
+              <option value="high">고품질 · 넓은 시야</option>
+            </select></label
+          ><label class="setting"
+            >시점 감도
+            <input
+              id="sensitivity"
+              type="range"
+              min="30"
+              max="180"
+              value="80" /></label
+          ><label class="setting"
+            >시야각
+            <input id="fov" type="range" min="60" max="100" value="76" /></label
+          ><label class="setting"
+            >도구 소리 <input id="sound" type="checkbox" checked /></label
+          ><label class="setting"
+            >왼손 조작 <input id="leftHand" type="checkbox"
+          /></label>
+          <p>
+            프레임이 낮으면 먼저 절전 모드를 선택하세요. 상세 복셀은 가까운
+            개체부터 배정합니다.
+          </p>
+        </section>
+        <section data-panel="help" class="hidden">
+          <div class="helpGrid">
+            <div>
+              <b>모바일</b>
+              <p>
+                왼쪽 스틱: 이동<br />오른쪽 화면 드래그: 시점<br />↑: 점프 /
+                비행 중 상승<br />◇: 비행 전환<br />◎: 선택한 도구 사용
+              </p>
+            </div>
+            <div>
+              <b>키보드 / 마우스</b>
+              <p>
+                WASD: 이동 · Shift: 달리기<br />마우스: 시점 · 클릭: 사용<br />Space:
+                점프 · F: 비행<br />1~9: 도구 · Esc: 메뉴<br />비행 중 Q: 하강 /
+                E: 상승
+              </p>
+            </div>
+          </div>
+          <p>
+            펄스로 복셀을 깎아내면 관절과 신체가 손실됩니다. 다리가 줄면
+            느려지고, 머리를 잃으면 먹을 수 없습니다. 물은 불을 끄고 산을
+            희석합니다. 산은 흙·나무를 부식시키며, 물과 용암은 현무암으로
+            바뀝니다.
+          </p>
+          <p>
+            물·산 도구는 재료를 추가합니다. 유체는 셀 사이에서 양을 보존하며
+            흐릅니다. 일반 유체 역학·분자 화학·완전한 래그돌을 구현한 버전은
+            아닙니다.
+          </p>
+        </section>
+        <div class="panelFooter">
+          <span>FERAL 0.1 / 생태 복셀 프로토타입</span
+          ><button id="backToGame" class="textButton">탐험 계속 →</button>
+        </div>
+      </div>
+    </div>
+    <div id="errorScreen" class="screen hidden">
+      <div class="panel">
+        <h2>그래픽을 시작하지 못했습니다.</h2>
+        <p id="errorText"></p>
+        <button onclick="location.reload()" class="primary">다시 시작</button>
+      </div>
+    </div>
+    <script type="module" src="main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,23 @@
+✔ seed gives identical terrain and one metre cells (35.099478ms)
+✔ both quarter and eighth metre creatures are defined (0.228909ms)
+✔ fluid movement conserves volume and acid mass in a sealed basin (11.854581ms)
+✔ mixing clean water dilutes acid without destroying solute (4.788774ms)
+✔ water and lava form basalt and account for steam (2.036327ms)
+✔ burning wood consumes fuel and completes (1.4177ms)
+✔ voxel damage severs a limb and changes locomotion capability (1.118768ms)
+✔ head detachment propagates to attached ears (0.616043ms)
+✔ grazing consumes vegetation and returns energy (0.856589ms)
+✔ predation transfers energy and death returns soil nutrients (0.668761ms)
+✔ well fed mature creatures reproduce within population budget (0.439631ms)
+✔ save roundtrip preserves terrain, fluid, population and severed parts (47.501724ms)
+✔ 3000 entities tick with finite positions and bounded population (63.905157ms)
+✔ water extinguishes a burning wooden cell (1.276941ms)
+✔ concentrated acid consumes reagent while corroding organic material (0.282709ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 295.471527
