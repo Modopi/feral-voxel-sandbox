@@ -1,0 +1,106 @@
+/* Shared game chrome for menus, inventory, world selection and the layout editor. */
+:root { --ui-face:#263532; --ui-inset:#172320; --ui-button:#3e5147; --ui-hi:#849483; --ui-lo:#101b19; --ui-ink:#f0e6cc; --ui-muted:#b0bba4; --ui-gold:#d7bc76; --ui-slot:#425349; }
+:root[data-ui-theme=sand] { --ui-face:#c6bc9e; --ui-inset:#a59f83; --ui-button:#b3ac8d; --ui-hi:#f3e9c6; --ui-lo:#6e7058; --ui-ink:#29352b; --ui-muted:#4c5b44; --ui-gold:#6a5629; --ui-slot:#8f9579; }
+#pauseScreen .panel,#pauseScreen:not(.inventoryMode) .panel,#pauseScreen.inventoryMode .panel,.gameWindow,.worldMenu main,.worldMenu dialog,#hudInspector,.editorToolbar {
+  background:var(--ui-face);color:var(--ui-ink);border:3px solid;border-color:var(--ui-hi) var(--ui-lo) var(--ui-lo) var(--ui-hi);border-radius:0;box-shadow:0 0 0 2px #101a16,6px 8px 0 #0005;
+}
+#pauseScreen:not(.inventoryMode) button,#pauseScreen:not(.inventoryMode) a.secondary,#frontierPanel button,#frontierPanel select,#pauseScreen.inventoryMode .panelTop button,#pauseScreen.inventoryMode .recipeFilters button,#pauseScreen.inventoryMode #itemDetail button,#pauseScreen.inventoryMode #splitStack,#pauseScreen.inventoryMode #cancelMove,#pauseScreen.inventoryMode #reclaimItems,#hudEditor button,#hudEditor select,.worldMenu button,.worldMenu input,.worldMenu select,.worldMenu a.gameButton,.machineShell button,.machineShell select {
+  color:var(--ui-ink);background:var(--ui-button);border:2px solid;border-color:var(--ui-hi) var(--ui-lo) var(--ui-lo) var(--ui-hi);border-radius:0;box-shadow:inset 0 -2px #0002;touch-action:manipulation;
+}
+#pauseScreen button:focus-visible,#frontierPanel button:focus-visible,#hudEditor :focus-visible,.worldMenu :focus-visible {outline:2px solid var(--ui-gold);outline-offset:2px;}
+#pauseScreen:not(.inventoryMode) button:hover,#frontierPanel button:hover,.worldMenu button:hover {filter:brightness(1.12);}
+#pauseScreen:not(.inventoryMode) .tabs button.active,#frontierPanel nav button.active {color:var(--ui-ink);background:var(--ui-inset);border-color:var(--ui-gold);box-shadow:inset 3px 0 var(--ui-gold);}
+#pauseScreen:not(.inventoryMode) .tabs {background:var(--ui-inset);border-right-color:var(--ui-lo);}
+#pauseScreen:not(.inventoryMode) .panelTop,#pauseScreen.inventoryMode .panelTop,.gameWindow>header {background:var(--ui-inset);border-bottom:2px solid var(--ui-lo);}
+#pauseScreen .panelTop h2,#pauseScreen:not(.inventoryMode) .panelTop h2,#pauseScreen.inventoryMode .panelTop h2,#frontierPanel h2,#frontierPanel h3,#pauseScreen:not(.inventoryMode) .metricGrid b {color:var(--ui-ink);}
+#pauseScreen:not(.inventoryMode) p,#pauseScreen:not(.inventoryMode) .metricGrid span,#frontierPanel p,#frontierPanel li,#frontierPanel h3 small,.characterName>span {color:var(--ui-muted);}
+#pauseScreen:not(.inventoryMode) .panelFooter {border-top-color:var(--ui-lo);background:var(--ui-inset);}
+#pauseScreen .panelFooter>span {color:var(--ui-muted)!important;}
+#pauseScreen:not(.inventoryMode) .setting {border-bottom-color:var(--ui-hi);}
+#pauseScreen:not(.inventoryMode) .setting select {background:var(--ui-inset);color:var(--ui-ink);}
+#pauseScreen:not(.inventoryMode) .setting input {accent-color:var(--ui-gold);}
+#pauseScreen:not(.inventoryMode) .menuContents {padding:12px 18px;}
+#pauseScreen #resumeWorld {width:100%;min-height:48px;background:var(--ui-button);border-color:var(--ui-gold);font-size:16px;letter-spacing:1px;color:var(--ui-ink);margin-bottom:6px;}
+#pauseScreen [data-panel=world]>p:first-of-type {display:none;}
+#pauseScreen .editHudEntry {display:block;width:100%;min-height:42px;margin:10px 0;text-align:left;color:var(--ui-ink);}
+#pauseScreen .editHudEntry small {display:block;font-size:10px;color:var(--ui-muted);margin-top:3px;}
+.worldFacts {font-size:11px;color:var(--ui-muted);border-top:1px solid var(--ui-hi);padding-top:7px;}.worldFacts summary {cursor:pointer;min-height:24px;}
+#pauseScreen:not(.inventoryMode) .confirm {border-color:var(--ui-gold);color:var(--ui-ink);background:var(--ui-inset);}
+#frontierPanel .gameWindow>nav {background:var(--ui-inset);border-right-color:var(--ui-lo);}
+#frontierPanel #frontierFeedback {background:var(--ui-inset);color:var(--ui-gold)!important;border-top-color:var(--ui-lo);}
+#frontierFeedback:empty::before {color:var(--ui-muted);}
+.characterStage,.avatarPanel {background-color:var(--ui-inset);border-color:var(--ui-lo) var(--ui-hi) var(--ui-hi) var(--ui-lo);}
+.equippedSlots>div,#pauseScreen .itemSlot,#pauseScreen #craftOutput,#pauseScreen .ingredient,#pauseScreen .recipeTile {background:var(--ui-slot);border-color:var(--ui-lo) var(--ui-hi) var(--ui-hi) var(--ui-lo);}
+.statMeter label,.combatStats,.milestoneStrip,.expeditionLog {color:var(--ui-ink);}.milestoneStrip,.expeditionLog,.villageRow {border-color:var(--ui-hi);}
+.regionMap {background-color:var(--ui-slot);border-color:var(--ui-lo) var(--ui-hi) var(--ui-hi) var(--ui-lo);}.regionMap>small {color:var(--ui-ink);}
+#pauseScreen .inventoryBody,#pauseScreen .recipeBook,#pauseScreen .craftBench,#pauseScreen #itemDetail {color:var(--ui-ink);}
+#pauseScreen .recipeBook {border-color:var(--ui-hi);}
+#pauseScreen .recipeTile.unavailable {background:var(--ui-inset);opacity:.65;}#pauseScreen .recipeTile.selected {opacity:1;outline-color:var(--ui-gold);background:var(--ui-button);}
+#pauseScreen .itemSlot.moving {outline-color:var(--ui-gold);background:var(--ui-button);}#pauseScreen .itemSlot.equipped {outline-color:var(--ui-gold);}
+#pauseScreen #craftFeedback,#pauseScreen .slotGuide,#pauseScreen .slotHeading small {color:var(--ui-muted);}
+#pauseScreen.inventoryMode .panelTop {margin-bottom:9px;padding:7px 12px;}
+#pauseScreen.inventoryMode .panelTop h2 {font-size:16px;}
+#pauseScreen.inventoryMode .panelTop .icon-button {color:var(--ui-ink);background:var(--ui-button);border-color:var(--ui-hi) var(--ui-lo) var(--ui-lo) var(--ui-hi);}
+#pauseScreen.inventoryMode .recipeBook h3,#pauseScreen.inventoryMode .craftBench h3 {font-size:12px;letter-spacing:.5px;}
+#titleScreen {display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(ellipse at center,#0a17165c,#07110ed9);text-align:center;}
+#titleScreen .titleCopy {position:static;margin:0;width:min(340px,100%);padding:0;transform:none;}
+#titleScreen .eyebrow {color:#ded6af;letter-spacing:4px;font-size:11px;}
+#titleScreen h1 {font-size:88px;letter-spacing:6px;line-height:1;margin:10px 0;color:#efdfb3;text-shadow:4px 4px #26372b,7px 7px #080e0b;font-weight:900;}
+#titleScreen h1 .period {display:none;}#titleScreen h2 {font-size:13px;color:#d8ddc8;margin:14px 0 25px;letter-spacing:1px;}
+#titleScreen .startActions {display:grid;gap:9px;margin:0;}
+#titleScreen .startActions button,#titleScreen .worldSelectButton {width:100%;min-height:46px;padding:12px;display:block;border:2px solid;border-color:#b5bb98 #202b21 #202b21 #b5bb98;border-radius:0;background:#425749;color:#f3e9c9;box-shadow:inset 0 -3px #0003;font-size:15px;text-decoration:none;font-weight:bold;}
+#titleScreen .startActions button b {display:none;}#titleScreen .worldSelectButton {margin-top:9px;background:#293f34;}
+#titleScreen #loadStatus {font-size:10px;color:#cad2b6;margin-top:14px;}
+#titleScreen .titleFooter {position:absolute;bottom:14px;left:20px;right:20px;display:flex;justify-content:space-between;border:0;padding:0;color:#bac7ac;font-size:9px;}
+/* The editor captures all input while its real HUD preview is noninteractive. */
+body.layoutEditing #hud {visibility:visible!important;pointer-events:none!important;}
+body.layoutEditing #hud * {pointer-events:none!important;}
+body.layoutEditing #flyBtn,body.layoutEditing #rangeBtn,body.layoutEditing #interactBtn {display:block!important;}
+body.layoutEditing #toast {opacity:1;transform:none;min-width:110px;min-height:30px;}
+.hudMeasure {visibility:hidden!important;}.hudMeasure.hidden,.hudMeasure[hidden] {display:block!important;}
+#hudEditor {position:fixed;inset:0;z-index:100;touch-action:none;background:repeating-linear-gradient(0deg,transparent 0 23px,#b9d6b512 23px 24px),repeating-linear-gradient(90deg,transparent 0 23px,#b9d6b512 23px 24px);}
+#hudEditor[hidden] {display:none;}
+.editorToolbar {position:absolute;top:max(8px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:7px;padding:6px 8px;z-index:3;width:max-content;max-width:calc(100% - 16px);}
+.editorToolbar>b {font-size:13px;margin-right:8px;}.editorToolbar small {display:block;font-size:9px;color:var(--ui-muted);font-weight:normal;}
+#hudEditor button {font-size:11px;min-height:34px;padding:6px 9px;}
+#hudEditor .accentButton {border-color:var(--ui-gold);}
+#hudInspector {position:absolute;left:12px;top:74px;width:216px;max-height:calc(100% - 88px);overflow:auto;overscroll-behavior:contain;padding:10px;z-index:2;touch-action:pan-y;}
+#hudInspector[hidden] {display:none;}
+#hudInspector label {display:block;font-size:11px;margin-bottom:10px;color:var(--ui-ink);}
+#hudInspector select {display:block;width:100%;font-size:11px;min-height:34px;margin-top:4px;padding:4px;}
+#hudInspector input[type=range] {width:100%;margin:7px 0 0;accent-color:var(--ui-gold);}
+#hudInspector output {float:right;color:var(--ui-gold);}
+#hudInspector p {font-size:10px;line-height:1.45;color:var(--ui-muted);margin:6px 0;}
+#hudInspector .hideHudOption {display:flex;align-items:center;gap:6px;margin-bottom:10px;}
+.editorReset {display:grid;gap:6px;}
+#hudEditor .hudHandle {position:absolute;margin:0;padding:0;min-height:0;border:1px dashed #e4d2a2;background:#ffffff05;box-shadow:none;color:#fff;border-radius:0;touch-action:none;z-index:1;}
+#hudEditor .hudHandle>span {position:absolute;left:0;top:-15px;background:#192b24e8;color:#f0dfb5;white-space:nowrap;font-size:9px;padding:1px 4px;pointer-events:none;}
+#hudEditor .hudHandle.selected {border:2px solid #f3cb69;background:#e9c56c22;box-shadow:0 0 0 1px #2c201a;}
+#hudEditor .hudHandle:active {transform:none;}
+/* Standalone local world selector, using the same slots and window frame. */
+.worldMenu {box-sizing:border-box;margin:0;min-height:100dvh;background:radial-gradient(ellipse at 50% 25%,#344d3c,#101e1a 70%);font:14px Arial,sans-serif;color:var(--ui-ink);display:grid;place-items:center;padding:20px;}
+.worldMenu * {box-sizing:border-box;}
+.worldMenu main {width:min(820px,100%);height:min(640px,calc(100dvh - 40px));display:grid;grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden;}
+.worldMenu header {display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--ui-inset);padding:16px 20px;border-bottom:2px solid var(--ui-lo);}
+.worldMenu h1 {margin:3px 0 0;font-size:24px;}.worldMenu header small {font-size:10px;color:var(--ui-gold);letter-spacing:3px;}
+.worldMenu button,.worldMenu a.gameButton {padding:10px 13px;font-size:12px;min-height:40px;cursor:pointer;text-decoration:none;}
+.worldMenu #worlds {padding:12px;overflow:auto;overscroll-behavior:contain;}
+.worldMenu article {display:flex;gap:12px;align-items:center;padding:12px;background:var(--ui-inset);border:2px solid;border-color:var(--ui-lo) var(--ui-hi) var(--ui-hi) var(--ui-lo);margin-bottom:9px;}
+.worldMenu article>div {flex:1;min-width:0;}.worldMenu article b {display:block;font-size:15px;overflow-wrap:anywhere;}.worldMenu article small {display:block;font-size:11px;color:var(--ui-muted);margin-top:5px;line-height:1.5;}
+.worldMenu .worldGlyph {display:grid;place-items:center;flex-shrink:0;width:48px;height:48px;font-size:29px;background:var(--ui-slot);border:2px solid;border-color:var(--ui-hi) var(--ui-lo) var(--ui-lo) var(--ui-hi);color:var(--ui-gold);}
+.worldMenu footer {display:flex;align-items:center;gap:12px;padding:12px 18px;border-top:2px solid var(--ui-lo);background:var(--ui-inset);}.worldMenu footer button {border-color:var(--ui-gold);}.worldMenu #status {font-size:11px;color:var(--ui-gold);margin:0;}
+.worldMenu dialog {width:min(400px,calc(100% - 24px));padding:20px;}.worldMenu dialog::backdrop {background:#060e0dcc;}.worldMenu dialog h2 {font-size:20px;margin:0 0 15px;}
+.worldMenu form {display:grid;gap:12px;}.worldMenu form label {font-size:12px;}.worldMenu input,.worldMenu select {width:100%;padding:10px;font-size:13px;margin-top:5px;min-width:0;}.worldMenu .dialogActions {display:flex;gap:8px;justify-content:flex-end;}.worldMenu dialog p {font-size:13px;line-height:1.6;overflow-wrap:anywhere;}
+.machineShell header,.machineShell section {background:var(--ui-face);color:var(--ui-ink);border:2px solid;border-color:var(--ui-hi) var(--ui-lo) var(--ui-lo) var(--ui-hi);border-radius:0;}
+.machineShell #metrics div {background:var(--ui-inset);border-radius:0;}.machineShell #metrics strong {color:var(--ui-ink);}.machineShell p,.machineShell small,.machineShell #metrics div {color:var(--ui-muted);}.machineShell #grid button {border-color:var(--ui-lo) var(--ui-hi) var(--ui-hi) var(--ui-lo);border-radius:0;}
+@media(orientation:landscape) and (max-height:540px) {
+  #titleScreen h1 {font-size:64px;margin:5px 0;}#titleScreen h2 {margin:8px 0 15px;}#titleScreen .titleCopy {width:300px;}#titleScreen .startActions button,#titleScreen .worldSelectButton {min-height:38px;padding:8px;font-size:13px;}#titleScreen #loadStatus {margin-top:8px;}
+  #pauseScreen.inventoryMode .panelTop {margin-bottom:5px;padding:3px 10px;}#pauseScreen:not(.inventoryMode) .menuContents {padding:9px 14px;}#pauseScreen #resumeWorld {min-height:40px;}#pauseScreen .editHudEntry {margin:7px 0;min-height:38px;}
+  .worldMenu {padding:10px;}.worldMenu main {height:calc(100dvh - 20px);}.worldMenu header {padding:9px 16px;}.worldMenu h1 {font-size:20px;}.worldMenu article {padding:8px;}.worldMenu footer {padding:8px 16px;}
+}
+@media(orientation:portrait) {
+  #pauseScreen:not(.inventoryMode) .panel {grid-template-columns:80px minmax(0,1fr);}#pauseScreen:not(.inventoryMode) .menuContents {padding:10px 9px;}
+  #pauseScreen #resumeWorld {font-size:13px;min-height:44px;}#pauseScreen .editHudEntry {font-size:11px;}
+  #hudInspector {width:190px;top:74px;left:8px;max-height:calc(100% - 88px);}.editorToolbar {gap:4px;padding:5px;}.editorToolbar>b {font-size:12px;margin-right:2px;}#hudEditor .editorToolbar button {padding:5px 7px;}
+  .worldMenu {padding:10px;}.worldMenu main {height:calc(100dvh - 20px);}.worldMenu header {padding:12px;}.worldMenu article {flex-wrap:wrap;gap:7px;padding:10px;}.worldMenu article>div {flex-basis:calc(100% - 65px);}.worldMenu article button {flex:1;padding:8px 4px;font-size:11px;}.worldMenu .worldGlyph {width:44px;height:44px;}.worldMenu h1 {font-size:22px;}
+}

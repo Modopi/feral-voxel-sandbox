@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="frontier/style.css" />
   <link rel="stylesheet" href="survival-ui.css" />
     <link rel="stylesheet" href="game-ui.css" />
+    <link rel="stylesheet" href="interface.css" />
   </head>
   <body>
     <canvas id="world"></canvas>
@@ -75,17 +76,10 @@
       </footer>
     </div>
     <div id="titleScreen" class="screen">
-      <div class="edition">
-        KGB / EXPERIMENT 001 <span>ANDROID · OFFLINE</span>
-      </div>
       <div class="titleCopy">
-        <div class="eyebrow">A LIVING VOXEL SANDBOX</div>
+        <div class="eyebrow">살아 있는 복셀 세계</div>
         <h1>F<span>Ξ</span>RAL<span class="period">.</span></h1>
-        <h2>야생에는 빈 공간이 없다.</h2>
-        <p>
-          땅을 깎고, 생명을 관찰하고, 흐름을 바꾸세요.<br />당신이 놓은 한
-          방울도 이 세계의 일부가 됩니다.
-        </p>
+        <h2>탐험하고, 만들고, 살아남으세요.</h2>
         <div class="startActions">
           <button id="startBtn" class="primary" disabled>
             <span>세계를 만드는 중</span><b>→</b></button
@@ -93,35 +87,11 @@
             이전 탐험 이어하기 ↗
           </button>
         </div>
-        <p><a href="worlds.html" style="color:#b8ebd1;font-weight:700">월드 선택 · 개척 원정 / 복셀 섬 / 기계 시험장 →</a></p>
+        <a href="worlds.html" class="worldSelectButton">내 월드</a>
         <div id="loadStatus">지형과 생태계를 준비합니다.</div>
       </div>
-      <div class="specs">
-        <div>
-          <b>01</b
-          ><span
-            >한 세계, 세 가지 크기<small
-              >1 m / 0.5 m / 0.25 m / 0.125 m</small
-            ></span
-          >
-        </div>
-        <div>
-          <b>02</b
-          ><span
-            >먹고, 쫓고, 다시 자라는 생태<small
-              >초식 · 포식 · 토양 순환</small
-            ></span
-          >
-        </div>
-        <div>
-          <b>03</b
-          ><span
-            >흐르는 물, 번지는 불<small>희석 · 부식 · 현무암 반응</small></span
-          >
-        </div>
-      </div>
       <div class="titleFooter">
-        <span>TOUCH TO EXPLORE / LANDSCAPE RECOMMENDED</span
+        <span>오프라인 탐험 · 가로 화면 권장</span
         ><span data-game-version>FERAL 0.3.1</span>
       </div>
     </div>
@@ -163,11 +133,7 @@
           </div>
         </section>
         <section data-panel="world">
-          <div class="metricGrid">
-            <div><span>발견한 장소</span><b id="foundCount">0 / 5</b></div>
-            <div><span>탐험 시간</span><b id="elapsed">00:00</b></div>
-            <div><span>월드 시드</span><b id="seedValue">63026</b></div>
-          </div>
+          <button id="resumeWorld" class="resumeWorld">▶ 탐험 계속</button>
           <p>
             160 × 160 × 40 m의 유한한 섬입니다. 5개의 장소를 탐험하고 주변
             생태의 변화를 관찰하세요.
@@ -177,7 +143,13 @@
             ><button id="homeBtn" class="secondary">출발 지점</button
             ><button id="newBtn" class="secondary danger">새 세계</button>
           </div>
+          <button id="editHudShortcut" class="editHudEntry">✥ UI 배치 편집</button>
           <p id="saveNote">30초마다 자동 저장 · 앱을 종료해도 이어서 탐험</p>
+          <details class="worldFacts"><summary>월드 정보</summary><div class="metricGrid">
+            <div><span>발견한 장소</span><b id="foundCount">0 / 5</b></div>
+            <div><span>탐험 시간</span><b id="elapsed">00:00</b></div>
+            <div><span>월드 시드</span><b id="seedValue">63026</b></div>
+          </div></details>
           <div id="resetConfirm" class="confirm hidden">
             현재 저장을 지우고 새 섬을 생성합니다.
             <div class="buttonRow">
@@ -215,6 +187,7 @@
           </div>
         </section>
         <section data-panel="settings" class="hidden">
+          <button id="editHudBtn" class="editHudEntry">✥ UI 배치 편집 <small>위치 · 크기 · 투명도 · 창 색상</small></button>
           <label class="setting"
             >그래픽
             <select id="quality">

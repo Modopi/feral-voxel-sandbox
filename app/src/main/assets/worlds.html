@@ -7,152 +7,41 @@
       content="width=device-width,initial-scale=1,viewport-fit=cover"
     />
     <title>FERAL · 내 월드</title>
-    <style>
-      * {
-        box-sizing: border-box;
-      }
-      body {
-        margin: 0;
-        background: #14272b;
-        color: #dfebe2;
-        font:
-          15px system-ui,
-          sans-serif;
-      }
-      main {
-        max-width: 850px;
-        margin: auto;
-        padding: 24px;
-      }
-      header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-      a {
-        color: #b4dbca;
-      }
-      h1 {
-        margin-bottom: 4px;
-      }
-      p,
-      small {
-        color: #a3c0b6;
-      }
-      article {
-        border: 1px solid #45645a;
-        border-radius: 12px;
-        background: #213a38;
-        margin: 12px 0;
-        padding: 16px;
-        display: flex;
-        gap: 12px;
-        align-items: center;
-      }
-      article div {
-        flex: 1;
-      }
-      article b,
-      article small {
-        display: block;
-      }
-      article b {
-        margin-bottom: 5px;
-      }
-      button,
-      input,
-      select {
-        font: inherit;
-        background: #28483e;
-        color: #edf3e9;
-        padding: 10px;
-        border: 1px solid #567c6b;
-        border-radius: 6px;
-      }
-      button {
-        cursor: pointer;
-      }
-      form {
-        border-top: 1px solid #45645a;
-        margin-top: 24px;
-        padding-top: 18px;
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-      }
-      input {
-        min-width: 100px;
-        max-width: 220px;
-      }
-      #status {
-        color: #ffcd8c;
-      }
-      dialog {
-        color: #edf3e9;
-        background: #213a38;
-        border: 1px solid #567c6b;
-        border-radius: 12px;
-        max-width: 90vw;
-      }
-      dialog::backdrop {
-        background: #000a;
-      }
-      @media (max-width: 600px) {
-        main {
-          padding: 12px;
-        }
-        article {
-          flex-wrap: wrap;
-          padding: 12px;
-        }
-        article div {
-          flex-basis: 100%;
-        }
-        button {
-          padding: 9px;
-        }
-      }
-    </style>
+    <link rel="stylesheet" href="interface.css" />
   </head>
-  <body>
+  <body class="worldMenu">
     <main>
       <header>
         <div>
-          <small>FERAL / LOCAL WORLDS</small>
+          <small>FERAL</small>
           <h1>내 월드</h1>
         </div>
-        <a href="index.html">타이틀 ←</a>
+        <a href="index.html" class="gameButton">돌아가기</a>
       </header>
-      <p>
-        탐험은 기본 맵에서, 복셀 기계 실증은 베타 맵에서. 월드마다 따로
-        저장됩니다.
-      </p>
       <div id="worlds"></div>
+      <footer><button id="newWorld">＋ 새 월드</button><p id="status" role="status">월드마다 진행을 따로 저장합니다.</p></footer>
+    </main>
+    <dialog id="createDialog"><h2>새로운 세계</h2>
       <form id="create">
-        <input
+        <label>월드 이름<input
           id="name"
           maxlength="40"
           placeholder="새 월드 이름"
           aria-label="새 월드 이름"
           required
-        /><select id="type" aria-label="월드 유형">
+        /></label><label>월드 유형<select id="type" aria-label="월드 유형">
           <option value="frontier">개척 원정 · 전체 게임 프로토타입</option>
           <option value="island">기본 탐험 맵</option>
-          <option value="machine">기계 베타 맵</option></select
-        ><input
+          <option value="machine">기계 베타 맵</option></select></label><label>시드<input
           id="seed"
           type="number"
           min="0"
           max="2147483647"
           value="63026"
           aria-label="월드 시드"
-        /><button>월드 만들기</button>
+        /></label><div class="dialogActions"><button type="button" id="createCancel">취소</button><button>월드 만들기</button></div>
       </form>
-      <p id="status" role="status"></p>
-      <small
-        >이 기기에 저장됩니다. 기계 베타 맵의 시험장은 고정 지형입니다.</small
-      >
-    </main>
+    </dialog>
     <dialog id="confirm">
       <p id="confirmText"></p>
       <button id="deleteYes">삭제</button> <button id="deleteNo">취소</button>
