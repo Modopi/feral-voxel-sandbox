@@ -1,0 +1,308 @@
+/* Frontier overlays use the same field-equipment vocabulary as inventory. */
+body.frontier #hotbar .slot:nth-child(5),
+body.frontier #hotbar .slot:nth-child(6),
+body.frontier #hotbar .slot:nth-child(7),
+body.frontier #hotbar .slot:nth-child(9) {
+  display: none;
+}
+body.frontier #hud .telemetry {
+  max-width: 50%;
+}
+body.frontier #discovery {
+  top: 31%;
+}
+body.frontier #events {
+  display: none;
+}
+#frontierHUD {
+  pointer-events: none;
+}
+#vitals {
+  position: absolute;
+  left: 20px;
+  top: 62px;
+  display: grid;
+  gap: 5px;
+  max-width: 210px;
+  padding: 8px 10px;
+  background: #10221cd9;
+  border-left: 2px solid #c4b26c;
+}
+#vitals span {
+  font-size: 13px;
+}
+#vitals small {
+  font-size: 12px;
+  color: #d0d5c4;
+}
+#vitals.hurt {
+  background: #963d2ed9;
+}
+#frontierHUD meter {
+  width: 100%;
+  height: 12px;
+  accent-color: #aac58b;
+}
+#bossHUD {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 250px;
+  max-width: 40vw;
+  padding: 8px;
+  background: #18211beb;
+  text-align: center;
+  font-size: 13px;
+}
+#bossHUD span {
+  display: block;
+  font-size: 12px;
+  color: #ffbb8e;
+}
+#bossHUD meter {
+  accent-color: #d68e65;
+}
+#waypoint {
+  position: absolute;
+  top: 150px;
+  left: 20px;
+  font-size: 13px;
+  text-shadow: 0 2px 3px #000;
+  background: #12231cbb;
+  padding: 6px;
+}
+#frontierActions {
+  position: absolute;
+  right: 20px;
+  top: 200px;
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+}
+#frontierActions button {
+  background: #13251de8;
+  border: 1px solid #9aab8766;
+  color: #eee8cd;
+  min-height: 44px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+#frontierActions small {
+  color: #d9b76c;
+  font-size: 11px;
+}
+#frontierPanel {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  overflow-y: auto;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  background: #101c19fa;
+  color: #f0eddb;
+  padding: max(16px, env(safe-area-inset-top))
+    max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom))
+    max(20px, env(safe-area-inset-left));
+}
+#frontierPanel[hidden],
+#bossHUD[hidden] {
+  display: none;
+}
+#frontierPanel > header,
+#frontierPanel > nav,
+#frontierPanel > p,
+#frontierContent {
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+#frontierPanel > header {
+  display: flex;
+  justify-content: space-between;
+  border-top: 2px solid #d9b76c;
+  padding: 12px 0;
+}
+#frontierPanel h2 {
+  font-size: 24px;
+  margin: 4px 0;
+}
+#frontierPanel header small {
+  letter-spacing: 2px;
+  color: #d9b76c;
+  font-size: 11px;
+}
+#frontierPanel button,
+#frontierPanel select {
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1px solid #526057;
+  background: #203129;
+  color: #f0eddb;
+  font-size: 14px;
+  border-radius: 1px;
+  touch-action: manipulation;
+}
+#frontierPanel button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+#frontierPanel nav {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid #526057;
+  padding-bottom: 12px;
+  overflow-x: auto;
+}
+#frontierPanel nav button {
+  white-space: nowrap;
+  flex: 1;
+}
+#frontierPanel nav button.active {
+  border-color: #d9b76c;
+  background: #49432b;
+}
+#frontierPanel h3 {
+  font-size: 18px;
+  margin: 22px 0 8px;
+}
+#frontierPanel h3 small {
+  color: #b8c6ae;
+  font-size: 13px;
+  font-weight: normal;
+}
+#frontierPanel p,
+#frontierPanel li {
+  font-size: 14px;
+  line-height: 1.8;
+  color: #c4cfbd;
+}
+#frontierFeedback {
+  color: #e9c77c !important;
+  min-height: 24px;
+  position: sticky;
+  top: 0;
+  background: #14251ef5;
+  z-index: 2;
+}
+.frontierButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.routeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  max-width: 440px;
+  margin: 20px auto;
+}
+.routeGrid button:first-child {
+  grid-column: 2;
+}
+.routeGrid button:nth-child(2) {
+  grid-column: 1;
+}
+.routeGrid button:last-child {
+  grid-column: 2;
+}
+.routeGrid span {
+  text-align: center;
+  align-self: center;
+  font-size: 14px;
+}
+#destinations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.villageRow {
+  padding: 12px 0 24px;
+  border-bottom: 1px solid #526057;
+}
+.raidConfirm {
+  border: 1px solid #b78464;
+  padding: 16px;
+}
+.raidConfirm button {
+  margin-right: 10px;
+}
+#frontierMachineGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  max-width: 440px;
+  margin-top: 16px;
+}
+#frontierMachineGrid button {
+  padding: 4px;
+  min-height: 44px;
+}
+#frontierMachineGrid .broken {
+  color: #ea9c8a;
+  background: #3c2521;
+}
+@media (orientation: landscape) and (max-height: 540px) {
+  #frontierActions {
+    right: 135px;
+    top: 73px;
+  }
+  #vitals {
+    top: 58px;
+  }
+  #waypoint {
+    top: 142px;
+    max-width: 240px;
+  }
+  #bossHUD {
+    width: 230px;
+  }
+  body.frontier #discovery {
+    top: 45%;
+  }
+}
+@media (orientation: portrait) {
+  #vitals {
+    top: 76px;
+    max-width: 185px;
+    left: 16px;
+  }
+  #waypoint {
+    top: 164px;
+    left: 16px;
+    max-width: 190px;
+  }
+  #bossHUD {
+    top: 212px;
+    max-width: 80vw;
+    width: 280px;
+  }
+  #frontierActions {
+    top: auto;
+    bottom: 210px;
+    left: 16px;
+    right: auto;
+  }
+  body.frontier #discovery {
+    display: none;
+  }
+  #frontierPanel {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  #frontierPanel nav {
+    gap: 4px;
+  }
+  #frontierPanel nav button {
+    padding: 8px;
+    font-size: 13px;
+  }
+  #frontierPanel h3 small {
+    display: block;
+    margin-top: 6px;
+  }
+}
+@media (orientation: portrait) {
+  #frontierActions { top: 204px; bottom: auto; left: 16px; right: auto; }
+  #bossHUD { top: 258px; }
+}

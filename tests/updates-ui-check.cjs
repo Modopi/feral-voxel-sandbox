@@ -27,21 +27,29 @@ const assert = require("node:assert/strict");
   page.on("pageerror", (e) => errors.push(e.message));
   await page.addInitScript(() => {
     window.__update = {
-      nativeVersion: "0.2.5",
-      nativeCode: 205,
-      runtimeCode: 205,
+      nativeVersion: "0.3.2",
+      nativeCode: 302,
+      runtimeCode: 501,
+      publicUpdates: true,
       pendingCode: 0,
       pendingVersion: "",
       configured: false,
       automatic: true,
       lastCheck: 0,
       busy: false,
-      phase: "setup",
-      message: "GitHub 연결 필요",
+      phase: "idle",
+      message: "",
     };
-    window.__calls = { connected: 0, checked: 0, applied: 0, healthy: [] };
+    window.__calls = {
+      connected: 0,
+      checked: 0,
+      applied: 0,
+      chosen: 0,
+      healthy: [],
+    };
     window.AndroidApp = {
       updateStatus: () => JSON.stringify(window.__update),
+      chooseVersions: () => window.__calls.chosen++,
       configureUpdates: () => window.__calls.connected++,
       checkUpdates: () => window.__calls.checked++,
       setAutoUpdates: (value) => {
@@ -68,7 +76,15 @@ const assert = require("node:assert/strict");
     await page.locator("#gameVersion").textContent(),
     version.version,
   );
-  assert.equal(await page.locator("#checkUpdates").isDisabled(), true);
+  assert.equal(await page.locator("#checkUpdates").isDisabled(), false);
+  assert.match(
+    await page.locator("#updateConnection").textContent(),
+    /공개.*로그인 불필요/,
+  );
+  await page.click("#checkUpdates");
+  assert.equal(await page.evaluate(() => window.__calls.checked), 1);
+  await page.click("#chooseGameVersion");
+  assert.equal(await page.evaluate(() => window.__calls.chosen), 1);
   await page.click("#connectUpdates");
   assert.equal(await page.evaluate(() => window.__calls.connected), 1);
   await page.evaluate(() => {
@@ -84,10 +100,10 @@ const assert = require("node:assert/strict");
   assert.equal(await page.evaluate(() => window.__update.automatic), false);
   await page.evaluate(() => {
     Object.assign(window.__update, {
-      pendingCode: 206,
-      pendingVersion: "0.2.6",
+      pendingCode: 502,
+      pendingVersion: "0.5.2",
       phase: "ready",
-      message: "0.2.6 준비 완료 · 다음 실행에 적용합니다.",
+      message: "0.5.2 준비 완료 · 다음 실행에 적용합니다.",
     });
     window.FeralUpdates.refresh();
   });
@@ -118,14 +134,16 @@ const assert = require("node:assert/strict");
   await page.evaluate(() => {
     Storage.prototype.setItem = window.__originalSet;
   });
-  await page.screenshot({ path: "build/update-menu-0.2.5.png" });
+  await page.screenshot({ path: "verification/public-update-menu-0.3.2.png" });
   const result = {
-    gameVersion: "0.2.5",
-    healthAck: [205],
-    githubConnect: true,
+    gameVersion: version.version,
+    nativeVersion: version.nativeVersion,
+    healthAck: [version.versionCode],
+    noTokenCheck: true,
+    versionSelection: true,
     check: true,
     automaticToggle: true,
-    pendingVersion: "0.2.6",
+    pendingVersion: "0.5.2",
     savesBeforeApply: true,
     saveFailureBlocksApply: true,
     errors,
@@ -140,7 +158,7 @@ const assert = require("node:assert/strict");
   result.webPreviewDisabled = true;
   assert.deepEqual(errors, []);
   fs.writeFileSync(
-    "build/updates-ui-results-0.2.5.json",
+    "verification/public-update-ui-results-0.3.2.json",
     JSON.stringify(result, null, 2),
   );
   console.log(JSON.stringify(result, null, 2));

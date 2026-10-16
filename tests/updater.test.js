@@ -22,9 +22,27 @@ test("native package verification, activation, interrupted startup and save roll
     { encoding: "utf8" },
   );
   fs.writeFileSync("build/native-update-results.txt", result);
-  assert.match(result, /Native updater checks: 36/);
+  assert.match(result, /Native updater checks: 44/);
 });
 
 test("version files agree with authoritative version.json", () => {
   execFileSync("node", ["tools/version.mjs", "--check"]);
+});
+
+test("public update transport works without credentials and enforces download boundaries", () => {
+  fs.mkdirSync("build/public-tests", { recursive: true });
+  execFileSync("java", [
+    "com.sun.tools.javac.Main",
+    "-d",
+    "build/public-tests",
+    "app/src/main/java/com/kgb/feral/PublicUpdates.java",
+    "tests/PublicUpdatesCheck.java",
+  ]);
+  const result = execFileSync(
+    "java",
+    ["-cp", "build/public-tests", "PublicUpdatesCheck"],
+    { encoding: "utf8" },
+  );
+  fs.writeFileSync("build/public-update-results.txt", result);
+  assert.match(result, /Public transport checks: 15/);
 });

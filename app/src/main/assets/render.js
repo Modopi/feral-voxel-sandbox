@@ -1,3 +1,4 @@
+import { ITEMS } from "./inventory.js";
 import * as T from "./vendor/three.module.js";
 import { SIZE, HEIGHT, CHUNK, COLORS, B, hash, clamp } from "./world.js";
 import { SPECIES, cellPosition, toWorld, occupied, pose } from "./entities.js";
@@ -300,6 +301,87 @@ export class View {
     this.toolBase = { y: -0.12, z: -0.22 };
     this.toolKick = 0;
   }
+  setHeldItem(id) {
+    if (ITEMS[id]?.gear) {
+      if (this.heldCube) {
+        this.camera.remove(this.heldCube);
+        this.heldCube.material.dispose();
+        this.heldCube = null;
+      }
+      this.tool.visible = true;
+      this.setEquipment(id);
+      return;
+    }
+    this.setEquipment("utility");
+    if (this.heldCube) {
+      this.camera.remove(this.heldCube);
+      this.heldCube.material.dispose();
+      this.heldCube = null;
+    }
+    this.tool.visible = false;
+    if (!id) return;
+    this.heldCube = new T.Mesh(
+      this.cube,
+      new T.MeshLambertMaterial({ color: ITEMS[id]?.color || 0x9b7654 }),
+    );
+    this.heldCube.scale.setScalar(ITEMS[id]?.block ? 0.1 : 0.06);
+    this.heldCube.position.set(0.22, -0.17, -0.4);
+    this.heldCube.rotation.set(0.1, 0.6, 0.1);
+    this.camera.add(this.heldCube);
+  }
+  setEquipment(id) {
+    if (this.equipmentId === id) return;
+    this.equipmentId = id;
+    if (!this.originalTool) this.originalTool = [...this.tool.children];
+    for (const mesh of [...this.tool.children]) {
+      this.tool.remove(mesh);
+      if (!this.originalTool.includes(mesh)) mesh.material.dispose();
+    }
+    if (id === "pulse" || id === "utility") {
+      this.tool.add(...this.originalTool);
+      return;
+    }
+    const metal =
+      id.includes("iron") || ["sword", "battleaxe", "crystalbow"].includes(id)
+        ? 0xb6d6d3
+        : 0x8c9b9c;
+    const add = (color, x, y, z, sx, sy, sz) => {
+      const mesh = new T.Mesh(this.cube, new T.MeshLambertMaterial({ color }));
+      mesh.position.set(x, y, z);
+      mesh.scale.set(sx, sy, sz);
+      this.tool.add(mesh);
+      return mesh;
+    };
+    add(0x76563a, 0.37, -0.34, -0.51, 0.065, 0.42, 0.065);
+    if (id === "bow" || id === "crystalbow") {
+      add(0xba8b50, 0.37, -0.12, -0.58, 0.055, 0.4, 0.06);
+      add(0xba8b50, 0.37, -0.52, -0.58, 0.055, 0.35, 0.06);
+      add(0xe4dac0, 0.37, -0.3, -0.45, 0.015, 0.75, 0.015);
+      add(metal, 0.37, -0.3, -0.76, 0.025, 0.025, 0.65);
+      if (id === "crystalbow")
+        add(0x6bccd4, 0.37, -0.28, -0.62, 0.42, 0.06, 0.08);
+    } else if (id === "sword" || id === "spear") {
+      add(
+        metal,
+        0.37,
+        0.04,
+        -0.52,
+        id === "spear" ? 0.065 : 0.12,
+        id === "spear" ? 0.65 : 0.5,
+        0.045,
+      );
+      add(0xc4a15a, 0.37, -0.18, -0.51, 0.26, 0.045, 0.08);
+    } else if (id === "axe" || id === "battleaxe") {
+      add(metal, 0.43, -0.09, -0.52, 0.28, 0.21, 0.07);
+    } else if (id === "shovel") {
+      add(metal, 0.37, -0.04, -0.52, 0.2, 0.24, 0.04);
+    } else if (id === "club") {
+      add(metal, 0.37, -0.06, -0.52, 0.18, 0.28, 0.18);
+    } else {
+      add(metal, 0.37, -0.08, -0.52, 0.48, 0.08, 0.09);
+      add(metal, 0.58, -0.14, -0.52, 0.06, 0.17, 0.09);
+    }
+  }
   resize() {
     const width = innerWidth,
       height = innerHeight;
@@ -560,7 +642,8 @@ export class View {
       this.pickupMesh.instanceColor.needsUpdate = true;
   }
   draw(time, dt, moving = 0) {
-    const day = 0.5 + Math.sin(time / 160) * 0.5;
+    const day =
+      0.5 + Math.sin(((((8 + time / 60) % 24) - 6) / 24) * Math.PI * 2) * 0.5;
     this.sunLight.intensity = 1.2 + day * 1.4;
     this.toolKick = Math.max(0, this.toolKick - dt * 6);
     this.tool.position.z = this.toolBase.z + this.toolKick * 0.035;

@@ -170,6 +170,8 @@ export class Ecology {
       phase: w.random() * 7,
       moving: 1,
       speed: type === 1 ? 2.2 : type === 2 ? 0.7 : 1.2,
+      hp: [48, 72, 32][type],
+      maxHP: [48, 72, 32][type],
       energy: 60 + w.random() * 40,
       age: w.random() * 60,
       lost: 0,
@@ -179,6 +181,11 @@ export class Ecology {
       lastThink: 0,
       fear: 0,
       dead: false,
+      behavior: "배회",
+      fedUntil: 0,
+      breedAt: 0,
+      angryUntil: 0,
+      biteAt: 0,
       dy: 0,
     };
     e.y = w.surface(e.x, e.z);
@@ -223,27 +230,83 @@ export class Ecology {
       }
     return a;
   }
-  kill(e) {
+  hurt(e, amount, cause = "체력 소진") {
+    if (e.dead || !Number.isFinite(amount) || amount <= 0) return;
+    e.hp = Math.max(0, e.hp - amount);
+    if (e.hp <= 0) this.kill(e, cause);
+  }
+  kill(e, cause = "체력 소진") {
     if (e.dead) return;
     e.dead = true;
+    e.hp = 0;
+    e.deathCause = cause;
     e.energy = 0;
     this.world.reactions.deaths++;
     this.onDeath(e);
     const i = clamp(e.x | 0, 0, SIZE - 1) + clamp(e.z | 0, 0, SIZE - 1) * SIZE;
     this.world.nutrients[i] = clamp(this.world.nutrients[i] + 0.35, 0, 1);
-    this.world.event(SPECIES[e.type].name + " → 토양 영양분", [e.x, e.y, e.z]);
+    this.world.event(
+      SPECIES[e.type].name + " 사망 · " + cause + " → 토양 영양분",
+      [e.x, e.y, e.z],
+    );
   }
   legs(e) {
     let n = 0;
     for (let i = 2; i < 6; i++) if (!(e.lost & (1 << i))) n++;
     return n;
   }
+  feed(e, inv, time) {
+    if (e.dead || e.type === 1) return "이 동물은 씨앗을 먹지 않습니다.";
+    const player = this.context?.player;
+    if (player && Math.hypot(e.x - player.x, e.z - player.z) > 3)
+      return "3m 안에서 먹이를 주세요.";
+    if (e.age < 25) return "어린 동물은 자연스럽게 성장합니다.";
+    if (time < (e.breedAt || 0) || time < (e.fedUntil || 0))
+      return "먹이를 충분히 먹었습니다. 잠시 기다리세요.";
+    if (!inv.take("seed", 1)) return "씨앗이 필요합니다.";
+    e.energy = clamp(e.energy + 25, 0, 150);
+    e.hp = Math.min(e.maxHP, e.hp + 4);
+    e.fedUntil = time + 45;
+    e.behavior = "번식 준비";
+    const mate = this.entities.find(
+      (o) =>
+        o !== e &&
+        !o.dead &&
+        o.type === e.type &&
+        o.age >= 25 &&
+        (o.fedUntil || 0) > time &&
+        (o.breedAt || 0) <= time &&
+        Math.hypot(o.x - e.x, o.z - e.z) < 5,
+    );
+    if (mate && this.entities.filter((o) => !o.dead).length < 3200) {
+      const child = this.spawn(e.type, (e.x + mate.x) / 2, (e.z + mate.z) / 2);
+      if (child) {
+        child.age = 0;
+        child.behavior = "성장 중";
+        e.fedUntil = mate.fedUntil = 0;
+        e.breedAt = mate.breedAt = time + 90;
+        this.world.reactions.births++;
+        return SPECIES[e.type].name + " 새끼 탄생 · 부모는 90초 휴식";
+      }
+    }
+    return "먹이 −1 · 근처의 같은 종에게도 먹이를 주세요.";
+  }
   think(e, dt) {
     const w = this.world;
     e.age += dt;
+    e.behavior = e.age < 25 ? "성장 중" : "배회";
     e.energy -= dt * (e.type === 1 ? 0.33 : 0.13);
-    if (e.energy <= 0 || e.lost & 1) {
-      this.kill(e);
+    if (e.hp <= 0 || e.energy <= 0 || e.lost & 3) {
+      this.kill(
+        e,
+        e.lost & 1
+          ? "몸통 파괴"
+          : e.lost & 2
+            ? "머리 파괴"
+            : e.hp <= 0
+              ? "체력 소진"
+              : "굶주림",
+      );
       return;
     }
     let dx = e.targetX - e.x,
@@ -263,25 +326,28 @@ export class Ecology {
       } else if (e.type !== 1 && o.type === 1) danger = o;
     }
     if (danger) {
+      e.behavior = "포식자 회피";
       e.targetX = clamp(e.x + (e.x - danger.x) * 3, 2, SIZE - 3);
       e.targetZ = clamp(e.z + (e.z - danger.z) * 3, 2, SIZE - 3);
       e.fear = 3;
     } else if (prey) {
+      e.behavior = "사냥";
       e.targetX = prey.x;
       e.targetZ = prey.z;
       if (dist < 1.9) {
-        prey.energy -= dt * 18;
+        this.hurt(prey, dt * 18, "포식자 공격");
         e.energy = clamp(e.energy + dt * 8, 0, 150);
         if (prey.energy <= 0) this.kill(prey);
       }
     } else if (e.type !== 1 && food > 0.15 && !(e.lost & 2) && e.fear <= 0) {
+      e.behavior = "풀뜯기";
       const bite = Math.min(food, dt * 0.1);
       w.plants[i] -= bite;
       e.energy = clamp(e.energy + bite * 30, 0, 150);
       w.reactions.grazed += bite;
       e.moving = 0.15;
     }
-    if (dx * dx + dz * dz < 2 || w.random() < dt * 0.15) {
+    if (!danger && !prey && (dx * dx + dz * dz < 2 || w.random() < dt * 0.15)) {
       let best = -100,
         bx = e.x,
         bz = e.z;
@@ -304,10 +370,57 @@ export class Ecology {
       e.targetX = bx;
       e.targetZ = bz;
     }
+    const ctx = this.context,
+      player = ctx?.player,
+      time = w.time;
+    if (player) {
+      const distance = Math.hypot(player.x - e.x, player.z - e.z),
+        night = (8 + time / 60) % 24 >= 19 || (8 + time / 60) % 24 < 6;
+      if (
+        e.type === 1 &&
+        distance < 10 &&
+        (night || time < (e.angryUntil || 0))
+      ) {
+        e.behavior = night ? "야간 사냥" : "반격";
+        e.targetX = player.x;
+        e.targetZ = player.z;
+        if (
+          distance < 1.8 &&
+          Math.abs(player.y - e.y) < 1.5 &&
+          time >= (e.biteAt || 0)
+        ) {
+          const origin = { x: e.x, y: e.y + 0.65, z: e.z },
+            dx = player.x - e.x,
+            dy = player.y + 0.7 - origin.y,
+            dz = player.z - e.z,
+            len = Math.hypot(dx, dy, dz);
+          if (
+            !w.raycast(origin, { x: dx / len, y: dy / len, z: dz / len }, len)
+          ) {
+            ctx.hurt?.(8);
+            e.biteAt = time + 1;
+          }
+        }
+      } else if (e.type !== 1 && e.fear > 0 && distance < 9) {
+        e.behavior = "도망";
+        e.targetX = clamp(e.x + (e.x - player.x) * 3, 2, SIZE - 3);
+        e.targetZ = clamp(e.z + (e.z - player.z) * 3, 2, SIZE - 3);
+      } else if (
+        e.type !== 1 &&
+        !danger &&
+        ctx.held === "seed" &&
+        distance < 7 &&
+        distance > 1.7
+      ) {
+        e.behavior = "씨앗 따라가기";
+        e.targetX = player.x;
+        e.targetZ = player.z;
+      }
+    }
     const burn = w.burning.has(w.index(e.x | 0, (e.y - 1) | 0, e.z | 0)),
       f = w.fluids.get(w.index(e.x | 0, e.y | 0, e.z | 0));
     if (burn || f?.a > 0.1) {
-      e.energy -= dt * 10;
+      this.hurt(e, dt * 10, burn ? "화상" : "산성 피해");
       e.fear = 3;
       e.targetX = clamp(e.x + (w.random() - 0.5) * 12, 2, SIZE - 3);
       e.targetZ = clamp(e.z + (w.random() - 0.5) * 12, 2, SIZE - 3);
@@ -318,7 +431,17 @@ export class Ecology {
       e.energy > 125 &&
       e.age > 25 &&
       this.birthBudget > 0 &&
-      this.entities.length < 3200
+      this.entities.length < 3200 &&
+      (e.breedAt || 0) <= w.time &&
+      near.some(
+        (o) =>
+          o !== e &&
+          !o.dead &&
+          o.type === e.type &&
+          o.age > 25 &&
+          o.energy > 125 &&
+          (o.breedAt || 0) <= w.time,
+      )
     ) {
       const child = this.spawn(
         e.type,
@@ -328,6 +451,7 @@ export class Ecology {
       if (child) {
         child.age = 0;
         e.energy -= 50;
+        e.breedAt = w.time + 90;
         w.reactions.births++;
         this.birthBudget--;
       }
@@ -488,14 +612,16 @@ export class Ecology {
       }
     for (let k = 0; k < SPECIES[e.type].parts.length; k++)
       if (SPECIES[e.type].parts[k].parent === pi) this.detach(e, k, time);
-    if (p.role === "core") this.kill(e);
+    if (p.role === "core" || p.role === "head")
+      this.kill(e, p.role === "core" ? "몸통 파괴" : "머리 파괴");
     this.world.event(SPECIES[e.type].name + " · " + p.name + " 분리", [
       e.x,
       e.y,
       e.z,
     ]);
   }
-  damageHit(hit, time, radius = 0.28) {
+  damageHit(hit, time, radius = 0.28, damage = 12) {
+    if (hit.entity.dead) return 0;
     const e = hit.entity,
       pi = hit.part,
       p = SPECIES[e.type].parts[pi];
@@ -507,7 +633,8 @@ export class Ecology {
       const q = cellPosition(p, j);
       if (
         dam[j] &&
-        Math.hypot(q[0] - v[0], q[1] - v[1], q[2] - v[2]) < radius
+        (j === hit.voxel ||
+          Math.hypot(q[0] - v[0], q[1] - v[1], q[2] - v[2]) < radius)
       ) {
         dam[j] = 0;
         removed++;
@@ -593,8 +720,14 @@ export class Ecology {
           color: p.color,
         });
       }
-    e.energy -= removed * 1.8;
+    if (removed)
+      this.hurt(
+        e,
+        damage * (p.role === "head" ? 1.5 : 1),
+        p.role === "head" ? "머리 치명타" : "공격 피해",
+      );
     e.fear = 6;
+    e.angryUntil = time + 12;
     e.targetX = clamp(e.x + (this.world.random() - 0.5) * 16, 2, SIZE - 3);
     e.targetZ = clamp(e.z + (this.world.random() - 0.5) * 16, 2, SIZE - 3);
     if (largest.length < Math.max(1, p.count * 0.38)) this.detach(e, pi, time);
@@ -628,6 +761,10 @@ export class Ecology {
     this.nextId = s.nextId;
     this.entities = s.entities.map((e) => ({
       ...e,
+      maxHP: [48, 72, 32][e.type],
+      hp: Number.isFinite(e.hp)
+        ? clamp(e.hp, 0, [48, 72, 32][e.type])
+        : [48, 72, 32][e.type],
       damage: Object.fromEntries(
         Object.entries(e.damage).map(([k, v]) => [
           k,

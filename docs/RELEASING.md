@@ -1,30 +1,31 @@
 # FERAL 버전 관리와 배포
 
-2026-10-16 사용자 결정: **0.2.5부터 버전별 배포와 게임 코드 자동 업데이트 사용.** 소스와 배포는 개인 계정 Modopi의 비공개 저장소에서 관리한다.
+현재 저장소는 **공개**이며, 앱 **0.3.2 / 302**부터 로그인이나 토큰 없이 업데이트와 게임 버전을 조회·다운로드한다. 앱 0.3.2에는 게임 **0.5.1 / 501**을 동봉한다.
 
-## 첫 설치와 GitHub 연결
+## 설치와 공개 업데이트
 
-0.2.5 APK를 기존 앱 위에 업데이트 설치한다. 패키지명과 시험 서명이 같고 versionCode는 205이다. 앱을 제거하거나 데이터를 지우지 않는다.
+`Feral-0.3.2-android.apk`를 기존 앱 위에 설치한다. 패키지명과 시험 서명이 같으므로 앱을 삭제하거나 데이터를 지울 필요가 없다. 네이티브 versionCode는 301에서 302로 증가했다. 구 앱의 토큰 요구 로직은 게임 업데이트로 바꿀 수 없어 이번에는 APK 설치가 필요하다.
 
-메뉴 → 업데이트 → GitHub 연결에서 fine-grained personal access token을 한 번 등록한다. Resource owner는 Modopi, Repository access는 **Only select repositories → feral-voxel-sandbox**, Repository permissions는 **Contents: Read-only**로 제한한다. Metadata 읽기는 GitHub가 함께 부여한다. 만료일을 설정하고 만료 후에는 새 토큰을 앱에 등록한다. 토큰을 대화나 이슈에 적지 않는다.
+메뉴 → 업데이트 → **지금 확인** 또는 **게임 버전 선택**을 이용한다. 공개 GitHub의 `updates/stable.feral`, `catalog.json` 및 불변 버전 패키지를 인증 없이 읽는다. 기존 토큰/IV 설정은 새 앱 시작 시 제거하며 토큰을 입력하거나 전송하지 않는다. 연결이 없어도 동봉 게임과 저장된 버전은 실행할 수 있다.
 
-토큰은 네이티브 입력 창에서 받고 Android Keystore의 AES-GCM 키로 암호화해 기기 내부에 저장한다. JavaScript·localStorage·업데이트 패키지에는 전달하지 않는다. GitHub 연결 관리에서 빈 값으로 연결하면 토큰을 삭제한다. 연결하지 않아도 동봉한 게임은 오프라인에서 실행된다.
+자동 확인이 켜져 있고 특정 게임 버전에 고정하지 않았으면 시작할 때 확인한다(15분 간격 제한). 다운로드 후 서명·해시·파일 목록을 검증하고 다음 실행 때 전체 버전을 적용한다. **저장 후 적용**은 현재 저장 성공 후에만 재시작한다. 선택한 게임 버전별 저장 분리, 최소 앱 버전 검사와 시작 실패 시 복구는 유지한다.
 
-자동 확인이 켜져 있으면 실행할 때 확인한다(15분 이내 반복 요청 제한). 수동 **지금 확인**은 즉시 요청한다. 다운로드가 완료되면 다음 실행 때 적용하며, 메뉴의 **저장 후 적용**으로 바로 재시작할 수도 있다. 저장 실패 시 재시작하지 않는다. 네트워크 단절·토큰 만료·업데이트 실패는 현재 버전의 오프라인 플레이를 막지 않는다.
+앱과 동봉 게임 버전은 독립적이다. `game-version.json`은 `version.json`에서 생성하며, 동봉 게임 선택·실행 확인·저장 키에 게임 코드 501을 사용한다. APK 호환성 판단에는 네이티브 코드 302를 사용한다. 게임 0.5.1의 최소 네이티브는 302다.
 
 ## 버전의 기준
 
-| 항목 | 0.2.5 값 | 의미 |
+| 항목 | 현재 값 | 의미 |
 | --- | --- | --- |
-| version | 0.2.5 | 사용자가 보는 게임 버전 / Release v0.2.5 |
-| versionCode | 205 | APK와 게임 패키지의 단조 증가 정수 |
-| minNativeCode | 205 | 이 게임 코드를 실행할 수 있는 최소 APK |
+| version | 0.5.1 | 게임 표시 버전 |
+| versionCode | 501 | 게임 코드 |
+| nativeVersion / nativeCode | 0.3.2 / 302 | APK 버전 |
+| minNativeCode | 302 | 이 게임 코드를 실행할 수 있는 최소 APK |
 | saveSchema | 2 | 월드 저장 형식. 앱 버전과 별개 |
 | channel | stable | 사용자가 받는 배포 채널 |
 
-`version.json`만 수정한 뒤 `node tools/version.mjs`를 실행하면 AndroidManifest, Gradle, package.json과 게임 version.js를 함께 맞춘다. UI는 실제 실행 중인 게임 버전과 Android APK 버전을 각각 표시한다.
+`version.json`만 수정한 뒤 `node tools/version.mjs`를 실행하면 AndroidManifest, Gradle, package.json과 게임 version.js·game-version.json을 함께 맞춘다. UI는 실제 실행 중인 게임 버전과 Android APK 버전을 각각 표시한다.
 
-일반적인 게임 패치는 0.2.6 / 206, 기능 추가는 0.3.0 / 300 등으로 올린다. 코드 숫자는 항상 이전 배포보다 커야 한다. 게임 코드만 변경했다면 minNativeCode 205를 유지할 수 있다. 네이티브 Java·권한·검증 키가 바뀌면 새 APK를 배포하고 minNativeCode를 새 versionCode와 같게 올린다. 지원하지 않는 앱에는 APK 설치가 필요하다고 표시한다. APK 자동 무인 설치는 구현하지 않는다.
+다음 게임 패치는 0.5.2 / 502, 기능 추가는 0.6.0 / 600 등으로 올린다. stable 코드 숫자는 항상 이전 stable 배포보다 커야 한다. 게임 코드만 변경했다면 minNativeCode 302를 유지할 수 있다. 네이티브 Java·권한·검증 키가 바뀌면 nativeCode를 증가한 새 APK를 배포하고 minNativeCode를 새 nativeCode와 같게 올린다. 지원하지 않는 앱에는 APK 설치가 필요하다고 표시한다. APK 자동 무인 설치는 구현하지 않는다.
 
 ## 다음 버전 배포 순서
 
@@ -33,7 +34,7 @@
 3. `node --test tests/*.test.js` 실행. UI·플레이 변경에는 관련 `tests/*-check.cjs` 실행.
 4. `bash build-apk.sh`와 `python3 tools/build-update.py`로 로컬 결과 확인.
 5. 검증된 변경을 main에 반영. **FERAL versioned release** Actions가 테스트·APK 빌드·서명 패키지 생성을 수행하고 GitHub Release에 결과를 올림.
-6. Release 게시가 완료되면 별도 `updates` 브랜치의 `versions/<버전>.feral`과 `stable.feral` 갱신. 앱은 인증된 GitHub Contents API로 stable.feral을 읽음.
+6. Release 게시가 완료되면 별도 `updates` 브랜치의 `versions/<버전>.feral`과 `stable.feral` 갱신. 앱은 공개 raw.githubusercontent.com 주소에서 stable.feral을 인증 없이 읽음.
 7. Release의 APK를 내려받아 실제 기기에서 업데이트 설치·이어하기 확인. 이미 배포한 번호는 재사용하지 않으며 수정 시 새 버전 배포.
 
 워크플로는 main push와 수동 실행을 지원한다. 이미 배포한 동일 버전·동일 패키지는 중복 배포하지 않는다. 동일 번호의 내용 변경이나 낮은 번호는 실패한다. 네이티브 파일의 fingerprint가 달라졌는데 minNativeCode를 올리지 않은 경우도 배포하지 않는다.
@@ -81,3 +82,23 @@
 `nativeVersion` / `nativeCode`는 APK 기준, `version` / `versionCode`는 게임 기준, `minNativeCode`는 호환성 기준이다. V_ 브랜치에서 Java를 수정해도 네이티브 앱에는 적용되지 않는다. 네이티브 변경은 main에서 새 APK 버전으로 배포한 뒤 해당 버전을 최소 기준으로 삼는다. 이미 발표한 main 버전은 다시 덮어쓰지 않는다.
 
 이전 게임은 서명된 .feral 패키지가 있는 버전부터 선택 가능하다. 단순히 옛 Git 브랜치가 존재하는 것만으로 앱에 나타나지 않는다. 카탈로그의 배포 성공 항목만 표시한다.
+
+## 0.4.0 개척 원정 — 미배포
+
+`feature/frontier-prototype`는 UI 초안과 개척 원정의 통합 프로토타입이다. 게임 표시 버전 0.4.0 / 게임 코드 400이며 nativeVersion/nativeCode와 minNativeCode는 0.3.1 / 301로 유지한다. 기존 릴리스 파일을 교체하지 않는다. 실제 게임 게시 시 V_ 브랜치 절차를 따르면 새로운 불변 빌드 번호를 부여받는다.
+
+로컬 테스트 APK의 기본 출력 이름은 네이티브 버전에 따라 `build/Feral-0.3.1-android.apk`다. 혼동 방지를 위해 검증본은 `build/Feral-0.4.0-prototype-native-0.3.1.apk`로도 복사한다. 이는 새 네이티브 릴리스가 아니라 개척 게임을 동봉한 테스트용 APK다. 정식 기존 v0.3.1 Release 자산을 교체하지 않는다. 게임 업데이트는 `build/release/Feral-0.4.0-update.feral`이며 아직 게시하지 않았다.
+
+저장소 공개 상태를 확인했다. 기존 앱의 토큰 필수 업데이트 흐름과 공유 시험 서명키는 유지된다. 공개 배포용 인증·서명 정책 정리는 별도 작업이다.
+
+## 0.4.1 전투·도구 — 미배포
+
+게임 0.4.1 / 401, 네이티브 0.3.1 / 301과 최소 네이티브 301은 유지한다. 저장 스키마 2에 체력·장비·내구도 선택 필드를 추가하며 구 저장을 읽을 수 있다. APK 출력은 `build/Feral-0.3.1-android.apk`, 게임 패키지는 `build/release/Feral-0.4.1-update.feral`이다. 기존 Release 자산을 교체하지 않는다. `verification/0.4.1.md`에 검증 결과를 기록한다.
+
+## 0.5.0 아이템 인벤토리·모바일 생존 UI — 미배포
+
+게임 0.5.0 / 500, 네이티브 0.3.1 / 301 및 최소 네이티브 301 유지. 저장 스키마 2에서 인벤토리 슬롯·선택 칸·보관품 필드를 추가했다. 구 저장의 재료와 해금 장비는 슬롯으로 이전하고 용량 초과분은 삭제하지 않는다. APK 출력은 `build/Feral-0.3.1-android.apk`이며 테스트용 사본은 `build/Feral-0.5.0-prototype-native-0.3.1.apk`다. 업데이트 패키지는 `build/release/Feral-0.5.0-update.feral`. 검증과 화면은 `verification/0.5.0.md` 참조. 기존 Release 파일 교체 없음.
+
+## 앱 0.3.2 / 게임 0.5.1 — 공개 업데이트 대응
+
+네이티브 0.3.1→0.3.2, 동봉 게임 0.5.0→0.5.1로 패치 번호를 증가했다. 게임 501 / 앱 302 / 최소 앱 302 / 저장 스키마 2. 인증 없는 자동 확인·카탈로그·버전 다운로드와 앱/동봉 게임 식별 분리를 포함한다. 배포 검사와 APK 체크섬 생성도 분리된 앱 번호를 사용한다. 출력은 `build/Feral-0.3.2-android.apk`와 `build/release/Feral-0.5.1-update.feral`. 기존 Release 파일은 교체하지 않는다. 검증은 `verification/public-app-0.3.2.md` 참조. 아직 main 병합·공개 릴리스는 수행하지 않았다.

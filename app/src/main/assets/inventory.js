@@ -1,6 +1,14 @@
+import { GEAR } from "./equipment.js";
 import { B, clamp } from "./world.js";
 import { solidAt } from "./physics.js";
 export const ITEMS = {
+  meat: { name: "날고기", icon: "", color: 0xc27670 },
+  arrow: { name: "화살", icon: "➶", color: 0xd5c59a },
+  food: { frontier: true, name: "야전 식량", icon: "◒", color: 0xd9b76c },
+  iron: { frontier: true, name: "합금", icon: "▰", color: 0xb8c4cf },
+  knowledge: { frontier: true, name: "연구 기록", icon: "▱", color: 0x9bdad0 },
+  relic: { frontier: true, name: "유적 핵", icon: "✦", color: 0xffce7a },
+  medicine: { frontier: true, name: "회복약", icon: "+", color: 0xb7d78c },
   dirt: { name: "흙 조각", icon: "▣", color: 0x9b7654, block: B.DIRT },
   stone: { name: "돌 조각", icon: "◆", color: 0x99a5a7, block: B.STONE },
   wood: { name: "원목 조각", icon: "▥", color: 0x9f7849, block: B.WOOD },
@@ -13,7 +21,122 @@ export const ITEMS = {
   seed: { name: "씨앗", icon: "✿", color: 0x98bf68 },
   resin: { name: "생체 수지", icon: "◉", color: 0xe4bc75 },
 };
+for (const [id, g] of Object.entries(GEAR))
+  ITEMS[id] = {
+    name: g.name,
+    color: 0x9eb5b5,
+    gear: true,
+    frontier: g.frontier,
+    icon: "",
+    limit: 1,
+  };
+export const SLOT_COUNT = 36,
+  STACK_LIMIT = 64;
+export const stackLimit = (id) => ITEMS[id]?.limit || STACK_LIMIT;
 export const RECIPES = [
+  {
+    id: "cooked_meat",
+    name: "구운 고기 × 2",
+    description: "사냥한 고기와 땔감으로 식량 마련",
+    cost: { meat: 1, wood: 1 },
+    give: { food: 2 },
+    frontier: true,
+  },
+  {
+    id: "arrows",
+    name: "화살 × 12",
+    description: "활·석궁 한 발당 1개 소비",
+    cost: { stone: 2, wood: 2, fiber: 1 },
+    give: { arrow: 12 },
+  },
+  ...Object.entries(GEAR)
+    .filter(([, g]) => g.cost)
+    .map(([id, g]) => ({
+      id,
+      name: g.name,
+      description:
+        g.slot === "weapon"
+          ? `피해 ${g.damage} · 사거리 ${g.range}m · ${g.cooldown}초 · 내구 ${g.durability}${g.ammo ? " · 화살 필요" : ""}`
+          : `${g.affinity === "rock" ? "돌·광석" : g.affinity === "wood" ? "나무" : "흙·모래"} 채굴 ${g.power}배 · 내구 ${g.durability}`,
+      cost: g.cost,
+      unlock: id,
+      frontier: g.frontier,
+    })),
+  {
+    id: "food",
+    name: "야전 식량 × 3",
+    description: "원정 중 허기를 회복",
+    cost: { fiber: 2, seed: 1 },
+    give: { food: 3 },
+    frontier: true,
+  },
+  {
+    id: "iron",
+    name: "합금 × 3",
+    description: "기계 조립과 무기 제작",
+    cost: { stone: 4, crystal: 1 },
+    give: { iron: 3 },
+    frontier: true,
+  },
+  {
+    id: "medicine",
+    name: "회복약 × 2",
+    description: "체력 45 회복",
+    cost: { fiber: 3, bio: 2 },
+    give: { medicine: 2 },
+    frontier: true,
+  },
+  {
+    id: "blade",
+    name: "합금 무기",
+    description: "펄스 공격력 12 → 24",
+    cost: { iron: 4, plank: 2 },
+    unlock: "blade",
+    frontier: true,
+  },
+  {
+    id: "armor",
+    name: "개척 갑옷",
+    description: "받는 피해 35% 감소",
+    cost: { iron: 5, fiber: 6 },
+    unlock: "armor",
+    frontier: true,
+  },
+  {
+    id: "engineering",
+    name: "동력 연구",
+    description: "기계와 회전익 제작 지식 · 보스 처치 불필요",
+    cost: { knowledge: 6, crystal: 3 },
+    unlock: "engineering",
+    frontier: true,
+  },
+  {
+    id: "rover",
+    name: "기본 차량 설계",
+    description: "차체·모터·바퀴 조립 차량 1대",
+    cost: { iron: 8, plank: 6, resin: 2 },
+    requires: "engineering",
+    unlock: "rover",
+    frontier: true,
+  },
+  {
+    id: "ballistics",
+    name: "투사체 연구",
+    description: "기계 포탑과 원거리 펄스",
+    cost: { knowledge: 8, iron: 4 },
+    unlock: "ballistics",
+    frontier: true,
+  },
+  {
+    id: "aviation",
+    name: "회전익 연구",
+    description: "회전익 2개로 간이 비행 · 고정익은 후속",
+    cost: { knowledge: 12, iron: 6, crystal: 4 },
+    requires: "engineering",
+    unlock: "aviation",
+    frontier: true,
+  },
+
   {
     id: "planks",
     name: "목재 조각 × 4",
@@ -69,57 +192,240 @@ export function resourceForBlock(b) {
 }
 export class Inventory {
   constructor(starter = true) {
-    this.items = starter ? { dirt: 16, wood: 4, stone: 4, seed: 4 } : {};
+    this.slots = Array(SLOT_COUNT).fill(null);
+    this.overflow = [];
+    this.selectedSlot = 0;
+    this.equipment = { weapon: "pulse", tool: "pick" };
+    this.wear = {};
     this.unlocks = new Set();
     this.revision = 0;
+    if (starter)
+      for (const [id, n] of Object.entries({
+        pick: 1,
+        pulse: 1,
+        dirt: 16,
+        wood: 4,
+        stone: 4,
+        seed: 4,
+      }))
+        this.add(id, n);
+  }
+  get items() {
+    const items = {};
+    for (const s of this.slots)
+      if (s) items[s.id] = (items[s.id] || 0) + s.count;
+    return items;
   }
   count(id) {
-    return this.items[id] || 0;
+    return this.slots.reduce((n, s) => n + (s?.id === id ? s.count : 0), 0);
   }
   add(id, n) {
-    if (!ITEMS[id] || n <= 0) return 0;
-    const add = Math.min(Math.floor(n), 9999 - this.count(id));
-    if (add > 0) {
-      this.items[id] = this.count(id) + add;
+    if (!ITEMS[id] || !Number.isFinite(n) || n < 1) return 0;
+    n = Math.floor(n);
+    const total = n,
+      limit = stackLimit(id);
+    for (const s of this.slots)
+      if (s?.id === id && s.count < limit) {
+        const v = Math.min(n, limit - s.count);
+        s.count += v;
+        n -= v;
+      }
+    for (let i = 0; i < SLOT_COUNT && n > 0; i++)
+      if (!this.slots[i]) {
+        const v = Math.min(n, limit);
+        this.slots[i] = { id, count: v };
+        n -= v;
+      }
+    if (total !== n) this.revision++;
+    return total - n;
+  }
+  // Earned rewards and legacy excess stay recoverable if all 36 slots are occupied.
+  grant(id, n) {
+    const remaining = n - this.add(id, n);
+    if (remaining > 0) {
+      const old = this.overflow.find((s) => s.id === id);
+      if (old) old.count += remaining;
+      else this.overflow.push({ id, count: remaining });
       this.revision++;
     }
-    return add;
+  }
+  reclaim() {
+    for (const s of this.overflow) s.count -= this.add(s.id, s.count);
+    this.overflow = this.overflow.filter((s) => s.count > 0);
+    this.revision++;
   }
   take(id, n) {
-    if (this.count(id) < n) return false;
-    this.items[id] -= n;
+    if (!Number.isInteger(n) || n < 0 || this.count(id) < n) return false;
+    // Consume the selected stack first so the number under the held item is truthful.
+    const order = [
+      this.selectedSlot,
+      ...Array.from({ length: SLOT_COUNT }, (_, i) => i).filter(
+        (i) => i !== this.selectedSlot,
+      ),
+    ];
+    for (const i of order) {
+      const s = this.slots[i];
+      if (s?.id !== id) continue;
+      const v = Math.min(s.count, n);
+      s.count -= v;
+      n -= v;
+      if (!s.count) this.slots[i] = null;
+      if (!n) break;
+    }
     this.revision++;
     return true;
   }
-  canCraft(recipe) {
+  move(from, to, split = false) {
+    if (
+      ![from, to].every(
+        (i) => Number.isInteger(i) && i >= 0 && i < SLOT_COUNT,
+      ) ||
+      from === to ||
+      !this.slots[from]
+    )
+      return false;
+    const a = this.slots[from],
+      b = this.slots[to],
+      n = split ? Math.ceil(a.count / 2) : a.count;
+    if (b && b.id !== a.id) {
+      if (split) return false;
+      [this.slots[from], this.slots[to]] = [b, a];
+    } else {
+      const moved = Math.min(n, stackLimit(a.id) - (b?.count || 0));
+      if (!moved) return false;
+      this.slots[to] = { id: a.id, count: (b?.count || 0) + moved };
+      a.count -= moved;
+      if (!a.count) this.slots[from] = null;
+    }
+    this.revision++;
+    return true;
+  }
+  select(index) {
+    if (!Number.isInteger(index) || index < 0 || index > 8) return false;
+    this.selectedSlot = index;
+    const id = this.slots[index]?.id;
+    if (GEAR[id]) this.equipment[GEAR[id].slot] = id;
+    this.revision++;
+    return true;
+  }
+  transaction(cost, reward, commit = false) {
+    if (!Object.entries(cost).every(([id, n]) => this.count(id) >= n))
+      return false;
+    const copy = new Inventory(false);
+    copy.slots = this.slots.map((s) => (s ? { ...s } : null));
+    copy.selectedSlot = this.selectedSlot;
+    for (const [id, n] of Object.entries(cost))
+      if (!copy.take(id, n)) return false;
+    for (const [id, n] of Object.entries(reward))
+      if (copy.add(id, n) !== n) return false;
+    if (commit) {
+      this.slots = copy.slots;
+      this.revision++;
+    }
+    return true;
+  }
+  canCraft(r) {
     return (
-      !(recipe.unlock && this.unlocks.has(recipe.unlock)) &&
-      Object.entries(recipe.cost).every(([id, n]) => this.count(id) >= n) &&
-      Object.entries(recipe.give || {}).every(
-        ([id, n]) => this.count(id) + n <= 9999,
-      )
+      (!r.requires || this.unlocks.has(r.requires)) &&
+      !(
+        r.unlock &&
+        (GEAR[r.id]?.cost ? this.count(r.id) > 0 : this.unlocks.has(r.unlock))
+      ) &&
+      this.transaction(r.cost, {
+        ...(r.give || {}),
+        ...(GEAR[r.id]?.cost ? { [r.id]: 1 } : {}),
+      })
     );
   }
   craft(id) {
     const r = RECIPES.find((r) => r.id === id);
     if (!r || !this.canCraft(r)) return false;
-    for (const [k, n] of Object.entries(r.cost)) this.take(k, n);
-    for (const [k, n] of Object.entries(r.give || {})) this.add(k, n);
+    this.transaction(
+      r.cost,
+      { ...(r.give || {}), ...(GEAR[id]?.cost ? { [id]: 1 } : {}) },
+      true,
+    );
     if (r.unlock) this.unlocks.add(r.unlock);
+    if (GEAR[id]?.cost) this.wear[id] = GEAR[id].durability;
+    this.revision++;
+    return true;
+  }
+  equip(id) {
+    const index = this.slots.findIndex((s) => s?.id === id);
+    if (!GEAR[id] || index < 0 || (GEAR[id].durability && !this.wear[id]))
+      return false;
+    if (index >= 9) this.move(index, this.selectedSlot);
+    this.select(index < 9 ? index : this.selectedSlot);
+    return true;
+  }
+  repair(id) {
+    const g = GEAR[id];
+    if (!g?.durability || !this.count(id) || this.wear[id] >= g.durability)
+      return false;
+    const cost = Object.fromEntries(
+      Object.entries(g.cost).map(([k, n]) => [k, Math.ceil(n / 2)]),
+    );
+    if (!this.transaction(cost, {}, true)) return false;
+    this.wear[id] = g.durability;
     this.revision++;
     return true;
   }
   save() {
-    return { items: this.items, unlocks: [...this.unlocks] };
+    return {
+      items: this.items,
+      unlocks: [...this.unlocks],
+      equipment: { ...this.equipment },
+      wear: { ...this.wear },
+      slots: this.slots.map((s) => (s ? { ...s } : null)),
+      selectedSlot: this.selectedSlot,
+      overflow: this.overflow.map((s) => ({ ...s })),
+    };
   }
   load(s) {
-    this.items = {};
-    for (const [k, n] of Object.entries(s?.items || {}))
-      if (ITEMS[k] && Number.isFinite(n))
-        this.items[k] = clamp(Math.floor(n), 0, 9999);
+    this.slots = Array(SLOT_COUNT).fill(null);
+    this.overflow = [];
+    this.selectedSlot = Number.isInteger(s?.selectedSlot)
+      ? clamp(s.selectedSlot, 0, 8)
+      : 0;
     this.unlocks = new Set(
-      (s?.unlocks || []).filter((k) => ["hammer", "pulse"].includes(k)),
+      (s?.unlocks || []).filter((k) => RECIPES.some((r) => r.unlock === k)),
     );
+    this.wear = {};
+    this.equipment = { weapon: "pulse", tool: "pick" };
+    if (Array.isArray(s?.slots)) {
+      s.slots.slice(0, SLOT_COUNT).forEach((v, i) => {
+        if (ITEMS[v?.id] && Number.isInteger(v.count) && v.count > 0) {
+          this.slots[i] = {
+            id: v.id,
+            count: Math.min(stackLimit(v.id), v.count),
+          };
+          if (v.count > stackLimit(v.id))
+            this.overflow.push({ id: v.id, count: v.count - stackLimit(v.id) });
+        }
+      });
+    } else {
+      this.add("pick", 1);
+      this.add("pulse", 1);
+      for (const [k, n] of Object.entries(s?.items || {}))
+        if (ITEMS[k] && Number.isFinite(n) && n > 0)
+          this.grant(k, clamp(Math.floor(n), 0, 9999));
+      for (const id of this.unlocks) if (GEAR[id]?.cost) this.grant(id, 1);
+    }
+    for (const v of s?.overflow || [])
+      if (ITEMS[v?.id] && Number.isInteger(v.count) && v.count > 0)
+        this.overflow.push({ id: v.id, count: Math.min(v.count, 9999) });
+    for (const [id, g] of Object.entries(GEAR))
+      if (
+        g.durability &&
+        (this.count(id) || this.overflow.some((s) => s.id === id))
+      ) {
+        this.unlocks.add(id);
+        this.wear[id] = Number.isFinite(s?.wear?.[id])
+          ? clamp(Math.floor(s.wear[id]), 0, g.durability)
+          : g.durability;
+        if (s?.equipment?.[g.slot] === id) this.equipment[g.slot] = id;
+      }
+    this.select(this.selectedSlot);
     this.revision++;
   }
 }

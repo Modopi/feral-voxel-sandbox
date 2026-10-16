@@ -1,0 +1,123 @@
+/* Field equipment: the world stays central; inventory is a dedicated workspace. */
+:root { --field-bg: #101c19; --field-line: #526057; --field-ink: #f0eddb; --field-accent: #d9b76c; }
+#hud .brand, #hud #fps, #hud #population, #hud .divider,
+#hud #hint, #stickLabel, #lookHint { display: none; }
+#hud header { gap: 10px; }
+#hud .telemetry { background: none; border: 0; backdrop-filter: none; padding: 8px 0; font-size: 14px; text-shadow: 0 2px 4px #000; }
+#hud #biome { display: inline; }
+#hud .icon-button { width: 48px; height: 48px; border-radius: 2px; background: #101c19dc; border-color: #a6af9360; }
+#hud .bagButton small { font-size: 11px; }
+#hud #radar { border-radius: 50% 50% 3px 3px; background: #101c19b8; padding: 7px; width: 102px; top: 80px; }
+#hud #map { width: 86px; height: 86px; border-radius: 50%; }
+#hud #radar > div { font-size: 10px; }
+#hud #target { background: #101c19d9; border-radius: 2px; font-size: 13px; max-width: 45vw; border-bottom: 2px solid var(--field-accent); }
+#hud #hotbar { bottom: max(26px, env(safe-area-inset-bottom)); padding: 4px; gap: 4px; background: #101c19d9; border-radius: 2px; }
+#hud .slot { width: 48px; height: 48px; border-radius: 1px; }
+#hud .slot small { font-size: 10px; }
+#hud .slot.selected { box-shadow: inset 0 -3px var(--field-accent); }
+#hud #toolLabel { bottom: 88px; }
+#hud #toolName { font-size: 14px; text-shadow: 0 2px 3px #000; }
+#hud #toolHelp { display: none; }
+#hud .rangeButton { bottom: 112px; min-height: 44px; border-radius: 2px; font-size: 12px; background: #101c19dc; }
+#hud footer { font-size: 10px; bottom: 7px; }
+#hud #events { font-size: 12px; max-width: 190px; }
+#hud .round { background: #101c199c; border-color: #e9e2c57a; }
+#hud .round.small { width: 48px; height: 48px; }
+#hud .round small { font-size: 11px; }
+#hud .round.action { background: #55462ccc; border: 2px solid #dfbc70a6; }
+#hud #toast { font-size: 14px; background: #101c19ed; border-left: 3px solid var(--field-accent); border-radius: 0; }
+#pauseScreen { padding: max(16px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left)); background: #07100de6; backdrop-filter: none; }
+#pauseScreen .panel { max-width: 1050px; padding: 0; margin: 0 auto; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+#pauseScreen .panelTop { background: #101c19; padding: 10px 16px; border-top: 2px solid var(--field-accent); }
+#pauseScreen .panelTop .eyebrow { font-size: 10px; letter-spacing: 2px; }
+#pauseScreen .panelTop h2 { margin: 4px 0 0; font-size: 24px; font-weight: bold; }
+#pauseScreen .icon-button { min-width: 48px; min-height: 48px; border-radius: 0; }
+#pauseScreen .tabs { margin: 8px 0 16px; gap: 16px; }
+#pauseScreen .tabs button { min-height: 48px; font-size: 14px; }
+#pauseScreen.inventoryMode .tabs { display: none; }
+#pauseScreen .bagHeader { margin: 0; padding: 16px 0; border-bottom: 1px solid var(--field-line); }
+#pauseScreen .bagHeader b { font-size: 16px; }
+#pauseScreen .bagHeader p { font-size: 12px; margin: 6px 0 0; }
+#pauseScreen .bagHeader > span { font-size: 13px; }
+#pauseScreen .bagLayout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; padding-top: 18px; }
+#pauseScreen #inventoryGrid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+#pauseScreen .itemSlot { height: 76px; border-radius: 0; background: #1c2a24; border: 1px solid #58615188; gap: 7px; }
+#pauseScreen .itemSlot > span { font-size: 28px; text-shadow: 0 2px 4px #0008; }
+#pauseScreen .itemSlot > b { font-size: 12px; }
+#pauseScreen .itemSlot > small { font-size: 12px; color: #d5d8c7; }
+#pauseScreen .itemSlot.equipped { border: 2px solid var(--field-accent); background: #3c3827; box-shadow: inset 0 -3px var(--field-accent); }
+#pauseScreen .itemDetail { display: flex; gap: 14px; align-items: center; min-height: 90px; padding: 16px 0; border-bottom: 1px solid var(--field-line); }
+#pauseScreen .detailGlyph { font-size: 38px; color: var(--field-accent); }
+#pauseScreen .itemDetail h3 { font-size: 16px; margin: 0; }
+#pauseScreen .itemDetail small { color: var(--field-accent); font-weight: normal; }
+#pauseScreen .itemDetail p, #pauseScreen .bagGuide { font-size: 12px; line-height: 1.6; margin: 8px 0; }
+#pauseScreen .crafting { border-left: 1px solid var(--field-line); padding-left: 24px; }
+#pauseScreen .crafting h3 { display: flex; justify-content: space-between; margin: 0 0 4px; font-size: 16px; }
+#pauseScreen .crafting h3 span { color: var(--muted); font-size: 12px; font-weight: normal; }
+#pauseScreen .recipe { min-height: 84px; gap: 14px; padding: 12px 0; }
+#pauseScreen .recipe b { font-size: 14px; }
+#pauseScreen .recipe small, #pauseScreen .recipe p { font-size: 12px; line-height: 1.5; }
+#pauseScreen .recipe button { min-width: 66px; min-height: 48px; border-radius: 1px; font-size: 14px; }
+#pauseScreen #craftFeedback { color: var(--field-accent); font-size: 14px; min-height: 22px; }
+#pauseScreen .panelFooter { margin: 12px 0 0; padding: 8px 0; }
+#pauseScreen .panelFooter > span { font-size: 11px; }
+#pauseScreen .textButton { font-size: 14px; min-height: 48px; }
+#pauseScreen .metricGrid > div { border: 0; border-left: 2px solid var(--field-line); border-radius: 0; background: transparent; }
+#pauseScreen .setting { font-size: 14px; min-height: 48px; }
+@media (orientation: landscape) and (max-height: 540px) {
+  #pauseScreen { padding-top: 8px; padding-bottom: 8px; }
+  #pauseScreen .panelTop { padding: 5px 12px; }
+  #pauseScreen .panelTop .eyebrow { display: none; }
+  #pauseScreen .panelTop h2 { font-size: 21px; }
+  #pauseScreen .bagHeader { padding: 10px 0; }
+  #pauseScreen .bagHeader p { display: none; }
+  #pauseScreen .bagLayout { padding-top: 12px; }
+  #pauseScreen .itemSlot { height: 64px; }
+  #pauseScreen .crafting { max-height: 220px; overflow-y: auto; padding-right: 8px; touch-action: pan-y; }
+  #pauseScreen .bagGuide { display: none; }
+}
+@media (orientation: portrait) {
+  #hud #hotbar { max-width: calc(100vw - 24px); overflow-x: auto; justify-content: flex-start; touch-action: pan-x; }
+  #hud .slot { flex-shrink: 0; width: 44px; }
+  #hud #toolLabel { bottom: 88px; }
+  #hud .rangeButton { bottom: 113px; }
+  #hud #events { top: 32%; max-width: 150px; }
+  #pauseScreen { padding-left: 16px; padding-right: 16px; }
+  #pauseScreen .bagLayout { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  #pauseScreen .crafting { border-left: 0; border-top: 1px solid var(--field-line); padding: 18px 0 0; }
+  #pauseScreen .bagHeader { align-items: center; }
+  #pauseScreen .bagHeader p { display: none; }
+  #pauseScreen .bagHeader > span { font-size: 12px; }
+  #pauseScreen .itemSlot > small { font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+body.menuOpen #hud { visibility: hidden; }
+#pauseScreen { background: #07100de8; }
+/* Notifications sit above tool controls, never on the range selector. */
+#hud #toast { bottom: 174px; max-width: min(460px, 70vw); line-height: 1.5; }
+@media (orientation: portrait) {
+  #hud #toast { bottom: 260px; max-width: calc(100vw - 40px); width: max-content; }
+}
+@media (orientation: portrait) {
+  #hud #toolLabel { left: 16px; right: 155px; bottom: 86px; transform: none; text-align: left; }
+  #hud .rangeButton { left: auto; right: 16px; bottom: 82px; transform: none; min-width: 118px; }
+  #hud .rangeButton:active { transform: scale(.98); }
+}
+
+/* Equipment actions stay readable in the compact field crafting ledger. */
+.gearActions { grid-column: 1 / -1; display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.gearActions button { min-height: 38px; padding: 6px 12px; color: #ecdfc4; background: #283b36; border: 1px solid #668273; }
+.gearActions button:disabled { opacity: .45; }
+.targetHealth { display: block; width: 160px; height: 6px; margin: 7px auto; accent-color: #e6a16f; }
+#hud #target { top: auto; bottom: 140px; transform: translateX(-50%); }
+@media (orientation: landscape) {
+  #hud #toast { top: 90px; bottom: auto; max-width: 42vw; }
+}
+@media (orientation: portrait) {
+  #hud #target { bottom: 180px; max-width: calc(100vw - 48px); width: max-content; }
+}
+@media (orientation: landscape) {
+  #hud #target { left: auto; right: 120px; bottom: 130px; transform: none; max-width: 240px; }
+}

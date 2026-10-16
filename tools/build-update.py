@@ -57,8 +57,8 @@ def build():
     (output / filename).write_bytes(packed)
     (output / "stable.feral").write_bytes(packed)
     sums = f"{hashlib.sha256(packed).hexdigest()}  {filename}\n"
-    apk = ROOT / "build" / f"Feral-{v['version']}-android.apk"
-    if apk.is_file():
+    apk = ROOT / "build" / f"Feral-{v.get('nativeVersion', v['version'])}-android.apk"
+    if not os.environ.get("GITHUB_REF_NAME", "").startswith("V_") and apk.is_file():
         sums += f"{hashlib.sha256(apk.read_bytes()).hexdigest()}  {apk.name}\n"
     (output / "SHA256SUMS.txt").write_text(sums)
     print(f"Update ready: {filename}, {len(packed)} bytes, {len(files)} verified files")

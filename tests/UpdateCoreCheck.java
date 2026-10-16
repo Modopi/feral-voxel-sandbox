@@ -104,6 +104,23 @@ public final class UpdateCoreCheck {
         ok(reopened.activationSnapshot().contains("205-save"), "old game retains its own progress");
         ok(reopened.rollback() && reopened.current() == 301 && reopened.snapshot().contains("301-updated"), "failed older selection rolls back both code and save");
         rejects(() -> UpdateCore.checkSelection(400, 302, 301, 301, 0), "manual selection cannot bypass minimum native");
+        File distinctRoot = Files.createTempDirectory("feral-native-game-").toFile();
+        UpdateCore distinct = new UpdateCore(distinctRoot, 501, 302);
+        ok(distinct.current() == 501 && distinct.builtin() == 501, "APK 302 boots bundled game 501");
+        distinct.healthy(501);
+        rejects(() -> distinct.healthy(302), "APK code cannot acknowledge a different game code");
+        distinct.stage(205, good.bytes, good.hashes, good.expanded, UpdateCore.sha256(good.bytes), true);
+        distinct.beginTrial("{\"feral.world.v1\":\"501-save\"}");distinct.healthy(205);
+        UpdateCore resumed = new UpdateCore(distinctRoot, 501, 302);
+        ok(resumed.current() == 205, "pinned older game survives restart when native and game differ");
+        resumed.selectBuiltin();resumed.beginTrial("{\"feral.world.v1\":\"205-save\"}");
+        ok(resumed.current()==501 && resumed.activeDirectory()==null, "offline switch returns bundled 501 rather than APK 302");
+        ok(resumed.activationSnapshot().contains("501-save"), "bundled game snapshot uses game code");
+        resumed.healthy(501);
+        UpdateCore.checkSelection(502,302,302,501,0);
+        ok(true,"new APK satisfies public game's minimum native version");
+        rejects(()->UpdateCore.checkSelection(502,302,301,301,0),"old APK is correctly incompatible");
+        ok(new UpdateCore(distinctRoot,502,303).current()==502,"next APK upgrade selects its distinct bundled game");
         System.out.println("Native updater checks: " + count);
     }
 }

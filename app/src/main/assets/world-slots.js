@@ -2,6 +2,7 @@
 export const CATALOG = "feral.worlds.v1";
 export const DEFAULTS = [
   { id: "default", name: "기본 탐험 맵", type: "island", seed: 63026 },
+  { id: "frontier", name: "개척 원정", type: "frontier", seed: 63026 },
   { id: "beta", name: "기계 베타 맵", type: "machine", seed: 63026 },
 ];
 export function listWorlds(store) {
@@ -14,7 +15,7 @@ export function listWorlds(store) {
       (w) =>
         !w ||
         !/^[-\w]+$/.test(w.id) ||
-        !["island", "machine"].includes(w.type) ||
+        !["island", "machine", "frontier"].includes(w.type) ||
         typeof w.name !== "string" ||
         !Number.isSafeInteger(w.seed),
     ) ||
@@ -36,14 +37,19 @@ export function worldURL(w) {
 export function currentWorld(store, type, search) {
   const id = new URLSearchParams(search).get("world");
   const w = id
-    ? listWorlds(store).find((w) => w.id === id && w.type === type)
-    : DEFAULTS.find((w) => w.type === type);
+    ? listWorlds(store).find(
+        (w) =>
+          w.id === id &&
+          (Array.isArray(type) ? type.includes(w.type) : w.type === type),
+      )
+    : DEFAULTS.find((w) => w.type === (Array.isArray(type) ? type[0] : type));
   if (!w)
     throw Error("이 월드를 찾을 수 없습니다. 월드 목록에서 다시 선택하세요.");
   return w;
 }
 export function createWorld(store, name, type, seed = 63026) {
-  if (!["island", "machine"].includes(type)) throw Error("잘못된 월드 유형");
+  if (!["island", "machine", "frontier"].includes(type))
+    throw Error("잘못된 월드 유형");
   name = name.trim().slice(0, 40);
   if (!name) throw Error("월드 이름을 입력하세요.");
   if (!Number.isSafeInteger(seed) || seed < 0 || seed > 2147483647)

@@ -134,7 +134,7 @@ export class CharacterController {
       side = (input.side || 0) / length,
       s = Math.sin(p.yaw),
       c = Math.cos(p.yaw),
-      speed = (input.sprint ? 4.8 : 3.2) * (p.flying ? 2.2 : 1),
+      speed = (input.sprint ? 4.8 : 3.2) * (p.flying ? 2.2 : 1) * clamp(Number.isFinite(input.speedScale) ? input.speedScale : 1, 0, 3),
       dx = (-s * f + c * side) * speed * dt,
       dz = (-c * f - s * side) * speed * dt;
     if (p.flying) {
