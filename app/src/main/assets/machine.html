@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <title>FERAL · 기계 시험장</title>
+    <link rel="stylesheet" href="machine/style.css" />
+  </head>
+  <body>
+    <canvas id="scene"></canvas>
+    <header>
+      <a href="worlds.html">← 내 월드</a
+      ><b>기계 시험장 <small>VERTICAL SLICE 0.1 / BETA</small></b
+      ><button id="save">저장</button>
+    </header>
+    <section id="workshop">
+      <div class="heading">
+        <b>01 / 조립</b><button id="mode">주행 시작 →</button>
+      </div>
+      <p>
+        격자를 눌러 배치 · 원점 차체와 면으로 연결<br />전방 ↑ · 한 칸 0.5 m ·
+        바퀴는 0층 좌우 배치
+      </p>
+      <div class="row">
+        <select id="part" aria-label="부품">
+          <option value="hull">차체 · 1</option>
+          <option value="motor">모터 · 6</option>
+          <option value="wheel">바퀴 · 3</option></select
+        ><select id="layer" aria-label="높이">
+          <option value="0">0층 · 지면</option>
+          <option value="1">1층</option>
+          <option value="2">2층</option>
+        </select>
+      </div>
+      <div class="row">
+        <select id="tool" aria-label="편집 도구">
+          <option value="add">배치</option>
+          <option value="remove">제거·회수</option>
+          <option value="repair">수리</option>
+          <option value="damage">타격 시험 · 30 HP</option>
+        </select>
+      </div>
+      <div id="grid" role="group" aria-label="복셀 조립 격자"></div>
+      <div class="row">
+        <button id="light">경량 예제</button
+        ><button id="heavy">중량 예제</button>
+      </div>
+      <small>예제는 시험장과 자원을 초기화합니다.</small>
+    </section>
+    <section id="telemetry">
+      <b>02 / 실시간 계측</b>
+      <div id="metrics"></div>
+      <p id="status" role="status" aria-live="polite"></p>
+      <div class="row">
+        <button id="mine">광맥 채굴</button
+        ><button id="recover">출발점 복귀</button>
+      </div>
+      <small
+        >초록 광맥 (−6, 9) 근처에서 정지 후 채굴<br />주행: WASD / 방향키 ·
+        Space 제동</small
+      >
+      <div id="events"></div>
+    </section>
+    <div id="drive" hidden>
+      <div class="pad">
+        <button data-key="ArrowUp" aria-label="전진">▲</button>
+        <div>
+          <button data-key="ArrowLeft" aria-label="좌회전">◀</button
+          ><button data-key="ArrowDown" aria-label="후진">▼</button
+          ><button data-key="ArrowRight" aria-label="우회전">▶</button>
+        </div>
+      </div>
+      <button data-key="Space" id="brake">제동</button>
+    </div>
+    <p id="notice">
+      복셀 기계를 조립하고 주행 → 충돌 → 손상 → 수리 순서로 시험하세요.
+    </p>
+    <script type="module" src="machine/view.js"></script>
+  </body>
+</html>

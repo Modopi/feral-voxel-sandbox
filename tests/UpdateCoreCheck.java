@@ -84,6 +84,26 @@ public final class UpdateCoreCheck {
         rejects(() -> UpdateCore.safeFile(root, "a\\b"), "Windows separator rejected");
         rejects(() -> UpdateCore.safeFile(root, "a//b"), "empty path component rejected");
         ok(new UpdateCore(root, 210).current() == 210, "newer installed APK supersedes old game bundle");
+        File multiRoot = Files.createTempDirectory("feral-selection-").toFile();
+        UpdateCore multi = new UpdateCore(multiRoot, 301);
+        rejects(() -> good.stage(multi, 205), "automatic downgrade still rejected");
+        UpdateCore.checkSelection(205, 205, 301, 301, 0);
+        multi.stage(205, good.bytes, good.hashes, good.expanded, UpdateCore.sha256(good.bytes), true);
+        ok(multi.pending() == 205, "explicit older selection prepared");
+        multi.beginTrial("{\"feral.world.v1\":\"301-save\"}");
+        ok(multi.current() == 205 && "{}".equals(multi.activationSnapshot()), "older game starts with independent empty saves");
+        multi.healthy(205);
+        UpdateCore reopened = new UpdateCore(multiRoot, 301);
+        ok(reopened.current() == 205 && reopened.activeDirectory().isDirectory(), "explicit old selection survives native restart");
+        reopened.selectBuiltin(); reopened.beginTrial("{\"feral.world.v1\":\"205-save\"}");
+        ok(reopened.current() == 301 && reopened.activeDirectory() == null, "bundled game can be selected offline");
+        ok(reopened.activationSnapshot().contains("301-save"), "return restores original version saves");
+        reopened.healthy(301);
+        reopened.stage(205, good.bytes, good.hashes, good.expanded, UpdateCore.sha256(good.bytes), true);
+        reopened.beginTrial("{\"feral.world.v1\":\"301-updated\"}");
+        ok(reopened.activationSnapshot().contains("205-save"), "old game retains its own progress");
+        ok(reopened.rollback() && reopened.current() == 301 && reopened.snapshot().contains("301-updated"), "failed older selection rolls back both code and save");
+        rejects(() -> UpdateCore.checkSelection(400, 302, 301, 301, 0), "manual selection cannot bypass minimum native");
         System.out.println("Native updater checks: " + count);
     }
 }

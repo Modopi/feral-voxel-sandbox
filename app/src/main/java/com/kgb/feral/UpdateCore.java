@@ -22,9 +22,14 @@ public final class UpdateCore {
         Files.createDirectories(root.toPath());
         File f = new File(root, "state.properties");
         if (f.isFile()) try (InputStream in = new FileInputStream(f)) { state.load(in); }
-        // 새 APK가 포함한 코드보다 오래된 내려받기 버전의 선택 방지
-        if (number("active") <= builtin && number("trial") == 0) state.setProperty("active", "0");
-        if (number("pending") <= builtin) state.setProperty("pending", "0");
+        // 새 네이티브 설치 시에만 동봉 버전을 기본값으로 선택
+        int previousNative = number("native");
+        if (previousNative != builtin) {
+            if (number("active") <= builtin && number("trial") == 0) state.setProperty("active", "0");
+            if (number("pending") <= builtin) state.setProperty("pending", "0");
+            state.setProperty("native", Integer.toString(builtin));
+            save();
+        }
     }
 
     public static void verifySignature(byte[] manifest, byte[] signature, byte[] publicKey) throws GeneralSecurityException {
@@ -48,6 +53,25 @@ public final class UpdateCore {
         if (code == blocked) throw new IOException("시작에 실패한 버전입니다. 다음 릴리스를 기다려 주세요.");
     }
 
+    // 자동 업데이트의 단조 증가와 분리한 명시적 버전 선택 계약
+    public static void checkSelection(int code, int minNative, int nativeCode, int current, int blocked) throws IOException {
+        if (code < 205 || minNative < 205 || minNative > nativeCode) throw new IOException("이 게임은 새 APK가 필요합니다.");
+        if (code == current) throw new IOException("현재 실행 중인 게임입니다.");
+        if (code == blocked) throw new IOException("시작에 실패한 빌드입니다. 수정 버전을 선택하세요.");
+    }
+    public synchronized void selectBuiltin() throws IOException {
+        if (trial()) throw new IOException("시작 검증 중입니다.");
+        checkSelection(builtin, builtin, builtin, current(), blocked());
+        state.setProperty("pending", Integer.toString(builtin));
+        state.setProperty("pendingManual", "1");
+        save();
+    }
+    public synchronized String activationSnapshot() throws IOException {
+        if (number("isolateTrial") != 1 || !trial()) return null;
+        state.setProperty("isolateTrial", "0"); save();
+        File f = new File(root, "saves/" + current() + ".json");
+        return f.isFile() ? new String(Files.readAllBytes(f.toPath()), "UTF-8") : "{}";
+    }
     public static File safeFile(File base, String path) throws IOException {
         if (path == null || path.isEmpty() || path.startsWith("/") || path.contains("\\")
                 || path.contains(":") || path.contains("\u0000")) throw new IOException("잘못된 파일 경로입니다.");
@@ -61,7 +85,13 @@ public final class UpdateCore {
     // 서명된 목록과 ZIP의 파일 집합·내용 모두 일치한 경우에만 준비 완료 처리
     public synchronized void stage(int code, byte[] archive, Map<String, String> hashes,
                                    int expandedBytes, String archiveHash) throws Exception {
-        checkVersion(code, 0, builtin, current(), number("blocked"));
+        stage(code, archive, hashes, expandedBytes, archiveHash, false);
+    }
+    public synchronized void stage(int code, byte[] archive, Map<String, String> hashes,
+                                   int expandedBytes, String archiveHash, boolean manual) throws Exception {
+        if (trial()) throw new IOException("시작 검증 중에는 버전을 준비할 수 없습니다.");
+        if (manual) checkSelection(code, 205, builtin, current(), blocked());
+        else checkVersion(code, 0, builtin, current(), blocked());
         if (archive.length > MAX_ARCHIVE || !sha256(archive).equals(archiveHash)
                 || expandedBytes < 1 || expandedBytes > MAX_EXPANDED
                 || hashes.size() > MAX_FILES || !hashes.containsKey("index.html")
@@ -92,9 +122,18 @@ public final class UpdateCore {
             }
             if (total != expandedBytes || !seen.equals(hashes.keySet())) throw new IOException("업데이트 파일이 누락되었습니다.");
             File destination = versionDir(code);
-            remove(destination);
-            Files.createDirectories(destination.getParentFile().toPath());
-            move(staging, destination);
+            if (destination.exists()) {
+                for (Map.Entry<String,String> e : hashes.entrySet()) {
+                    File f = safeFile(destination, e.getKey());
+                    if (!f.isFile() || !sha256(Files.readAllBytes(f.toPath())).equals(e.getValue()))
+                        throw new IOException("같은 버전 번호의 다른 내용은 설치할 수 없습니다.");
+                }
+                remove(staging);
+            } else {
+                Files.createDirectories(destination.getParentFile().toPath());
+                move(staging, destination);
+            }
+            state.setProperty("pendingManual", manual ? "1" : "0");
             state.setProperty("pending", Integer.toString(code));
             save();
         } catch (Exception e) { remove(staging); throw e; }
@@ -110,12 +149,15 @@ public final class UpdateCore {
 
     public synchronized boolean beginTrial(String snapshot) throws IOException {
         int pending = number("pending");
-        if (pending <= current() || pending == number("blocked")) return false;
-        if (!new File(versionDir(pending), "index.html").isFile()) throw new IOException("준비된 버전이 없습니다.");
+        boolean manual = number("pendingManual") == 1;
+        if (pending == 0 || pending == current() || (!manual && pending <= current()) || pending == number("blocked")) return false;
+        if (pending != builtin && !new File(versionDir(pending), "index.html").isFile()) throw new IOException("준비된 버전이 없습니다.");
         // 저장 스냅샷을 먼저 영속화한 후 활성 버전 포인터를 원자적으로 전환
         atomicWrite(new File(root, "save-backup.json"), snapshot.getBytes("UTF-8"));
+        atomicWrite(new File(root, "saves/" + current() + ".json"), snapshot.getBytes("UTF-8"));
+        state.setProperty("isolateTrial", manual ? "1" : "0");
         state.setProperty("previous", Integer.toString(number("active")));
-        state.setProperty("active", Integer.toString(pending));
+        state.setProperty("active", pending == builtin ? "0" : Integer.toString(pending));
         state.setProperty("trial", Integer.toString(pending));
         state.setProperty("pending", "0");
         save();
@@ -141,7 +183,7 @@ public final class UpdateCore {
     public synchronized boolean rollback() throws IOException {
         int failed = number("active");
         int previous = number("previous");
-        if (previous <= builtin || !new File(versionDir(previous), "index.html").isFile()) previous = 0;
+        if (previous != 0 && !new File(versionDir(previous), "index.html").isFile()) previous = 0;
         state.setProperty("active", Integer.toString(previous));
         state.setProperty("blocked", Integer.toString(failed));
         state.setProperty("trial", "0");
@@ -159,11 +201,11 @@ public final class UpdateCore {
         File f = new File(root, "save-backup.json");
         return f.isFile() ? new String(Files.readAllBytes(f.toPath()), "UTF-8") : "null";
     }
-    public synchronized int current() { return Math.max(builtin, number("active")); }
+    public synchronized int current() { return number("active") == 0 ? builtin : number("active"); }
     public synchronized int pending() { return number("pending"); }
     public synchronized int blocked() { return number("blocked"); }
     public synchronized boolean trial() { return number("trial") != 0; }
-    public synchronized File activeDirectory() { return number("active") > builtin ? versionDir(number("active")) : null; }
+    public synchronized File activeDirectory() { return number("active") != 0 ? versionDir(number("active")) : null; }
     private File versionDir(int code) { return new File(root, "versions/" + code); }
     private int number(String key) { try { return Integer.parseInt(state.getProperty(key, "0")); } catch (NumberFormatException e) { return 0; } }
     private void save() throws IOException {

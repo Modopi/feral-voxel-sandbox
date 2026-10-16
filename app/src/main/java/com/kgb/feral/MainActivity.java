@@ -31,7 +31,7 @@ public final class MainActivity extends Activity {
             core = new UpdateCore(new File(getFilesDir(), "updates"), pkg.versionCode);
             boolean recovered = core.recover();
             if (recovered) restore = core.snapshot();
-            updates = new UpdateManager(this, core, pkg.versionCode, pkg.versionName, this::notifyUpdates);
+            updates = new UpdateManager(this, core, pkg.versionCode, pkg.versionName, this::notifyUpdates, this::saveThen, this::launchBootstrap);
             if (recovered) updates.recovered();
         } catch (Exception e) { fatal("업데이트 상태를 읽지 못했습니다. 앱을 다시 실행해 주세요."); return; }
         game = new WebView(this);
@@ -71,9 +71,25 @@ public final class MainActivity extends Activity {
             }
         });
         game.addJavascriptInterface(new NativeBridge(), "AndroidApp");
-        setContentView(game);
+        android.widget.FrameLayout shell = new android.widget.FrameLayout(this);
+        shell.addView(game);
+        android.widget.Button versions = new android.widget.Button(this);
+        versions.setText("게임 버전"); versions.setTextSize(10);
+        android.widget.FrameLayout.LayoutParams button = new android.widget.FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, Gravity.TOP | Gravity.CENTER_HORIZONTAL);
+        versions.setAlpha(0.8f); versions.setOnClickListener(v -> { if (!bootstrapping) updates.chooseVersions(); });
+        shell.addView(versions, button);
+        setContentView(shell);
         immersive();
         launchBootstrap();
+    }
+
+    private void saveThen(Runnable next) {
+        if (bootstrapping || destroyed || core.trial()) return;
+        game.evaluateJavascript("(function(){try{const n=window.FeralNative; const playing=window.FERAL&&window.FERAL.stats?window.FERAL.stats().running:undefined; if(n&&n.save&&playing!==false&&n.save()===false)return false;if(n&&n.pause)n.pause();return true}catch(e){return false}})()", result -> {
+            if ("true".equals(result)) next.run();
+            else new AlertDialog.Builder(this).setTitle("게임 전환 중단").setMessage("현재 게임을 저장하지 못했습니다.").setPositiveButton("닫기", null).show();
+        });
     }
 
     private void launchBootstrap() {
@@ -115,11 +131,12 @@ public final class MainActivity extends Activity {
         @JavascriptInterface public String platform() { return "Android"; }
         @JavascriptInterface public String updateStatus() { return updates.status(); }
         @JavascriptInterface public void configureUpdates() { runOnUiThread(() -> updates.configure()); }
+        @JavascriptInterface public void chooseVersions() { runOnUiThread(() -> updates.chooseVersions()); }
         @JavascriptInterface public void checkUpdates() { updates.check(true); }
         @JavascriptInterface public void setAutoUpdates(boolean enabled) { updates.setAutomatic(enabled); }
         @JavascriptInterface public void applyUpdate() {
             runOnUiThread(() -> {
-                if (core.pending() <= core.current() || core.trial()) return;
+                if ((core.pending() == 0 || core.pending() == core.current()) || core.trial()) return;
                 game.evaluateJavascript("window.FeralNative && window.FeralNative.pause()", result -> launchBootstrap());
             });
         }
@@ -130,7 +147,14 @@ public final class MainActivity extends Activity {
                     if (snapshot.length() > 8 * 1024 * 1024) throw new IOException("저장 크기 초과");
                     new JSONObject(snapshot);
                     core.restored();
-                    core.beginTrial(snapshot);
+                    boolean activated = core.beginTrial(snapshot);
+                    String selectedSave = activated ? core.activationSnapshot() : null;
+                    if (selectedSave != null) {
+                        new JSONObject(selectedSave);
+                        restore = selectedSave;
+                        game.loadUrl(ORIGIN + "/bootstrap");
+                        return;
+                    }
                     activeDirectory = core.activeDirectory();
                     restore = "null";
                     bootstrapping = false;

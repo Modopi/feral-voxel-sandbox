@@ -2,7 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 node tools/version.mjs --check
-FERAL_VERSION="$(node -p 'JSON.parse(require("fs").readFileSync("version.json","utf8")).version')"
+FERAL_VERSION="$(node -p 'JSON.parse(require("fs").readFileSync("version.json","utf8")).nativeVersion || JSON.parse(require("fs").readFileSync("version.json","utf8")).version')"
 FERAL_APK="build/Feral-$FERAL_VERSION-android.apk"
 FERAL_SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-../toolchain/sdk}}"
 if [[ -d "$FERAL_SDK/build-tools" ]]; then

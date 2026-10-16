@@ -35,7 +35,7 @@ export function initUpdates({ beforeApply }) {
         : "GitHub 연결 필요";
       $("updateMessage").textContent =
         s.message ||
-        (s.pendingCode > s.runtimeCode
+        (s.pendingCode !== 0 && s.pendingCode !== s.runtimeCode
           ? `${s.pendingVersion} 준비 완료 · 다음 실행에 적용합니다.`
           : "저장된 버전으로 오프라인에서도 탐험할 수 있습니다.");
       $("automaticUpdates").checked = s.automatic;
@@ -44,13 +44,13 @@ export function initUpdates({ beforeApply }) {
       $("connectUpdates").textContent = s.configured
         ? "GitHub 연결 관리"
         : "GitHub 연결";
-      $("applyUpdate").disabled = !(s.pendingCode > s.runtimeCode);
+      $("applyUpdate").disabled = !(s.pendingCode !== 0 && s.pendingCode !== s.runtimeCode);
       $("applyUpdate").classList.toggle(
         "hidden",
-        !(s.pendingCode > s.runtimeCode),
+        !(s.pendingCode !== 0 && s.pendingCode !== s.runtimeCode),
       );
       $("updateBadge").textContent =
-        s.pendingCode > s.runtimeCode
+        s.pendingCode !== 0 && s.pendingCode !== s.runtimeCode
           ? "준비됨"
           : `v${VERSION.version}`;
       $("updateLastCheck").textContent = s.lastCheck

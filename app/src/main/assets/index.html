@@ -87,6 +87,7 @@
             이전 탐험 이어하기 ↗
           </button>
         </div>
+        <p><a href="worlds.html" style="color:#b8ebd1;font-weight:700">내 월드 · 기본 맵 / 기계 베타 맵 →</a></p>
         <div id="loadStatus">지형과 생태계를 준비합니다.</div>
       </div>
       <div class="specs">
@@ -115,7 +116,7 @@
       </div>
       <div class="titleFooter">
         <span>TOUCH TO EXPLORE / LANDSCAPE RECOMMENDED</span
-        ><span data-game-version>FERAL 0.2.5</span>
+        ><span data-game-version>FERAL 0.3.1</span>
       </div>
     </div>
     <div id="pauseScreen" class="screen hidden">
@@ -168,7 +169,7 @@
             생태의 변화를 관찰하세요.
           </p>
           <div class="buttonRow">
-            <button id="saveBtn" class="primary">지금 저장</button
+            <a href="worlds.html" id="worldListBtn" class="secondary">저장 후 월드 목록</a><button id="saveBtn" class="primary">지금 저장</button
             ><button id="homeBtn" class="secondary">출발 지점</button
             ><button id="newBtn" class="secondary danger">새 세계</button>
           </div>
@@ -282,7 +283,7 @@
             <input id="automaticUpdates" type="checkbox" checked />
           </label>
           <div class="buttonRow">
-            <button id="connectUpdates" class="secondary">GitHub 연결</button>
+            <button id="chooseGameVersion" onclick="window.AndroidApp?.chooseVersions?.()" class="secondary">게임 버전 선택</button><button id="connectUpdates" class="secondary">GitHub 연결</button>
             <button id="checkUpdates" class="secondary">지금 확인</button>
             <button id="applyUpdate" class="primary hidden">저장 후 적용</button>
           </div>
@@ -291,7 +292,7 @@
           <p class="updateHelp">최근 확인: <span id="updateLastCheck">아직 확인하지 않음</span></p>
         </section>
         <div class="panelFooter">
-          <span><span data-game-version>FERAL 0.2.5</span> / 생태 복셀 프로토타입</span
+          <span><span data-game-version>FERAL 0.3.1</span> / 생태 복셀 프로토타입</span
           ><button id="backToGame" class="textButton">탐험 계속 →</button>
         </div>
       </div>

@@ -1,3 +1,5 @@
+import {currentWorld,saveKey} from "./world-slots.js";
+const activeWorld=currentWorld(localStorage,"island",location.search);
 import { World, B, SIZE, HEIGHT, COLORS, clamp } from "./world.js";
 import { Ecology, SPECIES } from "./entities.js";
 import { View, T } from "./render.js";
@@ -28,7 +30,7 @@ let inventory = new Inventory(),
   lastInventoryRevision = -1,
   collectedMessage = 0;
 const $ = (id) => document.getElementById(id),
-  storageKey = "feral.world.v1";
+  storageKey = saveKey(activeWorld);
 const tools = [
   ["◈", "관찰", "관찰 렌즈", "생태와 신체 상태 읽기"],
   ["⌁", "펄스", "복셀 펄스", "개체의 복셀을 정밀하게 깎기"],
@@ -855,6 +857,7 @@ function frame(now) {
         $("startBtn").querySelector("span").textContent = "새로운 탐험";
       }
       refreshAPI();
+      if (new URLSearchParams(location.search).has("world")) start(!!localStorage.getItem(storageKey));
     }
   }
   let moving = 0;
@@ -975,10 +978,11 @@ function refreshAPI() {
     },
   };
 }
-$("startBtn").onclick = () => start(false);
+$("startBtn").onclick = () => { if (localStorage.getItem(storageKey)) location.href="worlds.html"; else start(false); };
 $("continueBtn").onclick = () => start(true);
 $("menuBtn").onclick = () => pause(true);
 $("resumeBtn").onclick = $("backToGame").onclick = () => pause(false);
+$("worldListBtn").onclick = (e) => { if (!save(true)) e.preventDefault(); };
 $("saveBtn").onclick = () => save();
 $("homeBtn").onclick = () => {
   home();
@@ -1198,7 +1202,7 @@ window.FeralUpdates = initUpdates({
   beforeApply: () => !running || save(true),
 });
 try {
-  world = new World();
+  world = new World(activeWorld.seed);
   world.generate();
   world.event = event;
   eco = new Ecology(world);

@@ -1,7 +1,7 @@
 name: FERAL versioned release
 on:
   push:
-    branches: [main]
+    branches: [main, "V_**"]
   workflow_dispatch:
 permissions:
   contents: write
@@ -20,6 +20,10 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+      - name: Prepare branch game version
+        run: |
+          python3 tools/prepare-branch.py
+          node tools/version.mjs
       - name: Check versions and regressions
         run: |
           node tools/version.mjs --check
@@ -31,7 +35,7 @@ jobs:
           fi
       - name: Build APK and signed game update
         run: |
-          bash build-apk.sh
+          if [[ "$GITHUB_REF_NAME" == "main" ]]; then bash build-apk.sh; fi
           python3 tools/build-update.py
       - uses: actions/upload-artifact@v4
         with:

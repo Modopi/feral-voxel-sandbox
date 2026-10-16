@@ -5,6 +5,7 @@ import hashlib
 import io
 import json
 import re
+import os
 from pathlib import Path
 import subprocess
 import zipfile
@@ -41,6 +42,9 @@ def build():
         native_hash.update(path.relative_to(ROOT).as_posix().encode() + b"\0" + contents)
     manifest = {"format": 1, **v, "nativeSha256": native_hash.hexdigest(), "archiveBytes": len(data), "expandedBytes": expanded,
                 "archiveSha256": hashlib.sha256(data).hexdigest(), "files": files}
+    if os.environ.get("GITHUB_REF_NAME", "").startswith("V_"):
+        manifest["sourceBranch"] = os.environ["GITHUB_REF_NAME"]
+        manifest["sourceCommit"] = os.environ["GITHUB_SHA"]
     raw = json.dumps(manifest, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()
     (output / "manifest.json").write_bytes(raw)
     subprocess.run(["java", "tools/BundleSigner.java", "signing/prototype.keystore", "android", "sign",

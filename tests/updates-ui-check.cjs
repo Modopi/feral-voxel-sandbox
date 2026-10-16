@@ -1,5 +1,6 @@
 const { chromium } = require("playwright");
 const fs = require("node:fs");
+const version = JSON.parse(fs.readFileSync("version.json", "utf8"));
 const assert = require("node:assert/strict");
 (async () => {
   const browser = await chromium.launch({
@@ -57,11 +58,16 @@ const assert = require("node:assert/strict");
   await page.waitForFunction(() => window.__calls.healthy.length > 0, {
     timeout: 30000,
   });
-  assert.deepEqual(await page.evaluate(() => window.__calls.healthy), [205]);
+  assert.deepEqual(await page.evaluate(() => window.__calls.healthy), [
+    version.versionCode,
+  ]);
   await page.click("#startBtn");
   await page.click("#menuBtn");
   await page.click('[data-tab="updates"]');
-  assert.equal(await page.locator("#gameVersion").textContent(), "0.2.5");
+  assert.equal(
+    await page.locator("#gameVersion").textContent(),
+    version.version,
+  );
   assert.equal(await page.locator("#checkUpdates").isDisabled(), true);
   await page.click("#connectUpdates");
   assert.equal(await page.evaluate(() => window.__calls.connected), 1);

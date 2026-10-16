@@ -42,7 +42,9 @@ def publish():
     build = ROOT / "build/release"
     bundle = build / f"Feral-{version['version']}-update.feral"
     packed = bundle.read_bytes()
-    current = optional(prefix + "/contents/stable.feral?ref=updates")
+    branch = os.environ.get("GITHUB_REF_NAME", "main")
+    experiment = branch.startswith("V_")
+    current = None if experiment else optional(prefix + "/contents/stable.feral?ref=updates")
     if current:
         content = current if current.get("encoding") == "base64" else request(prefix + "/git/blobs/" + current["sha"])
         previous = json.loads(base64.b64decode(content["content"]))
@@ -57,15 +59,16 @@ def publish():
             return
         if old.get("nativeSha256") != new.get("nativeSha256") and version["minNativeCode"] != version["versionCode"]:
             raise RuntimeError("Native changes require minNativeCode = versionCode and a new APK")
-    tag = "v" + version["version"]
+    tag = ("game-" + str(version["versionCode"])) if experiment else "v" + version["version"]
     release = optional(prefix + "/releases/tags/" + tag)
     notes = (ROOT / "CHANGELOG.md").read_text().split("\n# ")[0].strip()
     notes += "\n\n비공개 배포 · 기존 앱에 APK 업데이트 설치 후 메뉴 → 업데이트에서 GitHub 연결.\n운영 절차: docs/RELEASING.md"
     if not release:
         release = request(prefix + "/releases", {"tag_name": tag, "target_commitish": os.environ["GITHUB_SHA"],
-            "name": "FERAL " + version["version"], "body": notes, "draft": True, "prerelease": False})
-    assets = [ROOT / "build" / f"Feral-{version['version']}-android.apk", bundle,
-              build / "manifest.json", build / "manifest.sig", build / "SHA256SUMS.txt"]
+            "name": "FERAL " + version["version"], "body": notes, "draft": True, "prerelease": experiment})
+    assets = [bundle, build / "manifest.json", build / "manifest.sig", build / "SHA256SUMS.txt"]
+    if not experiment:
+        assets.insert(0, ROOT / "build" / f"Feral-{version.get('nativeVersion', version['version'])}-android.apk")
     if release["draft"]:
         existing = {a["name"]: a for a in request(prefix + f"/releases/{release['id']}/assets")}
         for path in assets:
@@ -73,7 +76,7 @@ def publish():
             if path.name in existing:
                 request(prefix + f"/releases/assets/{existing[path.name]['id']}", method="DELETE")
             request(f"https://uploads.github.com/repos/{repo}/releases/{release['id']}/assets?name={path.name}", path.read_bytes(), binary=True)
-        request(prefix + f"/releases/{release['id']}", {"draft": False, "make_latest": "true"}, method="PATCH")
+        request(prefix + f"/releases/{release['id']}", {"draft": False, "make_latest": "false" if experiment else "true"}, method="PATCH")
     else:
         existing = {a["name"]: a for a in request(prefix + f"/releases/{release['id']}/assets")}
         if not all(path.name in existing for path in assets):
@@ -85,19 +88,44 @@ def publish():
     ref = optional(prefix + "/git/ref/heads/updates")
     parents = [ref["object"]["sha"]] if ref else []
     base_tree = request(prefix + "/git/commits/" + parents[0])["tree"]["sha"] if parents else None
+    manifest = json.loads(base64.b64decode(json.loads(packed)["manifest"]))
+    code = version["versionCode"]
+    package_path = f"builds/{code}.feral" if experiment else f"versions/{version['version']}.feral"
+    catalog_file = optional(prefix + "/contents/catalog.json?ref=updates")
+    catalog = json.loads(base64.b64decode(catalog_file["content"])) if catalog_file else {"format": 1, "versions": []}
+    entries = []
+    # 최초 전환 시 이미 게시된 0.2.5 등의 패키지를 목록에 포함
+    if not catalog_file and current:
+        old_code = old["versionCode"]
+        catalog["versions"].append({"version": old["version"], "versionCode": old_code,
+            "minNativeCode": old["minNativeCode"], "path": f"versions/{old['version']}.feral", "branch": "legacy stable"})
+    previous_entry = next((v for v in catalog["versions"] if v["versionCode"] == code), None)
+    row = {"version": version["version"], "versionCode": code, "minNativeCode": version["minNativeCode"],
+           "path": package_path, "branch": branch, "commit": os.environ["GITHUB_SHA"],
+           "archiveSha256": manifest["archiveSha256"]}
+    if previous_entry and previous_entry != row:
+        raise RuntimeError("A build number already exists with different content")
+    if not previous_entry: catalog["versions"].append(row)
+    if len(catalog["versions"]) > 500: raise RuntimeError("Catalog limit reached")
+    old_package = optional(prefix + "/contents/" + package_path + "?ref=updates")
+    if old_package and base64.b64decode(old_package["content"]) != packed:
+        raise RuntimeError("Existing game packages are immutable")
     blob = request(prefix + "/git/blobs", {"content": packed.decode(), "encoding": "utf-8"})["sha"]
-    entries = [{"path": path, "mode": "100644", "type": "blob", "sha": blob}
-               for path in ["stable.feral", f"versions/{version['version']}.feral"]]
+    entries.append({"path": package_path, "mode": "100644", "type": "blob", "sha": blob})
+    if not experiment:
+        entries.append({"path": "stable.feral", "mode": "100644", "type": "blob", "sha": blob})
+    catalog_blob = request(prefix + "/git/blobs", {"content": json.dumps(catalog, ensure_ascii=False), "encoding": "utf-8"})["sha"]
+    entries.append({"path": "catalog.json", "mode": "100644", "type": "blob", "sha": catalog_blob})
     data = {"tree": entries}
     if base_tree:
         data["base_tree"] = base_tree
     tree = request(prefix + "/git/trees", data)["sha"]
-    commit = request(prefix + "/git/commits", {"message": "Publish " + tag + " to stable", "tree": tree, "parents": parents})["sha"]
+    commit = request(prefix + "/git/commits", {"message": "Publish " + tag + (" to version catalog" if experiment else " to stable and catalog"), "tree": tree, "parents": parents})["sha"]
     if ref:
         request(prefix + "/git/refs/heads/updates", {"sha": commit, "force": False}, method="PATCH")
     else:
         request(prefix + "/git/refs", {"ref": "refs/heads/updates", "sha": commit})
-    print("Published " + tag + " and advanced stable")
+    print("Published " + tag + (" to catalog" if experiment else " and advanced stable/catalog"))
 
 
 if __name__ == "__main__":
