@@ -29,6 +29,11 @@ test("actual release bundle matches the pinned Android verification key and payl
     manifest.versionCode,
     JSON.parse(fs.readFileSync("version.json")).versionCode,
   );
+  const apkName = `Feral-${manifest.nativeVersion || manifest.version}-android.apk`;
+  if (!process.env.GITHUB_REF_NAME?.startsWith("V_") && fs.existsSync(`build/${apkName}`)) {
+    const apkHash = crypto.createHash("sha256").update(fs.readFileSync(`build/${apkName}`)).digest("hex");
+    assert.ok(fs.readFileSync("build/release/SHA256SUMS.txt", "utf8").includes(`${apkHash}  ${apkName}`));
+  }
   const previous = fs.readFileSync("build/release/stable.feral");
   execFileSync("python3", ["tools/build-update.py"]);
   assert.deepEqual(

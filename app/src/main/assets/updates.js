@@ -1,6 +1,6 @@
 import { VERSION } from "./version.js";
 
-// 화면에는 연결 상태만 노출하며 토큰 입력과 보관은 Android에서 처리
+// 공개 업데이트는 로그인 없이 사용. 구 네이티브 상태 응답도 읽을 수 있도록 유지.
 export function initUpdates({ beforeApply }) {
   const $ = (id) => document.getElementById(id);
   const bridge = window.AndroidApp;
@@ -23,6 +23,7 @@ export function initUpdates({ beforeApply }) {
         "checkUpdates",
         "applyUpdate",
         "automaticUpdates",
+        "chooseGameVersion",
       ])
         $(id).disabled = true;
       return;
@@ -30,21 +31,29 @@ export function initUpdates({ beforeApply }) {
     try {
       const s = JSON.parse(bridge.updateStatus());
       $("nativeVersion").textContent = s.nativeVersion;
-      $("updateConnection").textContent = s.configured
-        ? "비공개 GitHub 연결됨"
-        : "GitHub 연결 필요";
+      const publicUpdates = s.publicUpdates === true;
+      $("updateConnection").textContent = publicUpdates
+        ? "공개 GitHub 업데이트 · 로그인 불필요"
+        : s.configured
+          ? "GitHub 연결됨"
+          : "공개 업데이트를 사용하려면 앱 0.3.2 설치";
       $("updateMessage").textContent =
         s.message ||
         (s.pendingCode !== 0 && s.pendingCode !== s.runtimeCode
           ? `${s.pendingVersion} 준비 완료 · 다음 실행에 적용합니다.`
           : "저장된 버전으로 오프라인에서도 탐험할 수 있습니다.");
       $("automaticUpdates").checked = s.automatic;
-      $("checkUpdates").disabled = s.busy || !s.configured;
+      $("checkUpdates").disabled = s.busy || (!publicUpdates && !s.configured);
       $("connectUpdates").disabled = s.busy;
-      $("connectUpdates").textContent = s.configured
-        ? "GitHub 연결 관리"
-        : "GitHub 연결";
-      $("applyUpdate").disabled = !(s.pendingCode !== 0 && s.pendingCode !== s.runtimeCode);
+      $("chooseGameVersion").disabled = s.busy;
+      $("connectUpdates").textContent = publicUpdates
+        ? "업데이트 안내"
+        : s.configured
+          ? "GitHub 연결 관리"
+          : "GitHub 연결";
+      $("applyUpdate").disabled = !(
+        s.pendingCode !== 0 && s.pendingCode !== s.runtimeCode
+      );
       $("applyUpdate").classList.toggle(
         "hidden",
         !(s.pendingCode !== 0 && s.pendingCode !== s.runtimeCode),

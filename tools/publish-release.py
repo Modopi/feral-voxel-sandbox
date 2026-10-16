@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""버전 번호가 증가했을 때 비공개 Release와 updates 채널 게시."""
+"""버전 번호가 증가했을 때 공개 Release와 updates 채널 게시."""
 import base64
 import hashlib
 import json
@@ -33,6 +33,15 @@ def optional(path):
         raise
 
 
+def check_native_upgrade(old, new):
+    if old.get("nativeSha256") == new.get("nativeSha256"):
+        return
+    native_code = new.get("nativeCode", new["versionCode"])
+    previous_native = old.get("nativeCode", old["versionCode"])
+    if native_code <= previous_native or new["minNativeCode"] != native_code:
+        raise RuntimeError("Native changes require an increased nativeCode, minNativeCode = nativeCode and a new APK")
+
+
 def publish():
     repo = os.environ.get("GITHUB_REPOSITORY", "Modopi/feral-voxel-sandbox")
     if repo != "Modopi/feral-voxel-sandbox":
@@ -57,12 +66,14 @@ def publish():
                 raise RuntimeError("Released versions are immutable. Bump version.json before changing shipped code.")
             print("Already published; no new release")
             return
-        if old.get("nativeSha256") != new.get("nativeSha256") and version["minNativeCode"] != version["versionCode"]:
-            raise RuntimeError("Native changes require minNativeCode = versionCode and a new APK")
+        check_native_upgrade(old, new)
     tag = ("game-" + str(version["versionCode"])) if experiment else "v" + version["version"]
     release = optional(prefix + "/releases/tags/" + tag)
     notes = (ROOT / "CHANGELOG.md").read_text().split("\n# ")[0].strip()
-    notes += "\n\n비공개 배포 · 기존 앱에 APK 업데이트 설치 후 메뉴 → 업데이트에서 GitHub 연결.\n운영 절차: docs/RELEASING.md"
+    notes += "\n\n공개 배포 · 앱 0.3.2부터 로그인이나 토큰 없이 메뉴 → 업데이트에서 확인·게임 버전 선택."
+    if not experiment:
+        notes += " 기존 앱을 삭제하지 말고 APK를 업데이트 설치하세요."
+    notes += "\n운영 절차: docs/RELEASING.md"
     if not release:
         release = request(prefix + "/releases", {"tag_name": tag, "target_commitish": os.environ["GITHUB_SHA"],
             "name": "FERAL " + version["version"], "body": notes, "draft": True, "prerelease": experiment})

@@ -13,10 +13,14 @@ public final class UpdateCore {
     public static final int MAX_EXPANDED = 32 * 1024 * 1024;
     public static final int MAX_FILES = 128;
     private final File root;
-    private final int builtin;
+    private final int builtin, nativeCode;
     private final Properties state = new Properties();
 
     public UpdateCore(File root, int builtin) throws IOException {
+        this(root, builtin, builtin);
+    }
+    public UpdateCore(File root, int builtin, int nativeCode) throws IOException {
+        this.nativeCode = nativeCode;
         this.root = root;
         this.builtin = builtin;
         Files.createDirectories(root.toPath());
@@ -24,10 +28,10 @@ public final class UpdateCore {
         if (f.isFile()) try (InputStream in = new FileInputStream(f)) { state.load(in); }
         // 새 네이티브 설치 시에만 동봉 버전을 기본값으로 선택
         int previousNative = number("native");
-        if (previousNative != builtin) {
+        if (previousNative != nativeCode) {
             if (number("active") <= builtin && number("trial") == 0) state.setProperty("active", "0");
             if (number("pending") <= builtin) state.setProperty("pending", "0");
-            state.setProperty("native", Integer.toString(builtin));
+            state.setProperty("native", Integer.toString(nativeCode));
             save();
         }
     }
@@ -61,7 +65,7 @@ public final class UpdateCore {
     }
     public synchronized void selectBuiltin() throws IOException {
         if (trial()) throw new IOException("시작 검증 중입니다.");
-        checkSelection(builtin, builtin, builtin, current(), blocked());
+        checkSelection(builtin, nativeCode, nativeCode, current(), blocked());
         state.setProperty("pending", Integer.toString(builtin));
         state.setProperty("pendingManual", "1");
         save();
@@ -201,6 +205,7 @@ public final class UpdateCore {
         File f = new File(root, "save-backup.json");
         return f.isFile() ? new String(Files.readAllBytes(f.toPath()), "UTF-8") : "null";
     }
+    public int builtin() { return builtin; }
     public synchronized int current() { return number("active") == 0 ? builtin : number("active"); }
     public synchronized int pending() { return number("pending"); }
     public synchronized int blocked() { return number("blocked"); }

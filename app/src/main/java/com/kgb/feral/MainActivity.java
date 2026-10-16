@@ -28,10 +28,14 @@ public final class MainActivity extends Activity {
             | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED | WindowManager.LayoutParams.FLAG_FULLSCREEN);
         try {
             android.content.pm.PackageInfo pkg = getPackageManager().getPackageInfo(getPackageName(), 0);
-            core = new UpdateCore(new File(getFilesDir(), "updates"), pkg.versionCode);
+            JSONObject bundled;
+            try (InputStream in = getAssets().open("game-version.json")) {
+                bundled = new JSONObject(new String(UpdateManager.read(in, 4096), "UTF-8"));
+            }
+            core = new UpdateCore(new File(getFilesDir(), "updates"), bundled.getInt("versionCode"), pkg.versionCode);
             boolean recovered = core.recover();
             if (recovered) restore = core.snapshot();
-            updates = new UpdateManager(this, core, pkg.versionCode, pkg.versionName, this::notifyUpdates, this::saveThen, this::launchBootstrap);
+            updates = new UpdateManager(this, core, pkg.versionCode, pkg.versionName, bundled.getString("version"), this::notifyUpdates, this::saveThen, this::launchBootstrap);
             if (recovered) updates.recovered();
         } catch (Exception e) { fatal("업데이트 상태를 읽지 못했습니다. 앱을 다시 실행해 주세요."); return; }
         game = new WebView(this);
