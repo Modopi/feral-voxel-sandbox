@@ -104,3 +104,38 @@ body.layoutEditing #toast {opacity:1;transform:none;min-width:110px;min-height:3
   #hudInspector {width:190px;top:74px;left:8px;max-height:calc(100% - 88px);}.editorToolbar {gap:4px;padding:5px;}.editorToolbar>b {font-size:12px;margin-right:2px;}#hudEditor .editorToolbar button {padding:5px 7px;}
   .worldMenu {padding:10px;}.worldMenu main {height:calc(100dvh - 20px);}.worldMenu header {padding:12px;}.worldMenu article {flex-wrap:wrap;gap:7px;padding:10px;}.worldMenu article>div {flex-basis:calc(100% - 65px);}.worldMenu article button {flex:1;padding:8px 4px;font-size:11px;}.worldMenu .worldGlyph {width:44px;height:44px;}.worldMenu h1 {font-size:22px;}
 }
+
+/* Thumb actions stay alongside the stick, leaving the aiming area clear. */
+#hud .posture {position:absolute;bottom:76px;width:48px;height:44px;touch-action:manipulation;font-size:22px;border-radius:3px;}
+#hud .posture small {font-size:9px;white-space:nowrap;}
+#hud #sprintBtn {left:22px;right:auto;}
+#hud #crouchBtn {left:76px;right:auto;}
+#hud #crawlBtn {left:130px;right:auto;}
+#hud .posture.enabled {color:#fff0b6;border-color:#e5c875;background:#58603ee0;}
+#hud #movementState {position:absolute;left:24px;bottom:55px;font-size:10px;color:#e5dfc6;text-shadow:1px 1px #111;pointer-events:none;}
+#hud #descendBtn {right:174px;left:auto;bottom:219px;width:60px;height:60px;touch-action:none;}
+#hud [hidden]:not(.hudMeasure) {display:none!important;}
+body.leftHand #hud #sprintBtn {right:22px;left:auto;}
+body.leftHand #hud #crouchBtn {right:76px;left:auto;}
+body.leftHand #hud #crawlBtn {right:130px;left:auto;}
+body.leftHand #hud #movementState {right:24px;left:auto;}
+body.leftHand #hud #descendBtn {left:174px;right:auto;}
+body.layoutEditing #hud #flightReadout,body.layoutEditing #hud #descendBtn,body.layoutEditing #hud .posture {display:block!important;}
+@media(orientation:portrait) {
+  #hud #stick {bottom:169px;}
+  #hud .posture {bottom:109px;}
+  #hud #movementState {bottom:157px;}
+  #hud #descendBtn {right:86px;bottom:283px;width:56px;height:56px;}
+  body.leftHand #hud #descendBtn {left:86px;right:auto;}
+  #hud #toast {top:auto;bottom:352px;}
+  #hud #toolLabel {left:190px;right:16px;bottom:109px;transform:none;max-width:none;text-align:right;}
+  body.leftHand #hud #toolLabel {left:16px;right:190px;text-align:left;}
+}
+
+#flightReadout {position:absolute;left:16px;right:auto;top:99px;max-width:240px;white-space:pre-line;text-align:left;font-size:11px;line-height:1.6;color:#f1e3b2;text-shadow:1px 1px 2px #000;pointer-events:none;background:#17241d66;padding:5px 8px;border-right:2px solid #d7bc76;}
+#flightReadout.stalled {color:#ffae90;border-color:#f28362;}
+@media(orientation:portrait) {#flightReadout {top:220px;left:auto;right:12px;max-width:220px;font-size:10px;}}
+
+body.piloting #hud #rangeBtn {display:none;}
+body.piloting #hud #toast {left:auto;right:20px;top:auto;bottom:76px;max-width:175px;font-size:11px;}
+@media(orientation:portrait) {body.piloting #hud #toast {left:12px;right:auto;top:164px;bottom:auto;max-width:200px;}}

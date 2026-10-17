@@ -3,6 +3,42 @@ import { validPose } from "./assembly-state.js";
 // 표현 계층에서 독립된 기계 데이터와 고정 시간 시뮬레이션
 export const DT = 1 / 60;
 export const TYPES = Object.freeze({
+  wing: {
+    label: "주날개",
+    mass: 1.5,
+    hp: 40,
+    cost: 2,
+    color: 0xd6d3b9,
+    aviation: true,
+    hint: "좌우로 넓게 연결 · 속도와 받음각에 따라 양력 발생",
+  },
+  elevator: {
+    label: "수평 꼬리날개",
+    mass: 1.5,
+    hp: 35,
+    cost: 3,
+    color: 0xd0a76f,
+    aviation: true,
+    hint: "본체 뒤쪽에 연결 · 상승/하강으로 기수 조종",
+  },
+  rudder: {
+    label: "수직 꼬리날개",
+    mass: 1.5,
+    hp: 35,
+    cost: 3,
+    color: 0x9dbba9,
+    aviation: true,
+    hint: "본체 뒤쪽에 연결 · 좌우 선회와 방향 안정",
+  },
+  propeller: {
+    label: "프로펠러",
+    mass: 4,
+    hp: 45,
+    cost: 5,
+    color: 0xb4c5ce,
+    aviation: true,
+    hint: "앞쪽(-Z)에 연결 · 모터 동력으로 전진 추력 발생",
+  },
   cannon: { label: "포탑", mass: 28, hp: 70, cost: 8, color: 0xc2a178 },
   rotor: { label: "회전익", mass: 14, hp: 50, cost: 10, color: 0x9ac9ce },
   hull: { label: "차체", mass: 12, hp: 100, cost: 1, color: 0x8ca7a2 },
@@ -77,7 +113,11 @@ export function evaluate(s) {
     ) || [];
   const connected = new Set(group.map((p) => p.id));
   let weapons = 0,
-    lift = 0;
+    lift = 0,
+    wings = 0,
+    propellers = 0,
+    elevators = 0,
+    rudders = 0;
   let mass = 0,
     power = 0,
     left = 0,
@@ -92,8 +132,12 @@ export function evaluate(s) {
     const health = s.hp[p.id] / TYPES[p.type].hp;
     if (p.type === "cannon") weapons += health;
     if (p.type === "rotor") lift += health;
+    if (p.type === "wing") wings += health * 0.25;
+    if (p.type === "propeller") propellers += health;
+    if (p.type === "elevator") elevators += health;
+    if (p.type === "rudder") rudders += health;
     if (p.type === "motor") power += health * 600;
-    if (p.type === "wheel" && p.y === 0) {
+    if (p.type === "wheel") {
       wheels += health;
       if (p.x < 0) left += health;
       if (p.x > 0) right += health;
@@ -113,6 +157,10 @@ export function evaluate(s) {
     ),
     weapons,
     lift,
+    wings,
+    propellers,
+    elevators,
+    rudders,
     mass: Math.max(1, mass),
     power,
     grip,

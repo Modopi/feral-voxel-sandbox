@@ -3,6 +3,12 @@ export const FIXED_DT = 1 / 60,
   BODY_HEIGHT = 1.5,
   EYE_HEIGHT = 1.36,
   BODY_RADIUS = 0.23;
+export const STANCES = Object.freeze({
+  stand: { label: "걷기", height: BODY_HEIGHT, eye: EYE_HEIGHT, speed: 3.2 },
+  crouch: { label: "웅크리기", height: 1, eye: 0.86, speed: 1.6 },
+  crawl: { label: "기어가기", height: 0.5, eye: 0.36, speed: 0.85 },
+});
+export const bodyHeight = (p) => STANCES[p.stance]?.height || BODY_HEIGHT;
 const EPS = 1e-7;
 export function solidAt(world, x, y, z) {
   return !!world.getCell(
@@ -82,35 +88,65 @@ export class CharacterController {
     this.previous = { x: player.x, y: player.y, z: player.z, offset: 0 };
     this.offset = 0;
     this.jumpWasDown = false;
+    player.stance = STANCES[player.stance] ? player.stance : "stand";
+    player.desiredStance = player.stance;
+    this.eye = STANCES[player.stance].eye;
+  }
+  requestStance(stance) {
+    if (STANCES[stance]) this.player.desiredStance = stance;
+  }
+  updateStance(stance = this.player.desiredStance) {
+    const p = this.player,
+      next = STANCES[stance] || STANCES.stand;
+    p.stanceBlocked =
+      next.height > bodyHeight(p) &&
+      (overlaps(this.world, p, BODY_RADIUS, next.height) ||
+        !!this.obstructed?.(p, next.height));
+    if (!p.stanceBlocked) p.stance = STANCES[stance] ? stance : "stand";
+    p.bodyHeight = bodyHeight(p);
+    // Lower immediately so the camera never peers through the new low ceiling.
+    this.eye = Math.min(this.eye, STANCES[p.stance].eye);
+  }
+  sweep(p, axis, delta) {
+    return sweep(
+      this.world,
+      p,
+      axis,
+      delta,
+      BODY_RADIUS,
+      bodyHeight(this.player),
+    );
   }
   reset(preserveVelocity = false) {
     const p = this.player;
     this.offset = 0;
-    this.previous = { x: p.x, y: p.y, z: p.z, offset: 0 };
+    p.stance = STANCES[p.stance] ? p.stance : "stand";
+    p.desiredStance = p.stance;
+    this.eye = STANCES[p.stance].eye;
+    this.previous = { x: p.x, y: p.y, z: p.z, offset: 0, eye: this.eye };
     this.jumpWasDown = false;
     if (!preserveVelocity) p.vy = 0;
   }
   supported() {
-    return sweep(this.world, this.player, "y", -0.025) > -0.025 + EPS;
+    return this.sweep(this.player, "y", -0.025) > -0.025 + EPS;
   }
   horizontal(axis, delta) {
     const p = this.player,
-      w = this.world,
-      allowed = sweep(w, p, axis, delta);
+      allowed = this.sweep(p, axis, delta);
     if (Math.abs(allowed - delta) < EPS) {
       p[axis] += allowed;
       return;
     }
     // Half-block stairs are stepped up only if both the head and destination fit.
-    if (p.grounded && Math.abs(delta) > EPS) {
+    if (p.grounded && p.stance !== "crawl" && Math.abs(delta) > EPS) {
       const old = { x: p.x, y: p.y, z: p.z },
-        up = sweep(w, p, "y", 0.5);
+        up = this.sweep(p, "y", 0.5);
       if (up > 0.49999) {
         p.y += up;
-        const stepped = sweep(w, p, axis, delta);
+        const stepped = this.sweep(p, axis, delta);
         if (Math.abs(stepped - delta) < EPS) {
           p[axis] += stepped;
-          const down = sweep(w, p, "y", -0.525);
+          const down = this.sweep(p, "y", -0.525);
           if (down > -0.525 + EPS) {
             p.y += down;
             this.offset -= p.y - old.y;
@@ -124,7 +160,17 @@ export class CharacterController {
   }
   step(dt, input = {}) {
     const p = this.player;
-    this.previous = { x: p.x, y: p.y, z: p.z, offset: this.offset };
+    this.previous = {
+      x: p.x,
+      y: p.y,
+      z: p.z,
+      offset: this.offset,
+      eye: this.eye,
+    };
+    if (input.stance) this.requestStance(input.stance);
+    this.updateStance();
+    this.eye += (STANCES[p.stance].eye - this.eye) * (1 - Math.exp(-16 * dt));
+    this.previous.eye = Math.min(this.previous.eye, this.eye);
     this.offset *= Math.exp(-14 * dt);
     const jump = !!input.jump,
       pressed = jump && !this.jumpWasDown;
@@ -134,7 +180,10 @@ export class CharacterController {
       side = (input.side || 0) / length,
       s = Math.sin(p.yaw),
       c = Math.cos(p.yaw),
-      speed = (input.sprint ? 4.8 : 3.2) * (p.flying ? 2.2 : 1) * clamp(Number.isFinite(input.speedScale) ? input.speedScale : 1, 0, 3),
+      speed =
+        (input.sprint && p.stance === "stand" ? 4.8 : STANCES[p.stance].speed) *
+        (p.flying ? 2.2 : 1) *
+        clamp(Number.isFinite(input.speedScale) ? input.speedScale : 1, 0, 3),
       dx = (-s * f + c * side) * speed * dt,
       dz = (-c * f - s * side) * speed * dt;
     if (p.flying) {
@@ -157,7 +206,7 @@ export class CharacterController {
       this.horizontal("x", dx);
       this.horizontal("z", dz);
       const support = this.supported();
-      if (pressed && support) {
+      if (pressed && support && p.stance === "stand") {
         p.vy = 6.2;
         p.grounded = false;
       } else if (support && p.vy <= 0) {
@@ -167,7 +216,7 @@ export class CharacterController {
       if (!p.grounded) {
         p.vy = Math.max(-25, (p.vy || 0) - 18 * dt);
         const delta = p.vy * dt,
-          dy = sweep(this.world, p, "y", delta);
+          dy = this.sweep(p, "y", delta);
         p.y += dy;
         if (Math.abs(dy - delta) > EPS) {
           if (p.vy < 0) p.grounded = true;
@@ -177,7 +226,9 @@ export class CharacterController {
     }
     p.x = clamp(p.x, BODY_RADIUS, SIZE - BODY_RADIUS);
     p.z = clamp(p.z, BODY_RADIUS, SIZE - BODY_RADIUS);
-    return Math.hypot(f, side);
+    p.sprinting =
+      !!input.sprint && p.stance === "stand" && Math.hypot(f, side) > 0.1;
+    return (Math.hypot(f, side) * speed) / 3.2;
   }
   render(alpha) {
     const p = this.player,
@@ -188,7 +239,8 @@ export class CharacterController {
       y:
         b.y +
         (p.y - b.y) * a +
-        EYE_HEIGHT +
+        (b.eye ?? this.eye) +
+        (this.eye - (b.eye ?? this.eye)) * a +
         b.offset +
         (this.offset - b.offset) * a,
       z: b.z + (p.z - b.z) * a,
@@ -196,7 +248,11 @@ export class CharacterController {
   }
   recover() {
     const p = this.player;
-    for (let i = 0; i < HEIGHT * 2 && overlaps(this.world, p); i++)
+    for (
+      let i = 0;
+      i < HEIGHT * 2 && overlaps(this.world, p, BODY_RADIUS, bodyHeight(p));
+      i++
+    )
       p.y = Math.ceil((p.y + 0.001) * 2) * 0.5;
     this.reset();
     p.grounded = this.supported();

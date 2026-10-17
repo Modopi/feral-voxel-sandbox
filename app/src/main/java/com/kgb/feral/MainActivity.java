@@ -16,10 +16,10 @@ public final class MainActivity extends Activity {
     private UpdateCore core;
     private UpdateManager updates;
     private volatile File activeDirectory;
-    private boolean bootstrapping, destroyed;
+    private boolean bootstrapping, destroyed, foreground;
     private volatile String restore = "null";
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private final Runnable watchdog = () -> failTrial();
+    private final Runnable watchdog = () -> { if (foreground) failTrial("timeout"); };
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override public void onCreate(Bundle state) {
@@ -96,6 +96,10 @@ public final class MainActivity extends Activity {
         });
     }
 
+    private void armWatchdog() {
+        handler.removeCallbacks(watchdog);
+        if (foreground && core.trial() && !bootstrapping) handler.postDelayed(watchdog, 90000);
+    }
     private void launchBootstrap() {
         bootstrapping = true;
         handler.removeCallbacks(watchdog);
@@ -112,7 +116,7 @@ public final class MainActivity extends Activity {
     private static WebResourceResponse response(String mime, InputStream in) {
         Map<String, String> headers = new HashMap<>();
         headers.put("Cache-Control", "no-store");
-        headers.put("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; frame-src 'none'");
+        headers.put("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'none'; frame-src 'none'");
         return new WebResourceResponse(mime, "UTF-8", 200, "OK", headers, in);
     }
     private static WebResourceResponse empty() {
@@ -121,10 +125,11 @@ public final class MainActivity extends Activity {
     private void notifyUpdates() {
         if (game != null && !destroyed) game.evaluateJavascript("window.FeralUpdates && window.FeralUpdates.refresh()", null);
     }
-    private void failTrial() {
+    private void failTrial() { failTrial("failed"); }
+    private void failTrial(String reason) {
         if (destroyed || core == null || !core.trial()) return;
         try {
-            if (core.rollback()) restore = core.snapshot();
+            if (core.rollback(reason)) restore = core.snapshot();
             updates.recovered();
             launchBootstrap();
         } catch (IOException e) { fatal("이전 버전으로 복구하지 못했습니다. 앱을 다시 실행해 주세요."); }
@@ -135,6 +140,7 @@ public final class MainActivity extends Activity {
         @JavascriptInterface public String platform() { return "Android"; }
         @JavascriptInterface public String updateStatus() { return updates.status(); }
         @JavascriptInterface public void configureUpdates() { runOnUiThread(() -> updates.configure()); }
+        @JavascriptInterface public void retryFailedUpdate() { runOnUiThread(() -> updates.chooseVersions(true)); }
         @JavascriptInterface public void chooseVersions() { runOnUiThread(() -> updates.chooseVersions()); }
         @JavascriptInterface public void checkUpdates() { updates.check(true); }
         @JavascriptInterface public void setAutoUpdates(boolean enabled) { updates.setAutomatic(enabled); }
@@ -152,6 +158,7 @@ public final class MainActivity extends Activity {
                     new JSONObject(snapshot);
                     core.restored();
                     boolean activated = core.beginTrial(snapshot);
+                    core.trialPaused(!foreground);
                     String selectedSave = activated ? core.activationSnapshot() : null;
                     if (selectedSave != null) {
                         new JSONObject(selectedSave);
@@ -163,7 +170,7 @@ public final class MainActivity extends Activity {
                     restore = "null";
                     bootstrapping = false;
                     game.loadUrl(ORIGIN + "/assets/index.html");
-                    if (core.trial()) handler.postDelayed(watchdog, 45000);
+                    armWatchdog();
                     updates.automatic();
                 } catch (Exception e) {
                     if (core.trial()) failTrial();
@@ -187,13 +194,17 @@ public final class MainActivity extends Activity {
     }
     @Override public void onWindowFocusChanged(boolean focused) { super.onWindowFocusChanged(focused); if (focused) immersive(); }
     @Override protected void onPause() {
+        foreground = false;
         handler.removeCallbacks(watchdog);
+        try { if (core != null) core.trialPaused(true); } catch (IOException ignored) { }
         if (game != null) { game.evaluateJavascript("window.FeralNative && window.FeralNative.pause()", null); game.onPause(); }
         super.onPause();
     }
     @Override protected void onResume() {
         super.onResume();
-        if (game != null) { game.onResume(); if (core.trial() && !bootstrapping) handler.postDelayed(watchdog, 45000); }
+        foreground = true;
+        try { if (core != null) core.trialPaused(false); } catch (IOException ignored) { }
+        if (game != null) { game.onResume(); armWatchdog(); }
     }
     @Override public void onBackPressed() { if (game != null) game.evaluateJavascript("window.FeralNative && window.FeralNative.back()", null); }
     @Override protected void onDestroy() {

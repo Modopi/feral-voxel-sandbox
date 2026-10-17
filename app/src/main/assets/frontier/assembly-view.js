@@ -1,3 +1,4 @@
+import { bodyHeight } from "../physics.js";
 import { T } from "../render.js";
 import { GEAR, spendGear } from "../equipment.js";
 import { ITEMS } from "../inventory.js";
@@ -60,8 +61,29 @@ export class AssemblyView {
           const mesh = new T.Mesh(this.geometry, mat);
           mesh.position.set(p.x * 0.5, p.y * 0.5 + 0.25, p.z * 0.5);
           mesh.userData = { assembly: m, part: p };
+          if (p.type === "wing" || p.type === "elevator") mesh.scale.y = 0.14;
+          if (p.type === "rudder") mesh.scale.x = 0.14;
+          if (p.type === "propeller") mesh.scale.z = 0.26;
           object.add(mesh);
           this.meshes.push(mesh);
+          if (["wing", "elevator", "rudder", "propeller"].includes(p.type)) {
+            const stripe = new T.Mesh(
+              this.geometry,
+              (this.stripeMaterial ||= new T.MeshLambertMaterial({
+                color: 0x485f59,
+              })),
+            );
+            stripe.position.copy(mesh.position);
+            if (p.type === "rudder") {
+              stripe.scale.set(0.15, 0.2, 1);
+            } else if (p.type === "propeller") {
+              stripe.scale.set(0.26, 1.15, 0.3);
+            } else {
+              stripe.scale.set(1, 0.16, 0.18);
+              stripe.position.z -= 0.14;
+            }
+            object.add(stripe);
+          }
           if (p.type === "wheel") {
             const hub = new T.Mesh(
               this.geometry,
@@ -160,7 +182,7 @@ export class AssemblyView {
     if (
       Math.hypot(point.x - player.x, point.z - player.z) < 0.65 &&
       point.y > player.y - 0.25 &&
-      point.y < player.y + 1.75
+      point.y < player.y + bodyHeight(player) + 0.25
     )
       reason = "플레이어와 겹칩니다.";
     for (const dx of [-0.24, 0, 0.24])

@@ -22,7 +22,7 @@ test("native package verification, activation, interrupted startup and save roll
     { encoding: "utf8" },
   );
   fs.writeFileSync("build/native-update-results.txt", result);
-  assert.match(result, /Native updater checks: 44/);
+  assert.match(result, /Native updater checks: 56/);
 });
 
 test("version files agree with authoritative version.json", () => {

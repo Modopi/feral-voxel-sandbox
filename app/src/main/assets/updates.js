@@ -24,6 +24,7 @@ export function initUpdates({ beforeApply }) {
         "applyUpdate",
         "automaticUpdates",
         "chooseGameVersion",
+        "retryFailedUpdate",
       ])
         $(id).disabled = true;
       return;
@@ -42,6 +43,10 @@ export function initUpdates({ beforeApply }) {
         (s.pendingCode !== 0 && s.pendingCode !== s.runtimeCode
           ? `${s.pendingVersion} 준비 완료 · 다음 실행에 적용합니다.`
           : "저장된 버전으로 오프라인에서도 탐험할 수 있습니다.");
+      const canRetry = s.blockedCode > 0 && s.blockedCode !== s.runtimeCode && typeof bridge.retryFailedUpdate === "function";
+      $("retryFailedUpdate").classList.toggle("hidden", !canRetry);
+      $("retryFailedUpdate").disabled = !!s.busy;
+      $("retryFailedUpdate").textContent = s.failureReason === "interrupted" ? "중단된 버전 다시 실행" : "실패한 버전 다시 실행";
       $("automaticUpdates").checked = s.automatic;
       $("checkUpdates").disabled = s.busy || (!publicUpdates && !s.configured);
       $("connectUpdates").disabled = s.busy;
@@ -71,6 +76,7 @@ export function initUpdates({ beforeApply }) {
     }
   }
   $("connectUpdates").onclick = () => bridge?.configureUpdates?.();
+  $("retryFailedUpdate").onclick = () => bridge?.retryFailedUpdate?.();
   $("checkUpdates").onclick = () => bridge?.checkUpdates?.();
   $("automaticUpdates").onchange = () =>
     bridge?.setAutoUpdates?.($("automaticUpdates").checked);

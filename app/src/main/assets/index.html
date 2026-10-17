@@ -48,11 +48,19 @@
       </div>
       <div id="crosshair"><i></i><i></i><i></i><i></i></div>
       <div id="target"></div>
+      <output id="flightReadout" hidden aria-label="비행 계기">대기 속도 · 출력
+양력 · 중량
+비행 상태</output>
       <div id="events"></div>
       <div id="toast"></div>
       <div id="touch">
         <div id="stick"><div id="knob"></div></div>
         <span id="stickLabel">MOVE</span>
+        <button id="sprintBtn" class="round posture" aria-label="달리기 전환" aria-pressed="false">»<small>달리기</small></button>
+        <button id="crouchBtn" class="round posture" aria-label="웅크리기 전환" aria-pressed="false">⌄<small>웅크리기</small></button>
+        <button id="crawlBtn" class="round posture" aria-label="기어가기 전환" aria-pressed="false">━<small>기어가기</small></button>
+        <span id="movementState">걷기</span>
+        <button id="descendBtn" class="round small" aria-label="하강 · 기수 내리기" hidden>↓<small>하강</small></button>
         <div id="lookHint">오른쪽 화면을 밀어 둘러보기</div>
         <button id="useBtn" class="round small" aria-label="선택 아이템 사용">▣<small>사용</small></button>
         <button id="jumpBtn" class="round small" aria-label="점프">
@@ -222,13 +230,13 @@
               <b>모바일</b>
               <p>
                 왼쪽 스틱: 이동 · 끝까지 밀면 달리기<br />오른쪽 화면 드래그: 시점<br />↑: 점프 /
-                비행 중 상승<br />◇: 비행 전환<br />공격·캐기: 타격/채굴 · 사용: 설치/먹이/소모품
+                비행 중 상승<br />◇: 비행 전환 · ↓: 하강<br />달리기·웅크리기·기어가기: 누르면 전환<br />낮은 자세에서 ↑: 일어서기<br />공격·캐기: 타격/채굴 · 사용: 설치/먹이/소모품
               </p>
             </div>
             <div>
               <b>키보드 / 마우스</b>
               <p>
-                WASD: 이동 · Shift: 달리기<br />마우스: 시점 · 좌클릭: 공격/채굴 · 우클릭: 설치/사용<br />Space:
+                WASD: 이동 · Shift: 달리기 · C: 웅크리기 · Z: 기어가기<br />마우스: 시점 · 좌클릭: 공격/채굴 · 우클릭: 설치/사용<br />Space:
                 점프 · F: 비행<br />I / Tab: 가방 · B: 범위<br />1~9: 아이템 슬롯 ·
                 Esc: 메뉴<br />비행 중 Q: 하강 / E: 상승
               </p>
@@ -262,10 +270,11 @@
           <div class="buttonRow">
             <button id="chooseGameVersion" onclick="window.AndroidApp?.chooseVersions?.()" class="secondary">게임 버전 선택</button><button id="connectUpdates" class="secondary">업데이트 안내</button>
             <button id="checkUpdates" class="secondary">지금 확인</button>
+            <button id="retryFailedUpdate" class="secondary hidden">실패한 버전 다시 실행</button>
             <button id="applyUpdate" class="primary hidden">저장 후 적용</button>
           </div>
           <p class="updateHelp">새 버전은 다음 실행에 적용합니다. 연결되지 않아도 현재 버전으로 탐험할 수 있습니다.
-            앱 0.3.2부터 로그인이나 토큰 없이 공개 배포 버전을 조회하고 내려받습니다.</p>
+            앱 0.3.3부터 실패·중단된 버전을 다시 검증 후 실행할 수 있습니다. 버전 목록에서 [재시도]를 선택하세요.</p>
           <p class="updateHelp">최근 확인: <span id="updateLastCheck">아직 확인하지 않음</span></p>
         </section>
         </div>

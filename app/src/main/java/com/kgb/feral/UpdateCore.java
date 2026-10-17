@@ -54,20 +54,25 @@ public final class UpdateCore {
     public static void checkVersion(int code, int minNative, int nativeCode, int current, int blocked) throws IOException {
         if (minNative > nativeCode) throw new IOException("새 APK 설치가 필요한 버전입니다.");
         if (code <= current) throw new IOException("이미 설치한 버전입니다.");
-        if (code == blocked) throw new IOException("시작에 실패한 버전입니다. 다음 릴리스를 기다려 주세요.");
+        if (code == blocked) throw new IOException("이전 시작이 완료되지 않았습니다. 게임 버전 목록에서 다시 시도할 수 있습니다.");
     }
 
     // 자동 업데이트의 단조 증가와 분리한 명시적 버전 선택 계약
     public static void checkSelection(int code, int minNative, int nativeCode, int current, int blocked) throws IOException {
+        checkSelection(code, minNative, nativeCode, current, blocked, false);
+    }
+    public static void checkSelection(int code, int minNative, int nativeCode, int current, int blocked, boolean retry) throws IOException {
         if (code < 205 || minNative < 205 || minNative > nativeCode) throw new IOException("이 게임은 새 APK가 필요합니다.");
         if (code == current) throw new IOException("현재 실행 중인 게임입니다.");
-        if (code == blocked) throw new IOException("시작에 실패한 빌드입니다. 수정 버전을 선택하세요.");
+        if (code == blocked && !retry) throw new IOException("이전 시작이 완료되지 않았습니다. 다시 검증 후 실행을 선택하세요.");
     }
-    public synchronized void selectBuiltin() throws IOException {
+    public synchronized void selectBuiltin() throws IOException { selectBuiltin(false); }
+    public synchronized void selectBuiltin(boolean retry) throws IOException {
         if (trial()) throw new IOException("시작 검증 중입니다.");
-        checkSelection(builtin, nativeCode, nativeCode, current(), blocked());
+        checkSelection(builtin, nativeCode, nativeCode, current(), blocked(), retry);
         state.setProperty("pending", Integer.toString(builtin));
         state.setProperty("pendingManual", "1");
+        state.setProperty("pendingRetry", retry ? Integer.toString(builtin) : "0");
         save();
     }
     public synchronized String activationSnapshot() throws IOException {
@@ -93,8 +98,13 @@ public final class UpdateCore {
     }
     public synchronized void stage(int code, byte[] archive, Map<String, String> hashes,
                                    int expandedBytes, String archiveHash, boolean manual) throws Exception {
+        stage(code, archive, hashes, expandedBytes, archiveHash, manual, false);
+    }
+    public synchronized void stage(int code, byte[] archive, Map<String, String> hashes,
+                                   int expandedBytes, String archiveHash, boolean manual, boolean retry) throws Exception {
+        if (retry && !manual) throw new IOException("재시도는 직접 선택한 버전에만 허용됩니다.");
         if (trial()) throw new IOException("시작 검증 중에는 버전을 준비할 수 없습니다.");
-        if (manual) checkSelection(code, 205, builtin, current(), blocked());
+        if (manual) checkSelection(code, 205, nativeCode, current(), blocked(), retry);
         else checkVersion(code, 0, builtin, current(), blocked());
         if (archive.length > MAX_ARCHIVE || !sha256(archive).equals(archiveHash)
                 || expandedBytes < 1 || expandedBytes > MAX_EXPANDED
@@ -137,6 +147,9 @@ public final class UpdateCore {
                 Files.createDirectories(destination.getParentFile().toPath());
                 move(staging, destination);
             }
+            // Only a fully verified manual package receives a single activation attempt.
+            // Keep the blocked marker until health acknowledgement: automatic checks cannot loop.
+            state.setProperty("pendingRetry", retry ? Integer.toString(code) : "0");
             state.setProperty("pendingManual", manual ? "1" : "0");
             state.setProperty("pending", Integer.toString(code));
             save();
@@ -145,7 +158,7 @@ public final class UpdateCore {
 
     public synchronized boolean recover() throws IOException {
         if (number("restore") == 1) return true;
-        if (number("trial") != 0) return rollback();
+        if (number("trial") != 0) return rollback(number("trialPaused") == 1 ? "interrupted" : "unconfirmed");
         if (number("active") != 0 && !new File(versionDir(number("active")), "index.html").isFile())
             return rollback();
         return false;
@@ -154,7 +167,7 @@ public final class UpdateCore {
     public synchronized boolean beginTrial(String snapshot) throws IOException {
         int pending = number("pending");
         boolean manual = number("pendingManual") == 1;
-        if (pending == 0 || pending == current() || (!manual && pending <= current()) || pending == number("blocked")) return false;
+        if (pending == 0 || pending == current() || (!manual && pending <= current()) || (pending == number("blocked") && (!manual || number("pendingRetry") != pending))) return false;
         if (pending != builtin && !new File(versionDir(pending), "index.html").isFile()) throw new IOException("준비된 버전이 없습니다.");
         // 저장 스냅샷을 먼저 영속화한 후 활성 버전 포인터를 원자적으로 전환
         atomicWrite(new File(root, "save-backup.json"), snapshot.getBytes("UTF-8"));
@@ -163,6 +176,8 @@ public final class UpdateCore {
         state.setProperty("previous", Integer.toString(number("active")));
         state.setProperty("active", pending == builtin ? "0" : Integer.toString(pending));
         state.setProperty("trial", Integer.toString(pending));
+        state.setProperty("trialPaused", "0");
+        state.setProperty("pendingRetry", "0");
         state.setProperty("pending", "0");
         save();
         return true;
@@ -172,6 +187,11 @@ public final class UpdateCore {
         if (code != current()) throw new IOException("실행 버전이 일치하지 않습니다.");
         if (number("trial") == code) {
             state.setProperty("trial", "0");
+            state.setProperty("trialPaused", "0");
+            if (blocked() == code) {
+                state.setProperty("blocked", "0");
+                state.remove("failureReason");
+            }
             save();
             // 성공 판정 후 이전 버전 한 개와 다음 업데이트만 유지
             File versions = new File(root, "versions");
@@ -184,12 +204,21 @@ public final class UpdateCore {
         }
     }
 
-    public synchronized boolean rollback() throws IOException {
-        int failed = number("active");
+    public synchronized void trialPaused(boolean paused) throws IOException {
+        if (trial() && number("trialPaused") != (paused ? 1 : 0)) {
+            state.setProperty("trialPaused", paused ? "1" : "0"); save();
+        }
+    }
+    public synchronized boolean rollback() throws IOException { return rollback("failed"); }
+    public synchronized boolean rollback(String reason) throws IOException {
+        int failed = trial() ? number("trial") : current();
         int previous = number("previous");
         if (previous != 0 && !new File(versionDir(previous), "index.html").isFile()) previous = 0;
         state.setProperty("active", Integer.toString(previous));
         state.setProperty("blocked", Integer.toString(failed));
+        state.setProperty("failureReason", reason);
+        state.setProperty("trialPaused", "0");
+        state.setProperty("pendingRetry", "0");
         state.setProperty("trial", "0");
         state.setProperty("pending", "0");
         state.setProperty("restore", new File(root, "save-backup.json").isFile() ? "1" : "0");
@@ -209,6 +238,7 @@ public final class UpdateCore {
     public synchronized int current() { return number("active") == 0 ? builtin : number("active"); }
     public synchronized int pending() { return number("pending"); }
     public synchronized int blocked() { return number("blocked"); }
+    public synchronized String failureReason() { return state.getProperty("failureReason", "unconfirmed"); }
     public synchronized boolean trial() { return number("trial") != 0; }
     public synchronized File activeDirectory() { return number("active") != 0 ? versionDir(number("active")) : null; }
     private File versionDir(int code) { return new File(root, "versions/" + code); }

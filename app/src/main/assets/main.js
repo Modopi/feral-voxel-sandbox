@@ -38,7 +38,8 @@ import {
   CharacterController,
   FIXED_DT,
   EYE_HEIGHT,
-  BODY_HEIGHT,
+  bodyHeight,
+  STANCES,
   BODY_RADIUS,
 } from "./physics.js";
 import {
@@ -93,7 +94,8 @@ let world,
   walkSound = 0,
   benchmarkStart = 0,
   benchmarkSamples = [],
-  resetOnReturn = false;
+  resetOnReturn = false,
+  sprintLatched = false;
 const keys = new Set(),
   joy = { x: 0, y: 0, id: null },
   look = { id: null, x: 0, y: 0 };
@@ -267,9 +269,75 @@ function home() {
     vy: 0,
     flying: false,
     grounded: true,
+    stance: "stand",
   });
   controller?.reset();
   $("flyBtn").classList.remove("enabled");
+}
+function toggleStance(stance) {
+  if (!running || paused || frontierState?.riding) return;
+  sprintLatched = false;
+  const target = player.stance === stance ? "stand" : stance;
+  controller.requestStance(target);
+  controller.updateStance(target);
+  if (player.stanceBlocked)
+    toast("천장이 낮아 일어설 수 없습니다. 밖으로 이동하세요.");
+  updateMovementHud();
+}
+let movementHudSignature = "";
+function updateMovementHud() {
+  const signature = [
+    frontierState?.riding,
+    frontierState?.airborne,
+    player.stance,
+    player.stanceBlocked,
+    player.sprinting,
+    sprintLatched,
+  ].join(":");
+  if (signature === movementHudSignature) return;
+  movementHudSignature = signature;
+  const riding = !!frontierState?.riding,
+    flying = !!frontierState?.airborne;
+  document.body.classList.toggle("piloting", riding);
+  for (const [id, stance] of [
+    ["crouchBtn", "crouch"],
+    ["crawlBtn", "crawl"],
+  ]) {
+    $(id).classList.toggle("enabled", !riding && player.stance === stance);
+    $(id).setAttribute(
+      "aria-pressed",
+      String(!riding && player.stance === stance),
+    );
+    $(id).hidden = riding;
+  }
+  $("sprintBtn").classList.toggle(
+    "enabled",
+    sprintLatched || !!player.sprinting,
+  );
+  $("sprintBtn").setAttribute(
+    "aria-pressed",
+    String(sprintLatched || !!player.sprinting),
+  );
+  $("sprintBtn").hidden = riding;
+  $("descendBtn").hidden = !flying;
+  $("jumpBtn").querySelector("small").textContent = flying
+    ? "상승"
+    : riding
+      ? "제동"
+      : "점프";
+  $("jumpBtn").setAttribute(
+    "aria-label",
+    flying ? "상승 · 기수 올리기" : riding ? "제동" : "점프",
+  );
+  $("movementState").textContent = riding
+    ? flying
+      ? "비행 조종"
+      : "차량 조종"
+    : player.stanceBlocked
+      ? "천장 낮음"
+      : player.sprinting
+        ? "달리기"
+        : STANCES[player.stance || "stand"].label;
 }
 function inputState() {
   return {
@@ -278,7 +346,7 @@ function inputState() {
     jump: keys.has("Space"),
     up: keys.has("KeyE"),
     down: keys.has("KeyQ"),
-    sprint: keys.has("ShiftLeft") || joy.y < -0.85,
+    sprint: keys.has("ShiftLeft") || keys.has("ShiftRight") || sprintLatched,
   };
 }
 function renderCamera(alpha) {
@@ -408,7 +476,7 @@ function intersectsPlayer(start, size) {
     a[0] + size > player.x - BODY_RADIUS &&
     a[2] < player.z + BODY_RADIUS &&
     a[2] + size > player.z - BODY_RADIUS &&
-    a[1] < player.y + BODY_HEIGHT &&
+    a[1] < player.y + bodyHeight(player) &&
     a[1] + size > player.y
   );
 }
@@ -522,7 +590,7 @@ function use(intent = "selected") {
             : "1") +
           " m · 거리 " +
           block.distance.toFixed(2) +
-          " m · 플레이어 1.5 m",
+          ` m · 플레이어 ${bodyHeight(player)} m`,
       );
     else toast("6.5 m 이내의 생명이나 지표를 관찰하세요.");
     sound("scan");
@@ -675,6 +743,7 @@ function setFlying() {
 }
 function stopInput() {
   keys.clear();
+  sprintLatched = false;
   joy.x = joy.y = 0;
   joy.id = null;
   look.id = null;
@@ -948,7 +1017,7 @@ function updatePanels() {
   $("elapsed").textContent =
     Math.floor(playTime / 60) +
     ":" +
-    String((playTime % 60) | 0).padStart(2, "0");
+    String(playTime % 60 | 0).padStart(2, "0");
   $("seedValue").textContent = world.seed;
   for (const [id, n] of [
     ["herbCount", s.counts[0]],
@@ -988,12 +1057,22 @@ function setPopulation(n = 3000) {
 }
 function fixedStep(input = inputState()) {
   world.time += FIXED_DT;
+  controller.obstructed = (p, h) =>
+    frontierUI?.motion.physics?.characterObstructed(p, h);
   const vehicleInput = frontierUI?.beforeStep(input, FIXED_DT);
   let moving = 0;
-  if (frontierState?.riding)
-    controller.previous = { x: player.x, y: player.y, z: player.z, offset: 0 };
-  else moving = controller.step(FIXED_DT, vehicleInput || input);
+  if (frontierState?.riding) {
+    controller.eye = EYE_HEIGHT;
+    controller.previous = {
+      x: player.x,
+      y: player.y,
+      z: player.z,
+      offset: 0,
+      eye: EYE_HEIGHT,
+    };
+  } else moving = controller.step(FIXED_DT, vehicleInput || input);
   frontierUI?.afterStep(FIXED_DT);
+  updateMovementHud();
   if (player.y < 0.25) home();
   eco.context = {
     player,
@@ -1293,6 +1372,21 @@ $("homeBtn").onclick = () => {
   pause(false);
 };
 $("flyBtn").onclick = setFlying;
+$("crouchBtn").onclick = () => toggleStance("crouch");
+$("crawlBtn").onclick = () => toggleStance("crawl");
+$("sprintBtn").onclick = () => {
+  if (!running || paused || frontierState?.riding) return;
+  if (player.stance !== "stand") {
+    controller.requestStance("stand");
+    controller.updateStance("stand");
+    if (player.stanceBlocked) {
+      toast("일어설 공간이 필요합니다.");
+      return;
+    }
+  }
+  sprintLatched = !sprintLatched;
+  updateMovementHud();
+};
 $("inventoryBtn").onclick = openBag;
 holdButton(
   $("useBtn"),
@@ -1403,8 +1497,17 @@ holdButton(
 );
 holdButton(
   $("jumpBtn"),
-  () => keys.add("Space"),
+  () => {
+    if (player.stance !== "stand" && !frontierState?.riding)
+      toggleStance(player.stance);
+    else keys.add("Space");
+  },
   () => keys.delete("Space"),
+);
+holdButton(
+  $("descendBtn"),
+  () => keys.add("KeyQ"),
+  () => keys.delete("KeyQ"),
 );
 $("stick").addEventListener("pointerdown", (e) => {
   e.preventDefault();
@@ -1503,6 +1606,19 @@ window.addEventListener("keydown", (e) => {
   }
   if (!running || paused) return;
   if (frontierUI && !e.repeat && frontierUI.key(e.code)) return;
+  if (!e.repeat && (e.code === "KeyC" || e.code === "KeyZ")) {
+    toggleStance(e.code === "KeyC" ? "crouch" : "crawl");
+    return;
+  }
+  if (
+    !e.repeat &&
+    e.code === "Space" &&
+    player.stance !== "stand" &&
+    !frontierState?.riding
+  ) {
+    toggleStance(player.stance);
+    return;
+  }
   keys.add(e.code);
   if (e.code === "KeyB" && !e.repeat) cycleRange();
   if (e.code === "KeyF" && !e.repeat) setFlying();

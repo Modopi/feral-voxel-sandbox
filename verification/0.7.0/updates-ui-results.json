@@ -1,0 +1,16 @@
+{
+  "gameVersion": "0.7.0",
+  "nativeVersion": "0.3.3",
+  "healthAck": [
+    700
+  ],
+  "noTokenCheck": true,
+  "versionSelection": true,
+  "check": true,
+  "automaticToggle": true,
+  "pendingVersion": "0.7.1",
+  "savesBeforeApply": true,
+  "saveFailureBlocksApply": true,
+  "errors": [],
+  "webPreviewDisabled": true
+}

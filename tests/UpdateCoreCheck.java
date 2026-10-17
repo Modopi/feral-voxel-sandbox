@@ -121,6 +121,34 @@ public final class UpdateCoreCheck {
         ok(true,"new APK satisfies public game's minimum native version");
         rejects(()->UpdateCore.checkSelection(502,302,301,301,0),"old APK is correctly incompatible");
         ok(new UpdateCore(distinctRoot,502,303).current()==502,"next APK upgrade selects its distinct bundled game");
+        File retryRoot = Files.createTempDirectory("feral-retry-").toFile();
+        UpdateCore retry = new UpdateCore(retryRoot, 501, 303);
+        good.stage(retry, 600); retry.beginTrial("{\"feral.world.v1\":\"before-600\"}");
+        retry.trialPaused(true);
+        UpdateCore interrupted = new UpdateCore(retryRoot, 501, 303);
+        ok(interrupted.recover() && interrupted.blocked() == 600 && "interrupted".equals(interrupted.failureReason()), "background process exit records interrupted start and rolls back");
+        interrupted.restored();
+        rejects(() -> interrupted.stage(600, good.bytes, good.hashes, good.expanded, "corrupt", true, true), "retry still rejects corrupt package");
+        ok(interrupted.blocked() == 600 && interrupted.pending() == 0, "failed retry verification preserves block and healthy game");
+        rejects(() -> interrupted.stage(600, good.bytes, good.hashes, good.expanded, UpdateCore.sha256(good.bytes), false, true), "automatic updates cannot request retry bypass");
+        rejects(() -> UpdateCore.checkSelection(600, 304, 303, 501, 600, true), "retry cannot bypass minimum native requirement");
+        UpdateCore.checkSelection(600, 302, 303, 501, 600, true);
+        interrupted.stage(600, good.bytes, good.hashes, good.expanded, UpdateCore.sha256(good.bytes), true, true);
+        ok(interrupted.pending() == 600 && interrupted.blocked() == 600, "verified manual retry prepares without dropping automatic block");
+        UpdateCore retried = new UpdateCore(retryRoot, 501, 303);
+        ok(retried.beginTrial("{\"feral.world.v1\":\"current-501\"}") && retried.current() == 600, "explicit retry survives process exit before activation");
+        retried.activationSnapshot();
+        retried.rollback("timeout");
+        ok(retried.current() == 501 && retried.blocked() == 600 && retried.snapshot().contains("current-501"), "second failure restores current save and blocks another automatic attempt");
+        retried.restored();
+        rejects(() -> good.stage(retried, 600), "failed retry never causes automatic launch loop");
+        retried.stage(600, good.bytes, good.hashes, good.expanded, UpdateCore.sha256(good.bytes), true, true);
+        retried.beginTrial("{\"feral.world.v1\":\"still-safe\"}");retried.healthy(600);
+        ok(!retried.trial() && retried.blocked() == 0 && retried.current() == 600, "healthy retry commits and clears failed marker");
+        retried.selectBuiltin(); retried.beginTrial("{\"feral.world.v1\":\"600-progress\"}"); retried.rollback();
+        ok(retried.blocked() == 501 && retried.current() == 600, "failed bundled trial blocks its game code rather than zero");
+        retried.restored(); retried.selectBuiltin(true); retried.beginTrial("{}"); retried.healthy(501);
+        ok(retried.current() == 501 && retried.blocked() == 0, "bundled failed version can also be retried offline");
         System.out.println("Native updater checks: " + count);
     }
 }

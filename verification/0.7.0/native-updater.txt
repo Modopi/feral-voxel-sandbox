@@ -1,0 +1,57 @@
+PASS valid RSA signature accepted
+PASS changed metadata rejected
+PASS native requirement enforced
+PASS downgrade rejected
+PASS failed version rejected
+PASS download never activates running code
+PASS new version enters trial
+PASS trial activation persisted
+PASS complete version directory selected
+PASS unacknowledged process exit rolls back
+PASS pre-update save backup preserved
+PASS interrupted save restoration retried
+PASS failed package cannot loop on every launch
+PASS acknowledged version survives restart
+PASS incorrect runtime acknowledgement rejected
+PASS rollback chooses last healthy downloaded version
+PASS zip traversal rejected
+PASS bad extraction leaves active version intact
+PASS per-file corruption rejected
+PASS expanded-byte budget enforced
+PASS archive corruption rejected
+PASS missing file rejected
+PASS relative escape rejected
+PASS absolute path rejected
+PASS Windows separator rejected
+PASS empty path component rejected
+PASS newer installed APK supersedes old game bundle
+PASS automatic downgrade still rejected
+PASS explicit older selection prepared
+PASS older game starts with independent empty saves
+PASS explicit old selection survives native restart
+PASS bundled game can be selected offline
+PASS return restores original version saves
+PASS old game retains its own progress
+PASS failed older selection rolls back both code and save
+PASS manual selection cannot bypass minimum native
+PASS APK 302 boots bundled game 501
+PASS APK code cannot acknowledge a different game code
+PASS pinned older game survives restart when native and game differ
+PASS offline switch returns bundled 501 rather than APK 302
+PASS bundled game snapshot uses game code
+PASS new APK satisfies public game's minimum native version
+PASS old APK is correctly incompatible
+PASS next APK upgrade selects its distinct bundled game
+PASS background process exit records interrupted start and rolls back
+PASS retry still rejects corrupt package
+PASS failed retry verification preserves block and healthy game
+PASS automatic updates cannot request retry bypass
+PASS retry cannot bypass minimum native requirement
+PASS verified manual retry prepares without dropping automatic block
+PASS explicit retry survives process exit before activation
+PASS second failure restores current save and blocks another automatic attempt
+PASS failed retry never causes automatic launch loop
+PASS healthy retry commits and clears failed marker
+PASS failed bundled trial blocks its game code rather than zero
+PASS bundled failed version can also be retried offline
+Native updater checks: 56
