@@ -9,7 +9,13 @@ export function itemArt(id) {
   let body = "";
   const rect = (x, y, w, h, c) =>
     `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`;
-  if (item.block || item.machinePart) {
+  if (["wing", "elevator"].includes(item.machinePart)) {
+    body = `<path d="M2 15L23 5 30 13 8 24Z" fill="${color}"/><path d="M2 15L8 24 30 13V17L8 28 2 19Z" fill="#647971"/><path d="M5 15L25 7" stroke="#455c53" stroke-width="2"/>`;
+  } else if (item.machinePart === "rudder") {
+    body = `<path d="M9 27V8L21 2 25 23Z" fill="${color}"/><path d="M9 16L23 10" stroke="#455c53" stroke-width="3"/>`;
+  } else if (item.machinePart === "propeller") {
+    body = rect(13,2,6,28,color) + rect(2,13,28,6,color) + rect(12,12,8,8,"#455c53");
+  } else if (item.block || item.machinePart) {
     body = `<path d="M3 10L16 3 29 10 16 18Z" fill="${color}"/><path d="M3 10L16 18V30L3 22Z" fill="${color}"/><path d="M16 18L29 10V22L16 30Z" fill="${color}"/><path d="M3 10L16 18V30L3 22Z" fill="#fff" opacity=".16"/><path d="M16 18L29 10V22L16 30Z" fill="#000" opacity=".28"/>`;
     for (let n = 0; n < 6; n++)
       body += rect(

@@ -299,16 +299,21 @@ export class FrontierView {
     if (
       !s.riding ||
       !inv.unlocks.has("aviation") ||
-      evaluate(s.machine).lift < 1.5
+      (evaluate(s.machine).lift < 1.5 &&
+        !(evaluate(s.machine).wings > 0 && evaluate(s.machine).propellers > 0))
     ) {
-      this.c.toast("회전익 연구 · 연결된 회전익 2개 · 탑승이 필요합니다.");
+      this.c.toast(
+        "항공 연구와 탑승, 회전익 2개 또는 주날개·프로펠러가 필요합니다.",
+      );
       return;
     }
     s.airborne = !s.airborne;
     player.flying = s.airborne;
     this.c.toast(
       s.airborne
-        ? "회전익 작동 · 점프로 상승 / Q로 하강 / 이동으로 추진·조향"
+        ? evaluate(s.machine).propellers > 0
+          ? "고정익 조종 · 출력은 이동 스틱으로 조절"
+          : "회전익 작동 · ↑ 상승 / ↓ 하강 · 이동으로 추진·조향"
         : "비행 해제 · 착륙",
     );
   }
@@ -428,6 +433,14 @@ export class FrontierView {
       distance(p, { x: 77.5, z: 84.5 }) >= 12 &&
       !s.riding &&
       !this.assembly.near();
+    $("flightReadout").hidden = !s.riding || !s.airborne;
+    if (s.riding && s.airborne) {
+      const physics = this.motion.physics,
+        f = evaluate(s.machine);
+      $("flightReadout").textContent =
+        `대기 속도 ${(physics.speed || 0).toFixed(1)} m/s · 출력 ${Math.round(physics.throttle * 100)}%\n${f.wings > 0 ? `양력 ${Math.round(physics.aero?.lift || 0)} N · 중량 ${Math.round(f.mass * 9.81)} N` : "회전익 · ↑ 상승 / ↓ 하강"}\n${physics.aero?.stalled ? "실속 · 기수를 낮추고 속도를 확보하세요" : f.wings > 0 ? "앞/뒤 출력 · 좌우 선회 · ↑/↓ 기수" : "이동 스틱으로 추진·선회"}`;
+      $("flightReadout").classList.toggle("stalled", !!physics.aero?.stalled);
+    }
     $("biome").textContent = s.info.name;
     $("flyBtn").classList.toggle("enabled", s.airborne);
     $("flyBtn").classList.toggle(
@@ -624,7 +637,7 @@ export class FrontierView {
   machinePanel(root) {
     const { model: s } = this.c,
       f = s.machine && evaluate(s.machine);
-    root.innerHTML = `<h3>월드에서 조립</h3><p>가방에서 차체·바퀴·모터를 제작해 하단 아이템 칸에 놓으세요. 차체를 바닥에 놓고, 부품을 들고 면을 조준해 사용하면 붙습니다.</p><p>렌치: 공격으로 회수, 사용으로 고정/해제<br>합금: 손상된 부품을 조준하고 사용해 수리<br>가까이에서 R / 상호작용으로 탑승·하차<br>이동으로 추진·조향, 점프로 제동. 비행 중에는 점프로 상승, Q로 하강합니다.</p>${f ? `<p>질량 ${Math.round(f.mass)} kg · 동력 ${Math.round(f.power)} · 바퀴 접지 능력 ${Math.round(f.grip * 100)}%<br>조립체 위치: ${s.machine.pose?.region || s.key} 지역 · 분리된 조각 ${s.machine.fragments?.length || 0}개</p>` : ""}`;
+    root.innerHTML = `<h3>월드에서 조립</h3><p>가방에서 차체·바퀴·모터를 제작해 하단 아이템 칸에 놓으세요. 차체를 바닥에 놓고, 부품을 들고 면을 조준해 사용하면 붙습니다.</p><p>렌치: 공격으로 회수, 사용으로 고정/해제<br>합금: 손상된 부품을 조준하고 사용해 수리<br>가까이에서 R / 상호작용으로 탑승·하차<br>이동으로 추진·조향, 점프로 제동. 비행 중에는 ↑/Space로 상승·기수 올리기, ↓/Q로 하강·기수 내리기. 고정익은 스틱 앞/뒤로 출력을 조절하고, 손을 놓으면 출력을 유지합니다. 좌우는 주날개와 방향타로 선회합니다.</p><p>항공 연구 후 주날개를 좌우로 넓게, 수평·수직 꼬리날개를 뒤로, 프로펠러를 앞에 붙이세요. 처음 놓은 차체의 앞은 북쪽(-Z)입니다. 날개가 적거나 너무 무거우면 뜨지 않습니다. 받음각이 너무 크면 실속하고, 한쪽 날개를 잃으면 기체가 기웁니다.</p><details><summary>경량 비행기 조립 예 · 40개 부품</summary><p>항공 부품 묶음을 제작한 뒤 바닥에서 높여 차체를 고정하세요. 최초 차체가 중심(0,0,0), 한 칸은 0.5m입니다. 앞은 -Z, 위는 +Y입니다.</p><p>차체: X=0, Y=0, Z=-2부터 3까지 6개<br>모터: (0,1,0), 프로펠러: (0,0,-3)<br>주날개: 좌우 X=1~4와 -1~-4, Y=0, Z=-1·0·1에 24개<br>수평 꼬리: X=±1·±2, Y=0, Z=3에 4개<br>수직 꼬리: (0,1,3)<br>바퀴: (-4,-1,0), (4,-1,0), (0,-1,-2)</p><p>평평한 활주로를 확보하고 렌치로 고정을 해제한 뒤 탑승합니다. 비행을 켜고 스틱을 앞으로 밀어 출력을 올리세요. 대기 속도 20m/s 부근부터 ↑를 짧게 눌러 기수를 올립니다. 날개 배치와 무게중심에 따라 조종 느낌이 달라집니다.</p></details>${f ? `<p>질량 ${Math.round(f.mass)} kg · 동력 ${Math.round(f.power)} · 바퀴 접지 능력 ${Math.round(f.grip * 100)}%<br>조립체 위치: ${s.machine.pose?.region || s.key} 지역 · 분리된 조각 ${s.machine.fragments?.length || 0}개</p>` : ""}`;
     root.append(
       this.button("월드로 돌아가기", () => this.c.pause(false)),
       this.button("가방 · 부품 제작", () => {

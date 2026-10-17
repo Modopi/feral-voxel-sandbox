@@ -466,8 +466,8 @@ export class Frontier {
     if (!this.machine)
       return "가방에서 동력 연구와 기본 차량 설계를 제작하세요.";
     const f = evaluate(this.machine);
-    if (!f.power || (!f.grip && f.lift < 1.5))
-      return "연결된 모터와 바퀴 또는 회전익이 필요합니다.";
+    if (!f.power || (!f.grip && f.lift < 1.5 && !(f.wings > 0 && f.propellers > 0)))
+      return "연결된 모터와 바퀴·회전익 또는 주날개·프로펠러가 필요합니다.";
     this.riding = true;
     if (this.machine.pose) this.machine.pose.anchored = false;
     return "탑승 · 이동으로 추진·조향 · 상호작용 / R로 하차";

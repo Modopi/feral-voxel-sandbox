@@ -50,6 +50,24 @@ export const SLOT_COUNT = 36,
 export const stackLimit = (id) => ITEMS[id]?.limit || STACK_LIMIT;
 export const RECIPES = [
   {
+    id: "aircraft_parts",
+    name: "경량 비행기 부품 묶음",
+    description:
+      "차체 6 · 모터 1 · 주날개 24 · 수평 꼬리 4 · 수직 꼬리 1 · 프로펠러 1 · 바퀴 3. 월드에서 직접 조립하세요.",
+    cost: { iron: 89 },
+    give: {
+      hull_part: 6,
+      motor_part: 1,
+      wing_part: 24,
+      elevator_part: 4,
+      rudder_part: 1,
+      propeller_part: 1,
+      wheel_part: 3,
+    },
+    requires: "aviation",
+    frontier: true,
+  },
+  {
     id: "wrench",
     name: "조립 렌치",
     description:
@@ -61,11 +79,11 @@ export const RECIPES = [
   ...Object.entries(TYPES).map(([type, p]) => ({
     id: `${type}_part`,
     name: p.label + " 블록",
-    description: "0.5m 부품 · 월드에서 면에 직접 붙이기",
+    description: p.hint || "0.5m 부품 · 월드에서 면에 직접 붙이기",
     cost: { iron: p.cost },
     give: { [`${type}_part`]: 1 },
     requires:
-      type === "rotor"
+      type === "rotor" || p.aviation
         ? "aviation"
         : type === "cannon"
           ? "ballistics"
@@ -167,8 +185,8 @@ export const RECIPES = [
   },
   {
     id: "aviation",
-    name: "회전익 연구",
-    description: "회전익 2개로 간이 비행 · 고정익은 후속",
+    name: "항공 연구",
+    description: "주날개·조종면·프로펠러와 회전익 제작",
     cost: { knowledge: 12, iron: 6, crystal: 4 },
     requires: "engineering",
     unlock: "aviation",

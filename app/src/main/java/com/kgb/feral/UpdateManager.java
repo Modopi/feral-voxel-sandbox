@@ -45,6 +45,7 @@ public final class UpdateManager {
         try {
             result.put("nativeVersion", nativeVersion).put("nativeCode", nativeCode)
                 .put("runtimeCode", core.current()).put("pendingCode", core.pending())
+                .put("blockedCode", core.blocked()).put("failureReason", core.failureReason())
                 .put("pendingVersion", pendingVersion).put("phase", phase).put("message", message)
                 .put("configured", true).put("publicUpdates", true).put("builtinVersion", builtinVersion).put("builtinCode", core.builtin()).put("automatic", prefs.getBoolean("automatic", true))
                 .put("pinned", prefs.getBoolean("pinned", false)).put("lastCheck", prefs.getLong("lastCheck", 0)).put("busy", busy);
@@ -59,7 +60,7 @@ public final class UpdateManager {
         prefs.edit().putBoolean("automatic", enabled).putBoolean("pinned", false).apply();
         signal("idle", enabled ? "실행할 때 업데이트를 확인합니다." : "자동 확인을 껐습니다.");
     }
-    public void recovered() { signal("recovered", "새 버전을 시작하지 못해 이전 버전과 저장으로 복구했습니다."); }
+    public void recovered() { signal("recovered", "새 버전의 시작이 완료되지 않아 이전 게임과 저장으로 복구했습니다. 게임 버전 목록에서 다시 검증 후 실행할 수 있습니다."); }
 
     public synchronized void check(boolean manual) {
         if (busy || closed) return;
@@ -111,7 +112,8 @@ public final class UpdateManager {
         });
     }
 
-    public synchronized void chooseVersions() {
+    public synchronized void chooseVersions() { chooseVersions(false); }
+    public synchronized void chooseVersions(boolean retryFailed) {
         if (busy || closed || core.trial()) return;
         busy = true;
         worker.execute(() -> {
@@ -128,11 +130,11 @@ public final class UpdateManager {
             final String note = warning;
             activity.runOnUiThread(() -> {
                 busy = false;
-                if (!closed) showVersions(note);
+                if (!closed) showVersions(note, retryFailed);
             });
         });
     }
-    private void showVersions(String note) {
+    private void showVersions(String note, boolean retryFailed) {
         try {
             JSONArray source = new JSONObject(prefs.getString("catalog", "{\"versions\":[]}")).getJSONArray("versions");
             ArrayList<JSONObject> rows = new ArrayList<>();
@@ -142,36 +144,48 @@ public final class UpdateManager {
                 JSONObject row = source.getJSONObject(i);
                 if (row.getInt("versionCode") != core.builtin()) rows.add(row);
             }
+            if (retryFailed) {
+                for (JSONObject row : rows) if (row.getInt("versionCode") == core.blocked()) {
+                    confirmSelection(row); return;
+                }
+                Toast.makeText(activity, "재시도할 버전을 목록에서 선택하세요.", Toast.LENGTH_LONG).show();
+            }
             String[] labels = new String[rows.size()];
             for (int i = 0; i < rows.size(); i++) {
                 JSONObject row = rows.get(i);
                 labels[i] = row.getString("version") + " · " + row.optString("branch", "기록")
                     + " · #" + row.getInt("versionCode")
                     + (row.getInt("versionCode") == core.current() ? " [실행 중]" : "")
+                    + (row.getInt("versionCode") == core.blocked() ? ("interrupted".equals(core.failureReason()) ? " [시작 중단 · 재시도]" : " [실행 실패 · 재시도]") : "")
                     + (row.getInt("minNativeCode") > nativeCode ? " [새 APK 필요]" : "");
             }
             new AlertDialog.Builder(activity).setTitle("게임 버전 선택 · 앱 " + nativeVersion)
                 .setItems(labels, (dialog, index) -> {
-                    JSONObject row = rows.get(index);
-                    try {
-                        UpdateCore.checkSelection(row.getInt("versionCode"), row.getInt("minNativeCode"), nativeCode, core.current(), core.blocked());
-                        new AlertDialog.Builder(activity).setTitle("이 게임으로 전환할까요?")
-                            .setMessage("현재 게임을 저장하고 재시작합니다. 버전별 저장은 분리되며, 처음 선택한 버전은 새 저장으로 시작합니다. 앱 버전은 " + nativeVersion + "로 유지됩니다.")
-                            .setNegativeButton("취소", null).setPositiveButton("저장 후 전환", (d,w) -> saveThen.accept(() -> selectVersion(row))).show();
-                    } catch (Exception e) { signal("error", e.getMessage()); Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show(); }
+                    confirmSelection(rows.get(index));
                 }).setNegativeButton("닫기", null)
                 .setNeutralButton("공개 업데이트 안내", (d,w) -> configure()).show();
             if (!note.isEmpty()) Toast.makeText(activity, note, Toast.LENGTH_LONG).show();
         } catch (Exception e) { signal("error", "버전 목록을 읽지 못했습니다."); }
     }
-    private synchronized void selectVersion(JSONObject row) {
+    private void confirmSelection(JSONObject row) {
+        try {
+            boolean retry = row.getInt("versionCode") == core.blocked();
+            UpdateCore.checkSelection(row.getInt("versionCode"), row.getInt("minNativeCode"), nativeCode, core.current(), core.blocked(), retry);
+            new AlertDialog.Builder(activity).setTitle(retry ? "이 버전을 다시 실행할까요?" : "이 게임으로 전환할까요?")
+                .setMessage(retry
+                    ? "현재 게임을 저장한 뒤 패키지의 서명과 파일을 다시 검증합니다. 시작 중 앱을 닫았거나 오류가 났던 버전도 재시도할 수 있습니다. 다시 실패하면 현재 게임과 저장으로 복구합니다. 버전별 저장은 분리됩니다."
+                    : "현재 게임을 저장하고 재시작합니다. 버전별 저장은 분리되며, 처음 선택한 버전은 새 저장으로 시작합니다. 앱 버전은 " + nativeVersion + "로 유지됩니다.")
+                .setNegativeButton("취소", null).setPositiveButton(retry ? "다시 검증 후 실행" : "저장 후 전환", (d,w) -> saveThen.accept(() -> selectVersion(row, retry))).show();
+        } catch (Exception e) { signal("error", e.getMessage()); Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show(); }
+    }
+    private synchronized void selectVersion(JSONObject row, boolean retry) {
         if (busy || closed || core.trial()) return;
         busy = true;
         signal("downloading", "선택한 게임을 검증합니다…");
         worker.execute(() -> {
             try {
                 int code = row.getInt("versionCode");
-                if (code == core.builtin()) core.selectBuiltin();
+                if (code == core.builtin()) core.selectBuiltin(retry);
                 else {
                     String path = row.getString("path");
                     if (!path.matches("(?:versions/[0-9]+\\.[0-9]+\\.[0-9]+|builds/[0-9]+)\\.feral")) throw new IOException("잘못된 패키지 경로입니다.");
@@ -187,20 +201,20 @@ public final class UpdateManager {
                         || !manifest.getString("version").equals(row.getString("version"))
                         || !"stable".equals(manifest.getString("channel")) || manifest.getInt("saveSchema") < 1)
                         throw new IOException("선택한 게임과 서명된 정보가 다릅니다.");
-                    UpdateCore.checkSelection(code, manifest.getInt("minNativeCode"), nativeCode, core.current(), core.blocked());
+                    UpdateCore.checkSelection(code, manifest.getInt("minNativeCode"), nativeCode, core.current(), core.blocked(), retry);
                     byte[] archive = Base64.getDecoder().decode(envelope.getString("archive"));
                     if (archive.length != manifest.getInt("archiveBytes")) throw new IOException("업데이트 크기가 다릅니다.");
                     JSONObject files = manifest.getJSONObject("files");
                     Map<String,String> hashes = new HashMap<>();
                     Iterator<String> keys = files.keys();
                     while (keys.hasNext()) { String key = keys.next(); hashes.put(key, files.getString(key)); }
-                    core.stage(code, archive, hashes, manifest.getInt("expandedBytes"), manifest.getString("archiveSha256"), true);
+                    core.stage(code, archive, hashes, manifest.getInt("expandedBytes"), manifest.getString("archiveSha256"), true, retry);
                 }
                 pendingVersion = row.getString("version");
                 prefs.edit().putBoolean("pinned", true).putString("pendingVersion", pendingVersion).apply();
                 signal("ready", pendingVersion + " 선택 완료 · 재시작합니다.");
                 activity.runOnUiThread(() -> { if (!closed) applySelected.run(); });
-            } catch (Exception e) { signal("error", "선택한 게임을 준비하지 못했습니다. 연결·호환성·패키지를 확인하세요."); }
+            } catch (Exception e) { signal("error", "선택한 게임을 준비하지 못했습니다. 현재 게임과 저장은 유지됩니다. 연결·호환성·패키지를 확인하고 버전 목록에서 다시 시도하세요."); }
             finally { busy = false; notifyChanged(); }
         });
     }

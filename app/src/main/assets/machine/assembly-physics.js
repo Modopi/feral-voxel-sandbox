@@ -1,4 +1,11 @@
+import {
+  AIRFOILS,
+  panelForce,
+  bodyDrag,
+  exposedFaces,
+} from "./aerodynamics.js";
 import R from "../vendor/rapier/rapier.js";
+import { bodyHeight, BODY_RADIUS } from "../physics.js";
 import { components } from "../structure.js";
 import { createLab, TYPES, evaluate, damage } from "./model.js";
 import { initialPose, rotate, worldPoint } from "./assembly-state.js";
@@ -15,6 +22,8 @@ export class AssemblyPhysics {
     this.colliders = new Map();
     this.ground = [];
     this.clock = 0;
+    this.wind = { x: 0, y: 0, z: 0 };
+    this.throttle = 0;
   }
   dispose() {
     this.events.free();
@@ -35,6 +44,22 @@ export class AssemblyPhysics {
         this.colliders.get(c.handle).s !== source,
     );
   }
+  characterObstructed(player, height) {
+    return !!this.world.intersectionWithShape(
+      { x: player.x, y: player.y + height / 2, z: player.z },
+      { x: 0, y: 0, z: 0, w: 1 },
+      new R.Cuboid(
+        BODY_RADIUS - 0.005,
+        height / 2 - 0.005,
+        BODY_RADIUS - 0.005,
+      ),
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      (c) => this.colliders.has(c.handle),
+    );
+  }
   moveCharacter(before, player) {
     if (!this.character) {
       this.character = this.world.createCharacterController(0.01);
@@ -44,9 +69,16 @@ export class AssemblyPhysics {
         R.ColliderDesc.capsule(0.52, 0.23).setSensor(true),
       );
     }
+    const height = bodyHeight(player),
+      radius = BODY_RADIUS - 0.01;
+    this.characterCollider.setShape(
+      new R.Capsule((height - 0.02) / 2 - radius, radius),
+    );
+    if (player.stance === "crawl") this.character.disableAutostep();
+    else this.character.enableAutostep(0.55, 0.2, true);
     this.characterCollider.setTranslation({
       x: before.x,
-      y: before.y + 0.75,
+      y: before.y + height / 2,
       z: before.z,
     });
     const delta = {
@@ -149,7 +181,7 @@ export class AssemblyPhysics {
       .setRotation(pose.rotation)
       .setLinvel(...["x", "y", "z"].map((k) => pose.velocity[k]))
       .setAngvel(pose.spin)
-      .setLinearDamping(0.15)
+      .setLinearDamping(0.02)
       .setAngularDamping(0.7)
       .setCcdEnabled(true);
     const body = this.world.createRigidBody(desc),
@@ -159,7 +191,13 @@ export class AssemblyPhysics {
       const desc = (
         part.type === "wheel"
           ? R.ColliderDesc.ball(0.28)
-          : R.ColliderDesc.cuboid(0.245, 0.245, 0.245)
+          : part.type === "rudder"
+            ? R.ColliderDesc.cuboid(0.035, 0.245, 0.245)
+            : AIRFOILS[part.type]
+              ? R.ColliderDesc.cuboid(0.245, 0.035, 0.245)
+              : part.type === "propeller"
+                ? R.ColliderDesc.cuboid(0.245, 0.245, 0.065)
+                : R.ColliderDesc.cuboid(0.245, 0.245, 0.245)
       )
         .setTranslation(part.x * 0.5, part.y * 0.5 + 0.25, part.z * 0.5)
         .setMass(TYPES[part.type].mass)
@@ -172,7 +210,12 @@ export class AssemblyPhysics {
       parts.set(c.handle, part);
       this.colliders.set(c.handle, { s, part });
     }
-    entry = { body, parts, revision: s.revision };
+    entry = {
+      body,
+      parts,
+      faces: exposedFaces(s.blueprint.filter((p) => s.hp[p.id] > 0)),
+      revision: s.revision,
+    };
     this.bodies.set(s, entry);
     return entry;
   }
@@ -255,6 +298,67 @@ export class AssemblyPhysics {
       [80, 160.5, 80, 0.5],
     ])
       add(x, 40, z, hx, 40, hz);
+    add(80, 80.5, 80, 80, 0.5, 80);
+  }
+  aerodynamics(s, controls = {}) {
+    const entry = this.bodies.get(s),
+      body = entry.body,
+      q = body.rotation();
+    const inverse = { x: -q.x, y: -q.y, z: -q.z, w: q.w };
+    let lift = 0,
+      drag = 0,
+      stalled = 0,
+      wings = 0;
+    for (const part of s.blueprint) {
+      if (s.hp[part.id] <= 0) continue;
+      const point = worldPoint(s.pose, {
+        x: part.x * 0.5,
+        y: part.y * 0.5 + 0.25,
+        z: part.z * 0.5,
+      });
+      const v = body.velocityAtPoint(point);
+      const local = rotate(inverse, {
+        x: v.x - this.wind.x,
+        y: v.y - this.wind.y,
+        z: v.z - this.wind.z,
+      });
+      const force = bodyDrag(part.type, local, entry.faces.get(part.id));
+      if (AIRFOILS[part.type]) {
+        const a = panelForce(
+          part.type,
+          local,
+          s.hp[part.id] / TYPES[part.type].hp,
+          controls,
+          part.x,
+        );
+        for (const k of ["x", "y", "z"]) force[k] += a.force[k];
+        if (part.type === "wing") {
+          lift += a.lift;
+          wings++;
+          if (a.stalled && a.speed > 2) stalled++;
+        }
+        drag += a.drag;
+      }
+      // Bound a per-panel impulse for very fast or tiny detached fragments.
+      const magnitude = Math.hypot(force.x, force.y, force.z);
+      const limit =
+        TYPES[part.type].mass *
+        Math.max(1, Math.hypot(local.x, local.y, local.z)) *
+        20;
+      const scale = Math.min(1, limit / Math.max(1, magnitude));
+      const worldForce = rotate(q, force);
+      if (!s.pose.anchored)
+        body.addForceAtPoint(
+          {
+            x: worldForce.x * scale,
+            y: worldForce.y * scale,
+            z: worldForce.z * scale,
+          },
+          point,
+          false,
+        );
+    }
+    return { lift, drag, stalled: wings > 0 && stalled / wings >= 0.5 };
   }
   step(s, dt, input = {}, riding = false, airborne = false) {
     if (!s?.pose) return;
@@ -275,6 +379,24 @@ export class AssemblyPhysics {
       body.resetForces(false);
       body.resetTorques(false);
     }
+    if (!riding || !airborne) this.throttle = 0;
+    else
+      this.throttle = clamp(
+        this.throttle + (input.forward || 0) * dt * 0.5,
+        0,
+        1,
+      );
+    const controls =
+      riding && airborne
+        ? {
+            pitch: (input.up || input.jump ? 1 : 0) - (input.down ? 1 : 0),
+            turn: clamp(input.side || 0, -1, 1),
+          }
+        : {};
+    for (const obj of active) {
+      const data = this.aerodynamics(obj, obj === s ? controls : {});
+      if (obj === s) this.aero = data;
+    }
     const body = entry.body,
       f = evaluate(s),
       q = body.rotation(),
@@ -293,7 +415,10 @@ export class AssemblyPhysics {
       }
     if (riding && !s.pose.anchored) {
       if (grounded) {
-        const force = f.power * f.grip * clamp(input.forward || 0, -1, 1),
+        const force =
+            airborne && f.propellers
+              ? 0
+              : f.power * f.grip * clamp(input.forward || 0, -1, 1),
           lateral = vel.x * right.x + vel.z * right.z;
         body.addForce(
           {
@@ -309,13 +434,39 @@ export class AssemblyPhysics {
           { x: 0, y: (turn - body.angvel().y) * f.inertia[1] * 5, z: 0 },
           true,
         );
-        if (input.jump)
+        if (input.jump && !airborne)
           body.addForce(
             { x: -vel.x * f.mass * 8, y: 0, z: -vel.z * f.mass * 8 },
             true,
           );
       }
       if (airborne && f.power > 0) {
+        const airspeed = Math.max(
+          0,
+          vel.x * forward.x + vel.y * forward.y + vel.z * forward.z,
+        );
+        for (const part of s.blueprint)
+          if (part.type === "propeller" && f.connected.has(part.id)) {
+            const thrust =
+              1800 *
+              (s.hp[part.id] / TYPES.propeller.hp) *
+              Math.min(1, f.power / (600 * Math.max(1, f.propellers))) *
+              this.throttle *
+              clamp(1 - airspeed / 90, 0.15, 1);
+            body.addForceAtPoint(
+              {
+                x: forward.x * thrust,
+                y: forward.y * thrust,
+                z: forward.z * thrust,
+              },
+              worldPoint(s.pose, {
+                x: part.x * 0.5,
+                y: part.y * 0.5 + 0.25,
+                z: part.z * 0.5,
+              }),
+              true,
+            );
+          }
         const throttle = input.down ? 0.55 : input.jump || input.up ? 1.4 : 1;
         for (const part of s.blueprint)
           if (part.type === "rotor" && f.connected.has(part.id)) {
@@ -334,18 +485,20 @@ export class AssemblyPhysics {
               true,
             );
           }
-        body.addForce(
-          {
-            x: forward.x * (input.forward || 0) * f.power * 0.35,
-            y: 0,
-            z: forward.z * (input.forward || 0) * f.power * 0.35,
-          },
-          true,
-        );
-        body.addTorque(
-          { x: 0, y: -(input.side || 0) * f.mass * 1.5, z: 0 },
-          true,
-        );
+        if (f.lift > 0)
+          body.addForce(
+            {
+              x: forward.x * (input.forward || 0) * f.power * 0.35,
+              y: 0,
+              z: forward.z * (input.forward || 0) * f.power * 0.35,
+            },
+            true,
+          );
+        if (f.lift > 0)
+          body.addTorque(
+            { x: 0, y: -(input.side || 0) * f.mass * 1.5, z: 0 },
+            true,
+          );
       }
     }
     this.world.timestep = dt;
@@ -364,7 +517,12 @@ export class AssemblyPhysics {
       }
     });
     for (const obj of active) this.snapshot(obj, this.bodies.get(obj).body);
-    this.speed = Math.hypot(vel.x, vel.y, vel.z);
+    const v = body.linvel();
+    this.speed = Math.hypot(
+      v.x - this.wind.x,
+      v.y - this.wind.y,
+      v.z - this.wind.z,
+    );
     this.grounded = grounded;
   }
 }
