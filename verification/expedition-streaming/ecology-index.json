@@ -1,0 +1,37 @@
+{
+  "environment": "Node v24.19.0 / shared Linux workspace; deterministic model comparison, not device gameplay",
+  "beforeSha256": "169b8b0f81d11e3ffb047299b377e5cae2ab66acf5719ced6efb65b0cad32090",
+  "afterSha256": "ffa39c6ec62a18e8f3d67ee6553643c778f08f97de03e24eee8bcfd498c871a8",
+  "rows": [
+    {
+      "scenario": "active",
+      "regions": 80,
+      "entities": 480,
+      "oldMs": 169.508072,
+      "newMs": 107.30258899999995,
+      "equal": true,
+      "work": {
+        "steps": 480,
+        "spatialCandidates": 3360,
+        "activeEntityUpdates": 3360,
+        "passiveEntityUpdates": 946,
+        "regionUpdates": 638
+      }
+    },
+    {
+      "scenario": "offline",
+      "regions": 80,
+      "entities": 987,
+      "oldMs": 3111.965812,
+      "newMs": 702.3140380000004,
+      "equal": true,
+      "work": {
+        "steps": 28800,
+        "spatialCandidates": 0,
+        "activeEntityUpdates": 0,
+        "passiveEntityUpdates": 95161,
+        "regionUpdates": 9600
+      }
+    }
+  ]
+}

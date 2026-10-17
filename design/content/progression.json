@@ -3960,6 +3960,10 @@
         {
           "kind": "component",
           "id": "battery"
+        },
+        {
+          "kind": "component",
+          "id": "arc_thrower"
         }
       ],
       "origin": {
@@ -8385,6 +8389,166 @@
         "productKg": 0.62,
         "processWasteKg": 3.28,
         "wastePolicy": "same prototype non-recoverable process waste policy"
+      }
+    },
+    {
+      "kind": "component",
+      "id": "arc_thrower",
+      "name": "전기 투사기",
+      "functions": [
+        "projectile_attack"
+      ],
+      "inputEnergies": [
+        "electrical"
+      ],
+      "outputEnergies": [],
+      "stores": [
+        "electrical"
+      ],
+      "research": "power",
+      "nominalPower": 40,
+      "capacity": 120,
+      "efficiency": 0.9,
+      "combat": {
+        "energyType": "electrical",
+        "energyPerShotEu": 20,
+        "damageHp": 30,
+        "rangeM": 24,
+        "attackPeriodS": 1.25,
+        "attackMode": "pierce",
+        "muzzleOffsetM": [
+          0,
+          0.46875,
+          0.6875
+        ],
+        "damageBudget": "one shot pays one stored 20 EU claim; replay returns prior shot without a second debit"
+      },
+      "origin": {
+        "type": "craft",
+        "recipe": "assemble_arc_thrower"
+      },
+      "designEnvelope": {
+        "referenceVolumeLiters": 2,
+        "scaleMin": 0.25,
+        "scaleMax": 8,
+        "damageDerating": "multiply charge rate and storage by minimum(health fraction, connected load path fraction); no new function ports from geometry"
+      },
+      "variableDictionary": "P-COMPONENT"
+    },
+    {
+      "kind": "weapon_pattern",
+      "id": "weapon_slash",
+      "name": "재료형 베기 무기",
+      "weaponKind": "slash",
+      "shapeId": "weapon_slash",
+      "slot": "main_hand",
+      "attackMode": "strike",
+      "rangeM": 2.8,
+      "attackPeriodS": 0.55,
+      "damageFactor": 1.05,
+      "materialVolumeLiters": 0.45,
+      "additionalInputs": {
+        "wood": 0.2,
+        "plant_fiber": 0.1
+      },
+      "durabilityPerCellHpLiter": 1.8,
+      "baseCraftSeconds": 25,
+      "materialRecipeTimeFraction": 0.25,
+      "materialRecipeEnergyFraction": 0.1,
+      "materialResearchRequired": true,
+      "materialRecipeStationRequired": true,
+      "origin": {
+        "type": "parameterized_craft",
+        "materialId": "selected material",
+        "recipe": "selected material origin.recipe",
+        "noPerMaterialItemClones": true
+      },
+      "variableDictionary": "P-WEAPON"
+    },
+    {
+      "kind": "weapon_pattern",
+      "id": "weapon_pierce",
+      "name": "재료형 관통 무기",
+      "weaponKind": "pierce",
+      "shapeId": "weapon_pierce",
+      "slot": "main_hand",
+      "attackMode": "pierce",
+      "rangeM": 4.4,
+      "attackPeriodS": 0.9,
+      "damageFactor": 0.9,
+      "materialVolumeLiters": 0.3,
+      "additionalInputs": {
+        "wood": 0.6,
+        "plant_fiber": 0.2
+      },
+      "durabilityPerCellHpLiter": 1.8,
+      "baseCraftSeconds": 25,
+      "materialRecipeTimeFraction": 0.25,
+      "materialRecipeEnergyFraction": 0.1,
+      "materialResearchRequired": true,
+      "materialRecipeStationRequired": true,
+      "origin": {
+        "type": "parameterized_craft",
+        "materialId": "selected material",
+        "recipe": "selected material origin.recipe",
+        "noPerMaterialItemClones": true
+      },
+      "variableDictionary": "P-WEAPON"
+    },
+    {
+      "kind": "weapon_pattern",
+      "id": "weapon_blunt",
+      "name": "재료형 둔기",
+      "weaponKind": "blunt",
+      "shapeId": "weapon_blunt",
+      "slot": "main_hand",
+      "attackMode": "impact",
+      "rangeM": 2.5,
+      "attackPeriodS": 1.1,
+      "damageFactor": 1.1,
+      "materialVolumeLiters": 0.75,
+      "additionalInputs": {
+        "wood": 0.4,
+        "plant_fiber": 0.15
+      },
+      "durabilityPerCellHpLiter": 1.8,
+      "baseCraftSeconds": 25,
+      "materialRecipeTimeFraction": 0.25,
+      "materialRecipeEnergyFraction": 0.1,
+      "materialResearchRequired": true,
+      "materialRecipeStationRequired": true,
+      "origin": {
+        "type": "parameterized_craft",
+        "materialId": "selected material",
+        "recipe": "selected material origin.recipe",
+        "noPerMaterialItemClones": true
+      },
+      "variableDictionary": "P-WEAPON"
+    },
+    {
+      "kind": "recipe",
+      "id": "assemble_arc_thrower",
+      "name": "전기 투사기 조립",
+      "inputs": {
+        "scrap_iron": 4,
+        "mana_crystal_ore": 1,
+        "plant_fiber": 2
+      },
+      "outputs": {
+        "arc_thrower": 1
+      },
+      "station": "field_bench",
+      "research": "power",
+      "seconds": 75,
+      "energy": {},
+      "origin": {
+        "type": "craft",
+        "discoveryRequired": false
+      },
+      "variableDictionary": "P-RECIPE",
+      "massBalance": {
+        "mode": "assembly_preserves_inputs",
+        "rule": "finished component records summed input material mass; the explicit projectile capability comes only from arc_thrower component data"
       }
     }
   ]

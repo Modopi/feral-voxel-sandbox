@@ -1,0 +1,16 @@
+{
+  "version": "0.11.0",
+  "versionCode": 1100,
+  "nativeVersion": "0.3.3",
+  "nativeCode": 303,
+  "minNativeCode": 303,
+  "saveSchema": 2,
+  "archiveBytes": 2779584,
+  "expandedBytes": 11461429,
+  "archiveSha256": "62d0208388d41bf71c251668c456465656d8eecc2ad79bbfc61defc7e6e746d0",
+  "nativeSha256": "946352359b7a7f8e664e6be24c58d232d8822be9b54dd15ed5b33278a379d548",
+  "fileCount": 118,
+  "packageBytes": 3721495,
+  "packageSha256": "f42977c98a74a138a453e298de749eade55da15da7e01ffe8449f563bf179ac9",
+  "allFileHashesVerified": true
+}

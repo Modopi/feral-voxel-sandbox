@@ -1,0 +1,460 @@
+{
+  "environment": "Headless Chromium / Linux / SwiftShader software WebGL; not a mobile-device measurement",
+  "seed": 63026,
+  "restriction": "Only keyboard, pointer and DOM UI actions mutate game state. FERAL reads only.",
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 (File not found)"
+  ],
+  "pageErrors": [],
+  "steps": [
+    {
+      "name": "fresh-world",
+      "state": {
+        "player": {
+          "x": 0,
+          "y": 4.007988474819103,
+          "z": 0,
+          "yaw": 3.141592653589793,
+          "pitch": 0,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2399.631666666692,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {},
+        "research": [],
+        "stations": {},
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 3.683333333333325,
+        "stats": {
+          "running": true,
+          "version": "content-runtime",
+          "player": {
+            "x": 0,
+            "y": 4.007988474819103,
+            "z": 0,
+            "yaw": 3.141592653589793,
+            "pitch": 0,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2399.631666666692,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 9,
+          "models": 98,
+          "chunks": 4
+        }
+      }
+    },
+    {
+      "name": "empty-bag",
+      "state": {
+        "player": {
+          "x": 0,
+          "y": 4.007988474819103,
+          "z": 0,
+          "yaw": 3.141592653589793,
+          "pitch": 0,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2399.5366666666987,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {},
+        "research": [],
+        "stations": {},
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 4.633333333333322,
+        "stats": {
+          "running": true,
+          "version": "content-runtime",
+          "player": {
+            "x": 0,
+            "y": 4.007988474819103,
+            "z": 0,
+            "yaw": 3.141592653589793,
+            "pitch": 0,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2399.5366666666987,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 9,
+          "models": 98,
+          "chunks": 5
+        }
+      }
+    },
+    {
+      "name": "research-observation",
+      "state": {
+        "player": {
+          "x": 5.430975545197725,
+          "y": 4.006427382064248,
+          "z": 16.703916139900684,
+          "yaw": 2.278247927027292,
+          "pitch": -0.8471618652343749,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2394.741666666826,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {},
+        "research": [
+          "observation"
+        ],
+        "stations": {},
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 37.616666666665814,
+        "stats": {
+          "running": true,
+          "version": "content-runtime",
+          "player": {
+            "x": 5.430975545197725,
+            "y": 4.006427382064248,
+            "z": 16.703916139900684,
+            "yaw": 2.278247927027292,
+            "pitch": -0.8471618652343749,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2394.741666666826,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 9,
+          "models": 98,
+          "chunks": 42
+        }
+      }
+    },
+    {
+      "name": "research-joinery",
+      "state": {
+        "player": {
+          "x": 16.346981711685658,
+          "y": 4.007055310455719,
+          "z": 9.73285915657878,
+          "yaw": 5.796078127222604,
+          "pitch": -0.7824975585937499,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2388.1350000004527,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "berry": 2,
+          "plant_fiber": 1
+        },
+        "research": [
+          "observation",
+          "joinery"
+        ],
+        "stations": {},
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 91.71666666666275,
+        "stats": {
+          "running": true,
+          "version": "content-runtime",
+          "player": {
+            "x": 16.346981711685658,
+            "y": 4.007055310455719,
+            "z": 9.73285915657878,
+            "yaw": 5.796078127222604,
+            "pitch": -0.7824975585937499,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2388.1350000004527,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 9,
+          "models": 98,
+          "chunks": 89
+        }
+      }
+    },
+    {
+      "name": "craft-field_bench",
+      "state": {
+        "player": {
+          "x": 4.2676998959143475,
+          "y": 4.0079981119980355,
+          "z": 15.93377396273912,
+          "yaw": 6.039359453516562,
+          "pitch": -0.9646121215820311,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2372.246666667796,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "berry": 2,
+          "plant_fiber": 1,
+          "field_bench": 1
+        },
+        "research": [
+          "observation",
+          "joinery"
+        ],
+        "stations": {},
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 219.70000000006698,
+        "stats": {
+          "running": true,
+          "version": "content-runtime",
+          "player": {
+            "x": 4.2676998959143475,
+            "y": 4.0079981119980355,
+            "z": 15.93377396273912,
+            "yaw": 6.039359453516562,
+            "pitch": -0.9646121215820311,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2372.246666667796,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 9,
+          "models": 98,
+          "chunks": 96
+        }
+      }
+    },
+    {
+      "name": "placed-field-bench",
+      "state": {
+        "player": {
+          "x": 4.2676998959143475,
+          "y": 4.0079981119980355,
+          "z": 15.93377396273912,
+          "yaw": 6.283185289698203,
+          "pitch": 1.734723475976807e-16,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2371.898333334487,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "berry": 2,
+          "plant_fiber": 1
+        },
+        "research": [
+          "observation",
+          "joinery"
+        ],
+        "stations": {
+          "field_bench": 1
+        },
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 223.18333333340308,
+        "stats": {
+          "running": true,
+          "version": "content-runtime",
+          "player": {
+            "x": 4.2676998959143475,
+            "y": 4.0079981119980355,
+            "z": 15.93377396273912,
+            "yaw": 6.283185289698203,
+            "pitch": 1.734723475976807e-16,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2371.898333334487,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 9,
+          "models": 99,
+          "chunks": 96
+        }
+      }
+    },
+    {
+      "name": "blocked",
+      "state": {
+        "player": {
+          "x": 17.381528128426226,
+          "y": 4.007693145496632,
+          "z": -5.481026275125135,
+          "yaw": 5.737667101221638,
+          "pitch": -0.8611207580566405,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2367.245000001261,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "berry": 2,
+          "plant_fiber": 1,
+          "raw_timber": 1
+        },
+        "research": [
+          "observation",
+          "joinery"
+        ],
+        "stations": {
+          "field_bench": 1
+        },
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 254.01666666676095,
+        "stats": {
+          "running": true,
+          "version": "content-runtime",
+          "player": {
+            "x": 17.381528128426226,
+            "y": 4.007693145496632,
+            "z": -5.481026275125135,
+            "yaw": 5.737667101221638,
+            "pitch": -0.8611207580566405,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2367.245000001261,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 12,
+          "models": 99,
+          "chunks": 91
+        }
+      }
+    }
+  ],
+  "startedAt": "2026-10-17T15:00:50.368Z",
+  "ok": false,
+  "failure": "locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#panelList .row').filter({ has: locator('b').filter({ hasText: '목재 가공 연구' }) }).first().getByRole('button', { name: '연구', exact: true })\u001b[22m\n\u001b[2m    - locator resolved to <button disabled>연구</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element was detached from the DOM, retrying\u001b[22m\n\u001b[2m      - locator resolved to <button disabled>연구</button>\u001b[22m\n\u001b[2m    - attempting click action\u001b[22m\n\u001b[2m      - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 20ms\u001b[22m\n\u001b[2m      - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not stable\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m      - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element was detached from the DOM, retrying\u001b[22m\n\u001b[2m      - locator resolved to <button disabled>연구</button>\u001b[22m\n\u001b[2m    - attempting click action\u001b[22m\n\u001b[2m      - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 20ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element is not enabled\u001b[22m\n\u001b[2m  - retrying click action\u001b[22m\n\u001b[2m    - waiting 100ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  - element was detached from the DOM, retrying\u001b[22m\n\u001b[2m    - locator resolved to <button disabled>연구</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element is not enabled\u001b[22m\n\u001b[2m  - retrying click action\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element is not stable\u001b[22m\n\u001b[2m  - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  - element was detached from the DOM, retrying\u001b[22m\n\u001b[2m    - locator resolved to <button disabled>연구</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    4 × waiting 20ms\u001b[22m\n\u001b[2m      - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element was detached from the DOM, retrying\u001b[22m\n\u001b[2m      - locator resolved to <button disabled>연구</button>\u001b[22m\n\u001b[2m    - attempting click action\u001b[22m\n\u001b[2m      - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not stable\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  - element was detached from the DOM, retrying\u001b[22m\n\u001b[2m    - locator resolved to <button disabled>연구</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element is not stable\u001b[22m\n\u001b[2m  - retrying click action\u001b[22m\n\u001b[2m    - waiting 100ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element was detached from the DOM, retrying\u001b[22m\n\u001b[2m      - locator resolved to <button disabled>연구</button>\u001b[22m\n\u001b[2m    - attempting click action\u001b[22m\n\u001b[2m      - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not stable\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 20ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m  - element was detached from the DOM, retrying\u001b[22m\n\u001b[2m    - locator resolved to <button disabled>연구</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m    - element is not enabled\u001b[22m\n\u001b[2m  - retrying click action\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\n    at panelAction (/workspace/feral-voxel-sandbox/tools/verify-expedition-browser.mjs:36:349)\n    at async research (/workspace/feral-voxel-sandbox/tools/verify-expedition-browser.mjs:37:35)\n    at async file:///workspace/feral-voxel-sandbox/tools/verify-expedition-browser.mjs:48:38",
+  "finishedAt": "2026-10-17T15:06:05.306Z"
+}

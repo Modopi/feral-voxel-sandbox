@@ -226,8 +226,10 @@ export class CharacterController {
         }
       }
     }
-    p.x = clamp(p.x, BODY_RADIUS, SIZE - BODY_RADIUS);
-    p.z = clamp(p.z, BODY_RADIUS, SIZE - BODY_RADIUS);
+    if (!this.world.unbounded) {
+      p.x = clamp(p.x, BODY_RADIUS, SIZE - BODY_RADIUS);
+      p.z = clamp(p.z, BODY_RADIUS, SIZE - BODY_RADIUS);
+    }
     p.sprinting =
       !!input.sprint && p.stance === "stand" && Math.hypot(f, side) > 0.1;
     return (Math.hypot(f, side) * speed) / 3.2;

@@ -1,0 +1,3543 @@
+{
+  "schemaVersion": 1,
+  "baseline": {
+    "schemaVersion": 1,
+    "generatedAt": "2026-10-17T15:11:56.456Z",
+    "url": "http://127.0.0.1:8081",
+    "seed": 63026,
+    "scenario": "Fresh local storage, initial expedition scene, no input, no grants/teleports/gameplay mutations.",
+    "instrumentation": "Instance method wrappers measure synchronous inclusive elapsed time; nested stages must not be summed. 1ms V8 CPU sampling enabled only in measured window.",
+    "limitations": [
+      "Forced Chromium SwiftShader software WebGL in shared execution environment; not Android or real mobile GPU validation.",
+      "Mobile mode changes viewport/touch/user-agent behavior with DPR1; CPU/GPU host is unchanged.",
+      "Other concurrent processes and code edits may affect results; file hashes and changedFiles are recorded.",
+      "No player movement; this measures initial stationary simulation and rendering, not streaming travel or peak combat."
+    ],
+    "runs": [
+      {
+        "name": "desktop",
+        "viewport": {
+          "width": 1100,
+          "height": 700
+        },
+        "isMobile": false,
+        "readyMs": 3921,
+        "warmupMs": 32000,
+        "targetSampleMs": 30000,
+        "actualSampleWallMs": 30020.60000000149,
+        "gameTimeSeconds": 13.433333333332728,
+        "startStats": {
+          "running": true,
+          "version": "content-runtime",
+          "player": {
+            "x": 0,
+            "y": 4.007996901124716,
+            "z": 0,
+            "yaw": 3.141592653589793,
+            "pitch": 0,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2398.5500000001,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 9,
+          "models": 98,
+          "chunks": 12
+        },
+        "endStats": {
+          "running": true,
+          "version": "content-runtime",
+          "player": {
+            "x": 0,
+            "y": 4.007996901124716,
+            "z": 0,
+            "yaw": 3.141592653589793,
+            "pitch": 0,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2397.2066666668597,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 9,
+          "models": 96,
+          "chunks": 21
+        },
+        "stages": {
+          "physics.terrainAt": {
+            "calls": 1750,
+            "totalMs": 16.499999970197678,
+            "medianMs": 0,
+            "p95Ms": 0.09999999776482582,
+            "maxMs": 2.599999997764826
+          },
+          "runtime.tick": {
+            "calls": 806,
+            "totalMs": 4575.100000031292,
+            "medianMs": 0,
+            "p95Ms": 51.899999998509884,
+            "maxMs": 204.69999999925494
+          },
+          "physics.step": {
+            "calls": 806,
+            "totalMs": 1031.3999999463558,
+            "medianMs": 0.6000000014901161,
+            "p95Ms": 4.199999999254942,
+            "maxMs": 57
+          },
+          "atlas.loadAround": {
+            "calls": 138,
+            "totalMs": 1762.800000011921,
+            "medianMs": 9.099999997764826,
+            "p95Ms": 28.599999997764826,
+            "maxMs": 179.19999999925494
+          },
+          "scene.syncTerrain": {
+            "calls": 138,
+            "totalMs": 750.5999999977648,
+            "medianMs": 0,
+            "p95Ms": 61.399999998509884,
+            "maxMs": 137.09999999776483
+          },
+          "runtime.descriptors": {
+            "calls": 138,
+            "totalMs": 94.20000002160668,
+            "medianMs": 0.3999999985098839,
+            "p95Ms": 1.6000000014901161,
+            "maxMs": 19.800000000745058
+          },
+          "scene.syncModels": {
+            "calls": 138,
+            "totalMs": 610.899999987334,
+            "medianMs": 2.300000000745058,
+            "p95Ms": 13.300000000745058,
+            "maxMs": 45.400000002235174
+          },
+          "physics.synchronize": {
+            "calls": 138,
+            "totalMs": 2087.0999999940395,
+            "medianMs": 11.600000001490116,
+            "p95Ms": 40.80000000074506,
+            "maxMs": 57.599999997764826
+          },
+          "scene.draw": {
+            "calls": 138,
+            "totalMs": 1838.9000000208616,
+            "medianMs": 9.699999999254942,
+            "p95Ms": 34.599999997764826,
+            "maxMs": 85.69999999925494
+          },
+          "runtime.refreshWorld": {
+            "calls": 6,
+            "totalMs": 15.600000001490116,
+            "medianMs": 1.5,
+            "p95Ms": 4.300000000745058,
+            "maxMs": 4.300000000745058
+          }
+        },
+        "frameIntervals": {
+          "calls": 137,
+          "totalMs": 29904.60000000149,
+          "medianMs": 200.5,
+          "p95Ms": 432.19999999925494,
+          "maxMs": 1034.5
+        },
+        "draws": 138,
+        "renderer": {
+          "calls": {
+            "min": 647,
+            "max": 669,
+            "mean": 659.7246376811594,
+            "last": 649
+          },
+          "triangles": {
+            "min": 37452,
+            "max": 42412,
+            "mean": 39681.42028985507,
+            "last": 42412
+          },
+          "points": {
+            "min": 0,
+            "max": 0,
+            "mean": 0,
+            "last": 0
+          },
+          "lines": {
+            "min": 0,
+            "max": 0,
+            "mean": 0,
+            "last": 0
+          },
+          "geometries": {
+            "min": 165,
+            "max": 169,
+            "mean": 166.80434782608697,
+            "last": 169
+          },
+          "textures": {
+            "min": 0,
+            "max": 0,
+            "mean": 0,
+            "last": 0
+          },
+          "programs": {
+            "min": 3,
+            "max": 3,
+            "mean": 3,
+            "last": 3
+          }
+        },
+        "longTasks": {
+          "calls": 110,
+          "totalMs": 13078,
+          "medianMs": 96,
+          "p95Ms": 258,
+          "maxMs": 432
+        },
+        "largestLongTasks": [
+          {
+            "startTime": 37765,
+            "duration": 432
+          },
+          {
+            "startTime": 57360.39999999851,
+            "duration": 372
+          },
+          {
+            "startTime": 63000.199999999255,
+            "duration": 297
+          },
+          {
+            "startTime": 53620.199999999255,
+            "duration": 269
+          },
+          {
+            "startTime": 50503.300000000745,
+            "duration": 259
+          },
+          {
+            "startTime": 39097.300000000745,
+            "duration": 258
+          },
+          {
+            "startTime": 56216,
+            "duration": 252
+          },
+          {
+            "startTime": 48158.300000000745,
+            "duration": 244
+          },
+          {
+            "startTime": 65532.39999999851,
+            "duration": 228
+          },
+          {
+            "startTime": 66499.80000000075,
+            "duration": 221
+          }
+        ],
+        "environment": {
+          "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "platform": "Linux x86_64",
+          "hardwareConcurrency": 5,
+          "deviceMemoryGiB": 16,
+          "dpr": 1,
+          "innerWidth": 1100,
+          "innerHeight": 700,
+          "visibility": "visible",
+          "webglRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+          "webglVendor": "Google Inc. (Google)",
+          "canvasWidth": 1100,
+          "canvasHeight": 700,
+          "jsHeap": {
+            "used": 84734872,
+            "total": 154626492,
+            "limit": 4395630592
+          }
+        },
+        "effectiveFps": 4.596843500795892,
+        "simulationToWallRatio": 0.44747051469098087,
+        "cpu": {
+          "samplingIntervalUs": 1000,
+          "sampledMs": 31690.215,
+          "nodeCount": 914,
+          "samples": 13305,
+          "topSelf": [
+            {
+              "function": "(idle)",
+              "url": "",
+              "line": 0,
+              "column": 0,
+              "ms": 15747.261,
+              "percent": 49.6912406558302
+            },
+            {
+              "function": "(program)",
+              "url": "",
+              "line": 0,
+              "column": 0,
+              "ms": 1510.003,
+              "percent": 4.764887205719495
+            },
+            {
+              "function": "isSolid",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+              "line": 49,
+              "column": 9,
+              "ms": 837.206,
+              "percent": 2.6418438625298064
+            },
+            {
+              "function": "isSolid",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+              "line": 49,
+              "column": 9,
+              "ms": 637.049,
+              "percent": 2.010238807152302
+            },
+            {
+              "function": "(garbage collector)",
+              "url": "",
+              "line": 0,
+              "column": 0,
+              "ms": 580.548,
+              "percent": 1.8319471799102656
+            },
+            {
+              "function": "_advanceChunk",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 354,
+              "column": 16,
+              "ms": 511.063,
+              "percent": 1.6126839152085273
+            },
+            {
+              "function": "chunkGeometry",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/scene.js",
+              "line": 24,
+              "column": 30,
+              "ms": 472.647,
+              "percent": 1.4914603766493852
+            },
+            {
+              "function": "solidAt",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/dungeons.js",
+              "line": 260,
+              "column": 10,
+              "ms": 464.015,
+              "percent": 1.4642216848323686
+            },
+            {
+              "function": "instancesNear",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/dungeons.js",
+              "line": 146,
+              "column": 16,
+              "ms": 388.315,
+              "percent": 1.225346688244305
+            },
+            {
+              "function": "syncFixtures",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/physics.js",
+              "line": 145,
+              "column": 15,
+              "ms": 372.741,
+              "percent": 1.1762021810202297
+            },
+            {
+              "function": "_column",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 157,
+              "column": 10,
+              "ms": 298.506,
+              "percent": 0.9419500625035205
+            },
+            {
+              "function": "_noise",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 73,
+              "column": 9,
+              "ms": 293.072,
+              "percent": 0.9248028137391937
+            },
+            {
+              "function": "instancesNear",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/dungeons.js",
+              "line": 146,
+              "column": 16,
+              "ms": 236.157,
+              "percent": 0.7452047895541258
+            },
+            {
+              "function": "_treeAt",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 176,
+              "column": 10,
+              "ms": 234.85,
+              "percent": 0.7410804880938802
+            },
+            {
+              "function": "getParameter",
+              "url": "",
+              "line": 0,
+              "column": 0,
+              "ms": 216.953,
+              "percent": 0.6846056424672411
+            },
+            {
+              "function": "structureModelBoxes",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/physics.js",
+              "line": 183,
+              "column": 22,
+              "ms": 206.699,
+              "percent": 0.6522486515159331
+            },
+            {
+              "function": "loadAround",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 380,
+              "column": 13,
+              "ms": 178.445,
+              "percent": 0.5630917934763143
+            },
+            {
+              "function": "needsUpdate",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+              "line": 15387,
+              "column": 22,
+              "ms": 175.503,
+              "percent": 0.5538081707555471
+            },
+            {
+              "function": "_canStep",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+              "line": 612,
+              "column": 11,
+              "ms": 174.785,
+              "percent": 0.5515424871683579
+            },
+            {
+              "function": "solidAt",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/dungeons.js",
+              "line": 260,
+              "column": 10,
+              "ms": 172.505,
+              "percent": 0.5443478373371717
+            },
+            {
+              "function": "deterministicUnit",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 21,
+              "column": 34,
+              "ms": 169.17,
+              "percent": 0.5338240841849764
+            },
+            {
+              "function": "setup",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+              "line": 15263,
+              "column": 16,
+              "ms": 132.81,
+              "percent": 0.4190883526665881
+            },
+            {
+              "function": "_vegetationAt",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 184,
+              "column": 16,
+              "ms": 125.285,
+              "percent": 0.3953428526755025
+            },
+            {
+              "function": "WebGLRenderer.renderBufferDirect",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+              "line": 29609,
+              "column": 38,
+              "ms": 124.562,
+              "percent": 0.3930613913474553
+            },
+            {
+              "function": "getCell",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 210,
+              "column": 10,
+              "ms": 119.308,
+              "percent": 0.3764821412540117
+            },
+            {
+              "function": "deterministicUnit",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 21,
+              "column": 34,
+              "ms": 115.548,
+              "percent": 0.3646172801288978
+            },
+            {
+              "function": "wasm-to-js",
+              "url": "",
+              "line": 1,
+              "column": 1,
+              "ms": 111.308,
+              "percent": 0.351237755881429
+            },
+            {
+              "function": "wasm-function[356]",
+              "url": "wasm://wasm/00bc1dde",
+              "line": 1,
+              "column": 1469432,
+              "ms": 109.734,
+              "percent": 0.3462709230593734
+            },
+            {
+              "function": "(anonymous)",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/dungeons.js",
+              "line": 14,
+              "column": 45,
+              "ms": 107.87,
+              "percent": 0.3403889812675616
+            },
+            {
+              "function": "uniformMatrix4fv",
+              "url": "",
+              "line": 0,
+              "column": 0,
+              "ms": 106.427,
+              "percent": 0.33583552525598204
+            },
+            {
+              "function": "animateCreatureModel",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creature-animation.js",
+              "line": 62,
+              "column": 37,
+              "ms": 105.233,
+              "percent": 0.33206780073912406
+            },
+            {
+              "function": "sample",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 155,
+              "column": 9,
+              "ms": 102.138,
+              "percent": 0.3223013791481061
+            },
+            {
+              "function": "bindVertexArray",
+              "url": "",
+              "line": 0,
+              "column": 0,
+              "ms": 101.339,
+              "percent": 0.3197800961590194
+            },
+            {
+              "function": "wasm-function[356]",
+              "url": "wasm://wasm/00bc1dde",
+              "line": 1,
+              "column": 1469432,
+              "ms": 99.792,
+              "percent": 0.31489846313759623
+            },
+            {
+              "function": "_treeAt",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 176,
+              "column": 10,
+              "ms": 98.414,
+              "percent": 0.3105501177571689
+            }
+          ],
+          "topInclusive": [
+            {
+              "function": "(root)",
+              "url": "",
+              "line": 0,
+              "column": 0,
+              "ms": 31690.215,
+              "percent": 100
+            },
+            {
+              "function": "(idle)",
+              "url": "",
+              "line": 0,
+              "column": 0,
+              "ms": 15747.261,
+              "percent": 49.6912406558302
+            },
+            {
+              "function": "frame",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/entry.js",
+              "line": 134,
+              "column": 15,
+              "ms": 13621.038,
+              "percent": 42.98184155582409
+            },
+            {
+              "function": "target.<computed>",
+              "url": "",
+              "line": 3,
+              "column": 130,
+              "ms": 13037.514,
+              "percent": 41.14050346455523
+            },
+            {
+              "function": "tick",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+              "line": 82,
+              "column": 6,
+              "ms": 4900.617,
+              "percent": 15.464133013928747
+            },
+            {
+              "function": "_step",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+              "line": 297,
+              "column": 8,
+              "ms": 4846.73,
+              "percent": 15.294089989607201
+            },
+            {
+              "function": "tick",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+              "line": 252,
+              "column": 7,
+              "ms": 4846.73,
+              "percent": 15.294089989607201
+            },
+            {
+              "function": "_act",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+              "line": 495,
+              "column": 7,
+              "ms": 2466.048,
+              "percent": 7.781733257410845
+            },
+            {
+              "function": "_move",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+              "line": 640,
+              "column": 8,
+              "ms": 2453.581,
+              "percent": 7.742393038355846
+            },
+            {
+              "function": "(anonymous)",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+              "line": 656,
+              "column": 40,
+              "ms": 2307.366,
+              "percent": 7.281004562449324
+            },
+            {
+              "function": "_canStep",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+              "line": 612,
+              "column": 11,
+              "ms": 2299.735,
+              "percent": 7.256924574352051
+            },
+            {
+              "function": "_decide",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+              "line": 419,
+              "column": 10,
+              "ms": 2090.383,
+              "percent": 6.596304253536936
+            },
+            {
+              "function": "isSolid",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+              "line": 49,
+              "column": 9,
+              "ms": 2087.727,
+              "percent": 6.587923117593237
+            },
+            {
+              "function": "_visible",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+              "line": 690,
+              "column": 11,
+              "ms": 2076.402,
+              "percent": 6.552186534550176
+            },
+            {
+              "function": "synchronize",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/physics.js",
+              "line": 267,
+              "column": 14,
+              "ms": 2064.944,
+              "percent": 6.516030263600295
+            },
+            {
+              "function": "lineOfSight",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+              "line": 55,
+              "column": 13,
+              "ms": 2032.063,
+              "percent": 6.412272684170809
+            },
+            {
+              "function": "isSolid",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+              "line": 49,
+              "column": 9,
+              "ms": 1940.968,
+              "percent": 6.124818023481381
+            },
+            {
+              "function": "loadAround",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 380,
+              "column": 13,
+              "ms": 1921.453,
+              "percent": 6.063237500913137
+            },
+            {
+              "function": "draw",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/scene.js",
+              "line": 136,
+              "column": 6,
+              "ms": 1811.463,
+              "percent": 5.716158757521841
+            },
+            {
+              "function": "WebGLRenderer.render",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+              "line": 29998,
+              "column": 26,
+              "ms": 1808.229,
+              "percent": 5.705953714734974
+            },
+            {
+              "function": "_advanceChunk",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 354,
+              "column": 16,
+              "ms": 1733.767,
+              "percent": 5.470985286783318
+            },
+            {
+              "function": "(program)",
+              "url": "",
+              "line": 0,
+              "column": 0,
+              "ms": 1510.003,
+              "percent": 4.764887205719495
+            },
+            {
+              "function": "renderScene",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+              "line": 30298,
+              "column": 23,
+              "ms": 1320.889,
+              "percent": 4.168128868800669
+            },
+            {
+              "function": "renderObjects",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+              "line": 30446,
+              "column": 25,
+              "ms": 1311.335,
+              "percent": 4.137980761569462
+            },
+            {
+              "function": "renderObject",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+              "line": 30469,
+              "column": 24,
+              "ms": 1289.819,
+              "percent": 4.070085987109901
+            },
+            {
+              "function": "WebGLRenderer.renderBufferDirect",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+              "line": 29609,
+              "column": 38,
+              "ms": 1192.562,
+              "percent": 3.7631868385872425
+            },
+            {
+              "function": "step",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/physics.js",
+              "line": 330,
+              "column": 7,
+              "ms": 933.033,
+              "percent": 2.944230577167116
+            },
+            {
+              "function": "solidAt",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/dungeons.js",
+              "line": 260,
+              "column": 10,
+              "ms": 825.116,
+              "percent": 2.6036932851354906
+            },
+            {
+              "function": "_column",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 157,
+              "column": 10,
+              "ms": 741.263,
+              "percent": 2.3390911043045937
+            },
+            {
+              "function": "syncTerrain",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/scene.js",
+              "line": 75,
+              "column": 13,
+              "ms": 723.718,
+              "percent": 2.2837270116343484
+            },
+            {
+              "function": "chunkGeometry",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/scene.js",
+              "line": 24,
+              "column": 30,
+              "ms": 700.577,
+              "percent": 2.2107044713959816
+            },
+            {
+              "function": "syncFixtures",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/physics.js",
+              "line": 145,
+              "column": 15,
+              "ms": 626.475,
+              "percent": 1.9768720407860911
+            },
+            {
+              "function": "(garbage collector)",
+              "url": "",
+              "line": 0,
+              "column": 0,
+              "ms": 580.548,
+              "percent": 1.8319471799102656
+            },
+            {
+              "function": "syncModels",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/scene.js",
+              "line": 114,
+              "column": 12,
+              "ms": 578.301,
+              "percent": 1.8248566631687415
+            },
+            {
+              "function": "solidAt",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/dungeons.js",
+              "line": 260,
+              "column": 10,
+              "ms": 570.27,
+              "percent": 1.7995144558028402
+            }
+          ],
+          "note": "V8 statistical CPU samples, inclusive stacks overlap. GPU/SwiftShader worker cost is not all attributed here."
+        },
+        "cpuError": null,
+        "pageErrors": [],
+        "consoleErrors": [
+          "Failed to load resource: the server responded with a status of 404 (File not found)"
+        ],
+        "codeBefore": {
+          "app/src/main/assets/content-runtime/entry.js": "2c8ce5230871a53d2f054af70c7d3caaef39600d4d5b792355a33551f6073095",
+          "app/src/main/assets/content-runtime/runtime.js": "20c7afe602fac1995a904b741643a94d58faf60f786a76719f372e016c3018fd",
+          "app/src/main/assets/content-runtime/scene.js": "f937ac122215616db2d9884d9388d205c637de0770a6e8f5ea2bee113ff8bea6",
+          "app/src/main/assets/content-runtime/physics.js": "f6c938bf116dc2f87feb9b2b03185a2ce244add3aeb435c0525fdb0bea73339f",
+          "app/src/main/assets/content-runtime/atlas.js": "8021e598bbe4dc07c1fc60e60788b5035577f3fca58f17fafe49492dfbe47c2d",
+          "app/src/main/assets/content-runtime/creatures.js": "4eb448d9eeae1357409b1eafaaa5def50c9b9c88c584053cff369dfe7b94b9c7",
+          "app/src/main/assets/content-runtime/progression.js": "2dc954d8af21855db88cafd5e920721eaebb6c586cc6a2ca3aff521b18a64178",
+          "app/src/main/assets/content-runtime/placements.js": "d956234bbd383b5266bf6f928899e7928ee2902aad7e731e4090f998c926e1da",
+          "app/src/main/assets/content-runtime/fixture-physics.js": "1acd6298a2cc0822e8656804c57a259138290792b7d47e030a6ffad8fa4a224a",
+          "app/src/main/assets/content-runtime/objects.js": "27ba2bde60ffb2385f9ec8f595e8d18f1239df1066780dce751c901b2179ba11",
+          "app/src/main/assets/content-runtime/object-physics.js": "d71128684ea453ea22ca6bd2aef92935629919d3b5652f59ef9871dcb5a293b3",
+          "app/src/main/assets/content-runtime/environment-view.js": "00ad6e236f6286eb70f224101846030699dcb6ce6609bc3d4f3d27e3e458df8a",
+          "app/src/main/assets/content-runtime/equipment-view.js": "63b480695ba2830cab8177b701420f32074a406d3ea4859bff19980f2d946aa5"
+        },
+        "codeAfter": {
+          "app/src/main/assets/content-runtime/entry.js": "37e16f4093d59c2ae7352ca0ad70d2a3686958b01b7a0af2941534c6a5e2025c",
+          "app/src/main/assets/content-runtime/runtime.js": "5aca2e2743123d118b5ff44571932b0c8c7f92cf114a5f6158ee0114afed4314",
+          "app/src/main/assets/content-runtime/scene.js": "f937ac122215616db2d9884d9388d205c637de0770a6e8f5ea2bee113ff8bea6",
+          "app/src/main/assets/content-runtime/physics.js": "58254b93da9ad544dc79dbb518993d1bd1d068932c88be00743804027699dd2b",
+          "app/src/main/assets/content-runtime/atlas.js": "5c988c051937bfa032b5ba09855e58152a81fbae5faa89bea73e5789559a4478",
+          "app/src/main/assets/content-runtime/creatures.js": "4eb448d9eeae1357409b1eafaaa5def50c9b9c88c584053cff369dfe7b94b9c7",
+          "app/src/main/assets/content-runtime/progression.js": "4878b71cf4ca0960b55b17875399bed743d12ecc57a1a49736373d18db0806bb",
+          "app/src/main/assets/content-runtime/placements.js": "d956234bbd383b5266bf6f928899e7928ee2902aad7e731e4090f998c926e1da",
+          "app/src/main/assets/content-runtime/fixture-physics.js": "1acd6298a2cc0822e8656804c57a259138290792b7d47e030a6ffad8fa4a224a",
+          "app/src/main/assets/content-runtime/objects.js": "558236b23b03176a28a9023cf6b1cf577669129baf7af2c6444faf58183d38d5",
+          "app/src/main/assets/content-runtime/object-physics.js": "d71128684ea453ea22ca6bd2aef92935629919d3b5652f59ef9871dcb5a293b3",
+          "app/src/main/assets/content-runtime/environment-view.js": "00ad6e236f6286eb70f224101846030699dcb6ce6609bc3d4f3d27e3e458df8a",
+          "app/src/main/assets/content-runtime/equipment-view.js": "63b480695ba2830cab8177b701420f32074a406d3ea4859bff19980f2d946aa5"
+        },
+        "changedFiles": [
+          "app/src/main/assets/content-runtime/entry.js",
+          "app/src/main/assets/content-runtime/runtime.js",
+          "app/src/main/assets/content-runtime/physics.js",
+          "app/src/main/assets/content-runtime/atlas.js",
+          "app/src/main/assets/content-runtime/progression.js",
+          "app/src/main/assets/content-runtime/objects.js"
+        ]
+      },
+      {
+        "name": "mobile_viewport",
+        "viewport": {
+          "width": 390,
+          "height": 844
+        },
+        "isMobile": true,
+        "readyMs": 1255,
+        "warmupMs": 32000,
+        "targetSampleMs": 30000,
+        "actualSampleWallMs": 30028.5,
+        "gameTimeSeconds": 21.23333333333213,
+        "startStats": {
+          "running": true,
+          "version": "content-runtime",
+          "player": {
+            "x": 0,
+            "y": 4.007996901124716,
+            "z": 0,
+            "yaw": 3.141592653589793,
+            "pitch": 0,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2397.7316666668235,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 9,
+          "models": 98,
+          "chunks": 21
+        },
+        "endStats": {
+          "running": true,
+          "version": "content-runtime",
+          "player": {
+            "x": 0,
+            "y": 4.007996901124716,
+            "z": 0,
+            "yaw": 3.141592653589793,
+            "pitch": 0,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2395.608333333637,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 9,
+          "models": 96,
+          "chunks": 38
+        },
+        "stages": {
+          "physics.terrainAt": {
+            "calls": 2785,
+            "totalMs": 14.799999985843897,
+            "medianMs": 0,
+            "p95Ms": 0,
+            "maxMs": 1.2000000029802322
+          },
+          "runtime.tick": {
+            "calls": 1274,
+            "totalMs": 5217.600000008941,
+            "medianMs": 0,
+            "p95Ms": 31.700000002980232,
+            "maxMs": 250
+          },
+          "physics.step": {
+            "calls": 1274,
+            "totalMs": 1764.5000000670552,
+            "medianMs": 0.6000000014901161,
+            "p95Ms": 4.699999999254942,
+            "maxMs": 144.39999999850988
+          },
+          "atlas.loadAround": {
+            "calls": 237,
+            "totalMs": 2767.699999999255,
+            "medianMs": 8.200000002980232,
+            "p95Ms": 30.899999998509884,
+            "maxMs": 141.20000000298023
+          },
+          "scene.syncTerrain": {
+            "calls": 237,
+            "totalMs": 1178.9000000283122,
+            "medianMs": 0,
+            "p95Ms": 50.100000001490116,
+            "maxMs": 150.80000000074506
+          },
+          "runtime.descriptors": {
+            "calls": 237,
+            "totalMs": 116.39999994263053,
+            "medianMs": 0.30000000074505806,
+            "p95Ms": 1.800000000745058,
+            "maxMs": 5
+          },
+          "scene.syncModels": {
+            "calls": 237,
+            "totalMs": 760.5000000298023,
+            "medianMs": 1.5,
+            "p95Ms": 9.699999999254942,
+            "maxMs": 70.60000000149012
+          },
+          "physics.synchronize": {
+            "calls": 237,
+            "totalMs": 2473.999999959022,
+            "medianMs": 7.300000000745058,
+            "p95Ms": 29,
+            "maxMs": 47.599999997764826
+          },
+          "scene.draw": {
+            "calls": 237,
+            "totalMs": 1383.3999999836087,
+            "medianMs": 3.600000001490116,
+            "p95Ms": 18.399999998509884,
+            "maxMs": 79.80000000074506
+          },
+          "runtime.refreshWorld": {
+            "calls": 10,
+            "totalMs": 56.20000000670552,
+            "medianMs": 2.900000002235174,
+            "p95Ms": 13.199999999254942,
+            "maxMs": 13.199999999254942
+          }
+        },
+        "frameIntervals": {
+          "calls": 236,
+          "totalMs": 29881.20000000298,
+          "medianMs": 102.69999999925494,
+          "p95Ms": 292.19999999925494,
+          "maxMs": 778.8000000007451
+        },
+        "draws": 237,
+        "renderer": {
+          "calls": {
+            "min": 239,
+            "max": 282,
+            "mean": 259.1603375527426,
+            "last": 265
+          },
+          "triangles": {
+            "min": 24254,
+            "max": 27492,
+            "mean": 25760.042194092828,
+            "last": 27124
+          },
+          "points": {
+            "min": 0,
+            "max": 0,
+            "mean": 0,
+            "last": 0
+          },
+          "lines": {
+            "min": 0,
+            "max": 0,
+            "mean": 0,
+            "last": 0
+          },
+          "geometries": {
+            "min": 157,
+            "max": 161,
+            "mean": 159.21097046413502,
+            "last": 161
+          },
+          "textures": {
+            "min": 0,
+            "max": 0,
+            "mean": 0,
+            "last": 0
+          },
+          "programs": {
+            "min": 3,
+            "max": 3,
+            "mean": 3,
+            "last": 3
+          }
+        },
+        "longTasks": {
+          "calls": 132,
+          "totalMs": 13588,
+          "medianMs": 87,
+          "p95Ms": 203,
+          "maxMs": 471
+        },
+        "largestLongTasks": [
+          {
+            "startTime": 64707.39999999851,
+            "duration": 471
+          },
+          {
+            "startTime": 46972.5,
+            "duration": 291
+          },
+          {
+            "startTime": 53856.89999999851,
+            "duration": 287
+          },
+          {
+            "startTime": 42283.5,
+            "duration": 284
+          },
+          {
+            "startTime": 39191.300000000745,
+            "duration": 222
+          },
+          {
+            "startTime": 62829.699999999255,
+            "duration": 217
+          },
+          {
+            "startTime": 39549.800000000745,
+            "duration": 203
+          },
+          {
+            "startTime": 41185.699999999255,
+            "duration": 201
+          },
+          {
+            "startTime": 50354.5,
+            "duration": 198
+          },
+          {
+            "startTime": 38198.5,
+            "duration": 187
+          }
+        ],
+        "environment": {
+          "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+          "platform": "Linux x86_64",
+          "hardwareConcurrency": 5,
+          "deviceMemoryGiB": 16,
+          "dpr": 1,
+          "innerWidth": 390,
+          "innerHeight": 844,
+          "visibility": "visible",
+          "webglRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+          "webglVendor": "Google Inc. (Google)",
+          "canvasWidth": 390,
+          "canvasHeight": 844,
+          "jsHeap": {
+            "used": 111418473,
+            "total": 195785149,
+            "limit": 4395630592
+          }
+        },
+        "effectiveFps": 7.892502122983165,
+        "simulationToWallRatio": 0.7071060270520382,
+        "cpu": {
+          "samplingIntervalUs": 1000,
+          "sampledMs": 32038.204,
+          "nodeCount": 1053,
+          "samples": 13983,
+          "topSelf": [
+            {
+              "function": "(idle)",
+              "url": "",
+              "line": 0,
+              "column": 0,
+              "ms": 12659.845,
+              "percent": 39.51483984557936
+            },
+            {
+              "function": "(program)",
+              "url": "",
+              "line": 0,
+              "column": 0,
+              "ms": 1348.202,
+              "percent": 4.208107295902105
+            },
+            {
+              "function": "getParameter",
+              "url": "",
+              "line": 0,
+              "column": 0,
+              "ms": 1115.855,
+              "percent": 3.4828887412040954
+            },
+            {
+              "function": "_advanceChunk",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 354,
+              "column": 16,
+              "ms": 940.817,
+              "percent": 2.936547254646359
+            },
+            {
+              "function": "chunkGeometry",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/scene.js",
+              "line": 24,
+              "column": 30,
+              "ms": 652.329,
+              "percent": 2.0360972793606034
+            },
+            {
+              "function": "(garbage collector)",
+              "url": "",
+              "line": 0,
+              "column": 0,
+              "ms": 482.666,
+              "percent": 1.5065326383463942
+            },
+            {
+              "function": "instancesNear",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/dungeons.js",
+              "line": 146,
+              "column": 16,
+              "ms": 473.872,
+              "percent": 1.4790841584003898
+            },
+            {
+              "function": "getCell",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 210,
+              "column": 10,
+              "ms": 466.981,
+              "percent": 1.457575462095191
+            },
+            {
+              "function": "_vegetationAt",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 184,
+              "column": 16,
+              "ms": 419,
+              "percent": 1.307813633997711
+            },
+            {
+              "function": "_column",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 157,
+              "column": 10,
+              "ms": 402.766,
+              "percent": 1.257142878545876
+            },
+            {
+              "function": "syncFixtures",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/physics.js",
+              "line": 145,
+              "column": 15,
+              "ms": 388.995,
+              "percent": 1.2141598199449632
+            },
+            {
+              "function": "lineOfSight",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+              "line": 57,
+              "column": 13,
+              "ms": 371.443,
+              "percent": 1.1593752259021761
+            },
+            {
+              "function": "structureModelBoxes",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/physics.js",
+              "line": 183,
+              "column": 22,
+              "ms": 321.29,
+              "percent": 1.0028339915683164
+            },
+            {
+              "function": "animateCreatureModel",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creature-animation.js",
+              "line": 62,
+              "column": 37,
+              "ms": 311.317,
+              "percent": 0.9717055300602992
+            },
+            {
+              "function": "solidAt",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/dungeons.js",
+              "line": 260,
+              "column": 10,
+              "ms": 303.314,
+              "percent": 0.9467259775235839
+            },
+            {
+              "function": "instancesNear",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/dungeons.js",
+              "line": 146,
+              "column": 16,
+              "ms": 299.233,
+              "percent": 0.9339880600048617
+            },
+            {
+              "function": "filterContactPair",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/voxel/physics.mjs",
+              "line": 44,
+              "column": 26,
+              "ms": 272.783,
+              "percent": 0.8514303735627627
+            },
+            {
+              "function": "_column",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 157,
+              "column": 10,
+              "ms": 217.454,
+              "percent": 0.6787334271296855
+            },
+            {
+              "function": "getCell",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 210,
+              "column": 10,
+              "ms": 210.987,
+              "percent": 0.6585481508264321
+            },
+            {
+              "function": "_treeAt",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 176,
+              "column": 10,
+              "ms": 197.275,
+              "percent": 0.6157492473672994
+            },
+            {
+              "function": "getCell",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 210,
+              "column": 10,
+              "ms": 174.707,
+              "percent": 0.5453083449996136
+            },
+            {
+              "function": "getCell",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 210,
+              "column": 10,
+              "ms": 171.266,
+              "percent": 0.5345680425781669
+            },
+            {
+              "function": "instancesNear",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/dungeons.js",
+              "line": 146,
+              "column": 16,
+              "ms": 170.024,
+              "percent": 0.5306914207800163
+            },
+            {
+              "function": "solidAt",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/dungeons.js",
+              "line": 260,
+              "column": 10,
+              "ms": 161.964,
+              "percent": 0.5055339556486999
+            },
+            {
+              "function": "_column",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 157,
+              "column": 10,
+              "ms": 157.237,
+              "percent": 0.49077969539116484
+            },
+            {
+              "function": "loadAround",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 380,
+              "column": 13,
+              "ms": 156.586,
+              "percent": 0.4887477462844047
+            },
+            {
+              "function": "_pose",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+              "line": 800,
+              "column": 8,
+              "ms": 154.3,
+              "percent": 0.48161251485882295
+            },
+            {
+              "function": "_canStep",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+              "line": 612,
+              "column": 11,
+              "ms": 151.981,
+              "percent": 0.4743742814047878
+            },
+            {
+              "function": "wasm-function[356]",
+              "url": "wasm://wasm/00bc1dde",
+              "line": 1,
+              "column": 1469432,
+              "ms": 142.795,
+              "percent": 0.445702262211702
+            },
+            {
+              "function": "instancesNear",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/dungeons.js",
+              "line": 146,
+              "column": 16,
+              "ms": 142.183,
+              "percent": 0.4437920427749321
+            },
+            {
+              "function": "setup",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+              "line": 15263,
+              "column": 16,
+              "ms": 138.759,
+              "percent": 0.43310480200450685
+            },
+            {
+              "function": "needsUpdate",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+              "line": 15387,
+              "column": 22,
+              "ms": 137.53,
+              "percent": 0.4292687567630195
+            },
+            {
+              "function": "memo",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 14,
+              "column": 14,
+              "ms": 134.94,
+              "percent": 0.4211846581662318
+            },
+            {
+              "function": "solidAt",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/dungeons.js",
+              "line": 260,
+              "column": 10,
+              "ms": 133.865,
+              "percent": 0.4178292890575265
+            },
+            {
+              "function": "_noise",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 73,
+              "column": 9,
+              "ms": 109.446,
+              "percent": 0.3416109092756885
+            }
+          ],
+          "topInclusive": [
+            {
+              "function": "(root)",
+              "url": "",
+              "line": 0,
+              "column": 0,
+              "ms": 32038.204,
+              "percent": 100
+            },
+            {
+              "function": "frame",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/entry.js",
+              "line": 136,
+              "column": 15,
+              "ms": 16399.728,
+              "percent": 51.1880378812745
+            },
+            {
+              "function": "target.<computed>",
+              "url": "",
+              "line": 3,
+              "column": 130,
+              "ms": 15540.461,
+              "percent": 48.50603048785131
+            },
+            {
+              "function": "(idle)",
+              "url": "",
+              "line": 0,
+              "column": 0,
+              "ms": 12659.845,
+              "percent": 39.51483984557936
+            },
+            {
+              "function": "tick",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+              "line": 84,
+              "column": 6,
+              "ms": 5212.25,
+              "percent": 16.26885826683668
+            },
+            {
+              "function": "_step",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+              "line": 297,
+              "column": 8,
+              "ms": 5058.282,
+              "percent": 15.788282014809567
+            },
+            {
+              "function": "tick",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+              "line": 252,
+              "column": 7,
+              "ms": 5058.282,
+              "percent": 15.788282014809567
+            },
+            {
+              "function": "loadAround",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 380,
+              "column": 13,
+              "ms": 2867.89,
+              "percent": 8.951469314572066
+            },
+            {
+              "function": "_advanceChunk",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 354,
+              "column": 16,
+              "ms": 2633.074,
+              "percent": 8.218544335381596
+            },
+            {
+              "function": "_act",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+              "line": 495,
+              "column": 7,
+              "ms": 2477.074,
+              "percent": 7.731625655420634
+            },
+            {
+              "function": "_move",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+              "line": 640,
+              "column": 8,
+              "ms": 2463.608,
+              "percent": 7.689594585264517
+            },
+            {
+              "function": "synchronize",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/physics.js",
+              "line": 267,
+              "column": 14,
+              "ms": 2459.452,
+              "percent": 7.676622572226583
+            },
+            {
+              "function": "(anonymous)",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+              "line": 656,
+              "column": 40,
+              "ms": 2194.1,
+              "percent": 6.8483863827073455
+            },
+            {
+              "function": "_canStep",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+              "line": 612,
+              "column": 11,
+              "ms": 2192.852,
+              "percent": 6.844491033267658
+            },
+            {
+              "function": "_decide",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+              "line": 419,
+              "column": 10,
+              "ms": 2156.802,
+              "percent": 6.731969120366423
+            },
+            {
+              "function": "_visible",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+              "line": 690,
+              "column": 11,
+              "ms": 2136.888,
+              "percent": 6.669812078105252
+            },
+            {
+              "function": "lineOfSight",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+              "line": 57,
+              "column": 13,
+              "ms": 2086.372,
+              "percent": 6.512137821458406
+            },
+            {
+              "function": "step",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/physics.js",
+              "line": 337,
+              "column": 7,
+              "ms": 1646.311,
+              "percent": 5.138587044392376
+            },
+            {
+              "function": "draw",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/scene.js",
+              "line": 136,
+              "column": 6,
+              "ms": 1418.576,
+              "percent": 4.427763803489109
+            },
+            {
+              "function": "WebGLRenderer.render",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+              "line": 29998,
+              "column": 26,
+              "ms": 1407.399,
+              "percent": 4.392877328579342
+            },
+            {
+              "function": "(program)",
+              "url": "",
+              "line": 0,
+              "column": 0,
+              "ms": 1348.202,
+              "percent": 4.208107295902105
+            },
+            {
+              "function": "evaluate",
+              "url": "",
+              "line": 305,
+              "column": 11,
+              "ms": 1128.71,
+              "percent": 3.5230127131970317
+            },
+            {
+              "function": "(anonymous)",
+              "url": "",
+              "line": 1,
+              "column": 2,
+              "ms": 1128.71,
+              "percent": 3.5230127131970317
+            },
+            {
+              "function": "(anonymous)",
+              "url": "",
+              "line": 1,
+              "column": 1,
+              "ms": 1123.616,
+              "percent": 3.507112945532153
+            },
+            {
+              "function": "getParameter",
+              "url": "",
+              "line": 0,
+              "column": 0,
+              "ms": 1115.855,
+              "percent": 3.4828887412040954
+            },
+            {
+              "function": "syncTerrain",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/scene.js",
+              "line": 75,
+              "column": 13,
+              "ms": 1078.226,
+              "percent": 3.36543833730505
+            },
+            {
+              "function": "step",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/rapier/rapier.js",
+              "line": 1,
+              "column": 156665,
+              "ms": 1062.165,
+              "percent": 3.315307562184197
+            },
+            {
+              "function": "chunkGeometry",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/scene.js",
+              "line": 24,
+              "column": 30,
+              "ms": 1057.492,
+              "percent": 3.300721850700495
+            },
+            {
+              "function": "stepWithEvents",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/rapier/rapier.js",
+              "line": 1,
+              "column": 48247,
+              "ms": 1047.389,
+              "percent": 3.269187623625844
+            },
+            {
+              "function": "wasm-function[254]",
+              "url": "wasm://wasm/00bc1dde",
+              "line": 1,
+              "column": 1239845,
+              "ms": 1046.13,
+              "percent": 3.2652579401766717
+            },
+            {
+              "function": "js-to-wasm:iiiiiiiiiiiiiiii:",
+              "url": "wasm://wasm/00bc1dde",
+              "line": 1,
+              "column": 1239845,
+              "ms": 1046.13,
+              "percent": 3.2652579401766717
+            },
+            {
+              "function": "wasm-function[2664]",
+              "url": "wasm://wasm/00bc1dde",
+              "line": 1,
+              "column": 2617603,
+              "ms": 1041.238,
+              "percent": 3.24998866977687
+            },
+            {
+              "function": "getCell",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+              "line": 210,
+              "column": 10,
+              "ms": 1022.017,
+              "percent": 3.1899946701132187
+            },
+            {
+              "function": "renderScene",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+              "line": 30298,
+              "column": 23,
+              "ms": 938.106,
+              "percent": 2.9280854819452427
+            },
+            {
+              "function": "renderObjects",
+              "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+              "line": 30446,
+              "column": 25,
+              "ms": 933.649,
+              "percent": 2.914173965556871
+            }
+          ],
+          "note": "V8 statistical CPU samples, inclusive stacks overlap. GPU/SwiftShader worker cost is not all attributed here."
+        },
+        "cpuError": null,
+        "pageErrors": [],
+        "consoleErrors": [],
+        "codeBefore": {
+          "app/src/main/assets/content-runtime/entry.js": "37e16f4093d59c2ae7352ca0ad70d2a3686958b01b7a0af2941534c6a5e2025c",
+          "app/src/main/assets/content-runtime/runtime.js": "5aca2e2743123d118b5ff44571932b0c8c7f92cf114a5f6158ee0114afed4314",
+          "app/src/main/assets/content-runtime/scene.js": "f937ac122215616db2d9884d9388d205c637de0770a6e8f5ea2bee113ff8bea6",
+          "app/src/main/assets/content-runtime/physics.js": "58254b93da9ad544dc79dbb518993d1bd1d068932c88be00743804027699dd2b",
+          "app/src/main/assets/content-runtime/atlas.js": "5c988c051937bfa032b5ba09855e58152a81fbae5faa89bea73e5789559a4478",
+          "app/src/main/assets/content-runtime/creatures.js": "4eb448d9eeae1357409b1eafaaa5def50c9b9c88c584053cff369dfe7b94b9c7",
+          "app/src/main/assets/content-runtime/progression.js": "4878b71cf4ca0960b55b17875399bed743d12ecc57a1a49736373d18db0806bb",
+          "app/src/main/assets/content-runtime/placements.js": "d956234bbd383b5266bf6f928899e7928ee2902aad7e731e4090f998c926e1da",
+          "app/src/main/assets/content-runtime/fixture-physics.js": "1acd6298a2cc0822e8656804c57a259138290792b7d47e030a6ffad8fa4a224a",
+          "app/src/main/assets/content-runtime/objects.js": "558236b23b03176a28a9023cf6b1cf577669129baf7af2c6444faf58183d38d5",
+          "app/src/main/assets/content-runtime/object-physics.js": "d71128684ea453ea22ca6bd2aef92935629919d3b5652f59ef9871dcb5a293b3",
+          "app/src/main/assets/content-runtime/environment-view.js": "00ad6e236f6286eb70f224101846030699dcb6ce6609bc3d4f3d27e3e458df8a",
+          "app/src/main/assets/content-runtime/equipment-view.js": "63b480695ba2830cab8177b701420f32074a406d3ea4859bff19980f2d946aa5"
+        },
+        "codeAfter": {
+          "app/src/main/assets/content-runtime/entry.js": "ab4689dfe48b5215e7db57c1dd0dd70714112f6cb94380259807dd1b33c7d951",
+          "app/src/main/assets/content-runtime/runtime.js": "0a7e7878f809631c66e3c5beddebfd8204629a9e6454fc5a33c4e39aef76cb28",
+          "app/src/main/assets/content-runtime/scene.js": "f937ac122215616db2d9884d9388d205c637de0770a6e8f5ea2bee113ff8bea6",
+          "app/src/main/assets/content-runtime/physics.js": "58254b93da9ad544dc79dbb518993d1bd1d068932c88be00743804027699dd2b",
+          "app/src/main/assets/content-runtime/atlas.js": "5c988c051937bfa032b5ba09855e58152a81fbae5faa89bea73e5789559a4478",
+          "app/src/main/assets/content-runtime/creatures.js": "4eb448d9eeae1357409b1eafaaa5def50c9b9c88c584053cff369dfe7b94b9c7",
+          "app/src/main/assets/content-runtime/progression.js": "06cda64b33ce19cdf6f883696d9089fb5d4c79833cb72c0bb82e8f560f5d8c7e",
+          "app/src/main/assets/content-runtime/placements.js": "d956234bbd383b5266bf6f928899e7928ee2902aad7e731e4090f998c926e1da",
+          "app/src/main/assets/content-runtime/fixture-physics.js": "1acd6298a2cc0822e8656804c57a259138290792b7d47e030a6ffad8fa4a224a",
+          "app/src/main/assets/content-runtime/objects.js": "558236b23b03176a28a9023cf6b1cf577669129baf7af2c6444faf58183d38d5",
+          "app/src/main/assets/content-runtime/object-physics.js": "d71128684ea453ea22ca6bd2aef92935629919d3b5652f59ef9871dcb5a293b3",
+          "app/src/main/assets/content-runtime/environment-view.js": "00ad6e236f6286eb70f224101846030699dcb6ce6609bc3d4f3d27e3e458df8a",
+          "app/src/main/assets/content-runtime/equipment-view.js": "63b480695ba2830cab8177b701420f32074a406d3ea4859bff19980f2d946aa5"
+        },
+        "changedFiles": [
+          "app/src/main/assets/content-runtime/entry.js",
+          "app/src/main/assets/content-runtime/runtime.js",
+          "app/src/main/assets/content-runtime/progression.js"
+        ]
+      }
+    ]
+  },
+  "baselineCpuCaveat": "Original baseline CPU samples included post-window WebGL debug getParameter collection; exclude those samples as instrumentation overhead. Current sample stops before report collection.",
+  "generatedAt": "2026-10-17T15:19:07.486Z",
+  "url": "http://127.0.0.1:8081",
+  "seed": 63026,
+  "scenario": "Fresh local storage, initial expedition scene, no input, no grants/teleports/gameplay mutations.",
+  "instrumentation": "Instance method wrappers measure synchronous inclusive elapsed time; nested stages must not be summed. 1ms V8 CPU sampling enabled only in measured window.",
+  "limitations": [
+    "Forced Chromium SwiftShader software WebGL in shared execution environment; not Android or real mobile GPU validation.",
+    "Mobile mode changes viewport/touch/user-agent behavior with DPR1; CPU/GPU host is unchanged.",
+    "Other concurrent processes and code edits may affect results; file hashes and changedFiles are recorded.",
+    "No player movement; this measures initial stationary simulation and rendering, not streaming travel or peak combat."
+  ],
+  "runs": [
+    {
+      "name": "desktop",
+      "measuredAt": "2026-10-17T15:17:57.025Z",
+      "viewport": {
+        "width": 1100,
+        "height": 700
+      },
+      "isMobile": false,
+      "readyMs": 3150,
+      "warmupMs": 32000,
+      "targetSampleMs": 30000,
+      "actualSampleWallMs": 30005.300000000745,
+      "gameTimeSeconds": 8.249999999999964,
+      "startStats": {
+        "running": true,
+        "version": "content-runtime",
+        "player": {
+          "x": 0,
+          "y": 4.007996901124716,
+          "z": 0,
+          "yaw": 3.141592653589793,
+          "pitch": 0,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2398.8083333334157,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "regions": 9,
+        "models": 98,
+        "chunks": 10
+      },
+      "endStats": {
+        "running": true,
+        "version": "content-runtime",
+        "player": {
+          "x": 0,
+          "y": 4.007996901124716,
+          "z": 0,
+          "yaw": 3.141592653589793,
+          "pitch": 0,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2397.9833333334727,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "regions": 9,
+        "models": 98,
+        "chunks": 13
+      },
+      "stages": {
+        "physics.terrainAt": {
+          "calls": 1074,
+          "totalMs": 10.299999985843897,
+          "medianMs": 0,
+          "p95Ms": 0.09999999776482582,
+          "maxMs": 2.899999998509884
+        },
+        "runtime.tick": {
+          "calls": 495,
+          "totalMs": 3540.699999973178,
+          "medianMs": 0.09999999776482582,
+          "p95Ms": 52.100000001490116,
+          "maxMs": 275.1000000014901
+        },
+        "physics.step": {
+          "calls": 495,
+          "totalMs": 756.6999999694526,
+          "medianMs": 0.6999999992549419,
+          "p95Ms": 6,
+          "maxMs": 28.800000000745058
+        },
+        "atlas.loadAround": {
+          "calls": 84,
+          "totalMs": 1127.100000012666,
+          "medianMs": 9.899999998509884,
+          "p95Ms": 31.800000000745058,
+          "maxMs": 35.5
+        },
+        "scene.syncTerrain": {
+          "calls": 84,
+          "totalMs": 375.19999999552965,
+          "medianMs": 0,
+          "p95Ms": 0.10000000149011612,
+          "maxMs": 170.40000000223517
+        },
+        "runtime.descriptors": {
+          "calls": 84,
+          "totalMs": 121.80000001192093,
+          "medianMs": 0.4000000022351742,
+          "p95Ms": 3.599999997764826,
+          "maxMs": 33.20000000298023
+        },
+        "scene.syncModels": {
+          "calls": 84,
+          "totalMs": 560.6999999955297,
+          "medianMs": 3.899999998509884,
+          "p95Ms": 23.800000000745058,
+          "maxMs": 34.69999999925494
+        },
+        "physics.synchronize": {
+          "calls": 84,
+          "totalMs": 1137.6000000052154,
+          "medianMs": 10.400000002235174,
+          "p95Ms": 36.5,
+          "maxMs": 56.30000000074506
+        },
+        "scene.draw": {
+          "calls": 84,
+          "totalMs": 1373.800000000745,
+          "medianMs": 13.399999998509884,
+          "p95Ms": 38,
+          "maxMs": 75
+        },
+        "runtime.refreshWorld": {
+          "calls": 4,
+          "totalMs": 38.79999999701977,
+          "medianMs": 1.6000000014901161,
+          "p95Ms": 19.899999998509884,
+          "maxMs": 19.899999998509884
+        }
+      },
+      "frameIntervals": {
+        "calls": 83,
+        "totalMs": 29535.5,
+        "medianMs": 359.3999999985099,
+        "p95Ms": 611,
+        "maxMs": 845.7000000029802
+      },
+      "draws": 84,
+      "renderer": {
+        "calls": {
+          "min": 644,
+          "max": 683,
+          "mean": 663.2142857142857,
+          "last": 651
+        },
+        "triangles": {
+          "min": 35622,
+          "max": 37452,
+          "mean": 36520.40476190476,
+          "last": 36808
+        },
+        "points": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "last": 0
+        },
+        "lines": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "last": 0
+        },
+        "geometries": {
+          "min": 164,
+          "max": 165,
+          "mean": 164.3452380952381,
+          "last": 165
+        },
+        "textures": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "last": 0
+        },
+        "programs": {
+          "min": 3,
+          "max": 3,
+          "mean": 3,
+          "last": 3
+        }
+      },
+      "longTasks": {
+        "calls": 75,
+        "totalMs": 9657,
+        "medianMs": 103,
+        "p95Ms": 288,
+        "maxMs": 410
+      },
+      "largestLongTasks": [
+        {
+          "startTime": 49421.39999999851,
+          "duration": 410
+        },
+        {
+          "startTime": 58830.300000000745,
+          "duration": 354
+        },
+        {
+          "startTime": 53394.5,
+          "duration": 314
+        },
+        {
+          "startTime": 47704.89999999851,
+          "duration": 288
+        },
+        {
+          "startTime": 41321.5,
+          "duration": 261
+        },
+        {
+          "startTime": 39803.89999999851,
+          "duration": 256
+        },
+        {
+          "startTime": 45363.699999999255,
+          "duration": 250
+        },
+        {
+          "startTime": 38692.5,
+          "duration": 238
+        },
+        {
+          "startTime": 64154.5,
+          "duration": 237
+        },
+        {
+          "startTime": 60658.300000000745,
+          "duration": 210
+        }
+      ],
+      "environment": {
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "platform": "Linux x86_64",
+        "hardwareConcurrency": 5,
+        "deviceMemoryGiB": 16,
+        "dpr": 1,
+        "innerWidth": 1100,
+        "innerHeight": 700,
+        "visibility": "visible",
+        "webglRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "webglVendor": "Google Inc. (Google)",
+        "canvasWidth": 1100,
+        "canvasHeight": 700,
+        "jsHeap": {
+          "used": 102302355,
+          "total": 144294147,
+          "limit": 4395630592
+        }
+      },
+      "effectiveFps": 2.7995054207089387,
+      "simulationToWallRatio": 0.27495142524819816,
+      "cpu": {
+        "samplingIntervalUs": 1000,
+        "sampledMs": 30770.418,
+        "nodeCount": 806,
+        "samples": 10591,
+        "topSelf": [
+          {
+            "function": "(idle)",
+            "url": "",
+            "line": 0,
+            "column": 0,
+            "ms": 19809.299,
+            "percent": 64.3777377349895
+          },
+          {
+            "function": "(program)",
+            "url": "",
+            "line": 0,
+            "column": 0,
+            "ms": 1111.551,
+            "percent": 3.6124013654933127
+          },
+          {
+            "function": "isSolid",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+            "line": 51,
+            "column": 9,
+            "ms": 687.501,
+            "percent": 2.234292039841643
+          },
+          {
+            "function": "isSolid",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+            "line": 51,
+            "column": 9,
+            "ms": 423.431,
+            "percent": 1.3760976532720486
+          },
+          {
+            "function": "_advanceChunk",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 354,
+            "column": 16,
+            "ms": 318.3,
+            "percent": 1.0344350863221943
+          },
+          {
+            "function": "chunkGeometry",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/scene.js",
+            "line": 24,
+            "column": 30,
+            "ms": 247.834,
+            "percent": 0.8054294225057327
+          },
+          {
+            "function": "_column",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 157,
+            "column": 10,
+            "ms": 217.817,
+            "percent": 0.707877936529819
+          },
+          {
+            "function": "_treeAt",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 176,
+            "column": 10,
+            "ms": 217.065,
+            "percent": 0.7054340308279206
+          },
+          {
+            "function": "(garbage collector)",
+            "url": "",
+            "line": 0,
+            "column": 0,
+            "ms": 211.437,
+            "percent": 0.6871437365589248
+          },
+          {
+            "function": "isSolid",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+            "line": 51,
+            "column": 9,
+            "ms": 183.061,
+            "percent": 0.5949252948074998
+          },
+          {
+            "function": "_treeAt",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 176,
+            "column": 10,
+            "ms": 144.577,
+            "percent": 0.46985712056300305
+          },
+          {
+            "function": "_vegetationAt",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 184,
+            "column": 16,
+            "ms": 142.299,
+            "percent": 0.46245390621602867
+          },
+          {
+            "function": "_treeAt",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 176,
+            "column": 10,
+            "ms": 141.358,
+            "percent": 0.4593957742140519
+          },
+          {
+            "function": "solidAt",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/dungeons.js",
+            "line": 264,
+            "column": 10,
+            "ms": 132.475,
+            "percent": 0.430527138110376
+          },
+          {
+            "function": "_noise",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 73,
+            "column": 9,
+            "ms": 121.222,
+            "percent": 0.3939562991961955
+          },
+          {
+            "function": "WebGLRenderer.renderBufferDirect",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+            "line": 29609,
+            "column": 38,
+            "ms": 113.353,
+            "percent": 0.36838303594055827
+          },
+          {
+            "function": "lineOfSight",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+            "line": 57,
+            "column": 13,
+            "ms": 108.468,
+            "percent": 0.35250739850202883
+          },
+          {
+            "function": "needsUpdate",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+            "line": 15387,
+            "column": 22,
+            "ms": 105.354,
+            "percent": 0.34238728898645443
+          },
+          {
+            "function": "_noise",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 73,
+            "column": 9,
+            "ms": 105.027,
+            "percent": 0.34132457999108107
+          },
+          {
+            "function": "setup",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+            "line": 15263,
+            "column": 16,
+            "ms": 97.763,
+            "percent": 0.3177174908706148
+          },
+          {
+            "function": "wasm-function[2664]",
+            "url": "wasm://wasm/00bc1dde",
+            "line": 1,
+            "column": 2617603,
+            "ms": 88.25,
+            "percent": 0.2868014337666781
+          },
+          {
+            "function": "animateCreatureModel",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creature-animation.js",
+            "line": 63,
+            "column": 37,
+            "ms": 86.318,
+            "percent": 0.28052267603254527
+          },
+          {
+            "function": "updateMatrixWorld",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+            "line": 7811,
+            "column": 19,
+            "ms": 86.149,
+            "percent": 0.2799734472245389
+          },
+          {
+            "function": "sample",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 155,
+            "column": 9,
+            "ms": 85.654,
+            "percent": 0.2783647592957626
+          },
+          {
+            "function": "updateMatrixWorld",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+            "line": 7811,
+            "column": 19,
+            "ms": 84.441,
+            "percent": 0.2744226614016098
+          },
+          {
+            "function": "syncModels",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/scene.js",
+            "line": 114,
+            "column": 12,
+            "ms": 83.631,
+            "percent": 0.2717902629727032
+          },
+          {
+            "function": "_rawSample",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 115,
+            "column": 13,
+            "ms": 83.353,
+            "percent": 0.2708867978329056
+          },
+          {
+            "function": "isSolidCell",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+            "line": 34,
+            "column": 16,
+            "ms": 81.207,
+            "percent": 0.2639125669336049
+          },
+          {
+            "function": "_vegetationAt",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 184,
+            "column": 16,
+            "ms": 78.66,
+            "percent": 0.2556351363182652
+          },
+          {
+            "function": "uniformMatrix4fv",
+            "url": "",
+            "line": 0,
+            "column": 0,
+            "ms": 76.321,
+            "percent": 0.24803367962047185
+          },
+          {
+            "function": "updateMatrixWorld",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+            "line": 7811,
+            "column": 19,
+            "ms": 73.508,
+            "percent": 0.2388917823605776
+          },
+          {
+            "function": "uniformMatrix3fv",
+            "url": "",
+            "line": 0,
+            "column": 0,
+            "ms": 66.988,
+            "percent": 0.21770259994518112
+          },
+          {
+            "function": "getCell",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 210,
+            "column": 10,
+            "ms": 66.35,
+            "percent": 0.21562917994809172
+          },
+          {
+            "function": "_rand",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 72,
+            "column": 8,
+            "ms": 65.302,
+            "percent": 0.212223311363531
+          },
+          {
+            "function": "drawElements",
+            "url": "",
+            "line": 0,
+            "column": 0,
+            "ms": 64.392,
+            "percent": 0.20926592547426556
+          }
+        ],
+        "topInclusive": [
+          {
+            "function": "(root)",
+            "url": "",
+            "line": 0,
+            "column": 0,
+            "ms": 30770.418,
+            "percent": 100
+          },
+          {
+            "function": "(idle)",
+            "url": "",
+            "line": 0,
+            "column": 0,
+            "ms": 19809.299,
+            "percent": 64.3777377349895
+          },
+          {
+            "function": "frame",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/entry.js",
+            "line": 140,
+            "column": 15,
+            "ms": 9598.696,
+            "percent": 31.194558357965757
+          },
+          {
+            "function": "target.<computed>",
+            "url": "",
+            "line": 3,
+            "column": 130,
+            "ms": 9048.381,
+            "percent": 29.406103615491997
+          },
+          {
+            "function": "tick",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+            "line": 84,
+            "column": 6,
+            "ms": 3529.115,
+            "percent": 11.469181211642947
+          },
+          {
+            "function": "tick",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+            "line": 252,
+            "column": 7,
+            "ms": 3411.886,
+            "percent": 11.088201661738882
+          },
+          {
+            "function": "_step",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+            "line": 297,
+            "column": 8,
+            "ms": 3379.652,
+            "percent": 10.983445203766813
+          },
+          {
+            "function": "_decide",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+            "line": 419,
+            "column": 10,
+            "ms": 1798.819,
+            "percent": 5.845936184552318
+          },
+          {
+            "function": "_visible",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+            "line": 690,
+            "column": 11,
+            "ms": 1778.838,
+            "percent": 5.781000440098018
+          },
+          {
+            "function": "lineOfSight",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+            "line": 57,
+            "column": 13,
+            "ms": 1673.85,
+            "percent": 5.439802605216477
+          },
+          {
+            "function": "isSolid",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+            "line": 51,
+            "column": 9,
+            "ms": 1561.275,
+            "percent": 5.073947971717511
+          },
+          {
+            "function": "draw",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/scene.js",
+            "line": 136,
+            "column": 6,
+            "ms": 1414.845,
+            "percent": 4.598068833514059
+          },
+          {
+            "function": "WebGLRenderer.render",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+            "line": 29998,
+            "column": 26,
+            "ms": 1397.791,
+            "percent": 4.542645472024462
+          },
+          {
+            "function": "_act",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+            "line": 495,
+            "column": 7,
+            "ms": 1380.674,
+            "percent": 4.487017368434839
+          },
+          {
+            "function": "_move",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+            "line": 640,
+            "column": 8,
+            "ms": 1377.14,
+            "percent": 4.4755323115857575
+          },
+          {
+            "function": "loadAround",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 380,
+            "column": 13,
+            "ms": 1239.895,
+            "percent": 4.029503271616265
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+            "line": 656,
+            "column": 40,
+            "ms": 1237.02,
+            "percent": 4.020159882130947
+          },
+          {
+            "function": "_advanceChunk",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 354,
+            "column": 16,
+            "ms": 1210.163,
+            "percent": 3.932877999902374
+          },
+          {
+            "function": "_canStep",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+            "line": 612,
+            "column": 11,
+            "ms": 1201.585,
+            "percent": 3.9050005755527923
+          },
+          {
+            "function": "synchronize",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/physics.js",
+            "line": 285,
+            "column": 14,
+            "ms": 1182.514,
+            "percent": 3.843022216987758
+          },
+          {
+            "function": "(program)",
+            "url": "",
+            "line": 0,
+            "column": 0,
+            "ms": 1111.551,
+            "percent": 3.6124013654933127
+          },
+          {
+            "function": "renderScene",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+            "line": 30298,
+            "column": 23,
+            "ms": 945.428,
+            "percent": 3.0725224467213934
+          },
+          {
+            "function": "renderObjects",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+            "line": 30446,
+            "column": 25,
+            "ms": 934.573,
+            "percent": 3.037245057899441
+          },
+          {
+            "function": "renderObject",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+            "line": 30469,
+            "column": 24,
+            "ms": 903.269,
+            "percent": 2.935510983308709
+          },
+          {
+            "function": "WebGLRenderer.renderBufferDirect",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+            "line": 29609,
+            "column": 38,
+            "ms": 849.216,
+            "percent": 2.759845511360944
+          },
+          {
+            "function": "_solid",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+            "line": 586,
+            "column": 9,
+            "ms": 815.393,
+            "percent": 2.649925002643773
+          },
+          {
+            "function": "isSolidCell",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+            "line": 34,
+            "column": 16,
+            "ms": 814.258,
+            "percent": 2.6462363949687
+          },
+          {
+            "function": "isSolid",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+            "line": 51,
+            "column": 9,
+            "ms": 733.051,
+            "percent": 2.3823238280350956
+          },
+          {
+            "function": "step",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/physics.js",
+            "line": 356,
+            "column": 7,
+            "ms": 630.719,
+            "percent": 2.049757660100685
+          },
+          {
+            "function": "syncModels",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/scene.js",
+            "line": 114,
+            "column": 12,
+            "ms": 533.963,
+            "percent": 1.7353127929558838
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 157,
+            "column": 61,
+            "ms": 488.542,
+            "percent": 1.587700238586294
+          },
+          {
+            "function": "_vegetationAt",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 184,
+            "column": 16,
+            "ms": 421.207,
+            "percent": 1.3688699321536677
+          },
+          {
+            "function": "sample",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 155,
+            "column": 9,
+            "ms": 411.409,
+            "percent": 1.3370276607877085
+          },
+          {
+            "function": "_column",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 157,
+            "column": 10,
+            "ms": 409.235,
+            "percent": 1.3299624333995073
+          },
+          {
+            "function": "animateCreatureModel",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creature-animation.js",
+            "line": 63,
+            "column": 37,
+            "ms": 405.398,
+            "percent": 1.3174926645455385
+          }
+        ],
+        "note": "V8 statistical CPU samples, inclusive stacks overlap. GPU/SwiftShader worker cost is not all attributed here."
+      },
+      "cpuError": null,
+      "pageErrors": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (File not found)"
+      ],
+      "codeBefore": {
+        "app/src/main/assets/content-runtime/entry.js": "1f7eccea42a158bac232bf011d486479c0913bdad997fc1ff603f47147836c51",
+        "app/src/main/assets/content-runtime/runtime.js": "fac4fd2c032cfb5185fa6cc25ce4a2758fc95ff850713e1488f5c966086d529b",
+        "app/src/main/assets/content-runtime/scene.js": "eeaa30f7cc07291bd5031800af0f83405794de5de716a9e5cd761793c5e899ce",
+        "app/src/main/assets/content-runtime/physics.js": "6f3e939bf271d4eb68a98a09686ceaa3eee4650413be7fd6b83acb48daa08cd5",
+        "app/src/main/assets/content-runtime/atlas.js": "5c988c051937bfa032b5ba09855e58152a81fbae5faa89bea73e5789559a4478",
+        "app/src/main/assets/content-runtime/creatures.js": "169b8b0f81d11e3ffb047299b377e5cae2ab66acf5719ced6efb65b0cad32090",
+        "app/src/main/assets/content-runtime/progression.js": "b724aa982339491008e078c44c7975a96b5f88710d2c4e1a97793eed08fd1c6d",
+        "app/src/main/assets/content-runtime/dungeons.js": "ec573ea4c51f5f042cda41af550f9b0ca08474e625c92f0e59dc41c61ecf93f6",
+        "app/src/main/assets/content-runtime/placements.js": "36593095023cca13c972f88f9eb1127604665521b26034a0f6f61edea263af99",
+        "app/src/main/assets/content-runtime/fixture-physics.js": "1acd6298a2cc0822e8656804c57a259138290792b7d47e030a6ffad8fa4a224a",
+        "app/src/main/assets/content-runtime/objects.js": "558236b23b03176a28a9023cf6b1cf577669129baf7af2c6444faf58183d38d5",
+        "app/src/main/assets/content-runtime/object-physics.js": "d71128684ea453ea22ca6bd2aef92935629919d3b5652f59ef9871dcb5a293b3",
+        "app/src/main/assets/content-runtime/environment-view.js": "00ad6e236f6286eb70f224101846030699dcb6ce6609bc3d4f3d27e3e458df8a",
+        "app/src/main/assets/content-runtime/equipment-view.js": "63b480695ba2830cab8177b701420f32074a406d3ea4859bff19980f2d946aa5"
+      },
+      "codeAfter": {
+        "app/src/main/assets/content-runtime/entry.js": "1f7eccea42a158bac232bf011d486479c0913bdad997fc1ff603f47147836c51",
+        "app/src/main/assets/content-runtime/runtime.js": "fac4fd2c032cfb5185fa6cc25ce4a2758fc95ff850713e1488f5c966086d529b",
+        "app/src/main/assets/content-runtime/scene.js": "eeaa30f7cc07291bd5031800af0f83405794de5de716a9e5cd761793c5e899ce",
+        "app/src/main/assets/content-runtime/physics.js": "6f3e939bf271d4eb68a98a09686ceaa3eee4650413be7fd6b83acb48daa08cd5",
+        "app/src/main/assets/content-runtime/atlas.js": "5c988c051937bfa032b5ba09855e58152a81fbae5faa89bea73e5789559a4478",
+        "app/src/main/assets/content-runtime/creatures.js": "169b8b0f81d11e3ffb047299b377e5cae2ab66acf5719ced6efb65b0cad32090",
+        "app/src/main/assets/content-runtime/progression.js": "b724aa982339491008e078c44c7975a96b5f88710d2c4e1a97793eed08fd1c6d",
+        "app/src/main/assets/content-runtime/dungeons.js": "ec573ea4c51f5f042cda41af550f9b0ca08474e625c92f0e59dc41c61ecf93f6",
+        "app/src/main/assets/content-runtime/placements.js": "36593095023cca13c972f88f9eb1127604665521b26034a0f6f61edea263af99",
+        "app/src/main/assets/content-runtime/fixture-physics.js": "1acd6298a2cc0822e8656804c57a259138290792b7d47e030a6ffad8fa4a224a",
+        "app/src/main/assets/content-runtime/objects.js": "558236b23b03176a28a9023cf6b1cf577669129baf7af2c6444faf58183d38d5",
+        "app/src/main/assets/content-runtime/object-physics.js": "d71128684ea453ea22ca6bd2aef92935629919d3b5652f59ef9871dcb5a293b3",
+        "app/src/main/assets/content-runtime/environment-view.js": "00ad6e236f6286eb70f224101846030699dcb6ce6609bc3d4f3d27e3e458df8a",
+        "app/src/main/assets/content-runtime/equipment-view.js": "63b480695ba2830cab8177b701420f32074a406d3ea4859bff19980f2d946aa5"
+      },
+      "changedFiles": []
+    },
+    {
+      "name": "mobile_viewport",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "isMobile": true,
+      "readyMs": 1610,
+      "warmupMs": 32000,
+      "targetSampleMs": 30000,
+      "actualSampleWallMs": 30076.5,
+      "gameTimeSeconds": 15.616666666665783,
+      "startStats": {
+        "running": true,
+        "version": "content-runtime",
+        "player": {
+          "x": 0,
+          "y": 4.007996901124716,
+          "z": 0,
+          "yaw": 3.141592653589793,
+          "pitch": 0,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2398.2666666667865,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "regions": 9,
+        "models": 98,
+        "chunks": 11
+      },
+      "endStats": {
+        "running": true,
+        "version": "content-runtime",
+        "player": {
+          "x": 0,
+          "y": 4.007996901124716,
+          "z": 0,
+          "yaw": 3.141592653589793,
+          "pitch": 0,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2396.6950000002284,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "regions": 9,
+        "models": 96,
+        "chunks": 22
+      },
+      "stages": {
+        "physics.terrainAt": {
+          "calls": 2040,
+          "totalMs": 17.100000005215406,
+          "medianMs": 0,
+          "p95Ms": 0,
+          "maxMs": 7.5
+        },
+        "runtime.tick": {
+          "calls": 937,
+          "totalMs": 3701.2999999821186,
+          "medianMs": 0,
+          "p95Ms": 27.900000002235174,
+          "maxMs": 173.60000000149012
+        },
+        "physics.step": {
+          "calls": 937,
+          "totalMs": 1106.6000000201166,
+          "medianMs": 0.5999999977648258,
+          "p95Ms": 4.300000000745058,
+          "maxMs": 36.400000002235174
+        },
+        "atlas.loadAround": {
+          "calls": 166,
+          "totalMs": 1910.699999999255,
+          "medianMs": 8.599999997764826,
+          "p95Ms": 26.199999999254942,
+          "maxMs": 56.69999999925494
+        },
+        "scene.syncTerrain": {
+          "calls": 166,
+          "totalMs": 1137.7999999932945,
+          "medianMs": 0,
+          "p95Ms": 78.59999999776483,
+          "maxMs": 153.09999999776483
+        },
+        "runtime.descriptors": {
+          "calls": 166,
+          "totalMs": 107.50000000372529,
+          "medianMs": 0.30000000074505806,
+          "p95Ms": 2.5,
+          "maxMs": 8.399999998509884
+        },
+        "scene.syncModels": {
+          "calls": 166,
+          "totalMs": 602.6000000014901,
+          "medianMs": 1.8999999985098839,
+          "p95Ms": 10.200000002980232,
+          "maxMs": 31.600000001490116
+        },
+        "physics.synchronize": {
+          "calls": 166,
+          "totalMs": 1627.200000014156,
+          "medianMs": 6.199999999254942,
+          "p95Ms": 30.699999999254942,
+          "maxMs": 53.69999999925494
+        },
+        "scene.draw": {
+          "calls": 166,
+          "totalMs": 1306.0999999940395,
+          "medianMs": 5.199999999254942,
+          "p95Ms": 24.600000001490116,
+          "maxMs": 34.29999999701977
+        },
+        "runtime.refreshWorld": {
+          "calls": 8,
+          "totalMs": 11.600000001490116,
+          "medianMs": 1,
+          "p95Ms": 2.899999998509884,
+          "maxMs": 2.899999998509884
+        }
+      },
+      "frameIntervals": {
+        "calls": 165,
+        "totalMs": 30016.800000000745,
+        "medianMs": 161.40000000223517,
+        "p95Ms": 401.19999999925494,
+        "maxMs": 628.1999999992549
+      },
+      "draws": 166,
+      "renderer": {
+        "calls": {
+          "min": 254,
+          "max": 271,
+          "mean": 259.7048192771084,
+          "last": 261
+        },
+        "triangles": {
+          "min": 20040,
+          "max": 24254,
+          "mean": 22371.5421686747,
+          "last": 24254
+        },
+        "points": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "last": 0
+        },
+        "lines": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "last": 0
+        },
+        "geometries": {
+          "min": 154,
+          "max": 157,
+          "mean": 155.66265060240963,
+          "last": 157
+        },
+        "textures": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "last": 0
+        },
+        "programs": {
+          "min": 3,
+          "max": 3,
+          "mean": 3,
+          "last": 3
+        }
+      },
+      "longTasks": {
+        "calls": 103,
+        "totalMs": 10752,
+        "medianMs": 85,
+        "p95Ms": 234,
+        "maxMs": 404
+      },
+      "largestLongTasks": [
+        {
+          "startTime": 61201.89999999851,
+          "duration": 404
+        },
+        {
+          "startTime": 60711.599999997765,
+          "duration": 259
+        },
+        {
+          "startTime": 47376.699999999255,
+          "duration": 256
+        },
+        {
+          "startTime": 43055.39999999851,
+          "duration": 247
+        },
+        {
+          "startTime": 41806.800000000745,
+          "duration": 242
+        },
+        {
+          "startTime": 44666.800000000745,
+          "duration": 234
+        },
+        {
+          "startTime": 41399.199999999255,
+          "duration": 214
+        },
+        {
+          "startTime": 65380.699999999255,
+          "duration": 201
+        },
+        {
+          "startTime": 40463.300000000745,
+          "duration": 200
+        },
+        {
+          "startTime": 46224.5,
+          "duration": 176
+        }
+      ],
+      "environment": {
+        "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+        "platform": "Linux x86_64",
+        "hardwareConcurrency": 5,
+        "deviceMemoryGiB": 16,
+        "dpr": 1,
+        "innerWidth": 390,
+        "innerHeight": 844,
+        "visibility": "visible",
+        "webglRenderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)",
+        "webglVendor": "Google Inc. (Google)",
+        "canvasWidth": 390,
+        "canvasHeight": 844,
+        "jsHeap": {
+          "used": 107792892,
+          "total": 159416976,
+          "limit": 4395630592
+        }
+      },
+      "effectiveFps": 5.5192592223164265,
+      "simulationToWallRatio": 0.519231515191787,
+      "cpu": {
+        "samplingIntervalUs": 1000,
+        "sampledMs": 31140.519,
+        "nodeCount": 883,
+        "samples": 14356,
+        "topSelf": [
+          {
+            "function": "(idle)",
+            "url": "",
+            "line": 0,
+            "column": 0,
+            "ms": 16861.257,
+            "percent": 54.14571606850869
+          },
+          {
+            "function": "(program)",
+            "url": "",
+            "line": 0,
+            "column": 0,
+            "ms": 1408.964,
+            "percent": 4.524536023307768
+          },
+          {
+            "function": "_advanceChunk",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 354,
+            "column": 16,
+            "ms": 718.223,
+            "percent": 2.3063938015933516
+          },
+          {
+            "function": "chunkGeometry",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/scene.js",
+            "line": 24,
+            "column": 30,
+            "ms": 662.814,
+            "percent": 2.1284616354659986
+          },
+          {
+            "function": "getCell",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 210,
+            "column": 10,
+            "ms": 387.306,
+            "percent": 1.243736496491918
+          },
+          {
+            "function": "_column",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 157,
+            "column": 10,
+            "ms": 373.835,
+            "percent": 1.2004777441249452
+          },
+          {
+            "function": "_column",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 157,
+            "column": 10,
+            "ms": 324.149,
+            "percent": 1.0409235632842213
+          },
+          {
+            "function": "_treeAt",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 176,
+            "column": 10,
+            "ms": 280.478,
+            "percent": 0.900685052808529
+          },
+          {
+            "function": "(garbage collector)",
+            "url": "",
+            "line": 0,
+            "column": 0,
+            "ms": 253.4,
+            "percent": 0.813730818038068
+          },
+          {
+            "function": "solidAt",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/dungeons.js",
+            "line": 264,
+            "column": 10,
+            "ms": 222.636,
+            "percent": 0.7149399147779136
+          },
+          {
+            "function": "isSolid",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+            "line": 51,
+            "column": 9,
+            "ms": 203.877,
+            "percent": 0.6547000709911097
+          },
+          {
+            "function": "getCell",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 210,
+            "column": 10,
+            "ms": 190.216,
+            "percent": 0.6108311810731222
+          },
+          {
+            "function": "animateCreatureModel",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creature-animation.js",
+            "line": 63,
+            "column": 37,
+            "ms": 187.821,
+            "percent": 0.6031402366800631
+          },
+          {
+            "function": "_compress",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/lz-string.mjs",
+            "line": 109,
+            "column": 23,
+            "ms": 180.912,
+            "percent": 0.580953708574992
+          },
+          {
+            "function": "_canStep",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+            "line": 612,
+            "column": 11,
+            "ms": 180.305,
+            "percent": 0.5790044796620121
+          },
+          {
+            "function": "_column",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 157,
+            "column": 10,
+            "ms": 163.578,
+            "percent": 0.5252898964208015
+          },
+          {
+            "function": "wasm-to-js",
+            "url": "",
+            "line": 1,
+            "column": 1,
+            "ms": 155.072,
+            "percent": 0.49797500163693487
+          },
+          {
+            "function": "_treeAt",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 176,
+            "column": 10,
+            "ms": 151.805,
+            "percent": 0.4874838470097432
+          },
+          {
+            "function": "solidAt",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/dungeons.js",
+            "line": 264,
+            "column": 10,
+            "ms": 138.565,
+            "percent": 0.4449668934547944
+          },
+          {
+            "function": "updateMatrixWorld",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+            "line": 7811,
+            "column": 19,
+            "ms": 137.857,
+            "percent": 0.4426933282646959
+          },
+          {
+            "function": "_pose",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+            "line": 825,
+            "column": 8,
+            "ms": 126.634,
+            "percent": 0.40665346650131295
+          },
+          {
+            "function": "getCell",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 210,
+            "column": 10,
+            "ms": 124.137,
+            "percent": 0.39863497458086683
+          },
+          {
+            "function": "wasm-to-js",
+            "url": "",
+            "line": 1,
+            "column": 1,
+            "ms": 122.963,
+            "percent": 0.39486496676564703
+          },
+          {
+            "function": "needsUpdate",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+            "line": 15387,
+            "column": 22,
+            "ms": 121.294,
+            "percent": 0.38950539006751944
+          },
+          {
+            "function": "_treeAt",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 176,
+            "column": 10,
+            "ms": 118.414,
+            "percent": 0.3802569892942375
+          },
+          {
+            "function": "wasm-function[1174]",
+            "url": "wasm://wasm/00bc1dde",
+            "line": 1,
+            "column": 2141434,
+            "ms": 111.067,
+            "percent": 0.3566639335715631
+          },
+          {
+            "function": "deterministicUnit",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 21,
+            "column": 34,
+            "ms": 110.576,
+            "percent": 0.35508720968972934
+          },
+          {
+            "function": "surfaceHeight",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+            "line": 52,
+            "column": 15,
+            "ms": 103.942,
+            "percent": 0.3337837754084959
+          },
+          {
+            "function": "getCell",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 210,
+            "column": 10,
+            "ms": 103.534,
+            "percent": 0.33247358529894766
+          },
+          {
+            "function": "solidAt",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/dungeons.js",
+            "line": 264,
+            "column": 10,
+            "ms": 103.084,
+            "percent": 0.3310285226781224
+          },
+          {
+            "function": "_vegetationAt",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 184,
+            "column": 16,
+            "ms": 101.279,
+            "percent": 0.3252322159434787
+          },
+          {
+            "function": "_noise",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 73,
+            "column": 9,
+            "ms": 97.281,
+            "percent": 0.312393637370013
+          },
+          {
+            "function": "_vegetationAt",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 184,
+            "column": 16,
+            "ms": 94.624,
+            "percent": 0.30386134540660675
+          },
+          {
+            "function": "intersectionWithShape",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/rapier/rapier.js",
+            "line": 1,
+            "column": 172760,
+            "ms": 94.569,
+            "percent": 0.3036847266418392
+          },
+          {
+            "function": "_noise",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 73,
+            "column": 9,
+            "ms": 93.846,
+            "percent": 0.3013629926977132
+          }
+        ],
+        "topInclusive": [
+          {
+            "function": "(root)",
+            "url": "",
+            "line": 0,
+            "column": 0,
+            "ms": 31140.519,
+            "percent": 100
+          },
+          {
+            "function": "(idle)",
+            "url": "",
+            "line": 0,
+            "column": 0,
+            "ms": 16861.257,
+            "percent": 54.14571606850869
+          },
+          {
+            "function": "frame",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/entry.js",
+            "line": 140,
+            "column": 15,
+            "ms": 12607.743,
+            "percent": 40.48661809393735
+          },
+          {
+            "function": "target.<computed>",
+            "url": "",
+            "line": 3,
+            "column": 130,
+            "ms": 11604.829,
+            "percent": 37.26601024215428
+          },
+          {
+            "function": "tick",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+            "line": 84,
+            "column": 6,
+            "ms": 3803.099,
+            "percent": 12.212702684884604
+          },
+          {
+            "function": "_step",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+            "line": 297,
+            "column": 8,
+            "ms": 3696.939,
+            "percent": 11.871796356380573
+          },
+          {
+            "function": "tick",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+            "line": 252,
+            "column": 7,
+            "ms": 3696.939,
+            "percent": 11.871796356380573
+          },
+          {
+            "function": "loadAround",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 380,
+            "column": 13,
+            "ms": 2014.527,
+            "percent": 6.469150369651835
+          },
+          {
+            "function": "_advanceChunk",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 354,
+            "column": 16,
+            "ms": 1935.62,
+            "percent": 6.215760244715254
+          },
+          {
+            "function": "_decide",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+            "line": 419,
+            "column": 10,
+            "ms": 1733.185,
+            "percent": 5.565690796611322
+          },
+          {
+            "function": "_visible",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+            "line": 690,
+            "column": 11,
+            "ms": 1717.565,
+            "percent": 5.515531067417341
+          },
+          {
+            "function": "lineOfSight",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+            "line": 57,
+            "column": 13,
+            "ms": 1678.09,
+            "percent": 5.388766963068278
+          },
+          {
+            "function": "isSolid",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/runtime.js",
+            "line": 51,
+            "column": 9,
+            "ms": 1652.039,
+            "percent": 5.3051106823235665
+          },
+          {
+            "function": "_act",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+            "line": 495,
+            "column": 7,
+            "ms": 1609.837,
+            "percent": 5.169589498492302
+          },
+          {
+            "function": "_move",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+            "line": 640,
+            "column": 8,
+            "ms": 1601.765,
+            "percent": 5.1436682863249645
+          },
+          {
+            "function": "synchronize",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/physics.js",
+            "line": 285,
+            "column": 14,
+            "ms": 1586.932,
+            "percent": 5.096035811092294
+          },
+          {
+            "function": "(program)",
+            "url": "",
+            "line": 0,
+            "column": 0,
+            "ms": 1408.964,
+            "percent": 4.524536023307768
+          },
+          {
+            "function": "(anonymous)",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+            "line": 656,
+            "column": 40,
+            "ms": 1399.711,
+            "percent": 4.494822324573332
+          },
+          {
+            "function": "_canStep",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creatures.js",
+            "line": 612,
+            "column": 11,
+            "ms": 1396.302,
+            "percent": 4.483875172408013
+          },
+          {
+            "function": "draw",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/scene.js",
+            "line": 136,
+            "column": 6,
+            "ms": 1328.329,
+            "percent": 4.265596857907218
+          },
+          {
+            "function": "WebGLRenderer.render",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+            "line": 29998,
+            "column": 26,
+            "ms": 1325.381,
+            "percent": 4.2561300921156775
+          },
+          {
+            "function": "getCell",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 210,
+            "column": 10,
+            "ms": 1186.542,
+            "percent": 3.8102833160873137
+          },
+          {
+            "function": "syncTerrain",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/scene.js",
+            "line": 75,
+            "column": 13,
+            "ms": 1117.732,
+            "percent": 3.589317185111783
+          },
+          {
+            "function": "chunkGeometry",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/scene.js",
+            "line": 24,
+            "column": 30,
+            "ms": 1092.151,
+            "percent": 3.5071701919932674
+          },
+          {
+            "function": "step",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/physics.js",
+            "line": 356,
+            "column": 7,
+            "ms": 1022.597,
+            "percent": 3.2838148908179723
+          },
+          {
+            "function": "renderObjects",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+            "line": 30446,
+            "column": 25,
+            "ms": 836.022,
+            "percent": 2.6846758719724617
+          },
+          {
+            "function": "renderScene",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+            "line": 30298,
+            "column": 23,
+            "ms": 836.022,
+            "percent": 2.6846758719724617
+          },
+          {
+            "function": "renderObject",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+            "line": 30469,
+            "column": 24,
+            "ms": 831.55,
+            "percent": 2.670315160771726
+          },
+          {
+            "function": "WebGLRenderer.renderBufferDirect",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/vendor/three.module.js",
+            "line": 29609,
+            "column": 38,
+            "ms": 815.19,
+            "percent": 2.6177791063790554
+          },
+          {
+            "function": "_column",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 157,
+            "column": 10,
+            "ms": 655.513,
+            "percent": 2.105016297255675
+          },
+          {
+            "function": "getCell",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 210,
+            "column": 10,
+            "ms": 632.212,
+            "percent": 2.030190954749341
+          },
+          {
+            "function": "syncModels",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/scene.js",
+            "line": 114,
+            "column": 12,
+            "ms": 607.489,
+            "percent": 1.9507992143611992
+          },
+          {
+            "function": "animateCreatureModel",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/creature-animation.js",
+            "line": 63,
+            "column": 37,
+            "ms": 554.094,
+            "percent": 1.7793345062746064
+          },
+          {
+            "function": "_column",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 157,
+            "column": 10,
+            "ms": 552.695,
+            "percent": 1.7748419671489741
+          },
+          {
+            "function": "_vegetationAt",
+            "url": "http://127.0.0.1:8081/app/src/main/assets/content-runtime/atlas.js",
+            "line": 184,
+            "column": 16,
+            "ms": 529.518,
+            "percent": 1.700414819675934
+          }
+        ],
+        "note": "V8 statistical CPU samples, inclusive stacks overlap. GPU/SwiftShader worker cost is not all attributed here."
+      },
+      "cpuError": null,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "codeBefore": {
+        "app/src/main/assets/content-runtime/entry.js": "1f7eccea42a158bac232bf011d486479c0913bdad997fc1ff603f47147836c51",
+        "app/src/main/assets/content-runtime/runtime.js": "fac4fd2c032cfb5185fa6cc25ce4a2758fc95ff850713e1488f5c966086d529b",
+        "app/src/main/assets/content-runtime/scene.js": "eeaa30f7cc07291bd5031800af0f83405794de5de716a9e5cd761793c5e899ce",
+        "app/src/main/assets/content-runtime/physics.js": "6f3e939bf271d4eb68a98a09686ceaa3eee4650413be7fd6b83acb48daa08cd5",
+        "app/src/main/assets/content-runtime/atlas.js": "5c988c051937bfa032b5ba09855e58152a81fbae5faa89bea73e5789559a4478",
+        "app/src/main/assets/content-runtime/creatures.js": "169b8b0f81d11e3ffb047299b377e5cae2ab66acf5719ced6efb65b0cad32090",
+        "app/src/main/assets/content-runtime/progression.js": "ef8e3d2752769bbe4aaecaeae8ea3c693ab078ce88dd6fb1cd2854bc3383511c",
+        "app/src/main/assets/content-runtime/dungeons.js": "ec573ea4c51f5f042cda41af550f9b0ca08474e625c92f0e59dc41c61ecf93f6",
+        "app/src/main/assets/content-runtime/placements.js": "36593095023cca13c972f88f9eb1127604665521b26034a0f6f61edea263af99",
+        "app/src/main/assets/content-runtime/fixture-physics.js": "1acd6298a2cc0822e8656804c57a259138290792b7d47e030a6ffad8fa4a224a",
+        "app/src/main/assets/content-runtime/objects.js": "558236b23b03176a28a9023cf6b1cf577669129baf7af2c6444faf58183d38d5",
+        "app/src/main/assets/content-runtime/object-physics.js": "d71128684ea453ea22ca6bd2aef92935629919d3b5652f59ef9871dcb5a293b3",
+        "app/src/main/assets/content-runtime/environment-view.js": "00ad6e236f6286eb70f224101846030699dcb6ce6609bc3d4f3d27e3e458df8a",
+        "app/src/main/assets/content-runtime/equipment-view.js": "63b480695ba2830cab8177b701420f32074a406d3ea4859bff19980f2d946aa5"
+      },
+      "codeAfter": {
+        "app/src/main/assets/content-runtime/entry.js": "1f7eccea42a158bac232bf011d486479c0913bdad997fc1ff603f47147836c51",
+        "app/src/main/assets/content-runtime/runtime.js": "fac4fd2c032cfb5185fa6cc25ce4a2758fc95ff850713e1488f5c966086d529b",
+        "app/src/main/assets/content-runtime/scene.js": "eeaa30f7cc07291bd5031800af0f83405794de5de716a9e5cd761793c5e899ce",
+        "app/src/main/assets/content-runtime/physics.js": "6f3e939bf271d4eb68a98a09686ceaa3eee4650413be7fd6b83acb48daa08cd5",
+        "app/src/main/assets/content-runtime/atlas.js": "5c988c051937bfa032b5ba09855e58152a81fbae5faa89bea73e5789559a4478",
+        "app/src/main/assets/content-runtime/creatures.js": "169b8b0f81d11e3ffb047299b377e5cae2ab66acf5719ced6efb65b0cad32090",
+        "app/src/main/assets/content-runtime/progression.js": "b724aa982339491008e078c44c7975a96b5f88710d2c4e1a97793eed08fd1c6d",
+        "app/src/main/assets/content-runtime/dungeons.js": "ec573ea4c51f5f042cda41af550f9b0ca08474e625c92f0e59dc41c61ecf93f6",
+        "app/src/main/assets/content-runtime/placements.js": "36593095023cca13c972f88f9eb1127604665521b26034a0f6f61edea263af99",
+        "app/src/main/assets/content-runtime/fixture-physics.js": "1acd6298a2cc0822e8656804c57a259138290792b7d47e030a6ffad8fa4a224a",
+        "app/src/main/assets/content-runtime/objects.js": "558236b23b03176a28a9023cf6b1cf577669129baf7af2c6444faf58183d38d5",
+        "app/src/main/assets/content-runtime/object-physics.js": "d71128684ea453ea22ca6bd2aef92935629919d3b5652f59ef9871dcb5a293b3",
+        "app/src/main/assets/content-runtime/environment-view.js": "00ad6e236f6286eb70f224101846030699dcb6ce6609bc3d4f3d27e3e458df8a",
+        "app/src/main/assets/content-runtime/equipment-view.js": "63b480695ba2830cab8177b701420f32074a406d3ea4859bff19980f2d946aa5"
+      },
+      "changedFiles": [
+        "app/src/main/assets/content-runtime/progression.js"
+      ]
+    }
+  ],
+  "assessment": {
+    "status": "inconclusive_for_device_performance",
+    "reason": "Concurrent SwiftShader browser sessions and a long-running progression test used the same host during remeasurement. Parent requested no additional concurrent profiling. FPS is not an Android/mobile performance target or isolated before/after result.",
+    "baselineCpuInstrumentation": "Baseline CPU profiler included post-sample getParameter calls; these are profiling overhead, not game work. Final runs stop CPU profiling before collection.",
+    "changes": [
+      "Dungeon candidate bucket caches; exact authored cuboid checks remain, including geometry outside reserved footprint.",
+      "Fixture pose geometry/access caches; exact range-boundary changes, revision and model identity invalidate caches.",
+      "Root runtime solidity and physics synchronization changed concurrently; total timing changes cannot be attributed to any single patch."
+    ],
+    "regressions": {
+      "dungeonPlacementFixturePhysics": {
+        "passed": 27
+      },
+      "equipmentView": {
+        "passed": 7
+      }
+    },
+    "intermediateDesktop": {
+      "effectiveFps": 6.862,
+      "runtimeTickP95Ms": 17.1,
+      "physicsSynchronizeMedianMs": 7.6,
+      "note": "Earlier post-change desktop run loaded physics before its final optimization; final desktop run supersedes it. Baseline desktop FPS 4.5968."
+    }
+  }
+}

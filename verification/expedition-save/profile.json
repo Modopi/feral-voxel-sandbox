@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-17T15:21:20.593Z",
+  "fixture": {
+    "path": "/tmp/feral-route-storage-failure.json",
+    "sha256": "c3b35051056a9c573c948678e8c0fce8bf728f2c92c5750da4a76246865cfd2d",
+    "bytes": 2426274,
+    "keys": [
+      "complete",
+      "reached",
+      "progression",
+      "atlas"
+    ],
+    "retainedCopy": "verification/expedition-save/high-tier-route.json.gz"
+  },
+  "codeHashes": {
+    "save.js": "84e259c6a48743cbe3a918bd1cffa7895a62a5844d62f9f34f4bc806780af8d5",
+    "save-worker.js": "b128b8538467b99a510f960b5997028ea9df9b3c09e57acc1c89d00d87962f98",
+    "autosave.js": "269a4724825dfddd9e4140c12cd8de7f0fbd13c7eae240ad5427819d08c979e0"
+  },
+  "scenario": "Immutable actual high-tier resource-consumption route snapshot, with finite player defaults added. Same snapshot saved three times synchronously and three times via a real browser module Worker.",
+  "limitations": [
+    "Isolated desktop Chromium persistence harness, no rendering or game loop; not Android or mobile hardware validation.",
+    "Input snapshot is already serialized by runtime. runtime.serialize() cost remains on the main thread and is excluded.",
+    "Worker main-call timing includes JSON stringify and postMessage; commit timing includes raw equality verification and localStorage writes.",
+    "50ms Long Tasks API entries measure main-thread tasks, while wall time includes background compression/validation.",
+    "Worker fallback preserves correctness but still performs compression synchronously on a deferred task.",
+    "Other agents may run browsers concurrently; elapsed times are environment observations, not device guarantees."
+  ],
+  "rows": [
+    {
+      "sequence": 1,
+      "mode": "sync",
+      "elapsedMs": 2678.300000000745,
+      "mainCallMs": 2678.300000000745,
+      "wallMs": 2678.300000000745,
+      "longTasks": [
+        {
+          "start": 8106.900000002235,
+          "ms": 2678
+        }
+      ],
+      "longTaskTotalMs": 2678,
+      "longTaskMaxMs": 2678
+    },
+    {
+      "sequence": 2,
+      "mode": "worker",
+      "preparationMs": 964,
+      "commitMs": 2.800000000745058,
+      "elapsedMs": 1031,
+      "mainCallMs": 30.800000000745058,
+      "wallMs": 1031.300000000745,
+      "longTasks": [],
+      "longTaskTotalMs": 0,
+      "longTaskMaxMs": 0
+    },
+    {
+      "sequence": 3,
+      "mode": "sync",
+      "elapsedMs": 1795.5999999977648,
+      "mainCallMs": 1795.5999999977648,
+      "wallMs": 1795.5999999977648,
+      "longTasks": [
+        {
+          "start": 12995.800000000745,
+          "ms": 1795
+        }
+      ],
+      "longTaskTotalMs": 1795,
+      "longTaskMaxMs": 1795
+    },
+    {
+      "sequence": 4,
+      "mode": "worker",
+      "preparationMs": 1943.300000000745,
+      "commitMs": 15.5,
+      "elapsedMs": 2004.3999999985099,
+      "mainCallMs": 40.80000000074506,
+      "wallMs": 2004.5,
+      "longTasks": [],
+      "longTaskTotalMs": 0,
+      "longTaskMaxMs": 0
+    },
+    {
+      "sequence": 5,
+      "mode": "sync",
+      "elapsedMs": 1594.5,
+      "mainCallMs": 1594.5,
+      "wallMs": 1594.5,
+      "longTasks": [
+        {
+          "start": 18396.5,
+          "ms": 1594
+        }
+      ],
+      "longTaskTotalMs": 1594,
+      "longTaskMaxMs": 1594
+    },
+    {
+      "sequence": 6,
+      "mode": "worker",
+      "preparationMs": 1430.800000000745,
+      "commitMs": 3.800000000745058,
+      "elapsedMs": 1507.4000000022352,
+      "mainCallMs": 66.19999999925494,
+      "wallMs": 1507.5999999977648,
+      "longTasks": [
+        {
+          "start": 20510.10000000149,
+          "ms": 66
+        }
+      ],
+      "longTaskTotalMs": 66,
+      "longTaskMaxMs": 66
+    }
+  ],
+  "originalCharacters": 2426324,
+  "generationCharacters": [
+    197051,
+    197051
+  ],
+  "environment": {
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "hardwareConcurrency": 5
+  },
+  "longTaskThresholdMs": 50,
+  "roundtripExact": true,
+  "pageErrors": []
+}

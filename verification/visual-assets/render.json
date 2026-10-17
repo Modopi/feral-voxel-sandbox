@@ -524,6 +524,406 @@
       "boxes": 4972,
       "modelSha256": "02ca218f6a9a1639edb33d37c282cc79784102d6ac4d745abe7fe2ce1e7cd695",
       "glbSha256": "40c4b1e5cdd5e2053c847eeb60c8a54711dfda2544eaf661e4a59685d8f1c8c6"
+    },
+    {
+      "id": "bark_cup",
+      "mode": "full",
+      "boxes": 12,
+      "modelSha256": "2f0d4d657f0c43c5772f3ddcc676a241a8bf4c1ed111c85811aeb0819009f973",
+      "glbSha256": "a92816bf4f0136963e9e54ae4a81f904c72b98e65c13c441abe3ad00ec6e15b6"
+    },
+    {
+      "id": "stone_pick",
+      "mode": "full",
+      "boxes": 22,
+      "modelSha256": "ddb57e0f47b21d04166a348218de94f6f437ddae0d60594e5bfd73034cc201e5",
+      "glbSha256": "7340ea4a16e88722b51e35e18fa4ea02eaf96be3bcb995885843e478927fe157"
+    },
+    {
+      "id": "hand_knife",
+      "mode": "full",
+      "boxes": 7,
+      "modelSha256": "e2abea47716074daa7e4dba7698ee0a802a45be87605e53f9661d27db552b597",
+      "glbSha256": "6f904553110b29493ac7e5bcab421e897131a1ca4277c4ab7064ed07be1291f5"
+    },
+    {
+      "id": "field_bench",
+      "mode": "full",
+      "boxes": 18,
+      "modelSha256": "9c72041284fd83f70d955f94a126055fcffd6afaf01e290d9fada825670b7010",
+      "glbSha256": "af43b9d66bc64c15feb18e80f5ea3ad67e43def973c97771fc8e85b5bd559d7b"
+    },
+    {
+      "id": "kiln",
+      "mode": "full",
+      "boxes": 277,
+      "modelSha256": "0964f37ef048d4b568601fad5fbda88d4af4e2236a62b3f3bb07e7a72f47f871",
+      "glbSha256": "b323e2e7750d153df74306a10d751ef090c6c05292e4a67bf127fdb16858f41f"
+    },
+    {
+      "id": "forge",
+      "mode": "full",
+      "boxes": 154,
+      "modelSha256": "57144193d713120beec33b1099a7d689f75cbff6c0e6cbe2abd4d3a71d1c5220",
+      "glbSha256": "c130abe74ebc0876c1581299ec1132f3fc596e32f8f13f65df5fbfe1c11093a1"
+    },
+    {
+      "id": "fluid_bench",
+      "mode": "full",
+      "boxes": 231,
+      "modelSha256": "9ab728c4a34ecb82c567907ef8c21c6fc112a285a7fc71468f0c8d8c93545634",
+      "glbSha256": "a965fbb8f6aed0684d98866fed17409a470755ce7b85720242c660ece07ef2bd"
+    },
+    {
+      "id": "arcane_bench",
+      "mode": "full",
+      "boxes": 69,
+      "modelSha256": "565695040091185c6db8a95078b652e4e75e74973488998b2b18f5337df4ed71",
+      "glbSha256": "3392aa20f9222dc52ab555f678045e93e7b2009a7872c642c31bdf99e96b665e"
+    },
+    {
+      "id": "consecration_table",
+      "mode": "full",
+      "boxes": 16,
+      "modelSha256": "8dc9fe24e673ad8e8aeb60f2154752e90f1b38db861712751cd8ac278ca7f6e6",
+      "glbSha256": "a54e961e6b83336048e838f9ff9db378decf6e15445bfd2daeaa35e68bcc8ffb"
+    },
+    {
+      "id": "precision_bench",
+      "mode": "full",
+      "boxes": 25,
+      "modelSha256": "5b56e110a7bfa063cc7247bbadb0f6da17d6b52db8eef701c33c3d47e20908ab",
+      "glbSha256": "b3eec7d4ea55f59aa03a6a852abc8ae9b371e0448b1839190c8b05e1bfea343c"
+    },
+    {
+      "id": "arcane_engineering_station_t6",
+      "mode": "full",
+      "boxes": 336,
+      "modelSha256": "4cb2b135c920cf98336528aa91ce11c159b813b810445aabd6f4308b4cc2798f",
+      "glbSha256": "5a9c2812d394c46627a44169d917fb945f34bb67cf05a5e91f8f4c42f960c167"
+    },
+    {
+      "id": "arcane_engineering_station_t7",
+      "mode": "full",
+      "boxes": 461,
+      "modelSha256": "26ce8768789c6cfbcd98d520452126501fa35335217f7adfc02a91ad279e86bf",
+      "glbSha256": "35581972e69e81f396abb4bfbe434f16a2a6dd8e8a0f817d7de057c54af06657"
+    },
+    {
+      "id": "arcane_engineering_station_t8",
+      "mode": "full",
+      "boxes": 830,
+      "modelSha256": "5af5aac21d810bb3f0f253b8bb7764646985c3fd946ed83ce8026a149bbe1f48",
+      "glbSha256": "7477d082b74a7cf25279d23449b5d2d03b10caccf36ee48701c040be59dabf0e"
+    },
+    {
+      "id": "arcane_engineering_station_t9",
+      "mode": "full",
+      "boxes": 1079,
+      "modelSha256": "8d5e74f5b84e0f020c6aa0d1a797d6870689b49d8407780218a94efbb7b718f6",
+      "glbSha256": "39b0b1c77543c306ec6c6fee4aa52c348e7b7f8301f2e106841b86ea1e329217"
+    },
+    {
+      "id": "arcane_engineering_station_t10",
+      "mode": "full",
+      "boxes": 1352,
+      "modelSha256": "237c730135bb72f2a3a98bace50ed92538c358c60e49d8050c8ab438814ae21a",
+      "glbSha256": "e28f2ebe997546109fe4b5d2dec7555327e9874f44c8df24e6cb7e9ae197222a"
+    },
+    {
+      "id": "arcane_studies_station_t6",
+      "mode": "full",
+      "boxes": 107,
+      "modelSha256": "44e4170b666ec591f47c6a39e4b88a6620005ad21f9174fbb9d921b43f7afe3f",
+      "glbSha256": "bd3bb1b12877548d62e5849f3816a7e3ee4d0c0f374d7c78b29fecb4495316ae"
+    },
+    {
+      "id": "arcane_studies_station_t7",
+      "mode": "full",
+      "boxes": 113,
+      "modelSha256": "048a0aa614cdfbb7e6ac8fcaa7a2c6467fb7eced07f6dbe4787686ffe4f047fd",
+      "glbSha256": "041fc394f6263c8453def3b5f11e75c9ce5846fa9e0eb49f0fec533c850607a2"
+    },
+    {
+      "id": "arcane_studies_station_t8",
+      "mode": "full",
+      "boxes": 119,
+      "modelSha256": "0ab46f44c68d1b1e6ed9c81e6c00a05af2a222bd465e6ab8d35d71024ce95760",
+      "glbSha256": "d71014fef8d7c9a67fa942e323c8e1ed61736bc0b00e3f2325417b5dbc31465b"
+    },
+    {
+      "id": "arcane_studies_station_t9",
+      "mode": "full",
+      "boxes": 126,
+      "modelSha256": "dfe0c7f99595ddd6c7857228fcaca9bd2451700bd75b1211869028bf7a2a84e0",
+      "glbSha256": "89f1f161c72e6f8724c9951142576ac830cbd26fa1d773a8db9da61971244ad3"
+    },
+    {
+      "id": "arcane_studies_station_t10",
+      "mode": "full",
+      "boxes": 132,
+      "modelSha256": "b07405b9adf9b90aac86215d54101553f2dfa4dfc86fd0b07a44177025ce6462",
+      "glbSha256": "59b7e769c6c6f4e901509084e7940aa7ad674cebdf937f551d10406a6166f63c"
+    },
+    {
+      "id": "sanctity_station_t6",
+      "mode": "full",
+      "boxes": 82,
+      "modelSha256": "6276904d0bec941b291453e0b836257fef92cb88a9cd7a8da6e5f4d273b5418d",
+      "glbSha256": "930f1043e57431bb58208285f88bd41e6ba974e67f3a1a3551f8922213be7ccf"
+    },
+    {
+      "id": "sanctity_station_t7",
+      "mode": "full",
+      "boxes": 92,
+      "modelSha256": "c16a2fc18b1faea17783e87a7a457ff2e0ca601efdff2ca4a3997e22f77a104b",
+      "glbSha256": "44064fe2668d96d5fbad1a317c3b15643d7a3f5f3f113140a3ef5c17540c8cbf"
+    },
+    {
+      "id": "sanctity_station_t8",
+      "mode": "full",
+      "boxes": 101,
+      "modelSha256": "41474ffff0f1ff9dcd33b361ee33afc0e5551ae9bc1e57a8509d727cd1920d78",
+      "glbSha256": "e2ee47d7eaf8078f859de2ee920733392e3cca57a4e96a6f382727f32fecff5c"
+    },
+    {
+      "id": "sanctity_station_t9",
+      "mode": "full",
+      "boxes": 109,
+      "modelSha256": "bf415e41097f2ea4817400323787076a1c4a64ec1602154b7d76bd61b2b0cd2d",
+      "glbSha256": "c9c8190663c2c2e1f14ec088723d5695cf5eaac3ef33b48f8f7d9779f4fac1ed"
+    },
+    {
+      "id": "sanctity_station_t10",
+      "mode": "full",
+      "boxes": 118,
+      "modelSha256": "662cdcb3761fcc1b676b8a684a567028475333b47a790b2beea32ab405bb0894",
+      "glbSha256": "ae1cd4251488d635368a206e1aba8c77ebf717c5eaa3881c2d4396075b9989f8"
+    },
+    {
+      "id": "physics_station_t6",
+      "mode": "full",
+      "boxes": 186,
+      "modelSha256": "ec3860a90dc7d21283ae4a38c8a817ee79add1f73cf7c0ad5b726b2550918d5b",
+      "glbSha256": "bcaa2e487a2e7cf525da0722f496f4fddd22b0550132382c42ad3a5de8dce968"
+    },
+    {
+      "id": "physics_station_t7",
+      "mode": "full",
+      "boxes": 208,
+      "modelSha256": "438720eccf45b76b85644b133a0bf7a481230629602becfbeb188bd49ff07c42",
+      "glbSha256": "af624d2500b24b80002ff2523cb68014bca68ea9a3052868cb4633424c27f131"
+    },
+    {
+      "id": "physics_station_t8",
+      "mode": "full",
+      "boxes": 230,
+      "modelSha256": "6e7f39806f0e563719e8782226c78c34c8b96e5f1d2c9634d936584e4c6e4de8",
+      "glbSha256": "594dab45f6794c54f18664a61aaadf79558da38fa98795f14c83715da7d8a3e0"
+    },
+    {
+      "id": "physics_station_t9",
+      "mode": "full",
+      "boxes": 252,
+      "modelSha256": "f65cee3e9e30215663c82399fe12829bf4f9be1be0b4064176cd0437ebc6b4ff",
+      "glbSha256": "c7f3d986225ccae80e78077c4bdeb980072efd209bb2ee6be1c2060b5ace4903"
+    },
+    {
+      "id": "physics_station_t10",
+      "mode": "full",
+      "boxes": 274,
+      "modelSha256": "f978e3376e20733643a768fdeb82b9873233dcd5bf3ab2182e900784641bcbc0",
+      "glbSha256": "86ac93ad937805ce471a038d8af157770553b917895c20b9833ee5c77e95bdab"
+    },
+    {
+      "id": "joint",
+      "mode": "full",
+      "boxes": 19,
+      "modelSha256": "00e9bfaddd2c2ccecdd3f8111112ae73e48fc1f617e86fa1a78e03c0e58a4db9",
+      "glbSha256": "8a44dfa0f7c5592792f420909d8eaf57798f51764a13ee54a2b082f07a70939f"
+    },
+    {
+      "id": "transmission",
+      "mode": "full",
+      "boxes": 98,
+      "modelSha256": "2b7c4867016b08fad2370edf848dd1d86e2d6ca0407cd25f40e0e3e12f728ece",
+      "glbSha256": "f1b616b5c3c256b49ab65339bea8449e4e37608e18a481812207064cad5c6871"
+    },
+    {
+      "id": "motor",
+      "mode": "full",
+      "boxes": 301,
+      "modelSha256": "28721049d008f0334cd59d37a00b440b79a12bcdeb6b128dc55e90d1402c85cc",
+      "glbSha256": "84236121249530c292615121ddb7ec0f7cf48c1dcfb14f2651f3c5de49432823"
+    },
+    {
+      "id": "heat_engine",
+      "mode": "full",
+      "boxes": 122,
+      "modelSha256": "618612014015a7c2878d026e7ea40d6b6734936a932dd42d37dddcc39b80b617",
+      "glbSha256": "2682a2067cb82ec07dd25bcafe2a5079ca987a5f7f458fa11f19c3d7dfcc6165"
+    },
+    {
+      "id": "generator",
+      "mode": "full",
+      "boxes": 301,
+      "modelSha256": "ba421124b13cacba3d47c4907f23a010fa4c1d28b9210f4706ff32002e8f2aba",
+      "glbSha256": "6068bba91a4f2eb4e05025e8f82f8719449e81cfc090d95c8d474df5df0f1497"
+    },
+    {
+      "id": "battery",
+      "mode": "full",
+      "boxes": 9,
+      "modelSha256": "6a0adfdab786bdf2834acc516a4b23b1b48ea0e85f15853ad292957c06fb44b2",
+      "glbSha256": "840f850d7ae52b9b47af110c8f573690eeb4bd4ab8a397d79876391960050162"
+    },
+    {
+      "id": "inertial_cell",
+      "mode": "full",
+      "boxes": 52,
+      "modelSha256": "2c2484c33edabadfb17cdde476dee39894c1430225e52ce8b32d5ea753969c6d",
+      "glbSha256": "631fae2fb7ccbd4004962759130240d2a09edbe0ee6b2bcb28a06b518e29543e"
+    },
+    {
+      "id": "fluid_container",
+      "mode": "full",
+      "boxes": 127,
+      "modelSha256": "d46335aec19527d08fe1daa8767516431126ff329eb7b232ccfac01f850f04cd",
+      "glbSha256": "67ef9a125d810dc0a5b57407493ace737f980eb18845e9c2d8557d51501d35e4"
+    },
+    {
+      "id": "pump",
+      "mode": "full",
+      "boxes": 18,
+      "modelSha256": "1dd2ad6e787239d0d61df0e05b8656556d9e8e60780f1284fb6a4c0338f08d77",
+      "glbSha256": "a0394f783e2241cf2b7893efca2e90d66a89f9708c5a97236b3336bf0204cac2"
+    },
+    {
+      "id": "mana_condenser",
+      "mode": "full",
+      "boxes": 66,
+      "modelSha256": "c7bdffe02106f1fa1757facb135e791d2a7ccb7d59a1a4eac2e773a4328b1218",
+      "glbSha256": "4d095c958e66e986cc73aa01d345b7cf362de1f428e6df004705c4c90eb0666d"
+    },
+    {
+      "id": "property_imprinter",
+      "mode": "full",
+      "boxes": 8,
+      "modelSha256": "70a5ed1eff2889c074e849075e5e44df25aba85b709d35021984bdc5932beaaf",
+      "glbSha256": "7bcbaa9935ababc41a1c25a26c8e3202820384de54a73ae18dae5448e018f5e1"
+    },
+    {
+      "id": "relic",
+      "mode": "full",
+      "boxes": 34,
+      "modelSha256": "48ee85154e54c347ce962b331cbe259658d93daf1f050d60766c167d1bff1df3",
+      "glbSha256": "5c3c9c072274f6655e4bf044a19eff50d8aad20aa6c397c178eca766e46dcd03"
+    },
+    {
+      "id": "controller",
+      "mode": "full",
+      "boxes": 7,
+      "modelSha256": "d77357ce43bc19eaa296e8b7dfa9c2b9abbb6e2c15f8c0d6e274bee313e2d5e8",
+      "glbSha256": "b09f282dce298ba133834317be57b1a1304686896014d6d41b4356a661e21289"
+    },
+    {
+      "id": "gear_baseline_t1",
+      "mode": "full",
+      "boxes": 84,
+      "modelSha256": "7c7baae39406bacc6475e2dc6c12f8e0f55899be49af5e6c8aad2592ad6a9b65",
+      "glbSha256": "915943af7c5a073c120d637b4b7d4a0f5b5a94a3ccb08992580bb59de442f87f"
+    },
+    {
+      "id": "gear_baseline_t2",
+      "mode": "full",
+      "boxes": 88,
+      "modelSha256": "fab393d382b72cb5c5f451f54bccb65a2769e78791a096158686561770bbf112",
+      "glbSha256": "b4ade259e42f28cd8c3f0d70343c1279fb95c08f6838147be9b7755eacb0b2a7"
+    },
+    {
+      "id": "gear_baseline_t3",
+      "mode": "full",
+      "boxes": 74,
+      "modelSha256": "574dc70ae37db88b26dfd00de4c79e6293d280d5811304ffb73b6547e511989e",
+      "glbSha256": "a8cfaeae7a0f3dead28c7c0c6cb78dd839742b48654abd4eb17c6f32a4a9b0ae"
+    },
+    {
+      "id": "gear_baseline_t4",
+      "mode": "full",
+      "boxes": 76,
+      "modelSha256": "e9beb5a926d0c724a8a5b1273dc8c8549934da88332c22b83dfe2751ccbc841c",
+      "glbSha256": "5208a083f4cbccfab29c2de0d76582574eca4df7a887edac49b28f4d26b80686"
+    },
+    {
+      "id": "gear_baseline_t5",
+      "mode": "full",
+      "boxes": 78,
+      "modelSha256": "dda745a87af810f17e429a8c1c04f47cb98e8f23cd44ab5193c76b65a218f664",
+      "glbSha256": "b6f0bbe03222919037339cb8cc37dba2aa0958af1939e4a78b392dcb96ce9389"
+    },
+    {
+      "id": "gear_baseline_t6",
+      "mode": "full",
+      "boxes": 79,
+      "modelSha256": "48f975aecd8740cb61af5e9454f59f56302191fdeef044974241c4f690658439",
+      "glbSha256": "d6bf21504d97e74a89d1acdf9701fb6139850aed3f8c506d4c6a29f47b1b484e"
+    },
+    {
+      "id": "gear_baseline_t7",
+      "mode": "full",
+      "boxes": 80,
+      "modelSha256": "43f6782b1ec37267acd3832cdc1dcf50e71037a803fab396a0e5fdaa09310c3d",
+      "glbSha256": "96fc33a6f833a3eb164539da702dbe944f1dda1aa5927c247df617a7ea235beb"
+    },
+    {
+      "id": "gear_baseline_t8",
+      "mode": "full",
+      "boxes": 81,
+      "modelSha256": "b324238b3326ec045602f67a10432cfe238e6bb3a9645475fecbc1432475c0f8",
+      "glbSha256": "2f6224702bde5973d1285fc2e4a4a3ed9b63d92137fb840d12556cb61aade08a"
+    },
+    {
+      "id": "gear_baseline_t9",
+      "mode": "full",
+      "boxes": 81,
+      "modelSha256": "2cc8819b45cafc6f712ca653dd99d4b8da24a9d1f0098e92142f3e476ed953eb",
+      "glbSha256": "74ee77dffa75e2a24f777b22ba9b4ceafcda91a229e8d51cc81e5589bf8dcb9c"
+    },
+    {
+      "id": "gear_baseline_t10",
+      "mode": "full",
+      "boxes": 81,
+      "modelSha256": "87874187626fa122d4271a5b16b46fd7c73751db39f19b1ea2df4d4f1060b270",
+      "glbSha256": "f7996c659f891bae459d2c1ccef24049de52b7164db01581f21cafee732d5aad"
+    },
+    {
+      "id": "arc_thrower",
+      "mode": "full",
+      "boxes": 17,
+      "modelSha256": "2585eed8affba379d168181702419277949a710b421f9ab89d5830e1a17ee7a1",
+      "glbSha256": "ca2b877aa0156ecfbf7cb1f9a155e612e22621e430587d3b920b485c25534690"
+    },
+    {
+      "id": "weapon_slash",
+      "mode": "full",
+      "boxes": 9,
+      "modelSha256": "e5872920e6b759990124fa998d8026655bfc0934b650a066bdc0626ae584698e",
+      "glbSha256": "3a285c0f49d86362bb520c40fda01f8119495ef2ddfeccb4fa6c779fc715f849"
+    },
+    {
+      "id": "weapon_pierce",
+      "mode": "full",
+      "boxes": 10,
+      "modelSha256": "4e6007d5b316b8d444d07024e4535b2dacc5012e333f03d128e90ea44a073acd",
+      "glbSha256": "192b8cf307963213fc4091a90b64ee42792ca57d2e1092a53e3ca987934b7bf1"
+    },
+    {
+      "id": "weapon_blunt",
+      "mode": "full",
+      "boxes": 9,
+      "modelSha256": "93af2d0bdb5fb432c64b06127da864b44dec03da99518022ee029fc758f85c16",
+      "glbSha256": "0f159c881d9c25a653e4ffd621bb50e2d53932c841d19ae4716f6fe3c3d40044"
     }
-  ]
+  ],
+  "provenance": "115 assets covered; four corrected arcane engineering station renders replace earlier records. Every source/GLB hash matches the current manifest."
 }

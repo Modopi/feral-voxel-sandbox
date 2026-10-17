@@ -15,7 +15,7 @@ export function listWorlds(store) {
       (w) =>
         !w ||
         !/^[-\w]+$/.test(w.id) ||
-        !["island", "machine", "frontier"].includes(w.type) ||
+        !["island", "machine", "frontier", "expedition"].includes(w.type) ||
         typeof w.name !== "string" ||
         !Number.isSafeInteger(w.seed),
     ) ||
@@ -32,7 +32,7 @@ export function saveKey(w) {
       : `feral.slot.${w.id}`;
 }
 export function worldURL(w) {
-  return `${w.type === "machine" ? "machine" : "index"}.html?world=${encodeURIComponent(w.id)}`;
+  return `${w.type === "machine" ? "machine" : w.type === "expedition" ? "expedition" : "index"}.html?world=${encodeURIComponent(w.id)}`;
 }
 export function currentWorld(store, type, search) {
   const id = new URLSearchParams(search).get("world");
@@ -48,7 +48,7 @@ export function currentWorld(store, type, search) {
   return w;
 }
 export function createWorld(store, name, type, seed = 63026) {
-  if (!["island", "machine", "frontier"].includes(type))
+  if (!["island", "machine", "frontier", "expedition"].includes(type))
     throw Error("잘못된 월드 유형");
   name = name.trim().slice(0, 40);
   if (!name) throw Error("월드 이름을 입력하세요.");
@@ -75,4 +75,8 @@ export function deleteWorld(store, id) {
   // 목록 갱신 성공 뒤 해당 월드 데이터만 제거
   store.setItem(CATALOG, JSON.stringify(rows.filter((w) => w.id !== id)));
   store.removeItem(saveKey(w));
+  if (w.type === "expedition") {
+    store.removeItem(saveKey(w) + ".a");
+    store.removeItem(saveKey(w) + ".b");
+  }
 }

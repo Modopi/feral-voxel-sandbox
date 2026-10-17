@@ -1,0 +1,27 @@
+{
+  "scope": "Legacy nonpositional tick-local assembly memoization; fixed graph excluded. Shared host CPU timings, not mobile performance.",
+  "command": "node /tmp/bench-progression.mjs [module] [serialized-output]",
+  "state": "/tmp/feral-route-storage-failure.json progression field",
+  "stateSha256": "c3b35051056a9c573c948678e8c0fce8bf728f2c92c5750da4a76246865cfd2d",
+  "modelSeconds": 1000,
+  "options": {
+    "manual": true
+  },
+  "beforeMs": [
+    1484.66242,
+    872.921129,
+    687.618034,
+    717.538383
+  ],
+  "afterMs": [
+    225.786971,
+    275.91382,
+    199.493821,
+    172.532788
+  ],
+  "warmMedianBeforeMs": 717.538383,
+  "warmMedianAfterMs": 199.493821,
+  "serializedOutputByteEqual": true,
+  "semantics": "Same 0.1-second steps, iteration order, rates, inputs, inventory, metrics and save format. Cache lifetime one synchronous legacy tick; try/finally cleanup.",
+  "regression": "tests/content-progression.test.js: legacy tick-local assembly caches match uncached stepping and expire between calls"
+}

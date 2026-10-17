@@ -422,17 +422,8 @@ export class Ecology {
     e.age += dt;
     e.behavior = e.age < 25 ? "성장 중" : "배회";
     e.energy -= dt * (e.type === 1 ? 0.33 : 0.13);
-    if (e.hp <= 0 || e.energy <= 0 || e.lost & 3) {
-      this.kill(
-        e,
-        e.lost & 1
-          ? "몸통 파괴"
-          : e.lost & 2
-            ? "머리 파괴"
-            : e.hp <= 0
-              ? "체력 소진"
-              : "굶주림",
-      );
+    if (e.hp <= 0 || e.energy <= 0) {
+      this.kill(e, e.hp <= 0 ? "체력 소진" : "굶주림");
       return;
     }
     let dx = e.targetX - e.x,
@@ -782,6 +773,7 @@ export class Ecology {
         }
       }
     }
+    if (hit) { hit.rayOrigin = {...origin}; hit.rayDirection = {...dir}; }
     return hit;
   }
   emitDebris(d) {
@@ -812,8 +804,7 @@ export class Ecology {
       }
     for (let k = 0; k < SPECIES[e.type].parts.length; k++)
       if (SPECIES[e.type].parts[k].parent === pi) this.detach(e, k, time);
-    if (p.role === "core" || p.role === "head")
-      this.kill(e, p.role === "core" ? "몸통 파괴" : "머리 파괴");
+    // Loss changes anatomy/behavior; only the HP ledger decides combat death.
     condition(e);
     this.world.event(SPECIES[e.type].name + " · " + p.name + " 분리", [
       e.x,
@@ -821,73 +812,70 @@ export class Ecology {
       e.z,
     ]);
   }
-  impact(e, point, energy, time = this.world.time) {
-    if (e.dead || !(energy > 0)) return;
-    const sp = SPECIES[e.type],
-      p = [point.x, point.y, point.z];
-    let nearest = null,
-      dist = Infinity;
+  impact(e, point, energy, time = this.world.time, options = {}) {
+    if (e.dead || !Number.isFinite(energy) || energy <= 0) return;
+    const damageBudget = options.damageBudget ?? Math.min(80, energy / 100), depthM = options.depthM ?? .6;
+    if (!Number.isFinite(damageBudget) || damageBudget < 0 || !Number.isFinite(depthM) || depthM < 0) return;
+    const sp = SPECIES[e.type], p = [point.x, point.y, point.z];
+    if (!p.every(Number.isFinite)) return;
+    let nearest = null, dist = Infinity;
     for (let pi = 0; pi < sp.parts.length; pi++) {
       if (e.lost & (1 << pi)) continue;
       const part = sp.parts[pi];
-      for (let j = 0; j < part.count; j++)
-        if (occupied(e, pi, j)) {
-          const pos = toWorld(e, part, pi, cellPosition(part, j), time),
-            d = Math.hypot(...pos.map((v, k) => v - p[k]));
-          if (d < dist) {
-            dist = d;
-            nearest = {
-              entity: e,
-              part: pi,
-              voxel: j,
-              point: pos,
-              layer: "shell",
-            };
-          }
-        }
-    }
-    // Soft tissue absorbs a fixed amount; only excess impact energy reaches the nearest internal bone.
-    if (nearest) {
-      this.damageHit(nearest, time, 0.08, 0);
-      energy = Math.max(0, energy - 550);
-    }
-    if (energy <= 0 || e.dead) return;
-    let bone = null;
-    dist = Infinity;
-    for (const piece of bonePieces(e, sp)) {
-      const pos = toWorld(e, sp.parts[piece.part], piece.part, piece.at, time),
-        d = Math.hypot(...pos.map((v, k) => v - p[k]));
-      if (d < dist) {
-        dist = d;
-        bone = {
-          entity: e,
-          part: piece.part,
-          node: piece.node,
-          point: pos,
-          layer: "structure",
-        };
+      for (let j = 0; j < part.count; j++) if (occupied(e, pi, j)) {
+        const pos = toWorld(e, part, pi, cellPosition(part,j),time), d=Math.hypot(...pos.map((v,k)=>v-p[k]));
+        if(d<dist){dist=d;nearest={entity:e,part:pi,voxel:j,point:pos,layer:"shell"};}
       }
     }
-    if (bone) this.damageHit(bone, time, 0.08, Math.min(80, energy / 100));
+    // Existing collision energy uses the legacy 550-energy soft-tissue barrier.
+    // Exterior and internal effects partition ONE finite impact, never replay it.
+    const absorbed = nearest ? Math.min(energy,550) : 0, remaining=energy-absorbed;
+    if(nearest)this.damageHit(nearest,time,.08,0,{applyHp:false});
+    let bone=null;dist=Infinity;
+    for(const piece of bonePieces(e,sp)){
+      const pos=toWorld(e,sp.parts[piece.part],piece.part,piece.at,time),d=Math.hypot(...pos.map((v,k)=>v-p[k]));
+      if(d<dist&&d<=depthM){dist=d;bone={entity:e,part:piece.part,node:piece.node,point:pos,layer:"structure"};}
+    }
+    if(bone&&remaining>0)this.damageHit(bone,time,.08,damageBudget*remaining/energy,{applyHp:false});
+    if(nearest||bone)this.hurt(e,damageBudget,"충격 피해");
+    return {damage:nearest||bone?damageBudget:0,absorbedEnergy:absorbed,internalEnergy:bone?remaining:0,unspentEnergy:bone?0:remaining};
   }
-  damageHit(hit, time, radius = 0.28, damage = 12) {
-    if (hit.entity.dead) return 0;
+  damageHit(hit, time, radius = 0.28, damage = 12, {applyHp = true, attackMode = "strike"} = {}) {
+    if (hit.entity.dead || !Number.isFinite(damage) || damage < 0) return 0;
     const e = hit.entity,
       pi = hit.part,
       p = SPECIES[e.type].parts[pi],
       sp = SPECIES[e.type];
     animalStructure(e, sp);
+    if (hit.layer !== "structure" && applyHp && ["pierce","impact"].includes(attackMode)) {
+      const depthM = attackMode === "pierce" ? 1.2 : .6;
+      const removed = this.damageHit(hit,time,radius,0,{applyHp:false});
+      const at=hit.point, direction=hit.rayDirection;
+      let internal=null, best=depthM;
+      for(const piece of bonePieces(e,sp)) {
+        const part=sp.parts[piece.part];let depth;
+        if(attackMode === "pierce" && direction) {
+          const origin=toLocal(e,part,piece.part,at,time), end=toLocal(e,part,piece.part,at.map((v,i)=>v+[direction.x,direction.y,direction.z][i]),time);
+          depth=rayBox(origin,end.map((v,i)=>v-origin[i]),piece.at,piece.size,best);
+        } else if (attackMode === "impact") {
+          const pos=toWorld(e,part,piece.part,piece.at,time);depth=Math.hypot(...pos.map((v,i)=>v-at[i]));
+        } else continue;
+        if(depth!==null && depth>=0 && depth<=best){best=depth;internal={entity:e,part:piece.part,node:piece.node,point:toWorld(e,part,piece.part,piece.at,time),layer:"structure"};}
+      }
+      // The legacy collision scale is 100 energy per damage. Existing tissue
+      // barrier 550 is paid once; distance adds 300 energy/m (initial proposal).
+      const energy=damage*100, transmitted=Math.max(0,energy-550-best*300);
+      if(internal && transmitted>0)this.damageHit(internal,time,.01,damage*transmitted/energy,{applyHp:false});
+      if(removed)this.hurt(e,damage,"외피·내부 전달 타격");
+      return removed;
+    }
     if (hit.layer === "structure") {
       const model = animalSkeleton(sp),
         node = model.byId.get(hit.node);
       if (!node || node.part !== pi) return 0;
       const result = breakBone(model, e.structure, node.id, damage);
       if (result.damage) {
-        this.hurt(
-          e,
-          result.damage * (node.id === model.brain ? 1.5 : 0.35),
-          "내부 골격 손상",
-        );
+        if (applyHp) this.hurt(e, result.damage * (node.id === model.brain ? 1.5 : 0.35), "내부 골격 손상");
         e.fear = 6;
         e.angryUntil = time + 12;
         this.reconcileStructure(e, time);
@@ -960,16 +948,19 @@ export class Ecology {
     e.targetX = clamp(e.x + (this.world.random() - 0.5) * 16, 2, SIZE - 3);
     e.targetZ = clamp(e.z + (this.world.random() - 0.5) * 16, 2, SIZE - 3);
     condition(e);
+    if (removed && applyHp) this.hurt(e, damage, "외피 타격");
     if (e.energy <= 0) this.kill(e);
     return removed;
   }
   reconcileStructure(e, time) {
     const sp = SPECIES[e.type],
       state = animalStructure(e, sp);
-    for (let pi = 1; pi < sp.parts.length; pi++)
-      if (!(e.lost & (1 << pi)) && !attachmentIntact(e, sp, pi))
-        this.detach(e, pi, time);
-    if (!state.alive) this.kill(e, "중추 골격 파괴");
+    // A broken central root can disable every function without magically
+    // detaching all still-present limbs from the living exterior.
+    const rootIntact = boneHealth(animalSkeleton(sp), e.structure, animalSkeleton(sp).root) > 0;
+    if (rootIntact) for (let pi = 1; pi < sp.parts.length; pi++)
+      if (!(e.lost & (1 << pi)) && !attachmentIntact(e, sp, pi)) this.detach(e, pi, time);
+    if (e.hp <= 0) this.kill(e, "체력 소진");
     condition(e);
   }
   stats() {

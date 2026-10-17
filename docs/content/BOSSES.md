@@ -3,7 +3,7 @@
 [시각 에셋 저장·재사용 안내](VISUAL-ASSETS.md) · 아래 이미지는 설계용 복셀 원형을 직접 렌더한 것이며 실제 게임 화면이 아닙니다.
 
 
-> 상태: **구현 전 제안**. 사용자 확정 원칙을 따른 콘텐츠 설계이며 실제 전투 성능을 측정한 결과가 아니다. 데이터 원본은 [bosses.json](../../design/content/bosses.json). 기존 게임 보스를 변경하지 않는다.
+> 상태: 8개 원형과 명시 T9/T10 변형의 전투 시뮬레이션이 구현되어 있다. 수치·TTK·보상량은 실제 전투 성능이나 경제를 측정한 값이 아닌 제안 목표이며 통합 플레이 검증은 별도다. 데이터 원본은 [bosses.json](../../design/content/bosses.json). 기존 저장 던전의 원형 보스는 사후 치환하지 않는다.
 
 ## 1. 개념
 
@@ -26,7 +26,7 @@
 
 앞 여섯 종은 유기생명으로 칼로리를 사용한다. 두 무기생명은 칼로리가 null이고 자연회복은 0이다. 이 두 개체의 문명 속성 true는 공동체를 형성할 능력만 의미하며, 자동 가입·우호·교역은 뜻하지 않는다. 공동체 소속과 관계는 별도 데이터가 소유한다.
 
-대표 티어는 환경 전체의 고정 티어가 아니다. 자동 tier 배율은 아직 적용하지 않는다. 다른 티어의 보스는 장비 기준·공간·보상·종의 특징을 함께 검토한 별도 변형으로 발행한다. 9~10티어까지 이 8개 수치만 기계적으로 확대하는 것은 완료 범위가 아니다.
+대표 티어는 환경 전체의 고정 티어가 아니다. 자동 tier 배율은 적용하지 않는다. 수도원 수호자와 관측탑 파수기는 각각 `sanctuary_warden_t9/t10`, `observatory_sentinel_t9/t10`의 명시 ID만 사용한다. 네 변형은 원형 에셋 ID·세 페이즈·네 기술을 보존하고, 티어별 HP·피해·EU·실제 재배치 행동을 별도 정의한다. 던전 보상 override는 기존 최초 처치 키를 유지하며 boss 채널에만 적용한다. 모든 수치·TTK·보상량은 제안값이며 실제 플레이 전에는 검증값으로 취급하지 않는다. 다른 티어를 자동 배율로 만들거나 8개 수치만 기계적으로 확대하지 않는다. 전체 제안은 [후반 보스 변형](BOSS-VARIANTS-PROPOSAL.md)을 참조한다.
 
 ## 3. 구성과 관계
 
@@ -52,7 +52,7 @@
 
 성장 담당과 합의한 공통 단위는 **EU(게임 에너지 단위)**, 출력은EU/s다. 실제 줄(J) 대응은 없으며 채널별별도ledger를 사용한다. 기술별비용도EU다. 채널간변환은 정의된component에서만 허용한다. 공통변환예시 역학→전기0.75, 전기→역학0.8, 열→역학0.35는 성장데이터가소유하며 보스는자동교환하지않는다.
 
-각 기술은 준비 시작 때EU비용을 차감하며 중단되어도 반환하지 않는다. 입사EU=spentEU×deliveredFraction(0~1)에서 실체외피의 남은 shellIntegrity와 재질이 흡수한EU를 먼저차감한다. 흡수분은외피파손에만 기록한다. 잔여EU×damageYieldHpPerEU를 neutralTargetHp로 제한하고 에너지반응·장비방어를각각한번적용한값이 bodyHpDamage다. 이값만전신HP와내부부위누적에1회반영한다. 외피와전신HP는독립이며외피피해를전신에다시더하지않는다. neutralTargetHp는외피·저항이없는표적의완전전달상한이다.
+각 기술은 준비 시작 때 EU 비용을 차감하며 중단되어도 반환하지 않는다. 입사 EU=spentEU×deliveredFraction(0~1)에 damageYieldHpPerEU를 곱하고 neutralTargetHp로 제한한 뒤 에너지반응·장비방어를 각각 한 번 적용한다. 외피 유효 타격도 전체 HP를 감소시키며 외피를 전부 벗겨야 HP를 줄일 수 있는 조건은 없다. shellIntegrity는 외피 파손 상태, bodyHP는 생존 상태를 따로 저장한다는 의미다. 실제 형상·재질·깊이에 따른 부위별 침착 EU/피해는 같은 공격 예산을 분배한 값이며 전체 HP에서 다시 차감하지 않는다. 전투 사망은 HP 0으로 결정하고 core·중추 파손은 이동/비행/기술 등 행동만 바꾼다. 최신 실제 관통·충격 전달 및 기존 모드 호환 계약은 [COMBAT-TRACE-PROPOSAL.md](COMBAT-TRACE-PROPOSAL.md)를 따른다.
 
 저장고는 해당 에너지에서 가장 비싼 기술의 10회분으로 시작한다. 4초 정지 재충전으로 4회분을 채우며 종류별로 최대 6회, 재충전 중 피격 배율은 1.25다. 이것은 유한 체내 저장물 또는 내장 전지·성물에 담긴 에너지를 옮기는 행위다. 공급 저장물이 소진되면 공격하지 못한다. 재충전 비용과 부위·남은 공급량을 저장해 재접속으로 초기화하지 않는다. 유기생명의 칼로리를 공격용 에너지로 자동 바꾸지 않는다. 체내 무기용 저장물 생산은 생태 생산 모델과 이어야 하는 명시적 후속 구현 항목이다.
 
@@ -502,7 +502,7 @@ TTK=HP/유효DPS. 성장 담당의 유효DPS에는 이동·회피·일반 저항
 | 단계별기관 | 없음 | entries[].phases[].state.coreExposure.durationS/completedAttackCount/angleDeg;moveSpeedMultiplier;bodyReactionOverrides.* | 신규 | number s/횟수/degree/ratio | 유효>=0,angle[0,360],count정수>0 | 이동.5~1,노출2~4s/상시0,각120deg,2~3공격 | after_skill/after_attack_count/grounded/rear_arc/rear_or_repair/always모드별처리 | 이벤트타이머저장;0은상시/조건형노출의비시간제 |
 | 단계별공간 | 없음 | entries[].phases[].state.foodChargeStaggerS/chargePillarStaggerS/northWaterDepthM/northWaterPlayerSpeedMultiplier/growthNodeCoverSizeM/growthNodeMaxCount/shieldFrontCoverageDeg/orbitRadiusM | 신규 | number s/m/ratio/degree,vector3,integer | 유효>=0;speed배율(0,1];angle[0,360] | 기믹기절3~6,수심0~.5/속도.85~1,성장2x3x2/2개,방패0~120,궤도0~6 | 출구띠영향없음;파괴기믹재생X | 방그래프위치검사/저장상태검사 |
 | 단계별비행 | 없음 | entries[].phases[].state.cruiseHeightM/maxAirborneS/minimumGroundedS | 신규 | number m/s | 유효>0 | 고도4/8/3,공중8/12/6,지상5/5/7 | phase별수직전투차이;날개손상시더낮은상한 | 실제grounded타이머검사 |
-| 외피독립 | frontier보스에없음;외피와개체HP분리설계원칙을따름 | entries[].stats.shellContract.baselineCoverageFraction/bodyHpIndependent | 신규 | number ratio/boolean | 유효ratio[0,1] | 기준피복.35,true | 외피EU흡수→잔여신체피해분리;실제복셀모델은후속 | 외피파손만으로전신HP차감되지않는경계검사 |
+| 외피독립 | frontier보스에없음;외피와개체HP분리설계원칙을따름 | entries[].stats.shellContract.baselineCoverageFraction/bodyHpIndependent | 신규 | number ratio/boolean | 유효ratio[0,1] | 기준피복.35,true | 외피상태와전체HP별도저장;외피타격도전체HP1회차감 | 외피만으로처치/중추파손후생존/부위별단일예산검사 |
 | 수위영역 | 없음 | entries[].arena.phaseWaterRegion.minM/maxM/damageHp | 신규 | vector3 m/number HP | 유효min<=max;피해>=0 | [-10,0,5]~[10,.5,11],피해0 | 북측만수위변화·출구띠보존 | arena경계·마른회피경로검사 |
 | 시전시간 | encounters.js PATTERNS.warning, model.js boss.warning/cooldown | entries[].skills[].windupS/activeS/recoveryS/cooldownS/rangeM | 변경 | number s/m | 유효>0;균형1.4~2준비,.25~4발동,1.8~3.5회복,7~15쿨다운,6~32거리 | 개별기술표 | 형상별보행회피시간+여유 | 공간·모바일입력지연검사;구warning임의재해석X |
 | 피해·비용 | frontier/model.js hitBoss와기존보스일괄피해 | entries[].skills[].damage.*,energyCost.amount/damageYieldHpPerEU | 신규 | number HP/ratio/EU,integer횟수 | 유효>=0유한;횟수1;기준HP비율0~1 | 각표;비용=ceil(중립피해*1.5) | 중립피해/비용→변환계수;장비방어1회 | energy총량·다중부품·다중프레임피해상한검사 |

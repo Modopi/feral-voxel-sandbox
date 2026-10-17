@@ -47,12 +47,12 @@ function hit(e, part, voxel, layer = "shell") {
     ),
   };
 }
-test("removing a whole foot exterior changes mass and appearance, but not support, HP, or identity", () => {
+test("removing a whole foot exterior changes mass and appearance, reduces HP once while preserving support and identity", () => {
   const { eco, e } = setup(),
     before = condition(e),
     id = e.id;
-  eco.damageHit(hit(e, 2, 0), 0, 0.01, 100);
-  assert.equal(e.hp, e.maxHP);
+  eco.damageHit(hit(e, 2, 0), 0, 0.01, 1);
+  assert.equal(e.hp, e.maxHP - 1);
   assert.equal(e.id, id);
   assert.equal(e.damage[2][0], 0);
   assert.equal(eco.legs(e), 4);
@@ -94,11 +94,12 @@ test("a front ray hits coat before bone, then exposed bone; only a full internal
 });
 test("all head coating can be removed without severing ears or destroying the vital skeleton", () => {
   const { eco, e } = setup();
+  e.hp=e.maxHP=200;
   for (let j = 0; j < SPECIES[0].parts[1].count; j++)
-    eco.damageHit(hit(e, 1, j), 0, 0.001, 100);
+    eco.damageHit(hit(e, 1, j), 0, 0.001, 1);
   assert.equal(e.dead, false);
   assert.equal(e.lost, 0);
-  assert.equal(e.hp, e.maxHP);
+  assert.equal(e.hp, e.maxHP - SPECIES[0].parts[1].count);
   assert.equal(animalBodyInfo(e, SPECIES[0]).structure, 100);
   const model = animalSkeleton(SPECIES[0]);
   eco.damageHit(
@@ -107,8 +108,8 @@ test("all head coating can be removed without severing ears or destroying the vi
     0.01,
     30,
   );
-  assert.equal(e.dead, true);
-  assert.match(e.deathCause, /골격|머리/);
+  assert.equal(e.dead, false);
+  assert(e.hp > 0, 'brain fracture is a functional injury, not an instant death');
 });
 test("severing the shared rear spine disconnects both hind limbs while front support survives", () => {
   const { eco, e } = setup();
@@ -122,7 +123,7 @@ test("severing the shared rear spine disconnects both hind limbs while front sup
 });
 test("surface-only injuries and partial bone damage persist independently through save/load", () => {
   const { w, eco, e } = setup();
-  eco.damageHit(hit(e, 2, 0), 0, 0.01, 100);
+  eco.damageHit(hit(e, 2, 0), 0, 0.01, 1);
   eco.damageHit(hit(e, 3, 0, "structure"), 0, 0.01, 8);
   const loaded = new Ecology(w);
   loaded.load(JSON.parse(JSON.stringify(eco.save())));

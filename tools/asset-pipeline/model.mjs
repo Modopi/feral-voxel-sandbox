@@ -14,7 +14,7 @@ export function boundsOf(boxes){if(!boxes.length)throw Error('Empty geometry');c
 export function validateAsset(a,library,content){
  const fail=m=>{throw Error(`${a.id}: ${m}`)};const vec=v=>Array.isArray(v)&&v.length===3&&v.every(Number.isFinite);
  if(a.schemaVersion!==1||a.status!=='art_prototype'||a.units!=='m'||a.upAxis!=='Y'||a.forwardAxis!=='+Z')fail('Invalid header');
- if(!['creature','boss','structure','environment'].includes(a.category)||!Number.isFinite(a.visualGridM)||a.visualGridM<=0)fail('Invalid category/grid');
+ if(!['creature','boss','structure','environment','equipment'].includes(a.category)||!Number.isFinite(a.visualGridM)||a.visualGridM<=0)fail('Invalid category/grid');
  const source=content[a.contentRef.file.split('/').pop().replace('.json','')];if(!source?.entries.some(e=>e.id===a.contentRef.id)||a.contentRef.id!==a.id)fail('Invalid content ref');
  const blockIds=new Set(content.blocks.entries.map(x=>x.id)),materialIds=new Set(),partIds=new Set();
  for(const m of a.materials){if(materialIds.has(m.id)||!/^#[0-9a-fA-F]{6}$/.test(m.color))fail('Invalid material '+m.id);materialIds.add(m.id);for(const key of ['roughness','metallic','opacity'])if(!Number.isFinite(m[key])||m[key]<0||m[key]>1)fail('Invalid '+key);if(!Number.isFinite(m.emission)||m.emission<0||m.emission>5)fail('Invalid emission');if(m.blockId&&!blockIds.has(m.blockId))fail('Unknown block '+m.blockId);}

@@ -44,7 +44,7 @@ test("tools specialize in materials", () => {
     miningWork(B.ORE, 1, GEAR.ironpick) < miningWork(B.ORE, 1, GEAR.axe),
   );
 });
-test("limb loss impairs movement; vital loss kills once; health is independent of food", () => {
+test("limb loss impairs movement; only depleted HP kills once; health is independent of food", () => {
   const w = new World(1),
     eco = new Ecology(w),
     e = eco.spawn(0, 12, 12);
@@ -58,9 +58,13 @@ test("limb loss impairs movement; vital loss kills once; health is independent o
   assert.equal(e.hp, 38);
   assert.equal(e.energy, energy);
   eco.detach(e, 1, 0);
+  assert.equal(e.dead, false);
+  assert.equal(e.hp, 38);
+  assert.ok(e.lost & 2);
+  eco.hurt(e, 200);
   assert.equal(e.dead, true);
   assert.equal(e.hp, 0);
-  assert.equal(e.deathCause, "머리 파괴");
+  assert.equal(e.deathCause, "체력 소진");
   eco.kill(e);
   eco.hurt(e, 200);
   assert.equal(deaths, 1);
@@ -82,8 +86,16 @@ test("legacy animal and inventory saves migrate without losing materials or inju
   assert.ok(i.unlocks.has("hammer"));
 });
 
-test("legacy headless creatures and zero-health creatures cannot remain alive", () => {
-  for (const state of [{ lost: 2 }, { hp: 0 }, { energy: 0 }]) {
+test("legacy head loss preserves positive HP while exhausted health or food still kills", () => {
+  const eco = new Ecology(new World(1)), headless = eco.spawn(0, 12, 12);
+  headless.lost = 2;
+  const hp = headless.hp, energy = headless.energy;
+  eco.think(headless, 0.25);
+  assert.equal(headless.dead, false);
+  assert.equal(headless.hp, hp);
+  assert.ok(headless.lost & 2);
+  assert.ok(headless.energy < energy);
+  for (const state of [{ hp: 0 }, { energy: 0 }]) {
     const eco = new Ecology(new World(1)),
       e = eco.spawn(0, 12, 12);
     Object.assign(e, state);

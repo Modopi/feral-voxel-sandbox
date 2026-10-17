@@ -11,8 +11,8 @@
   },
   "rules": {
     "partHpSharesBody": true,
-    "partDamageAccounting": "실제 피해는 전신HP에1회만 차감하고 부위 누적파손에 같은양을 기록. 부위HP를 추가 생명력으로 더하지 않음.",
-    "energyDamageFormula": "입사 에너지=spentEU*deliveredFraction. 외피의 재질·남은 shellIntegrity가 흡수할 수 있는 EU를 먼저 차감하여 외피파손에 반영. 잔여EU*damageYieldHpPerEU를 neutralTargetHp로 제한하고 표적반응/방어를 각각 한 번 적용해 bodyHpDamage를 계산. 전신HP와 내부부위 누적에는 bodyHpDamage만 1회 기록. 한 시전이 닿은 여러 외피/부위의 총 EU 지출은 spentEU를 초과하지 않는다.",
+    "partDamageAccounting": "전체 HP가 전투 사망 기준이다. 외피·내부의 유효 타격을 방어 반응 후 전신HP에 한 번 차감하며 같은 공격 예산을 부위별 누적파손에 분배한다. core·중추 파손은 행동/기술 변화이며 HP를 강제로0으로 만들지 않는다.",
+    "energyDamageFormula": "입사 에너지=spentEU*deliveredFraction. 입사EU*damageYieldHpPerEU를 neutralTargetHp로 제한하고 표적반응/장비방어를 각각 한 번 적용해 전체HP피해를 계산한다. 외피에 침착된 에너지도 유효한 신체 타격이며 shellIntegrity를 먼저 전부 소진해야HP피해가 생기는 조건은 없다. 실제형상·재질·깊이에 따라 부위별 침착EU/피해를 분배하되 합계는 한 공격 예산 이하이고 그 부위피해를 전체HP에서 다시 차감하지 않는다.",
     "damageRounding": "계산 내부 소수 유지, HP UI만 반올림.",
     "energyProduction": "모든 기술은 공통 game EU를 사용하되 에너지 채널별로 별도 계정에 기록한다. 정의된 변환 component 이외의 채널 교환은 금지. 고갈시4초노출 재충전행동은 유한sourceCharges를 사용한다. 저장고까지 소진되면 접근/방어만 가능, 공짜 공격 없음.",
     "regenVsEnergy": "칼로리는 HP 회복·생명유지값이다. 이 파일의 EU 저장물과 자동 교환하지 않는다. 유기생명의 무기용 저장물 생산 경로는 생태/가공체계에 연결할 후속 구현 계약.",
@@ -24,8 +24,8 @@
     "tierVariants": "대표tier 외 자동생성은 비활성. 변형제작시 새baseline HP/DPS로 HP와피해를 재산정, 예고시간은줄이지 않음. 공간·기믹·재료보상을 함께 검토한 별도contentVariantId 필요.",
     "safeExitRule": "양쪽출구상시개방. 지면지속위험의전체footprint가z[-3,3]띠와겹치면생성취소(중심점만검사하지않음). 즉발공격도피할경로검사실패시취소. 영구차폐제거와청크이탈로사망보관을없애지않음.",
     "brokenParts": "핵 부위 파손 시 disabledSkillIds를 모든 페이즈 후보에서 제거. fallback도 사거리·쿨다운·EU를 지키며 사용불가하면 접근/재충전. locomotion 파손은 이동속도 저하이며 기능 소멸이 아닌 구조 균열을 뜻함.",
-    "shellVsBody": "shellIntegrity는 외피 복셀 상태이고 bodyHP와 독립. 외피를 깨뜨린 에너지와 신체를 손상시킨 에너지를 구분한다. 외피흡수와 에너지반응배율을 같은 방어계수로 중복 적용하지 않는다. 본초안 baselineEffectiveDPS에는 기준 외피도 포함된 것으로 간주하며 실측때 재보정.",
-    "multiplierStacking": "코어노출1.4와재충전노출1.25는겹칠경우큰값만사용. 에너지반응과장비방어는각각1회. partBreakThreshold는 bodyHpDamage 누적이며 외피피해는포함하지않음."
+    "shellVsBody": "shellIntegrity는 외피 복셀 파손 원장, bodyHP는 생존 원장으로 따로 저장한다. bodyHpIndependent=true는 외피를 모두 벗겨야HP가감소한다는 뜻이 아니다. 외피 유효타격도 방어 반응 후 전체HP를 감소시킨다. 외피 침착분을HP에서제외하거나외피·부위피해를추가HP피해로중복더하지않는다. baselineEffectiveDPS는이최신규칙에따라실측재검증한다.",
+    "multiplierStacking": "코어노출1.4와재충전노출1.25는겹칠경우큰값만사용. 에너지반응과장비방어는각각1회. partBreakThreshold는같은공격의유효전체HP피해를맞은부위별로분배한누적값이며전신HP를추가차감하지않는다. 외피만때려도HP0으로처치가능하며기관파손자체는즉사조건이아니다."
   },
   "entries": [
     {
@@ -61,7 +61,7 @@
           "storage": "voxelShellIntegrity",
           "bodyHpIndependent": true,
           "baselineCoverageFraction": 0.35,
-          "construction": "각 보스 외피의 실체 복셀과 재질로 확정할 구현 계약. 입사EU 중 흡수분은 외피에만 기록, 침투분만 몸체HP에 전달. 외피 자동재생 없음."
+          "construction": "실제 외피 복셀과 재질의 파손 상태는 별도 저장한다. 외피 유효 타격도 에너지 방어 반응 후 전체HP에 한 번 반영한다. 외피를 전부 제거하는 선행 조건이나 core 파손 즉사는 없다. 부위별 전달은 실제 형상·깊이·재질과 단일 공격 예산을 따른다. 외피 자동재생 없음."
         }
       },
       "baselineRef": "gear_baseline_t2",
@@ -565,7 +565,7 @@
           "storage": "voxelShellIntegrity",
           "bodyHpIndependent": true,
           "baselineCoverageFraction": 0.35,
-          "construction": "각 보스 외피의 실체 복셀과 재질로 확정할 구현 계약. 입사EU 중 흡수분은 외피에만 기록, 침투분만 몸체HP에 전달. 외피 자동재생 없음."
+          "construction": "실제 외피 복셀과 재질의 파손 상태는 별도 저장한다. 외피 유효 타격도 에너지 방어 반응 후 전체HP에 한 번 반영한다. 외피를 전부 제거하는 선행 조건이나 core 파손 즉사는 없다. 부위별 전달은 실제 형상·깊이·재질과 단일 공격 예산을 따른다. 외피 자동재생 없음."
         }
       },
       "baselineRef": "gear_baseline_t3",
@@ -1072,7 +1072,7 @@
           "storage": "voxelShellIntegrity",
           "bodyHpIndependent": true,
           "baselineCoverageFraction": 0.35,
-          "construction": "각 보스 외피의 실체 복셀과 재질로 확정할 구현 계약. 입사EU 중 흡수분은 외피에만 기록, 침투분만 몸체HP에 전달. 외피 자동재생 없음."
+          "construction": "실제 외피 복셀과 재질의 파손 상태는 별도 저장한다. 외피 유효 타격도 에너지 방어 반응 후 전체HP에 한 번 반영한다. 외피를 전부 제거하는 선행 조건이나 core 파손 즉사는 없다. 부위별 전달은 실제 형상·깊이·재질과 단일 공격 예산을 따른다. 외피 자동재생 없음."
         }
       },
       "baselineRef": "gear_baseline_t4",
@@ -1605,7 +1605,7 @@
           "storage": "voxelShellIntegrity",
           "bodyHpIndependent": true,
           "baselineCoverageFraction": 0.35,
-          "construction": "각 보스 외피의 실체 복셀과 재질로 확정할 구현 계약. 입사EU 중 흡수분은 외피에만 기록, 침투분만 몸체HP에 전달. 외피 자동재생 없음."
+          "construction": "실제 외피 복셀과 재질의 파손 상태는 별도 저장한다. 외피 유효 타격도 에너지 방어 반응 후 전체HP에 한 번 반영한다. 외피를 전부 제거하는 선행 조건이나 core 파손 즉사는 없다. 부위별 전달은 실제 형상·깊이·재질과 단일 공격 예산을 따른다. 외피 자동재생 없음."
         }
       },
       "baselineRef": "gear_baseline_t5",
@@ -2115,7 +2115,7 @@
           "storage": "voxelShellIntegrity",
           "bodyHpIndependent": true,
           "baselineCoverageFraction": 0.35,
-          "construction": "각 보스 외피의 실체 복셀과 재질로 확정할 구현 계약. 입사EU 중 흡수분은 외피에만 기록, 침투분만 몸체HP에 전달. 외피 자동재생 없음."
+          "construction": "실제 외피 복셀과 재질의 파손 상태는 별도 저장한다. 외피 유효 타격도 에너지 방어 반응 후 전체HP에 한 번 반영한다. 외피를 전부 제거하는 선행 조건이나 core 파손 즉사는 없다. 부위별 전달은 실제 형상·깊이·재질과 단일 공격 예산을 따른다. 외피 자동재생 없음."
         }
       },
       "baselineRef": "gear_baseline_t5",
@@ -2639,7 +2639,7 @@
           "storage": "voxelShellIntegrity",
           "bodyHpIndependent": true,
           "baselineCoverageFraction": 0.35,
-          "construction": "각 보스 외피의 실체 복셀과 재질로 확정할 구현 계약. 입사EU 중 흡수분은 외피에만 기록, 침투분만 몸체HP에 전달. 외피 자동재생 없음."
+          "construction": "실제 외피 복셀과 재질의 파손 상태는 별도 저장한다. 외피 유효 타격도 에너지 방어 반응 후 전체HP에 한 번 반영한다. 외피를 전부 제거하는 선행 조건이나 core 파손 즉사는 없다. 부위별 전달은 실제 형상·깊이·재질과 단일 공격 예산을 따른다. 외피 자동재생 없음."
         }
       },
       "baselineRef": "gear_baseline_t6",
@@ -3176,7 +3176,7 @@
           "storage": "voxelShellIntegrity",
           "bodyHpIndependent": true,
           "baselineCoverageFraction": 0.35,
-          "construction": "각 보스 외피의 실체 복셀과 재질로 확정할 구현 계약. 입사EU 중 흡수분은 외피에만 기록, 침투분만 몸체HP에 전달. 외피 자동재생 없음."
+          "construction": "실제 외피 복셀과 재질의 파손 상태는 별도 저장한다. 외피 유효 타격도 에너지 방어 반응 후 전체HP에 한 번 반영한다. 외피를 전부 제거하는 선행 조건이나 core 파손 즉사는 없다. 부위별 전달은 실제 형상·깊이·재질과 단일 공격 예산을 따른다. 외피 자동재생 없음."
         }
       },
       "baselineRef": "gear_baseline_t7",
@@ -3684,7 +3684,7 @@
           "storage": "voxelShellIntegrity",
           "bodyHpIndependent": true,
           "baselineCoverageFraction": 0.35,
-          "construction": "각 보스 외피의 실체 복셀과 재질로 확정할 구현 계약. 입사EU 중 흡수분은 외피에만 기록, 침투분만 몸체HP에 전달. 외피 자동재생 없음."
+          "construction": "실제 외피 복셀과 재질의 파손 상태는 별도 저장한다. 외피 유효 타격도 에너지 방어 반응 후 전체HP에 한 번 반영한다. 외피를 전부 제거하는 선행 조건이나 core 파손 즉사는 없다. 부위별 전달은 실제 형상·깊이·재질과 단일 공격 예산을 따른다. 외피 자동재생 없음."
         }
       },
       "baselineRef": "gear_baseline_t8",
@@ -4177,6 +4177,392 @@
         "rewardKey": "worldId:dungeonInstanceId:bossId:first_defeat",
         "rewardCommit": "격파확정→보상 entitlement 저장→인벤토리 transfer journal commit. 재로드·수령중단 시 동일 key 재처리, 가방 부족 미수령 유지."
       }
+    }
+  ],
+  "variants": [
+    {
+      "id": "sanctuary_warden_t9",
+      "name": "성역 수호자 · 9티어 변형",
+      "baseBossId": "sanctuary_warden",
+      "tier": 9,
+      "schemaVersion": 1,
+      "status": "implemented_proposed_balance",
+      "baselineRef": "gear_baseline_t9",
+      "stats": {
+        "maxHp": 27520
+      },
+      "balanceTarget": {
+        "effectiveSoloDps": 172,
+        "soloTtkS": 160,
+        "machineTtkS": 100,
+        "ttkIncludesRecovery": false,
+        "interpretation": "실측 전 제안 목표. 재배치·성공수리로 길어질 수 있음. 기존 원형 기반 변형이며 신규 보스 종이 아님."
+      },
+      "partThresholds": {
+        "core": 3302,
+        "locomotion": 4954
+      },
+      "repairHp": 2202,
+      "gimmickBreakHp": 516,
+      "skills": {
+        "warden_hammer": {
+          "neutralTargetHp": 166,
+          "energyCostEU": 249,
+          "baselinePlayerHpLost": 89.64,
+          "baselineHpFraction": 0.2801
+        },
+        "warden_ray": {
+          "neutralTargetHp": 178,
+          "energyCostEU": 267,
+          "baselinePlayerHpLost": 96.12,
+          "baselineHpFraction": 0.3004
+        },
+        "warden_seal": {
+          "neutralTargetHp": 159,
+          "energyCostEU": 239,
+          "baselinePlayerHpLost": 85.86,
+          "baselineHpFraction": 0.2683
+        },
+        "warden_sweep": {
+          "neutralTargetHp": 189,
+          "energyCostEU": 284,
+          "baselinePlayerHpLost": 102.06,
+          "baselineHpFraction": 0.3189
+        }
+      },
+      "energyReserves": [
+        {
+          "energyType": "divine",
+          "capacityEU": 2670,
+          "initialEU": 2670,
+          "rechargeEU": 1068
+        },
+        {
+          "energyType": "mechanical",
+          "capacityEU": 2840,
+          "initialEU": 2840,
+          "rechargeEU": 1136
+        }
+      ],
+      "behavior": {
+        "kind": "lateral_guard",
+        "maxDurationS": 1.5,
+        "alternateRepairShrines": true,
+        "triggersByPhase": {
+          "0": [
+            "warden_hammer"
+          ]
+        },
+        "distanceM": 3,
+        "angleStepRad": 0,
+        "reverseOnSkillIds": [
+          "warden_hammer",
+          "warden_ray"
+        ],
+        "gimmickPolicy": "none"
+      },
+      "rewardOverride": {
+        "guaranteed": {
+          "blessed_holy_iron": 3
+        },
+        "divineEnergy": 45,
+        "rolls": 0
+      },
+      "rewardBalanceStatus": "proposed",
+      "assetPolicy": "reuse_base_asset_and_3_phases_4_skills; not a new boss species"
+    },
+    {
+      "id": "sanctuary_warden_t10",
+      "name": "성역 수호자 · 10티어 변형",
+      "baseBossId": "sanctuary_warden",
+      "tier": 10,
+      "schemaVersion": 1,
+      "status": "implemented_proposed_balance",
+      "baselineRef": "gear_baseline_t10",
+      "stats": {
+        "maxHp": 39200
+      },
+      "balanceTarget": {
+        "effectiveSoloDps": 245,
+        "soloTtkS": 160,
+        "machineTtkS": 100,
+        "ttkIncludesRecovery": false,
+        "interpretation": "실측 전 제안 목표. 재배치·성공수리로 길어질 수 있음. 기존 원형 기반 변형이며 신규 보스 종이 아님."
+      },
+      "partThresholds": {
+        "core": 4704,
+        "locomotion": 7056
+      },
+      "repairHp": 3136,
+      "gimmickBreakHp": 735,
+      "skills": {
+        "warden_hammer": {
+          "neutralTargetHp": 213,
+          "energyCostEU": 320,
+          "baselinePlayerHpLost": 106.5,
+          "baselineHpFraction": 0.2803
+        },
+        "warden_ray": {
+          "neutralTargetHp": 229,
+          "energyCostEU": 344,
+          "baselinePlayerHpLost": 114.5,
+          "baselineHpFraction": 0.3013
+        },
+        "warden_seal": {
+          "neutralTargetHp": 205,
+          "energyCostEU": 308,
+          "baselinePlayerHpLost": 102.5,
+          "baselineHpFraction": 0.2697
+        },
+        "warden_sweep": {
+          "neutralTargetHp": 243,
+          "energyCostEU": 365,
+          "baselinePlayerHpLost": 121.5,
+          "baselineHpFraction": 0.3197
+        }
+      },
+      "energyReserves": [
+        {
+          "energyType": "divine",
+          "capacityEU": 3440,
+          "initialEU": 3440,
+          "rechargeEU": 1376
+        },
+        {
+          "energyType": "mechanical",
+          "capacityEU": 3650,
+          "initialEU": 3650,
+          "rechargeEU": 1460
+        }
+      ],
+      "behavior": {
+        "kind": "lateral_guard",
+        "maxDurationS": 1.5,
+        "alternateRepairShrines": true,
+        "triggersByPhase": {
+          "0": [
+            "warden_hammer"
+          ],
+          "2": [
+            "warden_ray"
+          ]
+        },
+        "distanceM": 3,
+        "angleStepRad": 0,
+        "reverseOnSkillIds": [
+          "warden_hammer",
+          "warden_ray"
+        ],
+        "gimmickPolicy": "phase3_requires_live_shrine"
+      },
+      "rewardOverride": {
+        "guaranteed": {
+          "saints_endurance": 3
+        },
+        "divineEnergy": 50,
+        "rolls": 0
+      },
+      "rewardBalanceStatus": "proposed",
+      "assetPolicy": "reuse_base_asset_and_3_phases_4_skills; not a new boss species"
+    },
+    {
+      "id": "observatory_sentinel_t9",
+      "name": "관측탑 무기생명 수호자 · 9티어 변형",
+      "baseBossId": "observatory_sentinel",
+      "tier": 9,
+      "schemaVersion": 1,
+      "status": "implemented_proposed_balance",
+      "baselineRef": "gear_baseline_t9",
+      "stats": {
+        "maxHp": 27520
+      },
+      "balanceTarget": {
+        "effectiveSoloDps": 172,
+        "soloTtkS": 160,
+        "machineTtkS": 100,
+        "ttkIncludesRecovery": false,
+        "interpretation": "실측 전 제안 목표. 재배치·성공수리로 길어질 수 있음. 기존 원형 기반 변형이며 신규 보스 종이 아님."
+      },
+      "partThresholds": {
+        "core": 3302,
+        "locomotion": 4954
+      },
+      "repairHp": 2202,
+      "gimmickBreakHp": 516,
+      "skills": {
+        "sentinel_rail": {
+          "neutralTargetHp": 195,
+          "energyCostEU": 293,
+          "baselinePlayerHpLost": 105.3,
+          "baselineHpFraction": 0.3291
+        },
+        "sentinel_arc": {
+          "neutralTargetHp": 166,
+          "energyCostEU": 249,
+          "baselinePlayerHpLost": 89.64,
+          "baselineHpFraction": 0.2801
+        },
+        "sentinel_ring": {
+          "neutralTargetHp": 190,
+          "energyCostEU": 285,
+          "baselinePlayerHpLost": 102.6,
+          "baselineHpFraction": 0.3206
+        },
+        "sentinel_collapse": {
+          "neutralTargetHp": 214,
+          "energyCostEU": 321,
+          "baselinePlayerHpLost": 115.56,
+          "baselineHpFraction": 0.3611
+        }
+      },
+      "energyReserves": [
+        {
+          "energyType": "electrical",
+          "capacityEU": 2490,
+          "initialEU": 2490,
+          "rechargeEU": 996
+        },
+        {
+          "energyType": "magic",
+          "capacityEU": 3210,
+          "initialEU": 3210,
+          "rechargeEU": 1284
+        },
+        {
+          "energyType": "mechanical",
+          "capacityEU": 2930,
+          "initialEU": 2930,
+          "rechargeEU": 1172
+        }
+      ],
+      "behavior": {
+        "kind": "alternating_orbit",
+        "maxDurationS": 1.5,
+        "alternateRepairShrines": false,
+        "triggersByPhase": {
+          "1": [
+            "sentinel_rail",
+            "sentinel_arc"
+          ]
+        },
+        "distanceM": 0,
+        "angleStepRad": 0.35,
+        "reverseOnSkillIds": [
+          "sentinel_rail"
+        ],
+        "gimmickPolicy": "any_consumed_stops"
+      },
+      "rewardOverride": {
+        "guaranteed": {
+          "superstring_aggregate": 3
+        },
+        "divineEnergy": 45,
+        "rolls": 0
+      },
+      "rewardBalanceStatus": "proposed",
+      "assetPolicy": "reuse_base_asset_and_3_phases_4_skills; not a new boss species"
+    },
+    {
+      "id": "observatory_sentinel_t10",
+      "name": "관측탑 무기생명 수호자 · 10티어 변형",
+      "baseBossId": "observatory_sentinel",
+      "tier": 10,
+      "schemaVersion": 1,
+      "status": "implemented_proposed_balance",
+      "baselineRef": "gear_baseline_t10",
+      "stats": {
+        "maxHp": 39200
+      },
+      "balanceTarget": {
+        "effectiveSoloDps": 245,
+        "soloTtkS": 160,
+        "machineTtkS": 100,
+        "ttkIncludesRecovery": false,
+        "interpretation": "실측 전 제안 목표. 재배치·성공수리로 길어질 수 있음. 기존 원형 기반 변형이며 신규 보스 종이 아님."
+      },
+      "partThresholds": {
+        "core": 4704,
+        "locomotion": 7056
+      },
+      "repairHp": 3136,
+      "gimmickBreakHp": 735,
+      "skills": {
+        "sentinel_rail": {
+          "neutralTargetHp": 250,
+          "energyCostEU": 375,
+          "baselinePlayerHpLost": 125.0,
+          "baselineHpFraction": 0.3289
+        },
+        "sentinel_arc": {
+          "neutralTargetHp": 213,
+          "energyCostEU": 320,
+          "baselinePlayerHpLost": 106.5,
+          "baselineHpFraction": 0.2803
+        },
+        "sentinel_ring": {
+          "neutralTargetHp": 244,
+          "energyCostEU": 366,
+          "baselinePlayerHpLost": 122.0,
+          "baselineHpFraction": 0.3211
+        },
+        "sentinel_collapse": {
+          "neutralTargetHp": 274,
+          "energyCostEU": 411,
+          "baselinePlayerHpLost": 137.0,
+          "baselineHpFraction": 0.3605
+        }
+      },
+      "energyReserves": [
+        {
+          "energyType": "electrical",
+          "capacityEU": 3200,
+          "initialEU": 3200,
+          "rechargeEU": 1280
+        },
+        {
+          "energyType": "magic",
+          "capacityEU": 4110,
+          "initialEU": 4110,
+          "rechargeEU": 1644
+        },
+        {
+          "energyType": "mechanical",
+          "capacityEU": 3750,
+          "initialEU": 3750,
+          "rechargeEU": 1500
+        }
+      ],
+      "behavior": {
+        "kind": "alternating_orbit",
+        "maxDurationS": 1.5,
+        "alternateRepairShrines": false,
+        "triggersByPhase": {
+          "1": [
+            "sentinel_rail",
+            "sentinel_arc"
+          ],
+          "2": [
+            "sentinel_rail",
+            "sentinel_arc"
+          ]
+        },
+        "distanceM": 0,
+        "angleStepRad": 0.35,
+        "reverseOnSkillIds": [
+          "sentinel_rail",
+          "sentinel_arc"
+        ],
+        "gimmickPolicy": "directional_anchors"
+      },
+      "rewardOverride": {
+        "guaranteed": {
+          "cosmic_megastructure": 3
+        },
+        "divineEnergy": 50,
+        "rolls": 0
+      },
+      "rewardBalanceStatus": "proposed",
+      "assetPolicy": "reuse_base_asset_and_3_phases_4_skills; not a new boss species"
     }
   ]
 }

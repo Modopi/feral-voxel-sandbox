@@ -1,0 +1,28 @@
+{"step":"fresh-world","time":4.516666666666656,"inventory":{},"player":{"x":0,"y":4.007988474819103,"z":0}}
+{"step":"empty-bag","time":5.266666666666653,"inventory":{},"player":{"x":0,"y":4.007988474819103,"z":0}}
+{"harvest":"source_raw_timber","node":"harvest:0,0:fallen_branch:3","inventory":{"raw_timber":1}}
+{"harvest":"source_loose_stone","node":"harvest:0,0:loose_stone:2","inventory":{"raw_timber":1,"loose_stone":1}}
+{"step":"research-observation","time":37.93333333333246,"inventory":{},"player":{"x":5.603708270937204,"y":4.007562218415205,"z":16.624135930091143}}
+{"harvest":"source_raw_timber","node":"starter:fallen_branch:4","inventory":{"berry":2}}
+{"harvest":"source_raw_timber","node":"starter:fallen_branch:4","inventory":{"berry":2,"raw_timber":1}}
+{"harvest":"source_raw_timber","node":"starter:fallen_branch:2","inventory":{"berry":2,"raw_timber":2}}
+{"harvest":"source_plant_fiber","node":"starter:fiber_patch:1","inventory":{"berry":2,"raw_timber":2,"plant_fiber":2}}
+{"step":"research-joinery","time":89.6499999999962,"inventory":{"berry":2,"plant_fiber":1},"player":{"x":16.248673966154456,"y":4.007953309610733,"z":9.919777068519036}}
+{"harvest":"source_raw_timber","node":"starter:fallen_branch:2","inventory":{"berry":2,"plant_fiber":1,"raw_timber":1}}
+{"harvest":"source_raw_timber","node":"harvest:0,0:fallen_branch:1","inventory":{"berry":2,"plant_fiber":1,"raw_timber":2}}
+{"harvest":"source_raw_timber","node":"starter:fallen_branch:6","inventory":{"berry":2,"plant_fiber":1,"raw_timber":3}}
+{"harvest":"source_raw_timber","node":"starter:fallen_branch:5","inventory":{"berry":2,"plant_fiber":1,"raw_timber":4}}
+{"harvest":"source_loose_stone","node":"starter:loose_stone:0","inventory":{"berry":2,"plant_fiber":1,"raw_timber":4,"loose_stone":1}}
+{"harvest":"source_loose_stone","node":"harvest:0,0:loose_stone:5","inventory":{"berry":2,"plant_fiber":1,"raw_timber":4,"loose_stone":2}}
+{"harvest":"source_plant_fiber","node":"harvest:0,0:fiber_patch:1","inventory":{"berry":2,"plant_fiber":3,"raw_timber":4,"loose_stone":2}}
+{"step":"craft-field_bench","time":214.73333333339636,"inventory":{"berry":2,"plant_fiber":1,"field_bench":1},"player":{"x":3.976039228029549,"y":4.007705719937511,"z":16.23960004139226}}
+{"step":"placed-field-bench","time":217.75000000006543,"inventory":{"berry":2,"plant_fiber":1},"player":{"x":3.976039228029549,"y":4.007705719937511,"z":16.23960004139226}}
+{"harvest":"source_raw_timber","node":"harvest:0,-1:fallen_branch:1","inventory":{"berry":2,"plant_fiber":1,"raw_timber":1}}
+{"step":"research-material-wood","time":262.86666666675626,"inventory":{"berry":2,"plant_fiber":1},"player":{"x":6.8163121389225125,"y":4.007913050074584,"z":11.85276907074731}}
+{"harvest":"source_raw_timber","node":"starter:fallen_branch:7","inventory":{"berry":2,"plant_fiber":1,"raw_timber":1}}
+{"harvest":"source_raw_timber","node":"harvest:0,0:fallen_branch:2","inventory":{"berry":2,"plant_fiber":1,"raw_timber":2}}
+Error: Movement timed out: harvest:1,0:fallen_branch:3
+    at moveTo (file:///workspace/feral-voxel-sandbox/tools/verify-expedition-browser.mjs:24:9)
+    at async gather (file:///workspace/feral-voxel-sandbox/tools/verify-expedition-browser.mjs:31:59)
+    at async file:///workspace/feral-voxel-sandbox/tools/verify-expedition-browser.mjs:49:81
+{"step":"blocked","time":319.45000000003813,"inventory":{"berry":2,"plant_fiber":1,"raw_timber":2},"player":{"x":60.713837135496554,"y":5.0079976257071355,"z":36.721884282058724}}

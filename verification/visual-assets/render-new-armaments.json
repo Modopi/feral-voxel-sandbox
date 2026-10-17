@@ -1,0 +1,39 @@
+{
+  "ok": true,
+  "renderer": "Three.js / headless Chromium",
+  "size": [
+    1200,
+    900
+  ],
+  "errors": [],
+  "reports": [
+    {
+      "id": "arc_thrower",
+      "mode": "full",
+      "boxes": 17,
+      "modelSha256": "2585eed8affba379d168181702419277949a710b421f9ab89d5830e1a17ee7a1",
+      "glbSha256": "ca2b877aa0156ecfbf7cb1f9a155e612e22621e430587d3b920b485c25534690"
+    },
+    {
+      "id": "weapon_slash",
+      "mode": "full",
+      "boxes": 9,
+      "modelSha256": "e5872920e6b759990124fa998d8026655bfc0934b650a066bdc0626ae584698e",
+      "glbSha256": "3a285c0f49d86362bb520c40fda01f8119495ef2ddfeccb4fa6c779fc715f849"
+    },
+    {
+      "id": "weapon_pierce",
+      "mode": "full",
+      "boxes": 10,
+      "modelSha256": "4e6007d5b316b8d444d07024e4535b2dacc5012e333f03d128e90ea44a073acd",
+      "glbSha256": "192b8cf307963213fc4091a90b64ee42792ca57d2e1092a53e3ca987934b7bf1"
+    },
+    {
+      "id": "weapon_blunt",
+      "mode": "full",
+      "boxes": 9,
+      "modelSha256": "93af2d0bdb5fb432c64b06127da864b44dec03da99518022ee029fc758f85c16",
+      "glbSha256": "0f159c881d9c25a653e4ffd621bb50e2d53932c841d19ae4716f6fe3c3d40044"
+    }
+  ]
+}

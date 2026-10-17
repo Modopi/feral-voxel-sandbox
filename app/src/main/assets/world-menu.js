@@ -38,7 +38,7 @@ function draw() {
     glyph.innerHTML = worldArt(w.type);
     glyph.setAttribute("aria-hidden", "true");
     name.textContent = w.name;
-    desc.textContent = `${w.type === "frontier" ? "첫 신호 · 야영지 성장 / 신호망 복원 / 자유 원정" : w.type === "machine" ? "BETA · 기계 조립 시험장" : "기본 · 복셀 섬 / 시드 " + w.seed} · ${localStorage.getItem(saveKey(w)) ? "저장 있음" : "새 월드"}`;
+    desc.textContent = `${w.type === "expedition" ? "FERAL 탐험 · 연구 / 던전 / 자유 제작" : w.type === "frontier" ? "첫 신호 · 야영지 성장 / 신호망 복원 / 자유 원정" : w.type === "machine" ? "BETA · 기계 조립 시험장" : "기본 · 복셀 섬 / 시드 " + w.seed} · ${localStorage.getItem(saveKey(w)) || localStorage.getItem(saveKey(w) + '.a') || localStorage.getItem(saveKey(w) + '.b') ? "저장 있음" : "새 월드"}`;
     info.append(name, desc);
     row.append(glyph, info);
     for (const [text, fn] of [

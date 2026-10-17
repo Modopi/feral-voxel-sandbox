@@ -225,7 +225,7 @@ export const RECIPES = [
       name: g.name,
       description:
         g.slot === "weapon"
-          ? `피해 ${g.damage} · 사거리 ${g.range}m · ${g.cooldown}초 · 내구 ${g.durability}${g.ammo ? " · 화살 필요" : ""}`
+          ? `피해 ${g.damage} · ${g.attackMode === "pierce" ? "내부 관통" : g.attackMode === "impact" ? "충격 전달" : "일반 타격"} · 사거리 ${g.range}m · ${g.cooldown}초 · 내구 ${g.durability}${g.ammo ? " · 화살 필요" : ""}`
           : `${g.affinity === "rock" ? "돌·광석" : g.affinity === "wood" ? "나무" : "흙·모래"} 채굴 ${g.power}배 · 내구 ${g.durability}`,
       cost: g.cost,
       unlock: id,

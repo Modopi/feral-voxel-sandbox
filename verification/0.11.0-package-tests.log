@@ -1,0 +1,20 @@
+✔ root manor opens only through powered gate travel; range, pose, collision and destructive bypass persist (9.36987ms)
+✔ 60 Hz gate operation snaps to the clearance threshold without a floating-point stall (5.666389ms)
+✔ fixture supply checks a real local output store and drains finite EU into device reserve (7.885057ms)
+✔ floodworks pump conserves its separate 400L circuit and samples exactly the 4m² pool (4.94688ms)
+✔ 60 Hz flood pumping reaches the exact 0.05 m safe-depth threshold (5.988016ms)
+✔ foundry exhausts a finite heat source but has enough finite coolant to reach the safe band (1.975881ms)
+✔ inertia brake integrates power, speed and position; platform hazard requires feet at its top (1.975373ms)
+✔ damage hides persistent vane, altar and platform parts without completing or respawning them (10.661742ms)
+✔ non-axis-aligned vane uses disjoint SDK-filled boxes and changes its physical pose (1.78638ms)
+✔ breaking the moving platform removes its support without clearing momentum (0.603503ms)
+✔ destroying a platform lock support releases residual motion without free braking (0.811507ms)
+✔ actual release bundle matches the pinned Android verification key and payload (2511.894443ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2617.869332
