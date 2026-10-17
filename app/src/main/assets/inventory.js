@@ -3,6 +3,8 @@ import { GEAR } from "./equipment.js";
 import { B, clamp } from "./world.js";
 import { solidAt } from "./physics.js";
 export const ITEMS = {
+  stew: { name: "야채 스튜", color: 0xd09d65, frontier: true },
+  tonic: { name: "약초 강장제", color: 0x80b3aa, frontier: true },
   berry: { name: "들열매", color: 0xb45765, frontier: true },
   herb: { name: "은잎 약초", color: 0xa5c9ab, frontier: true },
   scrap: { name: "옛 기계 고철", color: 0x9f8e76, frontier: true },
@@ -52,6 +54,30 @@ export const SLOT_COUNT = 36,
   STACK_LIMIT = 64;
 export const stackLimit = (id) => ITEMS[id]?.limit || STACK_LIMIT;
 export const RECIPES = [
+  {
+    id: "stew",
+    name: "야채 스튜",
+    description: "포만 50·체력 20 회복 · 180초간 받는 피해 10% 감소",
+    cost: { berry: 3, herb: 1, wood: 1 },
+    give: { stew: 1 },
+    frontier: true,
+  },
+  {
+    id: "tonic",
+    name: "약초 강장제",
+    description: "60초간 초당 체력 0.8 회복",
+    cost: { herb: 3, crystal: 1 },
+    give: { tonic: 1 },
+    frontier: true,
+  },
+  {
+    id: "plant_resin",
+    name: "식물 수지 × 2",
+    description: "나무와 약초로 접착제 추출 · 사냥 없는 기계 제작",
+    cost: { wood: 2, herb: 2 },
+    give: { resin: 2 },
+    frontier: true,
+  },
   {
     id: "compost",
     name: "식물 퇴비 흙 × 4",

@@ -1,0 +1,83 @@
+touch campaign: onboarding, five layouts and survey passed
+{
+  "layouts": [
+    {
+      "width": 900,
+      "height": 412,
+      "exposedButtons": 16
+    },
+    {
+      "width": 640,
+      "height": 360,
+      "exposedButtons": 16
+    },
+    {
+      "width": 360,
+      "height": 640,
+      "exposedButtons": 16
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "exposedButtons": 16
+    },
+    {
+      "width": 1280,
+      "height": 720,
+      "exposedButtons": 16
+    }
+  ],
+  "onboarding": {
+    "gathers": 3,
+    "constructedGarden": true,
+    "plantedAndHarvested": true,
+    "craftedStew": true,
+    "saveReload": true
+  },
+  "sorties": {
+    "survey": true,
+    "hunt": true
+  },
+  "graphics": [
+    {
+      "quality": "low",
+      "drawCalls": 178,
+      "triangles": 33758,
+      "nearVoxels": 222,
+      "farParts": 316,
+      "visibleEntities": 36,
+      "medianFrameMs": 299.8999999999942,
+      "p95FrameMs": 416.6000000000058,
+      "geometries": 98,
+      "textures": 3,
+      "shadow": false
+    },
+    {
+      "quality": "balanced",
+      "drawCalls": 178,
+      "triangles": 46418,
+      "nearVoxels": 222,
+      "farParts": 771,
+      "visibleEntities": 87,
+      "medianFrameMs": 350,
+      "p95FrameMs": 666.6999999999825,
+      "geometries": 99,
+      "textures": 3,
+      "shadow": true
+    },
+    {
+      "quality": "high",
+      "drawCalls": 182,
+      "triangles": 51986,
+      "nearVoxels": 276,
+      "farParts": 1016,
+      "visibleEntities": 115,
+      "medianFrameMs": 416.6000000000058,
+      "p95FrameMs": 566.7000000000116,
+      "geometries": 99,
+      "textures": 3,
+      "shadow": true
+    }
+  ],
+  "errors": []
+}

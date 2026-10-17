@@ -1,0 +1,36 @@
+{
+  "walk": {
+    "distance": 4.997607215607594,
+    "knowledge": 2,
+    "x": 69.68309283366716,
+    "y": 16,
+    "z": 72.21628873862038
+  },
+  "combat": {
+    "hits": 8,
+    "defeated": true,
+    "relic": 1,
+    "hp": 0
+  },
+  "flight": 7.426682785228865,
+  "restored": {
+    "block": 3,
+    "damage": 0.3,
+    "boss": true,
+    "machine": 10,
+    "allies": 1,
+    "food": 2
+  },
+  "failure": {
+    "moved": false,
+    "key": "0,0",
+    "food": true,
+    "storage": true
+  },
+  "viewports": [
+    900,
+    412,
+    360
+  ],
+  "errors": []
+}

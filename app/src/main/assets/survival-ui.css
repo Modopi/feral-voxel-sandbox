@@ -54,6 +54,14 @@ body.leftHand #hud #target {left:auto;right:16px;}
 .recipeTile {height:48px;min-width:0;padding:4px;background:#8b8b8b;border:2px solid;border-color:#555 #fff #fff #555;border-radius:0;}
 .recipeTile.unavailable {background:#a49c9c;}
 .recipeTile.selected {outline:2px solid #5c844a;outline-offset:-2px;background:#b4bfa5;}
+.recipeSearch {display:flex;gap:4px;margin-bottom:6px;flex:none;}
+#recipeSearch {width:100%;min-width:0;height:44px;padding:5px 7px;border:2px solid var(--ui-hi,#777);border-radius:0;background:var(--ui-inset,#333);color:var(--ui-ink,#eee);font-size:12px;user-select:text;touch-action:manipulation;}
+#recipeSearch::placeholder {color:var(--ui-muted,#ccc);}
+#pauseScreen.inventoryMode #craftableOnly {min-width:44px;min-height:44px;border:2px solid var(--ui-hi,#777);border-radius:0;background:var(--ui-button,#555);color:var(--ui-ink,#eee);touch-action:pan-y;}
+#pauseScreen.inventoryMode #craftableOnly[aria-pressed=true],.recipeFilters button[aria-pressed=true] {outline:2px solid var(--ui-gold,#c5b477);outline-offset:-3px;}
+#pauseScreen .recipeTile {height:64px;position:relative;padding-bottom:18px;}
+.recipeTile small {position:absolute;bottom:2px;left:2px;right:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;color:var(--ui-ink,#eee);text-shadow:1px 1px #20291e;}
+.recipeEmpty {grid-column:1/-1;font-size:11px;color:var(--ui-muted,#ccc);line-height:1.6;}
 .researchIcon {font-size:25px;color:#edcb62;}
 .inventoryBody {min-width:0;min-height:0;overflow-x:hidden;overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;padding:0 4px 6px 0;scrollbar-gutter:stable;}
 .inventoryTop {display:grid;grid-template-columns:110px 1fr;gap:14px;min-height:136px;}
@@ -118,7 +126,7 @@ body.leftHand #hud #target {left:auto;right:16px;}
   #bossHUD {left:12px;right:auto;top:186px;max-width:135px;width:135px;font-size:11px;}
   #pauseScreen.inventoryMode {padding:6px;}
   #pauseScreen.inventoryMode [data-panel=bag] {padding:0 8px 8px;}
-  .survivalInventory {grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(156px,34%) minmax(0,1fr);gap:8px;}
+  .survivalInventory {grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(206px,38%) minmax(0,1fr);gap:8px;}
   .recipeBook {border:0;border-bottom:2px solid #999;padding:0 0 6px;}
   .recipeFilters {margin-bottom:4px;}
   .recipeTile {height:44px;}

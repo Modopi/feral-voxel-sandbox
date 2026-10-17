@@ -1,0 +1,1 @@
+SURVIVAL_UI_OK [{"width":900,"height":412,"targetClear":true,"panelsClear":true,"controlsClear":true,"within":true,"slots":9},{"width":412,"height":900,"targetClear":true,"panelsClear":true,"controlsClear":true,"within":true,"slots":9},{"width":360,"height":640,"targetClear":true,"panelsClear":true,"controlsClear":true,"within":true,"slots":9}]

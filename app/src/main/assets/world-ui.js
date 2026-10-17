@@ -34,7 +34,7 @@ export class WorldUI {
       mesh.visible = false;
       this.root.add(mesh);
       const line = new T.Line(new T.BufferGeometry().setFromPoints([new T.Vector3(), new T.Vector3()]),
-        new T.LineBasicMaterial({ color: 0xc3e2c9, transparent: true, opacity: 0.65, depthTest: false, depthWrite: false, fog: false }));
+        new T.LineBasicMaterial({ color: 0xc3e2c9, transparent: true, opacity: 0.65, depthTest: false, depthWrite: false, fog: false, toneMapped: false }));
       line.visible = false;
       this.root.add(line);
       this.labels.set(id, { mesh, line, canvas, texture, signature: "", data: null });

@@ -1,0 +1,36 @@
+{
+  "scene": "completed camp visual fixture; gameplay completion separately verified",
+  "qualities": [
+    {
+      "quality": "low",
+      "shadow": false,
+      "shadowSize": 1024,
+      "drawCalls": 193,
+      "triangles": 42994,
+      "nearVoxels": 276,
+      "farParts": 370,
+      "visibleEntities": 41
+    },
+    {
+      "quality": "balanced",
+      "shadow": true,
+      "shadowSize": 1024,
+      "drawCalls": 193,
+      "triangles": 48014,
+      "nearVoxels": 330,
+      "farParts": 800,
+      "visibleEntities": 90
+    },
+    {
+      "quality": "high",
+      "shadow": true,
+      "shadowSize": 2048,
+      "drawCalls": 193,
+      "triangles": 53186,
+      "nearVoxels": 330,
+      "farParts": 1079,
+      "visibleEntities": 121
+    }
+  ],
+  "errors": []
+}

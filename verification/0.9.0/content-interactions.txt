@@ -1,0 +1,12 @@
+{
+  partialDamage: 0.25,
+  aimInterruptionAndReload: true,
+  resources: 4,
+  exposedNpcContract: true,
+  wallOcclusion: true,
+  relays: 3,
+  ruinRewardOnce: true,
+  animalObserveFeedHeal: true,
+  contentSaveReload: true,
+  errors: []
+}

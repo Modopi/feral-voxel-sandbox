@@ -3,13 +3,66 @@ const cache = new Map();
 // Original vector sprites: crisp voxel blocks and pixel tools, no external texture assets.
 export function itemArt(id) {
   if (cache.has(id)) return cache.get(id);
-  const item = ITEMS[id];
+  const research = [
+    "engineering",
+    "aviation",
+    "ballistics",
+    "armor",
+    "blade",
+    "rover",
+    "hammer",
+    "pulse",
+  ];
+  const item =
+    ITEMS[id] ||
+    (research.includes(id) ? { color: 0xc9b77f, research: true } : null);
   if (!item) return "";
   const color = "#" + item.color.toString(16).padStart(6, "0");
   let body = "";
   const rect = (x, y, w, h, c) =>
     `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`;
-  if (["wing", "elevator"].includes(item.machinePart)) {
+  if (item.research) {
+    body =
+      rect(6, 4, 20, 25, "#c8c5a5") +
+      rect(8, 6, 16, 21, "#536d6b") +
+      rect(10, 10, 12, 2, "#b7cebb") +
+      rect(10, 15, 9, 2, "#b7cebb") +
+      rect(10, 20, 12, 2, "#b7cebb") +
+      rect(4, 7, 3, 19, "#9e875e");
+  } else if (id === "berry") {
+    body =
+      rect(7, 12, 9, 10, "#a24d65") +
+      rect(17, 15, 9, 10, "#c76977") +
+      rect(12, 7, 9, 10, "#b35770") +
+      rect(9, 12, 3, 3, "#e39b9c") +
+      rect(14, 4, 3, 7, "#789258") +
+      rect(17, 3, 8, 4, "#a0b579");
+  } else if (id === "herb") {
+    body =
+      rect(14, 8, 3, 22, "#759464") +
+      rect(5, 13, 10, 5, "#b3d2a9") +
+      rect(17, 7, 10, 5, "#88b59a") +
+      rect(16, 20, 10, 4, "#96b397") +
+      rect(10, 4, 9, 5, "#e2ddbb");
+  } else if (id === "scrap") {
+    body =
+      rect(4, 10, 24, 5, "#9b8263") +
+      rect(8, 6, 6, 20, "#8eaaac") +
+      rect(18, 15, 8, 10, "#6e898b") +
+      rect(10, 9, 2, 11, "#d4ded1") +
+      rect(20, 18, 3, 3, "#223d40");
+  } else if (id === "knowledge") {
+    body =
+      rect(7, 4, 20, 25, "#d5c9a3") +
+      rect(4, 6, 4, 23, "#7c9d96") +
+      rect(10, 9, 12, 2, "#607b76") +
+      rect(10, 14, 8, 2, "#607b76") +
+      rect(10, 19, 11, 2, "#607b76") +
+      rect(19, 23, 5, 3, "#b69754");
+  } else if (id === "relic") {
+    body =
+      '<path d="m16 2 12 9v13l-12 7-12-7V11Z" fill="#a18758"/><path d="m16 7 7 6v9l-7 4-7-4v-9Z" fill="#385d5e"/><path d="m16 10 4 6-4 7-4-7Z" fill="#92e6cf"/>';
+  } else if (["wing", "elevator"].includes(item.machinePart)) {
     body = `<path d="M2 15L23 5 30 13 8 24Z" fill="${color}"/><path d="M2 15L8 24 30 13V17L8 28 2 19Z" fill="#647971"/><path d="M5 15L25 7" stroke="#455c53" stroke-width="2"/>`;
   } else if (item.machinePart === "rudder") {
     body = `<path d="M9 27V8L21 2 25 23Z" fill="${color}"/><path d="M9 16L23 10" stroke="#455c53" stroke-width="3"/>`;
@@ -108,6 +161,13 @@ export function itemArt(id) {
       rect(5, 10, 22, 14, "#9a4e4b") +
       rect(8, 7, 16, 14, "#d58a7f") +
       rect(10, 12, 9, 5, "#f4d4b3");
+  else if (id === "stew")
+    body =
+      rect(5, 15, 22, 9, "#977657") +
+      rect(8, 24, 16, 3, "#664c38") +
+      rect(5, 12, 22, 5, "#d5b562") +
+      rect(10, 11, 4, 4, "#7eac62") +
+      rect(18, 13, 4, 3, "#bb6161");
   else if (id === "food")
     body =
       rect(4, 12, 24, 13, "#9c652f") +
@@ -115,7 +175,7 @@ export function itemArt(id) {
       rect(10, 6, 12, 6, "#edc677") +
       rect(9, 11, 2, 8, "#b4833b") +
       rect(18, 10, 2, 8, "#b4833b");
-  else if (id === "medicine")
+  else if (id === "medicine" || id === "tonic")
     body =
       rect(11, 3, 10, 5, "#ad8954") +
       rect(9, 8, 14, 20, "#98c6bd") +

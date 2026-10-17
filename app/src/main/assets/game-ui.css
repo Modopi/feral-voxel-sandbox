@@ -40,6 +40,25 @@
 #frontierContent {width:100%;min-width:0;min-height:0;overflow:auto;overscroll-behavior:contain;padding:12px 16px;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:#7e8574 #b9beb0;}
 #frontierPanel #frontierFeedback {position:static;grid-column:1/-1;margin:0;padding:5px 12px;background:#adb5a1;border-top:2px solid #999f8e;color:#343c29!important;font-size:11px;line-height:16px;min-height:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 #frontierFeedback:empty::before {content:"탐험 일시정지";color:#56614a;}
+#hud #journeyHUD {position:absolute;left:20px;top:92px;width:min(245px,37vw);min-height:44px;padding:5px 8px;text-align:left;border:0;border-left:3px solid #c9b77b;background:#13241ec9;color:#f0eed9;pointer-events:auto;touch-action:manipulation;text-shadow:1px 1px #15231a;}
+#journeyHUD b,#journeyHUD small {display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+#journeyHUD b {font-size:12px;}#journeyHUD small {font-size:10px;margin-top:4px;color:#c5d6be;}
+#journeyHUD.ready {border-color:#b4e67f;}#journeyHUD.ready small {color:#d5efa9;}
+#frontierPanel .journeySection {padding:8px 0 18px;border-bottom:2px solid #939f85;margin-bottom:12px;}
+#frontierPanel .journeySection button {min-height:44px;touch-action:pan-y;margin:6px 6px 4px 0;max-width:100%;}
+.signalNetwork {display:flex;align-items:stretch;gap:4px;margin:14px 0;background:linear-gradient(transparent 45%,#65735d 45%,#65735d 52%,transparent 52%);}
+.signalNetwork span {flex:1;min-width:0;text-align:center;white-space:pre-line;padding:10px 3px;background:#a3ac98;border:2px solid #77866b;color:#46513c;font-size:10px;line-height:1.8;}
+.signalNetwork .lit {background:#d4dfb4;border-color:#708744;color:#374e27;}
+.journeyStep,.projectRow,.signalRoute,.sortieRow {border-left:3px solid #89987a;padding:9px 12px;margin:10px 0;}
+.journeyStep.completed {border-color:#718a48;color:#566448;}.journeyStep.completed p {display:none;}
+.journeySection strong {font-size:13px;}.journeySection small {display:block;font-size:11px;color:#4d5b41;line-height:1.6;}
+.cropRow {border-top:1px solid #a4ad96;margin-top:10px;padding-top:8px;}.cropRow>span {display:block;font-size:12px;}
+.journeySources summary {min-height:44px;cursor:pointer;font-size:12px;padding:10px 0;touch-action:pan-y;}
+.journeyPages {display:flex;gap:5px;position:sticky;top:0;z-index:1;background:var(--game-face);padding:4px 0 10px;}
+#frontierPanel .journeyPages button {flex:1;min-width:0;min-height:44px;padding:5px;touch-action:pan-y;}
+#frontierPanel .journeyPages button[aria-pressed=true] {border-color:#c6d5a5;color:#edf1d9;background:#53674d;}
+@media (orientation:landscape) {body.frontier #hud #toast {top:142px;} }
+@media (orientation:portrait) {#hud #journeyHUD {left:16px;top:108px;width:170px;max-width:46vw;} }
 #frontierPanel h3 {font-size:15px;margin:0 0 8px;color:#30382b;}
 #frontierPanel h3 small {font-size:11px;color:#59624e;}
 #frontierPanel p,#frontierPanel li {font-size:12px;line-height:1.6;color:#4c5742;margin:8px 0;}

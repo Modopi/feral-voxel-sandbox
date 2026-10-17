@@ -72,7 +72,7 @@ export const RUINS = [
   },
 ];
 export function ruinDefinition(info) {
-  return RUINS[info.seed % RUINS.length];
+  return RUINS[info.biome ?? info.seed % RUINS.length];
 }
 export function relaySites(info) {
   const d = info.dungeon;

@@ -96,6 +96,7 @@ test("boss telegraphs can be dodged, damages the player on impact and rewards on
   tick(s, i, 1.25, p);
   assert.equal(s.hp, hp);
   b.cooldown = 0;
+  b.phase = 0; // Explicitly retest the first stomp; other patterns have different safe zones.
   s.tick(0.1, p, i);
   tick(s, i, 1.25, p);
   assert.ok(s.hp < hp);

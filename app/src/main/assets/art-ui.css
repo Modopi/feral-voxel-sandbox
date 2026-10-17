@@ -1,0 +1,48 @@
+/* FERAL field instruments: cool slate, warm brass, bone typography, mint signals. */
+:root {--ui-face:#203337;--ui-inset:#11252b;--ui-button:#344d4e;--ui-hi:#819894;--ui-lo:#0a191e;--ui-ink:#f2e9d5;--ui-muted:#b9c9bd;--ui-gold:#ddbb78;--ui-slot:#31494b;--game-face:var(--ui-face);}
+body,button,input,select {font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;}
+.uiIcon {width:25px;height:25px;display:inline-block;vertical-align:middle;filter:drop-shadow(0 1px 1px #00161c80);}
+#hud .icon-button .uiIcon {width:26px;height:26px;}
+#hud .round>.uiIcon {display:block;width:29px;height:29px;margin:0 auto 3px;}
+#hud .posture>.uiIcon {width:20px;height:20px;margin-bottom:0;}
+#frontierActions button>span .uiIcon {height:23px;width:23px;}
+#frontierPanel nav button b .uiIcon {width:24px;height:24px;margin:1px 0;}
+#frontierPanel nav button {border-width:1px;box-shadow:inset 0 1px #b6cac31f;}
+.gameWindow,#pauseScreen:not(.inventoryMode) .panel,#pauseScreen.inventoryMode .panel,.worldMenu main {box-shadow:0 0 0 1px #d8be7a70,0 14px 44px #06141799,inset 0 0 0 1px #b5ccc319;border-width:2px;}
+.gameWindow>header,#pauseScreen .panelTop,.worldMenu header {background:linear-gradient(110deg,#293e40,#13262c);border-bottom:1px solid #c3a66a80;}
+#frontierPanel h2,#pauseScreen .panelTop h2 {font-size:16px;letter-spacing:.5px;font-weight:650;}
+#frontierPanel h3 {font-size:16px;letter-spacing:.2px;color:var(--ui-ink);}
+#frontierPanel p,#frontierPanel li {font-size:13px;line-height:1.75;}
+#frontierContent {background:linear-gradient(120deg,#ffffff03,transparent 50%);}
+#frontierPanel button,#pauseScreen:not(.inventoryMode) button {box-shadow:inset 0 1px #c4d8c91f,inset 0 -2px #00131a50;}
+#frontierPanel button:disabled {opacity:.52;}
+#frontierPanel .journeyPages {background:var(--ui-face);border-bottom:1px solid #82988d55;gap:7px;}
+#frontierPanel .journeyPages button {border:0;border-bottom:2px solid transparent;background:transparent;box-shadow:none;color:var(--ui-muted);}
+#frontierPanel .journeyPages button[aria-pressed=true] {color:var(--ui-gold);border-color:var(--ui-gold);background:#ddbb780b;}
+#frontierPanel .journeySection {border-color:#859b8c45;}
+.journeyStep,.projectRow,.signalRoute,.sortieRow {border-color:#7c978666;}
+.journeyStep.completed {color:#b6cf9b;border-color:#a8c480;}
+.journeySection small {color:var(--ui-muted);}.journeySection strong {font-size:14px;color:var(--ui-ink);}
+.signalNetwork {gap:10px;background:linear-gradient(transparent 38%,#bca36b66 38%,#bca36b66 40%,transparent 40%);}
+.signalNetwork span {background:var(--ui-inset);border:1px solid #77978955;color:var(--ui-muted);padding:12px 4px;font-size:11px;}
+.signalNetwork .lit {background:#2b4b45;border-color:#8ac8a8;color:#d6ead5;box-shadow:inset 0 2px #a7d3af;}
+#hud #hotbar {border-color:#8c9c91 #0c1b20 #0c1b20 #8c9c91;background:linear-gradient(#24383a,#10252b);box-shadow:0 2px 10px #06111399;}
+#hud .slot {background:linear-gradient(145deg,#516461,#33484a);border-color:#182d30 #788b7c #788b7c #182d30;}
+#hud .slot.selected {outline-color:#f5dfaa;box-shadow:inset 0 0 0 2px #ddbd7a;}
+#pauseScreen .itemSlot,#pauseScreen .recipeTile,#pauseScreen #craftOutput {background:linear-gradient(145deg,#263e42,#405856);border-width:1px;}
+#pauseScreen .recipeTile.selected {background:linear-gradient(145deg,#4b5d50,#34483e);outline-color:var(--ui-gold);}
+.itemIcon {filter:drop-shadow(1px 2px 0 #07191a8c);}
+#pauseScreen #recipeList {scroll-snap-type:y mandatory;scroll-padding-top:2px;}
+#pauseScreen .recipeTile {scroll-snap-align:start;}
+.stackCount {text-shadow:1px 1px #0b1b20,-1px -1px #0b1b20,0 2px 2px #000;}
+#pauseScreen .recipeTile.unavailable {opacity:.7;}
+#hud #journeyHUD {background:linear-gradient(90deg,#14282ee8,#172f328f);border-left-color:var(--ui-gold);box-shadow:0 1px 0 #bca66a44;}
+#hud #journeyHUD b {letter-spacing:.2px;font-weight:650;}
+#hud .round {border-radius:5px;border-width:1px;background:linear-gradient(145deg,#243d40c9,#10272bb0);box-shadow:inset 0 1px #d0dcc12b,0 2px 5px #07191c42;}
+#hud .round.action {background:linear-gradient(145deg,#62553cbd,#3c392fc9);border-color:#dbc186ad;}
+#hud .round.held {background:#526c5c;border-color:#f1dba4;}
+.worldMenu {background:radial-gradient(ellipse at 65% 20%,#43675e,#142b31 55%,#0b1c23);}
+.worldMenu .worldGlyph {width:80px;height:72px;padding:0;flex-shrink:0;border:1px solid #78978766;overflow:hidden;}
+.worldArt {display:block;width:100%;height:100%;}
+.worldMenu article {background:#12272ec4;border-width:1px;border-color:#77988a55;margin-bottom:10px;}
+@media (orientation:portrait) {#frontierPanel h2 {font-size:13px;}#frontierPanel h3 {font-size:15px;}#frontierPanel p {font-size:12px;}.signalNetwork {gap:4px;}.signalNetwork span {font-size:9px;}.worldMenu .worldGlyph {width:56px;height:56px;}}

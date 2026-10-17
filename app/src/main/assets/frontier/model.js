@@ -1,4 +1,13 @@
 import {
+  BIOMES,
+  biomeIndex,
+  newJourney,
+  ensureOutpost,
+  campaignAction,
+  validateCampaign,
+} from "./campaign.js";
+import { prepareAttack, attackHits } from "./encounters.js";
+import {
   GATHERABLES,
   CONTRACTS,
   resourceSites,
@@ -29,10 +38,8 @@ export function regionInfo(seed, x, z) {
     z,
     seed: Math.floor(roll(1) * 2147483647),
     tier,
-    name:
-      ["이끼 숲", "붉은 구릉", "유리 해안", "잿빛 고원"][
-        Math.floor(roll(2) * 4)
-      ] + ` [${x}, ${z}]`,
+    biome: biomeIndex(x, z),
+    name: BIOMES[biomeIndex(x, z)].name + ` [${x}, ${z}]`,
     villages: [0, 1].map((i) => ({
       id: `${x},${z}:${i}`,
       name: ["강변 야영지", "고원 정착지"][i],
@@ -61,7 +68,10 @@ export class Frontier {
     this.diplomacy = [0, 0, 0];
     this.allies = [];
     this.regions = {};
-    this.log = ["원정 시작 · 강변 야영지에서 교역하고 유적을 탐사하세요."];
+    this.log = [
+      "첫 신호 · 주변에서 보급품을 채집하고 여정 버튼으로 다음 목표를 확인하세요.",
+    ];
+    this.journey = newJourney();
     this.machine = null;
     this.riding = false;
     this.airborne = false;
@@ -74,10 +84,20 @@ export class Frontier {
     return regionKey(this.x, this.z);
   }
   get info() {
-    return regionInfo(this.seed, this.x, this.z);
+    return {
+      ...regionInfo(this.seed, this.x, this.z),
+      terrainVersion: this.region?.terrainVersion ?? 2,
+    };
   }
   get region() {
     return this.regions[this.key];
+  }
+  get activeBoss() {
+    const run = this.region.outpost.sortie;
+    return run?.kind === "hunt" ? run.boss : this.region.boss;
+  }
+  campaign(action, arg, player, inv) {
+    return campaignAction(this, action, arg, player, inv);
   }
   get level() {
     return 1 + Math.floor(this.xp / 80);
@@ -94,6 +114,7 @@ export class Frontier {
     if (!this.regions[i.key])
       this.regions[i.key] = {
         visited: true,
+        terrainVersion: 2,
         discovered: [],
         dungeon: 0,
         cacheClaimed: false,
@@ -122,6 +143,7 @@ export class Frontier {
         })),
       };
     ensureContent(this.region);
+    ensureOutpost(this.region);
     return this.region;
   }
   canPay(inv, cost, reward = {}) {
@@ -285,8 +307,18 @@ export class Frontier {
     if (id === "food" && this.hunger >= 100) return "아직 배가 부릅니다.";
     if (id === "medicine" && this.hp >= this.maxHP)
       return "체력이 가득 찼습니다.";
-    if (!["food", "medicine"].includes(id) || !inv.take(id, 1))
+    if (!["food", "medicine", "stew", "tonic"].includes(id) || !inv.take(id, 1))
       return "가방에 해당 물품이 없습니다.";
+    if (id === "stew") {
+      this.hunger = Math.min(100, this.hunger + 50);
+      this.hp = Math.min(this.maxHP, this.hp + 20);
+      this.journey.fedUntil = this.time + 180;
+      return "야채 스튜 · 포만 +50 · 체력 +20 · 든든함 180초";
+    }
+    if (id === "tonic") {
+      this.journey.tonicUntil = this.time + 60;
+      return "약초 강장제 · 60초간 초당 체력 0.8 회복";
+    }
     if (id === "food") this.hunger = Math.min(100, this.hunger + 35);
     else this.hp = Math.min(this.maxHP, this.hp + 45);
     return id === "food" ? "식량 -1 · 허기 회복" : "회복약 -1 · 체력 +45";
@@ -303,7 +335,10 @@ export class Frontier {
   damagePlayer(amount, inv) {
     this.hp = Math.max(
       0,
-      this.hp - amount * (inv.unlocks.has("armor") ? 0.65 : 1),
+      this.hp -
+        amount *
+          (inv.unlocks.has("armor") ? 0.65 : 1) *
+          (this.journey.fedUntil > this.time ? 0.9 : 1),
     );
     this.hurtClock = 0.4;
     if (this.riding && this.machine) {
@@ -319,11 +354,13 @@ export class Frontier {
     dt = Math.min(dt, 0.25);
     this.time += dt;
     this.socialClock += dt;
+    if (this.hp > 0 && this.journey.tonicUntil > this.time)
+      this.hp = Math.min(this.maxHP, this.hp + dt * 0.8);
     this.attackClock = Math.max(0, this.attackClock - dt);
     this.hurtClock = Math.max(0, this.hurtClock - dt);
     this.hunger = Math.max(0, this.hunger - dt * 0.055);
     if (!this.hunger) this.hp = Math.max(0, this.hp - dt * 0.5);
-    else if (this.hunger > 65 && this.hp < this.maxHP)
+    else if (this.hp > 0 && this.hunger > 65 && this.hp < this.maxHP)
       this.hp = Math.min(this.maxHP, this.hp + dt * 0.12);
     while (this.socialClock >= 30) {
       this.socialClock -= 30;
@@ -342,21 +379,23 @@ export class Frontier {
       )
         this.damagePlayer(8, inv);
     }
-    const b = this.region.boss,
+    const b = this.activeBoss,
       d = Math.hypot(player.x - b.x, player.z - b.z);
-    if (!b.defeated && d < 26 && !player.flying) {
+    if (!b.defeated && d < 26) {
       if (b.warning > 0) {
         b.warning -= dt;
         if (b.warning <= 0) {
-          if (Math.hypot(player.x - b.aimX, player.z - b.aimZ) < 4)
+          if (attackHits(b, player))
             this.damagePlayer(16 + this.info.tier * 5, inv);
-          b.cooldown = 1.8;
+          if (b.pattern === "charge") {
+            b.x = b.aimX;
+            b.z = b.aimZ;
+          }
+          b.cooldown = b.hp < b.maxHP * 0.4 ? 1.3 : 1.8;
           b.phase++;
         }
       } else if ((b.cooldown -= dt) <= 0) {
-        b.warning = 1.15;
-        b.aimX = player.x;
-        b.aimZ = player.z;
+        prepareAttack(b, this.info.biome, player);
       } else if (d > 4) {
         b.x += ((player.x - b.x) / d) * dt * 1.2;
         b.z += ((player.z - b.z) / d) * dt * 1.2;
@@ -396,14 +435,19 @@ export class Frontier {
     return null;
   }
   hitBoss(amount, inv) {
-    const b = this.region.boss;
-    if (b.defeated) return false;
+    const b = this.activeBoss;
+    if (b.defeated || !Number.isFinite(amount) || amount <= 0) return false;
     b.hp = Math.max(0, b.hp - amount);
     if (!b.hp) {
       b.defeated = true;
       b.warning = 0;
-      this.xp += 60 * this.info.tier;
       this.hp = Math.min(this.maxHP, this.hp + 30);
+      if (this.region.outpost.sortie?.kind === "hunt") {
+        this.region.outpost.sortie.done = true;
+        this.note("수호자 잔향 격파 · 야영지에서 원정 보상을 받으세요.");
+        return true;
+      }
+      this.xp += 60 * this.info.tier;
       // A defeated boss is marked first. Rewards cannot be farmed by reopening its menu.
       inv.grant("relic", this.info.tier);
       inv.grant("knowledge", 6 * this.info.tier);
@@ -587,7 +631,7 @@ export class Frontier {
     )
       return "인접한 지역만 이동할 수 있습니다.";
     if (Math.abs(this.x + dx) > 10000 || Math.abs(this.z + dz) > 10000)
-      return "프로토타입 탐험 범위 끝입니다.";
+      return "지원하는 탐험 좌표 범위 끝입니다.";
     if (
       Math.hypot(player.x - 77.5, player.z - 84.5) > 12 &&
       player.x > 8 &&
@@ -621,6 +665,7 @@ export class Frontier {
       allies: this.allies,
       regions: this.regions,
       log: this.log,
+      journey: this.journey,
       machine: this.machine
         ? { ...this.machine, events: [], revision: 0 }
         : null,
@@ -710,8 +755,11 @@ export class Frontier {
       throw Error("원정 기록이 손상되었습니다.");
     const clean = clone(data);
     for (const key of Object.keys(s.save())) s[key] = clean[key];
+    s.journey = clean.journey || newJourney();
     for (const r of Object.values(s.regions)) {
       ensureContent(r);
+      ensureOutpost(r);
+      r.terrainVersion ??= 1;
       if (
         !Array.isArray(r.relays) ||
         new Set(r.relays).size !== r.relays.length ||
@@ -728,6 +776,7 @@ export class Frontier {
         throw Error("탐사 콘텐츠 기록이 손상되었습니다.");
       r.dungeon = Math.max(r.dungeon, r.relays.length);
     }
+    validateCampaign(s);
     s.hp = Math.min(s.maxHP, s.hp);
     s.hunger = Math.min(100, s.hunger);
     if (data.machine) s.machine = restore(serialize(data.machine));
