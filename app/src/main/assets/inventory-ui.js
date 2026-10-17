@@ -9,11 +9,12 @@ export class InventoryUI {
     this.recipe = "planks";
     this.filter = "all";
     const panel = document.querySelector('[data-panel="bag"]');
-    panel.innerHTML = `<div class="survivalInventory"><aside class="recipeBook"><h3>제작법</h3><div class="recipeFilters"><button data-filter="all">전체</button><button data-filter="gear">장비</button><button data-filter="supplies">재료</button></div><div id="recipeList"></div></aside><div class="inventoryBody"><div class="inventoryTop"><div class="avatarPanel" aria-label="플레이어 장비"><div class="voxelAvatar"><i class="head"></i><i class="body"></i><i class="arm a"></i><i class="arm b"></i><i class="leg a"></i><i class="leg b"></i></div><span id="equippedName"></span></div><div class="craftBench"><h3 id="recipeName">제작</h3><div class="craftFlow"><div id="craftIngredients"></div><b>→</b><button id="craftOutput" aria-label="제작 결과"></button></div><p id="craftFeedback" role="status"></p></div></div><div class="slotHeading"><span>인벤토리 <small id="bagTotal"></small></span><button id="splitStack" aria-pressed="false">나누기</button><button id="cancelMove">선택 취소</button></div><div id="inventoryGrid" role="group" aria-label="보관함 27칸"></div><div id="inventoryHotbar" role="group" aria-label="핫바 9칸"></div><div id="itemDetail" aria-live="polite"></div><button id="reclaimItems" hidden>이전 보관품 받기</button><p class="slotGuide">아이템 → 목적지 탭으로 이동 · 나누기: 절반 이동 · 하단 9칸은 탐험 핫바</p></div></div>`;
+    panel.innerHTML = `<div class="survivalInventory"><aside class="recipeBook"><h3>제작법 <small>↕ 밀어서 더 보기</small></h3><div class="recipeFilters"><button data-filter="all">전체</button><button data-filter="gear">장비</button><button data-filter="supplies">재료</button></div><div id="recipeList" tabindex="0" role="region" aria-label="제작법 목록 · 위아래로 스크롤"></div></aside><div class="inventoryBody" tabindex="0" role="region" aria-label="인벤토리 · 위아래로 스크롤"><div class="inventoryTop"><div class="avatarPanel" aria-label="플레이어 장비"><div class="voxelAvatar"><i class="head"></i><i class="body"></i><i class="arm a"></i><i class="arm b"></i><i class="leg a"></i><i class="leg b"></i></div><span id="equippedName"></span></div><div class="craftBench"><h3 id="recipeName">제작</h3><div class="craftFlow"><div id="craftIngredients"></div><b>→</b><button id="craftOutput" aria-label="제작 결과"></button></div><p id="craftFeedback" role="status"></p></div></div><div class="slotHeading"><span>인벤토리 <small id="bagTotal"></small></span><button id="splitStack" aria-pressed="false">나누기</button><button id="cancelMove">선택 취소</button></div><div id="inventoryGrid" role="group" aria-label="보관함 27칸"></div><div id="inventoryHotbar" role="group" aria-label="핫바 9칸"></div><div id="itemDetail" aria-live="polite"></div><button id="reclaimItems" hidden>이전 보관품 받기</button><p class="slotGuide">아이템 → 목적지 탭으로 이동 · 나누기: 절반 이동 · 하단 9칸은 탐험 핫바</p></div></div>`;
     document.querySelectorAll("[data-filter]").forEach(
       (b) =>
         (b.onclick = () => {
           this.filter = b.dataset.filter;
+          document.getElementById("recipeList").scrollTop = 0;
           this.render();
         }),
     );
@@ -57,19 +58,22 @@ export class InventoryUI {
     b.onclick = () => this.tap(index);
     b.oncontextmenu = (e) => {
       e.preventDefault();
+      if (e.pointerType === "touch") return;
       this.split = true;
       this.tap(index);
     };
-    // Drag and tap share one atomic move operation; cancellation never removes an item.
+    // Touch uses tap-to-move so a swipe on any slot can scroll the inventory.
+    // Mouse drag shares the same atomic move operation.
     b.onpointerdown = (e) => {
-      if (e.button !== 0) return;
+      if (e.pointerType !== "mouse" || e.button !== 0) return;
       this.drag = { index, x: e.clientX, y: e.clientY, id: e.pointerId };
       b.setPointerCapture(e.pointerId);
     };
     b.onpointerup = (e) => {
       const d = this.drag;
+      if (!d || d.id !== e.pointerId) return;
       this.drag = null;
-      if (!d || Math.hypot(e.clientX - d.x, e.clientY - d.y) < 12) return;
+      if (Math.hypot(e.clientX - d.x, e.clientY - d.y) < 12) return;
       const target = document
         .elementFromPoint(e.clientX, e.clientY)
         ?.closest("[data-slot]");
@@ -80,8 +84,8 @@ export class InventoryUI {
         this.render();
       }
     };
-    b.onpointercancel = () => {
-      this.drag = null;
+    b.onpointercancel = b.onlostpointercapture = (e) => {
+      if (this.drag?.id === e.pointerId) this.drag = null;
     };
     return b;
   }
@@ -100,6 +104,8 @@ export class InventoryUI {
   }
   render() {
     const inv = this.c.inventory;
+    const body = document.querySelector(".inventoryBody"),
+      inventoryScroll = body.scrollTop;
     document
       .getElementById("inventoryGrid")
       .replaceChildren(
@@ -148,6 +154,7 @@ export class InventoryUI {
           (this.filter === "gear" ? !!GEAR[r.id] : !GEAR[r.id])),
     );
     const list = document.getElementById("recipeList");
+    const recipeScroll = list.scrollTop;
     list.replaceChildren();
     for (const r of recipes) {
       const id = Object.keys(r.give || {})[0] || r.id,
@@ -164,6 +171,7 @@ export class InventoryUI {
       };
       list.append(b);
     }
+    list.scrollTop = recipeScroll;
     const r = RECIPES.find((r) => r.id === this.recipe) || RECIPES[0];
     this.recipe = r.id;
     document.getElementById("recipeName").textContent = r.name;
@@ -194,5 +202,6 @@ export class InventoryUI {
         ? " · 결과를 눌러 제작"
         : " · 재료·빈 칸·보유 상태 확인");
     this.c.renderHotbar();
+    body.scrollTop = inventoryScroll;
   }
 }

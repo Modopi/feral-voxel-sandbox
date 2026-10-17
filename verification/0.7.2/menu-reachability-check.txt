@@ -1,0 +1,77 @@
+{
+  "layouts": [
+    {
+      "width": 900,
+      "height": 412,
+      "reachableRecipes": 37,
+      "craftedAfterScroll": true,
+      "slotSwipeSafe": true,
+      "tapMove": true,
+      "reclaim": true,
+      "menuTabSwipes": 0,
+      "settings": true,
+      "status": true,
+      "machineGuide": true
+    },
+    {
+      "width": 640,
+      "height": 360,
+      "reachableRecipes": 37,
+      "craftedAfterScroll": true,
+      "slotSwipeSafe": true,
+      "tapMove": true,
+      "reclaim": true,
+      "menuTabSwipes": 0,
+      "settings": true,
+      "status": true,
+      "machineGuide": true
+    },
+    {
+      "width": 568,
+      "height": 320,
+      "reachableRecipes": 37,
+      "craftedAfterScroll": true,
+      "slotSwipeSafe": true,
+      "tapMove": true,
+      "reclaim": true,
+      "menuTabSwipes": 1,
+      "settings": true,
+      "status": true,
+      "machineGuide": true
+    },
+    {
+      "width": 360,
+      "height": 640,
+      "reachableRecipes": 37,
+      "craftedAfterScroll": true,
+      "slotSwipeSafe": true,
+      "tapMove": true,
+      "reclaim": true,
+      "menuTabSwipes": 0,
+      "settings": true,
+      "status": true,
+      "machineGuide": true
+    },
+    {
+      "width": 320,
+      "height": 480,
+      "reachableRecipes": 37,
+      "craftedAfterScroll": true,
+      "slotSwipeSafe": true,
+      "tapMove": true,
+      "reclaim": true,
+      "menuTabSwipes": 0,
+      "settings": true,
+      "status": true,
+      "machineGuide": true
+    }
+  ],
+  "extra": {
+    "editorSwipes": 1,
+    "editorPaused": true,
+    "worldListRename": true,
+    "dialogSwipes": 1,
+    "shortDialogCreate": true
+  },
+  "errors": []
+}

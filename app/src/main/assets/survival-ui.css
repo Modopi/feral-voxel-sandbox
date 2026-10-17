@@ -33,25 +33,29 @@ body.leftHand #hud #stick {left:auto;right:24px;}
 body.leftHand #hud #actBtn,body.leftHand #hud #jumpBtn {right:auto;left:24px;}
 body.leftHand #hud #useBtn,body.leftHand #hud #flyBtn {right:auto;left:102px;}
 body.leftHand #hud #target {left:auto;right:16px;}
-#pauseScreen.inventoryMode {padding:12px;display:flex;align-items:center;justify-content:center;background:#1119;}
+#pauseScreen.inventoryMode {padding:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#1119;}
 #pauseScreen.inventoryMode.hidden {display:none;}
-#pauseScreen.inventoryMode .panel {width:min(850px,100%);max-width:850px;max-height:100%;overflow:auto; border:4px solid;border-color:#fafafa #525252 #525252 #fafafa;background:#c6c6c6;color:#252525;border-radius:0;box-shadow:0 0 0 2px #171717; padding:0;}
-#pauseScreen.inventoryMode .panelTop {border:0;background:transparent;padding:8px 12px;}
-#pauseScreen.inventoryMode .panelTop h2 {font-size:18px;color:#303030;}
+#pauseScreen.inventoryMode .panel {width:min(850px,100%);max-width:850px;max-height:100%;height:min(640px,100%);margin:0;display:flex;flex-direction:column;overflow:hidden; border:4px solid;border-color:#fafafa #525252 #525252 #fafafa;background:#c6c6c6;color:#252525;border-radius:0;box-shadow:0 0 0 2px #171717; padding:0;}
+#pauseScreen.inventoryMode .panelTop {border:0;background:transparent;position:static;flex:none;margin:0;padding:6px 10px;min-height:52px;}
+#pauseScreen.inventoryMode .panelTop h2 {font-size:18px;color:#303030;margin:0;}
 #pauseScreen.inventoryMode .panelTop .eyebrow, #pauseScreen.inventoryMode .tabs,#pauseScreen.inventoryMode .panelFooter {display:none;}
-#pauseScreen.inventoryMode .panelTop .icon-button {width:36px;height:36px;color:#333;border:2px solid;border-color:white #666 #666 white;background:#aaa;}
-#pauseScreen.inventoryMode [data-panel=bag] {padding:0 12px 12px;}
-.survivalInventory {display:grid;grid-template-columns:190px 1fr;gap:16px;}
-.recipeBook {border-right:2px solid #777;padding-right:12px;}
+#pauseScreen.inventoryMode .panelTop .icon-button {width:44px;height:44px;min-height:44px;flex:none;color:#333;border:2px solid;border-color:white #666 #666 white;background:#aaa;}
+#pauseScreen.inventoryMode .menuContents {flex:1;min-height:0;overflow:hidden;}
+#pauseScreen.inventoryMode [data-panel=bag] {height:100%;min-height:0;padding:0 12px 12px;}
+.survivalInventory {height:100%;min-height:0;display:grid;grid-template-columns:190px minmax(0,1fr);grid-template-rows:minmax(0,1fr);gap:16px;}
+.recipeBook {display:flex;flex-direction:column;min-height:0;min-width:0;border-right:2px solid #777;padding-right:12px;}
+.recipeBook h3 {display:flex;justify-content:space-between;align-items:center;gap:4px;flex:none;}
+.recipeBook h3 small {font-size:9px;font-weight:normal;color:var(--ui-muted);}
 .recipeBook h3,.craftBench h3 {font-size:13px;margin:0 0 6px;font-weight:600;}
-.recipeFilters {display:flex;gap:3px;margin-bottom:8px;}
-#pauseScreen.inventoryMode button {font-family:inherit;}
+.recipeFilters {flex:none;display:flex;gap:3px;margin-bottom:8px;}
+#pauseScreen.inventoryMode button {font-family:inherit;touch-action:pan-y;}
 .recipeFilters button,#splitStack,#cancelMove,#itemDetail button,#reclaimItems {border:2px solid;border-color:#fff #5b5b5b #5b5b5b #fff;border-radius:0;background:#a6a6a6;color:#222;padding:5px 6px;min-height:32px;font-size:11px;}
-#pauseScreen #recipeList {display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-height:330px;overflow:auto;align-content:start;touch-action:pan-y;}
+#pauseScreen #recipeList {display:grid;grid-template-columns:repeat(auto-fit,minmax(44px,1fr));gap:4px;flex:1;min-height:0;overflow-x:hidden;overflow-y:auto;align-content:start;touch-action:pan-y;overscroll-behavior:contain;scrollbar-gutter:stable;padding:2px 4px 4px 2px;}
 .recipeTile {height:48px;min-width:0;padding:4px;background:#8b8b8b;border:2px solid;border-color:#555 #fff #fff #555;border-radius:0;}
 .recipeTile.unavailable {background:#a49c9c;}
 .recipeTile.selected {outline:2px solid #5c844a;outline-offset:-2px;background:#b4bfa5;}
 .researchIcon {font-size:25px;color:#edcb62;}
+.inventoryBody {min-width:0;min-height:0;overflow-x:hidden;overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;padding:0 4px 6px 0;scrollbar-gutter:stable;}
 .inventoryTop {display:grid;grid-template-columns:110px 1fr;gap:14px;min-height:136px;}
 .avatarPanel {background:#333;position:relative;height:126px;border:2px solid;border-color:#555 #eee #eee #555;}
 .avatarPanel>span {position:absolute;bottom:4px;left:2px;right:2px;font-size:10px;text-align:center;color:#eee;}
@@ -76,7 +80,7 @@ body.leftHand #hud #target {left:auto;right:16px;}
 #splitStack[aria-pressed=true] {background:#abc190;}
 #pauseScreen #inventoryGrid,#pauseScreen #inventoryHotbar {display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:3px;}
 #pauseScreen #inventoryHotbar {margin-top:8px;}
-#pauseScreen .itemSlot {position:relative;aspect-ratio:1;height:auto;min-width:0;padding:3px;border:2px solid;border-color:#555 #fff #fff #555;background:#8b8b8b;border-radius:0;touch-action:none;}
+#pauseScreen .itemSlot {position:relative;aspect-ratio:1;height:auto;min-width:0;padding:3px;border:2px solid;border-color:#555 #fff #fff #555;background:#8b8b8b;border-radius:0;touch-action:pan-y;}
 #pauseScreen .itemSlot.equipped {outline:2px solid #e8d78a;outline-offset:-3px;}
 #pauseScreen .itemSlot.moving {background:#b3ca9e;outline:2px solid #477a31;outline-offset:-2px;}
 .slotNumber {position:absolute;left:1px;top:0;color:#eee;font-size:9px;pointer-events:none;}
@@ -90,7 +94,6 @@ body.leftHand #hud #target {left:auto;right:16px;}
   .inventoryTop {min-height:112px;grid-template-columns:92px 1fr;gap:10px;}
   .avatarPanel {height:106px;}.voxelAvatar {transform:scale(.8);transform-origin:top center;}
   #craftIngredients {grid-template-columns:repeat(2,30px);}.ingredient {width:30px;height:30px;}
-  #pauseScreen #recipeList {max-height:270px;}
   #pauseScreen #craftFeedback {font-size:9px;}
   .slotGuide {display:none;}
   #pauseScreen #inventoryGrid,#pauseScreen #inventoryHotbar {gap:2px;}
@@ -115,11 +118,10 @@ body.leftHand #hud #target {left:auto;right:16px;}
   #bossHUD {left:12px;right:auto;top:186px;max-width:135px;width:135px;font-size:11px;}
   #pauseScreen.inventoryMode {padding:6px;}
   #pauseScreen.inventoryMode [data-panel=bag] {padding:0 8px 8px;}
-  .survivalInventory {display:flex;flex-direction:column;gap:8px;}
+  .survivalInventory {grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(156px,34%) minmax(0,1fr);gap:8px;}
   .recipeBook {border:0;border-bottom:2px solid #999;padding:0 0 6px;}
-  .recipeBook h3 {display:none;}.recipeFilters {margin-bottom:4px;}
-  #pauseScreen #recipeList {display:flex;overflow-x:auto;overflow-y:hidden;gap:4px;max-height:none;padding-bottom:3px;touch-action:pan-x;}
-  .recipeTile {flex:0 0 44px;height:44px;}
+  .recipeFilters {margin-bottom:4px;}
+  .recipeTile {height:44px;}
   .inventoryTop {grid-template-columns:82px 1fr;gap:10px;min-height:126px;}
   .avatarPanel {height:119px;}
   .craftFlow {gap:8px;}
@@ -131,7 +133,6 @@ body.leftHand #hud #target {left:auto;right:16px;}
 #pauseScreen .itemSlot .slotNumber {font-size:9px;line-height:1;color:#ddd;}
 #pauseScreen .itemSlot .stackCount {font-size:12px;line-height:1;}
 @media(orientation:landscape) and (max-height:540px) {
-  #pauseScreen.inventoryMode .panelTop .icon-button {min-height:28px;height:28px;width:28px;}
   .inventoryTop {min-height:100px;}.avatarPanel {height:96px;}
   #pauseScreen .itemSlot {max-height:34px;}
   #pauseScreen #itemDetail {min-height:24px;margin-top:3px;}

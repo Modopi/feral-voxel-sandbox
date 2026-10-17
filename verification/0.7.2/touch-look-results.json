@@ -1,0 +1,187 @@
+{
+  "gestures": [
+    {
+      "width": 900,
+      "height": 412,
+      "left": false,
+      "id": "actBtn",
+      "yaw": 0.24,
+      "pitch": 0.06720000000000001,
+      "heldDuringDrag": true,
+      "repeatedAction": true,
+      "released": true
+    },
+    {
+      "width": 900,
+      "height": 412,
+      "left": false,
+      "id": "useBtn",
+      "yaw": 0.24,
+      "pitch": 0.06720000000000001,
+      "heldDuringDrag": true,
+      "repeatedAction": true,
+      "released": true
+    },
+    {
+      "width": 900,
+      "height": 412,
+      "left": false,
+      "id": "jumpBtn",
+      "yaw": 0.24,
+      "pitch": 0.06720000000000001,
+      "heldDuringDrag": true,
+      "repeatedAction": true,
+      "released": true
+    },
+    {
+      "width": 900,
+      "height": 412,
+      "left": false,
+      "id": "descendBtn",
+      "yaw": 0.24,
+      "pitch": 0.06720000000000001,
+      "heldDuringDrag": true,
+      "repeatedAction": true,
+      "released": true
+    },
+    {
+      "width": 900,
+      "height": 412,
+      "left": true,
+      "id": "actBtn",
+      "yaw": -0.24,
+      "pitch": 0.06720000000000001,
+      "heldDuringDrag": true,
+      "repeatedAction": true,
+      "released": true
+    },
+    {
+      "width": 900,
+      "height": 412,
+      "left": true,
+      "id": "useBtn",
+      "yaw": -0.24,
+      "pitch": 0.06720000000000001,
+      "heldDuringDrag": true,
+      "repeatedAction": true,
+      "released": true
+    },
+    {
+      "width": 900,
+      "height": 412,
+      "left": true,
+      "id": "jumpBtn",
+      "yaw": -0.24,
+      "pitch": 0.06720000000000001,
+      "heldDuringDrag": true,
+      "repeatedAction": true,
+      "released": true
+    },
+    {
+      "width": 900,
+      "height": 412,
+      "left": true,
+      "id": "descendBtn",
+      "yaw": -0.24,
+      "pitch": 0.06720000000000001,
+      "heldDuringDrag": true,
+      "repeatedAction": true,
+      "released": true
+    },
+    {
+      "width": 360,
+      "height": 640,
+      "left": false,
+      "id": "actBtn",
+      "yaw": 0.24,
+      "pitch": 0.06720000000000001,
+      "heldDuringDrag": true,
+      "repeatedAction": true,
+      "released": true
+    },
+    {
+      "width": 360,
+      "height": 640,
+      "left": false,
+      "id": "useBtn",
+      "yaw": 0.24,
+      "pitch": 0.06720000000000001,
+      "heldDuringDrag": true,
+      "repeatedAction": true,
+      "released": true
+    },
+    {
+      "width": 360,
+      "height": 640,
+      "left": false,
+      "id": "jumpBtn",
+      "yaw": 0.24,
+      "pitch": 0.06720000000000001,
+      "heldDuringDrag": true,
+      "repeatedAction": true,
+      "released": true
+    },
+    {
+      "width": 360,
+      "height": 640,
+      "left": false,
+      "id": "descendBtn",
+      "yaw": 0.24,
+      "pitch": 0.06720000000000001,
+      "heldDuringDrag": true,
+      "repeatedAction": true,
+      "released": true
+    },
+    {
+      "width": 360,
+      "height": 640,
+      "left": true,
+      "id": "actBtn",
+      "yaw": -0.24,
+      "pitch": 0.06720000000000001,
+      "heldDuringDrag": true,
+      "repeatedAction": true,
+      "released": true
+    },
+    {
+      "width": 360,
+      "height": 640,
+      "left": true,
+      "id": "useBtn",
+      "yaw": -0.24,
+      "pitch": 0.06720000000000001,
+      "heldDuringDrag": true,
+      "repeatedAction": true,
+      "released": true
+    },
+    {
+      "width": 360,
+      "height": 640,
+      "left": true,
+      "id": "jumpBtn",
+      "yaw": -0.24,
+      "pitch": 0.06720000000000001,
+      "heldDuringDrag": true,
+      "repeatedAction": true,
+      "released": true
+    },
+    {
+      "width": 360,
+      "height": 640,
+      "left": true,
+      "id": "descendBtn",
+      "yaw": -0.24,
+      "pitch": 0.06720000000000001,
+      "heldDuringDrag": true,
+      "repeatedAction": true,
+      "released": true
+    }
+  ],
+  "sameButtonMultiTouch": true,
+  "joystickAndLook": true,
+  "cancellation": true,
+  "pauseReset": true,
+  "menuInteractionReset": true,
+  "captureLoss": true,
+  "errors": []
+}

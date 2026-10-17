@@ -40,7 +40,7 @@
 #pauseScreen .recipeTile.unavailable {background:var(--ui-inset);opacity:.65;}#pauseScreen .recipeTile.selected {opacity:1;outline-color:var(--ui-gold);background:var(--ui-button);}
 #pauseScreen .itemSlot.moving {outline-color:var(--ui-gold);background:var(--ui-button);}#pauseScreen .itemSlot.equipped {outline-color:var(--ui-gold);}
 #pauseScreen #craftFeedback,#pauseScreen .slotGuide,#pauseScreen .slotHeading small {color:var(--ui-muted);}
-#pauseScreen.inventoryMode .panelTop {margin-bottom:9px;padding:7px 12px;}
+#pauseScreen.inventoryMode .panelTop {margin:0;padding:6px 10px;}
 #pauseScreen.inventoryMode .panelTop h2 {font-size:16px;}
 #pauseScreen.inventoryMode .panelTop .icon-button {color:var(--ui-ink);background:var(--ui-button);border-color:var(--ui-hi) var(--ui-lo) var(--ui-lo) var(--ui-hi);}
 #pauseScreen.inventoryMode .recipeBook h3,#pauseScreen.inventoryMode .craftBench h3 {font-size:12px;letter-spacing:.5px;}
@@ -97,7 +97,7 @@ body.layoutEditing #toast {opacity:1;transform:none;min-width:110px;min-height:3
 .machineShell #metrics div {background:var(--ui-inset);border-radius:0;}.machineShell #metrics strong {color:var(--ui-ink);}.machineShell p,.machineShell small,.machineShell #metrics div {color:var(--ui-muted);}.machineShell #grid button {border-color:var(--ui-lo) var(--ui-hi) var(--ui-hi) var(--ui-lo);border-radius:0;}
 @media(orientation:landscape) and (max-height:540px) {
   #titleScreen h1 {font-size:64px;margin:5px 0;}#titleScreen h2 {margin:8px 0 15px;}#titleScreen .titleCopy {width:300px;}#titleScreen .startActions button,#titleScreen .worldSelectButton {min-height:38px;padding:8px;font-size:13px;}#titleScreen #loadStatus {margin-top:8px;}
-  #pauseScreen.inventoryMode .panelTop {margin-bottom:5px;padding:3px 10px;}#pauseScreen:not(.inventoryMode) .menuContents {padding:9px 14px;}#pauseScreen #resumeWorld {min-height:40px;}#pauseScreen .editHudEntry {margin:7px 0;min-height:38px;}
+  #pauseScreen.inventoryMode .panelTop {margin:0;padding:3px 10px;}#pauseScreen:not(.inventoryMode) .menuContents {padding:9px 14px;}#pauseScreen #resumeWorld {min-height:40px;}#pauseScreen .editHudEntry {margin:7px 0;min-height:38px;}
   .worldMenu {padding:10px;}.worldMenu main {height:calc(100dvh - 20px);}.worldMenu header {padding:9px 16px;}.worldMenu h1 {font-size:20px;}.worldMenu article {padding:8px;}.worldMenu footer {padding:8px 16px;}
 }
 @media(orientation:portrait) {
@@ -142,3 +142,9 @@ body.layoutEditing #hud #flightReadout,body.layoutEditing #hud #descendBtn,body.
 body.piloting #hud #rangeBtn {display:none;}
 body.piloting #hud #toast {left:auto;right:20px;top:auto;bottom:76px;max-width:175px;font-size:11px;}
 @media(orientation:portrait) {body.piloting #hud #toast {left:12px;right:auto;top:164px;bottom:auto;max-width:200px;}}
+
+
+/* Scroll gestures follow vertical menus; dialogs fit the available viewport. */
+#pauseScreen #recipeList,#pauseScreen .inventoryBody,#pauseScreen .menuContents,#pauseScreen .tabs,#frontierPanel nav,#frontierContent,#hudInspector,.worldMenu #worlds,.worldMenu dialog {scrollbar-width:thin;scrollbar-color:var(--ui-hi) var(--ui-inset);}
+#pauseScreen:not(.inventoryMode) .tabs,#frontierPanel .gameWindow>nav {min-height:0;touch-action:pan-y;overscroll-behavior:contain;}
+.worldMenu dialog {max-height:calc(100dvh - 24px);overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;}
