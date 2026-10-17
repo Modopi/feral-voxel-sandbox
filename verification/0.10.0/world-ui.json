@@ -1,0 +1,101 @@
+{
+  "near": {
+    "visible": true,
+    "width": 143.10186674978954,
+    "x": 527.5135111561357,
+    "y": 144.27922898481808,
+    "title": "이끼사슴 · 꼬리 · 외피",
+    "hp": 48,
+    "depthTest": false,
+    "sceneParent": true,
+    "domHidden": true,
+    "planes": 2
+  },
+  "far": {
+    "visible": true,
+    "width": 95.06373448878222,
+    "x": 501.49285618142346,
+    "y": 164.89209128714228,
+    "title": "이끼사슴 · 꼬리 · 외피",
+    "hp": 48,
+    "depthTest": false,
+    "sceneParent": true,
+    "domHidden": true,
+    "planes": 2
+  },
+  "follow": {
+    "delta": 0.4000000000000057,
+    "reusedTexture": true
+  },
+  "occlusion": {
+    "visibleBehindTerrain": true,
+    "samples": [
+      {
+        "transparent": false,
+        "covered": [
+          254,
+          28,
+          23,
+          255
+        ],
+        "overlay": [
+          53,
+          26,
+          24,
+          255
+        ]
+      },
+      {
+        "transparent": true,
+        "covered": [
+          245,
+          31,
+          25,
+          255
+        ],
+        "overlay": [
+          51,
+          27,
+          24,
+          255
+        ]
+      }
+    ]
+  },
+  "damage": 0,
+  "dead": true,
+  "mining": 0.25,
+  "villageLabelAndInteraction": true,
+  "layouts": [
+    {
+      "width": 900,
+      "height": 412,
+      "frameFits": true,
+      "noOuterScroll": true,
+      "noHorizontalScroll": true,
+      "suppliesVisible": true,
+      "paused": true
+    },
+    {
+      "width": 412,
+      "height": 900,
+      "frameFits": true,
+      "noOuterScroll": true,
+      "noHorizontalScroll": true,
+      "suppliesVisible": true,
+      "paused": true
+    },
+    {
+      "width": 360,
+      "height": 640,
+      "frameFits": true,
+      "noOuterScroll": true,
+      "noHorizontalScroll": true,
+      "suppliesVisible": true,
+      "paused": true
+    }
+  ],
+  "supplyUse": true,
+  "inventoryTransition": true,
+  "errors": []
+}

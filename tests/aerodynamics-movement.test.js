@@ -94,7 +94,8 @@ test("a connected craft takes off from a runway using its propeller and wings; o
   const s = aircraft(),
     physics = new AssemblyPhysics(terrain());
   try {
-    for (let i = 0; i < 360; i++)
+    // Intact landing gear absorbs small runway bumps; allow a full 6.5-second takeoff.
+    for (let i = 0; i < 390; i++)
       physics.step(s, 1 / 60, { forward: 1, up: i > 240 }, true, true);
     assert.ok(s.pose.position.y > 12, `altitude ${s.pose.position.y}`);
     assert.equal(physics.grounded, 0);

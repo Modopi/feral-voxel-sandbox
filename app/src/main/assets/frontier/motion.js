@@ -36,21 +36,20 @@ export class FrontierMotion {
       y: this.c.player.y,
       z: this.c.player.z,
     };
+    this.physics.player = this.c.player;
     if (machine) {
       if (s.riding) machine.pose.anchored = false;
       this.physics.step(machine, dt, input, s.riding, s.airborne);
-    } else s.riding = s.airborne = false;
+    } else {
+      s.riding = s.airborne = false;
+      this.physics.step(null, dt);
+    }
     if (s.riding) this.c.player.flying = false;
     return { ...input, speedScale: 1 };
   }
   afterStep(dt) {
     const { model: s, inventory, player: p } = this.c;
-    if (
-      !s.riding &&
-      s.machine?.pose.region === s.key &&
-      this.previous &&
-      !p.flying
-    )
+    if (!s.riding && this.previous && !p.flying)
       this.physics.moveCharacter(this.previous, p);
     if (s.riding && s.machine?.pose) {
       const seat = worldPoint(s.machine.pose, { x: 0, y: 1.05, z: 0 });

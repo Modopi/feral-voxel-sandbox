@@ -1,0 +1,2 @@
+FERAL 0.10.0 (1000), minimum native 303
+Update ready: Feral-0.10.0-update.feral, 2857275 bytes, 67 verified files

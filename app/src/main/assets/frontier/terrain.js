@@ -131,8 +131,39 @@ export function frontierWorld(seed, info) {
         world.rescan(x, z);
       }
   }
+  // A material playground in new regions: these are ordinary terrain cells,
+  // so cutting their supports, salvaging, carrying and rebuilding use the same rules.
+  if ((info.terrainVersion ?? 3) >= 3) {
+    const base = pad(94, 102, 5, B.DIRT),
+      hy = base * 2;
+    const fine = (x, y, z, b) => world.setCell(x, hy + y, z, b);
+    // Trestle bridge: both supports must be cut before the deck becomes one body.
+    for (const x of [180, 188])
+      for (let y = 0; y < 4; y++) fine(x, y, 198, B.WOOD);
+    for (let x = 180; x <= 188; x++)
+      for (let z = 197; z <= 199; z++) fine(x, 4, z, B.PLANK);
+    // Heavy ore head on a narrow removable stem.
+    for (let y = 0; y < 4; y++) fine(196, y, 200, B.WOOD);
+    for (let x = 195; x <= 197; x++)
+      for (let z = 199; z <= 201; z++)
+        for (let y = 4; y < 6; y++) fine(x, y, z, B.ORE);
+    // Hollow crate with a single support; its hollow collision volume remains hollow.
+    fine(184, 0, 210, B.WOOD);
+    for (let x = 182; x <= 186; x++)
+      for (let z = 208; z <= 212; z++)
+        for (let y = 1; y <= 4; y++)
+          if (y === 1 || x === 182 || x === 186 || z === 208 || z === 212)
+            fine(x, y, z, B.PLANK);
+    // Long timber: a light reusable beam for ramps, bridges and vehicle cargo.
+    for (let x = 192; x <= 199; x++) fine(x, 2, 211, B.WOOD);
+    for (let y = 0; y < 2; y++) fine(196, y, 211, B.WOOD);
+    world.workyard = { x: 94, z: 102, y: base };
+  }
   world.landmarks = [
     { name: "원정 야영지", x: 77, z: 84 },
+    ...(world.workyard
+      ? [{ name: "해체·운반 작업장", ...world.workyard }]
+      : []),
     ...info.villages.map((v) => ({ name: v.name, x: v.x, z: v.z })),
     { name: "동력 유적", ...d },
     { name: "수호자 둥지", ...p },

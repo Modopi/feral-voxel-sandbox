@@ -1,0 +1,33 @@
+{
+  "touchRotationAndCancel": true,
+  "poses": [
+    "walk",
+    "run",
+    "crouch",
+    "crawl",
+    "wave",
+    "idle"
+  ],
+  "portraitContextReused": true,
+  "portraitViewport": [
+    360,
+    740
+  ],
+  "armorAndHands": true,
+  "emptyHandPreview": true,
+  "npcRoles": [
+    0,
+    1,
+    2
+  ],
+  "repeatTargetPassPreservesWalk": true,
+  "closeupRender": {
+    "drawCalls": 77,
+    "triangles": 2642
+  },
+  "animalInstances": {
+    "near": 168,
+    "details": 459
+  },
+  "errors": []
+}

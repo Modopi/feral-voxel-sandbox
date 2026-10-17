@@ -1,3 +1,24 @@
+import { impactEnergy, impactHealth } from "./impact.js";
+import { LooseView } from "./loose-view.js";
+import { AssemblyPhysics } from "./machine/assembly-physics.js";
+let looseUI,
+  islandPhysics,
+  wasLooseAim = false;
+function currentPhysics() {
+  return frontierUI?.motion.physics || islandPhysics;
+}
+function preparePhysics() {
+  if (frontierUI) {
+    frontierUI.motion.prepare();
+    return currentPhysics();
+  }
+  if (islandPhysics?.terrain !== world) {
+    islandPhysics?.dispose();
+    islandPhysics = new AssemblyPhysics(world);
+  }
+  return islandPhysics;
+}
+import { animalBodyInfo } from "./animal-skeleton.js";
 import { uiIcon, installHUDArt } from "./ui-art.js";
 import { InventoryUI } from "./inventory-ui.js";
 import { HudEditor } from "./hud-editor.js";
@@ -404,6 +425,11 @@ function updateToolLabel() {
     $("useBtn").querySelector("small").textContent = "고정 전환";
     $("toolHelp").textContent = "공격: 회수 · 사용: 고정/해제";
   }
+  if (id === "grapple") {
+    $("useBtn").querySelector("small").textContent = "집기";
+    $("actBtn").querySelector("small").textContent = "던지기";
+    $("toolHelp").textContent = "분리 물체 · 사용: 집기/놓기 · 공격: 던지기";
+  }
   if (id === "iron")
     $("useBtn").querySelector("small").textContent = "부품 수리";
   view?.setHeldItem(id);
@@ -502,14 +528,34 @@ function target() {
     world.time,
   );
   const object = frontierUI?.objectTarget(range);
+  const assemblyDistance = frontierUI?.assembly.ray(
+    Math.min(
+      range,
+      block?.distance ?? range,
+      ent?.distance ?? range,
+      object?.distance ?? range,
+    ),
+  )?.distance;
+  const loose = world.loose.raycast(
+    view.camera.position,
+    d,
+    Math.min(
+      6.5,
+      block?.distance ?? range,
+      ent?.distance ?? range,
+      object?.distance ?? range,
+      assemblyDistance ?? range,
+    ),
+  );
   return {
+    loose,
     block,
     ent: object && object.distance < (ent?.distance ?? Infinity) ? null : ent,
     object:
       object && object.distance < (ent?.distance ?? Infinity) ? object : null,
   };
 }
-function use(intent = "selected") {
+function use(intent = "selected", repeated = false) {
   if (!running || paused) return;
   const held = heldItem();
   const aimed = target();
@@ -519,6 +565,11 @@ function use(intent = "selected") {
     !inventory.wear[held]
   ) {
     toast("도구가 부서졌습니다. 가방에서 수리하거나 다른 아이템을 선택하세요.");
+    return;
+  }
+  if (looseUI?.use(aimed.loose, intent, held, repeated)) {
+    syncHeld();
+    updateAim();
     return;
   }
   if (
@@ -541,6 +592,8 @@ function use(intent = "selected") {
       world.time +
       (intent === "secondary" ? 0.5 : activeGear(inventory, "weapon").cooldown);
     if (intent === "secondary") frontierUI.interact(aimed.object);
+    else if (aimed.object.kind === "body")
+      frontierUI.damageTraining(aimed.object, held);
     else if (aimed.object.kind === "boss" && GEAR[held]?.slot === "weapon") {
       if (!frontierUI.use(1)) toast("무기의 사거리 안으로 다가가세요.");
     } else
@@ -656,7 +709,9 @@ function use(intent = "selected") {
       toast(
         e.dead
           ? `${SPECIES[e.type].name} 처치 · ${e.deathCause}`
-          : `피해 ${Math.ceil(before - e.hp)} · 체력 ${Math.ceil(e.hp)}/${e.maxHP}${ent.part === 1 ? " · 머리 치명타" : ""}`,
+          : ent.layer === "structure"
+            ? `골격 타격 · 피해 ${Math.ceil(before - e.hp)} · ${e.bodyPose.label}`
+            : `외피 파손 · 골격 보존 · ${e.bodyPose.label}`,
       );
       document.getElementById("crosshair")?.animate(
         [
@@ -784,6 +839,7 @@ function stopInput() {
   look.id = null;
   actionHeld = false;
   useHeld = false;
+  currentPhysics()?.loose.release();
   $("knob").style.transform = "";
 }
 function pause(force) {
@@ -1090,8 +1146,71 @@ function setPopulation(n = 3000) {
 }
 function fixedStep(input = inputState()) {
   world.time += FIXED_DT;
-  controller.obstructed = (p, h) =>
-    frontierUI?.motion.physics?.characterObstructed(p, h);
+  world.loose.enabled = true;
+  world.loose.tick();
+  const activePhysics =
+    frontierUI || world.loose.bodies.length ? preparePhysics() : null;
+  const before = { x: player.x, y: player.y, z: player.z, vy: player.vy };
+  if (activePhysics) {
+    activePhysics.player = player;
+    const near = eco.entities.filter(
+      (e) => !e.dead && Math.hypot(e.x - player.x, e.z - player.z) < 30,
+    );
+    activePhysics.impactActors = [
+      ...(!player.flying && !frontierState?.riding
+        ? [
+            {
+              id: "player",
+              key: player,
+              mass: 80,
+              radius: BODY_RADIUS,
+              height: bodyHeight(player),
+              position: {
+                x: player.x,
+                y: player.y + bodyHeight(player) / 2,
+                z: player.z,
+              },
+            },
+          ]
+        : []),
+      ...near.map((e) => ({
+        id: "animal:" + e.id,
+        key: e,
+        entity: e,
+        mass: e.type === 2 ? 8 : 90,
+        radius: e.type === 2 ? 0.2 : 0.42,
+        height: e.type === 2 ? 0.5 : 1.3,
+        position: {
+          x: e.x,
+          y: e.y + (e.bodyPose?.drop || 0) + (e.type === 2 ? 0.25 : 0.65),
+          z: e.z,
+        },
+      })),
+    ];
+    activePhysics.onVoxelImpact = (b, p) => {
+      const item = resourceForBlock(b);
+      if (item) loot.spawn(item, 1, p.x, p.y, p.z);
+    };
+    activePhysics.onActorImpact = (a, hit) => {
+      if (a.entity) eco.impact(a.entity, hit.point, hit.energy, world.time);
+      else if (frontierState) {
+        const amount = impactHealth(hit.energy);
+        frontierState.damagePlayer(amount, inventory);
+        toast(
+          `물체 충돌 −${Math.ceil(amount)} · 속도 ${hit.speed.toFixed(1)} m/s`,
+        );
+      }
+    };
+    const d = new T.Vector3();
+    view.camera.getWorldDirection(d);
+    activePhysics.loose.aim = {
+      origin: { x: player.x, y: player.y + controller.eye, z: player.z },
+      direction: d,
+    };
+
+    if (!frontierUI) activePhysics.step(null, FIXED_DT);
+  }
+  controller.obstructed = (p, h) => activePhysics?.characterObstructed(p, h);
   const vehicleInput = frontierUI?.beforeStep(input, FIXED_DT);
   let moving = 0;
   if (frontierState?.riding) {
@@ -1103,8 +1222,27 @@ function fixedStep(input = inputState()) {
       offset: 0,
       eye: EYE_HEIGHT,
     };
-  } else moving = controller.step(FIXED_DT, vehicleInput || input);
+  } else
+    moving = controller.step(FIXED_DT, {
+      ...(vehicleInput || input),
+      speedScale:
+        (vehicleInput?.speedScale || input.speedScale || 1) *
+        (activePhysics?.loose.speedScale || 1),
+    });
   frontierUI?.afterStep(FIXED_DT);
+  if (!frontierUI && activePhysics && !player.flying)
+    activePhysics.moveCharacter(before, player);
+  if (
+    frontierState &&
+    !player.flying &&
+    !frontierState.riding &&
+    player.grounded &&
+    before.vy < -8
+  ) {
+    const amount = impactHealth(impactEnergy(80, Infinity, -before.vy, 8));
+    frontierState.damagePlayer(amount, inventory);
+    toast(`낙하 충격 −${Math.ceil(amount)}`);
+  }
   updateMovementHud();
   if (player.y < 0.25) home();
   eco.context = {
@@ -1137,7 +1275,16 @@ function fixedStep(input = inputState()) {
   return moving;
 }
 function updateAim() {
-  const { block, ent, object } = target();
+  const { block, ent, object, loose } = target();
+  if (wasLooseAim) {
+    updateToolLabel();
+    wasLooseAim = false;
+  }
+  if (looseUI?.aim(loose, heldItem())) {
+    wasLooseAim = true;
+    if (frontierUI) frontierUI.assembly.ghost.visible = false;
+    return;
+  }
   if (
     frontierUI?.assemblyAim(
       heldItem(),
@@ -1149,10 +1296,11 @@ function updateAim() {
   if (frontierUI?.objectAim(object)) return;
   const aimAction = actionHeld && !ent ? 2 : selected;
   if (ent) {
-    const e = ent.entity;
+    const e = ent.entity,
+      body = animalBodyInfo(e, SPECIES[e.type]);
     view.worldUI.set("focus", {
-      title: `${SPECIES[e.type].name} · ${SPECIES[e.type].parts[ent.part].name}`,
-      detail: `HP ${Math.ceil(e.hp)} / ${e.maxHP} · ${e.behavior || "배회"}`,
+      title: `${SPECIES[e.type].name} · ${SPECIES[e.type].parts[ent.part].name} · ${ent.layer === "structure" ? "골격" : "외피"}`,
+      detail: `외피 ${body.shell}% · 골격 ${body.structure}% · ${e.behavior || "배회"}`,
       hint: `사용: 관찰 · 씨앗: 먹이 · 회복약: 치료 · 지지 다리 ${eco.legs(e)}/4`,
       value: Math.ceil(e.hp),
       max: e.maxHP,
@@ -1273,11 +1421,11 @@ function frame(now) {
     actionCooldown -= dt;
     useCooldown -= dt;
     if (useHeld && useCooldown <= 0) {
-      use("secondary");
+      use("secondary", true);
       useCooldown = 0.35;
     }
     if (actionHeld && actionCooldown <= 0) {
-      use("primary");
+      use("primary", true);
       actionCooldown =
         selected === 1
           ? activeGear(inventory, "weapon").cooldown
@@ -1326,6 +1474,7 @@ function frame(now) {
     );
     view.environment(world.time);
     view.pickups(loot, world.time);
+    looseUI?.draw();
     frontierUI?.draw();
     view.draw(world.time, dt, moving);
   }
@@ -1371,6 +1520,13 @@ function refreshAPI() {
     selectHotbar,
     heldItem,
     use,
+    target,
+    get looseUI() {
+      return looseUI;
+    },
+    get physicalWorld() {
+      return currentPhysics();
+    },
     setPopulation,
     stats: () => ({
       ...eco.stats(),
@@ -1770,7 +1926,13 @@ try {
       save,
       interact: () => {
         const aimed = target();
-        if (aimed.ent || aimed.object) use("secondary");
+        if (
+          aimed.ent ||
+          aimed.object ||
+          aimed.loose ||
+          currentPhysics()?.loose.grip
+        )
+          use("secondary");
         else frontierUI.interact(null);
       },
       get running() {
@@ -1780,6 +1942,20 @@ try {
         return paused;
       },
     });
+  looseUI = new LooseView({
+    get world() {
+      return world;
+    },
+    get inventory() {
+      return inventory;
+    },
+    get loot() {
+      return loot;
+    },
+    view,
+    toast,
+    currentPhysics,
+  });
   view.camera.position.set(85, 25, 98);
   view.camera.lookAt(74, 13, 58);
   const settings = JSON.parse(localStorage.getItem("feral.settings") || "null");

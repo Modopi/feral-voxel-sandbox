@@ -76,14 +76,14 @@ test("burning wood consumes fuel and completes", () => {
   assert.equal(w.burning.size, 0);
   assert.equal(w.reactions.burned, 1);
 });
-test("voxel damage severs a limb and changes locomotion capability", () => {
+test("exposed internal joint damage severs a limb and changes locomotion capability", () => {
   const w = new World(),
     e = new Ecology(w),
     mob = e.spawn(0, 12, 12),
     p = SPECIES[0].parts[2];
   const pt = toWorld(mob, p, 2, cellPosition(p, 1), 0);
-  const count = e.damageHit({ entity: mob, part: 2, point: pt }, 0, 0.3);
-  assert.equal(count, 2);
+  const count = e.damageHit({ entity: mob, part: 2, point: pt,layer:"structure",node:"2:1" }, 0, 0.3,24);
+  assert.equal(count, 1);
   assert.equal(e.legs(mob), 3);
   assert.ok(mob.lost & (1 << 2));
   assert.equal(occupied(mob, 2, 0), false);

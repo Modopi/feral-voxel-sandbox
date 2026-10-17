@@ -109,7 +109,8 @@ fs.mkdirSync(out, { recursive: true });
       for (let x = 89; x <= 92; x++)
         for (let z = 87; z <= 93; z++)
           for (let y = 14; y <= 19; y++) f.world.set(x, y, z, 0);
-      f.world.set(90, 15, 88, 3);
+      // Mining persistence is tested on supported terrain; floating cells now become bodies.
+      for (let y = 1; y <= 15; y++) f.world.set(90, y, 88, 3);
       f.player.flying = true;
       f.setCamera(90.25, 15.25, 91, 0, 0);
       f.selectHotbar(0);
@@ -213,7 +214,10 @@ fs.mkdirSync(out, { recursive: true });
     await page.waitForTimeout(800);
     const timber = await page.evaluate(() => FERAL.inventory.count("wood"));
     await tap("#useBtn");
-    await page.waitForFunction(n => FERAL.inventory.count("wood") === n + 4, timber);
+    await page.waitForFunction(
+      (n) => FERAL.inventory.count("wood") === n + 4,
+      timber,
+    );
     await page.screenshot({ path: out + "/field-gathering.png" });
     await aim("npc");
     await page.waitForTimeout(600);
@@ -360,9 +364,18 @@ fs.mkdirSync(out, { recursive: true });
     );
     console.log(report);
   } catch (e) {
-    if(global.debugPage) {
-      console.log(await global.debugPage.evaluate(() => ({feedback:document.getElementById("frontierFeedback").textContent,toast:document.getElementById("toast")?.textContent,items:FERAL.inventory.items,contracts:FERAL.frontier.region.contracts,player:FERAL.player,conversation:FERAL.frontierUI.conversation})));
-      await global.debugPage.screenshot({path:out+"/failure.png"});
+    if (global.debugPage) {
+      console.log(
+        await global.debugPage.evaluate(() => ({
+          feedback: document.getElementById("frontierFeedback").textContent,
+          toast: document.getElementById("toast")?.textContent,
+          items: FERAL.inventory.items,
+          contracts: FERAL.frontier.region.contracts,
+          player: FERAL.player,
+          conversation: FERAL.frontierUI.conversation,
+        })),
+      );
+      await global.debugPage.screenshot({ path: out + "/failure.png" });
     }
     throw e;
   } finally {

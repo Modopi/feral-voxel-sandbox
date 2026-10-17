@@ -50,10 +50,24 @@ ITEMS.wrench = {
   limit: 1,
   frontier: true,
 };
+ITEMS.grapple = {
+  name: "운반 집게",
+  color: 0x83c8ba,
+  assemblyTool: true,
+  limit: 1,
+};
 export const SLOT_COUNT = 36,
   STACK_LIMIT = 64;
 export const stackLimit = (id) => ITEMS[id]?.limit || STACK_LIMIT;
 export const RECIPES = [
+  {
+    id: "grapple",
+    name: "운반 집게",
+    description:
+      "분리된 지형 집기·운반·던지기 · 사용: 집기/놓기 · 공격: 던지기",
+    cost: { wood: 2, fiber: 2, crystal: 1 },
+    give: { grapple: 1 },
+  },
   {
     id: "stew",
     name: "야채 스튜",

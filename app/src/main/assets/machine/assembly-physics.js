@@ -1,3 +1,5 @@
+import { ImpactPhysics } from "../impact-physics.js";
+import { LoosePhysics } from "../loose-physics.js";
 import {
   AIRFOILS,
   panelForce,
@@ -7,7 +9,7 @@ import {
 import R from "../vendor/rapier/rapier.js";
 import { bodyHeight, BODY_RADIUS } from "../physics.js";
 import { components } from "../structure.js";
-import { createLab, TYPES, evaluate, damage } from "./model.js";
+import { createLab, TYPES, evaluate } from "./model.js";
 import { initialPose, rotate, worldPoint } from "./assembly-state.js";
 await R.init();
 const vector = (v) => ({ x: v.x, y: v.y, z: v.z });
@@ -21,6 +23,8 @@ export class AssemblyPhysics {
     this.bodies = new Map();
     this.colliders = new Map();
     this.ground = [];
+    this.loose = new LoosePhysics(this);
+    this.impacts = new ImpactPhysics(this);
     this.clock = 0;
     this.wind = { x: 0, y: 0, z: 0 };
     this.throttle = 0;
@@ -86,7 +90,13 @@ export class AssemblyPhysics {
       y: player.y - before.y,
       z: player.z - before.z,
     };
-    this.character.computeColliderMovement(this.characterCollider, delta);
+    this.character.computeColliderMovement(
+      this.characterCollider,
+      delta,
+      undefined,
+      undefined,
+      (c) => this.impacts.actorHandles.get(c.handle)?.spec.id !== "player",
+    );
     const move = this.character.computedMovement();
     player.x = before.x + move.x;
     player.y = before.y + move.y;
@@ -221,7 +231,12 @@ export class AssemblyPhysics {
   }
   terrainAround(s) {
     const tiles = new Set();
-    for (const obj of [s, ...(s.fragments || [])]) {
+    for (const obj of [
+      s,
+      ...(s.fragments || []),
+      ...(this.terrain.loose?.bodies || []),
+      ...(this.player ? [{ pose: { position: this.player } }] : []),
+    ]) {
       const p = obj.pose.position,
         cx = Math.floor(p.x / 8),
         cz = Math.floor(p.z / 8);
@@ -360,8 +375,28 @@ export class AssemblyPhysics {
     }
     return { lift, drag, stalled: wings > 0 && stalled / wings >= 0.5 };
   }
+  stepLoose(dt) {
+    for (const [s, entry] of this.bodies) {
+      for (const h of entry.parts.keys()) this.colliders.delete(h);
+      this.world.removeRigidBody(entry.body);
+    }
+    this.bodies.clear();
+    this.loose.before(dt);
+    this.terrainAround({
+      pose: { position: this.player || { x: 80, y: 15, z: 80 } },
+    });
+    this.impacts.before(dt);
+    this.world.timestep = dt;
+    this.world.step(this.events);
+    this.events.drainContactForceEvents((event) => this.impacts.collect(event));
+    this.loose.after();
+    this.impacts.flush();
+  }
   step(s, dt, input = {}, riding = false, airborne = false) {
-    if (!s?.pose) return;
+    if (!s?.pose) {
+      this.stepLoose(dt);
+      return;
+    }
     this.clock += dt;
     this.split(s);
     const active = [s, ...(s.fragments || [])];
@@ -373,6 +408,7 @@ export class AssemblyPhysics {
       }
     const entry = this.sync(s);
     for (const fragment of s.fragments || []) this.sync(fragment);
+    this.loose.before(dt);
     this.terrainAround(s);
     for (const obj of active) {
       const body = this.bodies.get(obj).body;
@@ -501,22 +537,13 @@ export class AssemblyPhysics {
           );
       }
     }
+    this.impacts.before(dt);
     this.world.timestep = dt;
     this.world.step(this.events);
-    this.events.drainContactForceEvents((event) => {
-      for (const handle of [event.collider1(), event.collider2()]) {
-        const hit = this.colliders.get(handle);
-        if (hit && this.clock >= (hit.s.impactAt || 0)) {
-          damage(
-            hit.s,
-            hit.part.id,
-            Math.min(50, (event.totalForceMagnitude() - 4000) * dt * 0.03),
-          );
-          hit.s.impactAt = this.clock + 0.4;
-        }
-      }
-    });
+    this.events.drainContactForceEvents((event) => this.impacts.collect(event));
     for (const obj of active) this.snapshot(obj, this.bodies.get(obj).body);
+    this.loose.after();
+    this.impacts.flush();
     const v = body.linvel();
     this.speed = Math.hypot(
       v.x - this.wind.x,

@@ -86,6 +86,15 @@ export function itemArt(id) {
         '<path d="M6 15v9m4-7v9m11-9v8m4-10v8" stroke="#503a25" stroke-width="1.5"/>';
     if (item.machinePart)
       body += rect(10, 13, 10, 10, "#273537") + rect(13, 16, 4, 4, color);
+  } else if (id === "grapple") {
+    body =
+      rect(13, 14, 6, 16, "#5b7875") +
+      rect(10, 10, 12, 8, "#8ee5d0") +
+      rect(4, 4, 5, 15, "#b6c6bd") +
+      rect(23, 4, 5, 15, "#b6c6bd") +
+      rect(7, 17, 18, 5, "#789d91") +
+      rect(8, 3, 4, 4, "#d9c18c") +
+      rect(20, 3, 4, 4, "#d9c18c");
   } else if (item.assemblyTool) {
     body =
       rect(13, 12, 6, 17, "#bfcad1") +

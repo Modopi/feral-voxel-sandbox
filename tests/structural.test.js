@@ -44,11 +44,12 @@ function cut(eco, e, part, voxel) {
       entity: e,
       part,
       voxel,
+      layer: "structure", node: `${part}:${voxel}`,
       point: toWorld(e, p, part, cellPosition(p, voxel), 0),
     },
     0,
     0.01,
-    0,
+    24,
   );
 }
 function machine(y = 10.06) {
@@ -258,7 +259,9 @@ test("old saves with destroyed body attachment points cannot retain functional f
   // Remove the lower left/front body cell adjacent to the left front hip.
   e.damage[0][0] = 0;
   const loaded = new Ecology(flat());
-  loaded.load(JSON.parse(JSON.stringify(eco.save())));
+  const legacy=JSON.parse(JSON.stringify(eco.save()));
+  delete legacy.entities[0].structure;
+  loaded.load(legacy);
   assert.ok(loaded.entities[0].lost & (1 << 2));
   assert.equal(condition(loaded.entities[0]).legs, 3);
 });

@@ -1,3 +1,8 @@
+import {
+  animalSkeleton,
+  animalStructure,
+  bonePieces,
+} from "./animal-skeleton.js";
 import { voxelComponents, massProperties } from "./structure.js";
 // Leg function requires an unbroken path from its attachment layer to its foot.
 export function limbSupport(mask, dims) {
@@ -15,6 +20,11 @@ export function attachmentIntact(e, species, pi) {
   const child = species.parts[pi],
     parent = species.parts[child.parent];
   if (!parent) return true;
+  if (e.structure) {
+    const model = animalSkeleton(species),
+      anchor = model.attachments[pi];
+    return !anchor || animalStructure(e, species).connected.has(anchor);
+  }
   if (e.lost & (1 << child.parent)) return false;
   if (!e.damage[child.parent]) return true;
   let indices = attachmentCells.get(child);
@@ -52,7 +62,13 @@ export function anatomy(e, species) {
       );
     if (p.leg)
       support.push(
-        attachmentIntact(e, species, pi) ? limbSupport(mask, p.dims) : 0,
+        e.structure
+          ? animalStructure(e, species).functions[`leg${pi}`]
+            ? 1
+            : 0
+          : attachmentIntact(e, species, pi)
+            ? limbSupport(mask, p.dims)
+            : 0,
       );
     for (let j = 0; j < mask.length; j++)
       if (mask[j]) {
@@ -68,6 +84,17 @@ export function anatomy(e, species) {
         });
       }
   }
+  if (e.structure)
+    for (const b of bonePieces(e, species)) {
+      const p = species.parts[b.part];
+      cells.push({
+        x: p.offset[0] + b.at[0],
+        y: p.offset[1] + b.at[1],
+        z: p.offset[2] + b.at[2],
+        mass: b.size[0] * b.size[1] * b.size[2] * 1400,
+        size: Math.min(...b.size),
+      });
+    }
   const legs = support.reduce((a, b) => a + b, 0),
     left = support[0] + support[2],
     right = support[1] + support[3],
