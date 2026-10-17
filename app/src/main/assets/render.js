@@ -1,14 +1,16 @@
+import { terrainMaterial, Atmosphere } from "./art-direction.js";
 import { ITEMS } from "./inventory.js";
 import { WorldUI } from "./world-ui.js";
 import * as T from "./vendor/three.module.js";
 import { SIZE, HEIGHT, CHUNK, COLORS, B, hash, clamp } from "./world.js";
 import { SPECIES, cellPosition, toWorld, occupied, pose } from "./entities.js";
 export { T };
-function geometry(positions, normals, colors) {
+function geometry(positions, normals, colors, materials) {
   const g = new T.BufferGeometry();
   g.setAttribute("position", new T.Float32BufferAttribute(positions, 3));
   g.setAttribute("normal", new T.Float32BufferAttribute(normals, 3));
   g.setAttribute("color", new T.Float32BufferAttribute(colors, 3));
+  g.setAttribute("materialKind", new T.Float32BufferAttribute(materials, 1));
   g.computeBoundingSphere();
   return g;
 }
@@ -17,6 +19,7 @@ export function chunkGeometry(w, cx, cz) {
   const positions = [],
     normals = [],
     colors = [],
+    materials = [],
     dims = [CHUNK, HEIGHT, CHUNK],
     origin = [cx * CHUNK, 0, cz * CHUNK],
     mask = new Int16Array(CHUNK * HEIGHT),
@@ -28,7 +31,7 @@ export function chunkGeometry(w, cx, cz) {
       x = [0, 0, 0],
       q = [0, 0, 0];
     q[d] = 1;
-    for (x[d] = -1; x[d] < dims[d];) {
+    for (x[d] = -1; x[d] < dims[d]; ) {
       let n = 0;
       for (x[v] = 0; x[v] < dims[v]; x[v]++)
         for (x[u] = 0; x[u] < dims[u]; x[u]++) {
@@ -47,7 +50,7 @@ export function chunkGeometry(w, cx, cz) {
       x[d]++;
       n = 0;
       for (let j = 0; j < dims[v]; j++)
-        for (let i = 0; i < dims[u];) {
+        for (let i = 0; i < dims[u]; ) {
           const m = mask[n];
           if (!m) {
             i++;
@@ -85,6 +88,7 @@ export function chunkGeometry(w, cx, cz) {
               corners[k][2] + origin[2],
             );
             normals.push(...normal);
+            materials.push(Math.abs(m));
             colors.push(color.r * shade, color.g * shade, color.b * shade);
           }
           for (let yy = 0; yy < height; yy++)
@@ -132,56 +136,57 @@ export function chunkGeometry(w, cx, cz) {
           for (const k of order) {
             positions.push(...corners[k]);
             normals.push(...normal);
+            materials.push(mat);
             colors.push(color.r * shade, color.g * shade, color.b * shade);
           }
         }
     }
   }
-  return geometry(positions, normals, colors);
+  return geometry(positions, normals, colors, materials);
 }
 export class View {
   constructor(canvas, w) {
     this.world = w;
     this.renderer = new T.WebGLRenderer({
       canvas,
-      antialias: false,
+      antialias: true,
       alpha: false,
       powerPreference: "high-performance",
     });
     this.renderer.setClearColor(0xb2d5cf);
     this.renderer.outputColorSpace = T.SRGBColorSpace;
+    this.renderer.toneMapping = T.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.08;
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = T.PCFSoftShadowMap;
     this.scene = new T.Scene();
     this.scene.fog = new T.Fog(0xb2d5cf, 48, 112);
     this.camera = new T.PerspectiveCamera(82, 1, 0.04, 150);
     this.camera.rotation.order = "YXZ";
     this.scene.add(this.camera);
     this.worldUI = new WorldUI(this.scene, this.camera);
-    this.scene.add(new T.HemisphereLight(0xe7f3de, 0x596b59, 2.1));
+    this.ambientLight = new T.HemisphereLight(0xc9dfed, 0x4e583d, 1.35);
+    this.scene.add(this.ambientLight);
     this.sunLight = new T.DirectionalLight(0xffe3a8, 2.4);
     this.sunLight.position.set(-40, 75, 35);
     this.scene.add(this.sunLight);
-    this.terrainMaterial = new T.MeshLambertMaterial({ vertexColors: true });
-    this.terrainMaterial.onBeforeCompile = (s) => {
-      s.vertexShader = s.vertexShader.replace(
-        "#include <common>",
-        "#include <common>\nvarying vec3 vWorldCell;",
-      );
-      s.vertexShader = s.vertexShader.replace(
-        "#include <begin_vertex>",
-        "#include <begin_vertex>\nvWorldCell=position;",
-      );
-      s.fragmentShader = s.fragmentShader.replace(
-        "#include <common>",
-        "#include <common>\nvarying vec3 vWorldCell;",
-      );
-      s.fragmentShader = s.fragmentShader.replace(
-        "#include <color_fragment>",
-        "#include <color_fragment>\nvec3 p=floor(vWorldCell*4.0+0.005); float h=fract(sin(dot(p,vec3(12.9898,78.233,45.164)))*43758.5453); diffuseColor.rgb*=0.91+h*0.17;",
-      );
-    };
+    this.scene.add(this.sunLight.target);
+    this.sunLight.castShadow = true;
+    this.sunLight.shadow.mapSize.set(1024, 1024);
+    Object.assign(this.sunLight.shadow.camera, {
+      left: -28,
+      right: 28,
+      top: 28,
+      bottom: -28,
+      near: 1,
+      far: 135,
+    });
+    this.sunLight.shadow.bias = -0.0003;
+    this.sunLight.shadow.normalBias = 0.04;
+    this.terrainMaterial = terrainMaterial();
     this.chunks = new Map();
     this.cube = new T.BoxGeometry(1, 1, 1);
-    this.creatureMaterial = new T.MeshLambertMaterial();
+    this.creatureMaterial = new T.MeshStandardMaterial({ roughness: 0.88 });
     this.nearMesh = new T.InstancedMesh(
       this.cube,
       this.creatureMaterial,
@@ -191,21 +196,27 @@ export class View {
     this.nearMesh.count = 0;
     this.farMesh.count = 0;
     for (const m of [this.nearMesh, this.farMesh]) {
+      m.castShadow = true;
+      m.receiveShadow = true;
       m.frustumCulled = false;
       m.instanceMatrix.setUsage(T.DynamicDrawUsage);
       this.scene.add(m);
     }
     this.waterMesh = new T.InstancedMesh(
-      this.cube,
-      new T.MeshLambertMaterial({
+      new T.PlaneGeometry(1, 1).rotateX(-Math.PI / 2),
+      new T.MeshStandardMaterial({
+        roughness: 0.23,
+        metalness: 0.15,
+        side: T.DoubleSide,
         transparent: true,
-        opacity: 0.64,
+        opacity: 0.67,
         depthWrite: false,
       }),
       16000,
     );
     this.waterMesh.frustumCulled = false;
     this.waterMesh.count = 0;
+    this.waterMesh.receiveShadow = true;
     this.scene.add(this.waterMesh);
     this.flameMesh = new T.InstancedMesh(
       this.cube,
@@ -222,6 +233,7 @@ export class View {
     );
     this.grassMesh.count = 0;
     this.grassMesh.frustumCulled = false;
+    this.grassMesh.receiveShadow = true;
     this.scene.add(this.grassMesh);
     this.cloudMesh = new T.InstancedMesh(
       this.cube,
@@ -264,7 +276,7 @@ export class View {
     this.scene.add(this.highlight);
     this.pickupMesh = new T.InstancedMesh(
       this.cube,
-      new T.MeshLambertMaterial({ emissive: 0x182317 }),
+      new T.MeshStandardMaterial({ roughness: 0.8, emissive: 0x182317 }),
       600,
     );
     this.pickupMesh.count = 0;
@@ -280,6 +292,7 @@ export class View {
     this.detailLimit = 24;
     this.radius = 76;
     this.fluidFrame = 0;
+    this.atmosphere = new Atmosphere(this);
     this.makeTool();
     this.resize();
   }
@@ -287,7 +300,14 @@ export class View {
     this.tool = new T.Group();
     this.camera.add(this.tool);
     const add = (c, x, y, z, sx, sy, sz) => {
-      const m = new T.Mesh(this.cube, new T.MeshLambertMaterial({ color: c }));
+      const m = new T.Mesh(
+        this.cube,
+        new T.MeshStandardMaterial({
+          color: c,
+          roughness: 0.65,
+          metalness: 0.1,
+        }),
+      );
       m.position.set(x, y, z);
       m.scale.set(sx, sy, sz);
       this.tool.add(m);
@@ -324,7 +344,10 @@ export class View {
     if (!id) return;
     this.heldCube = new T.Mesh(
       this.cube,
-      new T.MeshLambertMaterial({ color: ITEMS[id]?.color || 0x9b7654 }),
+      new T.MeshStandardMaterial({
+        color: ITEMS[id]?.color || 0x9b7654,
+        roughness: 0.8,
+      }),
     );
     this.heldCube.scale.setScalar(
       ITEMS[id]?.block || ITEMS[id]?.machinePart ? 0.1 : 0.06,
@@ -350,7 +373,10 @@ export class View {
         ? 0xb6d6d3
         : 0x8c9b9c;
     const add = (color, x, y, z, sx, sy, sz) => {
-      const mesh = new T.Mesh(this.cube, new T.MeshLambertMaterial({ color }));
+      const mesh = new T.Mesh(
+        this.cube,
+        new T.MeshStandardMaterial({ color, roughness: 0.65, metalness: 0.1 }),
+      );
       mesh.position.set(x, y, z);
       mesh.scale.set(sx, sy, sz);
       this.tool.add(mesh);
@@ -396,7 +422,7 @@ export class View {
     this.renderer.setPixelRatio(
       Math.min(
         devicePixelRatio,
-        this.quality === "low" ? 1 : this.quality === "high" ? 1.8 : 1.35,
+        this.quality === "low" ? 1 : this.quality === "high" ? 2 : 1.5,
       ),
     );
     this.renderer.setSize(width, height, false);
@@ -405,6 +431,14 @@ export class View {
   }
   qualitySet(q) {
     this.quality = q;
+    this.renderer.shadowMap.enabled = q !== "low";
+    this.sunLight.castShadow = q !== "low";
+    const size = q === "high" ? 2048 : 1024;
+    if (this.sunLight.shadow.mapSize.x !== size) {
+      this.sunLight.shadow.map?.dispose();
+      this.sunLight.shadow.map = null;
+      this.sunLight.shadow.mapSize.set(size, size);
+    }
     this.detailLimit = q === "low" ? 10 : q === "high" ? 42 : 24;
     this.radius = q === "low" ? 48 : q === "high" ? 108 : 76;
     this.scene.fog.near = this.radius * 0.58;
@@ -428,6 +462,7 @@ export class View {
         chunkGeometry(this.world, cx, cz),
         this.terrainMaterial,
       );
+      mesh.castShadow = mesh.receiveShadow = true;
       this.chunks.set(id, mesh);
       this.scene.add(mesh);
       if (++n >= count) break;
@@ -573,8 +608,8 @@ export class View {
       this.instance(
         this.waterMesh,
         n++,
-        [x + 0.5, y + f.v / 2, z + 0.5],
-        [1.002, Math.max(0.01, f.v), 1.002],
+        [x + 0.5, y + f.v - 0.005, z + 0.5],
+        [1, 1, 1],
         a > 0.08 ? 0x97bb46 : 0x458e9e,
       );
       if (n >= 16000) break;
@@ -622,7 +657,7 @@ export class View {
           n++,
           [x + 0.3 + hash(x, z) * 0.4, h + scale / 2, z + 0.5],
           [0.08, scale, 0.25],
-          v > 0.6 ? 0x8da85d : 0x8b9255,
+          hash(x, z) > 0.92 ? 0xdac694 : v > 0.6 ? 0x96b477 : 0x889263,
           0,
           hash(x, z) * 6,
         );
@@ -656,7 +691,7 @@ export class View {
   draw(time, dt, moving = 0) {
     const day =
       0.5 + Math.sin(((((8 + time / 60) % 24) - 6) / 24) * Math.PI * 2) * 0.5;
-    this.sunLight.intensity = 1.2 + day * 1.4;
+    this.atmosphere.update(time, day);
     this.toolKick = Math.max(0, this.toolKick - dt * 6);
     this.tool.position.z = this.toolBase.z + this.toolKick * 0.035;
     this.tool.position.y =

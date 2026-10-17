@@ -1,3 +1,4 @@
+import { uiIcon, installHUDArt } from "./ui-art.js";
 import { InventoryUI } from "./inventory-ui.js";
 import { HudEditor } from "./hud-editor.js";
 import {
@@ -251,6 +252,7 @@ bagUI = new InventoryUI({
   renderHotbar,
 });
 renderHotbar();
+installHUDArt();
 function home() {
   Object.assign(player, {
     x: 77.5,
@@ -382,11 +384,13 @@ function updateToolLabel() {
     editSizeLabel(selected === 3 ? buildSize : miningSize) +
     " ↻";
   $("rangeBtn").classList.toggle("hidden", selected !== 2 && selected !== 3);
-  $("actBtn").firstChild.textContent = "⚒";
+  $("actBtn").innerHTML =
+    uiIcon(g?.slot === "weapon" ? "attack" : "tools") +
+    "<small>공격·캐기</small>";
   $("actBtn").querySelector("small").textContent = "공격·캐기";
   $("useBtn").querySelector("small").textContent = ITEMS[id]?.block
     ? `놓기 ×${buildSize === 1 ? 8 : 1}`
-    : id === "food" || id === "medicine"
+    : ["food", "medicine", "stew", "tonic"].includes(id)
       ? "먹기"
       : id === "seed"
         ? "먹이·심기"
@@ -566,7 +570,7 @@ function use(intent = "selected") {
     return;
   }
   if (intent === "secondary") {
-    if (["food", "medicine"].includes(held)) {
+    if (["food", "medicine", "stew", "tonic"].includes(held)) {
       if (world.time < nextStrike) return;
       nextStrike = world.time + 0.5;
       toast(
@@ -1649,6 +1653,11 @@ canvas.addEventListener(
 canvas.addEventListener("contextmenu", (e) => e.preventDefault());
 window.addEventListener("keydown", (e) => {
   if (hudEditor?.editing) return;
+  if (
+    e.code !== "Escape" &&
+    e.target.closest?.("input, textarea, select, [contenteditable=true]")
+  )
+    return;
   if (e.target.closest?.("#frontierPanel") && e.code !== "Escape") return;
   if (["Space", "Tab", "ArrowUp", "ArrowDown"].includes(e.code))
     e.preventDefault();

@@ -1,3 +1,7 @@
+import { uiIcon } from "../ui-art.js";
+import { CampaignView } from "./campaign-view.js";
+import { BIOMES, CROPS, biomeIndex } from "./campaign.js";
+import { PATTERNS, attackZones } from "./encounters.js";
 import {
   GATHERABLES,
   CONTRACTS,
@@ -63,7 +67,7 @@ export class FrontierView {
     panel.setAttribute("aria-modal", "true");
     panel.setAttribute("aria-labelledby", "frontierTitle");
     panel.innerHTML = `<div class="gameWindow"><header><h2 id="frontierTitle">원정 지도</h2><button id="frontierClose" aria-label="원정 장부 닫기">×</button></header>
-      <nav aria-label="원정 장부 메뉴"><button data-frontier-tab="journal" aria-label="캐릭터 상태"><b aria-hidden="true">♟</b><span>상태</span></button><button data-frontier-tab="map" aria-label="원정 지도"><b aria-hidden="true">▧</b><span>지도</span></button><button data-frontier-tab="society" aria-label="공동체"><b aria-hidden="true">⚑</b><span>마을</span></button><button data-frontier-tab="machine" aria-label="기계 조립"><b aria-hidden="true">⚒</b><span>기계</span></button></nav>
+      <nav aria-label="원정 장부 메뉴"><button data-frontier-tab="journey" aria-label="여정과 야영지"><b aria-hidden="true">◈</b><span>여정</span></button><button data-frontier-tab="journal" aria-label="캐릭터 상태"><b aria-hidden="true">♟</b><span>상태</span></button><button data-frontier-tab="map" aria-label="원정 지도"><b aria-hidden="true">▧</b><span>지도</span></button><button data-frontier-tab="society" aria-label="공동체"><b aria-hidden="true">⚑</b><span>마을</span></button><button data-frontier-tab="machine" aria-label="기계 조립"><b aria-hidden="true">⚒</b><span>기계</span></button></nav>
       <div id="frontierContent"></div><p id="frontierFeedback" role="status" aria-live="polite"></p></div>`;
     document.body.append(panel);
     $("journalBtn").onclick = () => this.open("map");
@@ -99,23 +103,50 @@ export class FrontierView {
     };
     $("flyBtn").setAttribute("aria-label", "차량 비행 전환");
     $("flyBtn").innerHTML = "◇<small>비행</small>";
+    for (const [tab, icon] of Object.entries({
+      journey: "journey",
+      journal: "person",
+      map: "map",
+      society: "village",
+      machine: "tools",
+    }))
+      panel.querySelector(`[data-frontier-tab="${tab}"] b`).innerHTML =
+        uiIcon(icon);
+    $("journalBtn").querySelector("span").innerHTML = uiIcon("map");
+    $("statusBtn").querySelector("span").innerHTML = uiIcon("person");
+    $("flyBtn").innerHTML = uiIcon("flight") + "<small>비행</small>";
     this.waypoint = ctx.model.region.villages[0];
+    this.campaignUI = new CampaignView(this);
   }
   box(parent, x, y, z, sx, sy, sz, color) {
     let mat = this.materials.get(color);
     if (!mat) {
-      mat = new T.MeshLambertMaterial({ color });
+      mat = new T.MeshStandardMaterial({
+        color,
+        roughness: 0.8,
+        metalness: 0.04,
+      });
       this.materials.set(color, mat);
     }
     const mesh = new T.Mesh(this.cube, mat);
     mesh.position.set(x, y, z);
     mesh.scale.set(sx, sy, sz);
+    mesh.castShadow = mesh.receiveShadow = true;
     parent.add(mesh);
     return mesh;
   }
   resetScene() {
     this.c.view.worldUI.clear();
     for (const { light } of this.relayMeshes) light.material.dispose();
+    this.bossCore?.material.dispose();
+    this.campaignUI?.lamps?.forEach((m) => m.material.dispose());
+    this.campaignUI?.beam?.material.dispose();
+    this.warning?.geometry.dispose();
+    this.warning?.material.dispose();
+    this.warningGroup?.children.forEach((m) => {
+      m.geometry.dispose();
+      m.material.dispose();
+    });
     this.group.clear();
     this.npcs = [];
     this.targets = [];
@@ -152,7 +183,42 @@ export class FrontierView {
         this.box(group, 0, 1.2, 0, 0.3, 0.3, 0.3, 0xdac4a0);
         this.box(group, -0.13, 0.2, 0, 0.16, 0.4, 0.2, 0x3e4b41);
         this.box(group, 0.13, 0.2, 0, 0.16, 0.4, 0.2, 0x3e4b41);
-        this.npcs.push({ group, v, i });
+        const arms = [-1, 1].map((side) =>
+          this.box(group, side * 0.31, 0.68, 0, 0.16, 0.62, 0.2, 0x697d69),
+        );
+        this.box(group, 0, 0.31, 0.03, 0.42, 0.1, 0.31, 0x3d4e4d);
+        for (const side of [-1, 1])
+          this.box(
+            group,
+            side * 0.08,
+            1.22,
+            0.155,
+            0.045,
+            0.045,
+            0.025,
+            0x273b39,
+          );
+        this.box(
+          group,
+          0,
+          1.38,
+          0,
+          0.36,
+          0.09,
+          0.36,
+          [0x747c52, 0xc7ceaf, 0x8b6a47][i],
+        );
+        this.box(
+          group,
+          i === 2 ? 0.25 : 0,
+          0.72,
+          0.18,
+          i === 2 ? 0.18 : 0.27,
+          0.34,
+          0.07,
+          [0xbfa06a, 0xc5d1b3, 0xab8356][i],
+        );
+        this.npcs.push({ group, v, i, arms });
         this.registerTarget(group, {
           kind: "npc",
           village: v,
@@ -170,10 +236,55 @@ export class FrontierView {
     this.group.add(this.boss);
     this.registerTarget(this.boss, {
       kind: "boss",
-      name: ["", "이끼 수호자", "구리 거신", "심연 파수꾼"][s.info.tier],
+      name: BIOMES[s.info.biome].boss,
     });
-    this.bossCore = this.box(this.boss, 0, 1.8, 0, 1.7, 2, 1.2, 0x607b77);
+    this.bossCore = this.box(
+      this.boss,
+      0,
+      1.8,
+      0,
+      1.7,
+      2,
+      1.2,
+      BIOMES[s.info.biome].color,
+    );
     this.box(this.boss, 0, 3.2, 0, 1.1, 0.8, 0.9, 0xd4b968);
+    this.bossCore.material = this.bossCore.material.clone();
+    this.bossCore.material.emissive.setHex(BIOMES[s.info.biome].color);
+    this.bossCore.material.emissiveIntensity = 0.08;
+    this.box(this.boss, 0, 3.22, 0.47, 0.55, 0.12, 0.05, 0x9ee4d8);
+    for (const side of [-1, 1]) {
+      if (s.info.biome === 0) {
+        this.box(this.boss, side * 0.65, 3.8, 0, 0.2, 1.2, 0.2, 0x836a48);
+        this.box(this.boss, side * 0.95, 4.2, 0, 0.7, 0.15, 0.18, 0xb4c187);
+      } else if (s.info.biome === 1) {
+        const shoulder = this.box(
+          this.boss,
+          side * 1.2,
+          2.5,
+          0,
+          0.9,
+          0.7,
+          1,
+          0xa77b58,
+        );
+        shoulder.rotation.z = side * 0.18;
+        this.box(this.boss, side * 0.8, 3.3, 0, 0.6, 0.4, 0.7, 0x6e7b7c);
+      } else {
+        const fin = this.box(
+          this.boss,
+          side * 1.3,
+          2.5,
+          0,
+          0.3,
+          2.3,
+          0.7,
+          0x7bb6c3,
+        );
+        fin.rotation.z = side * 0.4;
+      }
+    }
+
     this.bossLimbs = [-1, 1].map((side) =>
       this.box(this.boss, side * 1.15, 1.8, 0, 0.55, 1.7, 0.6, 0x40534e),
     );
@@ -191,6 +302,9 @@ export class FrontierView {
     );
     this.warning.rotation.x = -Math.PI / 2;
     this.group.add(this.warning);
+    this.warningGroup = new T.Group();
+    this.group.add(this.warningGroup);
+    this.warningKey = null;
     this.beacon = this.box(this.group, 0, 0, 0, 0.18, 6, 0.18, 0xe5c56f);
     const d = s.info.dungeon;
     this.cache = this.box(
@@ -246,6 +360,26 @@ export class FrontierView {
         this.box(growth, 0, 0.65, 0, 0.25, 1.3, 0.25, 0x805738);
         this.box(growth, 0, 1.5, 0, 1.1, 0.8, 1.1, def.color);
       }
+      if (site.kind === "berry") {
+        growth.clear();
+        this.box(growth, 0, 0.42, 0, 0.9, 0.7, 0.85, 0x597a51);
+        for (const [x, z] of [
+          [-0.3, 0.4],
+          [0.25, 0.37],
+          [0.25, -0.3],
+        ])
+          this.box(growth, x, 0.62, z, 0.18, 0.18, 0.18, 0xc76b77);
+      } else if (site.kind === "herb") {
+        for (const x of [-0.22, 0.2, 0])
+          this.box(growth, x, 0.94, 0, 0.2, 0.09, 0.2, 0xd8dbbc);
+      } else if (site.kind === "scrap") {
+        growth.children.forEach((m, i) => {
+          m.rotation.z = (i - 1) * 0.5;
+          m.scale.y *= 0.65;
+        });
+        this.box(growth, 0, 0.23, 0.2, 0.9, 0.15, 0.25, 0x7f9394);
+      } else if (site.kind === "crystal")
+        growth.children.forEach((m, i) => (m.rotation.z = (i - 1) * 0.25));
       this.resourceMeshes.push({ root, growth, site });
       this.registerTarget(root, { kind: "resource", site, name: def.name });
     }
@@ -255,17 +389,26 @@ export class FrontierView {
     this.group.add(this.support);
     this.box(this.support, 0, 0.8, 0, 0.5, 1, 0.4, 0xaacb85);
     this.box(this.support, 0, 1.5, 0, 0.3, 0.35, 0.3, 0xe4cfa6);
+    this.campaignUI.reset();
     this.draw();
   }
   draw() {
     this.updateTargets();
     this.assembly.draw();
+    this.campaignUI.update();
   }
   updateTargets() {
     const { model: s, world, player: p } = this.c;
     if (!this.boss) return;
-    for (const { group, v, i } of this.npcs) {
+    for (const { group, v, i, arms } of this.npcs) {
       const t = s.time * 0.18 + i * 2;
+      arms.forEach(
+        (arm, index) =>
+          (arm.rotation.x =
+            distance(p, group.position) > 4
+              ? Math.sin(s.time * 2 + index * Math.PI) * 0.2
+              : 0),
+      );
       if (!group.userData.placed || distance(p, group.position) > 4) {
         group.position.set(
           v.x + Math.cos(t) * 3,
@@ -280,7 +423,7 @@ export class FrontierView {
           p.z - group.position.z,
         );
     }
-    const b = s.region.boss;
+    const b = s.activeBoss;
     this.boss.visible = !b.defeated;
     this.boss.position.set(b.x, world.surface(b.x, b.z), b.z);
     this.boss.rotation.y = Math.atan2(p.x - b.x, p.z - b.z);
@@ -288,7 +431,38 @@ export class FrontierView {
       m.rotation.x = Math.sin(s.time * 3 + i) * 0.2;
       m.visible = b.hp / b.maxHP > (i === 0 ? 0.2 : 0.4);
     });
-    this.warning.visible = b.warning > 0;
+    this.warning.visible = false;
+    this.warningGroup.visible = b.warning > 0;
+    const key =
+      b.warning > 0 ? `${b.phase}/${b.pattern}/${b.aimX}/${b.aimZ}` : null;
+    if (key && key !== this.warningKey) {
+      for (const m of this.warningGroup.children) {
+        m.geometry.dispose();
+        m.material.dispose();
+      }
+      this.warningGroup.clear();
+      for (const zone of attackZones(b)) {
+        const geometry =
+          zone.type === "circle"
+            ? new T.RingGeometry(Math.max(0.05, zone.inner), zone.outer, 32)
+            : new T.PlaneGeometry(zone.width, zone.length);
+        const mesh = new T.Mesh(
+          geometry,
+          new T.MeshBasicMaterial({
+            color: 0xff634b,
+            transparent: true,
+            opacity: 0.55,
+            side: T.DoubleSide,
+            depthWrite: false,
+          }),
+        );
+        mesh.rotation.x = -Math.PI / 2;
+        if (zone.type === "line") mesh.rotation.z = zone.angle;
+        mesh.position.set(zone.x, world.surface(zone.x, zone.z) + 0.06, zone.z);
+        this.warningGroup.add(mesh);
+      }
+    }
+    this.warningKey = key;
     this.warning.position.set(
       b.aimX,
       world.surface(b.aimX, b.aimZ) + 0.04,
@@ -358,7 +532,8 @@ export class FrontierView {
         data = null;
       while (root) {
         if (!root.visible) visible = false;
-        if (root.userData.interaction) data = root.userData.interaction;
+        if (!data && root.userData.interaction)
+          data = root.userData.interaction;
         root = root.parent;
       }
       if (visible && data)
@@ -406,11 +581,25 @@ export class FrontierView {
     } else if (hit.kind === "npc") {
       detail = `${FACTIONS[hit.village.faction]} · 평판 ${s.reputation[hit.village.faction]}`;
       hint = "사용 · 대화 / 교역 / 주민 의뢰";
+    } else if (hit.kind === "outpost") {
+      detail = "시설 건설 · 작물 재배 · 신호 복원 · 원정";
+      hint = "사용 · 여정 열기";
+    } else if (hit.kind === "crop") {
+      const plot = s.region.outpost.plots[hit.index];
+      detail = plot
+        ? `${CROPS[plot.crop].name} · ${plot.ready > s.time ? Math.ceil(plot.ready - s.time) + "초 후 수확" : "수확 가능"}`
+        : "빈 밭";
+      hint = "사용 · 수확 또는 파종 준비";
+    } else if (hit.kind === "survey") {
+      detail = s.region.outpost.sortie?.visited.includes(hit.index)
+        ? "측량 완료"
+        : "측량 표석";
+      hint = "사용 · 측량 원정 기록";
     } else if (hit.kind === "boss") {
-      detail = `HP ${Math.ceil(s.region.boss.hp)} / ${s.region.boss.maxHP}`;
+      detail = `HP ${Math.ceil(s.activeBoss.hp)} / ${s.activeBoss.maxHP}`;
       hint = "공격 · 장착 무기로 타격";
-      value = s.region.boss.hp;
-      max = s.region.boss.maxHP;
+      value = s.activeBoss.hp;
+      max = s.activeBoss.maxHP;
     }
     this.c.view.worldUI.set("focus", {
       title: hit.name,
@@ -502,8 +691,22 @@ export class FrontierView {
         this.open("society");
         return;
       }
-      if (hit.kind === "camp") {
-        this.open("journal");
+      if (hit.kind === "camp" || hit.kind === "outpost") {
+        this.campaignUI.page = hit.kind === "camp" ? "camp" : "network";
+        this.open("journey");
+        return;
+      }
+      if (hit.kind === "crop") {
+        if (s.region.outpost.plots[hit.index])
+          this.campaignUI.action("harvest", hit.index);
+        else {
+          this.campaignUI.page = "camp";
+          this.open("journey");
+        }
+        return;
+      }
+      if (hit.kind === "survey") {
+        this.campaignUI.action("survey", hit.index);
         return;
       }
       const message =
@@ -540,6 +743,7 @@ export class FrontierView {
   }
   hud() {
     const { model: s, player: p } = this.c;
+    this.campaignUI.hud();
     $("healthText").textContent =
       `체력 ${Math.ceil(s.hp)} / ${s.maxHP} · Lv.${s.level}`;
     $("health").max = s.maxHP;
@@ -550,12 +754,12 @@ export class FrontierView {
     $("experienceHUD").value = s.xp % 80;
     $("hungerText").textContent =
       `포만 ${Math.ceil(s.hunger)} · ${s.riding ? (s.airborne ? "비행 중" : "탑승 중") : "도보"}`;
-    const b = s.region.boss,
+    const b = s.activeBoss,
       near = !b.defeated && distance(p, b) < 28;
-    const bossName = `${["", "이끼 수호자", "구리 거신", "심연 파수꾼"][s.info.tier]} · 위험 ${s.info.tier}`;
+    const bossName = `${BIOMES[s.info.biome].boss}${s.region.outpost.sortie?.kind === "hunt" ? " 잔향" : ""} · 위험 ${s.info.tier}`;
     const bossWarning =
       b.warning > 0
-        ? "충격파! 붉은 원 밖으로 피하세요"
+        ? `${PATTERNS[b.pattern]?.name || "내려찍기"} · ${PATTERNS[b.pattern]?.hint || "붉은 원 밖으로 이동"}`
         : this.bossTarget()
           ? "장착 무기로 공격"
           : "수호자를 조준하세요";
@@ -657,6 +861,7 @@ export class FrontierView {
     this.tab = tab;
     $("frontierPanel").dataset.page = tab;
     $("frontierTitle").textContent = {
+      journey: "첫 신호 · 여정과 야영지",
       map: "원정 지도",
       society: "공동체",
       machine: "기계 조립",
@@ -687,6 +892,8 @@ export class FrontierView {
     const { model: s, inventory: inv, player: p } = this.c,
       root = $("frontierContent");
     root.replaceChildren();
+    root.classList.toggle("journeyContent", this.tab === "journey");
+    if (this.tab === "journey") this.campaignUI.render(root);
     if (this.tab === "map") {
       root.innerHTML = `<div class="mapLayout"><div class="regionMap"><h3>${escape(s.info.name)}</h3><small>위험 ${s.info.tier} · ${Object.keys(s.regions).length}개 지역 발견</small>
       <div class="routeGrid"><button data-route="0,-1">↑<small>북쪽 지역</small></button><button data-route="-1,0">←<small>서쪽</small></button><span><b>⌂</b><small>${s.x}, ${s.z}</small></span><button data-route="1,0">→<small>동쪽</small></button><button data-route="0,1">↓<small>남쪽 지역</small></button></div>
@@ -698,6 +905,11 @@ export class FrontierView {
             (b.onclick = () =>
               this.c.travel(...b.dataset.route.split(",").map(Number))),
         );
+      for (const b of root.querySelectorAll("[data-route]")) {
+        const [dx, dz] = b.dataset.route.split(",").map(Number),
+          bio = BIOMES[biomeIndex(s.x + dx, s.z + dz)];
+        b.querySelector("small").textContent = bio.name + " · " + bio.signal;
+      }
       const destinations = [
         { name: "원정 야영지", x: 77.5, z: 84.5 },
         ...s.region.villages,
@@ -709,7 +921,7 @@ export class FrontierView {
           .filter((site) => site.id.endsWith(":0"))
           .map((site) => ({ ...site, name: GATHERABLES[site.kind].name })),
         {
-          name: s.region.boss.defeated ? "수호자 둥지 · 격파" : "수호자 둥지",
+          name: s.activeBoss.defeated ? "수호자 둥지 · 격파" : "수호자 둥지",
           ...s.info.boss,
         },
       ];
@@ -718,6 +930,7 @@ export class FrontierView {
           this.button(
             `${d.name} · ${Math.round(distance(p, d))} m`,
             () => {
+              this.campaignUI.track = false;
               this.waypoint = d;
               this.c.pause(false);
               this.hud();
@@ -773,6 +986,23 @@ export class FrontierView {
           if (distance(p, v) > 12) b.disabled = true;
           row.querySelector("div").append(b);
         }
+        if (
+          v.id === s.region.villages[0].id &&
+          s.region.outpost.sortie?.kind === "supply"
+        ) {
+          const delivery = this.button(
+            "원정 보급 전달 · 식량 6·회복약 2·목재 8",
+            () => {
+              const result = this.campaignUI.action("deliverSortie");
+              this.render();
+              return result;
+            },
+          );
+          delivery.dataset.campaign = "deliverSortie";
+          delivery.disabled =
+            distance(p, v) > 12 || s.region.outpost.sortie.done;
+          row.append(delivery);
+        }
         const quests = document.createElement("div");
         quests.className = "villageContracts";
         quests.innerHTML = "<h4>주민 의뢰 · 재료를 모아 전달</h4>";
@@ -818,12 +1048,15 @@ export class FrontierView {
       <div class="statMeter food"><label>포만 <b>${Math.ceil(s.hunger)} / 100</b></label><progress max="100" value="${s.hunger}"></progress></div>
       <div class="statMeter xp"><label>경험 <b>${s.xp % 80} / 80</b></label><progress max="80" value="${s.xp % 80}"></progress></div>
       <dl class="combatStats"><div><dt>${escape(weapon.name)}</dt><dd>공격 ${weapon.damage + (weapon.name === "기본 펄스" && inv.unlocks.has("blade") ? 12 : 0)}</dd></div><div><dt>${armor ? "개척 갑옷" : "기본 의복"}</dt><dd>피해 감소 ${armor ? "35" : "0"}%</dd></div></dl>
+      <p class="activeEffects">${[s.journey.fedUntil > s.time ? `든든함 ${Math.ceil(s.journey.fedUntil - s.time)}초 · 피해 10% 감소` : "", s.journey.tonicUntil > s.time ? `강장 ${Math.ceil(s.journey.tonicUntil - s.time)}초 · 체력 0.8/초` : ""].filter(Boolean).join("<br>") || "음식·강장제의 효과가 여기에 표시됩니다."}</p>
       <div id="supplies" class="supplySlots"></div></div></div>
       <div class="milestoneStrip"><span>⚑ <b>${s.allies.length}</b> 동맹</span><span>◆ <b>${wins}</b> 수호자</span><span>▧ <b>${inv.count("knowledge")}</b> 연구</span><span>◈ <b>${inv.count("relic")}</b> 유적 핵</span></div>
       <details class="expeditionLog"><summary>원정 기록 <span>${s.log.length}</span></summary><ol>${s.log.map((t) => `<li>${escape(t)}</li>`).join("") || "<li>첫 원정을 시작했습니다.</li>"}</ol></details>`;
       for (const [label, fn, id] of [
         ["식량 먹기", () => s.consume("food", inv), "eatFood"],
         ["회복약 사용 · H", () => s.consume("medicine", inv), "useMedicine"],
+        ["야채 스튜 먹기", () => s.consume("stew", inv), "eatStew"],
+        ["약초 강장제 사용", () => s.consume("tonic", inv), "useTonic"],
         ["야영지 휴식", () => s.camp(p, inv), "campRest"],
         [
           "가방 · 제작과 연구",
@@ -852,11 +1085,15 @@ export class FrontierView {
           id,
         );
         button.setAttribute("aria-label", label);
-        const item =
-          id === "eatFood" ? "food" : id === "useMedicine" ? "medicine" : null;
+        const item = {
+          eatFood: "food",
+          useMedicine: "medicine",
+          eatStew: "stew",
+          useTonic: "tonic",
+        }[id];
         button.innerHTML = item
-          ? `${itemArt(item)}<b class="supplyCount">${inv.count(item)}</b><small>${item === "food" ? "먹기" : "회복"}</small>`
-          : `<b aria-hidden="true">${id === "campRest" ? "⌂" : id === "frontierBag" ? "▦" : "▣"}</b><small>${id === "campRest" ? "휴식" : id === "frontierBag" ? "가방" : "저장"}</small>`;
+          ? `${itemArt(item)}<b class="supplyCount">${inv.count(item)}</b><small>${item === "food" || item === "stew" ? "먹기" : "사용"}</small>`
+          : `<b aria-hidden="true">${uiIcon(id === "campRest" ? "village" : id === "frontierBag" ? "bag" : "journey")}</b><small>${id === "campRest" ? "휴식" : id === "frontierBag" ? "가방" : "저장"}</small>`;
         if (item) button.disabled = inv.count(item) === 0;
         $("supplies").append(button);
       }

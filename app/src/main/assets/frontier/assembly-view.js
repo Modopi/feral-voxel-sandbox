@@ -55,10 +55,15 @@ export class AssemblyView {
             .getHex();
           let mat = this.materials.get(color);
           if (!mat) {
-            mat = new T.MeshLambertMaterial({ color });
+            mat = new T.MeshStandardMaterial({
+              color,
+              roughness: 0.65,
+              metalness: 0.18,
+            });
             this.materials.set(color, mat);
           }
           const mesh = new T.Mesh(this.geometry, mat);
+          mesh.castShadow = mesh.receiveShadow = true;
           mesh.position.set(p.x * 0.5, p.y * 0.5 + 0.25, p.z * 0.5);
           mesh.userData = { assembly: m, part: p };
           if (p.type === "wing" || p.type === "elevator") mesh.scale.y = 0.14;

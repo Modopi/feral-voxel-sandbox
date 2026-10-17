@@ -1,3 +1,4 @@
+import { CROPS } from "./frontier/campaign.js";
 import { B } from "./world.js";
 import { ITEMS, RECIPES, resourceForBlock } from "./inventory.js";
 import { GEAR } from "./equipment.js";
@@ -63,9 +64,17 @@ export function acquisitionRules(frontier = true) {
 }
 export function sourceHints(id, frontier = true) {
   const rules = acquisitionRules(frontier).filter((r) => r.give[id]);
-  return rules.map(
-    (r) => `${r.name}${r.id.startsWith("gather:") ? " · " + r.renewal : ""}`,
-  );
+  const farm = frontier
+    ? Object.values(CROPS)
+        .filter((c) => c.reward[id])
+        .map((c) => `재생 텃밭 · ${c.name} 재배 (${c.seconds}초 · 씨앗 회수)`)
+    : [];
+  return [
+    ...farm,
+    ...rules.map(
+      (r) => `${r.name}${r.id.startsWith("gather:") ? " · " + r.renewal : ""}`,
+    ),
+  ];
 }
 export function auditAcquisition(frontier = true) {
   const rules = acquisitionRules(frontier),

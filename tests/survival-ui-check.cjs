@@ -35,6 +35,49 @@ const fs = require("node:fs");
     assert.equal(await page.locator("#inventoryGrid .itemSlot").count(), 27);
     // Desktop dragging uses the same atomic slot moves as mobile taps.
     const dragSlot = async (from, to) => {
+      for (let attempt = 0; attempt < 12; attempt++) {
+        const visible = await page.evaluate(
+          ({ from, to }) => {
+            const body = document.querySelector(".inventoryBody"),
+              r = body.getBoundingClientRect();
+            const rects = [from, to].map((i) =>
+              document
+                .querySelector(`[data-slot="${i}"]`)
+                .getBoundingClientRect(),
+            );
+            return {
+              fits: rects.every((b) => b.top >= r.top && b.bottom <= r.bottom),
+              direction:
+                Math.max(...rects.map((b) => b.bottom)) > r.bottom ? 1 : -1,
+              x: r.right - 12,
+              y: r.top + 30,
+            };
+          },
+          { from, to },
+        );
+        if (visible.fits) break;
+        await page.mouse.move(visible.x, visible.y);
+        await page.mouse.wheel(0, visible.direction * 100);
+        await page.waitForTimeout(120);
+      }
+      for (const index of [from, to])
+        assert.ok(
+          await page.locator(`[data-slot="${index}"]`).evaluate((el) => {
+            const r = el.getBoundingClientRect(),
+              p = el.closest(".inventoryBody").getBoundingClientRect();
+            return (
+              r.top >= p.top &&
+              r.bottom <= p.bottom &&
+              el.contains(
+                document.elementFromPoint(
+                  r.x + r.width / 2,
+                  r.y + r.height / 2,
+                ),
+              )
+            );
+          }),
+          "drag slot is exposed",
+        );
       const a = await page.locator(`[data-slot="${from}"]`).boundingBox(),
         b = await page.locator(`[data-slot="${to}"]`).boundingBox();
       await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
@@ -104,13 +147,23 @@ const fs = require("node:fs");
       type: "touchStart",
       touchPoints: [{ ...act, id: 1 }],
     });
-    await page.waitForTimeout(1400);
+    await page.waitForFunction(
+      () => FERAL.world.getCell(157, 26, 165) === 0,
+      null,
+      { timeout: 30000 },
+    );
     await cdp.send("Input.dispatchTouchEvent", {
       type: "touchEnd",
       touchPoints: [],
     });
-    assert.equal(await page.evaluate(() => FERAL.world.getCell(157, 26, 165)), 0);
-    assert.equal(await page.evaluate(() => FERAL.world.getCell(156, 26, 165)), 3);
+    assert.equal(
+      await page.evaluate(() => FERAL.world.getCell(157, 26, 165)),
+      0,
+    );
+    assert.equal(
+      await page.evaluate(() => FERAL.world.getCell(156, 26, 165)),
+      3,
+    );
     assert.ok(await page.evaluate(() => FERAL.inventory.wear.stonepick < 160));
     // Select a real block stack and use the distinct place/use control.
     await page.tap('[data-hotbar="2"]');

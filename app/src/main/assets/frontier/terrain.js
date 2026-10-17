@@ -51,6 +51,44 @@ export function frontierWorld(seed, info) {
   for (const x of [d.x - 5, d.x + 5])
     for (const z of [d.z - 5, d.z + 5])
       for (let j = 0; j < 4; j++) put(x, h + j, z, j === 3 ? B.ORE : B.BASALT);
+  if ((info.terrainVersion ?? 2) >= 2) {
+    // Region silhouettes are baked into the voxel terrain only for newly generated regions.
+    const bio = info.biome ?? 0;
+    for (const side of [-1, 1]) {
+      const x = d.x + side * 5;
+      if (bio === 0) {
+        for (let z = d.z - 4; z <= d.z + 4; z++)
+          for (let yy = 0; yy < 3; yy++)
+            if (z === d.z - 4 || z === d.z + 4) put(x, h + yy, z, B.WOOD);
+        for (let z = d.z - 5; z <= d.z + 5; z++) put(x, h + 4, z, B.LEAF);
+      } else if (bio === 1) {
+        for (let yy = 0; yy < 6; yy++)
+          put(x, h + yy, d.z - 4, yy % 2 ? B.ORE : B.BASALT);
+        for (let xx = d.x - 5; xx <= d.x + 5; xx++)
+          put(xx, h + 6, d.z - 4, B.PLANK);
+      } else {
+        for (let yy = 0; yy < 5; yy++)
+          put(x, h + yy, d.z - 4, yy >= 3 ? B.ORE : B.STONE);
+        for (let z = d.z - 4; z <= d.z + 4; z++)
+          put(x, h - 1, z, z % 2 ? B.SAND : B.ORE);
+      }
+    }
+    // Distinct arena landmarks leave the fighting floor and three survey approaches clear.
+    for (const side of [-1, 1])
+      for (let yy = 0; yy < (bio === 1 ? 6 : 4); yy++)
+        put(
+          p.x + side * 9,
+          y + yy,
+          p.z - 7,
+          bio === 0
+            ? yy === 3
+              ? B.LEAF
+              : B.WOOD
+            : bio === 1
+              ? B.BASALT
+              : B.ORE,
+        );
+  }
   // Walkable half-metre supply trails connect hubs across cliffs and rivers.
   // Projection assigns each column one height so diagonal overlaps cannot create walls.
   const origin = { x: 77, z: 84, y: world.surface(77, 84) };
