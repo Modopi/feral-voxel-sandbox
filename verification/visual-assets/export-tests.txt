@@ -1,0 +1,15 @@
+✔ visual catalog covers every content ID and enforces coordinates/materials/hierarchy (437.86408ms)
+✔ creature and boss silhouettes fit design dimensions and stand on ground (2.482071ms)
+✔ environment references canonical entrance after translation and remains deterministic (21529.817272ms)
+✔ invalid references and cyclic hierarchy fail before export (11.498899ms)
+✔ GLB preserves part and attachment names without invalid empty child arrays (7.125706ms)
+✔ emission above one survives GLB export as standard strength extension (5.133405ms)
+✔ GLB material colors use canonical decimal precision across JavaScript engines (16.863143ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 31765.174245

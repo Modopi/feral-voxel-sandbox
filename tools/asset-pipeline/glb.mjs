@@ -1,6 +1,7 @@
 import {surfaceGroups} from './solid.mjs';
 // glTF 2.0, untextured PBR cuboid surfaces, metre units, named hierarchical parts.
-const linear=c=>c<=.04045?c/12.92:((c+.055)/1.055)**2.4;
+// Canonical precision avoids V8-version differences in Math.pow changing GLB bytes.
+const linear=c=>Math.round((c<=.04045?c/12.92:((c+.055)/1.055)**2.4)*1e8)/1e8;
 export function exportGlb(asset,library){
  const gltf={asset:{version:'2.0',generator:'FERAL voxel asset pipeline v1'},scene:0,scenes:[{nodes:[]}],nodes:[],meshes:[],materials:[],buffers:[{byteLength:0}],bufferViews:[],accessors:[]};let length=0;const chunks=[],meshCache=new Map(),materialCache=new Map();
  function acc(array,type,componentType,target,min,max){const bytes=Buffer.from(array.buffer,array.byteOffset,array.byteLength);const view=gltf.bufferViews.push({buffer:0,byteOffset:length,byteLength:bytes.length,target})-1;chunks.push(bytes);length+=bytes.length;const pad=(4-length%4)%4;if(pad){chunks.push(Buffer.alloc(pad));length+=pad;}return gltf.accessors.push({bufferView:view,componentType,count:array.length/(type==='VEC3'?3:1),type,...(min?{min,max}:{})})-1;}
