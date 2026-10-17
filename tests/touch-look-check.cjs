@@ -58,6 +58,7 @@ fs.mkdirSync(out, { recursive: true });
         return step(dt, input);
       };
     });
+    await page.waitForFunction(() => window.lastInput !== undefined);
     const cdp = await page.context().newCDPSession(page);
     const send = (type, touchPoints) =>
       cdp.send("Input.dispatchTouchEvent", { type, touchPoints });

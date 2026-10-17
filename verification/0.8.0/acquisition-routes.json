@@ -1,0 +1,332 @@
+{
+  "items": {
+    "dirt": {
+      "via": "풀밭 채굴",
+      "inputs": [],
+      "renewal": "다음 지역 탐사 또는 해당 재료 재활용"
+    },
+    "stone": {
+      "via": "돌 채굴",
+      "inputs": [],
+      "renewal": "다음 지역 탐사 또는 해당 재료 재활용"
+    },
+    "sand": {
+      "via": "모래 채굴",
+      "inputs": [],
+      "renewal": "다음 지역 탐사 또는 해당 재료 재활용"
+    },
+    "wood": {
+      "via": "나무 채굴",
+      "inputs": [],
+      "renewal": "다음 지역 탐사 또는 해당 재료 재활용"
+    },
+    "fiber": {
+      "via": "나뭇잎 채굴",
+      "inputs": [],
+      "renewal": "다음 지역 탐사 또는 해당 재료 재활용"
+    },
+    "crystal": {
+      "via": "광석 채굴",
+      "inputs": [],
+      "renewal": "다음 지역 탐사 또는 해당 재료 재활용"
+    },
+    "plank": {
+      "via": "목재 채굴",
+      "inputs": [],
+      "renewal": "다음 지역 탐사 또는 해당 재료 재활용"
+    },
+    "meat": {
+      "via": "이끼사슴 사냥",
+      "inputs": [],
+      "renewal": "먹이 번식 · 비옥한 서식지의 이동 무리"
+    },
+    "essence": {
+      "via": "이끼사슴 사냥",
+      "inputs": [],
+      "renewal": "먹이 번식 · 비옥한 서식지의 이동 무리"
+    },
+    "bio": {
+      "via": "이끼사슴 사냥",
+      "inputs": [],
+      "renewal": "먹이 번식 · 비옥한 서식지의 이동 무리"
+    },
+    "seed": {
+      "via": "맹아 나무 채집",
+      "inputs": [],
+      "renewal": "300초 후 재성장"
+    },
+    "berry": {
+      "via": "들열매 덤불 채집",
+      "inputs": [],
+      "renewal": "180초 후 재성장"
+    },
+    "herb": {
+      "via": "은잎 약초 채집",
+      "inputs": [],
+      "renewal": "240초 후 재성장"
+    },
+    "scrap": {
+      "via": "옛 기계 잔해 채집",
+      "inputs": [],
+      "renewal": "다음 지역 탐사 · 재활용"
+    },
+    "pick": {
+      "via": "나무 곡괭이 복구",
+      "inputs": [
+        "wood"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "pulse": {
+      "via": "기본 펄스 제작",
+      "inputs": [
+        "stone",
+        "crystal"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "knowledge": {
+      "via": "생태 연구 기록 × 2",
+      "inputs": [
+        "herb",
+        "fiber",
+        "crystal"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "relic": {
+      "via": "공명 핵 재구성",
+      "inputs": [
+        "essence",
+        "crystal",
+        "knowledge"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "food": {
+      "via": "들열매 식량 × 3",
+      "inputs": [
+        "berry",
+        "fiber"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "iron": {
+      "via": "고철 재련 × 3",
+      "inputs": [
+        "scrap",
+        "wood"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "wrench": {
+      "via": "조립 렌치",
+      "inputs": [
+        "iron",
+        "wood"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "arrow": {
+      "via": "화살 × 12",
+      "inputs": [
+        "stone",
+        "wood",
+        "fiber"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "relicpick": {
+      "via": "공명 곡괭이",
+      "inputs": [
+        "relic",
+        "iron",
+        "crystal"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "club": {
+      "via": "돌 곤봉",
+      "inputs": [
+        "stone",
+        "wood"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "spear": {
+      "via": "돌 창",
+      "inputs": [
+        "stone",
+        "plank",
+        "fiber"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "sword": {
+      "via": "합금 검",
+      "inputs": [
+        "iron",
+        "plank"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "battleaxe": {
+      "via": "합금 전투 도끼",
+      "inputs": [
+        "iron",
+        "plank"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "bow": {
+      "via": "사냥 활",
+      "inputs": [
+        "plank",
+        "fiber"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "crystalbow": {
+      "via": "결정 석궁",
+      "inputs": [
+        "iron",
+        "crystal",
+        "fiber"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "stonepick": {
+      "via": "돌 곡괭이",
+      "inputs": [
+        "stone",
+        "plank"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "ironpick": {
+      "via": "합금 곡괭이",
+      "inputs": [
+        "iron",
+        "plank"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "axe": {
+      "via": "벌목 도끼",
+      "inputs": [
+        "stone",
+        "plank"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "shovel": {
+      "via": "삽",
+      "inputs": [
+        "stone",
+        "plank"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "medicine": {
+      "via": "회복약 × 2",
+      "inputs": [
+        "fiber",
+        "bio"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "resin": {
+      "via": "생체 수지 × 2",
+      "inputs": [
+        "bio"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "hull_part": {
+      "via": "경량 비행기 부품 묶음",
+      "inputs": [
+        "iron"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "motor_part": {
+      "via": "경량 비행기 부품 묶음",
+      "inputs": [
+        "iron"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "wing_part": {
+      "via": "경량 비행기 부품 묶음",
+      "inputs": [
+        "iron"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "elevator_part": {
+      "via": "경량 비행기 부품 묶음",
+      "inputs": [
+        "iron"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "rudder_part": {
+      "via": "경량 비행기 부품 묶음",
+      "inputs": [
+        "iron"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "propeller_part": {
+      "via": "경량 비행기 부품 묶음",
+      "inputs": [
+        "iron"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "wheel_part": {
+      "via": "경량 비행기 부품 묶음",
+      "inputs": [
+        "iron"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "cannon_part": {
+      "via": "포탑 블록",
+      "inputs": [
+        "iron"
+      ],
+      "renewal": "재료를 모아 제작"
+    },
+    "rotor_part": {
+      "via": "회전익 블록",
+      "inputs": [
+        "iron"
+      ],
+      "renewal": "재료를 모아 제작"
+    }
+  },
+  "unlocks": [
+    "relicpick",
+    "club",
+    "spear",
+    "sword",
+    "battleaxe",
+    "bow",
+    "crystalbow",
+    "stonepick",
+    "ironpick",
+    "axe",
+    "shovel",
+    "blade",
+    "armor",
+    "engineering",
+    "ballistics",
+    "aviation",
+    "hammer",
+    "pulse",
+    "rover"
+  ],
+  "unreachableItems": [],
+  "unreachableRecipes": []
+}

@@ -1,0 +1,13 @@
+ZERO_STARTER_CRAFT_LOOP {"recipes":47,"minedCells":685,"gatherings":274,"hunts":29}
+✔ every item and prerequisite has a route without starter items in both game modes (3.941507ms)
+✔ every recipe executes from an empty bag using actual mining, regrowth, animals and prerequisite crafts (40.321811ms)
+✔ extinction recovery consumes fertile habitat, stays away from player and survives save (17.994076ms)
+✔ a single region can renew timber, building minerals and research, and reconstruct relics without a boss (0.896981ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 132.311923

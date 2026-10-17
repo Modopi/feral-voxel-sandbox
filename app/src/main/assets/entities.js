@@ -109,6 +109,16 @@ export const SPECIES = [
   species("구리여우", 0.25, 0xbe7952, true),
   species("청금딱정", 0.125, 0x4d9ead, false, true),
 ];
+// Shared by death drops, the acquisition guide and progression verification.
+export function animalDrops(type) {
+  return type === 2
+    ? { crystal: 1, bio: 4 }
+    : {
+        meat: type === 0 ? 2 : 1,
+        essence: type === 1 ? 3 : 1,
+        bio: type === 1 ? 8 : 4,
+      };
+}
 export function cellPosition(p, index) {
   const [x, y, z] = p.dims,
     ix = index % x,
@@ -188,6 +198,7 @@ export class Ecology {
     this.cursor = 0;
     this.tick = 0;
     this.birthBudget = 0;
+    this.nextMigration = 90;
     this.debris = [];
     this.onVoxel = null;
     this.onDeath = () => {};
@@ -289,6 +300,20 @@ export class Ecology {
   legs(e) {
     return condition(e).legs;
   }
+  heal(e, inv) {
+    if (e.dead) return "죽은 생명체는 치료할 수 없습니다.";
+    const player = this.context?.player;
+    if (
+      player &&
+      Math.hypot(e.x - player.x, e.y - player.y, e.z - player.z) > 4
+    )
+      return "가까이 다가가 치료하세요.";
+    if (e.hp >= e.maxHP)
+      return "이미 건강합니다. 사라진 부위는 회복약으로 재생되지 않습니다.";
+    if (!inv.take("medicine", 1)) return "회복약이 필요합니다.";
+    e.hp = Math.min(e.maxHP, e.hp + 30);
+    return `${SPECIES[e.type].name} 치료 · HP ${Math.ceil(e.hp)}/${e.maxHP} · 손실 부위는 유지`;
+  }
   feed(e, inv, time) {
     if (e.dead || e.type === 1) return "이 동물은 씨앗을 먹지 않습니다.";
     const player = this.context?.player;
@@ -324,6 +349,54 @@ export class Ecology {
       }
     }
     return "먹이 −1 · 근처의 같은 종에게도 먹이를 주세요.";
+  }
+  migrate(time, player) {
+    if (time < this.nextMigration) return;
+    this.nextMigration = time + 90;
+    const alive = this.entities.filter((e) => !e.dead),
+      w = this.world;
+    // Fertile, unoccupied habitat supports a small arriving pair after local extinction.
+    // Predators arrive only once prey exists; no instant player-triggered spawning.
+    for (const type of [0, 2, 1]) {
+      if (
+        alive.filter((e) => e.type === type).length >= 2 ||
+        (type === 1 && alive.filter((e) => e.type !== 1).length < 4)
+      )
+        continue;
+      for (let attempt = 0; attempt < 48; attempt++) {
+        const x = 5 + w.random() * (SIZE - 10),
+          z = 5 + w.random() * (SIZE - 10),
+          y = w.surface(x, z),
+          i = Math.floor(x) + Math.floor(z) * SIZE;
+        if (
+          Math.hypot(x - player.x, z - player.z) < 16 ||
+          y <= 9 ||
+          w.get(Math.floor(x), Math.floor(y - 0.01), Math.floor(z)) !==
+            B.GRASS ||
+          w.plants[i] < 0.4 ||
+          w.nutrients[i] < 0.2 ||
+          w.get(Math.floor(x), Math.floor(y), Math.floor(z))
+        )
+          continue;
+        const count = 2 - alive.filter((e) => e.type === type).length;
+        for (let n = 0; n < count; n++) {
+          const e = this.spawn(type, x, z);
+          if (e) {
+            e.age = 30;
+            alive.push(e);
+          }
+        }
+        w.plants[i] = Math.max(0, w.plants[i] - 0.2);
+        w.nutrients[i] = Math.max(0, w.nutrients[i] - 0.05);
+        w.event(SPECIES[type].name + " 이동 무리가 숲으로 들어왔습니다.", [
+          x,
+          y,
+          z,
+        ]);
+        break;
+      }
+    }
+    this.rehash();
   }
   think(e, dt) {
     const w = this.world,
@@ -493,6 +566,7 @@ export class Ecology {
     }
   }
   update(dt, camera, time) {
+    this.migrate(time, camera);
     this.tick++;
     if (this.tick % 8 === 0) this.rehash();
     this.birthBudget = Math.min(3, this.birthBudget + dt * 0.15);
@@ -762,6 +836,7 @@ export class Ecology {
   }
   save() {
     return {
+      nextMigration: this.nextMigration,
       nextId: this.nextId,
       entities: this.entities
         .filter((e) => !e.dead)
@@ -775,6 +850,10 @@ export class Ecology {
     };
   }
   load(s) {
+    this.nextMigration =
+      Number.isFinite(s.nextMigration) && s.nextMigration >= 0
+        ? s.nextMigration
+        : this.world.time + 90;
     this.nextId = s.nextId;
     this.entities = s.entities.map((e) => ({
       ...e,

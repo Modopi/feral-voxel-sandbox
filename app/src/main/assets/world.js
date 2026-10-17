@@ -51,6 +51,7 @@ export class World {
     this.burning = new Map();
     this.edits = new Map();
     this.subcells = new Map();
+    this.miningDamage = new Map();
     this.dirty = new Set();
     this.flowCursor = 0;
     this.ecoCursor = 0;
@@ -97,6 +98,7 @@ export class World {
     const i = this.index(x, y, z);
     if (this.blocks[i] === v && !this.subcells.has(i)) return false;
     this.subcells.delete(i);
+    for (let j = 0; j < 8; j++) this.miningDamage.delete(i * 8 + j);
     this.blocks[i] = v;
     this.markCollision(x, z);
     if (record) this.edits.set(i, v);
@@ -193,6 +195,7 @@ export class World {
     }
     if (fine[j] === value) return false;
     fine[j] = value;
+    this.miningDamage.delete(i * 8 + j);
     this.markCollision(x, z);
     if (fine.every((v) => v === fine[0])) {
       this.subcells.delete(i);
@@ -215,6 +218,48 @@ export class World {
               Math.floor(hit.hz / 2) * 2 - (n === 4 ? 1 : 0),
             ];
     return { start, n, size };
+  }
+  damageKey(hx, hy, hz) {
+    return (
+      this.index(hx >> 1, hy >> 1, hz >> 1) * 8 +
+      (hx & 1) +
+      ((hy & 1) << 1) +
+      ((hz & 1) << 2)
+    );
+  }
+  damageAt(hit) {
+    return (
+      this.miningDamage.get(this.damageKey(hit.hx, hit.hy, hit.hz))?.[1] || 0
+    );
+  }
+  // Damage belongs to physical half-metre cells, not a tool, cursor or timer.
+  strikeMining(hit, size, amountForMaterial) {
+    const r = this.miningRegion(hit, size),
+      counts = new Map();
+    let removed = 0,
+      struck = 0;
+    for (let dz = 0; dz < r.n; dz++)
+      for (let dy = 0; dy < r.n; dy++)
+        for (let dx = 0; dx < r.n; dx++) {
+          const x = r.start[0] + dx,
+            y = r.start[1] + dy,
+            z = r.start[2] + dz;
+          const b = this.getCell(x, y, z);
+          if (!b || b === B.LAVA || y < 2) continue;
+          const amount = amountForMaterial(b);
+          if (!Number.isFinite(amount) || amount <= 0) continue;
+          const key = this.damageKey(x, y, z),
+            previous = this.miningDamage.get(key);
+          const damage = (previous?.[0] === b ? previous[1] : 0) + amount;
+          struck++;
+          if (damage >= 1 - 1e-9) {
+            if (this.setCell(x, y, z, B.AIR)) {
+              counts.set(b, (counts.get(b) || 0) + 1);
+              removed++;
+            }
+          } else this.miningDamage.set(key, [b, damage]);
+        }
+    return { removed, struck, counts, region: r };
   }
   mine(hit, size = 1) {
     const r = this.miningRegion(hit, size),
@@ -599,6 +644,7 @@ export class World {
       time: this.time,
       rngState: this.rngState,
       edits: [...this.edits],
+      miningDamage: [...this.miningDamage],
       subcells: [...this.subcells].map(([i, v]) => [i, Array.from(v)]),
       fluids: [...this.fluids].map(([i, f]) => [
         i,
@@ -625,6 +671,36 @@ export class World {
         this.mark(x, z);
         this.rescan(x, z);
       }
+    }
+    this.miningDamage.clear();
+    for (const entry of s.miningDamage || []) {
+      if (!Array.isArray(entry) || entry.length !== 2) continue;
+      const [key, state] = entry;
+      if (
+        !Number.isInteger(key) ||
+        key < 0 ||
+        key >= this.blocks.length * 8 ||
+        !Array.isArray(state) ||
+        state.length !== 2
+      )
+        continue;
+      const [b, ratio] = state,
+        [x, y, z] = this.decode(Math.floor(key / 8)),
+        j = key % 8;
+      if (
+        y > 0 &&
+        b &&
+        b !== B.LAVA &&
+        Number.isFinite(ratio) &&
+        ratio > 0 &&
+        ratio < 1 &&
+        this.getCell(
+          x * 2 + (j & 1),
+          y * 2 + ((j >> 1) & 1),
+          z * 2 + ((j >> 2) & 1),
+        ) === b
+      )
+        this.miningDamage.set(key, [b, ratio]);
     }
     if (s.fluids)
       this.fluids = new Map(s.fluids.map(([i, v, a]) => [i, { v, a }]));

@@ -7,15 +7,7 @@ import {
   editSizeLabel,
 } from "./edit-grid.js";
 import { itemArt } from "./item-art.js";
-import {
-  GEAR,
-  activeGear,
-  gearId,
-  spendGear,
-  miningWork,
-  MiningProgress,
-} from "./equipment.js";
-const miningProgress = new MiningProgress();
+import { GEAR, activeGear, spendGear, miningWork } from "./equipment.js";
 let nextStrike = 0;
 import { currentWorld, saveKey } from "./world-slots.js";
 const activeWorld = currentWorld(
@@ -30,7 +22,7 @@ let frontierState = null,
   frontierUI = null,
   regionCache = {};
 import { World, B, SIZE, HEIGHT, COLORS, clamp } from "./world.js";
-import { Ecology, SPECIES } from "./entities.js";
+import { Ecology, SPECIES, animalDrops } from "./entities.js";
 import { View, T } from "./render.js";
 import { VERSION } from "./version.js";
 import { initUpdates } from "./updates.js";
@@ -191,7 +183,6 @@ function syncHeld() {
             : 0;
   if (GEAR[id]) inventory.equipment[GEAR[id].slot] = id;
   if (ITEMS[id]?.block) buildMaterial = id;
-  miningProgress.reset();
   updateToolLabel();
   renderHotbar();
 }
@@ -367,16 +358,8 @@ function bindDrops() {
   world.event = event;
   eco.onVoxel = (d) => loot.spawn("bio", 1, d.x, d.y, d.z, d);
   eco.onDeath = (e) => {
-    if (e.type !== 2)
-      loot.spawn("meat", e.type === 0 ? 2 : 1, e.x, e.y + 0.35, e.z);
-    loot.spawn(
-      e.type === 2 ? "crystal" : "essence",
-      e.type === 1 ? 3 : 1,
-      e.x,
-      e.y + 0.3,
-      e.z,
-    );
-    loot.spawn("bio", e.type === 1 ? 8 : 4, e.x + 0.15, e.y + 0.3, e.z);
+    for (const [id, count] of Object.entries(animalDrops(e.type)))
+      loot.spawn(id, count, e.x, e.y + 0.35, e.z);
   };
   loot.onCollect = (id, n) => {
     if (world.time - collectedMessage > 0.3) {
@@ -429,7 +412,6 @@ function cycleRange() {
     miningSize = sizes[(sizes.indexOf(miningSize) + 1) % sizes.length];
     if (selected !== 2) selectTool(2);
   }
-  miningProgress.reset();
   updateToolLabel();
   sound("scan");
 }
@@ -483,8 +465,7 @@ function intersectsPlayer(start, size) {
     a[1] + size > player.y
   );
 }
-function harvest(hit, size) {
-  const r = world.mine(hit, size);
+function harvest(hit, r) {
   if (!r.removed) {
     toast("기반암과 용암은 채굴할 수 없습니다.");
     return false;
@@ -500,7 +481,12 @@ function harvest(hit, size) {
   return true;
 }
 function target() {
-  const range = selected === 1 ? activeGear(inventory, "weapon").range : 6.5;
+  const range = Math.max(
+    6.5,
+    selected === 1
+      ? (frontierUI?.weaponRange() ?? activeGear(inventory, "weapon").range)
+      : 6.5,
+  );
   const block = blockRay(range),
     d = new T.Vector3();
   view.camera.getWorldDirection(d);
@@ -510,7 +496,13 @@ function target() {
     Math.min(range, block?.distance || range),
     world.time,
   );
-  return { block, ent };
+  const object = frontierUI?.objectTarget(range);
+  return {
+    block,
+    ent: object && object.distance < (ent?.distance ?? Infinity) ? null : ent,
+    object:
+      object && object.distance < (ent?.distance ?? Infinity) ? object : null,
+  };
 }
 function use(intent = "selected") {
   if (!running || paused) return;
@@ -524,8 +516,53 @@ function use(intent = "selected") {
     toast("도구가 부서졌습니다. 가방에서 수리하거나 다른 아이템을 선택하세요.");
     return;
   }
-  if (frontierUI?.assemblyUse(intent, held, aimed.block, aimed.ent?.distance)) {
+  if (
+    frontierUI?.assemblyUse(
+      intent,
+      held,
+      aimed.block,
+      Math.min(
+        aimed.ent?.distance ?? Infinity,
+        aimed.object?.distance ?? Infinity,
+      ),
+    )
+  ) {
     syncHeld();
+    return;
+  }
+  if (aimed.object) {
+    if (world.time < nextStrike) return;
+    nextStrike =
+      world.time +
+      (intent === "secondary" ? 0.5 : activeGear(inventory, "weapon").cooldown);
+    if (intent === "secondary") frontierUI.interact(aimed.object);
+    else if (aimed.object.kind === "boss" && GEAR[held]?.slot === "weapon") {
+      if (!frontierUI.use(1)) toast("무기의 사거리 안으로 다가가세요.");
+    } else
+      toast(
+        aimed.object.kind === "boss"
+          ? "무기를 들고 수호자를 공격하세요."
+          : "사용 버튼으로 " + aimed.object.name + " 상호작용",
+      );
+    syncHeld();
+    updateAim();
+    return;
+  }
+  if (intent === "secondary" && aimed.ent) {
+    if (world.time < nextStrike) return;
+    nextStrike = world.time + 0.5;
+    const e = aimed.ent.entity;
+    if (aimed.ent.distance > 3.5) toast("3.5m 안에서 동물을 사용하세요.");
+    else if (held === "seed") toast(eco.feed(e, inventory, world.time));
+    else if (held === "medicine") toast(eco.heal(e, inventory));
+    else {
+      const recorded = frontierState?.study(e.type, inventory);
+      toast(
+        `${SPECIES[e.type].name} · HP ${Math.ceil(e.hp)}/${e.maxHP} · ${recorded ? "관찰 기록: 연구 +2 · " : ""}${e.type === 1 ? "포식자 · 가까이 다가갈 때 주의" : "씨앗으로 먹이 · 회복약으로 치료"}`,
+      );
+    }
+    syncHeld();
+    updateAim();
     return;
   }
   if (intent === "secondary") {
@@ -537,13 +574,6 @@ function use(intent = "selected") {
           ? frontierState.consume(held, inventory)
           : "개척 원정에서 사용하는 보급품입니다.",
       );
-      syncHeld();
-      return;
-    }
-    if (held === "seed" && aimed.ent) {
-      if (world.time < nextStrike) return;
-      nextStrike = world.time + 0.5;
-      toast(eco.feed(aimed.ent.entity, inventory, world.time));
       syncHeld();
       return;
     }
@@ -566,10 +596,6 @@ function use(intent = "selected") {
       : action === 2
         ? 0.18
         : 0.3);
-  if (GEAR[held]?.slot === "weapon" && frontierUI?.use(action)) {
-    updateToolLabel();
-    return;
-  }
   const { block, ent } = target();
   view.toolKick = 1;
   if (action === 0) {
@@ -653,17 +679,17 @@ function use(intent = "selected") {
   if (action === 2) {
     const g =
       GEAR[held]?.slot === "tool" ? activeGear(inventory, "tool") : GEAR.pick;
-    const key = `${block.hx},${block.hy},${block.hz}:${miningSize}:${gearId(inventory, "tool")}`;
-    if (
-      miningProgress.strike(key, world.time, miningWork(block.b, miningSize, g))
-    ) {
-      if (harvest(block, miningSize) && GEAR[held]?.slot === "tool")
-        spendGear(inventory, "tool");
-      miningProgress.reset();
-    } else {
-      sound("step");
-      updateAim();
-    }
+    const result = world.strikeMining(
+      block,
+      miningSize,
+      (material) => 0.2 / miningWork(material, miningSize, g),
+    );
+    if (result.removed) {
+      harvest(block, result);
+      if (GEAR[held]?.slot === "tool") spendGear(inventory, "tool");
+    } else if (!result.struck) toast("기반암과 용암은 채굴할 수 없습니다.");
+    else sound("step");
+    updateAim();
   }
   if (action === 3) {
     const r = buildTarget(block),
@@ -753,7 +779,6 @@ function stopInput() {
   look.id = null;
   actionHeld = false;
   useHeld = false;
-  miningProgress.reset();
   $("knob").style.transform = "";
 }
 function pause(force) {
@@ -815,7 +840,6 @@ function start(load = false) {
     physicsTick = 0;
     syncHeld();
     nextStrike = 0;
-    miningProgress.reset();
     bindDrops();
     renderCamera(1);
     updateToolLabel();
@@ -1108,15 +1132,23 @@ function fixedStep(input = inputState()) {
   return moving;
 }
 function updateAim() {
-  const { block, ent } = target();
-  if (frontierUI?.assemblyAim(heldItem(), block, ent?.distance)) return;
+  const { block, ent, object } = target();
+  if (
+    frontierUI?.assemblyAim(
+      heldItem(),
+      block,
+      Math.min(ent?.distance ?? Infinity, object?.distance ?? Infinity),
+    )
+  )
+    return;
+  if (frontierUI?.objectAim(object)) return;
   const aimAction = actionHeld && !ent ? 2 : selected;
   if (ent) {
     const e = ent.entity;
     view.worldUI.set("focus", {
       title: `${SPECIES[e.type].name} · ${SPECIES[e.type].parts[ent.part].name}`,
       detail: `HP ${Math.ceil(e.hp)} / ${e.maxHP} · ${e.behavior || "배회"}`,
-      hint: `지지 다리 ${eco.legs(e)}/4 · HP 0 / 머리·몸통 파괴 시 사망`,
+      hint: `사용: 관찰 · 씨앗: 먹이 · 회복약: 치료 · 지지 다리 ${eco.legs(e)}/4`,
       value: Math.ceil(e.hp),
       max: e.maxHP,
       color: e.type === 1 ? "#efb484" : "#b4ddbe",
@@ -1147,26 +1179,21 @@ function updateAim() {
       "재",
       "목재",
     ];
-    const ratio =
-      world.time - miningProgress.last < 0.6 &&
-      miningProgress.key ===
-        `${block.hx},${block.hy},${block.hz}:${miningSize}:${gearId(inventory, "tool")}`
-        ? miningProgress.ratio
-        : 0;
+    const ratio = world.damageAt(block);
     view.worldUI.set("focus", {
       title: names[block.b] || "블록",
       detail:
         aimAction === 2
-          ? `채굴 ${Math.floor(ratio * 100)}% · ${activeGear(inventory, "tool").name}`
-          : `${block.distance.toFixed(1)} m`,
+          ? `파손 ${Math.floor(ratio * 100)}% · ${activeGear(inventory, "tool").name}`
+          : `파손 ${Math.floor(ratio * 100)}% · ${block.distance.toFixed(1)} m`,
       hint:
         aimAction === 2
-          ? "공격 · 캐기를 길게 누르세요"
+          ? "공격 · 캐기 · 손상은 계속 보존됩니다"
           : aimAction === 3
             ? "사용으로 블록 설치"
             : "도구를 들고 상호작용",
       value: ratio,
-      max: aimAction === 2 ? 1 : 0,
+      max: aimAction === 2 || ratio > 0 ? 1 : 0,
       color: "#e5d6a1",
       position: {
         x: block.hx * 0.5 + 0.25 + block.normal[0] * 0.33,
@@ -1731,6 +1758,11 @@ try {
       travel,
       openBag,
       save,
+      interact: () => {
+        const aimed = target();
+        if (aimed.ent || aimed.object) use("secondary");
+        else frontierUI.interact(null);
+      },
       get running() {
         return running;
       },

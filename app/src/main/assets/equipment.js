@@ -1,6 +1,15 @@
 import { B } from "./world.js";
 // Distances in metres, cooldowns in simulation seconds. Tools are persistent gear.
 export const GEAR = {
+  relicpick: {
+    name: "공명 곡괭이",
+    slot: "tool",
+    power: 6,
+    affinity: "rock",
+    durability: 520,
+    cost: { relic: 1, iron: 8, crystal: 6 },
+    frontier: true,
+  },
   pulse: {
     name: "기본 펄스",
     slot: "weapon",
@@ -148,24 +157,4 @@ export function miningWork(block, size, gear) {
     (hardness * Math.max(0.5, size ** 3)) /
     (gear.affinity === kind ? gear.power : 1)
   );
-}
-// Reset progress on target/range/tool changes and after interruptions.
-export class MiningProgress {
-  constructor() {
-    this.reset();
-  }
-  reset() {
-    this.key = "";
-    this.work = 0;
-    this.last = -Infinity;
-    this.ratio = 0;
-  }
-  strike(key, time, required) {
-    if (this.key !== key || time - this.last > 0.6) this.work = 0;
-    this.key = key;
-    this.last = time;
-    this.work += 0.2;
-    this.ratio = Math.min(1, this.work / required);
-    return this.ratio >= 1;
-  }
 }

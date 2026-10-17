@@ -5,7 +5,6 @@ import {
   GEAR,
   activeGear,
   spendGear,
-  MiningProgress,
   miningWork,
 } from "../app/src/main/assets/equipment.js";
 import { World, B } from "../app/src/main/assets/world.js";
@@ -37,20 +36,13 @@ test("gear crafting, ammo, breakage, repair and save restore form a finite loop"
   assert.equal(restored.wear.bow, 140);
   assert.equal(restored.repair("bow"), false);
 });
-test("tools specialize in materials and interrupted mining never carries across targets", () => {
+test("tools specialize in materials", () => {
   assert.ok(
     miningWork(B.WOOD, 1, GEAR.axe) < miningWork(B.WOOD, 1, GEAR.ironpick),
   );
   assert.ok(
     miningWork(B.ORE, 1, GEAR.ironpick) < miningWork(B.ORE, 1, GEAR.axe),
   );
-  const p = new MiningProgress();
-  assert.equal(p.strike("a", 0, 0.5), false);
-  assert.equal(p.strike("a", 0.2, 0.5), false);
-  assert.equal(p.strike("b", 0.4, 0.5), false);
-  assert.equal(p.strike("b", 2, 0.5), false);
-  assert.equal(p.strike("b", 2.2, 0.5), false);
-  assert.equal(p.strike("b", 2.4, 0.5), true);
 });
 test("limb loss impairs movement; vital loss kills once; health is independent of food", () => {
   const w = new World(1),

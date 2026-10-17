@@ -3,6 +3,9 @@ import { GEAR } from "./equipment.js";
 import { B, clamp } from "./world.js";
 import { solidAt } from "./physics.js";
 export const ITEMS = {
+  berry: { name: "들열매", color: 0xb45765, frontier: true },
+  herb: { name: "은잎 약초", color: 0xa5c9ab, frontier: true },
+  scrap: { name: "옛 기계 고철", color: 0x9f8e76, frontier: true },
   meat: { name: "날고기", icon: "", color: 0xc27670 },
   arrow: { name: "화살", icon: "➶", color: 0xd5c59a },
   food: { frontier: true, name: "야전 식량", icon: "◒", color: 0xd9b76c },
@@ -49,6 +52,76 @@ export const SLOT_COUNT = 36,
   STACK_LIMIT = 64;
 export const stackLimit = (id) => ITEMS[id]?.limit || STACK_LIMIT;
 export const RECIPES = [
+  {
+    id: "compost",
+    name: "식물 퇴비 흙 × 4",
+    description: "재생되는 식물 섬유와 씨앗으로 건축용 흙 마련",
+    cost: { fiber: 3, seed: 1 },
+    give: { dirt: 4 },
+  },
+  {
+    id: "wooden_pick",
+    name: "나무 곡괭이 복구",
+    description: "기본 도구를 잃어도 목재로 다시 제작",
+    cost: { wood: 4 },
+    give: { pick: 1 },
+  },
+  {
+    id: "pulse_emitter",
+    name: "기본 펄스 제작",
+    description: "기본 무기를 잃어도 자원으로 다시 제작",
+    cost: { stone: 3, crystal: 2 },
+    give: { pulse: 1 },
+  },
+  {
+    id: "field_notes",
+    name: "생태 연구 기록 × 2",
+    description: "약초·섬유·결정을 분석해 반복해서 연구 기록 생산",
+    cost: { herb: 2, fiber: 4, crystal: 1 },
+    give: { knowledge: 2 },
+    frontier: true,
+  },
+  {
+    id: "relic_core",
+    name: "공명 핵 재구성",
+    description:
+      "생명 정수와 광물·지식으로 유적 핵을 재구성 · 보스 처치 불필요",
+    cost: { essence: 8, crystal: 12, knowledge: 6 },
+    give: { relic: 1 },
+    frontier: true,
+  },
+  {
+    id: "metal_scrap",
+    name: "합금 분해 × 2",
+    description: "합금을 고철로 재활용해 수리 의뢰에 전달",
+    cost: { iron: 2 },
+    give: { scrap: 2 },
+    frontier: true,
+  },
+  {
+    id: "berry_meal",
+    name: "들열매 식량 × 3",
+    description: "야영지와 마을 주변의 덤불을 채집해 보급",
+    cost: { berry: 3, fiber: 1 },
+    give: { food: 3 },
+    frontier: true,
+  },
+  {
+    id: "herbal_medicine",
+    name: "약초 회복약 × 2",
+    description: "체력 45 회복 · 다친 동물을 조준하고 사용하면 치료",
+    cost: { herb: 2, resin: 1 },
+    give: { medicine: 2 },
+    frontier: true,
+  },
+  {
+    id: "salvage_iron",
+    name: "고철 재련 × 3",
+    description: "기계 잔해를 회수해 합금으로 재활용",
+    cost: { scrap: 3, wood: 1 },
+    give: { iron: 3 },
+    frontier: true,
+  },
   {
     id: "aircraft_parts",
     name: "경량 비행기 부품 묶음",

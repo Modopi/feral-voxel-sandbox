@@ -1,3 +1,4 @@
+import { sourceHints } from "./acquisition.js";
 import { ITEMS, RECIPES } from "./inventory.js";
 import { GEAR } from "./equipment.js";
 import { itemArt } from "./item-art.js";
@@ -126,6 +127,12 @@ export class InventoryUI {
       const text = document.createElement("span");
       text.textContent = `${ITEMS[s.id].name} · ${s.count}개${GEAR[s.id]?.durability ? ` · 내구 ${inv.wear[s.id]}/${GEAR[s.id].durability}` : ""}${this.source !== null ? " · 옮길 칸을 누르세요" : ""}`;
       detail.append(text);
+      const source = document.createElement("small");
+      source.className = "itemSource";
+      source.textContent =
+        "얻는 곳: " +
+        sourceHints(s.id, !!this.c.frontier).slice(0, 3).join(" / ");
+      detail.append(source);
       if (GEAR[s.id]?.durability) {
         const b = document.createElement("button");
         b.textContent = "수리";
@@ -151,7 +158,10 @@ export class InventoryUI {
       (r) =>
         (!r.frontier || this.c.frontier) &&
         (this.filter === "all" ||
-          (this.filter === "gear" ? !!GEAR[r.id] : !GEAR[r.id])),
+          (this.filter === "gear"
+            ? !!GEAR[r.id] || Object.keys(r.give || {}).some((id) => GEAR[id])
+            : !GEAR[r.id] &&
+              !Object.keys(r.give || {}).some((id) => GEAR[id]))),
     );
     const list = document.getElementById("recipeList");
     const recipeScroll = list.scrollTop;
@@ -201,6 +211,22 @@ export class InventoryUI {
       (inv.canCraft(r)
         ? " · 결과를 눌러 제작"
         : " · 재료·빈 칸·보유 상태 확인");
+    const previousGuide = document.getElementById("sourceGuide"),
+      wasOpen = previousGuide?.open;
+    previousGuide?.remove();
+    const guide = document.createElement("details");
+    guide.id = "sourceGuide";
+    guide.open = !!wasOpen;
+    const summary = document.createElement("summary");
+    summary.textContent = "재료 얻는 곳 · 채집과 제작 경로";
+    guide.append(summary);
+    for (const [id] of costs) {
+      const line = document.createElement("p");
+      line.textContent =
+        ITEMS[id].name + ": " + sourceHints(id, !!this.c.frontier).join(" / ");
+      guide.append(line);
+    }
+    document.querySelector(".craftBench").append(guide);
     this.c.renderHotbar();
     body.scrollTop = inventoryScroll;
   }

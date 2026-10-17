@@ -217,6 +217,7 @@ fs.mkdirSync(out, { recursive: true });
       const slotsBefore = await page.evaluate(() =>
         JSON.stringify(FERAL.inventory.slots),
       );
+      await reach('[data-slot="18"]', ".inventoryBody");
       const firstVisible = await page.locator(".itemSlot").evaluateAll(
         (els) =>
           els.find((e) => {
