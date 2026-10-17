@@ -2,9 +2,9 @@
 
 Android에서 오프라인으로 탐험·직접 조립·재배·공동체 협력으로 성장하는 1인칭 복셀 샌드박스 RPG.
 
-**[현재까지의 진행 현황](docs/PROJECT-STATUS.md)** — 구현 범위, 플레이 루프, 구조·물리 아키텍처, 검증·배포 결과, 남은 과제와 다음 우선순위 (2026-10-17, 게임 0.10.0 기준).
+**[현재까지의 진행 현황](docs/PROJECT-STATUS.md)** — 구현 범위, 플레이 루프, 구조·물리 아키텍처, 검증·배포 결과, 남은 과제와 다음 우선순위 (2026-10-17, 공개 배포 게임 0.11.0 기준).
 
-**이번 변경은 게임 0.11.0 / 1100입니다.** 공개 게시 여부는 아래 공식 버전 목록과 릴리스에서 확인합니다. 새 콘텐츠 구현과 검증의 최신 기준은 [요구사항 추적표](docs/content/IMPLEMENTATION-STATUS.md), 전체 완료 조건은 [구현 Goal](docs/IMPLEMENTATION-GOAL.md)을 확인하세요.
+**게임 0.11.0 / 1100이 공개 배포됐습니다** ([v0.11.0 릴리스](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.11.0), 2026-10-17 17:13 UTC). 새 콘텐츠 구현과 검증의 최신 기준은 [요구사항 추적표](docs/content/IMPLEMENTATION-STATUS.md), 전체 완료 조건은 [구현 Goal](docs/IMPLEMENTATION-GOAL.md)을 확인하세요.
 
 ## 0.11.0 — 콘텐츠 탐험 통합
 
@@ -49,12 +49,12 @@ npm run author:assets
 
 ## 설치·업데이트
 
-앱 0.3.3에서는 **메뉴 → 업데이트 → 지금 확인 → 저장 후 적용**으로 게임 0.11.0을 받습니다. 특정 버전에 고정했다면 **게임 버전 → 0.11.0**을 선택하세요. 버전 목록에 아직 없다면 공개 게시가 완료된 뒤 다시 확인합니다. 처음 설치하거나 앱 0.3.2 이하인 경우 [공개 릴리스](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.11.0)의 `Feral-0.3.3-android.apk`를 설치합니다. 기존 앱을 삭제할 필요가 없습니다.
+앱 0.3.3에서는 **메뉴 → 업데이트 → 지금 확인 → 저장 후 적용**으로 게임 0.11.0을 받습니다. 특정 버전에 고정했다면 **게임 버전 → 0.11.0**을 선택하세요. 처음 설치하거나 앱 0.3.2 이하인 경우 [공개 릴리스](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.11.0)의 `Feral-0.3.3-android.apk`를 설치합니다. 기존 앱을 삭제할 필요가 없습니다.
 
 게임 1100, 앱/최소 앱 303, 저장 스키마 2. 기존 저장을 읽으며 기존 지역의 지형을 다시 생성하지 않습니다. 수동 게임 버전 전환은 빌드별 저장을 분리하며 첫 선택은 새 저장으로 시작합니다. [배포·설치 안내](docs/RELEASING.md), [자원 순환 규칙](docs/PERSISTENT-WORLD-AND-LOOPS.md).
 
 
-앱이 사용하는 공개 배포 경로는 동일 저장소의 `updates` 브랜치입니다: [버전 목록](https://raw.githubusercontent.com/Modopi/feral-voxel-sandbox/updates/catalog.json), [최신 게임 패키지](https://raw.githubusercontent.com/Modopi/feral-voxel-sandbox/updates/stable.feral). 0.10.0과 0.10.1의 불변 패키지는 보존하며, 0.11.0은 별도의 버전으로 추가합니다. 기존 저장에서 콘텐츠 탐험을 이용하려면 내 월드에 새 콘텐츠 탐험 월드를 만드세요.
+앱이 사용하는 공개 배포 경로는 동일 저장소의 `updates` 브랜치입니다: [버전 목록](https://raw.githubusercontent.com/Modopi/feral-voxel-sandbox/updates/catalog.json), [최신 게임 패키지](https://raw.githubusercontent.com/Modopi/feral-voxel-sandbox/updates/stable.feral). 0.11.0은 별도의 불변 패키지로 추가됐고 0.10.0·0.10.1을 포함한 이전 패키지는 그대로 보존됩니다. 기존 저장에서 콘텐츠 탐험을 이용하려면 내 월드에 새 콘텐츠 탐험 월드를 만드세요.
 
 버전 목록은 **게임 버전** 창을 열 때 다시 요청합니다. 요청에 실패하면 “목록을 새로 받지 못했습니다. 저장된 목록을 표시합니다.” 안내와 함께 이전 목록을 보여줍니다. 자동 업데이트의 15분 간격 제한은 수동 **지금 확인**에는 적용되지 않습니다. 공개 서버 응답에 5분 캐시 설정이 있으나 기기별 갱신 지연의 상한을 보장하지는 않습니다.
 

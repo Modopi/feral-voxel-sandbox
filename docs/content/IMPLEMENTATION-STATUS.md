@@ -41,11 +41,11 @@
 | 생성 시드/객체ID·보상 원장·영구 손상·저장 안전 | 전체 모델 `serialize()`, `save.js` | JSON 왕복·멱등 거래·다중 객체·손상 복구·실패 시 정상 저장 보존 | 시드·보상 원장·영구 손상·여섯 시스템 JSON 왕복 독립 검사 통과; 최종 경제 경로7,392,216글자의 두 세대 압축 저장·worker 복원 통과; 생명체/기계를 누적한 전체 무한 월드 상한은 미검증 |
 | 탐험→채집→연구→제작→개인/기계 보스→다음 탐험 | 통합 런타임/화면/기존 게임 연결 | 처음부터 수량/시간을 소비한 브라우저 완주·게임 저장 후 재개 | 기존 사용자 저장을 초기화하지 않고 실제 채집→돌 곡괭이 제작→목재 가공까지 진행; 메뉴 저장·페이지 재접속 뒤 인벤토리/연구/설비/배치가 일치. [실행 보고서](../../verification/screenshots/expedition-browser-report.json); 보스/장거리 진행은 미검증 |
 | 모바일 조작·화면 접근·성능·안드로이드 생명주기 | 통합 UI/렌더·기존 Android 앱 | 실제 입력·프레임/메모리/발열·백그라운드 복귀·충돌 활성 범위 | Chromium/desktop SwiftShader 터치 검사 390×844·844×390·360×640에서 레이아웃·터치 모드·제작 스크롤·시점·조이스틱·메뉴 일시정지·저장 재접속 통과; Android 실기기 설치/측정 없음. 실제 기기 확인은 사용자의 Android 모델·SoC·RAM·OS/WebView에서 native0.3.3/code303 + game0.11.0/code1100, 일반 플레이·밀집 던전/기계 장면의 30분 및 2시간 세션으로 수행하고 p50/p95 프레임·프로세스 메모리 증가·열 제한·백그라운드 복귀/프로세스 종료 후 저장 복원을 기록해야 함 |
-| 회귀·APK·서명 업데이트·공개 배포 | 전체 tests, 빌드/배포 도구 | 필수 검사·빌드·리뷰·릴리스 조회·버전/해시 일치 | 신규 구현 배포 대기 |
+| 회귀·APK·서명 업데이트·공개 배포 | 전체 tests, 빌드/배포 도구 | 필수 검사·빌드·리뷰·릴리스 조회·버전/해시 일치 | 0.11.0 / 1100 공개 게시 완료: PR #16 병합, 배포 Actions·제작 하네스 성공, v0.11.0 Release와 `updates`의 stable·불변 패키지·카탈로그 해시 일치, 과거 항목 불변 확인. 휴대폰 업데이트 적용·재시작은 미검증 |
 
 ## 현재 패키지 검증 스냅샷
 
-`version.json`은 0.11.0 / versionCode 1100을 가리키지만 아직 배포되지 않았다. 현재 canonical asset regeneration에는 119개 모델이 포함된다: 환경8, 생물34, 구조물12, 보스8, 장비57. 기존 115개 모델은 유지됐고 재료형 무기 3개와 전기 투사기 1개를 추가했다.
+`version.json`은 0.11.0 / versionCode 1100이며 2026-10-17에 공개 게시됐다([게시 확인](../../verification/0.11.0.md#공개-게시-결과)). 현재 canonical asset regeneration에는 119개 모델이 포함된다: 환경8, 생물34, 구조물12, 보스8, 장비57. 기존 115개 모델은 유지됐고 재료형 무기 3개와 전기 투사기 1개를 추가했다.
 
 - `npm run build:assets`: 모델119개, 복셀55,511개, GLB 합계31,290,864바이트를 생성했다. [manifest SHA256](../../verification/visual-assets/gltf-validation.json)은 `a4f3de159fd8cbb22449f48770e89f8f4880fdb3b3dee7c5459c6dedabdc7b09`다.
 - `npm run check:assets`, Khronos glTF Validator 2.0.0-dev.3.10: 119개 검사, 오류0·경고0·manifest 해시 불일치0.
@@ -54,7 +54,7 @@
 - Expedition entry에서 도달 가능한 61개 JavaScript 모듈의 HTTP preflight가 모두 200을 반환했고, 최신 dungeon/runtime import 및 `ExpeditionRuntime.create()`/serialize smoke는 총괄이 통과시켰다.
 - 기존 browser save를 잇는 정상 UI 검사는 원래 저장 SHA256 `62011246…8fcea`에서 채집, 돌 곡괭이 제작, 목재 가공 후 메뉴 저장·재접속까지 완료했다. 현재 UI save는 SHA256 `b87155a4…4f15f`이고, 9개 단계 기록은 [expedition-browser-report.json](../../verification/screenshots/expedition-browser-report.json)에 있다. 페이지 오류0·요청 실패0; 콘솔에는 favicon 파일 부재 404만 있다.
 
-이 스냅샷은 자산·runtime-content 생성물과 집중 검사를 기록한다. 전체495개 테스트·APK 생성·서명 패키지 검증도 통과했다. 최종 앱118파일/11,469,147바이트, ZIP2,781,642바이트이며 APK와 업데이트 내부 자산이 모두 같다. 실제 Android 설치·복귀와 공개 게시 확인은 별도로 기록한다.
+이 스냅샷은 자산·runtime-content 생성물과 집중 검사를 기록한다. 전체495개 테스트·APK 생성·서명 패키지 검증도 통과했다. 최종 앱118파일/11,469,147바이트, ZIP2,781,642바이트이며 APK와 업데이트 내부 자산이 모두 같다. 공개 게시된 패키지도 같은 118파일·아카이브 크기·해시를 갖는다. 실제 Android 설치·복귀는 별도로 기록한다.
 
 ## 최초 패키징 이력 (115모델 이전)
 
