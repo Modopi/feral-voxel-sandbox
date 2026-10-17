@@ -1,6 +1,11 @@
 import { InventoryUI } from "./inventory-ui.js";
 import { HudEditor } from "./hud-editor.js";
-import { DEFAULT_EDIT_SIZE, EDIT_GRID_VERSION, restoreEditGrid, editSizeLabel } from "./edit-grid.js";
+import {
+  DEFAULT_EDIT_SIZE,
+  EDIT_GRID_VERSION,
+  restoreEditGrid,
+  editSizeLabel,
+} from "./edit-grid.js";
 import { itemArt } from "./item-art.js";
 import {
   GEAR,
@@ -319,7 +324,9 @@ function updateToolLabel() {
       ? `보유 ${inventory.count(id)} · 설치 ${buildSize === 1 ? 8 : 1}조각`
       : "선택한 아이템 사용";
   $("rangeBtn").textContent =
-    (selected === 3 ? "설치 " : "채굴 ") + editSizeLabel(selected === 3 ? buildSize : miningSize) + " ↻";
+    (selected === 3 ? "설치 " : "채굴 ") +
+    editSizeLabel(selected === 3 ? buildSize : miningSize) +
+    " ↻";
   $("rangeBtn").classList.toggle("hidden", selected !== 2 && selected !== 3);
   $("actBtn").firstChild.textContent = "⚒";
   $("actBtn").querySelector("small").textContent = "공격·캐기";
@@ -330,6 +337,17 @@ function updateToolLabel() {
       : id === "seed"
         ? "먹이·심기"
         : "상호작용";
+  if (ITEMS[id]?.machinePart) {
+    $("useBtn").querySelector("small").textContent = "붙이기";
+    $("toolHelp").textContent = "0.5m 부품 · 면에 붙이기";
+  }
+  if (id === "wrench") {
+    $("actBtn").querySelector("small").textContent = "부품 회수";
+    $("useBtn").querySelector("small").textContent = "고정 전환";
+    $("toolHelp").textContent = "공격: 회수 · 사용: 고정/해제";
+  }
+  if (id === "iron")
+    $("useBtn").querySelector("small").textContent = "부품 수리";
   view?.setHeldItem(id);
   $("hint").textContent = "1–9 아이템 · I 가방";
 }
@@ -433,6 +451,10 @@ function use(intent = "selected") {
     !inventory.wear[held]
   ) {
     toast("도구가 부서졌습니다. 가방에서 수리하거나 다른 아이템을 선택하세요.");
+    return;
+  }
+  if (frontierUI?.assemblyUse(intent, held, aimed.block, aimed.ent?.distance)) {
+    syncHeld();
     return;
   }
   if (intent === "secondary") {
@@ -665,7 +687,10 @@ function pause(force) {
   if (!running) return;
   paused = force ?? !paused;
   stopInput();
-  $("pauseScreen").classList.toggle("hidden", !paused || hudEditor?.editing === true);
+  $("pauseScreen").classList.toggle(
+    "hidden",
+    !paused || hudEditor?.editing === true,
+  );
   document.body.classList.toggle("menuOpen", paused);
   if (!paused) frontierUI?.close();
   if (paused) {
@@ -695,7 +720,10 @@ function start(load = false) {
         if (s.inventory) inventory.load(s.inventory);
         loot = new Pickups();
         if (s.loot) loot.load(s.loot);
-        ({ miningSize, buildSize } = restoreEditGrid(s, inventory.unlocks.has("hammer")));
+        ({ miningSize, buildSize } = restoreEditGrid(
+          s,
+          inventory.unlocks.has("hammer"),
+        ));
         buildMaterial = ITEMS[s.buildMaterial]?.block
           ? s.buildMaterial
           : "dirt";
@@ -920,7 +948,7 @@ function updatePanels() {
   $("elapsed").textContent =
     Math.floor(playTime / 60) +
     ":" +
-    String(playTime % 60 | 0).padStart(2, "0");
+    String((playTime % 60) | 0).padStart(2, "0");
   $("seedValue").textContent = world.seed;
   for (const [id, n] of [
     ["herbCount", s.counts[0]],
@@ -961,7 +989,10 @@ function setPopulation(n = 3000) {
 function fixedStep(input = inputState()) {
   world.time += FIXED_DT;
   const vehicleInput = frontierUI?.beforeStep(input, FIXED_DT);
-  const moving = controller.step(FIXED_DT, vehicleInput || input);
+  let moving = 0;
+  if (frontierState?.riding)
+    controller.previous = { x: player.x, y: player.y, z: player.z, offset: 0 };
+  else moving = controller.step(FIXED_DT, vehicleInput || input);
   frontierUI?.afterStep(FIXED_DT);
   if (player.y < 0.25) home();
   eco.context = {
@@ -995,16 +1026,27 @@ function fixedStep(input = inputState()) {
 }
 function updateAim() {
   const { block, ent } = target();
+  if (frontierUI?.assemblyAim(heldItem(), block, ent?.distance)) return;
   const aimAction = actionHeld && !ent ? 2 : selected;
   if (ent) {
     const e = ent.entity;
     view.worldUI.set("focus", {
       title: `${SPECIES[e.type].name} · ${SPECIES[e.type].parts[ent.part].name}`,
       detail: `HP ${Math.ceil(e.hp)} / ${e.maxHP} · ${e.behavior || "배회"}`,
-      hint: "HP 0 · 머리 / 몸통 파괴 시 사망", value: Math.ceil(e.hp), max: e.maxHP,
+      hint: `지지 다리 ${eco.legs(e)}/4 · HP 0 / 머리·몸통 파괴 시 사망`,
+      value: Math.ceil(e.hp),
+      max: e.maxHP,
       color: e.type === 1 ? "#efb484" : "#b4ddbe",
-      maxDistance: selected === 1 ? activeGear(inventory, "weapon").range + 1 : 8,
-      follow: () => e.dead ? null : { x: e.x, y: e.y + 1.25 * SPECIES[e.type].s, z: e.z },
+      maxDistance:
+        selected === 1 ? activeGear(inventory, "weapon").range + 1 : 8,
+      follow: () =>
+        e.dead
+          ? null
+          : {
+              x: e.x,
+              y: e.y + (e.bodyPose?.drop || 0) + 1.25 * SPECIES[e.type].s,
+              z: e.z,
+            },
     });
     view.highlight.visible = false;
   } else if (block) {
@@ -1022,15 +1064,32 @@ function updateAim() {
       "재",
       "목재",
     ];
-    const ratio = world.time - miningProgress.last < 0.6 &&
-      miningProgress.key === `${block.hx},${block.hy},${block.hz}:${miningSize}:${gearId(inventory, "tool")}`
-      ? miningProgress.ratio : 0;
+    const ratio =
+      world.time - miningProgress.last < 0.6 &&
+      miningProgress.key ===
+        `${block.hx},${block.hy},${block.hz}:${miningSize}:${gearId(inventory, "tool")}`
+        ? miningProgress.ratio
+        : 0;
     view.worldUI.set("focus", {
       title: names[block.b] || "블록",
-      detail: aimAction === 2 ? `채굴 ${Math.floor(ratio * 100)}% · ${activeGear(inventory, "tool").name}` : `${block.distance.toFixed(1)} m`,
-      hint: aimAction === 2 ? "공격 · 캐기를 길게 누르세요" : aimAction === 3 ? "사용으로 블록 설치" : "도구를 들고 상호작용",
-      value: ratio, max: aimAction === 2 ? 1 : 0, color: "#e5d6a1",
-      position: { x: block.hx * 0.5 + 0.25 + block.normal[0] * 0.33, y: block.hy * 0.5 + 0.25 + block.normal[1] * 0.33, z: block.hz * 0.5 + 0.25 + block.normal[2] * 0.33 },
+      detail:
+        aimAction === 2
+          ? `채굴 ${Math.floor(ratio * 100)}% · ${activeGear(inventory, "tool").name}`
+          : `${block.distance.toFixed(1)} m`,
+      hint:
+        aimAction === 2
+          ? "공격 · 캐기를 길게 누르세요"
+          : aimAction === 3
+            ? "사용으로 블록 설치"
+            : "도구를 들고 상호작용",
+      value: ratio,
+      max: aimAction === 2 ? 1 : 0,
+      color: "#e5d6a1",
+      position: {
+        x: block.hx * 0.5 + 0.25 + block.normal[0] * 0.33,
+        y: block.hy * 0.5 + 0.25 + block.normal[1] * 0.33,
+        z: block.hz * 0.5 + 0.25 + block.normal[2] * 0.33,
+      },
       maxDistance: 8,
     });
     view.highlight.visible = aimAction === 2 || aimAction === 3;
@@ -1550,8 +1609,16 @@ try {
     view.camera.updateProjectionMatrix();
   }
   hudEditor = new HudEditor({
-    open: () => { pause(true); frontierUI?.close(); $("pauseScreen").classList.add("hidden"); },
-    close: () => { stopInput(); pause(true); document.querySelector('[data-tab="settings"]').click(); },
+    open: () => {
+      pause(true);
+      frontierUI?.close();
+      $("pauseScreen").classList.add("hidden");
+    },
+    close: () => {
+      stopInput();
+      pause(true);
+      document.querySelector('[data-tab="settings"]').click();
+    },
   });
   $("editHudBtn").onclick = () => hudEditor.open();
   $("editHudShortcut").onclick = () => hudEditor.open();

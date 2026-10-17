@@ -141,18 +141,52 @@ const fs = require("node:fs");
     await page.click("#resumeBtn");
     await page.click("#journalBtn");
     await page.click('[data-frontier-tab="machine"]');
-    await page.selectOption("#frontierLayer", "2");
-    await page.selectOption("#frontierPart", "rotor");
-    await page
-      .locator('#frontierMachineGrid button[aria-label="0,2,0 빈 칸"]')
-      .click();
-    await page
-      .locator('#frontierMachineGrid button[aria-label="1,2,0 빈 칸"]')
-      .click();
+    assert.equal(await page.locator("#frontierMachineGrid").count(), 0);
+    assert.match(
+      await page.locator("#frontierPanel").innerText(),
+      /월드에서 조립/,
+    );
+    await page.click("#frontierClose");
+    await page.click("#inventoryBtn");
+    await craft("회전익 블록");
+    await craft("회전익 블록");
+    await page.click("#resumeBtn");
+    // Aim at opposite motor faces and attach crafted rotors in world coordinates.
+    for (const side of [-1, 1]) {
+      await page.evaluate((side) => {
+        const f = FERAL,
+          m = f.frontier.machine,
+          p = m.pose.position;
+        f.player.flying = true;
+        const index = f.inventory.slots.findIndex(
+          (s) => s?.id === "rotor_part",
+        );
+        if (index >= 9) f.inventory.move(index, 8);
+        f.selectHotbar(index >= 9 ? 8 : index);
+        f.setCamera(p.x + side * 3, p.y + 0.75, p.z, (side * Math.PI) / 2, 0);
+      }, side);
+      await page.waitForFunction(
+        () => FERAL.frontier.time > FERAL.frontierUI.assembly.nextUse,
+      );
+      await page.tap("#useBtn");
+    }
+    assert.equal(
+      await page.evaluate(
+        () =>
+          FERAL.frontier.machine.blueprint.filter((p) => p.type === "rotor")
+            .length,
+      ),
+      2,
+    );
     await page.screenshot({ path: "build/frontier-machine.png" });
-    await page.click("#rideVehicle");
+    await page.evaluate(() => {
+      const f = FERAL,
+        p = f.frontier.machine.pose.position;
+      f.setCamera(p.x + 2, p.y + 1.36, p.z, Math.PI / 2, 0);
+    });
+    await page.tap("#interactBtn");
     assert.equal(await page.evaluate(() => FERAL.frontier.riding), true);
-    await page.click("#flyBtn");
+    await page.tap("#flyBtn");
     assert.equal(await page.evaluate(() => FERAL.frontier.airborne), true);
     const flight = await page.evaluate(() => {
       const f = FERAL,
@@ -161,12 +195,9 @@ const fs = require("node:fs");
         f.fixedStep({ forward: 0, side: 0, up: true });
       return f.player.y - y;
     });
-    assert.ok(flight > 2);
-    await page.click("#journalBtn");
-    await page.click('[data-frontier-tab="machine"]');
-    await page.click("#rideVehicle");
+    assert.ok(flight > 2, `physical rotor ascent ${flight}`);
+    await page.tap("#interactBtn");
     assert.equal(await page.evaluate(() => FERAL.frontier.riding), false);
-    await page.click("#frontierClose");
     await page.evaluate(() => {
       const f = FERAL;
       f.setCamera(77.5, f.world.surface(77.5, 84.5) + 1.36, 84.5, 0, 0);

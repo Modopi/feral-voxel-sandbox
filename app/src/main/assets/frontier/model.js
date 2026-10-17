@@ -361,13 +361,8 @@ export class Frontier {
         this.hp - dt * (inv.unlocks.has("armor") ? 0.6 : 1.2),
       );
     }
-    if (this.riding && this.machine) {
-      const f = evaluate(this.machine);
-      if (!f.power || (!f.grip && f.lift < 1.5)) {
-        this.riding = false;
-        this.airborne = false;
-      }
-      if (f.lift < 1.5) this.airborne = false;
+    if (this.riding && this.machine && !evaluate(this.machine).connected.size) {
+      this.riding = this.airborne = false;
     }
     if (this.hp <= 0) {
       this.deaths++;
@@ -438,7 +433,7 @@ export class Frontier {
       preset(this.machine);
       this.machine.stock = 0;
       this.note(
-        "기본 차량 조립 완료 · 원정 장부의 기계 탭에서 개조할 수 있습니다.",
+        "기본 차량 준비 · 부품을 들고 월드에서 면에 붙이세요. 렌치로 고정/해제합니다.",
       );
     }
   }
@@ -474,7 +469,8 @@ export class Frontier {
     if (!f.power || (!f.grip && f.lift < 1.5))
       return "연결된 모터와 바퀴 또는 회전익이 필요합니다.";
     this.riding = true;
-    return "탑승 · 이동 조작으로 주행 · 기계 버튼으로 하차";
+    if (this.machine.pose) this.machine.pose.anchored = false;
+    return "탑승 · 이동으로 추진·조향 · 상호작용 / R로 하차";
   }
   move(dx, dz, inv, player) {
     if (

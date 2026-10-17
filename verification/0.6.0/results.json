@@ -1,0 +1,26 @@
+{
+  "version": "0.6.0",
+  "gameCode": 600,
+  "nativeCode": 302,
+  "unitTests": 89,
+  "browserChecks": [
+    "interface",
+    "survival-ui",
+    "world-ui",
+    "progression",
+    "equipment",
+    "machine",
+    "updates-ui",
+    "structural-ui",
+    "frontier-ui"
+  ],
+  "apk": {
+    "bytes": 2088303,
+    "sha256": "ddef32c9c6347959de3fc650998783959c64982178c70d30aec9b7e9ff6cd50e"
+  },
+  "update": {
+    "bytes": 2745659,
+    "sha256": "695a71c8d539d4c0e35f10b1c11fdb06e47bd2a96ddaa028bfe0efab6317c162"
+  },
+  "physicalDeviceTested": false
+}

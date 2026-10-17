@@ -1,3 +1,5 @@
+import { components, massProperties } from "../structure.js";
+import { validPose } from "./assembly-state.js";
 // 표현 계층에서 독립된 기계 데이터와 고정 시간 시뮬레이션
 export const DT = 1 / 60;
 export const TYPES = Object.freeze({
@@ -68,27 +70,12 @@ export function edit(s, kind, x, y, z, type = "hull") {
   return true;
 }
 export function evaluate(s) {
-  const alive = s.blueprint.filter((p) => s.hp[p.id] > 0),
-    connected = new Set(),
-    cells = new Map(alive.map((p) => [key(p.x, p.y, p.z), p]));
-  const root = cells.get("0,0,0"),
-    queue = root?.type === "hull" ? [root] : [];
-  for (let i = 0; i < queue.length; i++) {
-    const p = queue[i];
-    if (connected.has(p.id)) continue;
-    connected.add(p.id);
-    for (const [x, y, z] of [
-      [1, 0, 0],
-      [-1, 0, 0],
-      [0, 1, 0],
-      [0, -1, 0],
-      [0, 0, 1],
-      [0, 0, -1],
-    ]) {
-      const n = cells.get(key(p.x + x, p.y + y, p.z + z));
-      if (n && !connected.has(n.id)) queue.push(n);
-    }
-  }
+  const alive = s.blueprint.filter((p) => s.hp[p.id] > 0);
+  const group =
+    components(alive).find((g) =>
+      g.some((p) => p.type === "hull" && p.x === 0 && p.y === 0 && p.z === 0),
+    ) || [];
+  const connected = new Set(group.map((p) => p.id));
   let weapons = 0,
     lift = 0;
   let mass = 0,
@@ -98,6 +85,7 @@ export function evaluate(s) {
     wheels = 0,
     radius = 0.5;
   for (const p of s.blueprint) {
+    if (!s.hp[p.id]) continue;
     mass += TYPES[p.type].mass;
     radius = Math.max(radius, Math.hypot(p.x * 0.5, p.z * 0.5) + 0.36);
     if (!connected.has(p.id)) continue;
@@ -114,6 +102,15 @@ export function evaluate(s) {
   const grip = Math.min(1, wheels / 4),
     steering = Math.min(1, left, right);
   return {
+    ...massProperties(
+      alive.map((p) => ({
+        x: p.x * 0.5,
+        y: p.y * 0.5 + 0.25,
+        z: p.z * 0.5,
+        mass: TYPES[p.type].mass,
+        size: 0.5,
+      })),
+    ),
     weapons,
     lift,
     mass: Math.max(1, mass),
@@ -254,10 +251,10 @@ export function restore(raw) {
       ids.has(p.id) ||
       positions.has(k) ||
       ![p.x, p.y, p.z].every(Number.isInteger) ||
-      Math.abs(p.x) > 3 ||
-      p.y < 0 ||
-      p.y > 2 ||
-      Math.abs(p.z) > 3 ||
+      Math.abs(p.x) > (a.assembly ? 16 : 3) ||
+      p.y < (a.assembly ? -16 : 0) ||
+      p.y > (a.assembly ? 16 : 2) ||
+      Math.abs(p.z) > (a.assembly ? 16 : 3) ||
       !Number.isFinite(a.hp?.[p.id]) ||
       a.hp[p.id] < 0 ||
       a.hp[p.id] > TYPES[p.type].hp
@@ -288,5 +285,22 @@ export function restore(raw) {
     tick: a.tick,
     nextId: a.nextId,
   });
+  if (a.pose) s.pose = validPose(a.pose);
+  if (a.assembly) s.assembly = true;
+  if (a.fragments) {
+    if (!Array.isArray(a.fragments) || a.fragments.length > 147)
+      throw Error("조립체 조각 범위 오류");
+    s.fragments = a.fragments.map((f) => {
+      if (!f.pose || !f.assembly) throw Error("조립체 조각의 위치가 없습니다.");
+      return restore(JSON.stringify({ ...f, fragments: undefined }));
+    });
+    if (
+      [s, ...s.fragments].reduce(
+        (n, f) => n + f.blueprint.filter((p) => f.hp[p.id] > 0).length,
+        0,
+      ) > 147
+    )
+      throw Error("전체 부품 수 범위 오류");
+  }
   return s;
 }

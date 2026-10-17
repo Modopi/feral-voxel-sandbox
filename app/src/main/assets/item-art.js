@@ -9,7 +9,7 @@ export function itemArt(id) {
   let body = "";
   const rect = (x, y, w, h, c) =>
     `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`;
-  if (item.block) {
+  if (item.block || item.machinePart) {
     body = `<path d="M3 10L16 3 29 10 16 18Z" fill="${color}"/><path d="M3 10L16 18V30L3 22Z" fill="${color}"/><path d="M16 18L29 10V22L16 30Z" fill="${color}"/><path d="M3 10L16 18V30L3 22Z" fill="#fff" opacity=".16"/><path d="M16 18L29 10V22L16 30Z" fill="#000" opacity=".28"/>`;
     for (let n = 0; n < 6; n++)
       body += rect(
@@ -22,6 +22,14 @@ export function itemArt(id) {
     if (id === "wood" || id === "plank")
       body +=
         '<path d="M6 15v9m4-7v9m11-9v8m4-10v8" stroke="#503a25" stroke-width="1.5"/>';
+    if (item.machinePart)
+      body += rect(10, 13, 10, 10, "#273537") + rect(13, 16, 4, 4, color);
+  } else if (item.assemblyTool) {
+    body =
+      rect(13, 12, 6, 17, "#bfcad1") +
+      rect(7, 4, 5, 11, "#bfcad1") +
+      rect(21, 4, 5, 11, "#bfcad1") +
+      rect(9, 12, 15, 6, "#bfcad1");
   } else if (item.gear) {
     const metal = ["sword", "battleaxe", "ironpick", "crystalbow"].includes(id)
       ? "#d1e6e4"

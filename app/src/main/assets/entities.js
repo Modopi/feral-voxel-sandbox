@@ -1,4 +1,19 @@
 import { SIZE, B, clamp, hash } from "./world.js";
+import { anatomy, attachmentIntact } from "./anatomy.js";
+import { voxelComponents } from "./structure.js";
+const conditions = new WeakMap();
+export function condition(e) {
+  const signature = `${e.lost}|${Object.entries(e.damage)
+    .map(([k, v]) => k + ":" + Array.from(v).join(""))
+    .join("|")}`;
+  let cached = conditions.get(e);
+  if (!cached || cached.signature !== signature) {
+    cached = { signature, value: anatomy(e, SPECIES[e.type]) };
+    conditions.set(e, cached);
+  }
+  e.bodyPose = cached.value;
+  return cached.value;
+}
 const makePart = (
   name,
   offset,
@@ -106,14 +121,26 @@ export function cellPosition(p, index) {
   ];
 }
 export function pose(e, p, pi, time) {
-  const swing = p.leg
-    ? Math.sin(
-        e.phase + time * e.speed * 5.6 + (pi === 3 || pi === 4 ? Math.PI : 0),
-      ) *
-      0.42 *
-      e.moving
-    : 0;
-  return { angle: swing, offset: p.offset };
+  const swing =
+    p.leg && (e.bodyPose?.support[pi - 2] ?? 1)
+      ? Math.sin(
+          e.phase + time * e.speed * 5.6 + (pi === 3 || pi === 4 ? Math.PI : 0),
+        ) *
+        0.42 *
+        e.moving *
+        (e.bodyPose?.speed ?? 1)
+      : 0;
+  const bend =
+    p.leg && e.bodyPose?.drop
+      ? Math.acos(
+          clamp(
+            (p.offset[1] + e.bodyPose.drop) / (p.cell * p.dims[1]),
+            0.15,
+            1,
+          ),
+        ) * (pi < 4 ? -1 : 1)
+      : 0;
+  return { angle: swing + bend, offset: p.offset };
 }
 export function toWorld(e, p, pi, v, time) {
   const a = pose(e, p, pi, time).angle,
@@ -124,16 +151,24 @@ export function toWorld(e, p, pi, v, time) {
   const x = v[0] + p.offset[0],
     y = v[1] * c - v[2] * s + p.offset[1],
     z = v[1] * s + v[2] * c + p.offset[2];
-  return [e.x + x * cy + z * sy, e.y + y, e.z - x * sy + z * cy];
+  const { roll = 0, pitch = 0, drop = 0 } = e.bodyPose || {};
+  const xx = x * Math.cos(roll) - y * Math.sin(roll),
+    yy = x * Math.sin(roll) + y * Math.cos(roll),
+    yp = yy * Math.cos(pitch) - z * Math.sin(pitch),
+    zp = yy * Math.sin(pitch) + z * Math.cos(pitch);
+  return [e.x + xx * cy + zp * sy, e.y + yp + drop, e.z - xx * sy + zp * cy];
 }
 export function toLocal(e, p, pi, v, time) {
+  const { roll = 0, pitch = 0, drop = 0 } = e.bodyPose || {};
   const dx = v[0] - e.x,
+    dy = v[1] - e.y - drop,
     dz = v[2] - e.z,
-    c = Math.cos(e.yaw),
-    s = Math.sin(e.yaw),
-    x = dx * c - dz * s - p.offset[0],
-    z = dx * s + dz * c - p.offset[2],
-    y = v[1] - e.y - p.offset[1],
+    xx = dx * Math.cos(e.yaw) - dz * Math.sin(e.yaw),
+    zp = dx * Math.sin(e.yaw) + dz * Math.cos(e.yaw),
+    yy = dy * Math.cos(pitch) + zp * Math.sin(pitch),
+    z = -dy * Math.sin(pitch) + zp * Math.cos(pitch) - p.offset[2],
+    x = xx * Math.cos(roll) + yy * Math.sin(roll) - p.offset[0],
+    y = -xx * Math.sin(roll) + yy * Math.cos(roll) - p.offset[1],
     a = pose(e, p, pi, time).angle;
   return [
     x,
@@ -239,6 +274,7 @@ export class Ecology {
     if (e.dead) return;
     e.dead = true;
     e.hp = 0;
+    e.moving = 0;
     e.deathCause = cause;
     e.energy = 0;
     this.world.reactions.deaths++;
@@ -251,9 +287,7 @@ export class Ecology {
     );
   }
   legs(e) {
-    let n = 0;
-    for (let i = 2; i < 6; i++) if (!(e.lost & (1 << i))) n++;
-    return n;
+    return condition(e).legs;
   }
   feed(e, inv, time) {
     if (e.dead || e.type === 1) return "이 동물은 씨앗을 먹지 않습니다.";
@@ -292,7 +326,8 @@ export class Ecology {
     return "먹이 −1 · 근처의 같은 종에게도 먹이를 주세요.";
   }
   think(e, dt) {
-    const w = this.world;
+    const w = this.world,
+      body = condition(e);
     e.age += dt;
     e.behavior = e.age < 25 ? "성장 중" : "배회";
     e.energy -= dt * (e.type === 1 ? 0.33 : 0.13);
@@ -334,7 +369,7 @@ export class Ecology {
       e.behavior = "사냥";
       e.targetX = prey.x;
       e.targetZ = prey.z;
-      if (dist < 1.9) {
+      if (dist < 1.9 && Math.abs(e.y + body.drop - prey.y) < 1.1) {
         this.hurt(prey, dt * 18, "포식자 공격");
         e.energy = clamp(e.energy + dt * 8, 0, 150);
         if (prey.energy <= 0) this.kill(prey);
@@ -386,10 +421,10 @@ export class Ecology {
         e.targetZ = player.z;
         if (
           distance < 1.8 &&
-          Math.abs(player.y - e.y) < 1.5 &&
+          Math.abs(player.y - e.y - body.drop) < 1.2 &&
           time >= (e.biteAt || 0)
         ) {
-          const origin = { x: e.x, y: e.y + 0.65, z: e.z },
+          const origin = { x: e.x, y: e.y + 0.65 + body.drop, z: e.z },
             dx = player.x - e.x,
             dy = player.y + 0.7 - origin.y,
             dz = player.z - e.z,
@@ -473,22 +508,29 @@ export class Ecology {
         this.think(e, Math.min(time - e.lastThink, 3.2));
         e.lastThink = time;
       }
+      if (e.dead) continue;
+      const body = condition(e);
+      if (!body.legs) {
+        e.targetX = e.x;
+        e.targetZ = e.z;
+        e.behavior = "이동 불가 · 방어 / 휴식";
+      } else if (body.legs < 4)
+        e.behavior =
+          body.label +
+          " · " +
+          e.behavior.replace(/^(절뚝거림|기어 이동) · /, "");
       const dx = e.targetX - e.x,
         dz = e.targetZ - e.z,
-        l = Math.hypot(dx, dz),
-        legs = this.legs(e);
-      e.moving = l > 1 ? 1 : 0.08;
+        l = Math.hypot(dx, dz);
+      e.moving = l > 1 && body.legs ? 1 : 0;
       const speed =
-        e.speed *
-        (legs / 4) ** 1.5 *
-        (e.fear > 0 ? 1.55 : 1) *
-        (e.lost & 1 ? 0 : 1);
+        e.speed * body.speed * (e.fear > 0 ? 1.55 : 1) * (e.lost & 1 ? 0 : 1);
       if (l > 1 && speed > 0) {
         const nx = clamp(e.x + (dx / l) * speed * dt, 1, SIZE - 2),
           nz = clamp(e.z + (dz / l) * speed * dt, 1, SIZE - 2),
           h = this.world.surface(nx, nz);
         if (
-          h - e.y <= 1.2 &&
+          h - e.y <= body.step &&
           !this.world.get(nx | 0, (e.y + 0.8) | 0, nz | 0)
         ) {
           e.x = nx;
@@ -614,6 +656,7 @@ export class Ecology {
       if (SPECIES[e.type].parts[k].parent === pi) this.detach(e, k, time);
     if (p.role === "core" || p.role === "head")
       this.kill(e, p.role === "core" ? "몸통 파괴" : "머리 파괴");
+    condition(e);
     this.world.event(SPECIES[e.type].name + " · " + p.name + " 분리", [
       e.x,
       e.y,
@@ -655,52 +698,17 @@ export class Ecology {
         }
       }
     }
-    // Remove disconnected islands from the largest remaining voxel component.
-    let largest = [],
-      seen = new Uint8Array(p.count);
-    const nx = p.dims[0],
-      ny = p.dims[1],
-      nz = p.dims[2];
-    for (let j = 0; j < p.count; j++)
-      if (dam[j] && !seen[j]) {
-        const stack = [j],
-          component = [];
-        seen[j] = 1;
-        while (stack.length) {
-          const a = stack.pop(),
-            x = a % nx,
-            y = ((a / nx) | 0) % ny,
-            z = (a / (nx * ny)) | 0;
-          component.push(a);
-          for (const [dx, dy, dz] of [
-            [1, 0, 0],
-            [-1, 0, 0],
-            [0, 1, 0],
-            [0, -1, 0],
-            [0, 0, 1],
-            [0, 0, -1],
-          ]) {
-            const xx = x + dx,
-              yy = y + dy,
-              zz = z + dz,
-              b = xx + yy * nx + zz * nx * ny;
-            if (
-              xx >= 0 &&
-              yy >= 0 &&
-              zz >= 0 &&
-              xx < nx &&
-              yy < ny &&
-              zz < nz &&
-              dam[b] &&
-              !seen[b]
-            ) {
-              seen[b] = 1;
-              stack.push(b);
-            }
-          }
-        }
-        if (component.length > largest.length) largest = component;
-      }
+    // Limbs must remain attached at the joint, not merely be the largest island.
+    const groups = voxelComponents(dam, p.dims).sort(
+      (a, b) => b.length - a.length,
+    );
+    const largest = p.leg
+      ? groups.find((g) =>
+          g.some(
+            (j) => Math.floor(j / p.dims[0]) % p.dims[1] === p.dims[1] - 1,
+          ),
+        ) || []
+      : groups[0] || [];
     const keep = new Set(largest);
     for (let j = 0; j < dam.length; j++)
       if (dam[j] && !keep.has(j)) {
@@ -731,6 +739,14 @@ export class Ecology {
     e.targetX = clamp(e.x + (this.world.random() - 0.5) * 16, 2, SIZE - 3);
     e.targetZ = clamp(e.z + (this.world.random() - 0.5) * 16, 2, SIZE - 3);
     if (largest.length < Math.max(1, p.count * 0.38)) this.detach(e, pi, time);
+    // A child's attachment is supported by the nearest original parent voxels.
+    for (let child = 0; child < SPECIES[e.type].parts.length; child++) {
+      const cp = SPECIES[e.type].parts[child];
+      if (cp.parent !== pi || e.lost & (1 << child)) continue;
+      if (!attachmentIntact(e, SPECIES[e.type], child))
+        this.detach(e, child, time);
+    }
+    condition(e);
     if (e.energy <= 0) this.kill(e);
     return removed;
   }
@@ -751,6 +767,7 @@ export class Ecology {
         .filter((e) => !e.dead)
         .map((e) => ({
           ...e,
+          bodyPose: undefined,
           damage: Object.fromEntries(
             Object.entries(e.damage).map(([k, v]) => [k, Array.from(v)]),
           ),
@@ -779,6 +796,11 @@ export class Ecology {
         ]),
       ),
     }));
+    for (const e of this.entities) {
+      for (let pi = 1; pi < SPECIES[e.type].parts.length; pi++)
+        if (!attachmentIntact(e, SPECIES[e.type], pi)) e.lost |= 1 << pi;
+      condition(e);
+    }
     this.rehash();
   }
 }
