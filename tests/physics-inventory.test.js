@@ -90,8 +90,24 @@ test("jump lands once on exact ground without subsequent floor bounce", () => {
     if (landed) assert.equal(p.y, 4);
     assert.ok(!overlaps(w, p));
   }
-  assert.ok(high > 4.9);
+  assert.ok(high - 4 > 1.28 && high - 4 < 1.33, `jump height ${high - 4}m`);
   assert.equal(p.y, 4);
+});
+test("jump clears a one-metre ledge with headroom and holding does not bounce", () => {
+  const w = field();
+  for (let x = 14; x < 19; x++)
+    for (let z = 10; z < 15; z++) w.set(x, 4, z, B.STONE);
+  const p = actor(13.3),
+    c = new CharacterController(w, p);
+  let peak = p.y;
+  for (let i = 0; i < 90; i++) {
+    c.step(FIXED_DT, { side: i < 55 ? 1 : 0, jump: true });
+    peak = Math.max(peak, p.y);
+    assert.ok(!overlaps(w, p));
+  }
+  assert.ok(p.x > 15 && peak > 5.28 && peak < 5.33);
+  assert.equal(p.y, 5);
+  assert.equal(p.grounded, true);
 });
 test("removing the support causes a real fall; half-metre platforms stop it exactly", () => {
   const w = field(),

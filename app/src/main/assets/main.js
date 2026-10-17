@@ -97,6 +97,7 @@ let world,
   resetOnReturn = false,
   sprintLatched = false;
 const keys = new Set(),
+  cancelButtonHolds = new Set(),
   joy = { x: 0, y: 0, id: null },
   look = { id: null, x: 0, y: 0 };
 const player = {
@@ -289,6 +290,7 @@ function updateMovementHud() {
   const signature = [
     frontierState?.riding,
     frontierState?.airborne,
+    player.flying,
     player.stance,
     player.stanceBlocked,
     player.sprinting,
@@ -297,8 +299,9 @@ function updateMovementHud() {
   if (signature === movementHudSignature) return;
   movementHudSignature = signature;
   const riding = !!frontierState?.riding,
-    flying = !!frontierState?.airborne;
+    flying = !!frontierState?.airborne || (!riding && player.flying);
   document.body.classList.toggle("piloting", riding);
+  document.body.classList.toggle("freeFlying", !riding && player.flying);
   for (const [id, stance] of [
     ["crouchBtn", "crouch"],
     ["crawlBtn", "crawl"],
@@ -742,6 +745,7 @@ function setFlying() {
   );
 }
 function stopInput() {
+  for (const cancel of cancelButtonHolds) cancel();
   keys.clear();
   sprintLatched = false;
   joy.x = joy.y = 0;
@@ -1470,17 +1474,44 @@ $("leftHand").onchange = () => {
   persistSettings();
   hudEditor?.apply();
 };
+function rotateLook(dx, dy) {
+  if (!running || paused || hudEditor?.editing) return;
+  player.yaw -= dx * 0.003 * sensitivity;
+  player.pitch = clamp(player.pitch - dy * 0.003 * sensitivity, -1.48, 1.48);
+}
 function holdButton(el, on, off) {
+  let pointer = null;
+  const cancel = () => {
+    if (!pointer) return;
+    const id = pointer.id;
+    pointer = null;
+    el.classList.remove("held");
+    off();
+    if (el.hasPointerCapture(id)) el.releasePointerCapture(id);
+  };
+  cancelButtonHolds.add(cancel);
   el.addEventListener("pointerdown", (e) => {
+    if (!running || paused || hudEditor?.editing || pointer || e.button !== 0)
+      return;
     e.preventDefault();
     e.stopPropagation();
+    pointer = { id: e.pointerId, x: e.clientX, y: e.clientY };
     el.setPointerCapture(e.pointerId);
+    el.classList.add("held");
     on();
+  });
+  el.addEventListener("pointermove", (e) => {
+    if (e.pointerId !== pointer?.id) return;
+    e.preventDefault();
+    rotateLook(e.clientX - pointer.x, e.clientY - pointer.y);
+    pointer.x = e.clientX;
+    pointer.y = e.clientY;
   });
   for (const type of ["pointerup", "pointercancel", "lostpointercapture"])
     el.addEventListener(type, (e) => {
+      if (e.pointerId !== pointer?.id) return;
       e.preventDefault();
-      off();
+      cancel();
     });
 }
 holdButton(
@@ -1572,8 +1603,7 @@ canvas.addEventListener("pointermove", (e) => {
     look.x = e.clientX;
     look.y = e.clientY;
   }
-  player.yaw -= dx * 0.003 * sensitivity;
-  player.pitch = clamp(player.pitch - dy * 0.003 * sensitivity, -1.48, 1.48);
+  rotateLook(dx, dy);
 });
 for (const type of ["pointerup", "pointercancel", "lostpointercapture"])
   canvas.addEventListener(type, (e) => {

@@ -1,0 +1,16 @@
+{
+  "drag": true,
+  "touchCancel": true,
+  "isolation": true,
+  "scale": true,
+  "opacity": true,
+  "persistence": true,
+  "cancel": true,
+  "orientation": true,
+  "reset": true,
+  "quotaRecovery": true,
+  "migration": true,
+  "explicitGridSave": true,
+  "worldCreation": true,
+  "errors": []
+}

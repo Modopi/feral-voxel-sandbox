@@ -155,7 +155,7 @@ export class View {
     this.camera = new T.PerspectiveCamera(82, 1, 0.04, 150);
     this.camera.rotation.order = "YXZ";
     this.scene.add(this.camera);
-    this.worldUI = new WorldUI(this.scene, this.camera, () => this.world);
+    this.worldUI = new WorldUI(this.scene, this.camera);
     this.scene.add(new T.HemisphereLight(0xe7f3de, 0x596b59, 2.1));
     this.sunLight = new T.DirectionalLight(0xffe3a8, 2.4);
     this.sunLight.position.set(-40, 75, 35);
