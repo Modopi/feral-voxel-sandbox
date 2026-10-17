@@ -15,7 +15,7 @@ import {FeedbackView} from './feedback-view.js';
 import {FixtureEnergyPanel} from './fixture-energy-panel.js';
 import {CreatureFragments} from './creature-fragments.js';
 import {VERSION} from '../version.js';
-const $=id=>document.getElementById(id),keys=new Set();
+const $=id=>document.getElementById(id),keys=new Set(),panelPointers=new Set();
 let runtime,view,bossView,environmentView,equipmentView,feedbackView,machinePanel,fixtureEnergyPanel,fragments,controller,physical,saveStore,autosave,updates,communityTarget=null,ready=false,menuOpen=false,panelOpen=false,tab='inventory',tabClock=0,last=0,accum=0,saveClock=0,hudClock=0,toastUntil=0,manual=false;
 const held={forward:0,side:0,jump:false,attack:false},angles={};
 const reasonNames={research_required:'먼저 관련 연구를 완료하세요.',station_required:'작업 설비가 필요합니다.',ingredients_required:'제작 재료가 부족합니다.',prerequisite_required:'선행 연구가 필요합니다.',samples_required:'연구 표본이 부족합니다.',tool_required:'채집 도구가 필요합니다.',source_depleted:'이미 채집한 곳입니다. 다른 자원을 찾으세요.',insufficient_resources:'재료 또는 에너지가 부족합니다.',component_required:'필요한 컴포넌트를 먼저 설치하세요.',unknown_source:'에너지 원천을 찾지 못했습니다.'};
@@ -28,7 +28,7 @@ const energyNames={mechanical:'역학',electrical:'전기',thermal:'열',chemica
 const attackStyles={strike:'일반 타격',pierce:'관통 찌르기',impact:'충격 전달'};
 let weaponPattern='weapon_slash',weaponMaterial='wood';
 let deviceTarget=null,manualDeviceId=null,deviceAngleRad=0;
-function clearInput(){keys.clear();held.forward=held.side=0;held.jump=held.attack=false;manual=false;manualDeviceId=null;fixtureEnergyPanel?.stopManual();physical?.objectPhysics.release();for(const id of Object.keys(angles))delete angles[id];$('stick').style.transform='';}
+function clearInput(){keys.clear();panelPointers.clear();held.forward=held.side=0;held.jump=held.attack=false;manual=false;manualDeviceId=null;fixtureEnergyPanel?.stopManual();physical?.objectPhysics.release();for(const id of Object.keys(angles))delete angles[id];$('stick').style.transform='';}
 function attack(){
  if(!ready||panelOpen||menuOpen)return;
  if(physical.objectPhysics.held){report(physical.objectPhysics.throwHeld(),'물체를 던졌습니다.');held.attack=false;return;}
@@ -54,7 +54,7 @@ function showPanel(value){panelOpen=value;clearInput();$('panel').classList.togg
 function showMenu(value){menuOpen=value;$('menu').classList.toggle('hidden',!value);clearInput();if(value){updates?.refresh();save();}}
 function row(title,detail,label,callback,disabled=false){const el=document.createElement('article');el.className='row';const copy=document.createElement('div');copy.className='copy';const b=document.createElement('b');b.textContent=title;const p=document.createElement('p');p.textContent=detail;copy.append(b,p);el.append(copy);if(label){const button=document.createElement('button');button.textContent=label;button.disabled=disabled;button.onclick=callback;el.append(button);}return el;}
 function renderPanel(){
- if(!ready||!panelOpen)return;const p=runtime.progression,list=$('panelList'),term=$('search').value.trim().toLowerCase();list.replaceChildren();
+ if(!ready||!panelOpen)return;const p=runtime.progression,list=$('panelList'),term=$('search').value.trim().toLowerCase(),scrollTop=list.scrollTop;list.replaceChildren();
  const append=(title,detail,label,action,disabled)=>{if(!term||title.toLowerCase().includes(term))list.append(row(title,detail,label,action,disabled));};
  document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===tab)));
  if(tab==='inventory'){
@@ -114,6 +114,7 @@ function renderPanel(){
   for(const d of runtime.nearbyStructures){const def=CONTENT.structures.entries.find(e=>e.id===d.templateId);append(def.name,`장소 ${d.tier}티어 · 지역 ${d.regionTier}티어 · 출발지로부터 ${Math.round(Math.hypot(d.origin[0],d.origin[2]))}m · 탐색한 방 ${d.visitedRooms.length}/${def.rooms.length}`);}
   for(const d of runtime.deaths.filter(d=>!d.recovered))append('요정이 지키는 소지품',`${Math.round(distance(runtime.player,d.position))}m · ${quantities(d.items)}${d.weapons?.length?' · 무기 '+d.weapons.length+'개':''}`);
  }
+ list.scrollTop=scrollTop;
  const work=p.researchJob?`연구: ${name(p.researchJob.researchId??p.researchJob.id)} `:'';
  $('workStatus').textContent=`${work}제작 대기 ${p.jobs.length} · ${Object.entries(p.energy).filter(([,v])=>v>0).map(([k,v])=>`${k} ${v.toFixed(1)} EU`).join(' · ')}`;
 }
@@ -170,7 +171,9 @@ function bind(){
  $('openBag').onclick=()=>showPanel(!panelOpen);$('closePanel').onclick=()=>showPanel(false);
  $('openMenu').onclick=()=>showMenu(true);$('closeMenu').onclick=()=>showMenu(false);$('save').onclick=()=>{if(save())notify('저장했습니다.');};
  $('leave').onclick=()=>{if(save())location.href='worlds.html';};$('rest').onclick=()=>{runtime.player.resting=true;showMenu(false);notify('휴식 중입니다. 이동하거나 공격하면 휴식을 끝냅니다.');};
- $('search').oninput=renderPanel;document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{manual=false;manualDeviceId=null;tab=b.dataset.tab;renderPanel();});
+ $('panelList').addEventListener('pointerdown',e=>panelPointers.add(e.pointerId));
+ for(const type of ['pointerup','pointercancel'])window.addEventListener(type,e=>panelPointers.delete(e.pointerId));
+ $('search').oninput=renderPanel;document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{manual=false;manualDeviceId=null;tab=b.dataset.tab;$('panelList').scrollTop=0;renderPanel();});
  $('use').onclick=interact;$('stance').onclick=()=>{const p=runtime.player;p.desiredStance=p.desiredStance==='stand'?'crouch':p.desiredStance==='crouch'?'crawl':'stand';$('stance').textContent={stand:'웅크리기',crouch:'기어가기',crawl:'일어서기'}[p.desiredStance];};
  for(const[id,property]of [['jump','jump'],['attack','attack']]){const el=$(id);el.onpointerdown=e=>{held[property]=true;angles[e.pointerId]={x:e.clientX,y:e.clientY};el.setPointerCapture(e.pointerId);};el.onpointermove=e=>look(e);el.onpointerup=el.onpointercancel=e=>{held[property]=false;delete angles[e.pointerId];};}
  const pad=$('movePad');let movingPointer=null;
@@ -222,7 +225,7 @@ function frame(now){
   }
   runtime.atlas.loadAround(runtime.player.x,runtime.player.z,{radiusChunks:3,verticalRadius:1,y:runtime.player.y,chunkBudget:1});
   view.syncTerrain();view.syncModels(runtime.descriptors(),runtime.time,dt);fragments.sync(view.models);physical?.synchronize(view.models,runtime.player);bossView.sync(runtime.bosses);environmentView.sync(runtime.player,runtime.time);equipmentView.sync(runtime,dt);feedbackView.sync(runtime,dt);
-  view.draw(runtime.player,controller.eye);hudClock+=dt;tabClock+=dt;if(hudClock>.2){hudClock=0;hud();}if(tabClock>1&&!manual&&!manualDeviceId){tabClock=0;if(!document.activeElement?.closest('#panelList'))renderPanel();}
+  view.draw(runtime.player,controller.eye);hudClock+=dt;tabClock+=dt;if(hudClock>.2){hudClock=0;hud();}if(tabClock>1&&!manual&&!manualDeviceId&&!panelPointers.size){tabClock=0;if(!document.activeElement?.matches('#panelList input, #panelList select, #panelList textarea'))renderPanel();}
   updates.frame(true,now);
  }
  requestAnimationFrame(frame);

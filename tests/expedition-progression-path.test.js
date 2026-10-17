@@ -13,6 +13,50 @@ const entries = kind => [...definitions.values()].filter(e => e.kind === kind);
 const near = (a, b, message) => assert(Math.abs(a - b) < 1e-4, `${message}: ${a} != ${b}`);
 const preservedCheckpointSha256 = '994fd5d257ffe02f32ac349ba08a87fd27d157c4c0dfcb87a6467163845a9002';
 
+// Keep candidates in their original discovery order while retaining only nodes that may
+// become eligible again. Permanently exhausted nodes are the only entries discarded.
+function findEligibleWithCursor(nodes, state, eligible, permanentlyExhausted) {
+  for (let i = 0; i < state.pending.length;) {
+    const node = nodes[state.pending[i]];
+    if (eligible(node)) return node;
+    if (permanentlyExhausted(node)) state.pending.splice(i, 1);
+    else i++;
+  }
+  while (state.cursor < nodes.length) {
+    const index = state.cursor++, node = nodes[index];
+    if (eligible(node)) {
+      state.pending.push(index);
+      return node;
+    }
+    if (!permanentlyExhausted(node)) state.pending.push(index);
+  }
+  return null;
+}
+
+test('harvest candidate cursor preserves find order and retries regrowing nodes', () => {
+  const nodes = [
+    { id: 'spent-a', permanent: true },
+    { id: 'regrowing-b', permanent: false },
+    { id: 'spent-c', permanent: true },
+    { id: 'available-d', permanent: false },
+  ];
+  const ready = new Set(['available-d']);
+  const checks = new Map();
+  const eligible = node => {
+    checks.set(node.id, (checks.get(node.id) || 0) + 1);
+    return ready.has(node.id);
+  };
+  const state = { cursor: 0, pending: [] };
+
+  assert.equal(findEligibleWithCursor(nodes, state, eligible, node => node.permanent)?.id,
+    nodes.find(node => ready.has(node.id))?.id);
+  ready.add('regrowing-b');
+  assert.equal(findEligibleWithCursor(nodes, state, eligible, node => node.permanent)?.id,
+    nodes.find(node => ready.has(node.id))?.id);
+  assert.equal(checks.get('spent-a'), 1, 'permanently exhausted prefix entries are not revisited');
+  assert.equal(checks.get('spent-c'), 1, 'permanently exhausted entries behind a regrow node are not revisited');
+});
+
 // This route accelerates elapsed simulation time and searches procedural coordinates.
 // It does not simulate walking/combat or bypass item, research, tool or energy costs.
 class ConsumptionRoute {
@@ -22,7 +66,7 @@ class ConsumptionRoute {
     this.dungeons = new DungeonSystem({ catalog: CONTENT, seed: 31415, atlas: this.atlas });
     this.community = this.dungeons.bootstrap().find(s => s.templateId === 'grove_supply_camp');
     assert(this.community);
-    this.nodes = new Map(); this.scanned = new Set(); this.nodeIds = new Set();
+    this.nodes = new Map(); this.nodeSearch = new Map(); this.scanned = new Set(); this.nodeIds = new Set();
     this.used = new Map(Object.entries(this.p.harvestClaims).map(([key, claim]) => [key.slice(key.indexOf(':') + 1), claim.at]));
     this.stack = [];
     const claims = [...this.p.claims];
@@ -61,6 +105,10 @@ class ConsumptionRoute {
     }
   }
   node(source) {
+    const nodes = this.nodes.get(source.id) || [];
+    if (!this.nodes.has(source.id)) this.nodes.set(source.id, nodes);
+    const search = this.nodeSearch.get(source.id) || { cursor: 0, pending: [] };
+    this.nodeSearch.set(source.id, search);
     const eligible = n => {
       const at = this.used.get(n.id);
       if (at != null && (!n.regrowS || this.p.clock < at + n.regrowS)) return false;
@@ -68,15 +116,16 @@ class ConsumptionRoute {
       const env = CONTENT.environments.entries.find(e => e.id === this.atlas.sample(n.x, n.z).environmentId);
       return n.cell ? env.oreVeins.some(v => CONTENT.blocks.entries.find(b => b.id === v.blockId)?.rawResourceId === Object.keys(source.outputs)[0]) : env.harvestNodeIds.includes(n.nodeId);
     };
-    let found = (this.nodes.get(source.id) || []).find(eligible); if (found) return found;
+    const find = () => findEligibleWithCursor(nodes, search, eligible, n => this.used.get(n.id) != null && !n.regrowS);
+    let found = find(); if (found) return found;
     for (let ring = 0; ring <= 96; ring++) {
       for (let x = -ring; x <= ring; x++) for (const z of ring ? [-ring, ring] : [0]) {
         if (this.scanned.has(`${x},${z}`)) continue;
-        this.scan(x, z); found = (this.nodes.get(source.id) || []).find(eligible); if (found) return found;
+        this.scan(x, z); found = find(); if (found) return found;
       }
       for (let z = -ring + 1; z < ring; z++) for (const x of [-ring, ring]) {
         if (this.scanned.has(`${x},${z}`)) continue;
-        this.scan(x, z); found = (this.nodes.get(source.id) || []).find(eligible); if (found) return found;
+        this.scan(x, z); found = find(); if (found) return found;
       }
     }
     throw Error(`No actual atlas source for ${source.id}`);

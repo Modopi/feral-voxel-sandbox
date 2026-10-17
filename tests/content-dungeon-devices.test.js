@@ -140,6 +140,11 @@ test('inertia brake integrates power, speed and position; platform hazard requir
   const feet = world(i, [32.75, .525, 0]);
   assert.deepEqual(d.devices.sampleAt(feet).platformVelocity, { x: 1, y: 0, z: 0 });
   assert.equal(d.devices.sampleAt(world(i, [32.75, 2, 0])), null);
+  const beforeInvalid = d.serialize();
+  for (const targetM of [-1, 9, NaN]) {
+    assert.equal(d.devices.act(i.id, 'engage_brake', { position: world(i, [21, 0, -4]), progression: p, targetM }).reason, 'invalid_target');
+    assert.deepEqual(d.serialize(), beforeInvalid, 'rejected braking cannot change motion or energy state');
+  }
   assert.equal(d.devices.act(i.id, 'engage_brake', { position: world(i, [21, 0, -4]), progression: p }).ok, true);
   d.update(2.5, { manualInstanceId: i.id, position: world(i, [21, 0, -4]) });
   assert(Math.abs(i.deviceState.motion.positionM - 4) < 1e-7);
@@ -203,6 +208,11 @@ test('destroying a platform lock support releases residual motion without free b
   assert(Math.abs(i.deviceState.motion.velocityMps - .08) < 1e-8);
   assert.equal(d.devices.act(i.id, 'lock_platform', { position, progression: p }).ok, true);
   const before = i.deviceState.motion.positionM;
+  const standing = world(i, [30 + before, .525, 0]);
+  assert.equal(d.devices.sampleAt(standing).platformVelocityMps, 0);
+  assert.equal(d.devices.geometry(i.id).find(box => box.partId === 'platform').velocityMps, 0);
+  d.update(1);
+  assert.equal(i.deviceState.motion.positionM, before);
   assert.equal(d.devices.damage(i.id, 'platform', 1000).removed, true);
   d.update(1);
   assert(Math.abs(i.deviceState.motion.velocityMps - .08) < 1e-9);

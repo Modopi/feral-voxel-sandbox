@@ -273,8 +273,9 @@ export class DungeonDeviceSystem {
         state.altar.running = true; state.work.active = true; break;
       case 'engage_brake':
         if (instance.templateId !== 'inertia_tower') return fail('unsupported_action');
+        if (targetM != null && (!finite(targetM) || targetM < PUZZLE_RULES.inertia_tower.railMinM || targetM > PUZZLE_RULES.inertia_tower.railMaxM)) return fail('invalid_target');
         state.motion.braking = true; state.motion.locked = false; state.work.active = true;
-        if (targetM != null) { if (!finite(targetM) || targetM < PUZZLE_RULES.inertia_tower.railMinM || targetM > PUZZLE_RULES.inertia_tower.railMaxM) return fail('invalid_target'); state.motion.targetM = targetM; }
+        if (targetM != null) state.motion.targetM = targetM;
         break;
       case 'lock_platform':
         if (instance.templateId !== 'inertia_tower') return fail('unsupported_action');
@@ -596,7 +597,7 @@ export class DungeonDeviceSystem {
         result.push(this._worldBox(instance, [25 + box.center[0], 0.875 + box.center[1], box.center[2]], box.size, { material: state.altar.aligned ? 'aligned_altar' : 'altar', color: state.altar.aligned ? '#C3B77F' : '#A9A68F', partId: 'altar', collision: true, angleRad: state.altar.angleRad }));
       }
     }
-    if (instance.templateId === 'inertia_tower' && state.motion && state.structureParts.platform?.installed) result.push(this._worldBox(instance, [30 + state.motion.positionM, 0.35, 0], [3, 0.35, 2], { material: 'inertia_platform', color: '#687C82', partId: 'platform', collision: true, velocityMps: state.motion.velocityMps, topY: 0.525 }));
+    if (instance.templateId === 'inertia_tower' && state.motion && state.structureParts.platform?.installed) result.push(this._worldBox(instance, [30 + state.motion.positionM, 0.35, 0], [3, 0.35, 2], { material: 'inertia_platform', color: '#687C82', partId: 'platform', collision: true, velocityMps: state.motion.locked ? 0 : state.motion.velocityMps, topY: 0.525 }));
     this.geometryCache.set(instance, { revision: instance.revision, boxes: result });
     return result;
   }
@@ -633,7 +634,7 @@ export class DungeonDeviceSystem {
           result.fluidType = state.fluid.type; result.fluidDepthM = depth; if (state.fluid.sourceLiters > PUZZLE_RULES.sealed_arboretum.safeLiters) result.hazards.push('mana_pressure'); found = true;
         }
       }
-      if (instance.templateId === 'inertia_tower' && state.motion && state.structureParts.platform?.installed && Math.abs(local[0] - (30 + state.motion.positionM)) <= 1.5 && Math.abs(local[2]) <= 1 && Math.abs(local[1] - 0.525) <= 0.25) { result.platformVelocityMps = state.motion.velocityMps; if (Math.abs(state.motion.velocityMps) > 0.1) result.hazards.push('moving_platform'); found = true; }
+      if (instance.templateId === 'inertia_tower' && state.motion && state.structureParts.platform?.installed && Math.abs(local[0] - (30 + state.motion.positionM)) <= 1.5 && Math.abs(local[2]) <= 1 && Math.abs(local[1] - 0.525) <= 0.25) { result.platformVelocityMps = state.motion.locked ? 0 : state.motion.velocityMps; if (Math.abs(result.platformVelocityMps) > 0.1) result.hazards.push('moving_platform'); found = true; }
     }
     if (!found) return null;
     if (result.windForceN) {
