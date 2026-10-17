@@ -1,0 +1,25 @@
+{
+  "detached": {
+    "bodies": [
+      {
+        "id": 1,
+        "count": 5
+      }
+    ],
+    "remaining": 0
+  },
+  "grip": {
+    "held": true,
+    "yaw": 0.18000000000000002,
+    "scale": 0.9638554216867469
+  },
+  "thrown": [
+    7.913424164658025
+  ],
+  "restoredCells": 6,
+  "occlusion": {
+    "assembly": true,
+    "loose": false
+  },
+  "errors": []
+}

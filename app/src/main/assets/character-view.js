@@ -1,6 +1,7 @@
+import { CharacterBody } from "./character-body.js";
 import * as T from "./vendor/three.module.js";
 import { characterModel, characterPose, PIXEL } from "./character-model.js";
-const textures = [
+export const textures = [
   "plain",
   "cloth",
   "seam",
@@ -140,6 +141,7 @@ export class CharacterRig {
     }
     const asset = cache.get(key);
     this.model = asset.model;
+    this.body = new CharacterBody(this.model);
     this.root = new T.Group();
     this.bones = {};
     this.meshes = [];
@@ -156,6 +158,7 @@ export class CharacterRig {
           characterMaterial(),
         );
         mesh.castShadow = mesh.receiveShadow = true;
+        mesh.userData.bodyPart = b.id;
         group.add(mesh);
         this.meshes.push(mesh);
       }

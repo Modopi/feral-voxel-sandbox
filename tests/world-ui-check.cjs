@@ -108,7 +108,8 @@ fs.mkdirSync(out, { recursive: true });
     await page.evaluate(() => { FERAL.setCamera(80, 13.36, 79, 0, Math.atan2(-0.58, 3)); FERAL.use(); });
     await page.waitForTimeout(250);
     const hit = await inspect();
-    assert.ok(hit.hp < near.hp, JSON.stringify(hit));
+    assert.equal(hit.hp, near.hp, "the first surface strike preserves HP");
+    assert.ok(await page.evaluate(()=>Object.values(subject.damage).some(cells=>Array.from(cells).includes(0))), "surface voxels were removed");
     const dead = await page.evaluate(() => {
       subject.dead = true; FERAL.view.worldUI.update();
       return !FERAL.view.worldUI.labels.get("focus").mesh.visible;

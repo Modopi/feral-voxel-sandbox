@@ -215,12 +215,12 @@ const fs = require("node:fs");
           {
             entity: e,
             part: pi,
-            voxel: 0,
+            voxel: 0,layer:"structure",node:`${pi}:0`,
             point: toWorld(e, p, pi, cellPosition(p, 0), 0),
           },
           0,
           0.01,
-          0,
+          24,
         );
       }
       f.ecology.rehash();

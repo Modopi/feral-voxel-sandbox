@@ -1,0 +1,25 @@
+{
+  "before": {
+    "hp": 48,
+    "legs": 4,
+    "layer": "shell"
+  },
+  "skin": {
+    "hp": 48,
+    "legs": 4,
+    "layer": "structure"
+  },
+  "fracture": {
+    "hp": 39.599999999999994,
+    "legs": 3,
+    "status": "절뚝거림"
+  },
+  "human": {
+    "target": "body",
+    "shellLeg": true,
+    "brokenLeg": false,
+    "fragments": 1,
+    "pose": true
+  },
+  "errors": []
+}

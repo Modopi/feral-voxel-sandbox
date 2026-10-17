@@ -30,7 +30,8 @@ test("frontier regions are seed-stable and structures retain player edits", () =
   const restored = frontierWorld(a.seed, a);
   restored.load(saved);
   assert.equal(restored.get(77, y, 84), 3);
-  assert.equal(restored.landmarks.length, 5);
+  assert.equal(restored.landmarks.length, 6);
+  assert.ok(restored.landmarks.some((p) => p.name === "해체·운반 작업장"));
 });
 test("trade and aid are atomic, finite, local, and lead to an alliance without a boss", () => {
   const s = new Frontier(),

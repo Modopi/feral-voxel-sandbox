@@ -1,3 +1,4 @@
+import { CharacterBodyView } from "../character-body-view.js";
 import { CharacterRig } from "../character-view.js";
 import { mountCharacterPortrait } from "../character-portrait.js";
 import { uiIcon } from "../ui-art.js";
@@ -12,7 +13,7 @@ import {
   ruinDefinition,
 } from "./content.js";
 import { ITEMS } from "../inventory.js";
-import { activeGear, gearId } from "../equipment.js";
+import { activeGear, gearId, GEAR } from "../equipment.js";
 import { itemArt } from "../item-art.js";
 import { T } from "../render.js";
 import { FACTIONS } from "./model.js";
@@ -149,6 +150,7 @@ export class FrontierView {
       m.geometry.dispose();
       m.material.dispose();
     });
+    this.training?.dispose();
     this.npcs.forEach((n) => n.rig?.dispose());
     this.group.clear();
     this.npcs = [];
@@ -194,6 +196,22 @@ export class FrontierView {
           role: i,
         });
       }
+    }
+    this.createTrainingBody();
+    if (world.workyard) {
+      const { x, y, z } = world.workyard;
+      const sign = this.box(
+        this.group,
+        x,
+        y + 0.9,
+        z,
+        1.1,
+        0.6,
+        0.12,
+        0x365c53,
+      );
+      this.box(this.group, x, y + 0.3, z, 0.12, 0.6, 0.12, 0x947654);
+      this.registerTarget(sign, { kind: "workyard", name: "해체·운반 작업장" });
     }
     const cy = world.surface(77, 84);
     this.registerTarget(
@@ -360,6 +378,54 @@ export class FrontierView {
     this.campaignUI.reset();
     this.draw();
   }
+  createTrainingBody() {
+    const { world, model: s } = this.c;
+    this.training?.dispose();
+    const rig = new CharacterRig("explorer");
+    rig.root.position.set(81, world.surface(81, 89) + 0.14, 89);
+    this.group.add(rig.root);
+    this.training = new CharacterBodyView(rig, s.region.trainingBody);
+    this.training.lastTime = s.time;
+    if (!this.trainingStand || !this.trainingStand.parent) {
+      this.trainingStand = this.box(
+        this.group,
+        81,
+        world.surface(81, 89) + 0.06,
+        89,
+        0.9,
+        0.12,
+        0.9,
+        0x8f9b83,
+      );
+      this.registerTarget(this.trainingStand, {
+        kind: "bodyStation",
+        name: "구조 훈련체 · 재조립 받침",
+      });
+    }
+  }
+  damageTraining(hit, held) {
+    if (hit.distance > 3) {
+      this.c.toast("3m 안에서 구조 훈련체를 타격하세요.");
+      return;
+    }
+    const amount =
+      GEAR[held]?.slot === "weapon"
+        ? activeGear(this.c.inventory, "weapon").damage
+        : 8;
+    this.training.damage(
+      hit,
+      amount,
+      GEAR[held]?.slot === "tool" ? 0.065 : 0.09,
+    );
+    this.c.model.region.trainingBody = this.training.body.save();
+    this.c.view.toolKick = 1;
+    this.c.toast(
+      hit.layer === "shell"
+        ? "외피 제거 · 내부 구조는 유지됩니다"
+        : "골격 타격 · 지지와 관절 기능 재계산",
+    );
+    this.training.lastTime = null;
+  }
   draw() {
     this.updateTargets();
     this.assembly.draw();
@@ -437,6 +503,19 @@ export class FrontierView {
         greeting: near && s.time < n.greetUntil ? 1 : 0,
       });
       rig.detail(distance(p, group.position));
+    }
+    if (this.training && this.training.lastTime !== s.time) {
+      const dt =
+        this.training.lastTime === null
+          ? 0
+          : Math.min(0.1, Math.max(0, s.time - this.training.lastTime));
+      this.training.lastTime = s.time;
+      this.training.poseLabel = this.training.animate(
+        s.time,
+        dt,
+        (x, z) => world.surface(x, z),
+        distance(p, this.training.rig.root.position) < 2.5,
+      );
     }
     const b = s.activeBoss;
     this.boss.visible = !b.defeated;
@@ -541,6 +620,7 @@ export class FrontierView {
       Math.min(max, block?.distance ?? max),
     );
     this.group.updateMatrixWorld(true);
+    let closest = null;
     for (const hit of ray.intersectObjects(this.targets, true)) {
       let root = hit.object,
         visible = true,
@@ -551,15 +631,24 @@ export class FrontierView {
           data = root.userData.interaction;
         root = root.parent;
       }
-      if (visible && data)
-        return {
+      if (visible && data) {
+        closest = {
           ...data,
           distance: hit.distance,
           point: hit.point,
           object: hit.object,
         };
+        break;
+      }
     }
-    return null;
+    const bodyHit = this.training?.raycast(
+      origin,
+      dir,
+      Math.min(max, block?.distance ?? max, closest?.distance ?? max),
+    );
+    return bodyHit
+      ? { ...bodyHit, kind: "body", name: "구조 훈련체" }
+      : closest;
   }
   objectAim(hit) {
     if (!hit) return false;
@@ -568,7 +657,16 @@ export class FrontierView {
       hint = "사용 / R · 상호작용",
       value = 0,
       max = 0;
-    if (hit.kind === "ruin") {
+    if (hit.kind === "workyard") {
+      detail = "가대교 · 광석 추 · 빈 상자 · 긴 원목";
+      hint = "지지대 절단 → 잡고 끌기 → 옮겨 쌓기 · 집게는 가방에서 제작";
+    } else if (hit.kind === "body" || hit.kind === "bodyStation") {
+      const structure = this.training.body.status();
+      detail = `${hit.layer === "structure" ? "내부 골격" : hit.kind === "body" ? "외피 복셀" : "재조립 받침"} · 골격 ${Math.round(structure.integrity * 100)}%`;
+      hint = `${this.training.poseLabel || "정상 보행"} · 공격: 깎기 / 사용: 재조립`;
+      value = structure.integrity;
+      max = 1;
+    } else if (hit.kind === "ruin") {
       detail = `중계기 ${s.region.relays.length}/3 해제`;
       hint =
         s.region.dungeon >= 3
@@ -695,6 +793,18 @@ export class FrontierView {
     if (hit) {
       if (hit.distance > (hit.kind === "npc" ? 6 : 4)) {
         this.c.toast("가까이 다가가 사용하세요.");
+        return;
+      }
+      if (hit.kind === "workyard") {
+        this.c.toast(
+          "지지대를 자르면 덩어리가 분리됩니다 · 사용: 잡고 끌기 · 빈 손 공격: 밀기 · 운반 집게: 힘 보조 · 렌치: 고정 · 재료: 붙이기",
+        );
+        return;
+      }
+      if (hit.kind === "body" || hit.kind === "bodyStation") {
+        delete s.region.trainingBody;
+        this.createTrainingBody();
+        this.c.toast("구조 훈련체 재조립 · 외피와 골격 복원");
         return;
       }
       if (hit.kind === "npc") {

@@ -1,10 +1,26 @@
+import { impactEnergy } from "./impact.js";
+import {
+  animalSkeleton,
+  createAnimalStructure,
+  animalStructure,
+  bonePieces,
+  breakAnimalPart,
+} from "./animal-skeleton.js";
+import {
+  boneHealth,
+  breakBone,
+  rayBox,
+  saveStructure,
+} from "./structural-body.js";
 import { visibleAnimalDetails, rayArtBox } from "./animal-art.js";
 import { SIZE, B, clamp, hash } from "./world.js";
 import { anatomy, attachmentIntact } from "./anatomy.js";
 import { voxelComponents } from "./structure.js";
 const conditions = new WeakMap();
 export function condition(e) {
-  const signature = `${e.lost}|${Object.entries(e.damage)
+  const signature = `${e.structure?.revision ?? "legacy"}|${e.lost}|${Object.entries(
+    e.damage,
+  )
     .map(([k, v]) => k + ":" + Array.from(v).join(""))
     .join("|")}`;
   let cached = conditions.get(e);
@@ -236,6 +252,7 @@ export class Ecology {
       dy: 0,
     };
     e.y = w.surface(e.x, e.z);
+    createAnimalStructure(e, SPECIES[e.type]);
     this.entities.push(e);
     return e;
   }
@@ -444,7 +461,15 @@ export class Ecology {
       e.targetX = prey.x;
       e.targetZ = prey.z;
       if (dist < 1.9 && Math.abs(e.y + body.drop - prey.y) < 1.1) {
-        this.hurt(prey, dt * 18, "포식자 공격");
+        if (w.time >= (e.huntBiteAt || 0)) {
+          this.impact(
+            prey,
+            { x: prey.x, y: prey.y + 0.7, z: prey.z },
+            1800,
+            w.time,
+          );
+          e.huntBiteAt = w.time + 0.65;
+        }
         e.energy = clamp(e.energy + dt * 8, 0, 150);
         if (prey.energy <= 0) this.kill(prey);
       }
@@ -622,6 +647,15 @@ export class Ecology {
       if (e.y > h) {
         e.dy -= dt * 12;
         e.y = Math.max(h, e.y + e.dy * dt);
+        if (e.y <= h && e.dy < -8) {
+          this.impact(
+            e,
+            { x: e.x, y: h + 0.1, z: e.z },
+            impactEnergy(e.type === 2 ? 8 : 90, Infinity, -e.dy, 8),
+            time,
+          );
+          e.dy = 0;
+        }
       } else {
         e.y = h;
         e.dy = 0;
@@ -663,7 +697,7 @@ export class Ecology {
         continue;
       const sp = SPECIES[e.type];
       for (
-        let t = Math.max(0.05, along - 2);
+        let t = Math.max(0.005, along - 2);
         t < Math.min(best, along + 2);
         t += 0.035
       ) {
@@ -693,7 +727,14 @@ export class Ecology {
           const j = ix + iy * p.dims[0] + iz * p.dims[0] * p.dims[1];
           if (occupied(e, pi, j)) {
             best = t;
-            hit = { entity: e, part: pi, voxel: j, point: pt, distance: t };
+            hit = {
+              entity: e,
+              part: pi,
+              voxel: j,
+              point: pt,
+              distance: t,
+              layer: "shell",
+            };
             break;
           }
         }
@@ -702,7 +743,10 @@ export class Ecology {
       // Detailed silhouettes are selectable too. Route their hits to the saved
       // anatomical cell so targeting, wounds and visual removal agree.
       const rays = new Map();
-      for (const d of visibleAnimalDetails(e, sp.parts)) {
+      for (const d of [
+        ...visibleAnimalDetails(e, sp.parts),
+        ...bonePieces(e, sp),
+      ]) {
         if (!rays.has(d.part)) {
           const p = sp.parts[d.part],
             o = toLocal(e, p, d.part, [origin.x, origin.y, origin.z], time),
@@ -716,8 +760,10 @@ export class Ecology {
           rays.set(d.part, { o, d: end.map((v, i) => v - o[i]) });
         }
         const r = rays.get(d.part),
-          t = rayArtBox(r.o, r.d, d, best);
-        if (t !== null) {
+          t = d.node
+            ? rayBox(r.o, r.d, d.at, d.size, best)
+            : rayArtBox(r.o, r.d, d, best);
+        if (t !== null && t < best - 0.0001) {
           best = t;
           hit = {
             entity: e,
@@ -730,6 +776,8 @@ export class Ecology {
             ],
             distance: t,
             detail: d.feature,
+            layer: d.node ? "structure" : "shell",
+            node: d.node,
           };
         }
       }
@@ -744,6 +792,7 @@ export class Ecology {
     if (e.lost & (1 << pi)) return;
     const p = SPECIES[e.type].parts[pi];
     e.lost |= 1 << pi;
+    breakAnimalPart(e, SPECIES[e.type], pi);
     for (let j = 0; j < p.count; j++)
       if (!e.damage[pi] || e.damage[pi][j]) {
         if (this.debris.length >= 350) break;
@@ -772,11 +821,79 @@ export class Ecology {
       e.z,
     ]);
   }
+  impact(e, point, energy, time = this.world.time) {
+    if (e.dead || !(energy > 0)) return;
+    const sp = SPECIES[e.type],
+      p = [point.x, point.y, point.z];
+    let nearest = null,
+      dist = Infinity;
+    for (let pi = 0; pi < sp.parts.length; pi++) {
+      if (e.lost & (1 << pi)) continue;
+      const part = sp.parts[pi];
+      for (let j = 0; j < part.count; j++)
+        if (occupied(e, pi, j)) {
+          const pos = toWorld(e, part, pi, cellPosition(part, j), time),
+            d = Math.hypot(...pos.map((v, k) => v - p[k]));
+          if (d < dist) {
+            dist = d;
+            nearest = {
+              entity: e,
+              part: pi,
+              voxel: j,
+              point: pos,
+              layer: "shell",
+            };
+          }
+        }
+    }
+    // Soft tissue absorbs a fixed amount; only excess impact energy reaches the nearest internal bone.
+    if (nearest) {
+      this.damageHit(nearest, time, 0.08, 0);
+      energy = Math.max(0, energy - 550);
+    }
+    if (energy <= 0 || e.dead) return;
+    let bone = null;
+    dist = Infinity;
+    for (const piece of bonePieces(e, sp)) {
+      const pos = toWorld(e, sp.parts[piece.part], piece.part, piece.at, time),
+        d = Math.hypot(...pos.map((v, k) => v - p[k]));
+      if (d < dist) {
+        dist = d;
+        bone = {
+          entity: e,
+          part: piece.part,
+          node: piece.node,
+          point: pos,
+          layer: "structure",
+        };
+      }
+    }
+    if (bone) this.damageHit(bone, time, 0.08, Math.min(80, energy / 100));
+  }
   damageHit(hit, time, radius = 0.28, damage = 12) {
     if (hit.entity.dead) return 0;
     const e = hit.entity,
       pi = hit.part,
-      p = SPECIES[e.type].parts[pi];
+      p = SPECIES[e.type].parts[pi],
+      sp = SPECIES[e.type];
+    animalStructure(e, sp);
+    if (hit.layer === "structure") {
+      const model = animalSkeleton(sp),
+        node = model.byId.get(hit.node);
+      if (!node || node.part !== pi) return 0;
+      const result = breakBone(model, e.structure, node.id, damage);
+      if (result.damage) {
+        this.hurt(
+          e,
+          result.damage * (node.id === model.brain ? 1.5 : 0.35),
+          "내부 골격 손상",
+        );
+        e.fear = 6;
+        e.angryUntil = time + 12;
+        this.reconcileStructure(e, time);
+      }
+      return result.broken ? 1 : 0;
+    }
     if (!e.damage[pi]) e.damage[pi] = new Uint8Array(p.count).fill(1);
     const v = toLocal(e, p, pi, hit.point, time),
       dam = e.damage[pi];
@@ -807,17 +924,18 @@ export class Ecology {
         }
       }
     }
-    // Limbs must remain attached at the joint, not merely be the largest island.
-    const groups = voxelComponents(dam, p.dims).sort(
-      (a, b) => b.length - a.length,
-    );
-    const largest = p.leg
-      ? groups.find((g) =>
-          g.some(
-            (j) => Math.floor(j / p.dims[0]) % p.dims[1] === p.dims[1] - 1,
-          ),
-        ) || []
-      : groups[0] || [];
+    // Surface islands are retained by any intact bone inside them. Exterior
+    // connectivity alone never decides leg function or destroys a joint.
+    const model = animalSkeleton(sp),
+      anchors = new Set(
+        model.nodes
+          .filter(
+            (n) => n.part === pi && boneHealth(model, e.structure, n.id) > 0,
+          )
+          .map((n) => n.voxel),
+      );
+    const groups = voxelComponents(dam, p.dims),
+      largest = groups.filter((g) => g.some((j) => anchors.has(j))).flat();
     const keep = new Set(largest);
     for (let j = 0; j < dam.length; j++)
       if (dam[j] && !keep.has(j)) {
@@ -837,27 +955,22 @@ export class Ecology {
           color: p.color,
         });
       }
-    if (removed)
-      this.hurt(
-        e,
-        damage * (p.role === "head" ? 1.5 : 1),
-        p.role === "head" ? "머리 치명타" : "공격 피해",
-      );
     e.fear = 6;
     e.angryUntil = time + 12;
     e.targetX = clamp(e.x + (this.world.random() - 0.5) * 16, 2, SIZE - 3);
     e.targetZ = clamp(e.z + (this.world.random() - 0.5) * 16, 2, SIZE - 3);
-    if (largest.length < Math.max(1, p.count * 0.38)) this.detach(e, pi, time);
-    // A child's attachment is supported by the nearest original parent voxels.
-    for (let child = 0; child < SPECIES[e.type].parts.length; child++) {
-      const cp = SPECIES[e.type].parts[child];
-      if (cp.parent !== pi || e.lost & (1 << child)) continue;
-      if (!attachmentIntact(e, SPECIES[e.type], child))
-        this.detach(e, child, time);
-    }
     condition(e);
     if (e.energy <= 0) this.kill(e);
     return removed;
+  }
+  reconcileStructure(e, time) {
+    const sp = SPECIES[e.type],
+      state = animalStructure(e, sp);
+    for (let pi = 1; pi < sp.parts.length; pi++)
+      if (!(e.lost & (1 << pi)) && !attachmentIntact(e, sp, pi))
+        this.detach(e, pi, time);
+    if (!state.alive) this.kill(e, "중추 골격 파괴");
+    condition(e);
   }
   stats() {
     const counts = [0, 0, 0];
@@ -865,7 +978,12 @@ export class Ecology {
     for (const e of this.entities)
       if (!e.dead) {
         counts[e.type]++;
-        if (e.lost || Object.keys(e.damage).length) injured++;
+        if (
+          e.lost ||
+          Object.keys(e.damage).length ||
+          Object.keys(e.structure?.hp || {}).length
+        )
+          injured++;
       }
     return { counts, total: counts.reduce((a, b) => a + b, 0), injured };
   }
@@ -878,6 +996,7 @@ export class Ecology {
         .map((e) => ({
           ...e,
           bodyPose: undefined,
+          structure: saveStructure(e.structure),
           damage: Object.fromEntries(
             Object.entries(e.damage).map(([k, v]) => [k, Array.from(v)]),
           ),
@@ -911,6 +1030,7 @@ export class Ecology {
       ),
     }));
     for (const e of this.entities) {
+      createAnimalStructure(e, SPECIES[e.type], !e.structure);
       for (let pi = 1; pi < SPECIES[e.type].parts.length; pi++)
         if (!attachmentIntact(e, SPECIES[e.type], pi)) e.lost |= 1 << pi;
       condition(e);

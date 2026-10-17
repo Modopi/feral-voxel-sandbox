@@ -1,3 +1,4 @@
+import { LooseVoxels } from "./loose-voxels.js";
 // 1 world unit = 1 metre. Cell-based rules, bounded work per simulation tick.
 export const SIZE = 160,
   HEIGHT = 40,
@@ -43,6 +44,7 @@ export function noise(x, z, seed) {
 export class World {
   constructor(seed = 63026) {
     this.seed = seed;
+    this.loose = new LooseVoxels(this);
     this.blocks = new Uint8Array(SIZE * SIZE * HEIGHT);
     this.ground = new Int16Array(SIZE * SIZE);
     this.plants = new Float32Array(SIZE * SIZE);
@@ -105,6 +107,7 @@ export class World {
     if (v) this.fluids.delete(i);
     this.mark(x, z);
     this.rescan(x, z);
+    this.loose.changed(x * 2, y * 2, z * 2, 2);
     return true;
   }
   markCollision(x, z) {
@@ -205,6 +208,7 @@ export class World {
     this.fluids.delete(i);
     this.mark(x, z);
     this.rescan(x, z);
+    this.loose.changed(hx, hy, hz);
     return true;
   }
   miningRegion(hit, size = 1) {
@@ -641,6 +645,7 @@ export class World {
   save() {
     return {
       seed: this.seed,
+      loose: this.loose.save(),
       time: this.time,
       rngState: this.rngState,
       edits: [...this.edits],
@@ -658,6 +663,8 @@ export class World {
     };
   }
   load(s) {
+    const wasEnabled = this.loose.enabled;
+    this.loose.enabled = false;
     this.time = s.time || 0;
     this.rngState = s.rngState || this.seed;
     for (const [i, v] of s.edits || []) {
@@ -708,5 +715,7 @@ export class World {
     if (s.plants) this.plants.set(s.plants);
     if (s.nutrients) this.nutrients.set(s.nutrients);
     Object.assign(this.reactions, s.reactions);
+    this.loose.load(s.loose);
+    this.loose.enabled = wasEnabled;
   }
 }

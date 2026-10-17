@@ -1,6 +1,6 @@
 {
-  "version": "0.9.1",
-  "versionCode": 901,
+  "version": "0.10.0",
+  "versionCode": 1000,
   "minNativeCode": 303,
   "saveSchema": 2,
   "channel": "stable",

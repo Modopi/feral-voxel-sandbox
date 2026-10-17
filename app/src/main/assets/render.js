@@ -1,3 +1,4 @@
+import { bonePieces } from "./animal-skeleton.js";
 import { animalMaterial } from "./animal-view.js";
 import { animalColor, visibleAnimalDetails } from "./animal-art.js";
 import { firstPersonHands } from "./character-view.js";
@@ -379,6 +380,24 @@ export class View {
       this.tool.remove(mesh);
       if (!this.originalTool.includes(mesh)) mesh.material.dispose();
     }
+    if (id === "grapple") {
+      const add = (x, y, z, sx, sy, sz, color) => {
+        const m = new T.Mesh(
+          this.cube,
+          new T.MeshStandardMaterial({ color, roughness: 0.7 }),
+        );
+        m.position.set(x, y, z);
+        m.scale.set(sx, sy, sz);
+        this.tool.add(m);
+      };
+      add(0.37, -0.39, -0.38, 0.08, 0.26, 0.09, 0x516d66);
+      add(0.37, -0.23, -0.48, 0.21, 0.09, 0.17, 0x82c9b8);
+      for (const side of [-1, 1]) {
+        add(0.37 + side * 0.13, -0.2, -0.59, 0.05, 0.07, 0.25, 0xbacabe);
+        add(0.37 + side * 0.095, -0.2, -0.72, 0.1, 0.07, 0.05, 0xddbf82);
+      }
+      return;
+    }
     if (id === "pulse" || id === "utility") {
       this.tool.add(...this.originalTool);
       return;
@@ -566,6 +585,23 @@ export class View {
           );
         }
       }
+      // Real internal geometry sits beneath the coat. Depth testing hides it
+      // until the exterior is removed; no x-ray overlay changes the hit policy.
+      if (dist < 35)
+        for (const b of bonePieces(e, sp)) {
+          if (far >= this.farMesh.instanceMatrix.count) break;
+          const p = sp.parts[b.part];
+          this.instance(
+            this.farMesh,
+            far++,
+            toWorld(e, p, b.part, b.at, time),
+            b.size,
+            e.structure.hp[b.node] !== undefined ? 0xc59268 : 0xe3d3a5,
+            pose(e, p, b.part, time).angle,
+            e.yaw,
+            e.bodyPose,
+          );
+        }
       // Silhouette pieces remain in the middle distance; tiny coat/eye accents
       // use the same near-detail budget as anatomical voxels.
       if (dist < 35)

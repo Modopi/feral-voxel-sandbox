@@ -1,3 +1,6 @@
+import { CharacterBody } from "../character-body.js";
+import { characterModel } from "../character-model.js";
+const trainingBodyModel = characterModel("explorer");
 import {
   BIOMES,
   biomeIndex,
@@ -86,7 +89,7 @@ export class Frontier {
   get info() {
     return {
       ...regionInfo(this.seed, this.x, this.z),
-      terrainVersion: this.region?.terrainVersion ?? 2,
+      terrainVersion: this.region?.terrainVersion ?? 3,
     };
   }
   get region() {
@@ -114,7 +117,7 @@ export class Frontier {
     if (!this.regions[i.key])
       this.regions[i.key] = {
         visited: true,
-        terrainVersion: 2,
+        terrainVersion: 3,
         discovered: [],
         dungeon: 0,
         cacheClaimed: false,
@@ -759,6 +762,7 @@ export class Frontier {
     for (const r of Object.values(s.regions)) {
       ensureContent(r);
       ensureOutpost(r);
+      if (r.trainingBody) new CharacterBody(trainingBodyModel, r.trainingBody);
       r.terrainVersion ??= 1;
       if (
         !Array.isArray(r.relays) ||
