@@ -1,0 +1,704 @@
+ZERO_STARTER_CRAFT_LOOP {"recipes":51,"minedCells":687,"gatherings":282,"hunts":29}
+✔ every item and prerequisite has a route without starter items in both game modes (8.437006ms)
+✔ every recipe executes from an empty bag using actual mining, regrowth, animals and prerequisite crafts (99.654427ms)
+✔ extinction recovery consumes fertile habitat, stays away from player and survives save (45.858414ms)
+✔ a single region can renew timber, building minerals and research, and reconstruct relics without a boss (1.608982ms)
+✔ wing lift scales with airspeed squared, loses lift after stall, and passive force never supplies energy (1.557348ms)
+✔ internal hull faces do not multiply drag, and reversed airflow reverses drag (0.526214ms)
+✔ elevator, fin and opposite wing deflections create pitch, yaw and roll forces in the commanded direction (0.294657ms)
+✔ a connected craft takes off from a runway using its propeller and wings; output is retained at neutral stick (967.656066ms)
+✔ asymmetric wing loss changes real angular motion; unpiloted panels and wind still produce forces (159.938993ms)
+✔ aircraft parts use research and shared inventory, including atomic kit crafting (1.448162ms)
+✔ only crawling fits a half-metre tunnel; standing remains blocked until outside, including camera height (6.704948ms)
+✔ crouching fits a metre tunnel; sprint is disabled in low stances and crawling cannot jump (3.500281ms)
+✔ standing clearance also checks moving assemblies, and the physics capsule fits the chosen stance (29.683943ms)
+✔ destroying the connected motor removes propeller thrust while the intact craft accelerates (433.297767ms)
+✔ SDK rejects overlapping add atomically instead of repairing the existing model (7.165436ms)
+✔ invalid SDK mutations leave model state unchanged (1.267874ms)
+✔ explicit replace transfers only intersecting volume to the new material (0.447222ms)
+✔ explicit fill preserves occupied material and inserts only empty volume (0.512884ms)
+✔ removal creates a real cavity with conserved remaining volume and local pivot (0.905749ms)
+✔ articulated children may overlap other parts while same-part additions stay exclusive (1.234992ms)
+✔ corrupt imported occupancy is rejected and never normalized as a side effect (0.481589ms)
+✔ tool provenance is runtime-created identity, not a copied metadata label (0.171281ms)
+✔ SDK copies input and exported data to prevent accidental alias mutations (0.314054ms)
+✔ actual Rapier: distinct owners collide and exchange impulses (193.117947ms)
+✔ actual Rapier: articulated child bodies of one owner pass through each other (29.128616ms)
+✔ actual Rapier: same-owner colliders on one rigid body do not self-resolve (12.191914ms)
+✔ actual Rapier: registered terrain and external terrain support dynamic assets (88.859048ms)
+✔ actual Rapier: local cuboid holes remain empty instead of using a combined AABB (3.227036ms)
+✔ actual Rapier: more than sixteen independent owners have no collision-mask aliases (97.704846ms)
+✔ actual Rapier: kinematic external bodies push dynamics while same-owner parts are ignored (16.9655ms)
+✔ ownership cleanup is selective and handle reuse does not inherit removed ownership (1.194845ms)
+✔ invalid mass, shape, pose and friction are rejected without leaving physics bodies (4.888387ms)
+✔ overlap removal preserves union volume and gives later material ownership (2.924007ms)
+✔ duplicate boxes collapse and partial opaque contacts lose only hidden faces (2.519619ms)
+✔ independent joint parts retain overlapping geometry and pivots (0.613499ms)
+✔ same species instances receive distinct collision ownership paths (0.55232ms)
+✔ adjacent cells of one translucent liquid have no internal seam (0.42442ms)
+✔ branch preparation preserves native version and creates unique game builds (151.558957ms)
+First Signal source-backed playthrough {
+  mined: 15,
+  gathered: 11,
+  crafted: 9,
+  attacks: 14,
+  regions: 3,
+  simulatedSeconds: 365,
+  deaths: 0,
+  signals: [ 0, 1, 2 ],
+  chapters: 6,
+  sorties: 3
+}
+✔ all campaign costs and rewards use reachable items; nearby regions guarantee all channels (4.198995ms)
+✔ a fresh empty-bag campaign finishes all chapters, all three routes and all repeatable sorties using real sources (248.992279ms)
+✔ campaign commands enforce location, prerequisites, atomic inventory and one-time rewards (0.867963ms)
+✔ new campaign state migrates old saves and survives travel, death and malformed-save checks (6.024703ms)
+✔ telegraphs and collisions share all five shapes including safe ring centres and charge flanks (0.784847ms)
+✔ food buffs expire without stacking and field workshop restores worn equipment at a real cost (1.062299ms)
+✔ jointed locomotion and crouch/crawl keep a supporting boot on the ground; reset clears gestures (60.491935ms)
+✔ all roles have connected elbow/knee/ankle rigs and share immutable geometry without sharing poses (27.922027ms)
+✔ an external antler hit removes its owning physical cell and decoration, including after save/load (15.867086ms)
+✔ every species detail is owned by a valid saved cell; lost limbs leave no floating eyes/feet/ears (2.356771ms)
+✔ dense detailed herds stay within both GPU instance buffer capacities (266.380646ms)
+✔ strike HP budget reaches surface; pierce and impulse reach actual internal part with no duplicate energy (4.353272ms)
+✔ resistant front shell stops internal damage; thickness, finite depth and exact rotation matter (1.470947ms)
+✔ real Rapier external cuboid blocks all modes before owner while exact gaps remain open (206.648243ms)
+✔ weapon patterns are separate from the 53 existing equipment results and reference only catalog materials (4.431136ms)
+✔ quote enforces the selected material recipe research and actual station, then crafts with real costs and time (3.789163ms)
+✔ equipping, cooldown, durability, serialization, death drain and recovery preserve the exact weapon record (17.590809ms)
+✔ rack holds eight carried weapons plus one equipped item and retains overflow for retry (1.993879ms)
+✔ atlas named random stream exactly matches SHA256 first 53 bits including negative/large coordinates (2.241671ms)
+✔ initial spawn is dry grove tier one and starter resources are accessible without inventory grants (36.558856ms)
+✔ negative chunk coordinates and exact boundaries map edits to unique cells and packed indices (147.70424ms)
+✔ edited terrain, deep cells and high construction survive unloading and JSON reload (79.906252ms)
+✔ visit ordering and bounded active residency do not change generated cells or regions (270.283471ms)
+✔ four directional high-tier anchors are isolated by connected dry baseline corridors (104.639564ms)
+✔ moving a reservation invalidates old and new chunks and persists its new position (46.281504ms)
+✔ capsule caves actually carve rock, preserve roof and respect structure reservations (2.866666ms)
+✔ building candidates identify original templates and preserve deterministic ruin variants (41.589184ms)
+✔ invalid cells, unknown saves and non-finite loading budgets fail explicitly (0.732475ms)
+✔ harvest candidates agree with the actual environment at their rounded position (64.832971ms)
+✔ incremental chunks remain private until complete and match pre-optimization bytes (33.557639ms)
+✔ edits during incremental generation are reflected at atomic chunk publication (23.296263ms)
+✔ finite flowing liquid conserves volume, reagent and thermal energy across negative chunk boundaries (22.764911ms)
+✔ withdrawing natural water persists depletion and building cannot erase a live liquid cell (2.062637ms)
+✔ partial burning survives reload, spreads through heat and never refills fuel after extinguishing (6.738266ms)
+✔ acid damage is bounded by available reagent and thermal energy actually damages vulnerable material (12.705963ms)
+✔ environment simulation is fixed-step, read-only queries do not advance it, and long catchup is bounded (1.727441ms)
+✔ environment snapshots are independent and resume the same fluid and fire evolution (26.611881ms)
+✔ editing a chunk boundary refreshes both exposed meshes without editing the neighbor voxels (53.929709ms)
+✔ 96 chunk residency selects all 49 nearby surface layers before remote underground or sky layers (2.279609ms)
+✔ default loading cell budget can use the remaining time instead of stopping at 2048 cells (41.355529ms)
+✔ environment destruction emits one support notification; ordinary edits and restoration do not (114.047539ms)
+✔ all eight actual boss rigs keep pivots/hierarchy while 24 phase poses and all 32 cast poses differ (62.481363ms)
+✔ actual locomotion, broken organs and frozen grounded death poses never mutate gameplay or lose nested wings/rings (17.197532ms)
+✔ logical boss damage regions use real part ancestry and authored weakpoint anchors (6.979542ms)
+✔ four explicit boss variants animate through their derived definitions on the preserved base rigs (11.391864ms)
+✔ Rapier reads the same animated parent/joint matrices and omitted real parts as rendering (245.931731ms)
+✔ death clock survives save/reload and resumed animation uses elapsed time instead of replaying the fall (13.0303ms)
+✔ inside sphere warning retains exact height/floor boundaries while limiting full-screen tint (13.801341ms)
+✔ sphere countdown represents windup plus actual projectile travel and stays continuous at launch (6.463345ms)
+✔ BossView renders all explicit T9/T10 variant cast volumes from the base asset identity (11.024724ms)
+✔ all eight bosses use real HP transitions through all 24 authored phases (14.933487ms)
+✔ four reviewed variants preserve the eight prototypes and use explicit tier-bound definitions (10.89029ms)
+✔ variant saves retain encounter identity and pending reposition; defeat keeps the original reward key (12.681658ms)
+✔ variant movement uses saved phase triggers, stops at consumed gimmicks or blocked sweeps (13.894042ms)
+✔ all 32 authored skills actually cast, spend channel EU, share telegraph/hit shape and enter recovery (47.528182ms)
+✔ same-owner multiple target parts receive at most one hit per cast and fixed aim can be evaded (13.64111ms)
+✔ 3D height/OBB/SAT use actual volumes, preserving flight and machine holes (0.736678ms)
+✔ terrain blocks targeting, active attacks and moving projectiles (3.375186ms)
+✔ exterior shell hits reduce total HP and exposed core break changes skills without forcing death (14.707606ms)
+✔ authored phase mechanics include water/draining, growth cover, heat exposure, shields and orbit (7.088026ms)
+✔ terrain solid lookups reuse a spatial effect index and invalidate it on boss state changes (2.262119ms)
+✔ organic combat recovery consumes calories; inorganic repair consumes supplies and interrupts on hit (3.152293ms)
+✔ glider alternates actual altitude and grounded windows with phase-specific limits (5.383834ms)
+✔ casting save/reload replays full warning without spending twice or repeating owner damage; inactive chunks freeze (4.151039ms)
+✔ defeat creates a durable entitlement and rewards require idempotent successful transfer (2.575217ms)
+✔ disengagement does not refill energy, restore parts, regenerate robots or respawn defeated bosses (3.319739ms)
+✔ gimmick forced landing takes priority over an existing schedule cursor (1.526995ms)
+✔ area damage splits a finite EU budget across distinct owners and saves remaining budget (2.242885ms)
+✔ Three boss view renders all 32 actual 3D skill volumes without changing simulation state (101.296389ms)
+✔ boss view tracks actual projectile, phase water and breakable growth-wall bounds (4.890493ms)
+✔ weakpoint overlays follow authored part matrices and exposure without mutating asset materials (2.585214ms)
+✔ multi-part allocations consume one total HP budget and reject duplicated structural damage (1.622096ms)
+✔ authored communal residents initialize once, preserve corpses, and never invent quest/trial rewards (13.661951ms)
+✔ trade checks civilization, actual distance, visibility, hostility and finite inventory (8.466472ms)
+✔ feeding charges actual food once and rest only invokes calorie-based player healing state (2.07115ms)
+✔ three paid timed contributions reward only through progression and survive each save boundary (12.07196ms)
+✔ only live civilized communities accept activities and queued cancellations grant no contribution (2.139532ms)
+✔ repair consumes finite material after elapsed work, pauses out of range and restores without replay (6.692155ms)
+✔ invalid actions and invalid time cannot mutate balances (1.850645ms)
+✔ activity request survives independently newer progression save without paying or rewarding twice (4.809482ms)
+✔ explicit request IDs cannot be reused for different actions (2.003809ms)
+✔ all 34 authored SDK species allocate exactly existing mass with one owner for joint union volume (95.163038ms)
+✔ actual animated leg transfers source boxes, posed world transform and exact budget to a new inert owner (18.776049ms)
+✔ physics snapshot overrides source animation with actual clamped body pose and inherited velocity (5.584183ms)
+✔ multiple cuts and save restoration conserve total mass with idempotent fragment claims and one corpse reward (31.689307ms)
+✔ internal core failure preserves living exterior and mass while reducing functions (2.468563ms)
+✔ offscreen damage survives save and lazily reconstructs its recorded pre-cut pose once (13.376791ms)
+✔ mass ledger conflicts and overdraw never create a duplicate fragment or alter world sources (4.246471ms)
+✔ real SDK limb reaches actual Rapier cuboids with exact mass, falls, and preserves its landed pose across saves (295.154651ms)
+✔ all 34 actual species survive internal core failure without exterior loss or duplicate mass (144.216907ms)
+✔ all 34 canonical species produce distinct typed bodies and finite serializable states (29.927418ms)
+✔ natural healing charges actual restored HP and never increases low calorie balance (3.743518ms)
+✔ inorganic creatures never heal naturally; repair consumes one material after full duration (7.815915ms)
+✔ region initialization and corpse rewards never duplicate after save or repeated ensure (6.426116ms)
+✔ safe bypass regions exclude hostile predators at initial placement (0.937656ms)
+✔ dungeon food, water, room limits and permanent extinction survive a two-hour offline run (57.221066ms)
+✔ living outdoor and closed dungeon ecology remains finite and bounded for two hours (75.543466ms)
+✔ births debit both parents, require room capacity and persist their serial (4.560976ms)
+✔ whole-body damage applies once while structural injury changes movement without calorie regrowth (18.487993ms)
+✔ attack telegraphs survive reload, can be dodged, and produce exactly one hit (5.49817ms)
+✔ wall occlusion prevents attacks and solid terrain prevents crossing (6.30362ms)
+✔ communal trade is finite, atomic and drops only existing personal inventory (0.559576ms)
+✔ feeding consumes inventory and different frame partitions produce the same state (5.668706ms)
+✔ invalid saves, invalid time and unknown parts do not silently mutate population (1.489905ms)
+✔ producer destruction and harvesting share finite food; corpse decomposition conserves edible CP (1.105131ms)
+✔ migration moves the same individual across an actual boundary and respects closed ecology (7.145809ms)
+✔ retrying a repair transaction after an independently persisted inventory does not pay twice (0.603157ms)
+✔ overlay species consume their host allocation instead of adding another ecology budget (2.159081ms)
+✔ only nearby capped individuals run detailed AI; remote ecology catches up without player hits (422.926135ms)
+✔ weapon attachment damage disables attack without killing an otherwise viable body (2.507096ms)
+✔ unclaimed dead creatures remain visible for ray-selected loot and disappear after claiming (0.599144ms)
+✔ all 34 real art models animate from original pivots with finite joint poses and instance collision ownership (41.492668ms)
+✔ logical limb loss hides the real model part and removes its collider; death and work poses are explicit (2.234246ms)
+✔ wounded flying creatures fall even when idle, and amphibious movement uses actual fluid depth (1.323903ms)
+✔ near-height floor queries and actual collision line-of-sight hooks receive ownership (1.082963ms)
+✔ all species can die from exterior-only hits or HP damage without breaking core bones (44.002262ms)
+✔ core and spine faults impair behavior while HP and intact exterior remain alive (1.580855ms)
+✔ piercing and transmitted impact allocate one HP budget across exterior and internal injuries (1.661963ms)
+✔ caller structural and energy over-allocation rejects the entire hit before changing HP (0.69239ms)
+✔ authored armor reduces the whole-body hit once and its broken shell loses that protection (10.605774ms)
+✔ proposed content links and all self-research bootstrap paths are consistent (37.092976ms)
+✔ first divinity cannot depend on the relic it must allow players to craft (40.070285ms)
+✔ missing animal rewards are detected across separate design files (26.513226ms)
+✔ a valid-looking corridor with its endpoint outside the target room is rejected (24.134213ms)
+✔ shortening a boss warning below the calculated escape time fails review (19.099717ms)
+✔ a phase cannot expose its weak point only after an attack absent from that phase (20.116828ms)
+✔ root manor opens only through powered gate travel; range, pose, collision and destructive bypass persist (18.744923ms)
+✔ 60 Hz gate operation snaps to the clearance threshold without a floating-point stall (6.057585ms)
+✖ fixture supply checks a real local output store and drains finite EU into device reserve (4.304995ms)
+✔ floodworks pump conserves its separate 400L circuit and samples exactly the 4m² pool (5.367108ms)
+✖ 60 Hz flood pumping reaches the exact 0.05 m safe-depth threshold (32.720411ms)
+✔ foundry exhausts a finite heat source but has enough finite coolant to reach the safe band (2.145518ms)
+✔ inertia brake integrates power, speed and position; platform hazard requires feet at its top (3.258669ms)
+✖ damage hides persistent vane, altar and platform parts without completing or respawning them (1.601874ms)
+✔ breaking the moving platform removes its support without clearing momentum (1.427733ms)
+✖ all 12 structures expose all 84 rooms, translated entrances, spawn and boss anchors (54.674956ms)
+✔ starter manor has a deterministic walkable approach outside spawn; large buildings span chunks (11.520305ms)
+✔ enter -> install joint -> supply held work -> defeat boss -> claim once -> damage -> reload (29.039353ms)
+✔ archive discovery unlocks research without boss or puzzle; out-of-range collection does not mutate (12.470367ms)
+✔ legacy paid openings finish without repayment while new saves never gain a timer shortcut (12.703693ms)
+✔ four explicit boss variants preserve encounter tier and only override the one-time boss reward (43.935704ms)
+✔ destroying gate or entering alternate rooms never grants boss completion (3.351449ms)
+✔ failed reward delivery leaves claim unconsumed; successful partial inventory uses progression overflow (3.323529ms)
+✔ small ruin reuses archive model and requires two persistent observations before research reward (15.373581ms)
+✔ basin and producer destruction emit one-way ecology events and persist through reload (7.702559ms)
+✔ Atlas reservation and generated sites are deterministic and preserve prototype combat tier (21.666253ms)
+✔ procedural footprints reject steep/wet/bypass sites and keep overlapping buildings apart (4.69216ms)
+✔ candidate retries are bounded and deterministic while existing placements survive reload (11.809883ms)
+✖ cached broad phase retains every authored solid center and invalidates after new structures and asset replacement (43.860743ms)
+✔ actual liquid geometry has volume-exact height, outward winding and no internal shared faces (10.280395ms)
+✔ opaque neighbor hides its liquid face; acid color reflects the saved reagent fraction (1.801301ms)
+✔ view uses persisted fluids, burning and heat with bounded instances and never changes game state (16.21782ms)
+✔ natural water is observed without materialization and a saved depleted surface is not redrawn (106.428087ms)
+✔ restored fluids create identical geometry and disappear after being withdrawn (3.960756ms)
+✔ all 10 gear and 3 tool models align their declared hand anchors without altering canonical pivots (44.828344ms)
+✔ selection respects ownership, active required harvesting tool and all equipped tiers (2.566008ms)
+✔ camera-held attack, harvesting and rest animation is read-only and disposes replaced geometry (5.730438ms)
+✔ late asset loads and errors never restore stale equipment or silently substitute another model (1.887901ms)
+✔ disposing while loading prevents later camera children and geometry allocation (0.726369ms)
+✔ strike, pierce and impact have distinct pure offsets and restore the original grip (0.648163ms)
+✔ attack style is captured per strike, preserves state and returns both hands to their original grips (2.41482ms)
+✔ faith uses real ruin/monastery anchors, proximity and visibility; membership never changes research (7.184476ms)
+✔ delivery consumes real inputs once and quest reward is one-time across leave/rejoin and reload (3.704313ms)
+✔ discovery and boss quests require new accepted-time evidence and explicit nearby claim (11.761714ms)
+✔ independent trial requires paid supply, all three timed actions and 12 seconds; reload preserves progress (6.161506ms)
+✔ failure reasons cover departure, damage, death and missed windows; each retry pays again (7.412804ms)
+✔ cannot pass from afar, use large dt, start parallel trials or repeat a reward after failed delivery (0.965974ms)
+✔ save validation rejects fabricated completed trials, unsupported versions and duplicate active attempts (5.121492ms)
+✔ save validation keeps faith phases aligned with paid and claimed progression receipts (8.296462ms)
+✔ reusable recovery fairy is authored through SDK with exclusive occupancy and cosmetic materials (11.365833ms)
+✔ damage flashes and HP labels expire; loading an old damage timestamp does not replay a hit (3.623127ms)
+✔ saved death items drive markers, partial recovery keeps its fairy and full recovery removes it (6.623424ms)
+✔ recovery uses exact three-dimensional ten-metre boundary and describes full inventory without claiming (4.35649ms)
+✔ many historical deaths and repeated claims stay within visual instance caps without event accumulation (50.502976ms)
+✔ new death announces retained items, restored ledger does not manufacture recovery or mutate gameplay (3.643156ms)
+✔ owned DOM overlays are bounded, noninteractive and removed on dispose (2.661368ms)
+✔ a death holding only crafted weapons still displays a fairy and recovery flight (1.868249ms)
+✔ unlinked nearby and distant stores remain isolated; explicit paid links carry power and removal stops transfer (19.567828ms)
+✔ station energy requires directed ports and linked converters; leaving the work site pauses the job (28.739058ms)
+✔ fuel remains local and finite across range changes, save and link removal (21.591021ms)
+✔ personal divinity funds the first relic only after explicit reservation at its actual workbench (13.308351ms)
+✔ legacy nonpositional mode is unchanged; migration quarantines pooled energy instead of assigning it to a distant store (2.37622ms)
+✔ avatar mana uses paid growth and actual liquid without summing fixed tanks or the cup (1.834939ms)
+✔ two simulated hours preserve source, storage, dissipation budgets without charging distant or personal stores (2070.044385ms)
+✔ breakage cuts links and repair never silently reconnects; a single player cannot multiply manual power (2.087503ms)
+✔ legacy queued input and work survive explicit station binding; live reservations cannot move (14.258974ms)
+✔ support loss replaces fixed owner with actual dynamic compound, falls and lands without granting function (226.750316ms)
+✔ mid-fall save reload retains owner, authored mass, health, quaternion and momentum then lands (42.828259ms)
+✔ rotated solids use OBB occupancy and allow objects in the empty corners of their AABB (10.143117ms)
+✔ destroyed supporting fixture releases its stack under original owners and preserves upper HP (9.96739ms)
+✔ legacy placement saves migrate to fixed identity; invalid rotation and velocity are rejected (3.960011ms)
+✔ arc_thrower is a normally crafted explicit component, not a motor or geometry-derived function (21.369881ms)
+✔ forge-to-power bootstrap needs no electrical assembly input; the real engine-generator-battery network charges 120 EU (105.072605ms)
+✔ shielded shots spend once, preserve blocked receipts, and do not consume reserve while idle (32.894761ms)
+✔ projectile receipts remain compact and retry-safe past the former 4096-shot limit (78.400233ms)
+✔ SDK placement debits exact material volume and is separate from component functions (9.595441ms)
+✔ finite paid fuel moves a real connected cart and stops providing power when exhausted (71.410053ms)
+✔ ports must be explicit; disconnected motor shape produces no propulsion (5.141608ms)
+✔ destroying a bridge separates structural groups, preserves momentum and cuts cross-fragment ports (15.343052ms)
+✔ cargo actually leaves inventory, adds mass and can be returned exactly once per request (2.585799ms)
+✔ liquid transfer needs a powered pump, preserves litres, and uses inventory fuel (10.644973ms)
+✔ external physics advances fuel exactly once and persists live corrected pose without geometry rebuilds (3.127691ms)
+✔ placement rejects external collisions before debit; repair consumes missing material and damage events replay once (1.845668ms)
+✔ manual push cannot create motion without an actual finite mechanical energy debit (2.789076ms)
+✔ rotating fragments retain the tangential velocities of their new centers of mass (1.257255ms)
+✔ imprinting reserves real mana, pauses without the apparatus, and adds actual mitigation once across save (12.945239ms)
+✔ consecration strengthens an existing property without healing, changing mass or granting a function (2.276809ms)
+✔ all six energy attacks consume finite resources and retries never deliver damage twice (2.895523ms)
+✔ water and wind are paid magical attributes; thermal work is bounded by fuel, elapsed time and capacity (2.0015ms)
+✔ strength and acid upgrades reduce the corresponding real machine damage rather than remaining display-only stats (2.991932ms)
+✔ machine-mounted imprinter requires routed energy and local relic strengthens with its own finite reserve (38.149658ms)
+✔ cutting a rotated detached trunk preserves split owners, remaining mass, damage and a single harvest (11.218405ms)
+✔ severed trunk transfers exact original cell mass and volume with exclusive SDK geometry (1.712942ms)
+✔ connected foundations, fixed building cells and unknown blocks prevent detachment (22.326128ms)
+✔ bounded search preserves large connected masses without partial deletion (25.94383ms)
+✔ two disjoint unsupported branches get independent object owners while grounded branch stays (9.599434ms)
+✔ saved pose, materials and finite cells restore with no repeated detachment (1.794794ms)
+✔ failed world mutation restores removed material and creates no object (1.017315ms)
+✔ invalid saves and unallocated biological fragments cannot create duplicate mass (1.297563ms)
+✔ actual procedural tree crown detaches after every supporting trunk cell is cut (213.042591ms)
+✔ mana investments spend existing authored materials, increase avatar capacity and never grant energy (5.7763ms)
+✔ one owned focus changes capacity; unequip reserves excess without reusable free mana or reserve refill while unequipped (1.469743ms)
+✔ death-style inventory removal, save and recovery preserve the exact existing mana budget (4.629597ms)
+✔ cup storage stays separate from avatar mana and cannot bypass its capacity (0.825886ms)
+✔ investment and focus maxima are bounded and a full capacity investment never charges materials twice (0.994506ms)
+✖ all 40 installable models consume real items and preserve distinct machine owners (279.495711ms)
+✔ actual cuboids allow a battery under a table but reject solid overlap without spending (3.906042ms)
+✔ terrain, support, distance and real building wall checks fail before inventory consumption (11.994304ms)
+✔ nearby station access, breakage, paid repair and save restoration synchronize progression (4.803703ms)
+✔ component condition and damaged salvage survive reload without duplicating assemblies or items (7.923875ms)
+✔ concurrent placements serialize their commits and reject corrupted restore state (1.708782ms)
+✔ dismantling a supporting table requires packing the fixture resting on it first (1.6803ms)
+✔ async loading cannot race past the 256 fixture limit (420.088351ms)
+✔ external actor or rotated-machine overlap rejects before any item is consumed (1.324824ms)
+✔ geometry and access caches invalidate at exact range boundary and every dynamic pose (2.311853ms)
+✔ empty inventory bootstraps wood, stone and kiln using actual harvest, samples and timed costs (8.079998ms)
+✔ harvest requires time, tool, source environment, depletion and persistent unique claim (1.403731ms)
+✔ inventory debit and energy costs are atomic, overflow remains reclaimable, legacy IDs are rejected (0.962179ms)
+✔ research pause/save/resume charges samples once; discovered blueprints immediately unlock (1.629933ms)
+✔ craft reserves inputs, pauses without energy, survives save and never repeats output (26.618868ms)
+✔ all 39 research nodes execute from samples without discovery, preserving four freely mixed fields (4.734695ms)
+✔ all 142 crafting contracts execute with finite debited energy and exact item output (817.349624ms)
+✔ mechanical-electric-mechanical loop never creates energy and battery discharge obeys rated power (3.124282ms)
+✔ first divinity comes from paid community work, then an intact relic generates at .1 EU/s (12.358075ms)
+✔ mana condenser and ordinary fluid container work without a preexisting mana item (10.142955ms)
+✔ machine material properties cannot invent functions or multiply component cores without spending them (1.448575ms)
+✔ reward claims, kit ownership and save validation reject duplication or invalid state (2.389646ms)
+✔ manual mechanical supply and a real generator power a mixed-channel recipe with a conserved budget (16.527731ms)
+✔ acid extraction debits fluid once and stores the unspent chemical energy in the correct tank (9.935495ms)
+✔ finite mining tool wear persists through save and replacement requires a second crafted tool (4.159248ms)
+✔ physical workshop access is local, changes atomically and survives reload without duplicating counts (3.071258ms)
+✔ community activity request retries preserve the original job and consume inputs once across reload (1.664047ms)
+✔ legacy tick-local assembly caches match uncached stepping and expire between calls (59.67128ms)
+canonical per-part draws 2259 -> 1412; 1151 independent part calls
+✔ compatible opaque colors merge in linear RGB without changing any colored face or input (5.755858ms)
+✔ roughness, metalness, emission, emissive color and transparency remain separate (1.664093ms)
+✔ original ray grid keeps floor edges, enclosed holes and independently transformed parts (27.158152ms)
+✔ every canonical model preserves triangle count per part; independent part geometry is never fused (8873.176375ms)
+✔ empty parts allocate nothing and invalid material references fail before GPU resources (1.184038ms)
+✔ gear crafting, ammo, breakage, repair and save restore form a finite loop (4.138088ms)
+✔ tools specialize in materials (0.320114ms)
+✖ limb loss impairs movement; vital loss kills once; health is independent of food (8.789135ms)
+✔ legacy animal and inventory saves migrate without losing materials or injuries (4.032774ms)
+✖ legacy headless creatures and zero-health creatures cannot remain alive (1.755284ms)
+✔ runtime weapon damage, wear, nine-item death overflow and repeated save/recovery share one inventory identity (371.971735ms)
+✔ crafted weapon material changes only the held working surface and preserves canonical geometry (82.075832ms)
+✔ worker preparations coalesce to latest immutable snapshot, preserving two generations (7.478113ms)
+✔ synchronous manual save cancels old worker results including queued error callbacks (1.37209ms)
+✔ direct store.write also supersedes active and queued autosaves even if manual save fails (9.411025ms)
+✔ corruption, storage quota and malformed worker response keep previous valid generation (5.450412ms)
+✔ worker unavailable or startup failure safely falls back, disposed requests never write (66.656899ms)
+✔ worker validation rejects invalid player data without overwriting saved state (0.618767ms)
+✔ real background worker roundtrip preserves large Unicode and fractional world data (615.035223ms)
+✔ actual atlas harvest nodes are compatible with progression source ownership (442.786432ms)
+✔ zero inventory reaches a researched crafted kit using actual atlas nodes and consumed materials (128.948969ms)
+✔ all authored dungeons instantiate ecological rooms and their corresponding boss together (28.112893ms)
+✔ boss, dungeon and progression ledgers survive a full six-system saved reward claim (77.982924ms)
+✔ runtime structure damage changes both rendered geometry and solid queries after restoration (121.988478ms)
+✔ actual runtime initializes outdoor creatures on terrain and rejects inedible item consumption (80.196605ms)
+✔ actual runtime recovers death inventory at 10 metres and keeps partial recovery after save (399.440677ms)
+✔ runtime mining spends the full harvest time, removes the cell once and preserves depletion after reload (1118.258545ms)
+✔ machine rendered quaternion and gameplay hit identify the same rotated paid voxel without rebuilding on motion (86.213411ms)
+✔ thermal interaction consumes fuel once and deposits heat rather than duplicating heat and direct damage (253.246441ms)
+✔ energy channels reach building cells and fixed equipment using actual material resistance (1266.841011ms)
+✔ actual scene renders puzzle gate and keeps damage separate between repeated building instances (786.830422ms)
+✔ actual scene accepts SDK-authored inline resource geometry outside the canonical manifest (3.546299ms)
+✔ runtime arc thrower spends and damages once across save retry; LOS is controlled, not physical proof (613.305926ms)
+✔ paid dungeon lift moves its actual Rapier gate while retaining unchanged building colliders (317.240128ms)
+✔ actual atlas 0.5m terrain becomes Rapier solids and supports a swept player (99.781737ms)
+✔ different moving entity blocks player, with actual cuboid gaps left traversable (31.971023ms)
+✔ child matrixWorld rotates/translates colliders and same entity joints do not self-block (8.982876ms)
+✔ kinematic entity movement is actually swept against terrain rather than teleported through it (4.852397ms)
+✔ a boss variant reposition is clamped by its real part sweep and the next tick cancels the blocked move (31.476143ms)
+✔ structure destruction rebuilds exact renderBoxes; water excluded and translucent glass remains solid (15.365067ms)
+✔ moving dungeon device parts preserve static colliders and their shared collision owner (3.140966ms)
+✔ unbounded atlas streaming handles negative distant coordinates and mining revisions (6.659058ms)
+✔ 64 instance owners remain independent and retain articulated children in the integrated scene (70.126249ms)
+✔ a collision-limited articulated owner keeps sibling body offsets and its visible root (25.493684ms)
+✔ moving kinematic owners are blocked by a stationary external player capsule (9.661653ms)
+✔ phase growth walls use exact shared bounds, block players and disappear when broken; water stays nonsolid (62.57341ms)
+✔ attack rays exclude only source and target owners, preserving articulated gaps and external solid glass (1.118983ms)
+✔ actual fluid displacement floats a light wooden hull while paid cargo changes its draft and can sink it (734.520508ms)
+✔ real machine cuboids fall, collide with terrain, retain physical mass/inertia and skip duplicate model integration (124.397103ms)
+✔ dynamic assemblies exchange momentum with external owners and rotate on all three axes (56.834839ms)
+✔ rotated machine damage uses actual cuboids, finite distribution, persistent claims and fragment body rebuilding (59.500555ms)
+✔ machine OBB respects annular hole and tiny sphere outside a rotated cuboid AABB (26.71129ms)
+✔ placements become fixed collision before their async render model exists and prevent paid overlapping voxel placement (13.5468ms)
+✔ a real boss cast damages a rotating dynamic machine once, with actual collider cover blocking another cast (145.012485ms)
+✔ detached matter uses cell masses, falls through no false leaf solids and reports saved 6DOF pose (277.828266ms)
+✔ connected paid machine fuel drives actual Rapier forces once and recreated physics restores quaternion, momentum and ledger (28.887766ms)
+✔ fixture placement checks rotating cuboid occupancy without filling its empty AABB corners (35.650093ms)
+✔ real WorldObjects detachment feeds exact original mass into Rapier and saves the landed pose (119.572713ms)
+✔ grabbing applies bounded physical impulses and throwing adds at most the specified work to a moving object (3.649374ms)
+route: observation, 524082s, nodes=25736
+route: joinery, 524082s, nodes=25736
+route: mechanisms, 524082s, nodes=25736
+route: power, 524082s, nodes=25736
+route: fluids, 524082s, nodes=25736
+route: mana, 524082s, nodes=25736
+route: consecration, 524082s, nodes=25736
+route: inertia, 524082s, nodes=25736
+route: material:wood, 524082s, nodes=25736
+route: material:stone, 524082s, nodes=25736
+route: material:scrap_iron, 524082s, nodes=25736
+route: material:steel, 524082s, nodes=25736
+route: material:titanium, 524082s, nodes=25736
+route: material:nickel, 524082s, nodes=25736
+route: material:mana_steel, 524082s, nodes=25736
+route: material:mana_titanium, 524082s, nodes=25736
+route: material:mana_nickel, 524082s, nodes=25736
+route: material:mithril, 524082s, nodes=25736
+route: material:stainless_alloy, 524082s, nodes=25736
+route: material:mana_stainless_alloy, 524082s, nodes=25736
+route: material:consecrated_adamantium, 524082s, nodes=25736
+route: material:arcane_crystal_alloy, 524082s, nodes=25736
+route: material:composite_mana_superalloy, 524082s, nodes=25736
+route: material:meister_composite, 524082s, nodes=25736
+route: material:mana_wood, 524082s, nodes=25736
+route: material:consecrated_mana_wood, 524082s, nodes=25736
+route: material:world_tree_wood, 524082s, nodes=25736
+route: material:fulfilled_world_tree_wood, 524082s, nodes=25736
+route: material:world_heartwood, 524082s, nodes=25736
+route: material:raw_arcane_crystal, 524082s, nodes=25736
+route: material:refined_arcane_crystal, 524082s, nodes=25736
+route: material:holy_iron, 524082s, nodes=25736
+route: material:blessed_holy_iron, 524082s, nodes=25736
+route: material:saints_endurance, 524082s, nodes=25736
+route: material:inertial_alloy, 524082s, nodes=25736
+route: material:alpha_particle, 524082s, nodes=25736
+route: material:neutrino_condensate, 524082s, nodes=25736
+route: material:superstring_aggregate, 524082s, nodes=25736
+route: material:cosmic_megastructure, 624682s, nodes=29991
+Debugger listening on ws://127.0.0.1:9229/f893deca-2afc-4c90-96d8-c01eeeb8ce63
+For help, see: https://nodejs.org/learn/getting-started/debugging
+Debugger attached.
+Debugger ending on ws://127.0.0.1:9229/f893deca-2afc-4c90-96d8-c01eeeb8ce63
+For help, see: https://nodejs.org/learn/getting-started/debugging
+✖ tests/expedition-progression-path.test.js (928325.972711ms)
+✔ failed or corrupted next save retains the previous complete world (10.462923ms)
+✔ saved generations preserve non-expedition legacy data and reject invalid state (0.844015ms)
+✔ lossless compressed generations preserve large idempotency ledgers and remain backward compatible (830.666814ms)
+✔ far signed-coordinate roundtrip retains mining, damage, fixtures, deaths and object owners (6146.692915ms)
+✔ chunk caps, signed floor boundaries and headless model pruning stay bounded across travel (572.115982ms)
+✔ two-hour inactive ecology catches up once and preserves pending time and identities on reload (1253.213328ms)
+✔ frontier regions are seed-stable and structures retain player edits (244.185527ms)
+✔ trade and aid are atomic, finite, local, and lead to an alliance without a boss (1.580984ms)
+✔ distant settlements produce and consume, diplomacy conflicts drain stocks (2.362576ms)
+✔ raiding breaks alliances and triggers guards; peace restores trade (0.768749ms)
+✔ boss telegraphs can be dodged, damages the player on impact and rewards only once (1.697058ms)
+✔ dungeon requires three relay interactions, claims once, and cannot be claimed remotely (2.345012ms)
+✔ technology is obtainable without boss kills and prerequisite research survives save (1.199555ms)
+✔ machine editing uses shared resources, connected damaged components change output, no duplication (1.651412ms)
+✔ travel validates adjacency, location, food and returns to persistent region state (0.325812ms)
+✔ save roundtrip preserves social, boss, machine and health; rejects malformed states (3.29092ms)
+✔ starvation and defeat recover at camp without deleting inventory or blueprint (0.257621ms)
+✔ vehicle movement belongs to the assembly and dismount preserves its world position (404.237566ms)
+✔ new and legacy worlds use half cells; explicit newer choices survive reload (6.932025ms)
+✔ damaged HUD preferences cannot hide core controls or inject unknown elements (1.021465ms)
+✔ custom HUD positions fit resized screens and keep touch buttons usable (2.021415ms)
+✔ orientation and handedness select independent layouts (0.330664ms)
+✔ removing a whole foot exterior changes mass and appearance, reduces HP once while preserving support and identity (9.223599ms)
+✔ a front ray hits coat before bone, then exposed bone; only a full internal fracture disables support (7.527247ms)
+✔ all head coating can be removed without severing ears or destroying the vital skeleton (5.710482ms)
+✔ severing the shared rear spine disconnects both hind limbs while front support survives (3.137198ms)
+✔ surface-only injuries and partial bone damage persist independently through save/load (2.801105ms)
+✔ old missing feet remain disabled when migrating the legacy all-voxel support policy (1.678712ms)
+✔ all human roles share structural capabilities while detailed skin and bone damage remain independent (11.624752ms)
+✔ training body belongs to persistent region state and rejects malformed structural saves (4.319295ms)
+✔ legacy ordinary exterior hits alone kill by HP with preserved skeleton; HP saves between hits (13.287092ms)
+✔ legacy core and brain fractures change function without forced death or whole-body disappearance (2.537385ms)
+✔ legacy spear ray reaches covered bone in one attack and applies its HP budget only once (6.180267ms)
+✔ legacy impact weapon and physical collisions distribute one finite HP and structural budget (4.299346ms)
+✔ cutting the last support converts the whole island, retaining material and mining damage (8.418051ms)
+✔ a second support prevents detachment, and connectivity work resumes after a save (18.460393ms)
+✔ further cuts split bodies without creating resources or losing angular momentum (1.189188ms)
+✔ rotated bodies raycast in their own coordinates; nearest terrain can occlude them (2.094228ms)
+✔ compound collider merging preserves occupied volume and material mass (0.914874ms)
+✔ saved bodies preserve pose, pins and partial damage; malformed data is rejected (30.279826ms)
+✔ physical fall causes one resource-conserving impact, resting contact does not keep damaging (308.239933ms)
+✔ mass-limited grabbing lifts a light object while a heavy stone stays on the ground and can be pushed (182.929407ms)
+✔ momentum damages contacted actors once and is not triggered by support force (55.384281ms)
+✔ impact rules forgive small falls, scale with mass, and stronger grips retain weight differences (0.469157ms)
+✔ animal impact is absorbed by the outer layer before damaging the internal skeleton (10.972768ms)
+✔ same command produces different acceleration with different mass (16.94144ms)
+✔ motor damage reduces force, repair restores, blueprint remains unchanged (0.858373ms)
+✔ wheel damage degrades grip and steering and disconnected motor cannot drive (0.862487ms)
+✔ collision damages local voxel and remains in bounded world (23.004671ms)
+✔ resource checks are atomic, mining finite and repair cannot mint resources (0.544833ms)
+✔ machine save roundtrip and invalid data rejected (1.249942ms)
+✔ world slots preserve legacy save and isolate create rename delete (6.373748ms)
+✔ failed catalogue write retains previous world data (0.356906ms)
+✔ voxel damage survives different targets, time, tool and footprint changes, then clears only destroyed cells (2.215548ms)
+✔ damage reloads with terrain, rejects stale/corrupt records, and legacy saves have no damage (15.655871ms)
+✔ mixed-material mining and protected cells use their own hardness without duplicate drops (0.94163ms)
+✔ gathering has finite/re-growing sources, atomic full-bag failure and deterministic locations (3.517668ms)
+✔ ruin relays, bonus cache, observations and contracts are persistent one-time progression (1.792969ms)
+✔ legacy ruin progress migrates and malformed new content is rejected (0.830612ms)
+✔ new gathering materials close crafting loop and relic tool uses real durability (0.985909ms)
+✔ animal healing consumes once only when injured and never restores lost limbs (4.074603ms)
+✔ regression: old five-centimetre foot gap oscillates; swept support stays constant (52.866099ms)
+✔ stationary floor contact is stable under irregular rendered frame intervals (8.275136ms)
+✔ jump lands once on exact ground without subsequent floor bounce (4.778341ms)
+✔ jump clears a one-metre ledge with headroom and holding does not bounce (6.062297ms)
+✔ removing the support causes a real fall; half-metre platforms stop it exactly (17.299721ms)
+✔ half-metre stair climb fits the full 1.5 metre body (3.546144ms)
+✔ a solid one-metre wall blocks walking and a low ceiling blocks jumping (8.367479ms)
+✔ half-cell edits preserve the other seven children and collapse uniform cells (2.921362ms)
+✔ tools remove 0.125, 1 and 8 cubic metres on filled terrain (11.557463ms)
+✔ ray picking and visible half-cell mesh agree on the excavated boundary (29.139876ms)
+✔ save and load preserve fine terrain and half-height support (28.831187ms)
+✔ crafting is atomic: missing resources never disappear and outputs are exact (4.569869ms)
+✔ resource collection enables crafted tools and an unlock cannot be charged twice (2.667546ms)
+✔ mined drops remain until approached, then collect only once (18.102359ms)
+✔ voxel damage routes collectable fragments; death yields a separate reward once (9.885132ms)
+✔ inventory, crafted unlocks and uncollected drops survive serialization (0.853504ms)
+✔ release publication happens before stable advances and failed uploads do not advance it (116.485555ms)
+✔ native release guard compares app codes independently of game codes (101.08349ms)
+✔ browser catalog preserves all six canonical documents and freezes definitions (29.66149ms)
+✔ lazy browser assets preserve every canonical model and manifest metadata (598.207418ms)
+✔ instanced environment loads a complete reusable hierarchy with independent owner identities (5.991861ms)
+✔ packaged authoring SDK can safely edit a copy without mutating cached source assets (5.641486ms)
+✔ runtime package is deterministic and committed files equal canonical compilation (4278.548231ms)
+✔ read-only package check rejects a modified generated file without repairing it (4151.607352ms)
+✔ canonical source hash corruption aborts compilation before outputs are written (99.509394ms)
+✔ complete browser package stays within existing native update file and byte limits (563.862986ms)
+✔ seed gives identical terrain and one metre cells (53.494656ms)
+✔ both quarter and eighth metre creatures are defined (0.370364ms)
+✔ fluid movement conserves volume and acid mass in a sealed basin (16.495018ms)
+✔ mixing clean water dilutes acid without destroying solute (6.788066ms)
+✔ water and lava form basalt and account for steam (2.285296ms)
+✔ burning wood consumes fuel and completes (1.229639ms)
+✔ exposed internal joint damage severs a limb and changes locomotion capability (7.814381ms)
+✔ head detachment propagates to attached ears (1.51428ms)
+✔ grazing consumes vegetation and returns energy (1.921709ms)
+✔ predation transfers energy and death returns soil nutrients (11.258937ms)
+✔ well fed mature creatures reproduce within population budget (0.972205ms)
+✔ save roundtrip preserves terrain, fluid, population and severed parts (85.679205ms)
+✔ 3000 entities tick with finite positions and bounded population (394.05379ms)
+✔ water extinguishes a burning wooden cell (0.615382ms)
+✔ concentrated acid consumes reagent while corroding organic material (0.581431ms)
+✔ 36 real slots split at 64 and transfers conserve counts through merge and swap (3.341427ms)
+✔ full inventory does not discard pickups or charge failed crafting; costs can free output slots (1.572607ms)
+✔ hotbar selection, exact layout, gear wear and consumption persist without duplicating items (1.461857ms)
+✔ legacy large inventories migrate to recoverable overflow instead of losing items (0.881106ms)
+✔ earned rewards are recoverable and selected stacks are consumed first (0.529156ms)
+✔ feeding two nearby adults consumes two seeds, creates one offspring, then enforces cooldown (8.117527ms)
+✔ passive animals follow held seeds, flee hits, and predators attack only at night or in retaliation (3.837034ms)
+✔ hunting materials can be cooked into food in the same inventory (0.533973ms)
+✔ a missing foot disables support before the whole leg detaches, changing speed and posture (12.063288ms)
+✔ severing a joint drops the disconnected foot and all missing supports stop pursuit immediately (4.934393ms)
+✔ support arrangement changes crawl capability; save/load retains wounds and recomputes anatomy (3.159828ms)
+✔ lowered and tilted body coordinates round-trip for ray hits on animated limbs (1.806334ms)
+✔ an entity killed by its decision step cannot take one last movement step (1.828067ms)
+✔ a released assembly falls and lands without being attached to a player (364.785808ms)
+✔ motor damage prevents powered motion while an intact assembly drives and steers (284.152396ms)
+✔ a broken bridge splits a rigid body; mass, fragments and six-axis transforms survive reload (19.86621ms)
+✔ terrain removal updates real colliders and an anchored structure stays still until released (76.328435ms)
+✔ lost left/front support lowers that side rather than the healthy side (0.983571ms)
+✔ walking collides with the actual assembly and can stand on top (19.637948ms)
+✔ balanced rotors lift the body and losing one changes its angular motion (111.892489ms)
+✔ a fragment can break again and no disconnected part retains powered function (10.177168ms)
+✔ invalid rigid transforms are rejected before entering the physics engine (1.269003ms)
+✔ old saves with destroyed body attachment points cannot retain functional floating legs (1.275308ms)
+✔ actual release bundle matches the pinned Android verification key and payload (3603.165129ms)
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+✔ native package verification, activation, interrupted startup and save rollback (2037.299243ms)
+✔ version files agree with authoritative version.json (52.070517ms)
+✔ public update transport works without credentials and enforces download boundaries (1175.127764ms)
+✔ visual catalog covers every content ID and enforces coordinates/materials/hierarchy (951.334843ms)
+✔ creature and boss silhouettes fit design dimensions and stand on ground (5.474792ms)
+✔ environment references canonical entrance after translation and remains deterministic (29404.303323ms)
+✔ invalid references and cyclic hierarchy fail before export (16.07694ms)
+✔ GLB preserves part and attachment names without invalid empty child arrays (10.967686ms)
+✔ emission above one survives GLB export as standard strength extension (8.113737ms)
+✔ GLB material colors use canonical decimal precision across JavaScript engines (6.320347ms)
+✔ equipment catalog covers authored tools, stations, components, kits and weapon patterns (0.857146ms)
+ℹ tests 488
+ℹ suites 0
+ℹ pass 479
+ℹ fail 9
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 940342.561705
+
+✖ failing tests:
+
+test at tests/content-dungeon-devices.test.js:65:1
+✖ fixture supply checks a real local output store and drains finite EU into device reserve (4.304995ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  false !== true
+
+      at TestContext.<anonymous> (file:///workspace/feral-voxel-sandbox/tests/content-dungeon-devices.test.js:73:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/content-dungeon-devices.test.js:106:1
+✖ 60 Hz flood pumping reaches the exact 0.05 m safe-depth threshold (32.720411ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + 'opening'
+  - 'locked'
+
+      at TestContext.<anonymous> (file:///workspace/feral-voxel-sandbox/tests/content-dungeon-devices.test.js:112:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'opening',
+    expected: 'locked',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/content-dungeon-devices.test.js:152:1
+✖ damage hides persistent vane, altar and platform parts without completing or respawning them (1.601874ms)
+  TypeError: builder.fillBox is not a function
+      at rotatingSegmentAsset (file:///workspace/feral-voxel-sandbox/app/src/main/assets/content-runtime/dungeon-devices.js:48:13)
+      at DungeonDeviceSystem.geometry (file:///workspace/feral-voxel-sandbox/app/src/main/assets/content-runtime/dungeon-devices.js:573:21)
+      at TestContext.<anonymous> (file:///workspace/feral-voxel-sandbox/tests/content-dungeon-devices.test.js:160:22)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests/content-dungeons.test.js:15:1
+✖ all 12 structures expose all 84 rooms, translated entrances, spawn and boss anchors (54.674956ms)
+  TypeError: builder.fillBox is not a function
+      at rotatingSegmentAsset (file:///workspace/feral-voxel-sandbox/app/src/main/assets/content-runtime/dungeon-devices.js:48:13)
+      at DungeonDeviceSystem.geometry (file:///workspace/feral-voxel-sandbox/app/src/main/assets/content-runtime/dungeon-devices.js:573:21)
+      at DungeonSystem.renderBoxes (file:///workspace/feral-voxel-sandbox/app/src/main/assets/content-runtime/dungeons.js:321:35)
+      at TestContext.<anonymous> (file:///workspace/feral-voxel-sandbox/tests/content-dungeons.test.js:25:14)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.start (node:internal/test_runner/test:1242:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+
+test at tests/content-dungeons.test.js:160:1
+✖ cached broad phase retains every authored solid center and invalidates after new structures and asset replacement (43.860743ms)
+  TypeError: builder.fillBox is not a function
+      at rotatingSegmentAsset (file:///workspace/feral-voxel-sandbox/app/src/main/assets/content-runtime/dungeon-devices.js:48:13)
+      at DungeonDeviceSystem.geometry (file:///workspace/feral-voxel-sandbox/app/src/main/assets/content-runtime/dungeon-devices.js:573:21)
+      at DungeonSystem.renderBoxes (file:///workspace/feral-voxel-sandbox/app/src/main/assets/content-runtime/dungeons.js:321:35)
+      at TestContext.<anonymous> (file:///workspace/feral-voxel-sandbox/tests/content-dungeons.test.js:164:24)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7)
+
+test at tests/content-placements.test.js:16:1
+✖ all 40 installable models consume real items and preserve distinct machine owners (279.495711ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  41 !== 40
+
+      at TestContext.<anonymous> (file:///workspace/feral-voxel-sandbox/tests/content-placements.test.js:19:10)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 41,
+    expected: 40,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/equipment.test.js:47:1
+✖ limb loss impairs movement; vital loss kills once; health is independent of food (8.789135ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  false !== true
+
+      at TestContext.<anonymous> (file:///workspace/feral-voxel-sandbox/tests/equipment.test.js:61:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/equipment.test.js:85:1
+✖ legacy headless creatures and zero-health creatures cannot remain alive (1.755284ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  false !== true
+
+      at TestContext.<anonymous> (file:///workspace/feral-voxel-sandbox/tests/equipment.test.js:91:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/expedition-progression-path.test.js:1:1
+✖ tests/expedition-progression-path.test.js (928325.972711ms)
+  'test failed'

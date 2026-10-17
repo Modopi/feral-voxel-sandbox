@@ -26,6 +26,9 @@ try{
   const list=await page.locator('#panelList').boundingBox();assert(list.height>=100,'craft list too short');
   await swipe(list.x+list.width*.45,list.y+list.height*.8,0,-list.height*.6);
   assert((await page.locator('#panelList').evaluate(e=>e.scrollTop))>10,'touch list scroll');
+  const scrollTime=await page.evaluate(()=>FERAL.runtime.time);
+  await page.waitForFunction(t=>FERAL.runtime.time>t+1.2,scrollTime,{timeout:20000});
+  assert((await page.locator('#panelList').evaluate(e=>e.scrollTop))>10,'periodic panel refresh preserves touch scroll');
   await tap('#closePanel');await page.screenshot({path:new URL(`${width}x${height}.png`,out).pathname});
   report.checks.push({width,height,controlsInside:true,touchModeCycle:true,touchCraftScroll:true,boxes});
  }

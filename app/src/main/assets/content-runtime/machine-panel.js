@@ -16,7 +16,7 @@ export class MachinePanel {
   if(options){for(const [value,text]of options){const option=el('option',text);option.value=value;input.append(option);}if(!options.some(([v])=>String(v)===String(this.draft[key])))this.draft[key]=options[0]?.[0]??'';}
   else{input.type=type;if(type==='number'){input.step='1';input.min=key==='amount'?'1':'-128';input.max=key==='amount'?'64':'128';}}
   input.value=this.draft[key]??'';input.oninput=()=>{this.draft[key]=type==='number'?Number(input.value):input.value;};
-  if(options)input.onchange=()=>{this.draft[key]=input.value;if(key==='component')this.report({ok:true},'컴포넌트를 선택했습니다.');};
+  if(options)input.onchange=()=>{this.draft[key]=input.value;if(key==='component')this.report({ok:true},'컴포넌트를 선택했습니다.');else if(key.startsWith('fixtureSource_')||key.startsWith('fixtureDestination_'))this.report?.({ok:true},'저장 설비를 선택했습니다.');};
   wrapper.append(input);parent.append(wrapper);return input;
  }
  action(parent,label,callback,disabled=false){const b=el('button',label);b.disabled=disabled;b.onclick=()=>{try{const result=callback();if(result&&typeof result.then==='function')result.then(r=>this.report(r)).catch(e=>this.report({ok:false,reason:e.message}));else if(result)this.report(result);}catch(e){this.report({ok:false,reason:e.message});}};parent.append(b);return b;}
@@ -64,7 +64,23 @@ export class MachinePanel {
    if(c.componentId==='heat_engine')this.action(card,'나무 연료 1개 넣기',()=>s.refuel(m.id,c.id,1),p.count('raw_timber')<1);
    if(c.componentId==='arc_thrower')this.action(card,rt.machineWeaponId===c.id?'선택한 무장':'조종 중 사용할 무장으로 선택',()=>{rt.machineWeaponId=c.id;return {ok:true};});
    const def=p.catalog.get(c.componentId);
-   for(const type of def.stores){card.append(el('p',`${ENERGY_NAMES[type]} ${c.energy[type].toFixed(1)}/${def.capacity} EU`));this.action(card,'10 EU 충전',()=>s.charge(m.id,c.id,type,10),p.energyAvailable(type)<10||c.energy[type]+10>def.capacity);this.action(card,'10 EU 꺼내기',()=>s.drainEnergy(m.id,c.id,type,10),c.energy[type]<10);}
+   for(const type of def.stores){
+    card.append(el('p',`${ENERGY_NAMES[type]} ${c.energy[type].toFixed(1)}/${def.capacity} EU`));
+    if(p.fixtureEnergy?.enabled){
+     const keySuffix=`${c.id.replace(/[^a-zA-Z0-9_-]/g,'_')}_${type}`;
+     const sources=s.fixtureTransferCandidates(m.id,c.id,type,'from_fixture'),sourceKey=`fixtureSource_${keySuffix}`;
+     this.field(card,sourceKey,'가까운 출력 저장 설비',sources.map(n=>[n.ownerId,`${this.name(n.assetId)} · ${n.ownerId} · ${n.storedEU.toFixed(1)} EU · ${n.distanceM.toFixed(1)}m`]));
+     const source=sources.find(n=>n.ownerId===d[sourceKey]);
+     this.action(card,'선택 설비에서 10 EU 받기',()=>d[sourceKey]?s.charge(m.id,c.id,type,10,{sourceOwnerId:d[sourceKey]}):{ok:false,reason:'fixture_source_required'},!source||source.availableEU<10);
+     const destinations=s.fixtureTransferCandidates(m.id,c.id,type,'to_fixture'),destinationKey=`fixtureDestination_${keySuffix}`;
+     this.field(card,destinationKey,'가까운 입력 저장 설비',destinations.map(n=>[n.ownerId,`${this.name(n.assetId)} · ${n.ownerId} · 여유 ${n.roomEU.toFixed(1)} EU · ${n.distanceM.toFixed(1)}m`]));
+     const destination=destinations.find(n=>n.ownerId===d[destinationKey]);
+     this.action(card,'선택 설비로 10 EU 보내기',()=>d[destinationKey]?s.drainEnergy(m.id,c.id,type,10,{destinationOwnerId:d[destinationKey]}):{ok:false,reason:'fixture_destination_required'},!destination||destination.availableEU<10);
+    }else{
+     this.action(card,'10 EU 충전',()=>s.charge(m.id,c.id,type,10),p.energyAvailable(type)<10||c.energy[type]+10>def.capacity);
+     this.action(card,'10 EU 꺼내기',()=>s.drainEnergy(m.id,c.id,type,10),c.energy[type]<10);
+    }
+   }
    if(c.componentId==='fluid_container'){
     for(const fluid of def.fluidContents){this.action(card,`${this.name(fluid)} 1L 넣기`,()=>s.fillFluid(m.id,c.id,fluid,1),p.count(fluid)<1);if(c.fluids[fluid]>0)this.action(card,`${this.name(fluid)} 1L 꺼내기`,()=>s.drainFluid(m.id,c.id,fluid,Math.min(1,c.fluids[fluid])));}
    }

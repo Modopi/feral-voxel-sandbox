@@ -12,6 +12,45 @@ const definitions = new Map(CONTENT.progression.entries.map(e => [e.id, e]));
 const entries = kind => [...definitions.values()].filter(e => e.kind === kind);
 const near = (a, b, message) => assert(Math.abs(a - b) < 1e-4, `${message}: ${a} != ${b}`);
 const preservedCheckpointSha256 = '994fd5d257ffe02f32ac349ba08a87fd27d157c4c0dfcb87a6467163845a9002';
+// The long route accumulates separate ledgers through millions of 0.1 s steps.
+// Observed Node 22/24 drift is ~2.1e-11 relative; keep this bound local to the
+// final aggregate, preserving strict per-recipe costs and rejecting 0.01 EU loss.
+const ENERGY_BALANCE_RELATIVE_TOLERANCE = 5e-11;
+
+function energyBalance({ generated, earned = 0, consumed, dissipated, conversionLoss, energy, overflow }) {
+  const total = map => Object.values(map).reduce((sum, value) => sum + value, 0);
+  const channelDeltas = Object.fromEntries(ENERGY_TYPES.map(type => [type,
+    generated[type] + (type === 'divine' ? earned : 0) - consumed[type] - dissipated[type] - energy[type] - overflow[type],
+  ]));
+  const inflow = total(generated) + earned;
+  const outflow = total(consumed) + total(dissipated) + conversionLoss + total(energy) + total(overflow);
+  const scale = Math.max(1, Math.abs(inflow), Math.abs(outflow));
+  return {
+    channelDeltas,
+    inflow,
+    outflow,
+    delta: inflow - outflow,
+    tolerance: Math.max(1e-4, scale * ENERGY_BALANCE_RELATIVE_TOLERANCE),
+    metricEntryCounts: { generated: Object.keys(generated).length, consumed: Object.keys(consumed).length, dissipated: Object.keys(dissipated).length },
+  };
+}
+
+test('whole-route energy balance allows only scale-sized floating point residue', () => {
+  const zeros = () => Object.fromEntries(ENERGY_TYPES.map(type => [type, 0]));
+  const observations = [
+    [35764026.495216995, 35764026.49446569],
+    [35739194.49519844, 35739194.494448386],
+  ];
+  for (const [input, output] of observations) {
+    const measured = energyBalance({ generated: { ...zeros(), mechanical: input }, consumed: { ...zeros(), mechanical: output }, dissipated: zeros(), conversionLoss: 0, energy: zeros(), overflow: zeros() });
+    assert(Math.abs(measured.delta) <= measured.tolerance, 'observed large-total residue is within the scale-aware bound');
+    assert.equal(measured.metricEntryCounts.generated, ENERGY_TYPES.length);
+    assert.equal(measured.metricEntryCounts.consumed, ENERGY_TYPES.length);
+  }
+  const [input, output] = observations[0];
+  const leaked = energyBalance({ generated: { ...zeros(), mechanical: input + 0.01 }, consumed: { ...zeros(), mechanical: output }, dissipated: zeros(), conversionLoss: 0, energy: zeros(), overflow: zeros() });
+  assert(Math.abs(leaked.delta) > leaked.tolerance, 'a 0.01 EU imbalance remains a failure at this route scale');
+});
 
 // Keep candidates in their original discovery order while retaining only nodes that may
 // become eligible again. Permanently exhausted nodes are the only entries discarded.
@@ -295,17 +334,32 @@ test('all ten tiers and four research fields are reached from actual terrain wit
     if (reportPath) fs.writeFileSync(reportPath, JSON.stringify({ complete: false, reached: r.id, resumedFrom: checkpointProof, progression: route.p.serialize(), atlas: route.atlas.serialize() }));
     if (r.field) t.diagnostic(`researched ${r.id} at ${Math.round(route.p.clock)} simulated seconds`);
   }
-  for (const material of entries('material')) if (!route.made.has(material.id)) route.item(material.id);
-  for (let tier = 1; tier <= 10; tier++) { route.item(`gear_baseline_t${tier}`); assert(route.p.equip(`gear_baseline_t${tier}`).ok); assert.equal(route.p.evaluateLoadout().tier, tier); }
+  for (const material of entries('material')) {
+    if (!route.made.has(material.id)) route.item(material.id);
+    if (process.env.FERAL_ROUTE_TRACE) console.error(`route: produced ${material.id}, ${Math.round(route.p.clock)}s, nodes=${route.used.size}`);
+  }
+  for (let tier = 1; tier <= 10; tier++) {
+    route.item(`gear_baseline_t${tier}`);
+    assert(route.p.equip(`gear_baseline_t${tier}`).ok);
+    assert.equal(route.p.evaluateLoadout().tier, tier);
+    if (process.env.FERAL_ROUTE_TRACE) console.error(`route: equipped tier ${tier}, ${Math.round(route.p.clock)}s, nodes=${route.used.size}`);
+  }
   assert.equal(route.p.research.size, 39);
   for (const field of ['arcane_engineering', 'arcane_studies', 'sanctity', 'physics']) assert.equal(entries('research').filter(r => r.field === field && route.p.research.has(r.id)).length, 5);
   for (const m of entries('material')) assert(route.made.has(m.id), `material ${m.id} was really produced`);
   for (const s of entries('station')) assert(route.p.stations[s.id], `station ${s.id} was crafted and installed`);
   assert(route.activityCount >= 3); assert(route.replacements > 0, 'route must debit replacement mining tools');
-  const total = map => Object.values(map).reduce((a, b) => a + b, 0);
-  near(total(route.p.metrics.generated) + Math.floor(route.activityCount / 3) * 20,
-    total(route.p.metrics.consumed) + total(route.p.metrics.dissipated) + route.p.metrics.conversionLoss + total(route.p.energy) + total(route.p.energyOverflow),
-    'whole-route generated + earned energy = consumption + losses + remaining');
+  const balance = energyBalance({
+    generated: route.p.metrics.generated,
+    earned: Math.floor(route.activityCount / 3) * 20,
+    consumed: route.p.metrics.consumed,
+    dissipated: route.p.metrics.dissipated,
+    conversionLoss: route.p.metrics.conversionLoss,
+    energy: route.p.energy,
+    overflow: route.p.energyOverflow,
+  });
+  assert(Math.abs(balance.delta) <= balance.tolerance,
+    `whole-route generated + earned energy = consumption + losses + remaining; delta=${balance.delta}, tolerance=${balance.tolerance}, channelDeltas=${JSON.stringify(balance.channelDeltas)}, metricEntryCounts=${JSON.stringify(balance.metricEntryCounts)}, metrics=${JSON.stringify(route.p.metrics)}`);
   const saved = route.p.serialize(), restored = new Progression(CONTENT, saved);
   assert.deepEqual(restored.serialize(), saved);
   assert.equal(restored.evaluateLoadout().tier, 10);

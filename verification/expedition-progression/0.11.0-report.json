@@ -1,0 +1,52 @@
+{
+  "simulatedSeconds": 1192812.044961995,
+  "researched": 39,
+  "stations": 27,
+  "materials": 31,
+  "activities": 6,
+  "toolReplacements": 83,
+  "harvestActions": {
+    "source_raw_timber": 49430,
+    "source_loose_stone": 322,
+    "source_plant_fiber": 68,
+    "source_clay": 13,
+    "source_iron_ore": 6619,
+    "source_water": 1885,
+    "source_sand": 572,
+    "source_herb": 1,
+    "source_nickel_ore": 2707,
+    "source_titanium_ore": 745,
+    "source_acid_sap": 746,
+    "source_berry": 24,
+    "source_sap": 259,
+    "source_seed": 56
+  },
+  "recipes": 78,
+  "energyConsumed": {
+    "mechanical": 239469.99999482435,
+    "electrical": 363200.00000063435,
+    "thermal": 1469760.0001128388,
+    "chemical": 4959.999999991983,
+    "magic": 443000.00000371755,
+    "divine": 63069.99999990864
+  },
+  "progressionSaveBytes": 7178082,
+  "atlasSaveBytes": 213318,
+  "resumedFrom": null,
+  "complete": true,
+  "freshStart": true,
+  "normalWalkingOrWiringEvidence": false,
+  "energyBalance": {
+    "inflowEU": 35764026.49521699,
+    "outflowEU": 35764026.494465694,
+    "residueEU": 0.0007512941956520081,
+    "toleranceEU": 0.0017882013247608494
+  },
+  "snapshot": {
+    "path": "0.11.0-paid-route.json.gz",
+    "sha256": "de2c048caac3c6ce03f6f3a7385d46f9548264a13caaf76bf122fe55a7130a72",
+    "uncompressedSha256": "61e7082812603e695523b80e73f6d2f435bc758fc2497877721af3caea19c5a8",
+    "compressedBytes": 794841,
+    "uncompressedBytes": 7392166
+  }
+}

@@ -3,6 +3,7 @@ import { components as connectedGroups, massProperties } from '../structure.js';
 import { TYPES as LEGACY_PARTS } from '../machine/model.js';
 import { MATERIAL_EFFECT_RULES } from './material-effects.js';
 import { panelForce, AIR_DENSITY } from '../machine/aerodynamics.js';
+import { FIXTURE_LINK_RULES } from './fixture-energy.js';
 
 const ENERGY = ['mechanical', 'electrical', 'thermal', 'chemical', 'magic', 'divine'];
 const zero = () => Object.fromEntries(ENERGY.map(k => [k, 0]));
@@ -93,7 +94,68 @@ export class MachineSystem {
   const m=this.machines.get(id),c=m?.components.find(c=>c.id===componentId);if(c?.componentId!=='heat_engine'||!Number.isInteger(count)||count<1||count>64)return no('invalid_fuel');
   const paid=this.progression.spend({raw_timber:count},{claimId:this._id('fuel')});if(!paid.ok)return paid;c.fuelItems+=count;return ok();
  }
- charge(id,componentId,type,amount){
+ _fixtureTransferContext(id,componentId,type,direction){
+  const m=this.machines.get(id),c=m?.components.find(c=>c.id===componentId),d=c&&this._entry(c.componentId),v=c&&m.voxels.find(v=>v.id===c.voxelId),g=this.progression.fixtureEnergy;
+  if(!g?.enabled)return {error:'fixture_network_unavailable'};
+  if(!m||!c||!d||!v||this._condition(m,c)<=0)return {error:'component_inactive'};
+  if(!ENERGY.includes(type)||!d.stores.includes(type))return {error:'incompatible_ports'};
+  const machinePorts={inputs:d.inputEnergies,outputs:d.outputEnergies,stores:d.stores};
+  const compatible=direction==='from_fixture'
+   ? machinePorts.inputs.includes(type)&&machinePorts.stores.includes(type)
+   : direction==='to_fixture'&&machinePorts.outputs.includes(type)&&machinePorts.stores.includes(type);
+  if(!compatible)return {error:'incompatible_ports'};
+  const local={x:(v.cell[0]+.5)*m.gridM,y:(v.cell[1]+.5)*m.gridM,z:(v.cell[2]+.5)*m.gridM},rotated=rotate(local,m.rotation);
+  return {m,c,d,v,g,hostPosition:{x:m.position.x+rotated.x,y:m.position.y+rotated.y,z:m.position.z+rotated.z}};
+ }
+ _fixtureNode(ownerId,type,direction,ctx){
+  const g=ctx.g,n=g.nodes.get(ownerId),record=this.progression.worldFixtures?.find(row=>row.ownerId===ownerId);
+  if(!n||!record||record.kind!=='component'||record.active!==true||record.health<=0||n.active!==true||n.health<=0||!this.progression.fixtureAccess?.includes(ownerId)||!g._access(n))return {error:'fixture_unavailable'};
+  const ports=g.ports(ownerId),compatible=direction==='from_fixture'
+   ? ports?.outputs.includes(type)&&ports?.stores.includes(type)
+   : ports?.inputs.includes(type)&&ports?.stores.includes(type);
+  if(!compatible)return {error:'incompatible_ports'};
+  const distanceM=Math.hypot(n.position.x-ctx.hostPosition.x,n.position.y-ctx.hostPosition.y,n.position.z-ctx.hostPosition.z);
+  if(!Number.isFinite(distanceM)||distanceM>FIXTURE_LINK_RULES.maxDistanceM+1e-8)return {error:'out_of_range'};
+  const storedEU=n.energy?.[type],capacityEU=g.capacity(n,type);
+  if(!finite(storedEU)||storedEU<0||!finite(capacityEU)||capacityEU<0||storedEU>capacityEU+1e-8)return {error:'invalid_fixture_storage'};
+  return {node:n,distanceM,storedEU,capacityEU,ports};
+ }
+ fixtureTransferCandidates(id,componentId,type,direction='from_fixture'){
+  const ctx=this._fixtureTransferContext(id,componentId,type,direction);if(ctx.error)return [];
+  const c=ctx.c,d=ctx.d,g=ctx.g;
+  return [...g.nodes.keys()].map(ownerId=>{
+   const fixed=this._fixtureNode(ownerId,type,direction,ctx);if(fixed.error)return null;
+   const machineStored=c.energy[type],machineRoom=Math.max(0,d.capacity-machineStored),fixtureRoom=Math.max(0,fixed.capacityEU-fixed.storedEU);
+   const availableEU=direction==='from_fixture'?Math.min(fixed.storedEU,machineRoom):Math.min(machineStored,fixtureRoom);
+   return {ownerId,assetId:fixed.node.assetId,distanceM:fixed.distanceM,storedEU:fixed.storedEU,roomEU:fixtureRoom,availableEU};
+  }).filter(Boolean).sort((a,b)=>a.distanceM-b.distanceM||a.ownerId.localeCompare(b.ownerId));
+ }
+ _transferFixtureEnergy(id,componentId,type,amount,ownerId,direction){
+  if(!finite(amount)||amount<=0)return no('invalid_amount');
+  const ctx=this._fixtureTransferContext(id,componentId,type,direction);if(ctx.error)return no(ctx.error);
+  const fixed=this._fixtureNode(ownerId,type,direction,ctx);if(fixed.error)return no(fixed.error);
+  const {m,c,d,g}=ctx,{node,storedEU,capacityEU}=fixed;
+  const machineEnergy=c.energy[type],machineCapacity=d.capacity;
+  if(!finite(machineEnergy)||machineEnergy<0||machineEnergy>machineCapacity+1e-8)return no('invalid_machine_storage');
+  const sourceEU=direction==='from_fixture'?storedEU:machineEnergy;
+  const targetRoomEU=direction==='from_fixture'?Math.max(0,machineCapacity-machineEnergy):Math.max(0,capacityEU-storedEU);
+  if(sourceEU+1e-8<amount)return no('insufficient_stored_energy');
+  if(targetRoomEU+1e-8<amount)return no('target_capacity');
+  if(!g.metrics?.exported||!g.metrics?.imported||!finite(g.metrics.exported[type])||!finite(g.metrics.imported[type])||!finite(m.metrics.generated)||!finite(m.metrics.consumed))return no('energy_ledger_unavailable');
+  // All checks finish before this synchronous debit/credit and its paired receipts.
+  if(direction==='from_fixture'){
+   node.energy[type]=Math.max(0,storedEU-amount);c.energy[type]+=amount;g.metrics.exported[type]+=amount;m.metrics.generated+=amount;
+  }else{
+   c.energy[type]=Math.max(0,machineEnergy-amount);node.energy[type]+=amount;g.metrics.imported[type]+=amount;m.metrics.consumed+=amount;
+  }
+  m.revision++;
+  return ok({transferredEU:amount,ownerId,direction,distanceM:fixed.distanceM});
+ }
+ /** With sourceOwnerId, atomically move stored EU from an accessible fixed
+  * fixture into this mounted store. Omitting options preserves legacy pooling. */
+ charge(id,componentId,type,amount,options={}){
+  options??={};
+  if(Object.prototype.hasOwnProperty.call(options,'sourceOwnerId'))return this._transferFixtureEnergy(id,componentId,type,amount,options.sourceOwnerId,'from_fixture');
   const m=this.machines.get(id),c=m?.components.find(c=>c.id===componentId),d=c&&this._entry(c.componentId);
   if(!d?.stores.includes(type)||!finite(amount)||amount<=0||c.energy[type]+amount>d.capacity+1e-8)return no('invalid_charge');
   const paid=this.progression.consumeEnergy(type,amount,{claimId:this._id('charge')});if(!paid.ok)return paid;
@@ -270,7 +332,11 @@ export class MachineSystem {
   }
  }
  tick(dt){if(!finite(dt)||dt<0||dt>60)return no('invalid_dt');if(this.physicsDriver)return ok({physicsDriven:true});let remaining=dt;while(remaining>1e-9){const step=Math.min(MACHINE_MOTION.physicsStep,remaining);for(const m of this.machines.values())this._step(m,step);this.clock+=step;remaining-=step;}return ok();}
- drainEnergy(id,componentId,type,amount){
+ /** With destinationOwnerId, atomically move stored EU into an accessible fixed
+  * fixture. Omitting options preserves the legacy personal-energy route. */
+ drainEnergy(id,componentId,type,amount,options={}){
+  options??={};
+  if(Object.prototype.hasOwnProperty.call(options,'destinationOwnerId'))return this._transferFixtureEnergy(id,componentId,type,amount,options.destinationOwnerId,'to_fixture');
   const m=this.machines.get(id),c=m?.components.find(c=>c.id===componentId),d=c&&this._entry(c.componentId);
   if(!d?.stores.includes(type)||!finite(amount)||amount<=0||c.energy[type]+1e-8<amount)return no('invalid_energy_drain');
   const received=this.progression.supplyEnergy(type,amount,{claimId:this._id('machine-discharge')});if(!received.ok)return received;c.energy[type]=Math.max(0,c.energy[type]-amount);m.metrics.consumed+=amount;return ok({transferred:amount});

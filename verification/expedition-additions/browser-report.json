@@ -1,0 +1,314 @@
+{
+  "schemaVersion": 1,
+  "composedFromRuns": true,
+  "evidenceBasis": "Independent completed browser scenarios; no single combined run.",
+  "seed": 63026,
+  "normalProgressionEvidence": false,
+  "mobilePerformanceEvidence": false,
+  "scenarios": {
+    "additions-faith": {
+      "sourceReport": "attempt-2/browser-report.json",
+      "scenario": {
+        "preparation": {
+          "allowedFixture": {
+            "items": {
+              "food": 12,
+              "wood": 16
+            },
+            "research": []
+          },
+          "naturalSite": {
+            "id": "site:-4,1:small_ruin:1",
+            "templateId": "communal_archive"
+          },
+          "target": {
+            "x": -1857,
+            "y": 17,
+            "z": 656.5
+          }
+        },
+        "fixturePlayer": {
+          "x": -1857,
+          "y": 17.05,
+          "z": 656.5,
+          "yaw": 3.141592653589793,
+          "pitch": 0,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2400,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": false,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false
+        },
+        "actions": [
+          {
+            "input": "faith join button"
+          },
+          {
+            "input": "accept/deliver/claim buttons",
+            "consumed": {
+              "food": 4,
+              "wood": 2
+            },
+            "divineEU": 10
+          }
+        ],
+        "checks": {
+          "deliveryCostsPaidThroughUI": true,
+          "questRewardDivineEU": 10,
+          "membershipJoinedThroughUI": true,
+          "timedAttunements": [
+            {
+              "elapsed": 2.9999999999999942,
+              "count": 1
+            },
+            {
+              "elapsed": 6.683333333333315,
+              "count": 2
+            },
+            {
+              "elapsed": 10.833333333333451,
+              "count": 3
+            }
+          ],
+          "trialCompletedAt": 12,
+          "trialRewardDivineEU": 15,
+          "noDuplicateRewardAfterReconnect": true
+        },
+        "status": "complete"
+      }
+    },
+    "additions-root-manor-device": {
+      "sourceReport": "attempt-2/browser-report.json",
+      "scenario": {
+        "preparation": {
+          "allowedFixture": {
+            "items": {
+              "joint": 1,
+              "gear_baseline_t8": 1
+            },
+            "research": []
+          },
+          "target": [
+            181,
+            4.5,
+            -4
+          ]
+        },
+        "fixturePlayer": {
+          "x": 181,
+          "y": 4.55,
+          "z": -4,
+          "yaw": 3.141592653589793,
+          "pitch": 0,
+          "hp": 275,
+          "maxHp": 275,
+          "calories": 2400,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": false,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false
+        },
+        "actions": [
+          {
+            "input": "pointer hold on 누르고 조작",
+            "simulatedSeconds": 4.5,
+            "progressM": 4.5
+          }
+        ],
+        "checks": {
+          "jointInstalledThroughUI": true,
+          "holdInputMovedGateGeometry": true,
+          "gateClearanceM": 4.5,
+          "gateGeometryLiftM": 4.5,
+          "raisedGatePersistsAsGeometry": true
+        },
+        "status": "complete"
+      }
+    },
+    "additions-weapon": {
+      "sourceReport": "attempt-6/browser-report.json",
+      "scenario": {
+        "preparation": {
+          "allowedFixture": {
+            "items": {
+              "gear_baseline_t8": 1,
+              "field_bench": 1,
+              "wood": 20,
+              "plant_fiber": 10
+            },
+            "research": [
+              "material:wood"
+            ]
+          },
+          "target": "structure:63026:starter-manor:root_manor:boss"
+        },
+        "fixturePlayer": {
+          "x": 242,
+          "y": 4.55,
+          "z": -10,
+          "yaw": -1.5707963267948966,
+          "pitch": 0,
+          "hp": 275,
+          "maxHp": 275,
+          "calories": 2400,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": false,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false
+        },
+        "actions": [
+          {
+            "input": "weapon shape/material selects and craft/equip buttons",
+            "quote": {
+              "patternId": "weapon_pierce",
+              "materialId": "wood",
+              "inputs": {
+                "wood": 0.8999999999999999,
+                "plant_fiber": 0.2
+              },
+              "seconds": 25
+            }
+          },
+          {
+            "input": "pointer hold on #attack",
+            "at": "2026-10-17T16:43:04.211Z"
+          }
+        ],
+        "checks": {
+          "stationInstalledThroughUI": true,
+          "actualCraftCostPaid": true,
+          "materialSelectedThroughUI": true,
+          "shapeSelectedThroughUI": true,
+          "equippedThroughUI": true,
+          "craftSeconds": 25,
+          "craftInputs": {
+            "wood": 0.8999999999999999,
+            "plant_fiber": 0.2
+          },
+          "runtimeWeaponName": "목재 관통 무기",
+          "matchingUiRows": [
+            {
+              "title": "목재 관통 무기",
+              "buttons": [
+                {
+                  "text": "제작",
+                  "disabled": false
+                }
+              ]
+            },
+            {
+              "title": "목재 관통 무기",
+              "buttons": [
+                {
+                  "text": "장착",
+                  "disabled": false
+                }
+              ]
+            }
+          ],
+          "actualAttackWoreDurability": true,
+          "attackTarget": {
+            "kind": "boss",
+            "id": "structure:63026:starter-manor:root_manor:boss",
+            "distance": 1.571040782746736
+          },
+          "bossHpBefore": 1440,
+          "bossHpAfter": 1430.03052
+        },
+        "status": "complete"
+      }
+    },
+    "additions-machine-fire": {
+      "sourceReport": "attempt-12/browser-report.json",
+      "scenario": {
+        "preparation": {
+          "allowedFixture": {
+            "items": {
+              "gear_baseline_t8": 1,
+              "wood": 2000,
+              "battery": 1,
+              "controller": 1,
+              "arc_thrower": 1
+            },
+            "research": [
+              "power",
+              "mechanisms"
+            ],
+            "initialTestEnergyEscrowEU": {
+              "electrical": 60
+            },
+            "targetSavedStunS": 120
+          },
+          "target": "structure:63026:starter-manor:root_manor:boss"
+        },
+        "fixturePlayer": {
+          "x": 236,
+          "y": 4.55,
+          "z": -10,
+          "yaw": 1.5707963267948966,
+          "pitch": 0,
+          "hp": 275,
+          "maxHp": 275,
+          "calories": 2400,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": false,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false
+        },
+        "actions": [
+          {
+            "input": "inventory battery placement, explicit fixed-energy escrow transfer",
+            "initialTestEnergyEscrowEU": 60
+          },
+          {
+            "input": "machine name/grid/voxel/component selectors, install and fixed-store charge buttons",
+            "chargedEUThroughUI": 40
+          }
+        ],
+        "checks": {
+          "batteryPlacedThroughUI": true,
+          "escrowExplicitlyMovedToFixedBattery": true,
+          "fixedOwnerId": "fixture:1",
+          "fixedElectricalEU": 60,
+          "machineCreatedThroughUI": true,
+          "controllerInstalledThroughUI": true,
+          "arcThrowerInstalledThroughUI": true,
+          "weaponSelectedThroughUI": true,
+          "initialChargeThroughUI": true,
+          "clearShot": {
+            "shots": 1,
+            "electricalEUSpent": 20,
+            "bossDamage": 28.5
+          },
+          "coveredShot": {
+            "shots": 1,
+            "electricalEUSpent": 20,
+            "bossDamage": 0,
+            "clearPhysicalLineOfSight": false
+          },
+          "machineAndShotLedgerPersisted": true
+        },
+        "status": "complete"
+      }
+    }
+  },
+  "optionalWindVane": {
+    "sourceReport": "attempt-2/browser-report.json",
+    "scenario": {
+      "status": "skipped",
+      "reason": "No naturally generated cliff_observatory site was found in the deterministic search.",
+      "checks": {}
+    }
+  },
+  "errors": []
+}

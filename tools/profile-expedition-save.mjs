@@ -5,6 +5,7 @@ import {createHash} from 'node:crypto';
 import {createRequire} from 'node:module';
 import {gunzipSync} from 'node:zlib';
 import {fileURLToPath} from 'node:url';
+import path from 'node:path';
 const {chromium}=createRequire(import.meta.url)('playwright');
 const source=process.env.FERAL_SAVE_FIXTURE??fileURLToPath(new URL('../verification/expedition-save/high-tier-route.json.gz',import.meta.url));
 const fixtureBytes=await fs.readFile(source);
@@ -66,6 +67,7 @@ try {
 const report={schemaVersion:1,generatedAt:new Date().toISOString(),fixture:{path:source,sha256:createHash('sha256').update(fixtureRaw).digest('hex'),bytes:Buffer.byteLength(fixtureRaw),keys:Object.keys(fixture)},codeHashes,
   scenario:'Immutable actual high-tier resource-consumption route snapshot, with finite player defaults added. Same snapshot saved three times synchronously and three times via a real browser module Worker.',
   limitations:['Isolated desktop Chromium persistence harness, no rendering or game loop; not Android or mobile hardware validation.','Input snapshot is already serialized by runtime. runtime.serialize() cost remains on the main thread and is excluded.','Worker main-call timing includes JSON stringify and postMessage; commit timing includes raw equality verification and localStorage writes.','50ms Long Tasks API entries measure main-thread tasks, while wall time includes background compression/validation.','Worker fallback preserves correctness but still performs compression synchronously on a deferred task.','Other agents may run browsers concurrently; elapsed times are environment observations, not device guarantees.'],...measured};
-await fs.mkdir(new URL('../verification/expedition-save/',import.meta.url),{recursive:true});
-await fs.writeFile(new URL('../verification/expedition-save/profile.json',import.meta.url),JSON.stringify(report,null,2)+'\n');
+const output=process.env.FERAL_SAVE_PROFILE_OUTPUT??fileURLToPath(new URL('../verification/expedition-save/profile.json',import.meta.url));
+await fs.mkdir(path.dirname(output),{recursive:true});
+await fs.writeFile(output,JSON.stringify(report,null,2)+'\n');
 console.log(JSON.stringify({rows:report.rows,generationCharacters:report.generationCharacters,pageErrors:report.pageErrors},null,2));

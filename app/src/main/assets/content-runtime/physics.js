@@ -391,7 +391,11 @@ export class RuntimePhysics {
     const q0 = machine.rotation ?? { x: 0, y: Math.sin(machine.yaw / 2), z: 0, w: Math.cos(machine.yaw / 2) };
     const q = new T.Quaternion(q0.x, q0.y, q0.z, q0.w);
     const center = new T.Vector3(...cell.map((v) => (v + .5) * gridM)).applyQuaternion(q).add(new T.Vector3(...array(machine.position)));
-    const shape = new R.Cuboid(...[0, 1, 2].map(() => gridM / 2 - 1e-5));
+    // Resting Rapier bodies can penetrate their support by a few tens of
+    // micrometres. Allow only this contact band when extending a grounded
+    // assembly; both streamed colliders and the exact terrain query use it.
+    const contactInset = Math.min(.001, gridM / 32);
+    const shape = new R.Cuboid(...[0, 1, 2].map(() => gridM / 2 - contactInset));
     const collision = this.world.intersectionWithShape(xyz(center), q, shape, undefined, undefined, this.characterCollider, undefined,
       (c) => !c.isSensor() && this.adapter.ownershipForCollider(c)?.ownerId !== machine.id);
     if (collision) return false;
