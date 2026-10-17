@@ -147,3 +147,5 @@ body.leftHand #hud #target {left:auto;right:16px;}
   #frontierActions {left:auto;right:12px;bottom:auto;}
   #hud #toast {top:240px;bottom:auto;max-width:140px;}
 }
+
+.itemSource{display:block;margin-top:6px;color:#c5cfb6;line-height:1.5}#sourceGuide{margin-top:8px;font-size:12px;line-height:1.5}#sourceGuide summary{min-height:44px;padding:10px 0;cursor:pointer;touch-action:pan-y}#sourceGuide p{margin:5px 0}

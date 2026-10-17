@@ -136,7 +136,7 @@ const fs = require("node:fs");
     });
     await page.click("#inventoryBtn");
     await craft("기본 차량 설계");
-    await craft("회전익 연구");
+    await craft("항공 연구");
     await craft("투사체 연구");
     await page.click("#resumeBtn");
     await page.click("#journalBtn");
@@ -202,6 +202,7 @@ const fs = require("node:fs");
       const f = FERAL;
       f.setCamera(77.5, f.world.surface(77.5, 84.5) + 1.36, 84.5, 0, 0);
       f.world.set(80, 25, 85, 3);
+      f.world.strikeMining({ hx: 160, hy: 50, hz: 170 }, 0.5, () => 0.3);
       f.save(true);
     });
     const before = await page.evaluate(() => ({
@@ -223,12 +224,14 @@ const fs = require("node:fs");
     await page.waitForFunction(() => FERAL.frontier.key === "0,0");
     const restored = await page.evaluate(() => ({
       block: FERAL.world.get(80, 25, 85),
+      damage: FERAL.world.damageAt({ hx: 160, hy: 50, hz: 170 }),
       boss: FERAL.frontier.region.boss.defeated,
       machine: FERAL.frontier.machine.blueprint.length,
       allies: FERAL.frontier.allies.length,
       food: FERAL.inventory.count("food"),
     }));
     assert.equal(restored.block, 3);
+    assert.equal(restored.damage, 0.3);
     assert.ok(restored.boss);
     assert.equal(restored.machine, before.machine);
     assert.equal(restored.allies, before.allies);

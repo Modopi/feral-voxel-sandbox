@@ -14,7 +14,10 @@ export function itemArt(id) {
   } else if (item.machinePart === "rudder") {
     body = `<path d="M9 27V8L21 2 25 23Z" fill="${color}"/><path d="M9 16L23 10" stroke="#455c53" stroke-width="3"/>`;
   } else if (item.machinePart === "propeller") {
-    body = rect(13,2,6,28,color) + rect(2,13,28,6,color) + rect(12,12,8,8,"#455c53");
+    body =
+      rect(13, 2, 6, 28, color) +
+      rect(2, 13, 28, 6, color) +
+      rect(12, 12, 8, 8, "#455c53");
   } else if (item.block || item.machinePart) {
     body = `<path d="M3 10L16 3 29 10 16 18Z" fill="${color}"/><path d="M3 10L16 18V30L3 22Z" fill="${color}"/><path d="M16 18L29 10V22L16 30Z" fill="${color}"/><path d="M3 10L16 18V30L3 22Z" fill="#fff" opacity=".16"/><path d="M16 18L29 10V22L16 30Z" fill="#000" opacity=".28"/>`;
     for (let n = 0; n < 6; n++)
@@ -37,7 +40,13 @@ export function itemArt(id) {
       rect(21, 4, 5, 11, "#bfcad1") +
       rect(9, 12, 15, 6, "#bfcad1");
   } else if (item.gear) {
-    const metal = ["sword", "battleaxe", "ironpick", "crystalbow"].includes(id)
+    const metal = [
+      "sword",
+      "battleaxe",
+      "ironpick",
+      "relicpick",
+      "crystalbow",
+    ].includes(id)
       ? "#d1e6e4"
       : "#929c99";
     if (id === "pulse")
@@ -70,7 +79,25 @@ export function itemArt(id) {
           rect(8, 17, 13, 3, "#d3ae5d") +
           rect(13, 0, 3, 3, metal);
     }
-  } else if (id === "seed" || id === "fiber")
+  } else if (id === "berry")
+    body =
+      rect(9, 6, 15, 5, "#71954f") +
+      rect(5, 12, 11, 12, color) +
+      rect(17, 15, 11, 12, color) +
+      rect(9, 13, 3, 3, "#f2a6aa");
+  else if (id === "herb")
+    body =
+      rect(14, 5, 3, 24, "#567950") +
+      rect(4, 8, 10, 6, color) +
+      rect(17, 15, 11, 6, color) +
+      rect(7, 21, 7, 5, color);
+  else if (id === "scrap")
+    body =
+      rect(4, 8, 18, 6, color) +
+      rect(17, 13, 8, 15, "#68797b") +
+      rect(6, 20, 15, 7, color) +
+      rect(8, 9, 3, 3, "#c7b994");
+  else if (id === "seed" || id === "fiber")
     body =
       rect(14, 10, 3, 19, "#7e9653") +
       rect(7, 7, 9, 6, "#adca66") +

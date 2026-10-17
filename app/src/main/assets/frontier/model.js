@@ -1,3 +1,11 @@
+import {
+  GATHERABLES,
+  CONTRACTS,
+  resourceSites,
+  relaySites,
+  ruinDefinition,
+  ensureContent,
+} from "./content.js";
 import { activeGear, spendGear } from "../equipment.js";
 // Frontier rules. No DOM, renderer or storage access: every action is explicit.
 import { hash, clamp } from "../world.js";
@@ -113,6 +121,7 @@ export class Frontier {
           raidAt: -999,
         })),
       };
+    ensureContent(this.region);
     return this.region;
   }
   canPay(inv, cost, reward = {}) {
@@ -213,6 +222,15 @@ export class Frontier {
       v.food -= 2;
       this.reputation[f] = Math.min(100, this.reputation[f] + 2);
       return "원목 4 → 결정 2 · 식량 2";
+    }
+    if (action === "quarry") {
+      if (v.stone < 12)
+        return "채석 재고가 부족합니다. 마을 생산을 기다리세요.";
+      if (!this.exchange(inv, { food: 2 }, { stone: 8, sand: 4 }))
+        return "식량 2개와 가방 여유가 필요합니다.";
+      v.stone -= 12;
+      v.food = Math.min(80, v.food + 2);
+      return "식량 2 → 돌 8 · 모래 4";
     }
     if (action === "aid") {
       if (!this.exchange(inv, { food: 3, plank: 4 }, { knowledge: 2 }))
@@ -349,18 +367,18 @@ export class Frontier {
         this.hitBoss(4 * this.allies.length, inv);
       }
     } else b.warning = 0;
+    // Ruins are opened by interacting with their three persistent relays.
+    // Staying inside the active field is hazardous, but waiting alone does not solve it.
     const ruin = this.info.dungeon;
     if (
       !this.region.cacheClaimed &&
-      Math.hypot(player.x - ruin.x, player.z - ruin.z) < 5 &&
-      this.region.dungeon < 3
-    ) {
-      this.region.dungeon = Math.min(3, this.region.dungeon + dt / 6);
+      this.region.dungeon < 3 &&
+      Math.hypot(player.x - ruin.x, player.z - ruin.z) < 5
+    )
       this.hp = Math.max(
         0,
         this.hp - dt * (inv.unlocks.has("armor") ? 0.6 : 1.2),
       );
-    }
     if (this.riding && this.machine && !evaluate(this.machine).connected.size) {
       this.riding = this.airborne = false;
     }
@@ -419,13 +437,99 @@ export class Frontier {
       return "유적 중심 6m 이내로 접근하세요.";
     if (r.cacheClaimed) return "이미 회수한 유적입니다.";
     if (r.dungeon < 3)
-      return `유적 방어장 해제 중 ${Math.floor((r.dungeon / 3) * 100)}% · 중심에서 버티세요.`;
-    if (!this.exchange(inv, {}, { knowledge: 6, crystal: 4, iron: 3 }))
+      return `중계기 ${r.relays.length}/3 해제 · 주변의 세 중계기를 조준하고 사용하세요.`;
+    if (
+      !this.exchange(
+        inv,
+        {},
+        Object.entries(ruinDefinition(this.info).bonus).reduce(
+          (reward, [id, n]) => {
+            reward[id] = (reward[id] || 0) + n;
+            return reward;
+          },
+          { knowledge: 6, crystal: 4, iron: 3, relic: 1 },
+        ),
+      )
+    )
       return "가방 여유가 필요합니다.";
     r.cacheClaimed = true;
     this.xp += 30;
-    this.note("옛 동력 유적 회수 · 연구 기록 +6");
-    return "유적 회수 · 연구 6 · 결정 4 · 합금 3";
+    this.note(ruinDefinition(this.info).lore);
+    this.note("유적 회수 · 유적 핵 +1 · 연구 기록 +6");
+    return "유적 회수 · 연구 6 · 결정 4 · 합금 3 · 유적 핵 1과 보관소 물자";
+  }
+  activateRelay(index, player) {
+    const site = relaySites(this.info)[index];
+    if (!site || Math.hypot(player.x - site.x, player.z - site.z) > 4)
+      return "중계기 4m 안에서 사용하세요.";
+    const r = this.region;
+    if (r.relays.includes(index)) return "이미 해제한 중계기입니다.";
+    r.relays.push(index);
+    r.dungeon = Math.max(r.dungeon, r.relays.length);
+    this.xp += 5;
+    this.note(`${site.name} 해제 · ${r.relays.length}/3`);
+    return r.relays.length === 3
+      ? "방어장 해제 · 가운데 회전하는 핵을 사용해 보상을 회수하세요."
+      : `중계기 ${r.relays.length}/3 해제 · 다른 중계기를 찾으세요.`;
+  }
+  gather(id, player, inv) {
+    const site = resourceSites(this.info).find((s) => s.id === id);
+    if (!site || Math.hypot(player.x - site.x, player.z - site.z) > 4)
+      return "채집 대상 4m 안으로 접근하세요.";
+    const def = GATHERABLES[site.kind],
+      until = this.region.resources[id];
+    if (until === -1) return "모두 회수한 자원입니다.";
+    if (until > this.time)
+      return `다시 자라기까지 ${Math.ceil(until - this.time)}초`;
+    if (!this.exchange(inv, {}, def.reward))
+      return "가방 여유가 필요합니다. 자원은 그대로 남아 있습니다.";
+    this.region.resources[id] = def.regrow ? this.time + def.regrow : -1;
+    this.xp += 2;
+    return (
+      `${def.name} 채집 · ` +
+      Object.entries(def.reward)
+        .map(
+          ([id, n]) =>
+            `${
+              {
+                wood: "원목",
+                berry: "들열매",
+                herb: "약초",
+                scrap: "고철",
+                crystal: "결정",
+                fiber: "섬유",
+                seed: "씨앗",
+              }[id]
+            } +${n}`,
+        )
+        .join(" · ")
+    );
+  }
+  deliver(villageId, contractId, player, inv) {
+    const v = this.region.villages.find((v) => v.id === villageId),
+      quest = CONTRACTS.find((q) => q.id === contractId);
+    if (!v || !quest || Math.hypot(player.x - v.x, player.z - v.z) > 12)
+      return "마을 12m 안에서 의뢰를 전달하세요.";
+    if (this.reputation[v.faction] <= -20)
+      return "적대 중입니다. 먼저 화해하세요.";
+    const key = `${v.id}/${quest.id}`;
+    if (this.region.contracts.includes(key)) return "이미 완료한 의뢰입니다.";
+    if (!this.exchange(inv, quest.cost, quest.reward))
+      return "의뢰 재료와 보상용 가방 공간을 확인하세요.";
+    this.region.contracts.push(key);
+    this.reputation[v.faction] = Math.min(100, this.reputation[v.faction] + 8);
+    this.xp += 15;
+    this.note(`${v.name} · ${quest.name} 완료 · 평판 +8`);
+    return `${quest.name} 완료 · 보상 수령 · 평판 +8 · 경험 +15`;
+  }
+  study(type, inv) {
+    if (![0, 1, 2].includes(type) || this.region.studies.includes(type))
+      return false;
+    this.region.studies.push(type);
+    inv.grant("knowledge", 2);
+    this.xp += 5;
+    this.note("생태 관찰 기록 · 연구 +2 · 경험 +5");
+    return true;
   }
   provisionMachine(inv) {
     if (inv.unlocks.has("rover") && !this.machine) {
@@ -466,7 +570,10 @@ export class Frontier {
     if (!this.machine)
       return "가방에서 동력 연구와 기본 차량 설계를 제작하세요.";
     const f = evaluate(this.machine);
-    if (!f.power || (!f.grip && f.lift < 1.5 && !(f.wings > 0 && f.propellers > 0)))
+    if (
+      !f.power ||
+      (!f.grip && f.lift < 1.5 && !(f.wings > 0 && f.propellers > 0))
+    )
       return "연결된 모터와 바퀴·회전익 또는 주날개·프로펠러가 필요합니다.";
     this.riding = true;
     if (this.machine.pose) this.machine.pose.anchored = false;
@@ -603,6 +710,24 @@ export class Frontier {
       throw Error("원정 기록이 손상되었습니다.");
     const clean = clone(data);
     for (const key of Object.keys(s.save())) s[key] = clean[key];
+    for (const r of Object.values(s.regions)) {
+      ensureContent(r);
+      if (
+        !Array.isArray(r.relays) ||
+        new Set(r.relays).size !== r.relays.length ||
+        r.relays.some((n) => ![0, 1, 2].includes(n)) ||
+        !Array.isArray(r.contracts) ||
+        r.contracts.some((n) => typeof n !== "string") ||
+        !Array.isArray(r.studies) ||
+        r.studies.some((n) => ![0, 1, 2].includes(n)) ||
+        !r.resources ||
+        Array.isArray(r.resources) ||
+        typeof r.resources !== "object" ||
+        Object.values(r.resources).some((n) => !Number.isFinite(n) || n < -1)
+      )
+        throw Error("탐사 콘텐츠 기록이 손상되었습니다.");
+      r.dungeon = Math.max(r.dungeon, r.relays.length);
+    }
     s.hp = Math.min(s.maxHP, s.hp);
     s.hunger = Math.min(100, s.hunger);
     if (data.machine) s.machine = restore(serialize(data.machine));

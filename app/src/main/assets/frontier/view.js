@@ -1,3 +1,11 @@
+import {
+  GATHERABLES,
+  CONTRACTS,
+  resourceSites,
+  relaySites,
+  ruinDefinition,
+} from "./content.js";
+import { ITEMS } from "../inventory.js";
 import { activeGear, gearId } from "../equipment.js";
 import { itemArt } from "../item-art.js";
 import { T } from "../render.js";
@@ -40,6 +48,9 @@ export class FrontierView {
     this.cube = new T.BoxGeometry(1, 1, 1);
     this.materials = new Map();
     this.npcs = [];
+    this.targets = [];
+    this.resourceMeshes = [];
+    this.relayMeshes = [];
     const hud = document.createElement("div");
     hud.id = "frontierHUD";
     hud.innerHTML = `<div id="vitals"><span id="healthText" class="srOnly"></span><meter id="health" class="srOnly" min="0" max="100" value="100" aria-label="체력"></meter>${pips("hearts")}<b id="levelHUD"></b>${pips("hunger")}<small id="hungerText" class="srOnly"></small><progress id="experienceHUD" max="80" value="0" aria-label="다음 레벨 경험치"></progress></div>
@@ -57,7 +68,7 @@ export class FrontierView {
     document.body.append(panel);
     $("journalBtn").onclick = () => this.open("map");
     $("statusBtn").onclick = () => this.open("journal");
-    $("interactBtn").onclick = () => this.interact();
+    $("interactBtn").onclick = () => ctx.interact();
     $("frontierClose").onclick = () => ctx.pause(false);
     panel
       .querySelectorAll("[data-frontier-tab]")
@@ -104,8 +115,12 @@ export class FrontierView {
   }
   resetScene() {
     this.c.view.worldUI.clear();
+    for (const { light } of this.relayMeshes) light.material.dispose();
     this.group.clear();
     this.npcs = [];
+    this.targets = [];
+    this.resourceMeshes = [];
+    this.relayMeshes = [];
     this.revision = -1;
     const { world, model: s } = this.c;
     for (const v of s.region.villages) {
@@ -138,12 +153,25 @@ export class FrontierView {
         this.box(group, -0.13, 0.2, 0, 0.16, 0.4, 0.2, 0x3e4b41);
         this.box(group, 0.13, 0.2, 0, 0.16, 0.4, 0.2, 0x3e4b41);
         this.npcs.push({ group, v, i });
+        this.registerTarget(group, {
+          kind: "npc",
+          village: v,
+          name: `${v.name} · ${["보급 담당", "약초사", "정비사"][i]}`,
+          role: i,
+        });
       }
     }
     const cy = world.surface(77, 84);
-    this.box(this.group, 77, cy + 0.25, 84, 1.1, 0.5, 1.1, 0xd69d55);
+    this.registerTarget(
+      this.box(this.group, 77, cy + 0.25, 84, 1.1, 0.5, 1.1, 0xd69d55),
+      { kind: "camp", name: "원정 보급함" },
+    );
     this.boss = new T.Group();
     this.group.add(this.boss);
+    this.registerTarget(this.boss, {
+      kind: "boss",
+      name: ["", "이끼 수호자", "구리 거신", "심연 파수꾼"][s.info.tier],
+    });
     this.bossCore = this.box(this.boss, 0, 1.8, 0, 1.7, 2, 1.2, 0x607b77);
     this.box(this.boss, 0, 3.2, 0, 1.1, 0.8, 0.9, 0xd4b968);
     this.bossLimbs = [-1, 1].map((side) =>
@@ -175,6 +203,52 @@ export class FrontierView {
       1,
       0x71d6cb,
     );
+    this.registerTarget(this.cache, {
+      kind: "ruin",
+      name: ruinDefinition(s.info).name + " · 공명 핵",
+    });
+    for (const site of relaySites(s.info)) {
+      const root = new T.Group();
+      root.position.set(site.x, world.surface(site.x, site.z), site.z);
+      this.group.add(root);
+      this.box(root, 0, 0.25, 0, 0.6, 0.5, 0.6, 0x576966);
+      const light = this.box(root, 0, 0.8, 0, 0.38, 0.6, 0.38, 0xe0a45c);
+      // Each relay owns its lamp material; changing it must not recolor other objects.
+      light.material = light.material.clone();
+      this.relayMeshes.push({ root, light, site });
+      this.registerTarget(root, { kind: "relay", ...site });
+    }
+    for (const site of resourceSites(s.info)) {
+      const def = GATHERABLES[site.kind],
+        root = new T.Group();
+      root.position.set(site.x, world.surface(site.x, site.z), site.z);
+      this.group.add(root);
+      this.box(
+        root,
+        0,
+        0.12,
+        0,
+        0.6,
+        0.24,
+        0.6,
+        site.kind === "scrap" ? 0x59656a : 0x576e43,
+      );
+      const growth = new T.Group();
+      root.add(growth);
+      for (const [x, y, z, h] of [
+        [-0.22, 0.42, 0, 0.45],
+        [0.2, 0.5, 0.15, 0.6],
+        [0, 0.6, -0.12, 0.7],
+      ])
+        this.box(growth, x, y, z, 0.24, h, 0.24, def.color);
+      if (site.kind === "wood") {
+        growth.clear();
+        this.box(growth, 0, 0.65, 0, 0.25, 1.3, 0.25, 0x805738);
+        this.box(growth, 0, 1.5, 0, 1.1, 0.8, 1.1, def.color);
+      }
+      this.resourceMeshes.push({ root, growth, site });
+      this.registerTarget(root, { kind: "resource", site, name: def.name });
+    }
     this.vehicle = this.assembly.group;
     this.group.add(this.vehicle);
     this.support = new T.Group();
@@ -184,16 +258,27 @@ export class FrontierView {
     this.draw();
   }
   draw() {
+    this.updateTargets();
+    this.assembly.draw();
+  }
+  updateTargets() {
     const { model: s, world, player: p } = this.c;
     if (!this.boss) return;
     for (const { group, v, i } of this.npcs) {
       const t = s.time * 0.18 + i * 2;
-      group.position.set(
-        v.x + Math.cos(t) * 3,
-        world.surface(v.x, v.z),
-        v.z + 1 + Math.sin(t) * 2,
-      );
-      group.rotation.y = -t;
+      if (!group.userData.placed || distance(p, group.position) > 4) {
+        group.position.set(
+          v.x + Math.cos(t) * 3,
+          world.surface(v.x, v.z),
+          v.z + 1 + Math.sin(t) * 2,
+        );
+        group.rotation.y = -t;
+        group.userData.placed = true;
+      } else
+        group.rotation.y = Math.atan2(
+          p.x - group.position.x,
+          p.z - group.position.z,
+        );
     }
     const b = s.region.boss;
     this.boss.visible = !b.defeated;
@@ -218,6 +303,14 @@ export class FrontierView {
       );
     this.cache.visible = !s.region.cacheClaimed;
     this.cache.rotation.y = s.time * 0.5;
+    for (const { light, site } of this.relayMeshes)
+      light.material.color.setHex(
+        s.region.relays.includes(site.index) ? 0x7ae0ba : 0xe0a45c,
+      );
+    for (const { growth, site } of this.resourceMeshes) {
+      const until = s.region.resources[site.id];
+      growth.visible = until !== -1 && !(until > s.time);
+    }
     this.support.visible =
       !!s.allies.length && !b.defeated && distance(p, b) < 26;
     this.support.position.set(
@@ -225,7 +318,6 @@ export class FrontierView {
       world.surface(b.x + 7, b.z + 4),
       b.z + 4,
     );
-    this.assembly.draw();
   }
   assemblyUse(intent, held, block, entityDistance) {
     return this.assembly.use(intent, held, block, entityDistance);
@@ -242,28 +334,105 @@ export class FrontierView {
       this.c.toast("쓰러졌습니다 · 야영지에서 다시 출발 · 경험 -15");
     }
   }
-  bossTarget() {
-    const { model: s, view, world, inventory: inv } = this.c;
-    if (s.region.boss.defeated) return false;
-    const b = s.region.boss,
+  registerTarget(root, data) {
+    root.userData.interaction = data;
+    this.targets.push(root);
+  }
+  objectTarget(max = 6.5) {
+    this.updateTargets();
+    const { view, world } = this.c,
       origin = view.camera.position,
       dir = new T.Vector3();
     view.camera.getWorldDirection(dir);
-    const center = new T.Vector3(b.x, world.surface(b.x, b.z) + 1.8, b.z),
-      delta = center.sub(origin),
-      along = delta.dot(dir);
-    const range =
-      s.riding && s.machine && evaluate(s.machine).weapons > 0
-        ? 22
-        : activeGear(inv, "weapon").range;
-    if (
-      along < 0 ||
-      along > range ||
-      delta.lengthSq() - along * along > 2.4 * 2.4
-    )
-      return false;
-    const hit = world.raycast(origin, dir, along);
-    return !hit || hit.distance > along - 1.4;
+    const block = world.raycast(origin, dir, max);
+    const ray = new T.Raycaster(
+      origin,
+      dir,
+      0,
+      Math.min(max, block?.distance ?? max),
+    );
+    this.group.updateMatrixWorld(true);
+    for (const hit of ray.intersectObjects(this.targets, true)) {
+      let root = hit.object,
+        visible = true,
+        data = null;
+      while (root) {
+        if (!root.visible) visible = false;
+        if (root.userData.interaction) data = root.userData.interaction;
+        root = root.parent;
+      }
+      if (visible && data)
+        return {
+          ...data,
+          distance: hit.distance,
+          point: hit.point,
+          object: hit.object,
+        };
+    }
+    return null;
+  }
+  objectAim(hit) {
+    if (!hit) return false;
+    const s = this.c.model;
+    let detail = `${hit.distance.toFixed(1)} m`,
+      hint = "사용 / R · 상호작용",
+      value = 0,
+      max = 0;
+    if (hit.kind === "ruin") {
+      detail = `중계기 ${s.region.relays.length}/3 해제`;
+      hint =
+        s.region.dungeon >= 3
+          ? "사용 · 유적 핵과 보관소 물자 회수"
+          : "주변의 주황색 중계기 세 개를 사용하세요";
+      value = s.region.dungeon;
+      max = 3;
+    } else if (hit.kind === "relay") {
+      detail = s.region.relays.includes(hit.index)
+        ? "해제 완료"
+        : "방어장 연결 중";
+      hint = "사용 · 중계기 해제 · 진행 보존";
+    } else if (hit.kind === "resource") {
+      const def = GATHERABLES[hit.site.kind],
+        until = s.region.resources[hit.site.id];
+      detail =
+        until === -1
+          ? "회수 완료"
+          : until > s.time
+            ? `재성장 ${Math.ceil(until - s.time)}초`
+            : Object.entries(def.reward)
+                .map(([id, n]) => `${ITEMS[id].name} ${n}`)
+                .join(" · ");
+      hint = "사용 · 채집";
+    } else if (hit.kind === "npc") {
+      detail = `${FACTIONS[hit.village.faction]} · 평판 ${s.reputation[hit.village.faction]}`;
+      hint = "사용 · 대화 / 교역 / 주민 의뢰";
+    } else if (hit.kind === "boss") {
+      detail = `HP ${Math.ceil(s.region.boss.hp)} / ${s.region.boss.maxHP}`;
+      hint = "공격 · 장착 무기로 타격";
+      value = s.region.boss.hp;
+      max = s.region.boss.maxHP;
+    }
+    this.c.view.worldUI.set("focus", {
+      title: hit.name,
+      detail,
+      hint,
+      value,
+      max,
+      color: "#addbd1",
+      maxDistance: 30,
+      position: { x: hit.point.x, y: hit.point.y + 0.15, z: hit.point.z },
+    });
+    this.c.view.highlight.visible = false;
+    return true;
+  }
+  weaponRange() {
+    const { model: s, inventory: inv } = this.c;
+    return s.riding && s.machine && evaluate(s.machine).weapons > 0
+      ? 22
+      : activeGear(inv, "weapon").range;
+  }
+  bossTarget() {
+    return this.objectTarget(this.weaponRange())?.kind === "boss";
   }
   use(selected) {
     if (selected !== 1 || !this.bossTarget()) return false;
@@ -285,7 +454,7 @@ export class FrontierView {
       return true;
     }
     if (code === "KeyR") {
-      this.interact();
+      this.c.interact();
       return true;
     }
     if (code === "KeyH") {
@@ -317,8 +486,38 @@ export class FrontierView {
         : "비행 해제 · 착륙",
     );
   }
-  interact() {
-    const { model: s, player: p } = this.c;
+  interact(hit = this.objectTarget()) {
+    const { model: s, player: p, inventory: inv } = this.c;
+    if (hit) {
+      if (hit.distance > (hit.kind === "npc" ? 6 : 4)) {
+        this.c.toast("가까이 다가가 사용하세요.");
+        return;
+      }
+      if (hit.kind === "npc") {
+        this.conversation = {
+          villageId: hit.village.id,
+          role: hit.role,
+          name: hit.name,
+        };
+        this.open("society");
+        return;
+      }
+      if (hit.kind === "camp") {
+        this.open("journal");
+        return;
+      }
+      const message =
+        hit.kind === "relay"
+          ? s.activateRelay(hit.index, p)
+          : hit.kind === "ruin"
+            ? s.claimRuin(p, inv)
+            : hit.kind === "resource"
+              ? s.gather(hit.site.id, p, inv)
+              : "수호자는 무기를 들고 공격하세요.";
+      this.c.toast(message);
+      this.draw();
+      return;
+    }
     if (this.assembly.ride()) return;
     const village = s.region.villages.find((v) => distance(p, v) < 12);
     if (village) {
@@ -337,7 +536,7 @@ export class FrontierView {
       this.c.toast(s.toggleRide(this.c.inventory));
       return;
     }
-    this.open("map");
+    this.c.toast("사용할 대상을 조준하세요. 지도는 지도 버튼으로 엽니다.");
   }
   hud() {
     const { model: s, player: p } = this.c;
@@ -360,10 +559,6 @@ export class FrontierView {
         : this.bossTarget()
           ? "장착 무기로 공격"
           : "수호자를 조준하세요";
-    if (this.bossTarget()) {
-      this.c.view.highlight.visible = false;
-      this.c.view.worldUI.set("focus", null);
-    }
     this.c.view.worldUI.set(
       "context",
       near
@@ -506,7 +701,13 @@ export class FrontierView {
       const destinations = [
         { name: "원정 야영지", x: 77.5, z: 84.5 },
         ...s.region.villages,
-        { name: "동력 유적", ...s.info.dungeon },
+        {
+          name: `${ruinDefinition(s.info).name} · 중계기 ${s.region.relays.length}/3`,
+          ...s.info.dungeon,
+        },
+        ...resourceSites(s.info)
+          .filter((site) => site.id.endsWith(":0"))
+          .map((site) => ({ ...site, name: GATHERABLES[site.kind].name })),
         {
           name: s.region.boss.defeated ? "수호자 둥지 · 격파" : "수호자 둥지",
           ...s.info.boss,
@@ -527,12 +728,32 @@ export class FrontierView {
     }
     if (this.tab === "society") {
       root.innerHTML = `<h3>공동체와 관계</h3><p>마을 12m 안에서 교역·지원·외교가 가능합니다. 원정 중 다른 지역 마을도 30초마다 생산·소비합니다.</p><div id="villageList"></div><h3>집단 간 관계</h3><p>${s.diplomacy.map((v, i) => `${FACTIONS[i]} ↔ ${FACTIONS[(i + 1) % 3]}: ${v} (${v <= -20 ? "분쟁" : v >= 20 ? "협력" : "중립"})`).join("<br>")}</p>`;
-      for (const v of s.region.villages) {
+      const conversation = this.conversation;
+      if (conversation) {
+        const greeting = document.createElement("p");
+        greeting.className = "npcSpeech";
+        greeting.textContent =
+          conversation.name +
+          " — " +
+          [
+            "새 탐험가군요. 주변의 열매와 나무를 모아 오세요. 물자와 교환하거나 식탁 의뢰를 도와주세요.",
+            "다친 동물에게도 회복약을 쓸 수 있어요. 은잎 약초는 수확한 뒤 다시 자랍니다.",
+            "옛 잔해는 합금으로 재련할 수 있죠. 유적의 세 중계기를 해제하면 공명 도구를 만들 핵도 얻을 수 있어요.",
+          ][conversation.role || 0];
+        root.prepend(greeting);
+      }
+      const villages = [...s.region.villages].sort(
+        (a, b) =>
+          Number(b.id === conversation?.villageId) -
+          Number(a.id === conversation?.villageId),
+      );
+      for (const v of villages) {
         const row = document.createElement("section");
         row.className = "villageRow";
         row.innerHTML = `<h3>${escape(v.name)} <small>${FACTIONS[v.faction]} · ${Math.round(distance(p, v))} m</small></h3><p>주민 ${v.population} · 기술 ${v.tech} · 평판 ${s.reputation[v.faction]} ${s.allies.includes(v.faction) ? "· 동맹" : ""}<br>재고: 식량 ${v.food} / 원목 ${v.wood} / 돌 ${v.stone} / 결정 ${v.crystal}</p><div class="frontierButtons"></div>`;
         for (const [action, label] of [
           ["trade", "교역 · 원목 4 → 결정 2·식량 2"],
+          ["quarry", "채석 교역 · 식량 2 → 돌 8·모래 4"],
           ["aid", "지원 · 식량 3·목재 4"],
           ["ally", "동맹 요청 · 평판 24"],
           ["mediate", "집단 중재 · 연구 2"],
@@ -552,6 +773,34 @@ export class FrontierView {
           if (distance(p, v) > 12) b.disabled = true;
           row.querySelector("div").append(b);
         }
+        const quests = document.createElement("div");
+        quests.className = "villageContracts";
+        quests.innerHTML = "<h4>주민 의뢰 · 재료를 모아 전달</h4>";
+        for (const quest of CONTRACTS) {
+          const done = s.region.contracts.includes(`${v.id}/${quest.id}`),
+            entry = document.createElement("section");
+          entry.className = "contractEntry";
+          entry.innerHTML = `<strong>${quest.name}${done ? " · 완료" : ""}</strong><p>${quest.text}<br>${Object.entries(
+            quest.cost,
+          )
+            .map(([id, n]) => `${ITEMS[id].name} ${inv.count(id)}/${n}`)
+            .join(" · ")}<br>보상: ${Object.entries(quest.reward)
+            .map(([id, n]) => `${ITEMS[id].name} ${n}`)
+            .join(" · ")} · 평판 8</p>`;
+          const button = this.button(done ? "전달 완료" : "의뢰 전달", () => {
+            const scroll = root.scrollTop,
+              result = s.deliver(v.id, quest.id, p, inv);
+            this.render();
+            root.scrollTop = scroll;
+            return result;
+          });
+          button.dataset.contract = quest.id;
+          button.disabled =
+            done || distance(p, v) > 12 || s.reputation[v.faction] <= -20;
+          entry.append(button);
+          quests.append(entry);
+        }
+        row.append(quests);
         $("villageList").append(row);
       }
     }

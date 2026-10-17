@@ -306,3 +306,6 @@ body.frontier #events {
   #frontierActions { top: 204px; bottom: auto; left: 16px; right: auto; }
   #bossHUD { top: 258px; }
 }
+
+.villageContracts{margin-top:12px;border-top:2px solid #697269;padding-top:8px}.contractEntry{padding:10px 0;border-bottom:1px solid #697269}.contractEntry p{margin:6px 0}.contractEntry button{min-height:44px;touch-action:pan-y}
+.npcSpeech{border-left:3px solid #b0c595;padding:10px 12px;color:#e1e6c9;line-height:1.6}

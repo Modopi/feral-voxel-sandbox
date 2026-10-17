@@ -1,0 +1,10 @@
+{
+  "game": "0.8.0",
+  "gameCode": 800,
+  "nativeCode": 303,
+  "saveSchema": 2,
+  "files": 47,
+  "sourceAndApkMatchManifest": true,
+  "Feral-0.3.3-android.apk": "08dd9e8680e92e0fdf1396256803d026e6d4e5b524f5e3210342ff5fa7188695",
+  "Feral-0.8.0-update.feral": "b5b842cbc36e3efdb90dfea47c38fc10af39ecac9a3a8f41c51dad2b80d5d4e3"
+}

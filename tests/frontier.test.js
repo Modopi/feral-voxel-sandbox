@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { Frontier, regionInfo } from "../app/src/main/assets/frontier/model.js";
+import { relaySites } from "../app/src/main/assets/frontier/content.js";
 import { Inventory, RECIPES } from "../app/src/main/assets/inventory.js";
 import { frontierWorld } from "../app/src/main/assets/frontier/terrain.js";
 import {
@@ -106,15 +107,17 @@ test("boss telegraphs can be dodged, damages the player on impact and rewards on
   assert.equal(i.count("knowledge"), reward);
   assert.equal(s.xp, 60 + 8);
 });
-test("dungeon progresses under hazard, claims once, and cannot be claimed remotely", () => {
+test("dungeon requires three relay interactions, claims once, and cannot be claimed remotely", () => {
   const s = new Frontier(),
     i = invWith({});
   const d = s.info.dungeon;
   assert.match(s.claimRuin(camp, i), /접근/);
   assert.match(s.claimRuin(d, i), /해제/);
   tick(s, i, 19, d);
-  assert.equal(s.region.dungeon, 3);
+  assert.equal(s.region.dungeon, 0);
   assert.ok(s.hp < 100);
+  for (const relay of relaySites(s.info)) s.activateRelay(relay.index, relay);
+  assert.equal(s.region.dungeon, 3);
   assert.match(s.claimRuin(d, i), /연구 6/);
   const count = i.count("iron");
   s.claimRuin(d, i);
@@ -210,8 +213,9 @@ test("starvation and defeat recover at camp without deleting inventory or bluepr
 });
 
 test("vehicle movement belongs to the assembly and dismount preserves its world position", async () => {
-  const { FrontierMotion } =
-    await import("../app/src/main/assets/frontier/motion.js");
+  const { FrontierMotion } = await import(
+    "../app/src/main/assets/frontier/motion.js"
+  );
   const s = new Frontier(),
     inv = invWith({});
   inv.unlocks.add("rover");
