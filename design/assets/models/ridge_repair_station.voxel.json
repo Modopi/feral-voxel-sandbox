@@ -1,0 +1,5710 @@
+{
+  "schemaVersion": 1,
+  "id": "ridge_repair_station",
+  "name": "구릉 정비 공동체",
+  "category": "structure",
+  "contentRef": {
+    "file": "design/content/structures.json",
+    "id": "ridge_repair_station"
+  },
+  "status": "art_prototype",
+  "units": "m",
+  "upAxis": "Y",
+  "forwardAxis": "+Z",
+  "visualGridM": 0.5,
+  "materials": [
+    {
+      "id": "stone",
+      "color": "#92948B",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true,
+      "blockId": "stone"
+    },
+    {
+      "id": "iron_scrap_block",
+      "color": "#716D68",
+      "roughness": 0.88,
+      "metallic": 0.55,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true,
+      "blockId": "iron_scrap_block"
+    },
+    {
+      "id": "rubble",
+      "color": "#756E64",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true,
+      "blockId": "rubble"
+    },
+    {
+      "id": "weathered_wall",
+      "color": "#656B6D",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true,
+      "blockId": "stone"
+    },
+    {
+      "id": "worn_wall",
+      "color": "#A1A197",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true,
+      "blockId": "stone"
+    }
+  ],
+  "parts": [
+    {
+      "id": "root",
+      "parent": null,
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "root",
+      "boxes": []
+    },
+    {
+      "id": "floor_mesh",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "floor",
+      "boxes": [
+        {
+          "center": [
+            16,
+            -0.25,
+            -15.5
+          ],
+          "size": [
+            12,
+            0.5,
+            3
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            16,
+            -0.25,
+            -10.5
+          ],
+          "size": [
+            20,
+            0.5,
+            7
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            8,
+            -0.25,
+            -6
+          ],
+          "size": [
+            4,
+            0.5,
+            2
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            24,
+            -0.25,
+            -6
+          ],
+          "size": [
+            4,
+            0.5,
+            2
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            16,
+            -0.25,
+            -4
+          ],
+          "size": [
+            44,
+            0.5,
+            2
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            16,
+            -0.25,
+            0
+          ],
+          "size": [
+            48,
+            0.5,
+            6
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            16,
+            -0.25,
+            4
+          ],
+          "size": [
+            44,
+            0.5,
+            2
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            8,
+            -0.25,
+            6
+          ],
+          "size": [
+            4,
+            0.5,
+            2
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            24,
+            -0.25,
+            6
+          ],
+          "size": [
+            4,
+            0.5,
+            2
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            16,
+            -0.25,
+            10.5
+          ],
+          "size": [
+            20,
+            0.5,
+            7
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            16,
+            -0.25,
+            15.5
+          ],
+          "size": [
+            12,
+            0.5,
+            3
+          ],
+          "material": "stone"
+        }
+      ]
+    },
+    {
+      "id": "room_walls",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "wall",
+      "boxes": [
+        {
+          "center": [
+            -6.5,
+            2.5,
+            -4.5
+          ],
+          "size": [
+            1,
+            5,
+            3
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            -6.5,
+            2.5,
+            4.5
+          ],
+          "size": [
+            1,
+            5,
+            3
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            6.5,
+            4.5,
+            0
+          ],
+          "size": [
+            1,
+            1,
+            12
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            -5,
+            2.5,
+            -5.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            0,
+            2.5,
+            -5.5
+          ],
+          "size": [
+            4,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            5,
+            2.5,
+            -5.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            3,
+            1,
+            -5.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            3,
+            4.5,
+            -5.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            -3,
+            1,
+            -5.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            -3,
+            4.5,
+            -5.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            -5,
+            2.5,
+            5.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            0,
+            2.5,
+            5.5
+          ],
+          "size": [
+            4,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            5,
+            2.5,
+            5.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            3,
+            1,
+            5.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            3,
+            4.5,
+            5.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            -3,
+            1,
+            5.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            -3,
+            4.5,
+            5.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            9.5,
+            4.5,
+            -12
+          ],
+          "size": [
+            1,
+            1,
+            12
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            9.5,
+            2,
+            -16
+          ],
+          "size": [
+            1,
+            4,
+            4
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            22.5,
+            4.5,
+            -12
+          ],
+          "size": [
+            1,
+            1,
+            12
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            22.5,
+            2,
+            -16
+          ],
+          "size": [
+            1,
+            4,
+            4
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            11,
+            2.5,
+            -17.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            16,
+            2.5,
+            -17.5
+          ],
+          "size": [
+            4,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            21,
+            2.5,
+            -17.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            19,
+            1,
+            -17.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            19,
+            4.5,
+            -17.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            13,
+            1,
+            -17.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            13,
+            4.5,
+            -17.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            11,
+            2.5,
+            -6.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            16,
+            2.5,
+            -6.5
+          ],
+          "size": [
+            4,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            21,
+            2.5,
+            -6.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            19,
+            1,
+            -6.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            19,
+            4.5,
+            -6.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            13,
+            1,
+            -6.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            13,
+            4.5,
+            -6.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            9.5,
+            4.5,
+            12
+          ],
+          "size": [
+            1,
+            1,
+            12
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            9.5,
+            2,
+            16
+          ],
+          "size": [
+            1,
+            4,
+            4
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            22.5,
+            4.5,
+            12
+          ],
+          "size": [
+            1,
+            1,
+            12
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            22.5,
+            2,
+            16
+          ],
+          "size": [
+            1,
+            4,
+            4
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            11,
+            2.5,
+            6.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            16,
+            2.5,
+            6.5
+          ],
+          "size": [
+            4,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            21,
+            2.5,
+            6.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            19,
+            1,
+            6.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            19,
+            4.5,
+            6.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            13,
+            1,
+            6.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            13,
+            4.5,
+            6.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            11,
+            2.5,
+            17.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            16,
+            2.5,
+            17.5
+          ],
+          "size": [
+            4,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            21,
+            2.5,
+            17.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            19,
+            1,
+            17.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            19,
+            4.5,
+            17.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            13,
+            1,
+            17.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            13,
+            4.5,
+            17.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            25.5,
+            4.5,
+            0
+          ],
+          "size": [
+            1,
+            1,
+            12
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            38.5,
+            2.5,
+            -4.5
+          ],
+          "size": [
+            1,
+            5,
+            3
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            38.5,
+            2.5,
+            4.5
+          ],
+          "size": [
+            1,
+            5,
+            3
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            27,
+            2.5,
+            -5.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            32,
+            2.5,
+            -5.5
+          ],
+          "size": [
+            4,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            37,
+            2.5,
+            -5.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            35,
+            1,
+            -5.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            35,
+            4.5,
+            -5.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            29,
+            1,
+            -5.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            29,
+            4.5,
+            -5.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            27,
+            2.5,
+            5.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            32,
+            2.5,
+            5.5
+          ],
+          "size": [
+            4,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            37,
+            2.5,
+            5.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            35,
+            1,
+            5.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            35,
+            4.5,
+            5.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            29,
+            1,
+            5.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            29,
+            4.5,
+            5.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "stone"
+        }
+      ]
+    },
+    {
+      "id": "corridor_walls",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "wall",
+      "boxes": [
+        {
+          "center": [
+            5.5,
+            2,
+            -7
+          ],
+          "size": [
+            1,
+            4,
+            4
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            10.5,
+            2,
+            -6
+          ],
+          "size": [
+            1,
+            4,
+            2
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            5.5,
+            2,
+            -12
+          ],
+          "size": [
+            1,
+            4,
+            6
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            8,
+            2,
+            -14.5
+          ],
+          "size": [
+            4,
+            4,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            5.5,
+            2,
+            7
+          ],
+          "size": [
+            1,
+            4,
+            4
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            10.5,
+            2,
+            6
+          ],
+          "size": [
+            1,
+            4,
+            2
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            5.5,
+            2,
+            12
+          ],
+          "size": [
+            1,
+            4,
+            6
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            8,
+            2,
+            14.5
+          ],
+          "size": [
+            4,
+            4,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            21.5,
+            2,
+            -6
+          ],
+          "size": [
+            1,
+            4,
+            2
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            26.5,
+            2,
+            -10
+          ],
+          "size": [
+            1,
+            4,
+            10
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            24,
+            2,
+            -14.5
+          ],
+          "size": [
+            4,
+            4,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            21.5,
+            2,
+            6
+          ],
+          "size": [
+            1,
+            4,
+            2
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            26.5,
+            2,
+            10
+          ],
+          "size": [
+            1,
+            4,
+            10
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            24,
+            2,
+            14.5
+          ],
+          "size": [
+            4,
+            4,
+            1
+          ],
+          "material": "stone"
+        }
+      ]
+    },
+    {
+      "id": "exterior_details",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "landmark",
+      "boxes": [
+        {
+          "center": [
+            -7,
+            2.75,
+            -6
+          ],
+          "size": [
+            1,
+            5.5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            -7,
+            2.75,
+            6
+          ],
+          "size": [
+            1,
+            5.5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            7,
+            4.75,
+            -6
+          ],
+          "size": [
+            1,
+            1.5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            7,
+            4.75,
+            6
+          ],
+          "size": [
+            1,
+            1.5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            -5.25,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            -3,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            0,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            3,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            5.25,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            0,
+            3.25,
+            5.75
+          ],
+          "size": [
+            12,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            -3.5,
+            0.25,
+            -6.5
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            -3.5,
+            1.25,
+            -6.5
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            -3.5,
+            0.75,
+            -6.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            -3.5,
+            2.25,
+            -6.5
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            -3.5,
+            2.75,
+            -6.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            -3.5,
+            1.75,
+            -6.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            1.25,
+            0.25,
+            -6.5
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            1.25,
+            1.75,
+            -6.5
+          ],
+          "size": [
+            0.5,
+            1.5,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            1.25,
+            2.75,
+            -6.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            1.25,
+            0.75,
+            -6.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            1.75,
+            0.75,
+            -6.5
+          ],
+          "size": [
+            0.5,
+            1.5,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            1.75,
+            2.5,
+            -6.75
+          ],
+          "size": [
+            0.5,
+            1,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            1.75,
+            1.75,
+            -6.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            9,
+            2.75,
+            -18
+          ],
+          "size": [
+            1,
+            5.5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            9,
+            4.75,
+            -6
+          ],
+          "size": [
+            1,
+            1.5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            23,
+            2.75,
+            -18
+          ],
+          "size": [
+            1,
+            5.5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            23,
+            4.75,
+            -6
+          ],
+          "size": [
+            1,
+            1.5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            10.75,
+            3.25,
+            -18.25
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            13,
+            3.25,
+            -18.25
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            16,
+            3.25,
+            -18.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            19,
+            3.25,
+            -18.25
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            21.25,
+            3.25,
+            -18.25
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            16,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            12,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            12.5,
+            0.25,
+            -18.5
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            12.5,
+            1.25,
+            -18.5
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            12.5,
+            0.75,
+            -18.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            12.5,
+            2.25,
+            -18.5
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            12.5,
+            2.75,
+            -18.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            12.5,
+            1.75,
+            -18.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            17.25,
+            0.25,
+            -18.5
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            17.25,
+            1.75,
+            -18.5
+          ],
+          "size": [
+            0.5,
+            1.5,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            17.25,
+            2.75,
+            -18.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            17.25,
+            0.75,
+            -18.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            17.75,
+            0.75,
+            -18.5
+          ],
+          "size": [
+            0.5,
+            1.5,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            17.75,
+            2.5,
+            -18.75
+          ],
+          "size": [
+            0.5,
+            1,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            17.75,
+            1.75,
+            -18.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            9,
+            4.75,
+            6
+          ],
+          "size": [
+            1,
+            1.5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            9,
+            2.75,
+            18
+          ],
+          "size": [
+            1,
+            5.5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            23,
+            4.75,
+            6
+          ],
+          "size": [
+            1,
+            1.5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            23,
+            2.75,
+            18
+          ],
+          "size": [
+            1,
+            5.5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            10.75,
+            3.25,
+            5.75
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            13,
+            3.25,
+            5.75
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            16,
+            3.25,
+            5.75
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            19,
+            3.25,
+            5.75
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            21.25,
+            3.25,
+            5.75
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            16,
+            3.25,
+            17.75
+          ],
+          "size": [
+            12,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            12.5,
+            0.25,
+            5.5
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            12.5,
+            1.25,
+            5.5
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            12.5,
+            0.75,
+            5.25
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            12.5,
+            2.25,
+            5.5
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            12.5,
+            2.75,
+            5.25
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            12.5,
+            1.75,
+            5.25
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            17.25,
+            0.25,
+            5.5
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            17.25,
+            1.75,
+            5.5
+          ],
+          "size": [
+            0.5,
+            1.5,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            17.25,
+            2.75,
+            5.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            17.25,
+            0.75,
+            5.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            17.75,
+            0.75,
+            5.5
+          ],
+          "size": [
+            0.5,
+            1.5,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            17.75,
+            2.5,
+            5.25
+          ],
+          "size": [
+            0.5,
+            1,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            17.75,
+            1.75,
+            5.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            25,
+            4.75,
+            -6
+          ],
+          "size": [
+            1,
+            1.5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            25,
+            4.75,
+            6
+          ],
+          "size": [
+            1,
+            1.5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            39,
+            2.75,
+            -6
+          ],
+          "size": [
+            1,
+            5.5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            39,
+            2.75,
+            6
+          ],
+          "size": [
+            1,
+            5.5,
+            1
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            26.75,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            29,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            32,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            35,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            37.25,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            32,
+            3.25,
+            5.75
+          ],
+          "size": [
+            12,
+            0.5,
+            0.5
+          ],
+          "material": "rubble"
+        },
+        {
+          "center": [
+            28.5,
+            0.25,
+            -6.5
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            28.5,
+            1.25,
+            -6.5
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            28.5,
+            0.75,
+            -6.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            28.5,
+            2.25,
+            -6.5
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            28.5,
+            2.75,
+            -6.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            28.5,
+            1.75,
+            -6.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            33.25,
+            0.25,
+            -6.5
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            33.25,
+            2,
+            -6.5
+          ],
+          "size": [
+            0.5,
+            2,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            33.25,
+            0.75,
+            -6.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            33.75,
+            0.75,
+            -6.5
+          ],
+          "size": [
+            0.5,
+            1.5,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            33.75,
+            2.5,
+            -6.75
+          ],
+          "size": [
+            0.5,
+            1,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            33.75,
+            1.75,
+            -6.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            -3,
+            1.75,
+            -6.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -3,
+            4.25,
+            -6.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -4.25,
+            2.25,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -4.25,
+            3.5,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            1,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -1.75,
+            3,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            3,
+            1.75,
+            -6.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            3,
+            4.25,
+            -6.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            1.75,
+            3,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            4.25,
+            2.25,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            4.25,
+            3.5,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            1,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -3,
+            1.75,
+            6.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -3,
+            4.25,
+            6.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -4.25,
+            2.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -4.25,
+            3.5,
+            6.25
+          ],
+          "size": [
+            0.5,
+            1,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -1.75,
+            3,
+            6.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            3,
+            1.75,
+            6.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            3,
+            4.25,
+            6.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            1.75,
+            3,
+            6.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            4.25,
+            2.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            4.25,
+            3.5,
+            6.25
+          ],
+          "size": [
+            0.5,
+            1,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -3.75,
+            0.75,
+            -6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            0.25,
+            0.75,
+            -6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            4.25,
+            0.75,
+            -6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            -3.75,
+            0.75,
+            6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            0.25,
+            0.75,
+            6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            4.25,
+            0.75,
+            6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -3.75,
+            2.75,
+            -6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            0.25,
+            2.75,
+            -6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            4.25,
+            2.75,
+            -6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -3.75,
+            2.75,
+            6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            0.25,
+            2.75,
+            6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            4.25,
+            2.75,
+            6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -3.75,
+            4.75,
+            -6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            0.25,
+            4.75,
+            -6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            4.25,
+            4.75,
+            -6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            0.25,
+            4.75,
+            6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            4.25,
+            4.75,
+            6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            13,
+            1.75,
+            -18.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            13,
+            4.25,
+            -18.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            11.75,
+            2.25,
+            -18.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            11.75,
+            3.5,
+            -18.25
+          ],
+          "size": [
+            0.5,
+            1,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            14.25,
+            3,
+            -18.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            19,
+            1.75,
+            -18.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            19,
+            4.25,
+            -18.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            17.75,
+            3,
+            -18.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            20.25,
+            2.25,
+            -18.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            20.25,
+            3.5,
+            -18.25
+          ],
+          "size": [
+            0.5,
+            1,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            13,
+            1.75,
+            -5.75
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            13,
+            4.25,
+            -5.75
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            11.75,
+            2.25,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            11.75,
+            3.5,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            1,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            14.25,
+            3,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            19,
+            1.75,
+            -5.75
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            19,
+            4.25,
+            -5.75
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            17.75,
+            3,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            20.25,
+            2.25,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            20.25,
+            3.5,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            1,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            12.25,
+            0.75,
+            -18.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            16.25,
+            0.75,
+            -18.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            20.25,
+            0.75,
+            -18.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            20.25,
+            0.75,
+            -5.75
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            12.25,
+            2.75,
+            -18.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            16.25,
+            2.75,
+            -18.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            20.25,
+            2.75,
+            -18.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            12.25,
+            2.75,
+            -5.75
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            16.25,
+            2.75,
+            -5.75
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            20.25,
+            2.75,
+            -5.75
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            12.25,
+            4.75,
+            -18.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            16.25,
+            4.75,
+            -18.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            20.25,
+            4.75,
+            -18.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            12.25,
+            4.75,
+            -5.75
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            20.25,
+            4.75,
+            -5.75
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            13,
+            1.75,
+            5.75
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            13,
+            4.25,
+            5.75
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            11.75,
+            2.25,
+            5.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            11.75,
+            3.5,
+            5.75
+          ],
+          "size": [
+            0.5,
+            1,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            14.25,
+            3,
+            5.75
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            19,
+            1.75,
+            5.75
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            19,
+            4.25,
+            5.75
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            17.75,
+            3,
+            5.75
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            20.25,
+            3,
+            5.75
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            13,
+            1.75,
+            18.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            13,
+            4.25,
+            18.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            11.75,
+            2.25,
+            18.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            11.75,
+            3.5,
+            18.25
+          ],
+          "size": [
+            0.5,
+            1,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            14.25,
+            3,
+            18.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            19,
+            1.75,
+            18.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            19,
+            4.25,
+            18.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            17.75,
+            3,
+            18.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            20.25,
+            2.25,
+            18.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            20.25,
+            3.5,
+            18.25
+          ],
+          "size": [
+            0.5,
+            1,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            12.25,
+            0.75,
+            5.75
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            16.25,
+            0.75,
+            5.75
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            20.25,
+            0.75,
+            5.75
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            12.25,
+            0.75,
+            18.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            16.25,
+            0.75,
+            18.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            12.25,
+            2.75,
+            5.75
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            16.25,
+            2.75,
+            5.75
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            12.25,
+            2.75,
+            18.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            16.25,
+            2.75,
+            18.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            20.25,
+            2.75,
+            18.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            16.25,
+            4.75,
+            5.75
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            20.25,
+            4.75,
+            18.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            29,
+            1.75,
+            -6.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            29,
+            4.25,
+            -6.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            27.75,
+            2.25,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            27.75,
+            3.5,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            1,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            30.25,
+            3,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            35,
+            1.75,
+            -6.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            35,
+            4.25,
+            -6.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            33.75,
+            3,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            36.25,
+            2.25,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            36.25,
+            3.5,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            1,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            29,
+            1.75,
+            6.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            29,
+            4.25,
+            6.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            27.75,
+            2.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            27.75,
+            3.5,
+            6.25
+          ],
+          "size": [
+            0.5,
+            1,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            30.25,
+            3,
+            6.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            35,
+            1.75,
+            6.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            35,
+            4.25,
+            6.25
+          ],
+          "size": [
+            3,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            33.75,
+            3,
+            6.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            36.25,
+            2.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            36.25,
+            3.5,
+            6.25
+          ],
+          "size": [
+            0.5,
+            1,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            28.25,
+            0.75,
+            -6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            32.25,
+            0.75,
+            -6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            28.25,
+            0.75,
+            6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            32.25,
+            0.75,
+            6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            36.25,
+            0.75,
+            6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            28.25,
+            2.75,
+            -6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            36.25,
+            2.75,
+            -6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            28.25,
+            2.75,
+            6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            32.25,
+            2.75,
+            6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            36.25,
+            2.75,
+            6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            36.25,
+            4.75,
+            -6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            36.25,
+            4.75,
+            6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        }
+      ]
+    },
+    {
+      "id": "interior_landmarks",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "landmark",
+      "boxes": []
+    },
+    {
+      "id": "corridor_roof_0",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            8.5,
+            4.25,
+            0
+          ],
+          "size": [
+            5,
+            0.5,
+            6
+          ],
+          "material": "iron_scrap_block"
+        }
+      ]
+    },
+    {
+      "id": "corridor_roof_1",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            8,
+            4.25,
+            -6
+          ],
+          "size": [
+            4,
+            0.5,
+            18
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            10.5,
+            4.25,
+            -2
+          ],
+          "size": [
+            1,
+            0.5,
+            10
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            5.5,
+            4.25,
+            -10
+          ],
+          "size": [
+            1,
+            0.5,
+            10
+          ],
+          "material": "iron_scrap_block"
+        }
+      ]
+    },
+    {
+      "id": "corridor_roof_2",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            7.5,
+            4.25,
+            -12
+          ],
+          "size": [
+            5,
+            0.5,
+            6
+          ],
+          "material": "iron_scrap_block"
+        }
+      ]
+    },
+    {
+      "id": "corridor_roof_3",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            8.5,
+            4.25,
+            0
+          ],
+          "size": [
+            5,
+            0.5,
+            6
+          ],
+          "material": "iron_scrap_block"
+        }
+      ]
+    },
+    {
+      "id": "corridor_roof_4",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            8,
+            4.25,
+            6
+          ],
+          "size": [
+            4,
+            0.5,
+            18
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            10.5,
+            4.25,
+            2
+          ],
+          "size": [
+            1,
+            0.5,
+            10
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            5.5,
+            4.25,
+            10
+          ],
+          "size": [
+            1,
+            0.5,
+            10
+          ],
+          "material": "iron_scrap_block"
+        }
+      ]
+    },
+    {
+      "id": "corridor_roof_5",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            7.5,
+            4.25,
+            12
+          ],
+          "size": [
+            5,
+            0.5,
+            6
+          ],
+          "material": "iron_scrap_block"
+        }
+      ]
+    },
+    {
+      "id": "corridor_roof_6",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            24.5,
+            4.25,
+            -12
+          ],
+          "size": [
+            5,
+            0.5,
+            6
+          ],
+          "material": "iron_scrap_block"
+        }
+      ]
+    },
+    {
+      "id": "corridor_roof_7",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            24,
+            4.25,
+            -6
+          ],
+          "size": [
+            4,
+            0.5,
+            18
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            26.5,
+            4.25,
+            -10
+          ],
+          "size": [
+            1,
+            0.5,
+            10
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            21.5,
+            4.25,
+            -2
+          ],
+          "size": [
+            1,
+            0.5,
+            10
+          ],
+          "material": "iron_scrap_block"
+        }
+      ]
+    },
+    {
+      "id": "corridor_roof_8",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            23.5,
+            4.25,
+            0
+          ],
+          "size": [
+            5,
+            0.5,
+            6
+          ],
+          "material": "iron_scrap_block"
+        }
+      ]
+    },
+    {
+      "id": "corridor_roof_9",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            24.5,
+            4.25,
+            12
+          ],
+          "size": [
+            5,
+            0.5,
+            6
+          ],
+          "material": "iron_scrap_block"
+        }
+      ]
+    },
+    {
+      "id": "corridor_roof_10",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            24,
+            4.25,
+            6
+          ],
+          "size": [
+            4,
+            0.5,
+            18
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            26.5,
+            4.25,
+            10
+          ],
+          "size": [
+            1,
+            0.5,
+            10
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            21.5,
+            4.25,
+            2
+          ],
+          "size": [
+            1,
+            0.5,
+            10
+          ],
+          "material": "iron_scrap_block"
+        }
+      ]
+    },
+    {
+      "id": "corridor_roof_11",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            23.5,
+            4.25,
+            0
+          ],
+          "size": [
+            5,
+            0.5,
+            6
+          ],
+          "material": "iron_scrap_block"
+        }
+      ]
+    },
+    {
+      "id": "roof_room_0",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            0,
+            5.25,
+            0
+          ],
+          "size": [
+            13,
+            0.5,
+            11
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            -5.5,
+            6,
+            -5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            -5.5,
+            6,
+            5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            -1.5,
+            6,
+            -5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            -1.5,
+            6,
+            5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            2.5,
+            6,
+            -5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            2.5,
+            6,
+            5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            -5,
+            6,
+            0
+          ],
+          "size": [
+            2,
+            1,
+            2
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            -1,
+            6,
+            0
+          ],
+          "size": [
+            2,
+            1,
+            2
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            3,
+            6,
+            0
+          ],
+          "size": [
+            2,
+            1,
+            2
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            -3.25,
+            5.75,
+            -3.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -3.25,
+            5.75,
+            -1.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            0.75,
+            5.75,
+            -3.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            0.75,
+            5.75,
+            -1.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            4.75,
+            5.75,
+            -3.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            4.75,
+            5.75,
+            -1.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        }
+      ]
+    },
+    {
+      "id": "roof_room_1",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            16,
+            5.25,
+            -12
+          ],
+          "size": [
+            13,
+            0.5,
+            11
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            10.5,
+            6,
+            -17
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            10.5,
+            6,
+            -7
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            14.5,
+            6,
+            -17
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            14.5,
+            6,
+            -7
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            18.5,
+            6,
+            -17
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            18.5,
+            6,
+            -7
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            11,
+            6,
+            -12
+          ],
+          "size": [
+            2,
+            1,
+            2
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            15,
+            6,
+            -12
+          ],
+          "size": [
+            2,
+            1,
+            2
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            19,
+            6,
+            -12
+          ],
+          "size": [
+            2,
+            1,
+            2
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            12.75,
+            5.75,
+            -15.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            12.75,
+            5.75,
+            -13.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            16.75,
+            5.75,
+            -15.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            16.75,
+            5.75,
+            -13.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            20.75,
+            5.75,
+            -15.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            20.75,
+            5.75,
+            -13.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "worn_wall"
+        }
+      ]
+    },
+    {
+      "id": "roof_room_2",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            16,
+            5.25,
+            12
+          ],
+          "size": [
+            13,
+            0.5,
+            11
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            10.5,
+            6,
+            7
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            10.5,
+            6,
+            17
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            14.5,
+            6,
+            7
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            14.5,
+            6,
+            17
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            18.5,
+            6,
+            7
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            18.5,
+            6,
+            17
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            11,
+            6,
+            12
+          ],
+          "size": [
+            2,
+            1,
+            2
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            15,
+            6,
+            12
+          ],
+          "size": [
+            2,
+            1,
+            2
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            19,
+            6,
+            12
+          ],
+          "size": [
+            2,
+            1,
+            2
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            12.75,
+            5.75,
+            8.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            12.75,
+            5.75,
+            10.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            16.75,
+            5.75,
+            8.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            16.75,
+            5.75,
+            10.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            20.75,
+            5.75,
+            8.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            20.75,
+            5.75,
+            10.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "worn_wall"
+        }
+      ]
+    },
+    {
+      "id": "roof_room_3",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            32,
+            5.25,
+            0
+          ],
+          "size": [
+            13,
+            0.5,
+            11
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            26.5,
+            6,
+            -5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            26.5,
+            6,
+            5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            30.5,
+            6,
+            -5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            30.5,
+            6,
+            5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            34.5,
+            6,
+            -5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            34.5,
+            6,
+            5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            27,
+            6,
+            0
+          ],
+          "size": [
+            2,
+            1,
+            2
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            31,
+            6,
+            0
+          ],
+          "size": [
+            2,
+            1,
+            2
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            35,
+            6,
+            0
+          ],
+          "size": [
+            2,
+            1,
+            2
+          ],
+          "material": "iron_scrap_block"
+        },
+        {
+          "center": [
+            28.75,
+            5.75,
+            -3.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            28.75,
+            5.75,
+            -1.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            32.75,
+            5.75,
+            -3.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            32.75,
+            5.75,
+            -1.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            36.75,
+            5.75,
+            -3.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            36.75,
+            5.75,
+            -1.5
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        }
+      ]
+    }
+  ],
+  "anchors": [
+    {
+      "id": "front",
+      "partId": "root",
+      "position": [
+        -6,
+        0,
+        0
+      ],
+      "purpose": "Open entrance 6m wide, 5m high; no combat lock"
+    },
+    {
+      "id": "rear",
+      "partId": "root",
+      "position": [
+        38,
+        0,
+        0
+      ],
+      "purpose": "Open entrance 6m wide, 5m high; no combat lock"
+    },
+    {
+      "id": "room_room_0",
+      "partId": "root",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "purpose": "정비 마당"
+    },
+    {
+      "id": "room_room_1",
+      "partId": "root",
+      "position": [
+        16,
+        0,
+        -12
+      ],
+      "purpose": "도구 작업실"
+    },
+    {
+      "id": "room_room_2",
+      "partId": "root",
+      "position": [
+        16,
+        0,
+        12
+      ],
+      "purpose": "부품 창고"
+    },
+    {
+      "id": "room_room_3",
+      "partId": "root",
+      "position": [
+        32,
+        0,
+        0
+      ],
+      "purpose": "공동 숙소"
+    },
+    {
+      "id": "repair",
+      "partId": "root",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "purpose": "Community service locator; no resident or stock spawned"
+    },
+    {
+      "id": "material_trade",
+      "partId": "root",
+      "position": [
+        16,
+        0,
+        -12
+      ],
+      "purpose": "Community service locator; no resident or stock spawned"
+    },
+    {
+      "id": "scrap_processing",
+      "partId": "root",
+      "position": [
+        16,
+        0,
+        12
+      ],
+      "purpose": "Community service locator; no resident or stock spawned"
+    }
+  ],
+  "instances": [],
+  "notes": [
+    "Single-floor art prototype. Room clear sizes and doorway/corridor widths come directly from structures.json. Roof and roof decorations have role=roof for inspection cutaway.",
+    "Closed room walls are carved against open corridor and entrance volumes. Exterior detail is clipped against rooms, passages and bypass. Visual GLB is not runtime collision or navigation validation.",
+    "Facade trim, stepped roof shapes and rooftop instruments are cosmetic; no extra story, usable technology, energy supply or generated loot is implied.",
+    "Water is a visual layer below walking level; its simulation, ecosystem stock, damage and persistent inventory remain gameplay work.",
+    "Gimmick, component, reward and room anchors preserve source data locations. Runtime requires source-of-truth content and actual component assembly."
+  ],
+  "collision": {
+    "enabled": true,
+    "ownerScope": "entity_instance",
+    "selfCollision": false,
+    "externalCollision": true,
+    "shape": "part_cuboid_compound",
+    "jointOverlapAllowed": true
+  },
+  "geometry": {
+    "authoringTool": "feral_voxel_builder_v1",
+    "occupancy": "exclusive_within_part",
+    "independentPartOverlap": "preserve_joint_allowance",
+    "surfaceMeshing": "remove_shared_same_medium_or_opaque_faces_within_part"
+  }
+}

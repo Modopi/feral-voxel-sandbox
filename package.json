@@ -5,6 +5,12 @@
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.js",
-    "serve": "python3 -m http.server 8080 --directory app/src/main/assets"
+    "audit:design": "node tools/audit-content-design.mjs",
+    "serve": "python3 -m http.server 8080 --directory app/src/main/assets",
+    "build:assets": "node tools/build-visual-assets.mjs",
+    "render:assets": "node tools/render-visual-assets.mjs",
+    "serve:assets": "python3 -m http.server 8081 --directory .",
+    "check:assets": "node tools/check-visual-assets.mjs",
+    "author:assets": "python3 -m http.server 8081 --directory ."
   }
 }

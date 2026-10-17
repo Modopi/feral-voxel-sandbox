@@ -1,0 +1,317 @@
+{
+  "ok": true,
+  "blender": "4.3.2",
+  "count": 62,
+  "reports": [
+    {
+      "id": "moss_deer",
+      "meshObjects": 12,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "copper_fox",
+      "meshObjects": 10,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "azure_beetle",
+      "meshObjects": 10,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "root_stalker",
+      "meshObjects": 8,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "scree_hare",
+      "meshObjects": 10,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "flint_jackal",
+      "meshObjects": 10,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "ore_mite",
+      "meshObjects": 10,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "shaft_weasel",
+      "meshObjects": 10,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "reed_grazer",
+      "meshObjects": 11,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "mud_croc",
+      "meshObjects": 8,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "silt_snail",
+      "meshObjects": 5,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "drain_eel",
+      "meshObjects": 13,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "ash_goat",
+      "meshObjects": 13,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "ember_lizard",
+      "meshObjects": 8,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "vent_grub",
+      "meshObjects": 9,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "furnace_mantis",
+      "meshObjects": 10,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "cliff_ibex",
+      "meshObjects": 13,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "gale_raptor",
+      "meshObjects": 7,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "tide_crab",
+      "meshObjects": 12,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "cistern_serpent",
+      "meshObjects": 14,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "prism_deer",
+      "meshObjects": 13,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "veil_cat",
+      "meshObjects": 10,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "mana_moth",
+      "meshObjects": 6,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "root_weaver",
+      "meshObjects": 12,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "candle_hare",
+      "meshObjects": 11,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "relic_hound",
+      "meshObjects": 11,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "shrine_beetle",
+      "meshObjects": 11,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "oath_sentinel",
+      "meshObjects": 11,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "drift_grazer",
+      "meshObjects": 13,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "phase_stalker",
+      "meshObjects": 10,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "anchor_tick",
+      "meshObjects": 10,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "survey_drone",
+      "meshObjects": 6,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "wayfarer_organic",
+      "meshObjects": 11,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "custodian_inorganic",
+      "meshObjects": 10,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "rootback_beast",
+      "meshObjects": 11,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "mine_carapace",
+      "meshObjects": 14,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "sluice_acidworm",
+      "meshObjects": 30,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "furnace_carapace",
+      "meshObjects": 10,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "spire_glider",
+      "meshObjects": 11,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "arboretum_symbiote",
+      "meshObjects": 16,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "sanctuary_warden",
+      "meshObjects": 13,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "observatory_sentinel",
+      "meshObjects": 8,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "root_manor",
+      "meshObjects": 20,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "mining_fort",
+      "meshObjects": 23,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "floodworks",
+      "meshObjects": 27,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "geothermal_foundry",
+      "meshObjects": 27,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "cliff_observatory",
+      "meshObjects": 23,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "sealed_arboretum",
+      "meshObjects": 27,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "forgotten_monastery",
+      "meshObjects": 28,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "inertia_tower",
+      "meshObjects": 30,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "grove_supply_camp",
+      "meshObjects": 20,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "ridge_repair_station",
+      "meshObjects": 20,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "communal_archive",
+      "meshObjects": 20,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "pilgrimage_waystation",
+      "meshObjects": 20,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "grove",
+      "meshObjects": 57,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "ridge",
+      "meshObjects": 58,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "marsh",
+      "meshObjects": 56,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "thermal",
+      "meshObjects": 62,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "coast",
+      "meshObjects": 60,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "mana_grove",
+      "meshObjects": 61,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "sacred",
+      "meshObjects": 67,
+      "maxBoundsErrorM": 0.0
+    },
+    {
+      "id": "anomaly",
+      "meshObjects": 69,
+      "maxBoundsErrorM": 0.0
+    }
+  ]
+}

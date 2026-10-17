@@ -1,0 +1,1074 @@
+{
+  "schemaVersion": 1,
+  "id": "mana_moth",
+  "name": "마나나방",
+  "category": "creature",
+  "contentRef": {
+    "file": "design/content/creatures.json",
+    "id": "mana_moth"
+  },
+  "status": "art_prototype",
+  "units": "m",
+  "upAxis": "Y",
+  "forwardAxis": "+Z",
+  "visualGridM": 0.03125,
+  "materials": [
+    {
+      "id": "coat",
+      "color": "#7973A9",
+      "roughness": 0.88,
+      "metallic": 0.03,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "belly",
+      "color": "#D5C9DD",
+      "roughness": 0.88,
+      "metallic": 0.03,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "dark",
+      "color": "#403D68",
+      "roughness": 0.88,
+      "metallic": 0.03,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "accent",
+      "color": "#A6DCCB",
+      "roughness": 0.88,
+      "metallic": 0.03,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "ivory",
+      "color": "#EEE4C9",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "ink",
+      "color": "#17212B",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    }
+  ],
+  "parts": [
+    {
+      "id": "root",
+      "parent": null,
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "root",
+      "boxes": []
+    },
+    {
+      "id": "thorax",
+      "parent": "root",
+      "translation": [
+        0.03125,
+        0.0625,
+        0
+      ],
+      "role": "torso_visual",
+      "boxes": [
+        {
+          "center": [
+            -0.015625,
+            0.046875,
+            0
+          ],
+          "size": [
+            0.09375,
+            0.03125,
+            0.125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.015625,
+            0.015625,
+            0.015625
+          ],
+          "size": [
+            0.09375,
+            0.03125,
+            0.09375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.015625,
+            -0.046875,
+            0
+          ],
+          "size": [
+            0.09375,
+            0.03125,
+            0.125
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            -0.015625,
+            -0.015625,
+            0.015625
+          ],
+          "size": [
+            0.09375,
+            0.03125,
+            0.09375
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            -0.015625,
+            0,
+            -0.046875
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.015625,
+            0,
+            -0.078125
+          ],
+          "size": [
+            0.03125,
+            0.0625,
+            0.03125
+          ],
+          "material": "accent"
+        }
+      ]
+    },
+    {
+      "id": "wing_-1",
+      "parent": "root",
+      "translation": [
+        -0.03125,
+        0.09375,
+        -0.03125
+      ],
+      "role": "wing_visual",
+      "boxes": [
+        {
+          "center": [
+            -0.0625,
+            0.015625,
+            -0.015625
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.09375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.0625,
+            0.015625,
+            0.09375
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.0625,
+            0.015625,
+            0.046875
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.03125
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            -0.171875,
+            0.015625,
+            0.078125
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            -0.109375,
+            0.015625,
+            0.015625
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.15625
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            -0.140625,
+            0.015625,
+            -0.015625
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.09375
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            -0.140625,
+            0.015625,
+            0.078125
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            -0.140625,
+            0.015625,
+            0.046875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            -0.234375,
+            0.015625,
+            -0.03125
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.171875,
+            0.015625,
+            0
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.203125,
+            0.015625,
+            -0.03125
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.328125,
+            0.015625,
+            -0.046875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            -0.328125,
+            0.015625,
+            0.046875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            -0.265625,
+            0.015625,
+            -0.03125
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.0625
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            -0.296875,
+            0.015625,
+            -0.015625
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.09375
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            -0.296875,
+            0.015625,
+            0.046875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            -0.359375,
+            0.015625,
+            0
+          ],
+          "size": [
+            0.09375,
+            0.03125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.359375,
+            0.015625,
+            0.046875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            -0.0625,
+            -0.015625,
+            -0.078125
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.09375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.109375,
+            -0.015625,
+            -0.046875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.125,
+            -0.015625,
+            -0.09375
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.203125,
+            -0.015625,
+            -0.09375
+          ],
+          "size": [
+            0.09375,
+            0.03125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.234375,
+            0.015625,
+            0.03125
+          ],
+          "size": [
+            0.09375,
+            0.03125,
+            0.0625
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.234375,
+            0.046875,
+            0.046875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "accent"
+        }
+      ]
+    },
+    {
+      "id": "wing_1",
+      "parent": "root",
+      "translation": [
+        0.0625,
+        0.09375,
+        -0.03125
+      ],
+      "role": "wing_visual",
+      "boxes": [
+        {
+          "center": [
+            0.0625,
+            0.015625,
+            -0.015625
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.09375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.0625,
+            0.015625,
+            0.09375
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.0625,
+            0.015625,
+            0.046875
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.03125
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            0.109375,
+            0.015625,
+            0.015625
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.15625
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            0.171875,
+            0.015625,
+            0.078125
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            0.140625,
+            0.015625,
+            -0.015625
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.09375
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            0.140625,
+            0.015625,
+            0.078125
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            0.140625,
+            0.015625,
+            0.046875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            0.171875,
+            0.015625,
+            0
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.234375,
+            0.015625,
+            -0.03125
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.203125,
+            0.015625,
+            -0.03125
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.265625,
+            0.015625,
+            -0.03125
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.0625
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            0.328125,
+            0.015625,
+            -0.046875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            0.328125,
+            0.015625,
+            0.046875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            0.296875,
+            0.015625,
+            -0.015625
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.09375
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            0.296875,
+            0.015625,
+            0.046875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            0.359375,
+            0.015625,
+            0
+          ],
+          "size": [
+            0.09375,
+            0.03125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.359375,
+            0.015625,
+            0.046875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            0.0625,
+            -0.015625,
+            -0.078125
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.09375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.109375,
+            -0.015625,
+            -0.046875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.125,
+            -0.015625,
+            -0.09375
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.203125,
+            -0.015625,
+            -0.09375
+          ],
+          "size": [
+            0.09375,
+            0.03125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.234375,
+            0.015625,
+            0.03125
+          ],
+          "size": [
+            0.09375,
+            0.03125,
+            0.0625
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            0.234375,
+            0.046875,
+            0.046875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "accent"
+        }
+      ]
+    },
+    {
+      "id": "head",
+      "parent": "root",
+      "translation": [
+        0.03125,
+        0.125,
+        0.09375
+      ],
+      "role": "head_visual",
+      "boxes": [
+        {
+          "center": [
+            -0.015625,
+            -0.015625,
+            -0.015625
+          ],
+          "size": [
+            0.09375,
+            0.09375,
+            0.03125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.015625,
+            -0.015625,
+            0.015625
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.046875,
+            0.015625,
+            0.015625
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            0.015625,
+            0.015625,
+            0.015625
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "accent"
+        }
+      ]
+    },
+    {
+      "id": "feathery_antenna_-1",
+      "parent": "root",
+      "translation": [
+        0,
+        0.15625,
+        0.09375
+      ],
+      "role": "visual",
+      "boxes": [
+        {
+          "center": [
+            0.015625,
+            -0.015625,
+            0.015625
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            -0.015625,
+            0.015625,
+            0.015625
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.015625,
+            0.015625,
+            0.046875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "accent"
+        }
+      ]
+    },
+    {
+      "id": "feathery_antenna_1",
+      "parent": "root",
+      "translation": [
+        0.03125,
+        0.15625,
+        0.09375
+      ],
+      "role": "visual",
+      "boxes": [
+        {
+          "center": [
+            0.015625,
+            -0.015625,
+            0.015625
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            0.015625,
+            0.015625,
+            0.015625
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            0.015625,
+            0.015625,
+            0.046875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            0.046875,
+            0.015625,
+            0.046875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "accent"
+        }
+      ]
+    }
+  ],
+  "anchors": [
+    {
+      "id": "wing_tip_-1",
+      "partId": "wing_-1",
+      "position": [
+        -0.40625,
+        0,
+        -0.09375
+      ],
+      "purpose": "visual wing-tip locator; lift not implemented"
+    },
+    {
+      "id": "wing_tip_1",
+      "partId": "wing_1",
+      "position": [
+        0.40625,
+        0,
+        -0.09375
+      ],
+      "purpose": "visual wing-tip locator; lift not implemented"
+    },
+    {
+      "id": "head_look",
+      "partId": "head",
+      "position": [
+        0,
+        0,
+        0.03125
+      ],
+      "purpose": "front-facing head animation locator; visual only"
+    },
+    {
+      "id": "body_center",
+      "partId": "thorax",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "purpose": "visual flying body locator"
+    },
+    {
+      "id": "ground_origin",
+      "partId": "root",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "purpose": "visual placement origin"
+    }
+  ],
+  "instances": [],
+  "notes": [
+    "재사용 가능한 절차적 복셀 시각 원본. 게임·충돌·HP·공격·부위 기능·애니메이션은 미통합.",
+    "전체 실루엣(뿔·날개·소지 시각소품 포함)을 설계 L/W/H 0.3/0.9/0.2m에 맞춤. 표현 격자 0.03125m로 반올림. 질량·장기 물성은 시각 모델에서 계산하지 않음.",
+    "발광 꽃가루를 옮기며 잎의 수액을 먹는다. 공격하지 않고 빛이 약한 잎 아래로 숨는다.",
+    "전면 +Z, 지면 Y=0. 부위 parent와 피벗은 편집·애니메이션 준비용이며 생물 기능 연결의 구현을 뜻하지 않음."
+  ],
+  "collision": {
+    "enabled": true,
+    "ownerScope": "entity_instance",
+    "selfCollision": false,
+    "externalCollision": true,
+    "shape": "part_cuboid_compound",
+    "jointOverlapAllowed": true
+  },
+  "geometry": {
+    "authoringTool": "feral_voxel_builder_v1",
+    "occupancy": "exclusive_within_part",
+    "independentPartOverlap": "preserve_joint_allowance",
+    "surfaceMeshing": "remove_shared_same_medium_or_opaque_faces_within_part"
+  }
+}

@@ -1,0 +1,52 @@
+name: FERAL voxel authoring harness
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'design/assets/**'
+      - 'design/content/**'
+      - 'tools/asset-pipeline/**'
+      - 'tools/*visual-assets*'
+      - 'tools/audit-content-design.mjs'
+      - 'tests/**'
+      - 'app/src/main/assets/**'
+      - 'package.json'
+      - '.github/workflows/voxel-assets.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'design/assets/**'
+      - 'design/content/**'
+      - 'tools/asset-pipeline/**'
+      - 'tools/*visual-assets*'
+      - 'tools/audit-content-design.mjs'
+      - 'tests/**'
+      - 'app/src/main/assets/**'
+      - 'package.json'
+      - '.github/workflows/voxel-assets.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: voxel-assets-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-authoring:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # The harness uses Node built-ins and the repository's vendored engines.
+      - name: Run model, authoring and physics regressions
+        run: npm test
+      - name: Audit content contracts
+        run: npm run audit:design
+      - name: Verify committed assets without overwriting them
+        run: npm run check:assets

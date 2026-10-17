@@ -1,0 +1,6 @@
+
+# Generated artifacts remain checked by the authoring harness.
+design/assets/models/** linguist-generated=true
+design/assets/exports/** linguist-generated=true
+design/assets/previews/** linguist-generated=true
+design/assets/manifest.json linguist-generated=true

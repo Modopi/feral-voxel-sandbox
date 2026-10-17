@@ -1,0 +1,19 @@
+{
+  "scope": "proposed_data",
+  "valid": true,
+  "counts": {
+    "blocks": 33,
+    "environments": 8,
+    "creatures": 34,
+    "structures": 12,
+    "bosses": 8,
+    "progression": 369
+  },
+  "reachability": {
+    "items": 150,
+    "research": 39,
+    "energies": 6,
+    "excludesDiscoveryRewards": true
+  },
+  "errors": []
+}

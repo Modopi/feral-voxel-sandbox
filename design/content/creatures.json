@@ -1,0 +1,5111 @@
+{
+  "schemaVersion": 1,
+  "status": "proposed",
+  "scope": "34 ordinary species and role prototypes; no bosses; no runtime integration",
+  "contracts": {
+    "calorieUnit": "CP: 게임 내 칼로리 점수, 현실 kcal 아님",
+    "edibleBiomassCpPerUnit": 100,
+    "initialCalorieSampling": "초기 생성시 max×initialFraction, 무작위 아님. 출생은 newbornCalorieFraction, 로드는 저장값 유지",
+    "regenRule": "HP 부족 AND (피격 후 regenDelayS 경과 OR 안전 휴식 중); 당 프레임 피격은 회복을 중단. minReserve 이상 CP만 사용. restMultiplier는 HP 회복 속도에 적용하고 비용/HP는 동일. HP 회복은 끊어진 복셀·골격을 재생하지 않음",
+    "regenEquation": "heal=max(0,min(missingHP,regenHpPerS*dt*restMultiplierIfRest,(calories-maxCp*minimumReserveFraction)/regenCpPerHp)); calories-=heal*regenCpPerHp",
+    "structuralRule": "외피·골격 HP는 개체HP와 합산하지 않음. 한 충격은 전달 모델로 각 층에 분배하고 총 전달 예산을 초과해 중복차감하지 않음. core/vital 연결 파괴시 개체HP와 무관하게 사망; 세부 hit adapter 구현 필요",
+    "tierScaling": {
+      "hpPerTierMultiplier": 1.35,
+      "damagePerTierMultiplier": 1.2,
+      "minTier": 1,
+      "maxTier": 10,
+      "rule": "delta=instanceTier-baselineTier; HP와 노드HP=round(base*1.35^delta), damage=round(base*1.2^delta). 속도·감지·개체수·칼로리 동일. 환경별로 허용된 변종만 생성하며 무조건 전종10티어화 금지. 변종값은 저장."
+    },
+    "sampling": {
+      "groupDistribution": "discrete_uniform",
+      "dropDistribution": "discrete_uniform",
+      "seedKey": "worldSeed/ecologyCellId/dungeonInstanceId/speciesId/eventOrdinal",
+      "savePolicy": "초기 집단은 셀 최초 생성 때, 드롭은 사망 원장 생성 때 1회 표본. 재접속·재청크 로드에 재추첨 없음"
+    },
+    "reproduction": "성체 둘의 CP에서 자식 초기 CP 및 생성 비용 동일액 추가 차감(총 초기 CP의2배). 부모별 반씩 부담; 원자적 슬롯 예약. offspring는 juvenile 상태이고 maturity 전 공격 불가. 문명 개체 자연증식은 현 범위 제외",
+    "offlineSimulation": "오프라인 시간 간격·최대 단계·이후 집계는 environments.json world.population 소유. 생명체는 먹이/CP/출생/정비 원장 보존 규칙만 공급. 같은 개체를 환경과 던전이 이중 진행하지 않음.",
+    "playerCorpsePolicy": "사망물품은 영구 보관, 10m 요정 회수. 동물·NPC·사체 분해기가 접근해도 소비 금지",
+    "damageCaveat": "damageHp는 표준 무방어 표적에 대한 목표 피해량; 에너지 전달과 재질 반응을 구현하기 전 임의 피해값을 물리 완성으로 간주하지 않음",
+    "energyUnit": "공통 단위는 progression:energy_units 참조: 저장량·소비량 EU, 출력 EU/s, 현실 J 대응 null. 채널별 원장을 유지하며 채널 변환은 선언된 변환 컴포넌트만 허용한다. 입력 차감 후 출력 계상, 변환 총 EU 증가 금지. 런타임 연결은 미구현.",
+    "starvation": "CP=0 상태가 starvationDelayS 지속될 때 HP 감소. 탈진 시 재충전/HP 회복 없음; 먹이 확보 후 다시 지연 시작",
+    "inorganicRestore": "정비에는 재료와 정비행동 필요. 에너지 충전만으로 HP 회복 금지. 자연 회복 없음. 파괴된 핵심은 새 개체 생성으로 복구하지 않음",
+    "populationPrecedence": "야외 group/cap은 environments.json 단일 권위. dungeonGroupMin/Max는 실내 배치 기본값이며 structures.json 방 할당이 더 엄격하면 그 값을 적용. 문명 원형은 공동체 인원 예산 사용.",
+    "biomassOwnership": "생산 패치 용량·재생은 environments.json 소유. 초기안은 패치10BU, 일반0.004BU/s, 열곡·이상0.002BU/s. creatures는 BU를100CP로 변환해 실제 잔량을 소비한다.",
+    "predatorCapacity": "던전 종 한도는 상한이며 지속가능 개체수를 보장하지 않음. 번식 허용을 계산할 때 prey의 예상 실제 출생 식용CP가 살아있는 포식자 유지소비보다 적으면 포식자 출생을 중지한다. 초기 사체재고는 structures ecology.initialCarrionCp에서 유한소비한다. 초식생산CP를 포식자에게 직접 지급하지 않는다. 평형 값은 시뮬레이션 전 미검증.",
+    "ecologyResources": [
+      {
+        "id": "detritus",
+        "name": "분해 유기물",
+        "unit": "CP",
+        "source": "채집되지 않은 식생 잔재와 남은 사체 식용예산을 유일 원장에서 이체. 플레이어 사망보관함 제외.",
+        "sink": "분해식자 섭식 또는 비식용 토양양분 전환. 기존 사체 원장 동시 소비 금지.",
+        "persistence": "구획별 residualCp 저장, 재로드 새 생성 없음"
+      },
+      {
+        "id": "community_plant_food",
+        "name": "공동체 식물식량",
+        "unit": "CP",
+        "source": "환경 또는 실내 producer의 가용 BU를 수확해 공동체 식량 원장으로 이전. 원생산원 BU 차감.",
+        "sink": "문명 유기생명 식사 및 공동체 보급 지출.",
+        "persistence": "communityId별 availableCp 저장, 식물식량과 종 calories 사이 원자적 이동"
+      }
+    ],
+    "energyUnitRef": "progression:energy_units",
+    "energyIntegrationStatus": "미구현: 공격 에너지 전달→재질 반응→HP 피해 계수 및 유기생명 음식대사→해당 채널 저장의 생산 어댑터. cpPerEu=1은 칼로리 비용 제안이며 칼로리를 임의 채널로 자유 교환하는 기능이 아니다. 무기생명 정비소/전력 공급은 같은 채널로만 충전하며 다른 채널은 선언된 변환 컴포넌트와 손실을 거친다."
+  },
+  "bodyProfiles": {
+    "quadruped": {
+      "name": "사족",
+      "core": "thorax",
+      "vital": [
+        "brain",
+        "spine"
+      ],
+      "limbCount": 4,
+      "shellHpFraction": 0.2,
+      "coreHpFraction": 0.35,
+      "limbHpFraction": 0.12,
+      "intactLimbSpeed": [
+        0,
+        0.045,
+        0.12,
+        0.55,
+        1
+      ],
+      "effect": "3다리 절뚝임, 2다리 대각지지이면0.22/그외0.12; 머리 연결 또는 척추 파괴 시 사망; 꼬리 손상은 회전속도0.8"
+    },
+    "arthropod": {
+      "name": "절지",
+      "core": "central_ganglion",
+      "vital": [
+        "thorax_ring"
+      ],
+      "limbCount": 6,
+      "shellHpFraction": 0.35,
+      "coreHpFraction": 0.3,
+      "limbHpFraction": 0.08,
+      "intactLimbSpeed": [
+        0,
+        0.06,
+        0.15,
+        0.35,
+        0.6,
+        0.8,
+        1
+      ],
+      "effect": "좌우 지지 각각1개 필요; 턱 부착 파괴 시 섭식·물기 중단; 외피 손상만으로 다리 파괴 판정 금지"
+    },
+    "crawler": {
+      "name": "복족·유충",
+      "core": "central_ganglion",
+      "vital": [
+        "ventral_tract"
+      ],
+      "limbCount": 1,
+      "shellHpFraction": 0.3,
+      "coreHpFraction": 0.35,
+      "limbHpFraction": 0.3,
+      "intactLimbSpeed": [
+        0,
+        1
+      ],
+      "effect": "복측 이동띠 단절 시 정지; 분비샘 파괴 시 산성 방어 중단"
+    },
+    "serpent": {
+      "name": "장체",
+      "core": "heart_segment",
+      "vital": [
+        "head",
+        "axial_chain"
+      ],
+      "limbCount": 4,
+      "shellHpFraction": 0.15,
+      "coreHpFraction": 0.35,
+      "limbHpFraction": 0.15,
+      "intactLimbSpeed": [
+        0,
+        0.15,
+        0.4,
+        0.7,
+        1
+      ],
+      "effect": "네 구간 연결 중간이 끊기면 머리·심장 연결 판정; 꼬리만 잃으면 후방 밀기 감소, 분리된 꼬리는 사물"
+    },
+    "winged": {
+      "name": "유익",
+      "core": "thorax",
+      "vital": [
+        "brain",
+        "keel"
+      ],
+      "limbCount": 2,
+      "shellHpFraction": 0.1,
+      "coreHpFraction": 0.35,
+      "limbHpFraction": 0.2,
+      "intactLimbSpeed": [
+        0,
+        0,
+        1
+      ],
+      "effect": "한쪽 날개 기능 상실 시 비행 중지·추락, 지상 이동은 원속도0.25; 날개 표면 50% 소실 시 양력0.5"
+    },
+    "biped": {
+      "name": "이족",
+      "core": "torso_core",
+      "vital": [
+        "head",
+        "central_column"
+      ],
+      "limbCount": 2,
+      "shellHpFraction": 0.25,
+      "coreHpFraction": 0.35,
+      "limbHpFraction": 0.15,
+      "intactLimbSpeed": [
+        0,
+        0.2,
+        1
+      ],
+      "effect": "한쪽 다리 손실 시 기어 이동, 무장 팔 연결 파괴 시 해당 공격 중단; 외장과 뼈·프레임은 독립"
+    },
+    "hover": {
+      "name": "부유",
+      "core": "logic_core",
+      "vital": [
+        "power_bus"
+      ],
+      "limbCount": 3,
+      "shellHpFraction": 0.3,
+      "coreHpFraction": 0.3,
+      "limbHpFraction": 0.12,
+      "intactLimbSpeed": [
+        0,
+        0.15,
+        0.55,
+        1
+      ],
+      "effect": "추진기 셋 중 하나 파괴 시 기울고 출력 감소, 모두 파괴 시 추락; 축전부 파괴 시 전격 중단"
+    },
+    "arachnid": {
+      "name": "거미형",
+      "core": "central_ganglion",
+      "vital": [
+        "thorax_ring"
+      ],
+      "limbCount": 8,
+      "shellHpFraction": 0.35,
+      "coreHpFraction": 0.3,
+      "limbHpFraction": 0.08,
+      "intactLimbSpeed": [
+        0,
+        0.03,
+        0.08,
+        0.18,
+        0.35,
+        0.55,
+        0.7,
+        0.85,
+        1
+      ],
+      "effect": "좌우 지지 각각1개 필요; 턱 부착 파괴 시 섭식·물기 중단; 외피 손상만으로 다리 파괴 판정 금지"
+    }
+  },
+  "entries": [
+    {
+      "id": "moss_deer",
+      "name": "이끼사슴",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "primary_consumer",
+      "baselineTier": 2,
+      "concept": "이끼빛 등과 밝은 배. 무리의 경계 개체가 먼저 귀를 세우고 도주하며 새끼 주변에서만 발차기한다.",
+      "body": {
+        "lengthWidthHeightM": [
+          1.8,
+          0.7,
+          1.5
+        ],
+        "massKg": 85,
+        "profile": "quadruped",
+        "outerCellM": 0.25,
+        "coreHp": 17,
+        "shellPatchHp": 10,
+        "limbNodeHp": 6
+      },
+      "stats": {
+        "maxHp": 48,
+        "cruiseMps": 1.2,
+        "sprintMps": 4.4,
+        "detectionM": 20,
+        "chaseFromHomeM": 24,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "avoidant",
+        "activePeriod": "day",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "퇴로가 막힌 상태에서 공격받음",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "moss_deer_primary",
+          "name": "뒷발차기",
+          "energyType": "mechanical",
+          "damageHp": 9,
+          "rangeM": 1.5,
+          "windupS": 0.8,
+          "recoveryS": 0.6,
+          "cooldownS": 2.8,
+          "telegraph": "뒷발을 들고 귀를 젖힘",
+          "shape": "뒤쪽 70도 부채꼴",
+          "calorieCostCp": 1.8,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 425,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.177,
+        "sprintExtraCpPerS": 0.354,
+        "regenDelayS": 10,
+        "regenHpPerS": 0.27,
+        "regenCpPerHp": 2,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 0.2
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "grove"
+        ],
+        "dungeonIds": [
+          "root_manor"
+        ],
+        "diet": [
+          {
+            "kind": "producer",
+            "id": "grass"
+          },
+          {
+            "kind": "producer",
+            "id": "moss"
+          },
+          {
+            "kind": "producer",
+            "id": "leaves"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 149,
+        "habitat": "생산원과 은신처가 연결된 지표; 중첩 환경에서는 기저 환경의 이동 조건도 만족",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": [
+          {
+            "dungeonId": "root_manor",
+            "diet": [
+              {
+                "kind": "dungeon_producer",
+                "id": "root_manor_primary_producer"
+              },
+              {
+                "kind": "dungeon_producer",
+                "id": "root_manor_secondary_producer"
+              }
+            ]
+          }
+        ]
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:grove:spawning",
+        "dungeonBudgetRef": "structures:root_manor:ecology",
+        "dungeonMaxCount": 2,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 0.9,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 1200,
+        "breedingCooldownS": 1200,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 3
+      },
+      "drops": [
+        {
+          "itemId": "meat",
+          "min": 2,
+          "max": 4,
+          "alternativeSourceRef": "progression:meat",
+          "alternativeRecipe": "synth_meat"
+        },
+        {
+          "itemId": "hide",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:hide",
+          "alternativeRecipe": "synth_hide"
+        },
+        {
+          "itemId": "bone",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:bone",
+          "alternativeRecipe": "synth_bone"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": 0
+    },
+    {
+      "id": "copper_fox",
+      "name": "구리여우",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "predator",
+      "baselineTier": 2,
+      "concept": "붉은 꼬리로 방향 전환을 보여준다. 포만 시 추적하지 않고 야간에 작은 먹이를 노린다.",
+      "body": {
+        "lengthWidthHeightM": [
+          1.3,
+          0.45,
+          0.8
+        ],
+        "massKg": 24,
+        "profile": "quadruped",
+        "outerCellM": 0.25,
+        "coreHp": 25,
+        "shellPatchHp": 14,
+        "limbNodeHp": 9
+      },
+      "stats": {
+        "maxHp": 72,
+        "cruiseMps": 2.2,
+        "sprintMps": 4.2,
+        "detectionM": 16,
+        "chaseFromHomeM": 28,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "satiation_gated_predator",
+        "activePeriod": "dusk_night",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "배고픔 기준 이하이며 자신보다 약한 먹이, 또는 직접 공격에 대한 방어",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "copper_fox_primary",
+          "name": "짧은 물기",
+          "energyType": "mechanical",
+          "damageHp": 12,
+          "rangeM": 1.5,
+          "windupS": 0.65,
+          "recoveryS": 0.49,
+          "cooldownS": 2.1,
+          "telegraph": "몸을 낮추고 꼬리를 세움",
+          "shape": "직선 0.8m 도약",
+          "calorieCostCp": 2.4,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 120,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.05,
+        "sprintExtraCpPerS": 0.1,
+        "regenDelayS": 12,
+        "regenHpPerS": 0.4,
+        "regenCpPerHp": 3,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 0.3
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "grove"
+        ],
+        "dungeonIds": [],
+        "diet": [
+          {
+            "kind": "species",
+            "id": "moss_deer"
+          },
+          {
+            "kind": "species",
+            "id": "azure_beetle"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 42,
+        "habitat": "생산원과 은신처가 연결된 지표; 중첩 환경에서는 기저 환경의 이동 조건도 만족",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": []
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:grove:spawning",
+        "dungeonBudgetRef": null,
+        "dungeonMaxCount": 0,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 0.65,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 1200,
+        "breedingCooldownS": 1200,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 2
+      },
+      "drops": [
+        {
+          "itemId": "meat",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:meat",
+          "alternativeRecipe": "synth_meat"
+        },
+        {
+          "itemId": "hide",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:hide",
+          "alternativeRecipe": "synth_hide"
+        },
+        {
+          "itemId": "bone",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:bone",
+          "alternativeRecipe": "synth_bone"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": 1
+    },
+    {
+      "id": "azure_beetle",
+      "name": "청금딱정",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "detritivore",
+      "baselineTier": 2,
+      "concept": "청금빛 등딱지와 작은 집게. 낙엽·썩은 목질을 분해하며 위협받으면 틈으로 숨는다.",
+      "body": {
+        "lengthWidthHeightM": [
+          0.55,
+          0.35,
+          0.3
+        ],
+        "massKg": 3,
+        "profile": "arthropod",
+        "outerCellM": 0.125,
+        "coreHp": 10,
+        "shellPatchHp": 11,
+        "limbNodeHp": 3
+      },
+      "stats": {
+        "maxHp": 32,
+        "cruiseMps": 0.7,
+        "sprintMps": 1.4,
+        "detectionM": 6,
+        "chaseFromHomeM": 4,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "avoidant",
+        "activePeriod": "all",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "퇴로가 막힌 상태에서 공격받음",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "azure_beetle_primary",
+          "name": "방어 집게",
+          "energyType": "mechanical",
+          "damageHp": 3,
+          "rangeM": 0.65,
+          "windupS": 0.9,
+          "recoveryS": 0.68,
+          "cooldownS": 3,
+          "telegraph": "집게를 벌리고 멈춤",
+          "shape": "정면 45도",
+          "calorieCostCp": 1,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 120,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.05,
+        "sprintExtraCpPerS": 0.1,
+        "regenDelayS": 10,
+        "regenHpPerS": 0.18,
+        "regenCpPerHp": 2,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 0.133
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "grove"
+        ],
+        "dungeonIds": [
+          "root_manor"
+        ],
+        "diet": [
+          {
+            "kind": "producer",
+            "id": "log"
+          },
+          {
+            "kind": "producer",
+            "id": "leaves"
+          },
+          {
+            "kind": "resource",
+            "id": "detritus"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 42,
+        "habitat": "생산원과 은신처가 연결된 지표; 중첩 환경에서는 기저 환경의 이동 조건도 만족",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": [
+          {
+            "dungeonId": "root_manor",
+            "diet": [
+              {
+                "kind": "dungeon_producer",
+                "id": "root_manor_primary_producer"
+              },
+              {
+                "kind": "dungeon_producer",
+                "id": "root_manor_secondary_producer"
+              },
+              {
+                "kind": "resource",
+                "id": "detritus"
+              }
+            ]
+          }
+        ]
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:grove:spawning",
+        "dungeonBudgetRef": "structures:root_manor:ecology",
+        "dungeonMaxCount": 6,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 0.275,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 600,
+        "breedingCooldownS": 600,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 4
+      },
+      "drops": [
+        {
+          "itemId": "chitin",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:chitin",
+          "alternativeRecipe": "synth_chitin"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": 2
+    },
+    {
+      "id": "root_stalker",
+      "name": "뿌리잠복수",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "predator",
+      "baselineTier": 2,
+      "concept": "저택 뿌리 통로의 낮은 포식자. 발자국 진동을 감지하되 돌바닥의 조용한 우회를 허용한다.",
+      "body": {
+        "lengthWidthHeightM": [
+          1.5,
+          0.65,
+          0.75
+        ],
+        "massKg": 38,
+        "profile": "quadruped",
+        "outerCellM": 0.25,
+        "coreHp": 30,
+        "shellPatchHp": 17,
+        "limbNodeHp": 10
+      },
+      "stats": {
+        "maxHp": 86,
+        "cruiseMps": 1.5,
+        "sprintMps": 3.8,
+        "detectionM": 12,
+        "chaseFromHomeM": 18,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "satiation_gated_predator",
+        "activePeriod": "dusk_night",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "배고픔 기준 이하이며 자신보다 약한 먹이, 또는 직접 공격에 대한 방어",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "root_stalker_primary",
+          "name": "뿌리 통로 덮치기",
+          "energyType": "mechanical",
+          "damageHp": 16,
+          "rangeM": 2.8,
+          "windupS": 1.1,
+          "recoveryS": 0.83,
+          "cooldownS": 3.4,
+          "telegraph": "바닥 긁는 소리와 어깨 수축",
+          "shape": "직선 2m, 벽에서 정지",
+          "calorieCostCp": 3.2,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 190,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.079,
+        "sprintExtraCpPerS": 0.158,
+        "regenDelayS": 12,
+        "regenHpPerS": 0.48,
+        "regenCpPerHp": 3,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 0.358
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "grove"
+        ],
+        "dungeonIds": [
+          "root_manor"
+        ],
+        "diet": [
+          {
+            "kind": "species",
+            "id": "azure_beetle"
+          },
+          {
+            "kind": "species",
+            "id": "moss_deer"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 66,
+        "habitat": "내부 그늘·먹이 방과 연결된 매복처",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": []
+      },
+      "population": {
+        "outdoorBudgetRef": null,
+        "dungeonBudgetRef": "structures:root_manor:ecology",
+        "dungeonMaxCount": 2,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 0.75,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 1200,
+        "breedingCooldownS": 1200,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 2
+      },
+      "drops": [
+        {
+          "itemId": "meat",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:meat",
+          "alternativeRecipe": "synth_meat"
+        },
+        {
+          "itemId": "hide",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:hide",
+          "alternativeRecipe": "synth_hide"
+        },
+        {
+          "itemId": "bone",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:bone",
+          "alternativeRecipe": "synth_bone"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "scree_hare",
+      "name": "너덜토끼",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "primary_consumer",
+      "baselineTier": 3,
+      "concept": "돌색 등과 긴 뒷다리. 마른 풀과 동굴 균류를 먹고 돌틈으로 피한다.",
+      "body": {
+        "lengthWidthHeightM": [
+          0.7,
+          0.35,
+          0.5
+        ],
+        "massKg": 5,
+        "profile": "quadruped",
+        "outerCellM": 0.125,
+        "coreHp": 15,
+        "shellPatchHp": 8,
+        "limbNodeHp": 5
+      },
+      "stats": {
+        "maxHp": 42,
+        "cruiseMps": 1.5,
+        "sprintMps": 4.7,
+        "detectionM": 18,
+        "chaseFromHomeM": 20,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "avoidant",
+        "activePeriod": "day",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "퇴로가 막힌 상태에서 공격받음",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "scree_hare_primary",
+          "name": "필사적 발차기",
+          "energyType": "mechanical",
+          "damageHp": 7,
+          "rangeM": 0.9,
+          "windupS": 0.7,
+          "recoveryS": 0.52,
+          "cooldownS": 3.5,
+          "telegraph": "몸을 둥글게 말고 뒷발을 모음",
+          "shape": "후방 좁은 접촉",
+          "calorieCostCp": 1.4,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 120,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.05,
+        "sprintExtraCpPerS": 0.1,
+        "regenDelayS": 10,
+        "regenHpPerS": 0.23,
+        "regenCpPerHp": 2,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 0.175
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "ridge"
+        ],
+        "dungeonIds": [
+          "mining_fort"
+        ],
+        "diet": [
+          {
+            "kind": "producer",
+            "id": "dry_grass"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 42,
+        "habitat": "생산원과 은신처가 연결된 지표; 중첩 환경에서는 기저 환경의 이동 조건도 만족",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": [
+          {
+            "dungeonId": "mining_fort",
+            "diet": [
+              {
+                "kind": "dungeon_producer",
+                "id": "mining_fort_primary_producer"
+              },
+              {
+                "kind": "dungeon_producer",
+                "id": "mining_fort_secondary_producer"
+              }
+            ]
+          }
+        ]
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:ridge:spawning",
+        "dungeonBudgetRef": "structures:mining_fort:ecology",
+        "dungeonMaxCount": 2,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 0.35,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 1200,
+        "breedingCooldownS": 1200,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 3
+      },
+      "drops": [
+        {
+          "itemId": "meat",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:meat",
+          "alternativeRecipe": "synth_meat"
+        },
+        {
+          "itemId": "hide",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:hide",
+          "alternativeRecipe": "synth_hide"
+        },
+        {
+          "itemId": "bone",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:bone",
+          "alternativeRecipe": "synth_bone"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "flint_jackal",
+      "name": "부싯돌자칼",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "predator",
+      "baselineTier": 3,
+      "concept": "바위 능선에서 먹이를 몰아가는 소규모 포식자. 혼자 있을 때 큰 표적을 회피한다.",
+      "body": {
+        "lengthWidthHeightM": [
+          1.6,
+          0.6,
+          0.95
+        ],
+        "massKg": 42,
+        "profile": "quadruped",
+        "outerCellM": 0.25,
+        "coreHp": 40,
+        "shellPatchHp": 23,
+        "limbNodeHp": 14
+      },
+      "stats": {
+        "maxHp": 115,
+        "cruiseMps": 2.1,
+        "sprintMps": 4.6,
+        "detectionM": 22,
+        "chaseFromHomeM": 32,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "satiation_gated_predator",
+        "activePeriod": "dusk_night",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "배고픔 기준 이하이며 자신보다 약한 먹이, 또는 직접 공격에 대한 방어",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "flint_jackal_primary",
+          "name": "측면 물기",
+          "energyType": "mechanical",
+          "damageHp": 19,
+          "rangeM": 1.8,
+          "windupS": 0.85,
+          "recoveryS": 0.64,
+          "cooldownS": 2.5,
+          "telegraph": "옆걸음 두 번 후 짖음",
+          "shape": "정면 60도",
+          "calorieCostCp": 3.8,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 210,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.087,
+        "sprintExtraCpPerS": 0.175,
+        "regenDelayS": 12,
+        "regenHpPerS": 0.64,
+        "regenCpPerHp": 3,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 0.479
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "ridge"
+        ],
+        "dungeonIds": [],
+        "diet": [
+          {
+            "kind": "species",
+            "id": "scree_hare"
+          },
+          {
+            "kind": "species",
+            "id": "ore_mite"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 74,
+        "habitat": "생산원과 은신처가 연결된 지표; 중첩 환경에서는 기저 환경의 이동 조건도 만족",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": []
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:ridge:spawning",
+        "dungeonBudgetRef": null,
+        "dungeonMaxCount": 0,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 0.8,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 1200,
+        "breedingCooldownS": 1200,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 2
+      },
+      "drops": [
+        {
+          "itemId": "meat",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:meat",
+          "alternativeRecipe": "synth_meat"
+        },
+        {
+          "itemId": "hide",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:hide",
+          "alternativeRecipe": "synth_hide"
+        },
+        {
+          "itemId": "bone",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:bone",
+          "alternativeRecipe": "synth_bone"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "ore_mite",
+      "name": "광분진진드기",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "detritivore",
+      "baselineTier": 3,
+      "concept": "광석을 먹는 것이 아니라 표면의 미생물막을 긁어 먹는다. 부드러운 복부가 드러나면 도망친다.",
+      "body": {
+        "lengthWidthHeightM": [
+          0.35,
+          0.3,
+          0.2
+        ],
+        "massKg": 1,
+        "profile": "arthropod",
+        "outerCellM": 0.125,
+        "coreHp": 8,
+        "shellPatchHp": 9,
+        "limbNodeHp": 2
+      },
+      "stats": {
+        "maxHp": 26,
+        "cruiseMps": 0.5,
+        "sprintMps": 1.2,
+        "detectionM": 5,
+        "chaseFromHomeM": 3,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "avoidant",
+        "activePeriod": "all",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "퇴로가 막힌 상태에서 공격받음",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "ore_mite_primary",
+          "name": "집게 방어",
+          "energyType": "mechanical",
+          "damageHp": 3,
+          "rangeM": 0.5,
+          "windupS": 0.9,
+          "recoveryS": 0.68,
+          "cooldownS": 3.4,
+          "telegraph": "앞다리를 세움",
+          "shape": "접촉 1회",
+          "calorieCostCp": 1,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 120,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.05,
+        "sprintExtraCpPerS": 0.1,
+        "regenDelayS": 10,
+        "regenHpPerS": 0.15,
+        "regenCpPerHp": 2,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 0.108
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "ridge"
+        ],
+        "dungeonIds": [
+          "mining_fort"
+        ],
+        "diet": [
+          {
+            "kind": "producer",
+            "id": "dry_grass"
+          },
+          {
+            "kind": "resource",
+            "id": "detritus"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 42,
+        "habitat": "생산원과 은신처가 연결된 지표; 중첩 환경에서는 기저 환경의 이동 조건도 만족",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": [
+          {
+            "dungeonId": "mining_fort",
+            "diet": [
+              {
+                "kind": "dungeon_producer",
+                "id": "mining_fort_primary_producer"
+              },
+              {
+                "kind": "dungeon_producer",
+                "id": "mining_fort_secondary_producer"
+              },
+              {
+                "kind": "resource",
+                "id": "detritus"
+              }
+            ]
+          }
+        ]
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:ridge:spawning",
+        "dungeonBudgetRef": "structures:mining_fort:ecology",
+        "dungeonMaxCount": 6,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 0.175,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 600,
+        "breedingCooldownS": 600,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 4
+      },
+      "drops": [
+        {
+          "itemId": "chitin",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:chitin",
+          "alternativeRecipe": "synth_chitin"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "shaft_weasel",
+      "name": "갱도족제비",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "predator",
+      "baselineTier": 3,
+      "concept": "굴 입구에서 몸을 낮춘 뒤 짧게 돌진한다. 좁은 통로에 강하지만 개방 공간에서는 오래 쫓지 않는다.",
+      "body": {
+        "lengthWidthHeightM": [
+          1.3,
+          0.4,
+          0.5
+        ],
+        "massKg": 18,
+        "profile": "quadruped",
+        "outerCellM": 0.125,
+        "coreHp": 37,
+        "shellPatchHp": 21,
+        "limbNodeHp": 13
+      },
+      "stats": {
+        "maxHp": 105,
+        "cruiseMps": 1.7,
+        "sprintMps": 4.1,
+        "detectionM": 14,
+        "chaseFromHomeM": 22,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "satiation_gated_predator",
+        "activePeriod": "dusk_night",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "배고픔 기준 이하이며 자신보다 약한 먹이, 또는 직접 공격에 대한 방어",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "shaft_weasel_primary",
+          "name": "갱도 돌진",
+          "energyType": "mechanical",
+          "damageHp": 22,
+          "rangeM": 3,
+          "windupS": 1,
+          "recoveryS": 0.75,
+          "cooldownS": 3.8,
+          "telegraph": "바닥 먼지와 긴 울음",
+          "shape": "직선 2.5m, 실패 후1s 회복",
+          "calorieCostCp": 4.4,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 120,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.05,
+        "sprintExtraCpPerS": 0.1,
+        "regenDelayS": 12,
+        "regenHpPerS": 0.58,
+        "regenCpPerHp": 3,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 0.438
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "ridge"
+        ],
+        "dungeonIds": [
+          "mining_fort"
+        ],
+        "diet": [
+          {
+            "kind": "species",
+            "id": "ore_mite"
+          },
+          {
+            "kind": "species",
+            "id": "scree_hare"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 42,
+        "habitat": "내부 그늘·먹이 방과 연결된 매복처",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": []
+      },
+      "population": {
+        "outdoorBudgetRef": null,
+        "dungeonBudgetRef": "structures:mining_fort:ecology",
+        "dungeonMaxCount": 2,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 0.65,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 1200,
+        "breedingCooldownS": 1200,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 2
+      },
+      "drops": [
+        {
+          "itemId": "meat",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:meat",
+          "alternativeRecipe": "synth_meat"
+        },
+        {
+          "itemId": "hide",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:hide",
+          "alternativeRecipe": "synth_hide"
+        },
+        {
+          "itemId": "bone",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:bone",
+          "alternativeRecipe": "synth_bone"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "reed_grazer",
+      "name": "갈대등짐수",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "primary_consumer",
+      "baselineTier": 4,
+      "concept": "넓은 발과 갈대색 등. 얕은 물을 헤치며 갈대를 먹고 깊은 물과 산성 웅덩이는 피한다.",
+      "body": {
+        "lengthWidthHeightM": [
+          2.1,
+          1,
+          1.3
+        ],
+        "massKg": 150,
+        "profile": "quadruped",
+        "outerCellM": 0.25,
+        "coreHp": 58,
+        "shellPatchHp": 33,
+        "limbNodeHp": 20
+      },
+      "stats": {
+        "maxHp": 165,
+        "cruiseMps": 1.1,
+        "sprintMps": 3.4,
+        "detectionM": 16,
+        "chaseFromHomeM": 18,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "avoidant",
+        "activePeriod": "day",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "퇴로가 막힌 상태에서 공격받음",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "reed_grazer_primary",
+          "name": "몸통 밀기",
+          "energyType": "mechanical",
+          "damageHp": 20,
+          "rangeM": 2,
+          "windupS": 1.1,
+          "recoveryS": 0.83,
+          "cooldownS": 3.8,
+          "telegraph": "머리를 돌리고 갈대를 흔듦",
+          "shape": "정면 80도",
+          "calorieCostCp": 4.0,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 750,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.312,
+        "sprintExtraCpPerS": 0.625,
+        "regenDelayS": 10,
+        "regenHpPerS": 0.92,
+        "regenCpPerHp": 2,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 0.688
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "marsh"
+        ],
+        "dungeonIds": [
+          "floodworks"
+        ],
+        "diet": [
+          {
+            "kind": "producer",
+            "id": "reed"
+          },
+          {
+            "kind": "producer",
+            "id": "algae"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 262,
+        "habitat": "수심 0.2~1.5m의 조류·갈대 가장자리",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": [
+          {
+            "dungeonId": "floodworks",
+            "diet": [
+              {
+                "kind": "dungeon_producer",
+                "id": "floodworks_primary_producer"
+              },
+              {
+                "kind": "dungeon_producer",
+                "id": "floodworks_secondary_producer"
+              }
+            ]
+          }
+        ]
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:marsh:spawning",
+        "dungeonBudgetRef": "structures:floodworks:ecology",
+        "dungeonMaxCount": 4,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 1.05,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 1200,
+        "breedingCooldownS": 1200,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 3
+      },
+      "drops": [
+        {
+          "itemId": "meat",
+          "min": 2,
+          "max": 4,
+          "alternativeSourceRef": "progression:meat",
+          "alternativeRecipe": "synth_meat"
+        },
+        {
+          "itemId": "hide",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:hide",
+          "alternativeRecipe": "synth_hide"
+        },
+        {
+          "itemId": "bone",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:bone",
+          "alternativeRecipe": "synth_bone"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "mud_croc",
+      "name": "진흙악어",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "predator",
+      "baselineTier": 4,
+      "concept": "수면에 눈만 드러내고 기다린다. 입 벌리는 예고 뒤 물가의 표적만 짧게 추격한다.",
+      "body": {
+        "lengthWidthHeightM": [
+          3,
+          1,
+          0.6
+        ],
+        "massKg": 190,
+        "profile": "quadruped",
+        "outerCellM": 0.25,
+        "coreHp": 77,
+        "shellPatchHp": 44,
+        "limbNodeHp": 26
+      },
+      "stats": {
+        "maxHp": 220,
+        "cruiseMps": 1.4,
+        "sprintMps": 4,
+        "detectionM": 18,
+        "chaseFromHomeM": 26,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "satiation_gated_predator",
+        "activePeriod": "dusk_night",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "배고픔 기준 이하이며 자신보다 약한 먹이, 또는 직접 공격에 대한 방어",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "mud_croc_primary",
+          "name": "턱 닫기",
+          "energyType": "mechanical",
+          "damageHp": 29,
+          "rangeM": 2.6,
+          "windupS": 1.25,
+          "recoveryS": 0.94,
+          "cooldownS": 3.6,
+          "telegraph": "입을 크게 벌리며 수면 파문",
+          "shape": "정면 60도, 고정 후 회전 금지",
+          "calorieCostCp": 5.8,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 950,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.396,
+        "sprintExtraCpPerS": 0.792,
+        "regenDelayS": 12,
+        "regenHpPerS": 1.22,
+        "regenCpPerHp": 3,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 0.917
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "marsh"
+        ],
+        "dungeonIds": [],
+        "diet": [
+          {
+            "kind": "species",
+            "id": "reed_grazer"
+          },
+          {
+            "kind": "species",
+            "id": "silt_snail"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 332,
+        "habitat": "수심 0.2~1.5m의 조류·갈대 가장자리",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": []
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:marsh:spawning",
+        "dungeonBudgetRef": null,
+        "dungeonMaxCount": 0,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 1.5,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 1200,
+        "breedingCooldownS": 1200,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 2
+      },
+      "drops": [
+        {
+          "itemId": "meat",
+          "min": 2,
+          "max": 4,
+          "alternativeSourceRef": "progression:meat",
+          "alternativeRecipe": "synth_meat"
+        },
+        {
+          "itemId": "hide",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:hide",
+          "alternativeRecipe": "synth_hide"
+        },
+        {
+          "itemId": "bone",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:bone",
+          "alternativeRecipe": "synth_bone"
+        },
+        {
+          "itemId": "acid_gland",
+          "min": 1,
+          "max": 1,
+          "alternativeSourceRef": "progression:acid_gland",
+          "alternativeRecipe": "synth_acid_gland"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "silt_snail",
+      "name": "침전달팽이",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "detritivore",
+      "baselineTier": 4,
+      "concept": "퇴적물과 조류를 먹고 산성 부산물을 저장한다. 접촉만으로 피해를 주지 않고 찔렸을 때 방어 분비한다.",
+      "body": {
+        "lengthWidthHeightM": [
+          0.6,
+          0.45,
+          0.45
+        ],
+        "massKg": 8,
+        "profile": "crawler",
+        "outerCellM": 0.125,
+        "coreHp": 23,
+        "shellPatchHp": 20,
+        "limbNodeHp": 20
+      },
+      "stats": {
+        "maxHp": 65,
+        "cruiseMps": 0.25,
+        "sprintMps": 0.6,
+        "detectionM": 5,
+        "chaseFromHomeM": 2,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "avoidant",
+        "activePeriod": "all",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "퇴로가 막힌 상태에서 공격받음",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "silt_snail_primary",
+          "name": "산성 방어액",
+          "energyType": "chemical",
+          "damageHp": 8,
+          "rangeM": 1.1,
+          "windupS": 1.4,
+          "recoveryS": 1.05,
+          "cooldownS": 5,
+          "telegraph": "껍데기 아래 초록 기포",
+          "shape": "단일 접촉, 잔류 장판 없음",
+          "calorieCostCp": 1.6,
+          "reserveCostEu": 16
+        }
+      ],
+      "calories": {
+        "maxCp": 120,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.05,
+        "sprintExtraCpPerS": 0.1,
+        "regenDelayS": 10,
+        "regenHpPerS": 0.36,
+        "regenCpPerHp": 2,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 0.271
+      },
+      "energyReserve": {
+        "kind": "chemical",
+        "capacityEu": 120,
+        "initialFraction": 0.75,
+        "recharge": "food_metabolism",
+        "cpPerEu": 1
+      },
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "marsh"
+        ],
+        "dungeonIds": [
+          "floodworks"
+        ],
+        "diet": [
+          {
+            "kind": "producer",
+            "id": "reed"
+          },
+          {
+            "kind": "producer",
+            "id": "algae"
+          },
+          {
+            "kind": "resource",
+            "id": "detritus"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 42,
+        "habitat": "수심 0.2~1.5m의 조류·갈대 가장자리",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": [
+          {
+            "dungeonId": "floodworks",
+            "diet": [
+              {
+                "kind": "dungeon_producer",
+                "id": "floodworks_primary_producer"
+              },
+              {
+                "kind": "dungeon_producer",
+                "id": "floodworks_secondary_producer"
+              },
+              {
+                "kind": "resource",
+                "id": "detritus"
+              }
+            ]
+          }
+        ]
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:marsh:spawning",
+        "dungeonBudgetRef": "structures:floodworks:ecology",
+        "dungeonMaxCount": 10,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 0.3,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 600,
+        "breedingCooldownS": 600,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 4
+      },
+      "drops": [
+        {
+          "itemId": "chitin",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:chitin",
+          "alternativeRecipe": "synth_chitin"
+        },
+        {
+          "itemId": "acid_gland",
+          "min": 1,
+          "max": 1,
+          "alternativeSourceRef": "progression:acid_gland",
+          "alternativeRecipe": "synth_acid_gland"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "drain_eel",
+      "name": "수로뱀장어",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "predator",
+      "baselineTier": 4,
+      "concept": "수문 뒤 조용한 수로에 숨는다. 물결과 턱의 밝은 반점으로 공격을 예고하며 마른 바닥에서는 느리다.",
+      "body": {
+        "lengthWidthHeightM": [
+          2.4,
+          0.35,
+          0.35
+        ],
+        "massKg": 28,
+        "profile": "serpent",
+        "outerCellM": 0.25,
+        "coreHp": 54,
+        "shellPatchHp": 23,
+        "limbNodeHp": 23
+      },
+      "stats": {
+        "maxHp": 155,
+        "cruiseMps": 1.2,
+        "sprintMps": 3.7,
+        "detectionM": 12,
+        "chaseFromHomeM": 18,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "satiation_gated_predator",
+        "activePeriod": "dusk_night",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "배고픔 기준 이하이며 자신보다 약한 먹이, 또는 직접 공격에 대한 방어",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "drain_eel_primary",
+          "name": "산성 물기",
+          "energyType": "chemical",
+          "damageHp": 25,
+          "rangeM": 2.4,
+          "windupS": 1,
+          "recoveryS": 0.75,
+          "cooldownS": 3.2,
+          "telegraph": "턱 반점 발광과 수면 선",
+          "shape": "직선 1.8m",
+          "calorieCostCp": 5.0,
+          "reserveCostEu": 50
+        }
+      ],
+      "calories": {
+        "maxCp": 140,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.058,
+        "sprintExtraCpPerS": 0.117,
+        "regenDelayS": 12,
+        "regenHpPerS": 0.86,
+        "regenCpPerHp": 3,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 0.646
+      },
+      "energyReserve": {
+        "kind": "chemical",
+        "capacityEu": 300,
+        "initialFraction": 0.75,
+        "recharge": "food_metabolism",
+        "cpPerEu": 1
+      },
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "marsh"
+        ],
+        "dungeonIds": [
+          "floodworks"
+        ],
+        "diet": [
+          {
+            "kind": "species",
+            "id": "silt_snail"
+          },
+          {
+            "kind": "species",
+            "id": "reed_grazer"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 49,
+        "habitat": "내부 그늘·먹이 방과 연결된 매복처",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": []
+      },
+      "population": {
+        "outdoorBudgetRef": null,
+        "dungeonBudgetRef": "structures:floodworks:ecology",
+        "dungeonMaxCount": 5,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 1.2,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 1200,
+        "breedingCooldownS": 1200,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 2
+      },
+      "drops": [
+        {
+          "itemId": "meat",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:meat",
+          "alternativeRecipe": "synth_meat"
+        },
+        {
+          "itemId": "hide",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:hide",
+          "alternativeRecipe": "synth_hide"
+        },
+        {
+          "itemId": "bone",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:bone",
+          "alternativeRecipe": "synth_bone"
+        },
+        {
+          "itemId": "acid_gland",
+          "min": 1,
+          "max": 1,
+          "alternativeSourceRef": "progression:acid_gland",
+          "alternativeRecipe": "synth_acid_gland"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "ash_goat",
+      "name": "재이끼염소",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "primary_consumer",
+      "baselineTier": 5,
+      "concept": "열원 가장자리의 재이끼를 먹는다. 열에 적응했어도 용암 위를 걷지 못하고 냉각지대로 피한다.",
+      "body": {
+        "lengthWidthHeightM": [
+          1.7,
+          0.8,
+          1.2
+        ],
+        "massKg": 95,
+        "profile": "quadruped",
+        "outerCellM": 0.25,
+        "coreHp": 74,
+        "shellPatchHp": 42,
+        "limbNodeHp": 25
+      },
+      "stats": {
+        "maxHp": 210,
+        "cruiseMps": 1.3,
+        "sprintMps": 4,
+        "detectionM": 20,
+        "chaseFromHomeM": 22,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "avoidant",
+        "activePeriod": "day",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "퇴로가 막힌 상태에서 공격받음",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "ash_goat_primary",
+          "name": "뿔 밀기",
+          "energyType": "mechanical",
+          "damageHp": 24,
+          "rangeM": 1.9,
+          "windupS": 1,
+          "recoveryS": 0.75,
+          "cooldownS": 3.2,
+          "telegraph": "앞발로 땅을 긁음",
+          "shape": "정면 55도",
+          "calorieCostCp": 4.8,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 475,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.198,
+        "sprintExtraCpPerS": 0.396,
+        "regenDelayS": 10,
+        "regenHpPerS": 1.17,
+        "regenCpPerHp": 2,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 0.875
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "thermal"
+        ],
+        "dungeonIds": [
+          "geothermal_foundry"
+        ],
+        "diet": [
+          {
+            "kind": "producer",
+            "id": "ash_lichen"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 166,
+        "habitat": "열원 바로 위를 제외한 생산원 가장자리",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": [
+          {
+            "dungeonId": "geothermal_foundry",
+            "diet": [
+              {
+                "kind": "dungeon_producer",
+                "id": "geothermal_foundry_primary_producer"
+              },
+              {
+                "kind": "dungeon_producer",
+                "id": "geothermal_foundry_secondary_producer"
+              }
+            ]
+          }
+        ]
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:thermal:spawning",
+        "dungeonBudgetRef": "structures:geothermal_foundry:ecology",
+        "dungeonMaxCount": 4,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 0.85,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 1200,
+        "breedingCooldownS": 1200,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 3
+      },
+      "drops": [
+        {
+          "itemId": "meat",
+          "min": 2,
+          "max": 4,
+          "alternativeSourceRef": "progression:meat",
+          "alternativeRecipe": "synth_meat"
+        },
+        {
+          "itemId": "hide",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:hide",
+          "alternativeRecipe": "synth_hide"
+        },
+        {
+          "itemId": "bone",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:bone",
+          "alternativeRecipe": "synth_bone"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "ember_lizard",
+      "name": "불씨도마뱀",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "predator",
+      "baselineTier": 5,
+      "concept": "가슴 주머니에 열을 모아 짧게 뿜는다. 공격 후 배가 식는 동안 접근할 틈을 준다.",
+      "body": {
+        "lengthWidthHeightM": [
+          2.2,
+          0.8,
+          0.6
+        ],
+        "massKg": 105,
+        "profile": "quadruped",
+        "outerCellM": 0.25,
+        "coreHp": 91,
+        "shellPatchHp": 52,
+        "limbNodeHp": 31
+      },
+      "stats": {
+        "maxHp": 260,
+        "cruiseMps": 1.6,
+        "sprintMps": 4.3,
+        "detectionM": 18,
+        "chaseFromHomeM": 28,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "satiation_gated_predator",
+        "activePeriod": "dusk_night",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "배고픔 기준 이하이며 자신보다 약한 먹이, 또는 직접 공격에 대한 방어",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "ember_lizard_primary",
+          "name": "불씨 분출",
+          "energyType": "thermal",
+          "damageHp": 36,
+          "rangeM": 5,
+          "windupS": 1.5,
+          "recoveryS": 1.12,
+          "cooldownS": 5.5,
+          "telegraph": "가슴이 주황색으로 부풀어 오름",
+          "shape": "정면 35도, 벽 차단",
+          "calorieCostCp": 7.2,
+          "reserveCostEu": 72
+        }
+      ],
+      "calories": {
+        "maxCp": 525,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.219,
+        "sprintExtraCpPerS": 0.438,
+        "regenDelayS": 12,
+        "regenHpPerS": 1.44,
+        "regenCpPerHp": 3,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 1.083
+      },
+      "energyReserve": {
+        "kind": "thermal",
+        "capacityEu": 432,
+        "initialFraction": 0.75,
+        "recharge": "food_metabolism",
+        "cpPerEu": 1
+      },
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "thermal"
+        ],
+        "dungeonIds": [],
+        "diet": [
+          {
+            "kind": "species",
+            "id": "ash_goat"
+          },
+          {
+            "kind": "species",
+            "id": "vent_grub"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 184,
+        "habitat": "열원 바로 위를 제외한 생산원 가장자리",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": []
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:thermal:spawning",
+        "dungeonBudgetRef": null,
+        "dungeonMaxCount": 0,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 1.1,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 1200,
+        "breedingCooldownS": 1200,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 2
+      },
+      "drops": [
+        {
+          "itemId": "meat",
+          "min": 2,
+          "max": 4,
+          "alternativeSourceRef": "progression:meat",
+          "alternativeRecipe": "synth_meat"
+        },
+        {
+          "itemId": "hide",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:hide",
+          "alternativeRecipe": "synth_hide"
+        },
+        {
+          "itemId": "bone",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:bone",
+          "alternativeRecipe": "synth_bone"
+        },
+        {
+          "itemId": "heat_gland",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:heat_gland",
+          "alternativeRecipe": "synth_heat_gland"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "vent_grub",
+      "name": "분기구유충",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "detritivore",
+      "baselineTier": 5,
+      "concept": "뜨겁지 않은 분기구 미생물층을 먹는다. 뒤집히면 이동이 멎지만 스스로 천천히 복귀한다.",
+      "body": {
+        "lengthWidthHeightM": [
+          0.5,
+          0.25,
+          0.25
+        ],
+        "massKg": 2,
+        "profile": "crawler",
+        "outerCellM": 0.125,
+        "coreHp": 19,
+        "shellPatchHp": 16,
+        "limbNodeHp": 16
+      },
+      "stats": {
+        "maxHp": 55,
+        "cruiseMps": 0.35,
+        "sprintMps": 0.8,
+        "detectionM": 4,
+        "chaseFromHomeM": 2,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "avoidant",
+        "activePeriod": "all",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "퇴로가 막힌 상태에서 공격받음",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "vent_grub_primary",
+          "name": "몸통 수축",
+          "energyType": "mechanical",
+          "damageHp": 5,
+          "rangeM": 0.65,
+          "windupS": 1,
+          "recoveryS": 0.75,
+          "cooldownS": 4,
+          "telegraph": "몸을 짧게 압축",
+          "shape": "접촉 1회",
+          "calorieCostCp": 1,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 120,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.05,
+        "sprintExtraCpPerS": 0.1,
+        "regenDelayS": 10,
+        "regenHpPerS": 0.31,
+        "regenCpPerHp": 2,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 0.229
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "thermal"
+        ],
+        "dungeonIds": [
+          "geothermal_foundry"
+        ],
+        "diet": [
+          {
+            "kind": "producer",
+            "id": "ash_lichen"
+          },
+          {
+            "kind": "resource",
+            "id": "detritus"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 42,
+        "habitat": "열원 바로 위를 제외한 생산원 가장자리",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": [
+          {
+            "dungeonId": "geothermal_foundry",
+            "diet": [
+              {
+                "kind": "dungeon_producer",
+                "id": "geothermal_foundry_primary_producer"
+              },
+              {
+                "kind": "dungeon_producer",
+                "id": "geothermal_foundry_secondary_producer"
+              },
+              {
+                "kind": "resource",
+                "id": "detritus"
+              }
+            ]
+          }
+        ]
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:thermal:spawning",
+        "dungeonBudgetRef": "structures:geothermal_foundry:ecology",
+        "dungeonMaxCount": 10,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 0.25,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 600,
+        "breedingCooldownS": 600,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 4
+      },
+      "drops": [
+        {
+          "itemId": "chitin",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:chitin",
+          "alternativeRecipe": "synth_chitin"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "furnace_mantis",
+      "name": "주조사마귀",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "predator",
+      "baselineTier": 5,
+      "concept": "주조소 차가운 배관에 매달린다. 밝아지는 앞낫을 보고 회피할 수 있으며 지속 가열되면 후퇴한다.",
+      "body": {
+        "lengthWidthHeightM": [
+          1.8,
+          1,
+          1.6
+        ],
+        "massKg": 70,
+        "profile": "arthropod",
+        "outerCellM": 0.25,
+        "coreHp": 86,
+        "shellPatchHp": 100,
+        "limbNodeHp": 23
+      },
+      "stats": {
+        "maxHp": 285,
+        "cruiseMps": 1.4,
+        "sprintMps": 3.8,
+        "detectionM": 15,
+        "chaseFromHomeM": 22,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "satiation_gated_predator",
+        "activePeriod": "dusk_night",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "배고픔 기준 이하이며 자신보다 약한 먹이, 또는 직접 공격에 대한 방어",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "furnace_mantis_primary",
+          "name": "가열 낫",
+          "energyType": "thermal",
+          "damageHp": 38,
+          "rangeM": 2.4,
+          "windupS": 1.15,
+          "recoveryS": 0.86,
+          "cooldownS": 3.6,
+          "telegraph": "앞낫을 들어 밝게 달굼",
+          "shape": "정면 80도, 뒤쪽 안전",
+          "calorieCostCp": 7.6,
+          "reserveCostEu": 76
+        }
+      ],
+      "calories": {
+        "maxCp": 350,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.146,
+        "sprintExtraCpPerS": 0.292,
+        "regenDelayS": 12,
+        "regenHpPerS": 1.58,
+        "regenCpPerHp": 3,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 1.188
+      },
+      "energyReserve": {
+        "kind": "thermal",
+        "capacityEu": 456,
+        "initialFraction": 0.75,
+        "recharge": "food_metabolism",
+        "cpPerEu": 1
+      },
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "thermal"
+        ],
+        "dungeonIds": [
+          "geothermal_foundry"
+        ],
+        "diet": [
+          {
+            "kind": "species",
+            "id": "vent_grub"
+          },
+          {
+            "kind": "species",
+            "id": "ash_goat"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 122,
+        "habitat": "내부 그늘·먹이 방과 연결된 매복처",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": []
+      },
+      "population": {
+        "outdoorBudgetRef": null,
+        "dungeonBudgetRef": "structures:geothermal_foundry:ecology",
+        "dungeonMaxCount": 5,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 0.9,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 1200,
+        "breedingCooldownS": 1200,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 2
+      },
+      "drops": [
+        {
+          "itemId": "meat",
+          "min": 2,
+          "max": 4,
+          "alternativeSourceRef": "progression:meat",
+          "alternativeRecipe": "synth_meat"
+        },
+        {
+          "itemId": "chitin",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:chitin",
+          "alternativeRecipe": "synth_chitin"
+        },
+        {
+          "itemId": "bone",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:bone",
+          "alternativeRecipe": "synth_bone"
+        },
+        {
+          "itemId": "heat_gland",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:heat_gland",
+          "alternativeRecipe": "synth_heat_gland"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "cliff_ibex",
+      "name": "절벽산양",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "primary_consumer",
+      "baselineTier": 5,
+      "concept": "넓은 발굽으로 좁은 암반을 건넌다. 전투보다 탈출을 선택하며 경사 지형의 길잡이가 된다.",
+      "body": {
+        "lengthWidthHeightM": [
+          1.6,
+          0.65,
+          1.3
+        ],
+        "massKg": 80,
+        "profile": "quadruped",
+        "outerCellM": 0.25,
+        "coreHp": 66,
+        "shellPatchHp": 38,
+        "limbNodeHp": 23
+      },
+      "stats": {
+        "maxHp": 190,
+        "cruiseMps": 1.4,
+        "sprintMps": 4.3,
+        "detectionM": 24,
+        "chaseFromHomeM": 24,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "avoidant",
+        "activePeriod": "day",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "퇴로가 막힌 상태에서 공격받음",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "cliff_ibex_primary",
+          "name": "뿔 받기",
+          "energyType": "mechanical",
+          "damageHp": 23,
+          "rangeM": 1.8,
+          "windupS": 1.1,
+          "recoveryS": 0.83,
+          "cooldownS": 3.8,
+          "telegraph": "고개를 숙이고 발굽 소리",
+          "shape": "정면 50도",
+          "calorieCostCp": 4.6,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 400,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.167,
+        "sprintExtraCpPerS": 0.333,
+        "regenDelayS": 10,
+        "regenHpPerS": 1.06,
+        "regenCpPerHp": 2,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 0.792
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "coast"
+        ],
+        "dungeonIds": [
+          "cliff_observatory"
+        ],
+        "diet": [
+          {
+            "kind": "producer",
+            "id": "salt_grass"
+          },
+          {
+            "kind": "producer",
+            "id": "algae"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 140,
+        "habitat": "절벽 선반·조수대; 비행종은 열린 상공",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": [
+          {
+            "dungeonId": "cliff_observatory",
+            "diet": [
+              {
+                "kind": "dungeon_producer",
+                "id": "cliff_observatory_primary_producer"
+              },
+              {
+                "kind": "dungeon_producer",
+                "id": "cliff_observatory_secondary_producer"
+              }
+            ]
+          }
+        ]
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:coast:spawning",
+        "dungeonBudgetRef": "structures:cliff_observatory:ecology",
+        "dungeonMaxCount": 4,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 0.8,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 1200,
+        "breedingCooldownS": 1200,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 3
+      },
+      "drops": [
+        {
+          "itemId": "meat",
+          "min": 2,
+          "max": 4,
+          "alternativeSourceRef": "progression:meat",
+          "alternativeRecipe": "synth_meat"
+        },
+        {
+          "itemId": "hide",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:hide",
+          "alternativeRecipe": "synth_hide"
+        },
+        {
+          "itemId": "bone",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:bone",
+          "alternativeRecipe": "synth_bone"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "gale_raptor",
+      "name": "돌풍맹금",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "predator",
+      "baselineTier": 5,
+      "concept": "넓은 날개로 상승기류를 돈다. 그림자와 울음으로 급강하를 알리고 빗나가면 선회 시간이 길다.",
+      "body": {
+        "lengthWidthHeightM": [
+          1.4,
+          3.2,
+          0.6
+        ],
+        "massKg": 18,
+        "profile": "winged",
+        "outerCellM": 0.125,
+        "coreHp": 61,
+        "shellPatchHp": 18,
+        "limbNodeHp": 35
+      },
+      "stats": {
+        "maxHp": 175,
+        "cruiseMps": 3.2,
+        "sprintMps": 6.2,
+        "detectionM": 30,
+        "chaseFromHomeM": 40,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "satiation_gated_predator",
+        "activePeriod": "dusk_night",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "배고픔 기준 이하이며 자신보다 약한 먹이, 또는 직접 공격에 대한 방어",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "gale_raptor_primary",
+          "name": "급강하 발톱",
+          "energyType": "mechanical",
+          "damageHp": 34,
+          "rangeM": 3,
+          "windupS": 1.6,
+          "recoveryS": 1.2,
+          "cooldownS": 6,
+          "telegraph": "그림자 원과 큰 울음",
+          "shape": "직선 비행 6m, 착점 고정",
+          "calorieCostCp": 6.8,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 120,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.05,
+        "sprintExtraCpPerS": 0.1,
+        "regenDelayS": 12,
+        "regenHpPerS": 0.97,
+        "regenCpPerHp": 3,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 0.729
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "coast"
+        ],
+        "dungeonIds": [],
+        "diet": [
+          {
+            "kind": "species",
+            "id": "cliff_ibex"
+          },
+          {
+            "kind": "species",
+            "id": "tide_crab"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 42,
+        "habitat": "절벽 선반·조수대; 비행종은 열린 상공",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": []
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:coast:spawning",
+        "dungeonBudgetRef": null,
+        "dungeonMaxCount": 0,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 1.6,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 1200,
+        "breedingCooldownS": 1200,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 2
+      },
+      "drops": [
+        {
+          "itemId": "meat",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:meat",
+          "alternativeRecipe": "synth_meat"
+        },
+        {
+          "itemId": "hide",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:hide",
+          "alternativeRecipe": "synth_hide"
+        },
+        {
+          "itemId": "bone",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:bone",
+          "alternativeRecipe": "synth_bone"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "tide_crab",
+      "name": "조수게",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "detritivore",
+      "baselineTier": 5,
+      "concept": "해조와 사체를 처리한다. 집게를 벌린 채 옆걸음으로 경고하고 먹이를 두고 도주한다.",
+      "body": {
+        "lengthWidthHeightM": [
+          0.8,
+          0.7,
+          0.35
+        ],
+        "massKg": 12,
+        "profile": "arthropod",
+        "outerCellM": 0.125,
+        "coreHp": 26,
+        "shellPatchHp": 30,
+        "limbNodeHp": 7
+      },
+      "stats": {
+        "maxHp": 85,
+        "cruiseMps": 0.6,
+        "sprintMps": 1.5,
+        "detectionM": 8,
+        "chaseFromHomeM": 5,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "avoidant",
+        "activePeriod": "all",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "퇴로가 막힌 상태에서 공격받음",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "tide_crab_primary",
+          "name": "경고 집게",
+          "energyType": "mechanical",
+          "damageHp": 12,
+          "rangeM": 1.2,
+          "windupS": 1,
+          "recoveryS": 0.75,
+          "cooldownS": 3.5,
+          "telegraph": "집게를 벌리고 옆걸음 중지",
+          "shape": "정면 70도",
+          "calorieCostCp": 2.4,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 120,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.05,
+        "sprintExtraCpPerS": 0.1,
+        "regenDelayS": 10,
+        "regenHpPerS": 0.47,
+        "regenCpPerHp": 2,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 0.354
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "coast"
+        ],
+        "dungeonIds": [
+          "cliff_observatory"
+        ],
+        "diet": [
+          {
+            "kind": "producer",
+            "id": "salt_grass"
+          },
+          {
+            "kind": "producer",
+            "id": "algae"
+          },
+          {
+            "kind": "resource",
+            "id": "detritus"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 42,
+        "habitat": "절벽 선반·조수대; 비행종은 열린 상공",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": [
+          {
+            "dungeonId": "cliff_observatory",
+            "diet": [
+              {
+                "kind": "dungeon_producer",
+                "id": "cliff_observatory_primary_producer"
+              },
+              {
+                "kind": "dungeon_producer",
+                "id": "cliff_observatory_secondary_producer"
+              },
+              {
+                "kind": "resource",
+                "id": "detritus"
+              }
+            ]
+          }
+        ]
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:coast:spawning",
+        "dungeonBudgetRef": "structures:cliff_observatory:ecology",
+        "dungeonMaxCount": 10,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 0.4,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 600,
+        "breedingCooldownS": 600,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 4
+      },
+      "drops": [
+        {
+          "itemId": "chitin",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:chitin",
+          "alternativeRecipe": "synth_chitin"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "cistern_serpent",
+      "name": "저수조큰뱀",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "predator",
+      "baselineTier": 5,
+      "concept": "관측성 저수조에서 기다린다. 꼬리가 벽을 두드린 뒤 짧은 직선 돌진을 하고 회복 틈을 둔다.",
+      "body": {
+        "lengthWidthHeightM": [
+          3.2,
+          0.45,
+          0.45
+        ],
+        "massKg": 48,
+        "profile": "serpent",
+        "outerCellM": 0.25,
+        "coreHp": 79,
+        "shellPatchHp": 34,
+        "limbNodeHp": 34
+      },
+      "stats": {
+        "maxHp": 225,
+        "cruiseMps": 1.1,
+        "sprintMps": 3.4,
+        "detectionM": 13,
+        "chaseFromHomeM": 20,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "satiation_gated_predator",
+        "activePeriod": "dusk_night",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "배고픔 기준 이하이며 자신보다 약한 먹이, 또는 직접 공격에 대한 방어",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "cistern_serpent_primary",
+          "name": "저수조 돌진",
+          "energyType": "mechanical",
+          "damageHp": 32,
+          "rangeM": 3.5,
+          "windupS": 1.3,
+          "recoveryS": 0.98,
+          "cooldownS": 4,
+          "telegraph": "꼬리 벽 두드림 2회",
+          "shape": "직선 3m, 조준 확정 후 회전 금지",
+          "calorieCostCp": 6.4,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 240,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.1,
+        "sprintExtraCpPerS": 0.2,
+        "regenDelayS": 12,
+        "regenHpPerS": 1.25,
+        "regenCpPerHp": 3,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 0.938
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "coast"
+        ],
+        "dungeonIds": [
+          "cliff_observatory"
+        ],
+        "diet": [
+          {
+            "kind": "species",
+            "id": "tide_crab"
+          },
+          {
+            "kind": "species",
+            "id": "cliff_ibex"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 84,
+        "habitat": "내부 그늘·먹이 방과 연결된 매복처",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": []
+      },
+      "population": {
+        "outdoorBudgetRef": null,
+        "dungeonBudgetRef": "structures:cliff_observatory:ecology",
+        "dungeonMaxCount": 5,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 1.6,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 1200,
+        "breedingCooldownS": 1200,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 2
+      },
+      "drops": [
+        {
+          "itemId": "meat",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:meat",
+          "alternativeRecipe": "synth_meat"
+        },
+        {
+          "itemId": "hide",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:hide",
+          "alternativeRecipe": "synth_hide"
+        },
+        {
+          "itemId": "bone",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:bone",
+          "alternativeRecipe": "synth_bone"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "prism_deer",
+      "name": "유리잎사슴",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "primary_consumer",
+      "baselineTier": 6,
+      "concept": "반투명 뿔과 잎 형태의 털. 마나 식생을 먹고 빛의 흔들림을 남기며 무리와 도망친다.",
+      "body": {
+        "lengthWidthHeightM": [
+          1.9,
+          0.8,
+          1.6
+        ],
+        "massKg": 100,
+        "profile": "quadruped",
+        "outerCellM": 0.25,
+        "coreHp": 89,
+        "shellPatchHp": 51,
+        "limbNodeHp": 31
+      },
+      "stats": {
+        "maxHp": 255,
+        "cruiseMps": 1.4,
+        "sprintMps": 4.5,
+        "detectionM": 24,
+        "chaseFromHomeM": 24,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "avoidant",
+        "activePeriod": "day",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "퇴로가 막힌 상태에서 공격받음",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "prism_deer_primary",
+          "name": "수정뿔 밀기",
+          "energyType": "mechanical",
+          "damageHp": 28,
+          "rangeM": 2,
+          "windupS": 1,
+          "recoveryS": 0.75,
+          "cooldownS": 3.4,
+          "telegraph": "뿔에 흰 선이 모임",
+          "shape": "정면 55도",
+          "calorieCostCp": 5.6,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 500,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.208,
+        "sprintExtraCpPerS": 0.417,
+        "regenDelayS": 10,
+        "regenHpPerS": 1.42,
+        "regenCpPerHp": 3,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 1.062
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "mana_grove"
+        ],
+        "dungeonIds": [
+          "sealed_arboretum"
+        ],
+        "diet": [
+          {
+            "kind": "producer",
+            "id": "mana_fern"
+          },
+          {
+            "kind": "producer",
+            "id": "mana_log"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 175,
+        "habitat": "생산원과 은신처가 연결된 지표; 중첩 환경에서는 기저 환경의 이동 조건도 만족",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": [
+          {
+            "dungeonId": "sealed_arboretum",
+            "diet": [
+              {
+                "kind": "dungeon_producer",
+                "id": "sealed_arboretum_primary_producer"
+              },
+              {
+                "kind": "dungeon_producer",
+                "id": "sealed_arboretum_secondary_producer"
+              }
+            ]
+          }
+        ]
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:mana_grove:spawning",
+        "dungeonBudgetRef": "structures:sealed_arboretum:ecology",
+        "dungeonMaxCount": 4,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 0.95,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 1200,
+        "breedingCooldownS": 1200,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 3
+      },
+      "drops": [
+        {
+          "itemId": "meat",
+          "min": 2,
+          "max": 4,
+          "alternativeSourceRef": "progression:meat",
+          "alternativeRecipe": "synth_meat"
+        },
+        {
+          "itemId": "hide",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:hide",
+          "alternativeRecipe": "synth_hide"
+        },
+        {
+          "itemId": "bone",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:bone",
+          "alternativeRecipe": "synth_bone"
+        },
+        {
+          "itemId": "mana_sap",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:mana_sap",
+          "alternativeRecipe": "synth_mana_sap"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "veil_cat",
+      "name": "장막표범",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "predator",
+      "baselineTier": 6,
+      "concept": "굴절된 외피로 접근하지만 발자국·그림자는 남는다. 완전 투명이나 무경고 순간이동은 사용하지 않는다.",
+      "body": {
+        "lengthWidthHeightM": [
+          2,
+          0.75,
+          1
+        ],
+        "massKg": 90,
+        "profile": "quadruped",
+        "outerCellM": 0.25,
+        "coreHp": 107,
+        "shellPatchHp": 61,
+        "limbNodeHp": 37
+      },
+      "stats": {
+        "maxHp": 305,
+        "cruiseMps": 1.9,
+        "sprintMps": 4.7,
+        "detectionM": 22,
+        "chaseFromHomeM": 32,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "satiation_gated_predator",
+        "activePeriod": "dusk_night",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "배고픔 기준 이하이며 자신보다 약한 먹이, 또는 직접 공격에 대한 방어",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "veil_cat_primary",
+          "name": "장막 도약",
+          "energyType": "magic",
+          "damageHp": 42,
+          "rangeM": 3,
+          "windupS": 1.2,
+          "recoveryS": 0.9,
+          "cooldownS": 4,
+          "telegraph": "윤곽이 드러나고 뒷발 고정",
+          "shape": "물성 부여 도약, 벽 통과 불가",
+          "calorieCostCp": 8.4,
+          "reserveCostEu": 84
+        }
+      ],
+      "calories": {
+        "maxCp": 450,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.188,
+        "sprintExtraCpPerS": 0.375,
+        "regenDelayS": 12,
+        "regenHpPerS": 1.69,
+        "regenCpPerHp": 4,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 1.271
+      },
+      "energyReserve": {
+        "kind": "magic",
+        "capacityEu": 504,
+        "initialFraction": 0.75,
+        "recharge": "food_metabolism",
+        "cpPerEu": 1
+      },
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "mana_grove"
+        ],
+        "dungeonIds": [],
+        "diet": [
+          {
+            "kind": "species",
+            "id": "prism_deer"
+          },
+          {
+            "kind": "species",
+            "id": "mana_moth"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 158,
+        "habitat": "생산원과 은신처가 연결된 지표; 중첩 환경에서는 기저 환경의 이동 조건도 만족",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": []
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:mana_grove:spawning",
+        "dungeonBudgetRef": null,
+        "dungeonMaxCount": 0,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 1.0,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 1200,
+        "breedingCooldownS": 1200,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 2
+      },
+      "drops": [
+        {
+          "itemId": "meat",
+          "min": 2,
+          "max": 4,
+          "alternativeSourceRef": "progression:meat",
+          "alternativeRecipe": "synth_meat"
+        },
+        {
+          "itemId": "hide",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:hide",
+          "alternativeRecipe": "synth_hide"
+        },
+        {
+          "itemId": "bone",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:bone",
+          "alternativeRecipe": "synth_bone"
+        },
+        {
+          "itemId": "mana_sap",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:mana_sap",
+          "alternativeRecipe": "synth_mana_sap"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "mana_moth",
+      "name": "마나나방",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "pollinator",
+      "baselineTier": 6,
+      "concept": "발광 꽃가루를 옮기며 잎의 수액을 먹는다. 공격하지 않고 빛이 약한 잎 아래로 숨는다.",
+      "body": {
+        "lengthWidthHeightM": [
+          0.3,
+          0.9,
+          0.2
+        ],
+        "massKg": 0.4,
+        "profile": "winged",
+        "outerCellM": 0.125,
+        "coreHp": 16,
+        "shellPatchHp": 4,
+        "limbNodeHp": 9
+      },
+      "stats": {
+        "maxHp": 45,
+        "cruiseMps": 0.8,
+        "sprintMps": 2.6,
+        "detectionM": 8,
+        "chaseFromHomeM": 5,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "avoidant",
+        "activePeriod": "all",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "퇴로가 막힌 상태에서 공격받음",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [],
+      "calories": {
+        "maxCp": 120,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.05,
+        "sprintExtraCpPerS": 0.1,
+        "regenDelayS": 10,
+        "regenHpPerS": 0.25,
+        "regenCpPerHp": 3,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 0.188
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "mana_grove"
+        ],
+        "dungeonIds": [
+          "sealed_arboretum"
+        ],
+        "diet": [
+          {
+            "kind": "producer",
+            "id": "mana_fern"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 42,
+        "habitat": "생산원과 은신처가 연결된 지표; 중첩 환경에서는 기저 환경의 이동 조건도 만족",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": [
+          {
+            "dungeonId": "sealed_arboretum",
+            "diet": [
+              {
+                "kind": "dungeon_producer",
+                "id": "sealed_arboretum_primary_producer"
+              },
+              {
+                "kind": "dungeon_producer",
+                "id": "sealed_arboretum_secondary_producer"
+              }
+            ]
+          }
+        ]
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:mana_grove:spawning",
+        "dungeonBudgetRef": "structures:sealed_arboretum:ecology",
+        "dungeonMaxCount": 10,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 0.45,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 600,
+        "breedingCooldownS": 600,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 4
+      },
+      "drops": [
+        {
+          "itemId": "mana_sap",
+          "min": 1,
+          "max": 1,
+          "alternativeSourceRef": "progression:mana_sap",
+          "alternativeRecipe": "synth_mana_sap"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "root_weaver",
+      "name": "뿌리직조거미",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "predator",
+      "baselineTier": 6,
+      "concept": "수목원 뿌리 사이에 보이는 실을 건다. 바닥을 미리 표시하고 얽매는 물성의 실을 발사한다.",
+      "body": {
+        "lengthWidthHeightM": [
+          1.4,
+          1.6,
+          0.65
+        ],
+        "massKg": 35,
+        "profile": "arachnid",
+        "outerCellM": 0.25,
+        "coreHp": 86,
+        "shellPatchHp": 100,
+        "limbNodeHp": 23
+      },
+      "stats": {
+        "maxHp": 285,
+        "cruiseMps": 1.2,
+        "sprintMps": 3.5,
+        "detectionM": 16,
+        "chaseFromHomeM": 24,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "satiation_gated_predator",
+        "activePeriod": "dusk_night",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "배고픔 기준 이하이며 자신보다 약한 먹이, 또는 직접 공격에 대한 방어",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "root_weaver_primary",
+          "name": "속박실",
+          "energyType": "magic",
+          "damageHp": 34,
+          "rangeM": 6,
+          "windupS": 1.6,
+          "recoveryS": 1.2,
+          "cooldownS": 5,
+          "telegraph": "바닥에 가는 발광선 표시",
+          "shape": "투사체 한 발, 명중 시2s 속도0.7",
+          "calorieCostCp": 6.8,
+          "reserveCostEu": 68
+        }
+      ],
+      "calories": {
+        "maxCp": 175,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.073,
+        "sprintExtraCpPerS": 0.146,
+        "regenDelayS": 12,
+        "regenHpPerS": 1.58,
+        "regenCpPerHp": 4,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 1.188
+      },
+      "energyReserve": {
+        "kind": "magic",
+        "capacityEu": 408,
+        "initialFraction": 0.75,
+        "recharge": "food_metabolism",
+        "cpPerEu": 1
+      },
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "mana_grove"
+        ],
+        "dungeonIds": [
+          "sealed_arboretum"
+        ],
+        "diet": [
+          {
+            "kind": "species",
+            "id": "mana_moth"
+          },
+          {
+            "kind": "species",
+            "id": "prism_deer"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 61,
+        "habitat": "내부 그늘·먹이 방과 연결된 매복처",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": []
+      },
+      "population": {
+        "outdoorBudgetRef": null,
+        "dungeonBudgetRef": "structures:sealed_arboretum:ecology",
+        "dungeonMaxCount": 5,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 0.8,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 1200,
+        "breedingCooldownS": 1200,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 2
+      },
+      "drops": [
+        {
+          "itemId": "meat",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:meat",
+          "alternativeRecipe": "synth_meat"
+        },
+        {
+          "itemId": "chitin",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:chitin",
+          "alternativeRecipe": "synth_chitin"
+        },
+        {
+          "itemId": "bone",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:bone",
+          "alternativeRecipe": "synth_bone"
+        },
+        {
+          "itemId": "mana_sap",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:mana_sap",
+          "alternativeRecipe": "synth_mana_sap"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "candle_hare",
+      "name": "촛빛토끼",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "primary_consumer",
+      "baselineTier": 7,
+      "concept": "성역의 발광 이끼를 먹는다. 신성 획득용 사냥 대상이 아니며 등불 주변으로 무리지어 피한다.",
+      "body": {
+        "lengthWidthHeightM": [
+          0.8,
+          0.4,
+          0.55
+        ],
+        "massKg": 7,
+        "profile": "quadruped",
+        "outerCellM": 0.125,
+        "coreHp": 82,
+        "shellPatchHp": 47,
+        "limbNodeHp": 28
+      },
+      "stats": {
+        "maxHp": 235,
+        "cruiseMps": 1.5,
+        "sprintMps": 4.6,
+        "detectionM": 22,
+        "chaseFromHomeM": 20,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "avoidant",
+        "activePeriod": "day",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "퇴로가 막힌 상태에서 공격받음",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "candle_hare_primary",
+          "name": "필사적 발차기",
+          "energyType": "mechanical",
+          "damageHp": 30,
+          "rangeM": 1,
+          "windupS": 0.9,
+          "recoveryS": 0.68,
+          "cooldownS": 3.5,
+          "telegraph": "촛빛 털이 모이고 뒷발 준비",
+          "shape": "후방 접촉",
+          "calorieCostCp": 6.0,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 120,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.05,
+        "sprintExtraCpPerS": 0.1,
+        "regenDelayS": 10,
+        "regenHpPerS": 1.31,
+        "regenCpPerHp": 3,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 0.979
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "sacred"
+        ],
+        "dungeonIds": [
+          "forgotten_monastery"
+        ],
+        "diet": [
+          {
+            "kind": "producer",
+            "id": "luminous_moss"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 42,
+        "habitat": "생산원과 은신처가 연결된 지표; 중첩 환경에서는 기저 환경의 이동 조건도 만족",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": [
+          {
+            "dungeonId": "forgotten_monastery",
+            "diet": [
+              {
+                "kind": "dungeon_producer",
+                "id": "forgotten_monastery_primary_producer"
+              },
+              {
+                "kind": "dungeon_producer",
+                "id": "forgotten_monastery_secondary_producer"
+              }
+            ]
+          }
+        ]
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:sacred:spawning",
+        "dungeonBudgetRef": "structures:forgotten_monastery:ecology",
+        "dungeonMaxCount": 4,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 0.4,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 1200,
+        "breedingCooldownS": 1200,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 2
+      },
+      "drops": [
+        {
+          "itemId": "meat",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:meat",
+          "alternativeRecipe": "synth_meat"
+        },
+        {
+          "itemId": "hide",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:hide",
+          "alternativeRecipe": "synth_hide"
+        },
+        {
+          "itemId": "bone",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:bone",
+          "alternativeRecipe": "synth_bone"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "relic_hound",
+      "name": "성흔들개",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "predator",
+      "baselineTier": 7,
+      "concept": "성역 야생종으로 신앙 공동체와 별개다. 먹이 또는 새끼를 지키며 경계 울음을 먼저 낸다.",
+      "body": {
+        "lengthWidthHeightM": [
+          1.8,
+          0.7,
+          1.1
+        ],
+        "massKg": 65,
+        "profile": "quadruped",
+        "outerCellM": 0.25,
+        "coreHp": 130,
+        "shellPatchHp": 74,
+        "limbNodeHp": 44
+      },
+      "stats": {
+        "maxHp": 370,
+        "cruiseMps": 1.8,
+        "sprintMps": 4.5,
+        "detectionM": 24,
+        "chaseFromHomeM": 30,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "satiation_gated_predator",
+        "activePeriod": "dusk_night",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "배고픔 기준 이하이며 자신보다 약한 먹이, 또는 직접 공격에 대한 방어",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "relic_hound_primary",
+          "name": "경계 돌진",
+          "energyType": "mechanical",
+          "damageHp": 50,
+          "rangeM": 3,
+          "windupS": 1.2,
+          "recoveryS": 0.9,
+          "cooldownS": 4.2,
+          "telegraph": "성흔 밝아짐과 경계 울음",
+          "shape": "직선 2.5m",
+          "calorieCostCp": 10.0,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 325,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.135,
+        "sprintExtraCpPerS": 0.271,
+        "regenDelayS": 12,
+        "regenHpPerS": 2.06,
+        "regenCpPerHp": 4,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 1.542
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "sacred"
+        ],
+        "dungeonIds": [],
+        "diet": [
+          {
+            "kind": "species",
+            "id": "candle_hare"
+          },
+          {
+            "kind": "species",
+            "id": "shrine_beetle"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 114,
+        "habitat": "생산원과 은신처가 연결된 지표; 중첩 환경에서는 기저 환경의 이동 조건도 만족",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": []
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:sacred:spawning",
+        "dungeonBudgetRef": null,
+        "dungeonMaxCount": 0,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 0.9,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 1200,
+        "breedingCooldownS": 1200,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 2
+      },
+      "drops": [
+        {
+          "itemId": "meat",
+          "min": 2,
+          "max": 4,
+          "alternativeSourceRef": "progression:meat",
+          "alternativeRecipe": "synth_meat"
+        },
+        {
+          "itemId": "hide",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:hide",
+          "alternativeRecipe": "synth_hide"
+        },
+        {
+          "itemId": "bone",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:bone",
+          "alternativeRecipe": "synth_bone"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "shrine_beetle",
+      "name": "제단딱정",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "detritivore",
+      "baselineTier": 7,
+      "concept": "제단 주변 낙엽과 균류를 분해한다. 신성에너지를 생성하거나 보상으로 떨구지 않는다.",
+      "body": {
+        "lengthWidthHeightM": [
+          0.7,
+          0.5,
+          0.35
+        ],
+        "massKg": 7,
+        "profile": "arthropod",
+        "outerCellM": 0.125,
+        "coreHp": 38,
+        "shellPatchHp": 44,
+        "limbNodeHp": 10
+      },
+      "stats": {
+        "maxHp": 125,
+        "cruiseMps": 0.6,
+        "sprintMps": 1.5,
+        "detectionM": 8,
+        "chaseFromHomeM": 4,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "avoidant",
+        "activePeriod": "all",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "퇴로가 막힌 상태에서 공격받음",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "shrine_beetle_primary",
+          "name": "방어 집게",
+          "energyType": "mechanical",
+          "damageHp": 16,
+          "rangeM": 0.9,
+          "windupS": 1.1,
+          "recoveryS": 0.83,
+          "cooldownS": 3.8,
+          "telegraph": "등딱지를 들고 멈춤",
+          "shape": "정면 45도",
+          "calorieCostCp": 3.2,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 120,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.05,
+        "sprintExtraCpPerS": 0.1,
+        "regenDelayS": 10,
+        "regenHpPerS": 0.69,
+        "regenCpPerHp": 3,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 0.521
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "sacred"
+        ],
+        "dungeonIds": [
+          "forgotten_monastery"
+        ],
+        "diet": [
+          {
+            "kind": "producer",
+            "id": "luminous_moss"
+          },
+          {
+            "kind": "resource",
+            "id": "detritus"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 42,
+        "habitat": "생산원과 은신처가 연결된 지표; 중첩 환경에서는 기저 환경의 이동 조건도 만족",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": [
+          {
+            "dungeonId": "forgotten_monastery",
+            "diet": [
+              {
+                "kind": "dungeon_producer",
+                "id": "forgotten_monastery_primary_producer"
+              },
+              {
+                "kind": "dungeon_producer",
+                "id": "forgotten_monastery_secondary_producer"
+              },
+              {
+                "kind": "resource",
+                "id": "detritus"
+              }
+            ]
+          }
+        ]
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:sacred:spawning",
+        "dungeonBudgetRef": "structures:forgotten_monastery:ecology",
+        "dungeonMaxCount": 10,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 0.35,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 600,
+        "breedingCooldownS": 600,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 2
+      },
+      "drops": [
+        {
+          "itemId": "chitin",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:chitin",
+          "alternativeRecipe": "synth_chitin"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "oath_sentinel",
+      "name": "서약경비체",
+      "status": "proposed",
+      "entityType": "inorganic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "guardian",
+      "baselineTier": 7,
+      "concept": "원래 월드에 존재하는 무기생명. 경계선을 표시하고 침범·공격에 반응하며 정비실 없이는 회복하지 않는다.",
+      "body": {
+        "lengthWidthHeightM": [
+          0.9,
+          0.7,
+          2.2
+        ],
+        "massKg": 320,
+        "profile": "biped",
+        "outerCellM": 0.25,
+        "coreHp": 182,
+        "shellPatchHp": 130,
+        "limbNodeHp": 78
+      },
+      "stats": {
+        "maxHp": 520,
+        "cruiseMps": 1.4,
+        "sprintMps": 3.2,
+        "detectionM": 20,
+        "chaseFromHomeM": 24,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.15
+      },
+      "behavior": {
+        "disposition": "territorial_warning",
+        "activePeriod": "all",
+        "huntBelowCalorieFraction": null,
+        "attackTrigger": "표시된 경계 침입 후 경고가 끝나거나 직접 공격",
+        "warningS": 2,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "oath_sentinel_primary",
+          "name": "경계봉 내려치기",
+          "energyType": "mechanical",
+          "damageHp": 62,
+          "rangeM": 2.8,
+          "windupS": 1.5,
+          "recoveryS": 1.12,
+          "cooldownS": 4,
+          "telegraph": "바닥 경계선 점멸과 봉 들어올림",
+          "shape": "정면 70도, 시야 차단 가능",
+          "calorieCostCp": 0,
+          "reserveCostEu": 124
+        }
+      ],
+      "calories": null,
+      "energyReserve": {
+        "kind": "mechanical",
+        "capacityEu": 744,
+        "initialFraction": 0.75,
+        "recharge": "community_grid_or_maintenance_station",
+        "cpPerEu": null
+      },
+      "repair": {
+        "naturalRecovery": false,
+        "action": "maintenance",
+        "materialId": "scrap_iron",
+        "unitsPerAction": 1,
+        "durationS": 8,
+        "hpPerAction": 40,
+        "requiresStation": true,
+        "coreDestroyedCanRevive": false
+      },
+      "ecology": {
+        "environmentIds": [
+          "sacred"
+        ],
+        "dungeonIds": [
+          "forgotten_monastery"
+        ],
+        "diet": [],
+        "foodCycle": "먹이망에 포함하지 않음; 정비 공급은 별도 공동체 원장",
+        "carcassEdibleCp": 0,
+        "habitat": "내부 그늘·먹이 방과 연결된 매복처",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": []
+      },
+      "population": {
+        "outdoorBudgetRef": null,
+        "dungeonBudgetRef": "structures:forgotten_monastery:ecology",
+        "dungeonMaxCount": 5,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 0.45,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": null,
+        "breedingCooldownS": null,
+        "offspringCount": 0,
+        "reproductionCalorieFraction": null,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": null,
+        "replacementRule": "핵심이 살아있는 기존 개체를 정비; 사망 개체 재생성 없음",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 2
+      },
+      "drops": [
+        {
+          "itemId": "scrap_iron",
+          "min": 3,
+          "max": 5,
+          "alternativeSourceRef": "progression:scrap_iron",
+          "alternativeRecipe": "make_scrap_iron"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "drift_grazer",
+      "name": "부유각초식수",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "primary_consumer",
+      "baselineTier": 8,
+      "concept": "짧게 떠오르는 발판에서 광물지의를 먹는다. 부유는 월드 생물의 기존 능력이며 외형만으로 제작에 복제되지 않는다.",
+      "body": {
+        "lengthWidthHeightM": [
+          2,
+          1,
+          1.4
+        ],
+        "massKg": 125,
+        "profile": "quadruped",
+        "outerCellM": 0.25,
+        "coreHp": 126,
+        "shellPatchHp": 72,
+        "limbNodeHp": 43
+      },
+      "stats": {
+        "maxHp": 360,
+        "cruiseMps": 1.3,
+        "sprintMps": 4.2,
+        "detectionM": 22,
+        "chaseFromHomeM": 24,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "avoidant",
+        "activePeriod": "day",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "퇴로가 막힌 상태에서 공격받음",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "drift_grazer_primary",
+          "name": "관성 뿔받기",
+          "energyType": "mechanical",
+          "damageHp": 39,
+          "rangeM": 2.3,
+          "windupS": 1.2,
+          "recoveryS": 0.9,
+          "cooldownS": 4,
+          "telegraph": "앞발이 바닥에 고정되고 뿔을 낮춤",
+          "shape": "정면 60도",
+          "calorieCostCp": 7.8,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 625,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.26,
+        "sprintExtraCpPerS": 0.521,
+        "regenDelayS": 10,
+        "regenHpPerS": 2.0,
+        "regenCpPerHp": 3,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 1.5
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "anomaly"
+        ],
+        "dungeonIds": [
+          "inertia_tower"
+        ],
+        "diet": [
+          {
+            "kind": "producer",
+            "id": "mineral_lichen"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 219,
+        "habitat": "생산원과 은신처가 연결된 지표; 중첩 환경에서는 기저 환경의 이동 조건도 만족",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": [
+          {
+            "dungeonId": "inertia_tower",
+            "diet": [
+              {
+                "kind": "dungeon_producer",
+                "id": "inertia_tower_primary_producer"
+              },
+              {
+                "kind": "dungeon_producer",
+                "id": "inertia_tower_secondary_producer"
+              }
+            ]
+          }
+        ]
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:anomaly:spawning",
+        "dungeonBudgetRef": "structures:inertia_tower:ecology",
+        "dungeonMaxCount": 4,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 1.0,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 1200,
+        "breedingCooldownS": 1200,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 2
+      },
+      "drops": [
+        {
+          "itemId": "meat",
+          "min": 2,
+          "max": 4,
+          "alternativeSourceRef": "progression:meat",
+          "alternativeRecipe": "synth_meat"
+        },
+        {
+          "itemId": "hide",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:hide",
+          "alternativeRecipe": "synth_hide"
+        },
+        {
+          "itemId": "bone",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:bone",
+          "alternativeRecipe": "synth_bone"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "phase_stalker",
+      "name": "위상추적수",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "predator",
+      "baselineTier": 8,
+      "concept": "몸의 줄무늬가 정렬된 뒤 직선으로 가속한다. 벽 통과 없이 열린 경로만 이용한다.",
+      "body": {
+        "lengthWidthHeightM": [
+          2.3,
+          0.9,
+          1.2
+        ],
+        "massKg": 150,
+        "profile": "quadruped",
+        "outerCellM": 0.25,
+        "coreHp": 164,
+        "shellPatchHp": 94,
+        "limbNodeHp": 56
+      },
+      "stats": {
+        "maxHp": 470,
+        "cruiseMps": 2,
+        "sprintMps": 4.8,
+        "detectionM": 26,
+        "chaseFromHomeM": 36,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "satiation_gated_predator",
+        "activePeriod": "dusk_night",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "배고픔 기준 이하이며 자신보다 약한 먹이, 또는 직접 공격에 대한 방어",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "phase_stalker_primary",
+          "name": "가속 돌진",
+          "energyType": "mechanical",
+          "damageHp": 67,
+          "rangeM": 4,
+          "windupS": 1.5,
+          "recoveryS": 1.12,
+          "cooldownS": 4.6,
+          "telegraph": "줄무늬 정렬과 낮은 울음",
+          "shape": "직선 4m, 장애물에 정지",
+          "calorieCostCp": 13.4,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 750,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.312,
+        "sprintExtraCpPerS": 0.625,
+        "regenDelayS": 12,
+        "regenHpPerS": 2.61,
+        "regenCpPerHp": 4,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 1.958
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "anomaly"
+        ],
+        "dungeonIds": [],
+        "diet": [
+          {
+            "kind": "species",
+            "id": "drift_grazer"
+          },
+          {
+            "kind": "species",
+            "id": "anchor_tick"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 262,
+        "habitat": "생산원과 은신처가 연결된 지표; 중첩 환경에서는 기저 환경의 이동 조건도 만족",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": []
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:anomaly:spawning",
+        "dungeonBudgetRef": null,
+        "dungeonMaxCount": 0,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 1.15,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 1200,
+        "breedingCooldownS": 1200,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 2
+      },
+      "drops": [
+        {
+          "itemId": "meat",
+          "min": 2,
+          "max": 4,
+          "alternativeSourceRef": "progression:meat",
+          "alternativeRecipe": "synth_meat"
+        },
+        {
+          "itemId": "hide",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:hide",
+          "alternativeRecipe": "synth_hide"
+        },
+        {
+          "itemId": "bone",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:bone",
+          "alternativeRecipe": "synth_bone"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "anchor_tick",
+      "name": "닻다리진드기",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "detritivore",
+      "baselineTier": 8,
+      "concept": "지의와 사체의 얇은 막을 먹고 변화하는 중력에 다리로 버틴다. 문명종의 수리 소재를 생성하지 않는다.",
+      "body": {
+        "lengthWidthHeightM": [
+          0.5,
+          0.5,
+          0.3
+        ],
+        "massKg": 5,
+        "profile": "arthropod",
+        "outerCellM": 0.125,
+        "coreHp": 45,
+        "shellPatchHp": 52,
+        "limbNodeHp": 12
+      },
+      "stats": {
+        "maxHp": 150,
+        "cruiseMps": 0.5,
+        "sprintMps": 1.3,
+        "detectionM": 7,
+        "chaseFromHomeM": 4,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "avoidant",
+        "activePeriod": "all",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "퇴로가 막힌 상태에서 공격받음",
+        "warningS": 1,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "anchor_tick_primary",
+          "name": "닻다리 집게",
+          "energyType": "mechanical",
+          "damageHp": 20,
+          "rangeM": 1,
+          "windupS": 1.2,
+          "recoveryS": 0.9,
+          "cooldownS": 4,
+          "telegraph": "다리 두 개를 들어올림",
+          "shape": "정면 접촉",
+          "calorieCostCp": 4.0,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 120,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.05,
+        "sprintExtraCpPerS": 0.1,
+        "regenDelayS": 10,
+        "regenHpPerS": 0.83,
+        "regenCpPerHp": 3,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 0.625
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "anomaly"
+        ],
+        "dungeonIds": [
+          "inertia_tower"
+        ],
+        "diet": [
+          {
+            "kind": "producer",
+            "id": "mineral_lichen"
+          },
+          {
+            "kind": "resource",
+            "id": "detritus"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 42,
+        "habitat": "생산원과 은신처가 연결된 지표; 중첩 환경에서는 기저 환경의 이동 조건도 만족",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": [
+          {
+            "dungeonId": "inertia_tower",
+            "diet": [
+              {
+                "kind": "dungeon_producer",
+                "id": "inertia_tower_primary_producer"
+              },
+              {
+                "kind": "dungeon_producer",
+                "id": "inertia_tower_secondary_producer"
+              },
+              {
+                "kind": "resource",
+                "id": "detritus"
+              }
+            ]
+          }
+        ]
+      },
+      "population": {
+        "outdoorBudgetRef": "environments:anomaly:spawning",
+        "dungeonBudgetRef": "structures:inertia_tower:ecology",
+        "dungeonMaxCount": 10,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 0.25,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 600,
+        "breedingCooldownS": 600,
+        "offspringCount": 1,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "생존 성체2·먹이·빈 슬롯·부모 칼로리 지불이 있을 때 출생; 완전 전멸은 실제 외부 이주만",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 2
+      },
+      "drops": [
+        {
+          "itemId": "chitin",
+          "min": 1,
+          "max": 2,
+          "alternativeSourceRef": "progression:chitin",
+          "alternativeRecipe": "synth_chitin"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "survey_drone",
+      "name": "측량부유체",
+      "status": "proposed",
+      "entityType": "inorganic",
+      "civilization": false,
+      "origin": "world_life",
+      "role": "guardian",
+      "baselineTier": 8,
+      "concept": "월드 기원의 무기생명 경비. 탐조선을 바닥에 그은 뒤 전격을 방출하고 발광 축전부가 취약점이다.",
+      "body": {
+        "lengthWidthHeightM": [
+          1.1,
+          1.1,
+          0.7
+        ],
+        "massKg": 180,
+        "profile": "hover",
+        "outerCellM": 0.25,
+        "coreHp": 204,
+        "shellPatchHp": 204,
+        "limbNodeHp": 82
+      },
+      "stats": {
+        "maxHp": 680,
+        "cruiseMps": 1.8,
+        "sprintMps": 3.6,
+        "detectionM": 26,
+        "chaseFromHomeM": 32,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.15
+      },
+      "behavior": {
+        "disposition": "territorial_warning",
+        "activePeriod": "all",
+        "huntBelowCalorieFraction": null,
+        "attackTrigger": "표시된 경계 침입 후 경고가 끝나거나 직접 공격",
+        "warningS": 2,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "survey_drone_primary",
+          "name": "측량 전격",
+          "energyType": "electrical",
+          "damageHp": 75,
+          "rangeM": 9,
+          "windupS": 1.8,
+          "recoveryS": 1.35,
+          "cooldownS": 5,
+          "telegraph": "탐조선 고정과 축전부 세 번 점멸",
+          "shape": "직선 투사체, 금속 전도 연쇄는 후속",
+          "calorieCostCp": 0,
+          "reserveCostEu": 150
+        }
+      ],
+      "calories": null,
+      "energyReserve": {
+        "kind": "electrical",
+        "capacityEu": 900,
+        "initialFraction": 0.75,
+        "recharge": "community_grid_or_maintenance_station",
+        "cpPerEu": null
+      },
+      "repair": {
+        "naturalRecovery": false,
+        "action": "maintenance",
+        "materialId": "scrap_iron",
+        "unitsPerAction": 1,
+        "durationS": 8,
+        "hpPerAction": 40,
+        "requiresStation": true,
+        "coreDestroyedCanRevive": false
+      },
+      "ecology": {
+        "environmentIds": [
+          "anomaly"
+        ],
+        "dungeonIds": [
+          "inertia_tower"
+        ],
+        "diet": [],
+        "foodCycle": "먹이망에 포함하지 않음; 정비 공급은 별도 공동체 원장",
+        "carcassEdibleCp": 0,
+        "habitat": "내부 그늘·먹이 방과 연결된 매복처",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": []
+      },
+      "population": {
+        "outdoorBudgetRef": null,
+        "dungeonBudgetRef": "structures:inertia_tower:ecology",
+        "dungeonMaxCount": 5,
+        "communityMaxCount": 0,
+        "spawnClearanceM": 0.55,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": null,
+        "breedingCooldownS": null,
+        "offspringCount": 0,
+        "reproductionCalorieFraction": null,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": null,
+        "replacementRule": "핵심이 살아있는 기존 개체를 정비; 사망 개체 재생성 없음",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 2
+      },
+      "drops": [
+        {
+          "itemId": "scrap_iron",
+          "min": 3,
+          "max": 5,
+          "alternativeSourceRef": "progression:scrap_iron",
+          "alternativeRecipe": "make_scrap_iron"
+        }
+      ],
+      "civilizationRules": null,
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "wayfarer_organic",
+      "name": "개척민 유기생명 원형",
+      "status": "proposed",
+      "entityType": "organic",
+      "civilization": true,
+      "origin": "world_life",
+      "role": "community_member",
+      "baselineTier": 3,
+      "concept": "종족 외형 확정 전 문명 개체용 역할 원형. 공동체 식량·경보·거래·구조 요청을 공유한다.",
+      "body": {
+        "lengthWidthHeightM": [
+          0.6,
+          0.4,
+          1.8
+        ],
+        "massKg": 72,
+        "profile": "biped",
+        "outerCellM": 0.25,
+        "coreHp": 44,
+        "shellPatchHp": 31,
+        "limbNodeHp": 19
+      },
+      "stats": {
+        "maxHp": 125,
+        "cruiseMps": 1.4,
+        "sprintMps": 4,
+        "detectionM": 20,
+        "chaseFromHomeM": 18,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.25
+      },
+      "behavior": {
+        "disposition": "civilized_neutral",
+        "activePeriod": "all",
+        "huntBelowCalorieFraction": 0.55,
+        "attackTrigger": "공동체 적대 판정 또는 직접 공격 이후만",
+        "warningS": 2,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "wayfarer_organic_primary",
+          "name": "방어봉",
+          "energyType": "mechanical",
+          "damageHp": 17,
+          "rangeM": 1.8,
+          "windupS": 1,
+          "recoveryS": 0.75,
+          "cooldownS": 3,
+          "telegraph": "물러서라는 경고와 봉 들기",
+          "shape": "정면 60도, 먼저 공격하지 않음",
+          "calorieCostCp": 3.4,
+          "reserveCostEu": 0
+        }
+      ],
+      "calories": {
+        "maxCp": 360,
+        "initialFraction": 0.75,
+        "basalCpPerS": 0.15,
+        "sprintExtraCpPerS": 0.3,
+        "regenDelayS": 10,
+        "regenHpPerS": 0.69,
+        "regenCpPerHp": 3,
+        "restMultiplier": 1.5,
+        "minimumReserveFraction": 0.1,
+        "starvationDelayS": 120,
+        "starvationDamageHpPerS": 0.521
+      },
+      "energyReserve": null,
+      "repair": null,
+      "ecology": {
+        "environmentIds": [
+          "grove",
+          "ridge",
+          "marsh",
+          "thermal",
+          "coast",
+          "mana_grove",
+          "sacred",
+          "anomaly"
+        ],
+        "dungeonIds": [],
+        "diet": [
+          {
+            "kind": "item",
+            "id": "meat"
+          },
+          {
+            "kind": "resource",
+            "id": "community_plant_food"
+          }
+        ],
+        "foodCycle": "배설물·사체→분해층→생산원; 사체 먹이와 플레이어 채집은 동일 잔량 원장 공유",
+        "carcassEdibleCp": 126,
+        "habitat": "공동체 주거·작업·정비 구역",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": []
+      },
+      "population": {
+        "outdoorBudgetRef": null,
+        "dungeonBudgetRef": null,
+        "dungeonMaxCount": 0,
+        "communityMaxCount": 8,
+        "spawnClearanceM": 0.3,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": 1200,
+        "breedingCooldownS": 1200,
+        "offspringCount": 0,
+        "reproductionCalorieFraction": 0.7,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": 0.25,
+        "replacementRule": "살아있는 인접 공동체의 이주 또는 회수된 비핵심파손 개체 정비; 무에서 생성 금지",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 1
+      },
+      "drops": [],
+      "civilizationRules": {
+        "communityId": "instance reference; not species property",
+        "interaction": [
+          "trade",
+          "contribution",
+          "help_request",
+          "warning"
+        ],
+        "deathInventory": "기존 개인 소지품만 단일 원장으로 이전; 새 보상 생성 없음",
+        "membership": "성향·적대·소속은 개체별 저장; 문명=true가 우호를 뜻하지 않음"
+      },
+      "legacyMappingCandidate": null
+    },
+    {
+      "id": "custodian_inorganic",
+      "name": "관리인 무기생명 원형",
+      "status": "proposed",
+      "entityType": "inorganic",
+      "civilization": true,
+      "origin": "world_life",
+      "role": "community_member",
+      "baselineTier": 3,
+      "concept": "월드에서 만나는 문명 무기생명 원형. 식량 대신 정비 공급을 이용하며 기여와 거래가 가능하다.",
+      "body": {
+        "lengthWidthHeightM": [
+          0.75,
+          0.6,
+          1.9
+        ],
+        "massKg": 160,
+        "profile": "biped",
+        "outerCellM": 0.25,
+        "coreHp": 66,
+        "shellPatchHp": 48,
+        "limbNodeHp": 28
+      },
+      "stats": {
+        "maxHp": 190,
+        "cruiseMps": 1.4,
+        "sprintMps": 4.2,
+        "detectionM": 22,
+        "chaseFromHomeM": 18,
+        "loseSightS": 6,
+        "retreatHpFraction": 0.15
+      },
+      "behavior": {
+        "disposition": "civilized_neutral",
+        "activePeriod": "all",
+        "huntBelowCalorieFraction": null,
+        "attackTrigger": "공동체 적대 판정 또는 직접 공격 이후만",
+        "warningS": 2,
+        "avoidance": "추격 반경 또는 시야 상실 시간을 넘으면 복귀; 복귀만으로 HP·에너지 리셋 없음"
+      },
+      "attacks": [
+        {
+          "id": "custodian_inorganic_primary",
+          "name": "정비팔 방어",
+          "energyType": "mechanical",
+          "damageHp": 24,
+          "rangeM": 2,
+          "windupS": 1.2,
+          "recoveryS": 0.9,
+          "cooldownS": 3.2,
+          "telegraph": "경고음과 팔 올리기",
+          "shape": "정면 65도, 먼저 공격하지 않음",
+          "calorieCostCp": 0,
+          "reserveCostEu": 48
+        }
+      ],
+      "calories": null,
+      "energyReserve": {
+        "kind": "mechanical",
+        "capacityEu": 288,
+        "initialFraction": 0.75,
+        "recharge": "community_grid_or_maintenance_station",
+        "cpPerEu": null
+      },
+      "repair": {
+        "naturalRecovery": false,
+        "action": "maintenance",
+        "materialId": "scrap_iron",
+        "unitsPerAction": 1,
+        "durationS": 8,
+        "hpPerAction": 40,
+        "requiresStation": true,
+        "coreDestroyedCanRevive": false
+      },
+      "ecology": {
+        "environmentIds": [
+          "grove",
+          "ridge",
+          "marsh",
+          "thermal",
+          "coast",
+          "mana_grove",
+          "sacred",
+          "anomaly"
+        ],
+        "dungeonIds": [],
+        "diet": [],
+        "foodCycle": "먹이망에 포함하지 않음; 정비 공급은 별도 공동체 원장",
+        "carcassEdibleCp": 0,
+        "habitat": "공동체 주거·작업·정비 구역",
+        "migrationFoodFraction": 0.2,
+        "migrationAfterS": 120,
+        "migrationSearchCells": 1,
+        "dungeonDietOverrides": []
+      },
+      "population": {
+        "outdoorBudgetRef": null,
+        "dungeonBudgetRef": null,
+        "dungeonMaxCount": 0,
+        "communityMaxCount": 4,
+        "spawnClearanceM": 0.375,
+        "minPlayerDistanceM": 32,
+        "recoveryEvaluationS": 60,
+        "maturityS": null,
+        "breedingCooldownS": null,
+        "offspringCount": 0,
+        "reproductionCalorieFraction": null,
+        "foodAvailabilityFraction": 0.4,
+        "newbornCalorieFraction": null,
+        "replacementRule": "살아있는 인접 공동체의 이주 또는 회수된 비핵심파손 개체 정비; 무에서 생성 금지",
+        "dungeonGroupMin": 1,
+        "dungeonGroupMax": 1
+      },
+      "drops": [],
+      "civilizationRules": {
+        "communityId": "instance reference; not species property",
+        "interaction": [
+          "trade",
+          "contribution",
+          "help_request",
+          "warning"
+        ],
+        "deathInventory": "기존 개인 소지품만 단일 원장으로 이전; 새 보상 생성 없음",
+        "membership": "성향·적대·소속은 개체별 저장; 문명=true가 우호를 뜻하지 않음"
+      },
+      "legacyMappingCandidate": null
+    }
+  ]
+}

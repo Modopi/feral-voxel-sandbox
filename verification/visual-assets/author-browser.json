@@ -1,0 +1,34 @@
+{
+  "ok": true,
+  "initial": {
+    "id": "moss_deer",
+    "parts": 13,
+    "ownBoxes": 126,
+    "historyIndex": 0,
+    "revision": 0
+  },
+  "addRejectUndoRedo": true,
+  "physics": {
+    "stats": {
+      "subjectOwners": 1,
+      "colliders": 127,
+      "sameOwnerCollision": false,
+      "externalCollision": true
+    },
+    "probe": {
+      "ownerId": "preview:probe:1",
+      "position": {
+        "x": -0.015703659504652023,
+        "y": 1.0937466621398926,
+        "z": 0.01405260618776083
+      },
+      "velocity": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "size": 0.25
+    }
+  },
+  "errors": []
+}
