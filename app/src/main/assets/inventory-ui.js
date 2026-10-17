@@ -138,7 +138,7 @@ export class InventoryUI {
     detail.replaceChildren();
     if (s) {
       const text = document.createElement("span");
-      text.textContent = `${ITEMS[s.id].name} · ${s.count}개${GEAR[s.id]?.durability ? ` · 내구 ${inv.wear[s.id]}/${GEAR[s.id].durability}` : ""}${this.source !== null ? " · 옮길 칸을 누르세요" : ""}`;
+      text.textContent = `${ITEMS[s.id].name} · ${s.count}개${GEAR[s.id]?.durability ? ` · 내구 ${inv.wear[s.id]}/${GEAR[s.id].durability}` : ""}${GEAR[s.id]?.attackMode ? (GEAR[s.id].attackMode === "pierce" ? " · 공격: 내부 관통" : " · 공격: 충격 전달") : ""}${this.source !== null ? " · 옮길 칸을 누르세요" : ""}`;
       detail.append(text);
       const source = document.createElement("small");
       source.className = "itemSource";

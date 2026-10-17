@@ -30,7 +30,8 @@ import {
 } from "./edit-grid.js";
 import { itemArt } from "./item-art.js";
 import { GEAR, activeGear, spendGear, miningWork } from "./equipment.js";
-let nextStrike = 0;
+let nextStrike = 0,
+  sandboxSelected = false;
 import { currentWorld, saveKey } from "./world-slots.js";
 const activeWorld = currentWorld(
   localStorage,
@@ -203,6 +204,7 @@ function syncHeld() {
           : id === "seed"
             ? 7
             : 0;
+  sandboxSelected = false;
   if (GEAR[id]) inventory.equipment[GEAR[id].slot] = id;
   if (ITEMS[id]?.block) buildMaterial = id;
   updateToolLabel();
@@ -433,9 +435,27 @@ function updateToolLabel() {
   }
   if (id === "iron")
     $("useBtn").querySelector("small").textContent = "부품 수리";
+  const sandbox = sandboxTool();
+  if (sandbox !== null) {
+    $("toolName").textContent = SANDBOX_TOOLS[sandbox][0];
+    $("toolHelp").textContent = SANDBOX_TOOLS[sandbox][1];
+    $("useBtn").querySelector("small").textContent = SANDBOX_TOOLS[sandbox][0];
+  } else if (!frontierUI && !id) $("useBtn").querySelector("small").textContent = "관찰";
   view?.setHeldItem(id);
   view?.setCharacterArmor(inventory.unlocks.has("armor"));
   $("hint").textContent = "1–9 아이템 · I 가방";
+}
+const SANDBOX_TOOLS = { 0: ["관찰 렌즈", "생명·지형 정보 읽기"], 4: ["물 붓기", "조준한 곳에 물 추가"], 5: ["불 붙이기", "조준한 칸에 불 붙이기"], 6: ["산 붓기", "조준한 곳에 산 추가"], 8: ["개체 생성", "조준한 곳에 동물 1마리"] };
+// Island-only sandbox tools stay selected until the hotbar changes; frontier keeps its own interactions.
+function sandboxTool() {
+  return !frontierUI && selected in SANDBOX_TOOLS && sandboxSelected ? selected : null;
+}
+function selectSandboxTool(n) {
+  if (frontierUI) return;
+  if (n < 0) { sandboxSelected = false; syncHeld(); pause(false); toast("들고 있는 아이템으로 돌아왔습니다."); return; }
+  selected = n; sandboxSelected = true; updateToolLabel();
+  pause(false);
+  toast(`${SANDBOX_TOOLS[n][0]} 선택 · 사용 버튼으로 실행`);
 }
 function cycleRange() {
   if (selected === 3) buildSize = buildSize === 1 ? 0.5 : 1;
@@ -558,6 +578,7 @@ function target() {
 }
 function use(intent = "selected", repeated = false) {
   if (!running || paused) return;
+  let islandAction = null;
   const held = heldItem();
   const aimed = target();
   if (
@@ -607,7 +628,7 @@ function use(intent = "selected", repeated = false) {
     updateAim();
     return;
   }
-  if (intent === "secondary" && aimed.ent) {
+  if (intent === "secondary" && aimed.ent && ![4, 5, 6, 8].includes(sandboxTool())) {
     if (world.time < nextStrike) return;
     nextStrike = world.time + 0.5;
     const e = aimed.ent.entity;
@@ -637,11 +658,15 @@ function use(intent = "selected", repeated = false) {
       return;
     }
     if (!ITEMS[held]?.block && held !== "seed") {
-      frontierUI?.interact();
-      return;
+      if (frontierUI) {
+        frontierUI.interact();
+        return;
+      }
+      // On the island the use button reads life and terrain unless a sandbox tool is chosen.
+      islandAction = sandboxTool() ?? 0;
     }
   }
-  let action = selected;
+  let action = islandAction ?? selected;
   if (intent === "primary")
     action =
       aimed.ent || (GEAR[held]?.slot === "weapon" && frontierUI?.bossTarget())
@@ -1034,6 +1059,7 @@ function save(quiet = false) {
   }
 }
 function map() {
+  if (!document.body.classList.contains("showRadar")) return;
   const canvas = $("map"),
     ctx = canvas.getContext("2d"),
     scale = 150 / SIZE;
@@ -1093,6 +1119,7 @@ function discover() {
       $("discovery").querySelector("strong").textContent = p.name;
       $("discovery").classList.add("show");
       setTimeout(() => $("discovery").classList.remove("show"), 4800);
+      toast(`새 장소 발견 · ${p.name} (${discovered.size}/${world.landmarks.length})`);
       sound("scan");
     }
   }
@@ -1639,6 +1666,8 @@ function persistSettings() {
       fov: $("fov").value,
       sound: $("sound").checked,
       leftHand: $("leftHand").checked,
+      showRadar: $("showRadar").checked,
+      showEvents: $("showEvents").checked,
     }),
   );
 }
@@ -1659,6 +1688,14 @@ $("sound").onchange = () => {
   soundEnabled = $("sound").checked;
   persistSettings();
 };
+for (const [id, className] of [["showRadar", "showRadar"], ["showEvents", "showEvents"]])
+  $(id).onchange = () => {
+    document.body.classList.toggle(className, $(id).checked);
+    persistSettings();
+    if (id === "showRadar") map();
+  };
+for (const b of document.querySelectorAll("[data-sandbox-tool]"))
+  b.onclick = () => selectSandboxTool(+b.dataset.sandboxTool);
 $("leftHand").onchange = () => {
   document.body.classList.toggle("leftHand", $("leftHand").checked);
   persistSettings();
@@ -1967,6 +2004,10 @@ try {
     $("fov").value = settings.layoutVersion === 2 ? settings.fov || 82 : 82;
     $("sound").checked = settings.sound !== false;
     $("leftHand").checked = !!settings.leftHand;
+    $("showRadar").checked = !!settings.showRadar;
+    $("showEvents").checked = !!settings.showEvents;
+    document.body.classList.toggle("showRadar", $("showRadar").checked);
+    document.body.classList.toggle("showEvents", $("showEvents").checked);
     sensitivity = $("sensitivity").value / 100;
     soundEnabled = $("sound").checked;
     document.body.classList.toggle("leftHand", $("leftHand").checked);

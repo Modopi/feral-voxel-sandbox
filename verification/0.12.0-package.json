@@ -1,0 +1,19 @@
+{
+  "version": "0.12.0",
+  "versionCode": 1200,
+  "minNativeCode": 303,
+  "files": 120,
+  "archiveBytes": 2796223,
+  "expandedBytes": 11511187,
+  "archiveSha256": "f7e55691801548686cb8829465725a0a28bcb409cd6b26d77e88862601f63e34",
+  "packageSha256": "8c9a94e399362d9c1e783509651d4fb20a69bece462e5c7159f5cbd70e595981",
+  "apkSha256": "1d24a27c5ae0e1a7c00240eb6ddb715eda790bb05d4e1663cdbc3e123b58a369",
+  "apkAssetsIdenticalToUpdate": true,
+  "nativeLimits": {
+    "files": 128,
+    "archiveBytes": 8388608,
+    "expandedBytes": 33554432
+  },
+  "withinLimits": true,
+  "note": "Local build with the shared test signing key; CI rebuilds and publishes after merge."
+}

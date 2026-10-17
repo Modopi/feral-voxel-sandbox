@@ -13,8 +13,13 @@ import {MaterialEffects,resolveSurfaceDamage,equipmentExposureProfile} from './m
 import {WorldObjects} from './objects.js';
 import {FaithSystem} from './faith.js';
 import {Armaments} from './armaments.js';
+import {reasonText} from './reasons.js';
 const clone = value => JSON.parse(JSON.stringify(value));
 export const distance = (a,b) => Math.hypot(a.x-b.x,(a.y||0)-(b.y||0),a.z-b.z);
+const asPoint = v => Array.isArray(v) ? {x:v[0],y:v[1],z:v[2]} : v;
+const firstSentence = text => String(text||'').split(/(?<=[.。])\s/)[0].trim();
+const SPECIES = new Map(CONTENT.creatures.entries.map(e=>[e.id,e]));
+const BOSS_ACTIONS = {repair:'수리',rest:'휴식',recharge:'재충전'};
 export class ExpeditionRuntime {
  static async create(seed,state=null){
   const assets=new Map();
@@ -32,7 +37,7 @@ export class ExpeditionRuntime {
   this.dungeons=new DungeonSystem({catalog:CONTENT,seed,state:state?.dungeons,atlas:this.atlas,assets});
   this.player=state?.player?clone(state.player):{x:0,y:this.atlas.heightAt(0,0)+.05,z:0,yaw:Math.PI,pitch:0,hp:100,maxHp:100,calories:this.calorieRule.capacity,maxCalories:this.calorieRule.capacity,vy:0,grounded:false,stance:'stand',lastDamageAt:-100,resting:false};
   this.deaths=clone(state?.deaths||[]);this.seenRegions=new Set(state?.seenRegions||[]);
-  this.messages=[];this.events=[];this.harvestAction=null;this.lastStrike=0;this.populationClock=Infinity;
+  this.messages=[];this.warnings=[];this.events=[];this.playerPush=null;this.harvestAction=null;this.lastStrike=0;this.populationClock=Infinity;
   this.terrain={unbounded:true,getCell:(x,y,z)=>this.isSolid(x*.5+.25,y*.5+.25,z*.5+.25)?1:0,
    isSolidCell:(x,y,z)=>this.isSolid(x*.5+.25,y*.5+.25,z*.5+.25),heightAt:(x,z,y)=>this.surfaceHeight(x,z,y),
    groundHeight:(x,z,y)=>this.surfaceHeight(x,z,y),fluidAt:(x,y,z)=>this.dungeons.fluidAt({x,y,z})??this.atlas.fluidAt(x,y,z),
@@ -53,6 +58,54 @@ export class ExpeditionRuntime {
  }
  id(prefix){return `${prefix}:${this.seed}:${this.nextId++}`;}
  message(text){this.messages.push(String(text));if(this.messages.length>30)this.messages.shift();}
+ warn(text,seconds=1.5){this.warnings.push({text:String(text),until:this.time+Math.max(.8,seconds)});if(this.warnings.length>8)this.warnings.shift();}
+ activeWarning(){this.warnings=this.warnings.filter(w=>w.until>this.time);return this.warnings.at(-1)??null;}
+ /** Screen-relative direction for a world position, matching the player's yaw convention. */
+ directionTo(position){
+  const p=this.player,dx=position.x-p.x,dz=position.z-p.z,forward=-Math.sin(p.yaw)*dx-Math.cos(p.yaw)*dz,right=Math.cos(p.yaw)*dx-Math.sin(p.yaw)*dz;
+  const angle=Math.atan2(right,forward)*180/Math.PI;return Math.abs(angle)<=45?'정면':Math.abs(angle)>=135?'뒤쪽':angle>0?'오른쪽':'왼쪽';
+ }
+ creatureWarning(event){
+  const e=this.creatures.get(event.entityId);if(!e||e.dead||e.attack?.targetId!=='player'||distance(this.player,e)>30)return;
+  this.warn(`${SPECIES.get(e.speciesId)?.name??'생명체'}: ${event.text??'공격 준비'} · ${this.directionTo(e)}`,event.duration);
+ }
+ bossEvent(event){
+  const b=this.bosses.get(event.bossId);if(!b||distance(this.player,b.position)>90)return;
+  const def=this.bosses.definitionFor(b),skill=id=>def.skills.find(s=>s.id===id);
+  if(event.type==='phase'){const phase=this.bosses.phase(b);this.message(`${def.name} · ${phase.name} 단계`);}
+  else if(event.type==='partBroken'){const part=def.parts.find(p=>p.id===event.partId);this.message(`${def.name}의 ${part?.name??'부위'} 파손${part?.onBreak?' · '+firstSentence(part.onBreak):''}`);}
+  else if(event.type==='gimmick')this.message(`${event.action!=='damage'?'장치를 작동했습니다':['root_charge','mine_charge'].includes(b.cast?.skillId)?'수호자가 장치에 부딪혔습니다':'장치를 파괴했습니다'} · ${firstSentence(def.arena.gimmickEffect)}`);
+  else if(event.type==='cast'&&b.cast?.targetOwnerId==='player')this.warn(`${def.name} · ${skill(event.skillId)?.name??'공격'} ${Number(event.windupS).toFixed(1)}초 · ${this.directionTo(b.position)}`,event.windupS);
+  else if(event.type==='castCancelled')this.message(`${skill(event.skillId)?.name??'기술'} 취소 · 장치 효과`);
+  else if(event.type==='action')this.message(event.action==='recharge'?`${def.name} 재충전 중 · 받는 피해가 늘어납니다.`:`${def.name} ${BOSS_ACTIONS[event.action]??event.action} 중 · 공격하면 멈춥니다.`);
+  else if(event.type==='actionInterrupted')this.message(`${def.name}의 ${BOSS_ACTIONS[event.action]??'행동'}을 끊었습니다.`);
+ }
+ dungeonEvent(event){
+  const name=this.dungeons.definition(event.instanceId)?.puzzle?.name;
+  if(event.type==='puzzle_opened')this.message(`${name??'장치'}: 통로가 열렸습니다.`);
+  else if(event.type==='producer_destroyed')this.message('생산 시설을 파괴했습니다. 이 던전의 개체가 더 늘지 않습니다.');
+  else if(event.type==='water_basin_breached')this.message('저수조가 터져 물이 빠졌습니다.');
+ }
+ communityEvent(event){
+  if(event.type==='community_contribution_completed')this.message(`보급 계약을 마쳤습니다. 누적 기여 ${event.contributions}회.`);
+  else if(event.type==='community_repair_paused')this.message('주민 수리를 멈췄습니다. 주민과 함께 정비소 근처에서 다시 시작하세요.');
+  else if(event.type==='community_repair_finished')this.message(event.ok?`주민 수리를 마쳤습니다. HP +${Math.round(event.restored??0)}`:`주민 수리를 끝내지 못했습니다. ${reasonText(event.reason)}`);
+ }
+ /** Arena gimmicks have no aim geometry, so a melee swing hits the one the player faces within reach. */
+ gimmickTarget(hit,range=4){
+  const p=this.player,eye={x:p.x,y:p.y+(p.bodyHeight??1.5)*.9,z:p.z},look={x:-Math.sin(p.yaw)*Math.cos(p.pitch),y:Math.sin(p.pitch),z:-Math.cos(p.yaw)*Math.cos(p.pitch)};
+  let best=null;
+  for(const a of this.dungeons.nearbyAnchors(p,3).filter(a=>a.kind==='gimmick')){
+   const b=this.bosses.get(a.bossInstanceId),g=b?.gimmicks?.[a.gimmickId];if(!b||b.defeated||!g||g.broken||g.uses<=0)continue;
+   const gd=this.bosses.definitionFor(b).arena.gimmicks.find(x=>x.id===a.gimmickId);if(!gd)continue;
+   const origin=asPoint(b.arenaOrigin),point={x:origin.x+gd.positionM[0],y:origin.y+gd.positionM[1]+1,z:origin.z+gd.positionM[2]},d=distance(eye,point);
+   if(d>Math.max(3,range)+1||d<1e-6)continue;
+   const cos=((point.x-eye.x)*look.x+(point.y-eye.y)*look.y+(point.z-eye.z)*look.z)/d;if(cos<Math.cos(30*Math.PI/180))continue;
+   if(hit&&Number.isFinite(hit.distance)&&hit.distance<d-1&&hit.kind!=='structure'&&hit.kind!=='terrain')continue;
+   if(!best||d<best.distance)best={bossInstanceId:b.id,gimmickId:a.gimmickId,distance:d,hp:g.hp};
+  }
+  return best;
+ }
  isSolid(x,y,z){return this.atlas.isSolidCell(Math.floor(x*2),Math.floor(y*2),Math.floor(z*2))||!!this.dungeons.solidAt({x,y,z})||!!this.placements?.solidAt({x,y,z})||this.bosses.isSolidAt(x,y,z);}
  surfaceHeight(x,z,nearY=this.atlas.heightAt(x,z)){
   const start=Math.floor((nearY+1.5)*2);
@@ -91,11 +144,12 @@ export class ExpeditionRuntime {
   this.time+=dt;this.populationClock+=dt;
   if(this.populationClock>=2){this.populationClock=0;this.refreshWorld();}
   this.placements.syncAccess(this.player);
-  this.progression.tick(dt,{researching:true,manual});this.dungeons.update(dt,{progression:this.progression,manualInstanceId:manualDeviceId,position:this.player});this.atlas.tick?.(dt);this.machines.tick(dt);this.materialEffects.tick(dt);this.community.tick(dt);
+  this.progression.tick(dt,{researching:true,manual});this.dungeons.update(dt,{progression:this.progression,manualInstanceId:manualDeviceId,position:this.player});this.atlas.tick?.(dt);this.machines.tick(dt);this.materialEffects.tick(dt);this.community.tick(dt);for(const event of this.community.drainEvents())this.communityEvent(event);
   if(this.pendingDetach.size){const key=this.pendingDetach.values().next().value;this.pendingDetach.delete(key);this.objects.detachAround(key.split(',').map(Number));}
   for(const event of this.dungeons.drainEvents()){
    if(event.type==='producer_destroyed')this.creatures.setProducerState(event.instanceId,event.producerId,{enabled:false});
    if(event.type==='water_basin_breached')this.creatures.setWater(event.instanceId,0);
+   this.dungeonEvent(event);
   }
   const loadout=this.progression.evaluateLoadout(),p=this.player;p.maxHp=loadout.maxHp;p.hp=Math.min(p.hp,p.maxHp);
   const rule=this.calorieRule;
@@ -103,13 +157,20 @@ export class ExpeditionRuntime {
   if(p.hp<p.maxHp&&p.calories>0&&(p.resting||this.time-p.lastDamageAt>=rule.noHitDelaySeconds)){
    const heal=Math.min(p.maxHp-p.hp,dt*rule.hpRegenPerSecond*(p.resting?rule.restMultiplier:1),p.calories/rule.caloriesPerHp);p.hp+=heal;p.calories-=heal*rule.caloriesPerHp;
   }
-  this.creatures.tick(dt,{player:p,terrain:this.terrain,damagePlayer:amount=>this.hurt(amount*(1-loadout.damageReduction),'creature')});
+  for(const event of this.creatures.tick(dt,{player:p,terrain:this.terrain,damagePlayer:amount=>this.hurt(amount*(1-loadout.damageReduction),'creature')})??[])if(event.type==='attack_telegraph')this.creatureWarning(event);
   const active=[...this.bosses.entities.values()].filter(e=>distance(p,e.position)<180).map(e=>e.id);
-  this.bosses.tick(dt,{activeIds:active,targets:[{id:'player',ownerId:'player',position:p,radius:.28,height:p.bodyHeight??1.5,armorReduction:loadout.damageReduction},...(this.physics?.machineTargets?.()??[])],terrain:this.terrain,
-   damage:e=>{if(e.targetId==='player')this.hurt(e.damage??e.amount??e.hpDamage,'boss');else this.physics?.damageMachineTarget?.(e);},
-   onDefeat:e=>{const b=this.bosses.get(e.bossId);if(b)this.dungeons.defeatBoss(b.instanceId,b.id,b.reward?.bossChannelOverride);this.message('수호자를 쓰러뜨렸습니다. 보상을 회수할 수 있습니다.');}});
+  const bossEvents=this.bosses.tick(dt,{activeIds:active,targets:[{id:'player',ownerId:'player',position:p,radius:.28,height:p.bodyHeight??1.5,armorReduction:loadout.damageReduction},...(this.physics?.machineTargets?.()??[])],terrain:this.terrain,
+   damage:e=>{if(e.targetId==='player'){this.hurt(e.damage??e.amount??e.hpDamage,'boss');if(e.impulse&&!this.drivingMachineId)this.playerPush={x:e.impulse.x,z:e.impulse.z,remaining:.25};}else this.physics?.damageMachineTarget?.(e);},
+   onDefeat:e=>{const b=this.bosses.get(e.bossId);if(b)this.dungeons.defeatBoss(b.instanceId,b.id,b.reward?.bossChannelOverride);this.message('수호자를 쓰러뜨렸습니다. 아레나 중앙의 빛나는 표식에서 보스 보상을 회수하세요.');}});
+  for(const event of bossEvents??[])this.bossEvent(event);
   this.faith.tick(dt);
   this.armaments.tick(dt);
+  if(this.playerPush){
+   // Catalog counterplay: the wind pushes back at most 1 m (4 m/s for 0.25 s), never through solid cells.
+   const step=Math.min(dt,this.playerPush.remaining),before={...p};p.x+=this.playerPush.x*4*step;p.z+=this.playerPush.z*4*step;this.playerPush.remaining-=step;
+   if(this.physics)this.physics.movePlayer(before,p);else if(this.isSolid(p.x,p.y+.5,p.z))Object.assign(p,{x:before.x,z:before.z});
+   if(this.playerPush.remaining<=1e-9||this.drivingMachineId)this.playerPush=null;
+  }
   const environment=this.dungeons.devices?.sampleAt(p);
   if(environment){
    const heatDps=Math.max(0,(environment.heatC??20)-45)*.05;
@@ -131,7 +192,7 @@ export class ExpeditionRuntime {
   }
   if(this.interactionAction){const a=this.interactionAction;
    if(distance(p,a.position)>3){this.interactionAction=null;this.message('장치에서 멀어져 조작을 멈췄습니다.');}
-   else if((a.elapsed+=dt)>=a.seconds){this.interactionAction=null;const result=this.bosses.interactGimmick(a.bossId,a.gimmickId,{actorPosition:p,progressS:a.elapsed});this.message(result?'장치를 조작했습니다.':'장치를 조작하지 못했습니다.');}
+   else if((a.elapsed+=dt)>=a.seconds){this.interactionAction=null;const result=this.bosses.interactGimmick(a.bossId,a.gimmickId,{actorPosition:p,progressS:a.elapsed});if(!result)this.message('장치를 조작하지 못했습니다.');}
   }
   for(const death of this.deaths)if(!death.recovered&&distance(p,death.position)<=10){
    this.recoverDeath(death);
@@ -195,12 +256,14 @@ export class ExpeditionRuntime {
  }
  strike(hit){
   const weapon=this.armaments.loadout(),loadout=weapon??this.progression.evaluateLoadout();if(this.time-this.lastStrike<loadout.attackPeriod)return {ok:false,reason:'공격 준비 중'};
-  if(!hit||hit.distance>(weapon?.range??4))return {ok:false,reason:'대상이 멉니다.'};
-  if(hit.kind==='resource'){const node=this.nodes.find(n=>n.id===hit.id);return node?this.beginHarvest(node):{ok:false};}
-  if(hit.kind==='terrain'){
-   const resource=this.terrainResource(hit);if(resource)return this.beginHarvest(resource);
+  const gimmick=this.gimmickTarget(hit,weapon?.range??4);
+  if(!gimmick){
+   if(!hit||hit.distance>(weapon?.range??4))return {ok:false,reason:'대상이 멉니다.'};
+   if(hit.kind==='resource'){const node=this.nodes.find(n=>n.id===hit.id);return node?this.beginHarvest(node):{ok:false};}
+   if(hit.kind==='terrain'){const resource=this.terrainResource(hit);if(resource)return this.beginHarvest(resource);}
   }
-  if(weapon){const worn=this.armaments.recordAttack({distanceM:hit.distance,at:this.time});if(!worn.ok)return worn;}
+  if(weapon){const worn=this.armaments.recordAttack({distanceM:gimmick?gimmick.distance:hit.distance,at:this.time});if(!worn.ok)return worn;}
+  if(gimmick){this.lastStrike=this.time;const ok=this.bosses.interactGimmick(gimmick.bossInstanceId,gimmick.gimmickId,{action:'damage',amount:loadout.hitDamage,actorPosition:this.player});return ok?{ok:true,gimmick:true,remainingHp:this.bosses.get(gimmick.bossInstanceId)?.gimmicks[gimmick.gimmickId]?.hp??0}:{ok:false,reason:'gimmick'};}
   this.lastStrike=this.time;this.lastAttackMode=weapon?.attackMode??this.player.attackStyle??'strike';
   return this.damageHit(hit,{amount:loadout.hitDamage,energyType:'mechanical',energyEU:loadout.hitDamage*1.5,attackMode:this.lastAttackMode});
  }
