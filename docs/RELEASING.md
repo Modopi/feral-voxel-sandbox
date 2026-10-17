@@ -61,7 +61,7 @@
 
 게임 1100 / 앱·최소 앱 303 / 저장 스키마 2. Java·권한·키 변경이 없는 게임 전용 릴리스다. 새 콘텐츠는 새 `expedition` 월드 유형으로 실행하며 기존 월드·저장 키를 재작성하지 않는다. 콘텐츠 저장은 자체 schema 1이며 무압축 저장을 읽고 압축된 두 세대로 보존한다. 게임 자동 저장은 별도 작업 스레드에서 압축하며 수동 저장·버전 전환 요청은 완료 확인 후 진행한다.
 
-공개 게시 전에는 앱 목록에 0.11.0이 나타나지 않는다. 검증과 병합 후 기존 공식 `updates/catalog.json`, `updates/stable.feral` 및 불변 `updates/versions/0.11.0.feral`로 게시한다. 새 네이티브 버전 설치는 필요 없다. 이미 배포한 0.10.1 이하의 파일·버전 선택 항목을 덮어쓰지 않는다. Android 실기기 성능·생명주기 검증은 아직 미완료다.
+2026-10-17 17:13 UTC [PR #16](https://github.com/Modopi/feral-voxel-sandbox/pull/16) 병합 커밋 `9740e38`에서 [배포 Actions](https://github.com/Modopi/feral-voxel-sandbox/actions/runs/39052235767)가 성공해 [v0.11.0 Release](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.11.0)와 기존 공식 `updates/catalog.json`, `updates/stable.feral`, 불변 `updates/versions/0.11.0.feral`로 게시됐다. stable과 버전 패키지는 같은 파일(SHA256 `c8606cca…3abd`)이고 내부 아카이브 SHA256 `f285230b…7c3a`가 카탈로그와 일치한다. 0.10.1 이하의 카탈로그 항목과 패키지 파일은 바뀌지 않았다. 새 네이티브 버전 설치는 필요 없다. 휴대폰에서의 업데이트 적용과 Android 실기기 성능·생명주기 검증은 아직 미완료다.
 
 | 버전 | 구분 | 주요 내용 |
 | --- | --- | --- |
