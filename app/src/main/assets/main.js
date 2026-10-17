@@ -407,6 +407,7 @@ function updateToolLabel() {
   if (id === "iron")
     $("useBtn").querySelector("small").textContent = "부품 수리";
   view?.setHeldItem(id);
+  view?.setCharacterArmor(inventory.unlocks.has("armor"));
   $("hint").textContent = "1–9 아이템 · I 가방";
 }
 function cycleRange() {

@@ -1,3 +1,6 @@
+import { animalMaterial } from "./animal-view.js";
+import { animalColor, visibleAnimalDetails } from "./animal-art.js";
+import { firstPersonHands } from "./character-view.js";
 import { terrainMaterial, Atmosphere } from "./art-direction.js";
 import { ITEMS } from "./inventory.js";
 import { WorldUI } from "./world-ui.js";
@@ -186,7 +189,7 @@ export class View {
     this.terrainMaterial = terrainMaterial();
     this.chunks = new Map();
     this.cube = new T.BoxGeometry(1, 1, 1);
-    this.creatureMaterial = new T.MeshStandardMaterial({ roughness: 0.88 });
+    this.creatureMaterial = animalMaterial();
     this.nearMesh = new T.InstancedMesh(
       this.cube,
       this.creatureMaterial,
@@ -294,6 +297,8 @@ export class View {
     this.fluidFrame = 0;
     this.atmosphere = new Atmosphere(this);
     this.makeTool();
+    this.hands = firstPersonHands();
+    this.camera.add(this.hands);
     this.resize();
   }
   makeTool() {
@@ -322,6 +327,16 @@ export class View {
     this.tool.position.set(0.18, -0.12, -0.22);
     this.toolBase = { y: -0.12, z: -0.22 };
     this.toolKick = 0;
+  }
+  setCharacterArmor(armored) {
+    if (this.characterArmored === armored) return;
+    this.characterArmored = armored;
+    if (this.hands) {
+      this.camera.remove(this.hands);
+      this.hands.children.forEach((m) => m.geometry.dispose());
+    }
+    this.hands = firstPersonHands(armored);
+    this.camera.add(this.hands);
   }
   setHeldItem(id) {
     if (ITEMS[id]?.gear || ITEMS[id]?.assemblyTool) {
@@ -525,47 +540,49 @@ export class View {
             if (occupied(e, pi, j) && near < 24000) {
               const v = cellPosition(p, j),
                 pos = toWorld(e, p, pi, v, time),
-                shade = hash(j, pi, e.type) > 0.68 ? 0xeee0b0 : p.color;
+                shade = animalColor(e.type, pi, j, p);
               this.instance(
                 this.nearMesh,
                 near++,
                 pos,
-                [p.cell * 0.985, p.cell * 0.985, p.cell * 0.985],
+                [p.cell * 0.999, p.cell * 0.999, p.cell * 0.999],
                 shade,
                 angle,
                 e.yaw,
                 e.bodyPose,
               );
             }
-        } else {
+        } else if (far < this.farMesh.instanceMatrix.count) {
           const center = [0, p.leg ? (-p.dims[1] * p.cell) / 2 : 0, 0];
           this.instance(
             this.farMesh,
             far++,
             toWorld(e, p, pi, center, time),
-            p.dims.map((v) => v * p.cell * 0.98),
-            p.color,
+            p.dims.map((v) => v * p.cell * 0.999),
+            animalColor(e.type, pi, p.dims[0], p),
             angle,
             e.yaw,
             e.bodyPose,
           );
         }
       }
-      // Eyes are separate eighth-metre voxels and follow the head.
-      if (!(e.lost & 2) && dist < 35) {
-        const p = sp.parts[1];
-        for (const x of [-0.2, 0.2])
+      // Silhouette pieces remain in the middle distance; tiny coat/eye accents
+      // use the same near-detail budget as anatomical voxels.
+      if (dist < 35)
+        for (const d of visibleAnimalDetails(e, sp.parts, fine)) {
+          if (far >= this.farMesh.instanceMatrix.count) break;
+          const p = sp.parts[d.part];
           this.instance(
             this.farMesh,
             far++,
-            toWorld(e, p, 1, [x, 0, -p.dims[2] * p.cell * 0.52], time),
-            [0.125, 0.125, 0.055],
-            0x172e2d,
-            0,
+            toWorld(e, p, d.part, d.at, time),
+            d.size,
+            d.color,
+            pose(e, p, d.part, time).angle,
             e.yaw,
             e.bodyPose,
           );
-      }
+        }
     }
     for (const d of eco.debris)
       if (near < 24000)
@@ -693,6 +710,13 @@ export class View {
       0.5 + Math.sin(((((8 + time / 60) % 24) - 6) / 24) * Math.PI * 2) * 0.5;
     this.atmosphere.update(time, day);
     this.toolKick = Math.max(0, this.toolKick - dt * 6);
+    this.hands.position.y =
+      Math.sin(time * 8) * moving * 0.009 + this.toolKick * 0.025;
+    this.hands.rotation.x = -this.toolKick * 0.16;
+    this.hands.children[1].visible =
+      !!this.heldCube ||
+      this.equipmentId === "pulse" ||
+      /bow/.test(this.equipmentId || "");
     this.tool.position.z = this.toolBase.z + this.toolKick * 0.035;
     this.tool.position.y =
       this.toolBase.y + Math.sin(time * 9) * 0.0025 * moving;

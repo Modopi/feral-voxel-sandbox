@@ -1,3 +1,4 @@
+import { mountCharacterPortrait } from "./character-portrait.js";
 import { sourceHints } from "./acquisition.js";
 import { ITEMS, RECIPES } from "./inventory.js";
 import { GEAR } from "./equipment.js";
@@ -12,7 +13,7 @@ export class InventoryUI {
     this.query = "";
     this.craftableOnly = false;
     const panel = document.querySelector('[data-panel="bag"]');
-    panel.innerHTML = `<div class="survivalInventory"><aside class="recipeBook"><h3>제작법 <small>↕ 밀어서 더 보기</small></h3><div class="recipeFilters"><button data-filter="all">전체</button><button data-filter="gear">장비</button><button data-filter="supplies">재료</button></div><div class="recipeSearch"><input id="recipeSearch" type="search" maxlength="40" placeholder="제작법 찾기" aria-label="제작법 또는 결과 아이템 이름 검색"><button id="craftableOnly" aria-pressed="false" aria-label="지금 제작 가능한 것만">✓</button></div><div id="recipeList" tabindex="0" role="region" aria-label="제작법 목록 · 위아래로 스크롤"></div></aside><div class="inventoryBody" tabindex="0" role="region" aria-label="인벤토리 · 위아래로 스크롤"><div class="inventoryTop"><div class="avatarPanel" aria-label="플레이어 장비"><div class="voxelAvatar"><i class="head"></i><i class="body"></i><i class="arm a"></i><i class="arm b"></i><i class="leg a"></i><i class="leg b"></i></div><span id="equippedName"></span></div><div class="craftBench"><h3 id="recipeName">제작</h3><div class="craftFlow"><div id="craftIngredients"></div><b>→</b><button id="craftOutput" aria-label="제작 결과"></button></div><p id="craftFeedback" role="status"></p></div></div><div class="slotHeading"><span>인벤토리 <small id="bagTotal"></small></span><button id="splitStack" aria-pressed="false">나누기</button><button id="cancelMove">선택 취소</button></div><div id="inventoryGrid" role="group" aria-label="보관함 27칸"></div><div id="inventoryHotbar" role="group" aria-label="핫바 9칸"></div><div id="itemDetail" aria-live="polite"></div><button id="reclaimItems" hidden>이전 보관품 받기</button><p class="slotGuide">아이템 → 목적지 탭으로 이동 · 나누기: 절반 이동 · 하단 9칸은 탐험 핫바</p></div></div>`;
+    panel.innerHTML = `<div class="survivalInventory"><aside class="recipeBook"><h3>제작법 <small>↕ 밀어서 더 보기</small></h3><div class="recipeFilters"><button data-filter="all">전체</button><button data-filter="gear">장비</button><button data-filter="supplies">재료</button></div><div class="recipeSearch"><input id="recipeSearch" type="search" maxlength="40" placeholder="제작법 찾기" aria-label="제작법 또는 결과 아이템 이름 검색"><button id="craftableOnly" aria-pressed="false" aria-label="지금 제작 가능한 것만">✓</button></div><div id="recipeList" tabindex="0" role="region" aria-label="제작법 목록 · 위아래로 스크롤"></div></aside><div class="inventoryBody" tabindex="0" role="region" aria-label="인벤토리 · 위아래로 스크롤"><div class="inventoryTop"><div class="avatarPanel" aria-label="플레이어 장비"><span id="equippedName"></span></div><div class="craftBench"><h3 id="recipeName">제작</h3><div class="craftFlow"><div id="craftIngredients"></div><b>→</b><button id="craftOutput" aria-label="제작 결과"></button></div><p id="craftFeedback" role="status"></p></div></div><div class="slotHeading"><span>인벤토리 <small id="bagTotal"></small></span><button id="splitStack" aria-pressed="false">나누기</button><button id="cancelMove">선택 취소</button></div><div id="inventoryGrid" role="group" aria-label="보관함 27칸"></div><div id="inventoryHotbar" role="group" aria-label="핫바 9칸"></div><div id="itemDetail" aria-live="polite"></div><button id="reclaimItems" hidden>이전 보관품 받기</button><p class="slotGuide">아이템 → 목적지 탭으로 이동 · 나누기: 절반 이동 · 하단 9칸은 탐험 핫바</p></div></div>`;
     document.querySelectorAll("[data-filter]").forEach(
       (b) =>
         (b.onclick = () => {
@@ -159,6 +160,10 @@ export class InventoryUI {
         detail.append(b);
       }
     } else detail.textContent = "빈 손 · 아이템을 핫바에 놓아 사용하세요.";
+    mountCharacterPortrait(document.querySelector(".avatarPanel"), {
+      armored: inv.unlocks.has("armor"),
+      held: inv.slots[inv.selectedSlot]?.id,
+    });
     document.getElementById("equippedName").textContent =
       ITEMS[inv.slots[inv.selectedSlot]?.id]?.name || "빈 손";
     document.getElementById("bagTotal").textContent =

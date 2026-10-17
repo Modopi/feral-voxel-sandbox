@@ -1,3 +1,5 @@
+import { CharacterRig } from "../character-view.js";
+import { mountCharacterPortrait } from "../character-portrait.js";
 import { uiIcon } from "../ui-art.js";
 import { CampaignView } from "./campaign-view.js";
 import { BIOMES, CROPS, biomeIndex } from "./campaign.js";
@@ -27,7 +29,7 @@ const escape = (s) =>
       ],
   );
 const distance = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
-const avatar = `<div class="voxelAvatar" aria-hidden="true"><i class="head"></i><i class="body"></i><i class="arm a"></i><i class="arm b"></i><i class="leg a"></i><i class="leg b"></i></div>`;
+
 const pips = (kind) =>
   `<div class="pipTrack ${kind}" aria-hidden="true">${"<i><b></b></i>".repeat(10)}</div>`;
 function fillPips(track, value) {
@@ -147,6 +149,7 @@ export class FrontierView {
       m.geometry.dispose();
       m.material.dispose();
     });
+    this.npcs.forEach((n) => n.rig?.dispose());
     this.group.clear();
     this.npcs = [];
     this.targets = [];
@@ -168,57 +171,22 @@ export class FrontierView {
         [0xa7bf7c, 0xd0a06d, 0x9aa9c9][v.faction],
       );
       for (let i = 0; i < 3; i++) {
-        const group = new T.Group();
+        const rig = new CharacterRig(
+            ["quartermaster", "herbalist", "mechanic"][i],
+            v.faction + i,
+          ),
+          group = rig.root;
         this.group.add(group);
-        this.box(
+        this.npcs.push({
           group,
-          0,
-          0.65,
-          0,
-          0.45,
-          0.75,
-          0.3,
-          [0x89a76b, 0xad8059, 0x798a9f][v.faction],
-        );
-        this.box(group, 0, 1.2, 0, 0.3, 0.3, 0.3, 0xdac4a0);
-        this.box(group, -0.13, 0.2, 0, 0.16, 0.4, 0.2, 0x3e4b41);
-        this.box(group, 0.13, 0.2, 0, 0.16, 0.4, 0.2, 0x3e4b41);
-        const arms = [-1, 1].map((side) =>
-          this.box(group, side * 0.31, 0.68, 0, 0.16, 0.62, 0.2, 0x697d69),
-        );
-        this.box(group, 0, 0.31, 0.03, 0.42, 0.1, 0.31, 0x3d4e4d);
-        for (const side of [-1, 1])
-          this.box(
-            group,
-            side * 0.08,
-            1.22,
-            0.155,
-            0.045,
-            0.045,
-            0.025,
-            0x273b39,
-          );
-        this.box(
-          group,
-          0,
-          1.38,
-          0,
-          0.36,
-          0.09,
-          0.36,
-          [0x747c52, 0xc7ceaf, 0x8b6a47][i],
-        );
-        this.box(
-          group,
-          i === 2 ? 0.25 : 0,
-          0.72,
-          0.18,
-          i === 2 ? 0.18 : 0.27,
-          0.34,
-          0.07,
-          [0xbfa06a, 0xc5d1b3, 0xab8356][i],
-        );
-        this.npcs.push({ group, v, i, arms });
+          v,
+          i,
+          rig,
+          phase: i * 2,
+          lastTime: null,
+          near: false,
+          greetUntil: 0,
+        });
         this.registerTarget(group, {
           kind: "npc",
           village: v,
@@ -400,28 +368,75 @@ export class FrontierView {
   updateTargets() {
     const { model: s, world, player: p } = this.c;
     if (!this.boss) return;
-    for (const { group, v, i, arms } of this.npcs) {
-      const t = s.time * 0.18 + i * 2;
-      arms.forEach(
-        (arm, index) =>
-          (arm.rotation.x =
-            distance(p, group.position) > 4
-              ? Math.sin(s.time * 2 + index * Math.PI) * 0.2
-              : 0),
-      );
-      if (!group.userData.placed || distance(p, group.position) > 4) {
+    for (const n of this.npcs) {
+      const { group, v, i, rig } = n,
+        t = s.time * 0.18 + i * 2,
+        dt =
+          n.lastTime === null
+            ? 0
+            : Math.min(0.15, Math.max(0, s.time - n.lastTime));
+      // Selection and draw can both update in the same simulation tick. Preserve
+      // the travelled-distance pose instead of replacing it with idle on dt=0.
+      if (n.lastTime === s.time) continue;
+      n.lastTime = s.time;
+      if (!group.userData.placed) {
         group.position.set(
           v.x + Math.cos(t) * 3,
           world.surface(v.x, v.z),
           v.z + 1 + Math.sin(t) * 2,
         );
-        group.rotation.y = -t;
         group.userData.placed = true;
-      } else
-        group.rotation.y = Math.atan2(
-          p.x - group.position.x,
-          p.z - group.position.z,
-        );
+      }
+      const near = distance(p, group.position) < 4;
+      if (near && !n.near) n.greetUntil = s.time + 1.4;
+      n.near = near;
+      const walking = !near && (s.time + i * 3) % 14 < 8;
+      let desired = group.rotation.y,
+        moved = 0;
+      if (walking) {
+        const dx = v.x + Math.cos(t) * 3 - group.position.x,
+          dz = v.z + 1 + Math.sin(t) * 2 - group.position.z,
+          d = Math.hypot(dx, dz);
+        moved = Math.min(d, dt * 0.65);
+        if (d > 0.01) {
+          group.position.x += (dx / d) * moved;
+          group.position.z += (dz / d) * moved;
+          desired = Math.atan2(dx, dz);
+        }
+      } else if (near)
+        desired = Math.atan2(p.x - group.position.x, p.z - group.position.z);
+      group.position.y = world.surface(group.position.x, group.position.z);
+      const turn = Math.atan2(
+        Math.sin(desired - group.rotation.y),
+        Math.cos(desired - group.rotation.y),
+      );
+      group.rotation.y += turn * Math.min(1, dt * 6);
+      n.phase += moved * 8;
+      const look = near
+        ? Math.atan2(p.x - group.position.x, p.z - group.position.z) -
+          group.rotation.y
+        : Math.sin(s.time * 0.6 + i) * 0.25;
+      rig.animate({
+        time: s.time,
+        phase: n.phase,
+        seed: i + v.faction * 3,
+        action: near
+          ? "talk"
+          : walking && moved > 0.001
+            ? "walk"
+            : i
+              ? "work"
+              : "idle",
+        lookYaw: Math.atan2(Math.sin(look), Math.cos(look)),
+        lookPitch: near
+          ? Math.max(
+              -0.25,
+              Math.min(0.25, (group.position.y + 1.4 - p.y - 1.36) * 0.2),
+            )
+          : 0,
+        greeting: near && s.time < n.greetUntil ? 1 : 0,
+      });
+      rig.detail(distance(p, group.position));
     }
     const b = s.activeBoss;
     this.boss.visible = !b.defeated;
@@ -1042,7 +1057,7 @@ export class FrontierView {
       const weapon = activeGear(inv, "weapon"),
         tool = activeGear(inv, "tool");
       const armor = inv.unlocks.has("armor");
-      root.innerHTML = `<div class="characterSheet"><div class="characterFigure"><div class="characterStage ${armor ? "armored" : ""}">${avatar}<span>개척자</span></div><div class="equippedSlots"><div title="${escape(weapon.name)}">${itemArt(gearId(inv, "weapon"))}<small>무기</small></div><div title="${escape(tool.name)}">${itemArt(gearId(inv, "tool"))}<small>도구</small></div><div class="armorSlot ${armor ? "equipped" : ""}" title="${armor ? "개척 갑옷 · 피해 35% 감소" : "갑옷 미착용"}"><b>⛨</b><small>${armor ? "갑옷" : "없음"}</small></div></div></div>
+      root.innerHTML = `<div class="characterSheet"><div class="characterFigure"><div class="characterStage ${armor ? "armored" : ""}"><span>개척자 · 끌어 회전</span></div><div class="equippedSlots"><div title="${escape(weapon.name)}">${itemArt(gearId(inv, "weapon"))}<small>무기</small></div><div title="${escape(tool.name)}">${itemArt(gearId(inv, "tool"))}<small>도구</small></div><div class="armorSlot ${armor ? "equipped" : ""}" title="${armor ? "개척 갑옷 · 피해 35% 감소" : "갑옷 미착용"}"><b>⛨</b><small>${armor ? "갑옷" : "없음"}</small></div></div></div>
       <div class="characterStats"><div class="characterName"><h3>개척자 <small>LV.</small> ${s.level}</h3><span>${s.riding ? (s.airborne ? "비행 중" : "탑승 중") : "탐험 중"}</span></div>
       <div class="statMeter hp"><label>체력 <b>${Math.ceil(s.hp)} / ${s.maxHP}</b></label><progress max="${s.maxHP}" value="${s.hp}"></progress></div>
       <div class="statMeter food"><label>포만 <b>${Math.ceil(s.hunger)} / 100</b></label><progress max="100" value="${s.hunger}"></progress></div>
@@ -1052,6 +1067,11 @@ export class FrontierView {
       <div id="supplies" class="supplySlots"></div></div></div>
       <div class="milestoneStrip"><span>⚑ <b>${s.allies.length}</b> 동맹</span><span>◆ <b>${wins}</b> 수호자</span><span>▧ <b>${inv.count("knowledge")}</b> 연구</span><span>◈ <b>${inv.count("relic")}</b> 유적 핵</span></div>
       <details class="expeditionLog"><summary>원정 기록 <span>${s.log.length}</span></summary><ol>${s.log.map((t) => `<li>${escape(t)}</li>`).join("") || "<li>첫 원정을 시작했습니다.</li>"}</ol></details>`;
+      mountCharacterPortrait(root.querySelector(".characterStage"), {
+        armored: armor,
+        held: inv.slots[inv.selectedSlot]?.id,
+        stance: p.stance,
+      });
       for (const [label, fn, id] of [
         ["식량 먹기", () => s.consume("food", inv), "eatFood"],
         ["회복약 사용 · H", () => s.consume("medicine", inv), "useMedicine"],
