@@ -1,0 +1,31 @@
+✔ SDK rejects overlapping add atomically instead of repairing the existing model (4.395012ms)
+✔ invalid SDK mutations leave model state unchanged (2.341177ms)
+✔ explicit replace transfers only intersecting volume to the new material (1.216779ms)
+✔ explicit fill preserves occupied material and inserts only empty volume (0.707954ms)
+✔ removal creates a real cavity with conserved remaining volume and local pivot (1.444246ms)
+✔ articulated children may overlap other parts while same-part additions stay exclusive (1.507264ms)
+✔ corrupt imported occupancy is rejected and never normalized as a side effect (0.812303ms)
+✔ tool provenance is runtime-created identity, not a copied metadata label (0.26325ms)
+✔ SDK copies input and exported data to prevent accidental alias mutations (0.564877ms)
+✔ actual Rapier: distinct owners collide and exchange impulses (890.590182ms)
+✔ actual Rapier: articulated child bodies of one owner pass through each other (7.84804ms)
+✔ actual Rapier: same-owner colliders on one rigid body do not self-resolve (5.602895ms)
+✔ actual Rapier: registered terrain and external terrain support dynamic assets (47.036709ms)
+✔ actual Rapier: local cuboid holes remain empty instead of using a combined AABB (29.171611ms)
+✔ actual Rapier: more than sixteen independent owners have no collision-mask aliases (153.365732ms)
+✔ actual Rapier: kinematic external bodies push dynamics while same-owner parts are ignored (137.32462ms)
+✔ ownership cleanup is selective and handle reuse does not inherit removed ownership (10.687624ms)
+✔ invalid mass, shape, pose and friction are rejected without leaving physics bodies (0.915482ms)
+✔ overlap removal preserves union volume and gives later material ownership (3.06472ms)
+✔ duplicate boxes collapse and partial opaque contacts lose only hidden faces (4.093965ms)
+✔ independent joint parts retain overlapping geometry and pivots (0.673714ms)
+✔ same species instances receive distinct collision ownership paths (0.423084ms)
+✔ adjacent cells of one translucent liquid have no internal seam (0.352431ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3512.033479

@@ -1,0 +1,1352 @@
+{
+  "schemaVersion": 1,
+  "id": "root_weaver",
+  "name": "뿌리직조거미",
+  "category": "creature",
+  "contentRef": {
+    "file": "design/content/creatures.json",
+    "id": "root_weaver"
+  },
+  "status": "art_prototype",
+  "units": "m",
+  "upAxis": "Y",
+  "forwardAxis": "+Z",
+  "visualGridM": 0.03125,
+  "materials": [
+    {
+      "id": "coat",
+      "color": "#695A7A",
+      "roughness": 0.88,
+      "metallic": 0.03,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "belly",
+      "color": "#BFB59B",
+      "roughness": 0.88,
+      "metallic": 0.03,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "dark",
+      "color": "#39384B",
+      "roughness": 0.88,
+      "metallic": 0.03,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "accent",
+      "color": "#9BC4A4",
+      "roughness": 0.88,
+      "metallic": 0.03,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "ivory",
+      "color": "#EEE4C9",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "ink",
+      "color": "#17212B",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    }
+  ],
+  "parts": [
+    {
+      "id": "root",
+      "parent": null,
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "root",
+      "boxes": []
+    },
+    {
+      "id": "abdomen",
+      "parent": "root",
+      "translation": [
+        0.03125,
+        0.375,
+        -0.21875
+      ],
+      "role": "abdomen_visual",
+      "boxes": [
+        {
+          "center": [
+            -0.328125,
+            0.015625,
+            0.015625
+          ],
+          "size": [
+            0.09375,
+            0.46875,
+            0.71875
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.265625,
+            0,
+            0.015625
+          ],
+          "size": [
+            0.03125,
+            0.4375,
+            0.71875
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.265625,
+            0.234375,
+            -0.3125
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.265625,
+            0.234375,
+            -0.125
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.265625,
+            0.234375,
+            0.109375
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.15625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.265625,
+            0.234375,
+            0.3125
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.296875,
+            0.015625,
+            0.015625
+          ],
+          "size": [
+            0.09375,
+            0.46875,
+            0.71875
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.234375,
+            0,
+            0.015625
+          ],
+          "size": [
+            0.03125,
+            0.4375,
+            0.71875
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.234375,
+            0.234375,
+            -0.25
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.1875
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.234375,
+            0.234375,
+            -0.015625
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.15625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.234375,
+            0.234375,
+            0.265625
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.21875
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.015625,
+            -0.015625,
+            0.015625
+          ],
+          "size": [
+            0.46875,
+            0.40625,
+            0.71875
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.015625,
+            0.21875,
+            -0.3125
+          ],
+          "size": [
+            0.46875,
+            0.0625,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.03125,
+            0.21875,
+            0.28125
+          ],
+          "size": [
+            0.375,
+            0.0625,
+            0.1875
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.203125,
+            0.203125,
+            0.28125
+          ],
+          "size": [
+            0.09375,
+            0.03125,
+            0.1875
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.203125,
+            0.234375,
+            0.3125
+          ],
+          "size": [
+            0.09375,
+            0.03125,
+            0.125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.015625,
+            0.234375,
+            -0.046875
+          ],
+          "size": [
+            0.28125,
+            0.09375,
+            0.46875
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            0.171875,
+            0.203125,
+            -0.046875
+          ],
+          "size": [
+            0.09375,
+            0.03125,
+            0.46875
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            0.171875,
+            0.25,
+            -0.21875
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.125
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            0.171875,
+            0.25,
+            -0.015625
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.15625
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            0.171875,
+            0.25,
+            0.171875
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            -0.203125,
+            0.203125,
+            -0.046875
+          ],
+          "size": [
+            0.09375,
+            0.03125,
+            0.46875
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            -0.203125,
+            0.25,
+            -0.125
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.125
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            -0.203125,
+            0.25,
+            0.109375
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.15625
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            -0.21875,
+            0.25,
+            -0.234375
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.09375
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            0.1875,
+            0.25,
+            -0.125
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.0625
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            -0.21875,
+            0.25,
+            -0.015625
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.09375
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            0.1875,
+            0.25,
+            0.109375
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.09375
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            -0.21875,
+            0.25,
+            0.21875
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.0625
+          ],
+          "material": "accent"
+        }
+      ]
+    },
+    {
+      "id": "thorax",
+      "parent": "root",
+      "translation": [
+        0.03125,
+        0.3125,
+        0.34375
+      ],
+      "role": "visual",
+      "boxes": [
+        {
+          "center": [
+            -0.015625,
+            -0.015625,
+            0
+          ],
+          "size": [
+            0.46875,
+            0.28125,
+            0.4375
+          ],
+          "material": "dark"
+        }
+      ]
+    },
+    {
+      "id": "leg_-1_0",
+      "parent": "root",
+      "translation": [
+        -0.21875,
+        0.3125,
+        0.5
+      ],
+      "role": "limb_visual",
+      "boxes": [
+        {
+          "center": [
+            -0.21875,
+            0.09375,
+            -0.140625
+          ],
+          "size": [
+            0.5,
+            0.0625,
+            0.09375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.484375,
+            0.015625,
+            -0.234375
+          ],
+          "size": [
+            0.09375,
+            0.28125,
+            0.09375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.515625,
+            -0.203125,
+            -0.328125
+          ],
+          "size": [
+            0.09375,
+            0.21875,
+            0.09375
+          ],
+          "material": "dark"
+        }
+      ]
+    },
+    {
+      "id": "leg_-1_1",
+      "parent": "root",
+      "translation": [
+        -0.21875,
+        0.3125,
+        0.3125
+      ],
+      "role": "limb_visual",
+      "boxes": [
+        {
+          "center": [
+            -0.203125,
+            0.09375,
+            -0.0625
+          ],
+          "size": [
+            0.46875,
+            0.0625,
+            0.125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.453125,
+            0.09375,
+            -0.015625
+          ],
+          "size": [
+            0.03125,
+            0.0625,
+            0.03125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.453125,
+            0.015625,
+            -0.09375
+          ],
+          "size": [
+            0.03125,
+            0.28125,
+            0.125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.5,
+            0.03125,
+            -0.09375
+          ],
+          "size": [
+            0.0625,
+            0.25,
+            0.125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.5,
+            -0.109375,
+            -0.0625
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.515625,
+            -0.203125,
+            -0.125
+          ],
+          "size": [
+            0.09375,
+            0.21875,
+            0.0625
+          ],
+          "material": "dark"
+        }
+      ]
+    },
+    {
+      "id": "leg_-1_2",
+      "parent": "root",
+      "translation": [
+        -0.21875,
+        0.3125,
+        0.09375
+      ],
+      "role": "limb_visual",
+      "boxes": [
+        {
+          "center": [
+            -0.203125,
+            0.09375,
+            0.046875
+          ],
+          "size": [
+            0.46875,
+            0.0625,
+            0.09375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.453125,
+            0.09375,
+            0.015625
+          ],
+          "size": [
+            0.03125,
+            0.0625,
+            0.03125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.453125,
+            0.015625,
+            0.078125
+          ],
+          "size": [
+            0.03125,
+            0.28125,
+            0.09375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.5,
+            0.03125,
+            0.078125
+          ],
+          "size": [
+            0.0625,
+            0.25,
+            0.09375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.5,
+            -0.109375,
+            0.046875
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.03125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.515625,
+            -0.203125,
+            0.109375
+          ],
+          "size": [
+            0.09375,
+            0.21875,
+            0.09375
+          ],
+          "material": "dark"
+        }
+      ]
+    },
+    {
+      "id": "leg_-1_3",
+      "parent": "root",
+      "translation": [
+        -0.21875,
+        0.3125,
+        -0.125
+      ],
+      "role": "limb_visual",
+      "boxes": [
+        {
+          "center": [
+            -0.21875,
+            0.09375,
+            0.140625
+          ],
+          "size": [
+            0.5,
+            0.0625,
+            0.09375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.453125,
+            0.015625,
+            0.25
+          ],
+          "size": [
+            0.03125,
+            0.28125,
+            0.125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.5,
+            0.03125,
+            0.25
+          ],
+          "size": [
+            0.0625,
+            0.25,
+            0.125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.5,
+            -0.109375,
+            0.234375
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.09375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.515625,
+            -0.203125,
+            0.328125
+          ],
+          "size": [
+            0.09375,
+            0.21875,
+            0.09375
+          ],
+          "material": "dark"
+        }
+      ]
+    },
+    {
+      "id": "leg_1_0",
+      "parent": "root",
+      "translation": [
+        0.25,
+        0.3125,
+        0.5
+      ],
+      "role": "limb_visual",
+      "boxes": [
+        {
+          "center": [
+            0.21875,
+            0.09375,
+            -0.140625
+          ],
+          "size": [
+            0.5,
+            0.0625,
+            0.09375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.484375,
+            0.015625,
+            -0.234375
+          ],
+          "size": [
+            0.09375,
+            0.28125,
+            0.09375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.515625,
+            -0.203125,
+            -0.328125
+          ],
+          "size": [
+            0.09375,
+            0.21875,
+            0.09375
+          ],
+          "material": "dark"
+        }
+      ]
+    },
+    {
+      "id": "leg_1_1",
+      "parent": "root",
+      "translation": [
+        0.25,
+        0.3125,
+        0.3125
+      ],
+      "role": "limb_visual",
+      "boxes": [
+        {
+          "center": [
+            0.203125,
+            0.09375,
+            -0.0625
+          ],
+          "size": [
+            0.46875,
+            0.0625,
+            0.125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.453125,
+            0.09375,
+            -0.015625
+          ],
+          "size": [
+            0.03125,
+            0.0625,
+            0.03125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.453125,
+            0.015625,
+            -0.09375
+          ],
+          "size": [
+            0.03125,
+            0.28125,
+            0.125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.5,
+            0.03125,
+            -0.09375
+          ],
+          "size": [
+            0.0625,
+            0.25,
+            0.125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.5,
+            -0.109375,
+            -0.0625
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.515625,
+            -0.203125,
+            -0.125
+          ],
+          "size": [
+            0.09375,
+            0.21875,
+            0.0625
+          ],
+          "material": "dark"
+        }
+      ]
+    },
+    {
+      "id": "leg_1_2",
+      "parent": "root",
+      "translation": [
+        0.25,
+        0.3125,
+        0.09375
+      ],
+      "role": "limb_visual",
+      "boxes": [
+        {
+          "center": [
+            0.203125,
+            0.09375,
+            0.046875
+          ],
+          "size": [
+            0.46875,
+            0.0625,
+            0.09375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.453125,
+            0.09375,
+            0.015625
+          ],
+          "size": [
+            0.03125,
+            0.0625,
+            0.03125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.453125,
+            0.015625,
+            0.078125
+          ],
+          "size": [
+            0.03125,
+            0.28125,
+            0.09375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.5,
+            0.03125,
+            0.078125
+          ],
+          "size": [
+            0.0625,
+            0.25,
+            0.09375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.5,
+            -0.109375,
+            0.046875
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.03125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.515625,
+            -0.203125,
+            0.109375
+          ],
+          "size": [
+            0.09375,
+            0.21875,
+            0.09375
+          ],
+          "material": "dark"
+        }
+      ]
+    },
+    {
+      "id": "leg_1_3",
+      "parent": "root",
+      "translation": [
+        0.25,
+        0.3125,
+        -0.125
+      ],
+      "role": "limb_visual",
+      "boxes": [
+        {
+          "center": [
+            0.21875,
+            0.09375,
+            0.140625
+          ],
+          "size": [
+            0.5,
+            0.0625,
+            0.09375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.453125,
+            0.015625,
+            0.25
+          ],
+          "size": [
+            0.03125,
+            0.28125,
+            0.125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.5,
+            0.03125,
+            0.25
+          ],
+          "size": [
+            0.0625,
+            0.25,
+            0.125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.5,
+            -0.109375,
+            0.234375
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.09375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.515625,
+            -0.203125,
+            0.328125
+          ],
+          "size": [
+            0.09375,
+            0.21875,
+            0.09375
+          ],
+          "material": "dark"
+        }
+      ]
+    },
+    {
+      "id": "face",
+      "parent": "root",
+      "translation": [
+        0.03125,
+        0.3125,
+        0.59375
+      ],
+      "role": "visual",
+      "boxes": [
+        {
+          "center": [
+            -0.15625,
+            0.03125,
+            0.03125
+          ],
+          "size": [
+            0.0625,
+            0.0625,
+            0.0625
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            -0.0625,
+            0.03125,
+            0.03125
+          ],
+          "size": [
+            0.0625,
+            0.0625,
+            0.0625
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "size": [
+            0.0625,
+            0.0625,
+            0.0625
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            0.125,
+            0.03125,
+            0.03125
+          ],
+          "size": [
+            0.0625,
+            0.0625,
+            0.0625
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            -0.140625,
+            -0.09375,
+            0.078125
+          ],
+          "size": [
+            0.09375,
+            0.1875,
+            0.09375
+          ],
+          "material": "ivory"
+        },
+        {
+          "center": [
+            0.109375,
+            -0.09375,
+            0.078125
+          ],
+          "size": [
+            0.09375,
+            0.1875,
+            0.09375
+          ],
+          "material": "ivory"
+        }
+      ]
+    },
+    {
+      "id": "spinneret",
+      "parent": "root",
+      "translation": [
+        0.03125,
+        0.21875,
+        -0.59375
+      ],
+      "role": "visual",
+      "boxes": [
+        {
+          "center": [
+            -0.015625,
+            0.015625,
+            -0.015625
+          ],
+          "size": [
+            0.28125,
+            0.15625,
+            0.15625
+          ],
+          "material": "accent"
+        }
+      ]
+    }
+  ],
+  "anchors": [
+    {
+      "id": "leg_-1_0_tip",
+      "partId": "leg_-1_0",
+      "position": [
+        -0.53125,
+        -0.3125,
+        -0.3125
+      ],
+      "purpose": "visual contact locator"
+    },
+    {
+      "id": "leg_-1_1_tip",
+      "partId": "leg_-1_1",
+      "position": [
+        -0.53125,
+        -0.3125,
+        -0.125
+      ],
+      "purpose": "visual contact locator"
+    },
+    {
+      "id": "leg_-1_2_tip",
+      "partId": "leg_-1_2",
+      "position": [
+        -0.53125,
+        -0.3125,
+        0.09375
+      ],
+      "purpose": "visual contact locator"
+    },
+    {
+      "id": "leg_-1_3_tip",
+      "partId": "leg_-1_3",
+      "position": [
+        -0.53125,
+        -0.3125,
+        0.34375
+      ],
+      "purpose": "visual contact locator"
+    },
+    {
+      "id": "leg_1_0_tip",
+      "partId": "leg_1_0",
+      "position": [
+        0.53125,
+        -0.3125,
+        -0.3125
+      ],
+      "purpose": "visual contact locator"
+    },
+    {
+      "id": "leg_1_1_tip",
+      "partId": "leg_1_1",
+      "position": [
+        0.53125,
+        -0.3125,
+        -0.125
+      ],
+      "purpose": "visual contact locator"
+    },
+    {
+      "id": "leg_1_2_tip",
+      "partId": "leg_1_2",
+      "position": [
+        0.53125,
+        -0.3125,
+        0.09375
+      ],
+      "purpose": "visual contact locator"
+    },
+    {
+      "id": "leg_1_3_tip",
+      "partId": "leg_1_3",
+      "position": [
+        0.53125,
+        -0.3125,
+        0.34375
+      ],
+      "purpose": "visual contact locator"
+    },
+    {
+      "id": "silk_origin",
+      "partId": "spinneret",
+      "position": [
+        0,
+        0,
+        -0.125
+      ],
+      "purpose": "visual filament attachment only"
+    },
+    {
+      "id": "ground_origin",
+      "partId": "root",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "purpose": "visual placement origin"
+    }
+  ],
+  "instances": [],
+  "notes": [
+    "재사용 가능한 절차적 복셀 시각 원본. 게임·충돌·HP·공격·부위 기능·애니메이션은 미통합.",
+    "전체 실루엣(뿔·날개·소지 시각소품 포함)을 설계 L/W/H 1.4/1.6/0.65m에 맞춤. 표현 격자 0.03125m로 반올림. 질량·장기 물성은 시각 모델에서 계산하지 않음.",
+    "수목원 뿌리 사이에 보이는 실을 건다. 바닥을 미리 표시하고 얽매는 물성의 실을 발사한다.",
+    "전면 +Z, 지면 Y=0. 부위 parent와 피벗은 편집·애니메이션 준비용이며 생물 기능 연결의 구현을 뜻하지 않음."
+  ],
+  "collision": {
+    "enabled": true,
+    "ownerScope": "entity_instance",
+    "selfCollision": false,
+    "externalCollision": true,
+    "shape": "part_cuboid_compound",
+    "jointOverlapAllowed": true
+  },
+  "geometry": {
+    "authoringTool": "feral_voxel_builder_v1",
+    "occupancy": "exclusive_within_part",
+    "independentPartOverlap": "preserve_joint_allowance",
+    "surfaceMeshing": "remove_shared_same_medium_or_opaque_faces_within_part"
+  }
+}

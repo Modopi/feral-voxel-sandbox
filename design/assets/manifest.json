@@ -1,0 +1,2432 @@
+{
+  "schemaVersion": 1,
+  "status": "art_prototype",
+  "units": "m",
+  "sourceOfTruth": "authored/*.voxel.json (if present), otherwise generators/*.mjs + design/content/*.json",
+  "counts": {
+    "creature": 34,
+    "boss": 8,
+    "structure": 12,
+    "environment": 8
+  },
+  "entries": [
+    {
+      "id": "moss_deer",
+      "name": "이끼사슴",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "moss_deer"
+      },
+      "model": "models/moss_deer.voxel.json",
+      "glb": "exports/moss_deer.glb",
+      "preview": "previews/moss_deer.png",
+      "sha256": "86006eaa15f6db6ceb7e94aea5275e4f688b92918ac8783b8dd2bc2e5ceef174",
+      "glbSha256": "7ebdce644d35f1a5aac0a0b874ac56d89f3d2c0db7461816a1fd5bea4224312d",
+      "boxes": 126,
+      "parts": 13,
+      "anchors": 7,
+      "bounds": {
+        "min": [
+          -0.34375,
+          0,
+          -0.90625
+        ],
+        "max": [
+          0.34375,
+          1.5,
+          0.90625
+        ],
+        "size": [
+          0.6875,
+          1.5,
+          1.8125
+        ],
+        "center": [
+          0,
+          0.75,
+          0
+        ]
+      }
+    },
+    {
+      "id": "copper_fox",
+      "name": "구리여우",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "copper_fox"
+      },
+      "model": "models/copper_fox.voxel.json",
+      "glb": "exports/copper_fox.glb",
+      "preview": "previews/copper_fox.png",
+      "sha256": "160fca8543b4fee444136fb618a9680b552b920a9cce4de2f17f6a8a723aec82",
+      "glbSha256": "544e69252c948e426358ee82195a4e2e6e04c76a70b1d3203887867c62fcbcd3",
+      "boxes": 88,
+      "parts": 11,
+      "anchors": 7,
+      "bounds": {
+        "min": [
+          -0.21875,
+          0,
+          -0.65625
+        ],
+        "max": [
+          0.21875,
+          0.8125,
+          0.65625
+        ],
+        "size": [
+          0.4375,
+          0.8125,
+          1.3125
+        ],
+        "center": [
+          0,
+          0.40625,
+          0
+        ]
+      }
+    },
+    {
+      "id": "azure_beetle",
+      "name": "청금딱정",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "azure_beetle"
+      },
+      "model": "models/azure_beetle.voxel.json",
+      "glb": "exports/azure_beetle.glb",
+      "preview": "previews/azure_beetle.png",
+      "sha256": "456f9bf0171022b8d6cd0da381dea30ab2b902374e6f41ae42f748f7d6aaa884",
+      "glbSha256": "53f894a305557a98109dd55949d264feae9d64274bc4190bd1e68c265391deba",
+      "boxes": 42,
+      "parts": 11,
+      "anchors": 8,
+      "bounds": {
+        "min": [
+          -0.15625,
+          0,
+          -0.28125
+        ],
+        "max": [
+          0.1875,
+          0.3125,
+          0.28125
+        ],
+        "size": [
+          0.34375,
+          0.3125,
+          0.5625
+        ],
+        "center": [
+          0.015625,
+          0.15625,
+          0
+        ]
+      }
+    },
+    {
+      "id": "root_stalker",
+      "name": "뿌리잠복수",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "root_stalker"
+      },
+      "model": "models/root_stalker.voxel.json",
+      "glb": "exports/root_stalker.glb",
+      "preview": "previews/root_stalker.png",
+      "sha256": "d2fbc732675968e5531f12d3a9929ebd820a4c5c0a5dab411cd210595d572a73",
+      "glbSha256": "953bbdd32147d928603e1ca3a1e01ef3dbbebca583b2074b8b514f7d7c0413ad",
+      "boxes": 97,
+      "parts": 9,
+      "anchors": 7,
+      "bounds": {
+        "min": [
+          -0.3125,
+          0,
+          -0.75
+        ],
+        "max": [
+          0.34375,
+          0.75,
+          0.75
+        ],
+        "size": [
+          0.65625,
+          0.75,
+          1.5
+        ],
+        "center": [
+          0.015625,
+          0.375,
+          0
+        ]
+      }
+    },
+    {
+      "id": "scree_hare",
+      "name": "너덜토끼",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "scree_hare"
+      },
+      "model": "models/scree_hare.voxel.json",
+      "glb": "exports/scree_hare.glb",
+      "preview": "previews/scree_hare.png",
+      "sha256": "4e1ba7aaccc1314687782b04fd7fd266c932996e8683ea108514400c5f7aa26f",
+      "glbSha256": "a24ca8150266d2cff4c677f2a62335e1e5600e46f8e799b978836adc1d544956",
+      "boxes": 49,
+      "parts": 11,
+      "anchors": 7,
+      "bounds": {
+        "min": [
+          -0.15625,
+          0,
+          -0.34375
+        ],
+        "max": [
+          0.1875,
+          0.5,
+          0.34375
+        ],
+        "size": [
+          0.34375,
+          0.5,
+          0.6875
+        ],
+        "center": [
+          0.015625,
+          0.25,
+          0
+        ]
+      }
+    },
+    {
+      "id": "flint_jackal",
+      "name": "부싯돌자칼",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "flint_jackal"
+      },
+      "model": "models/flint_jackal.voxel.json",
+      "glb": "exports/flint_jackal.glb",
+      "preview": "previews/flint_jackal.png",
+      "sha256": "1bad695c3fd807731ced90a9cc27d7648854e0686381d1b609a6a2c7ccf2326e",
+      "glbSha256": "72e6dcd09bb1c5b87137425405ade3b7d48e72ab163e94426207fbae2ace9a04",
+      "boxes": 85,
+      "parts": 11,
+      "anchors": 7,
+      "bounds": {
+        "min": [
+          -0.28125,
+          0,
+          -0.78125
+        ],
+        "max": [
+          0.3125,
+          0.9375,
+          0.8125
+        ],
+        "size": [
+          0.59375,
+          0.9375,
+          1.59375
+        ],
+        "center": [
+          0.015625,
+          0.46875,
+          0.015625
+        ]
+      }
+    },
+    {
+      "id": "ore_mite",
+      "name": "광분진진드기",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "ore_mite"
+      },
+      "model": "models/ore_mite.voxel.json",
+      "glb": "exports/ore_mite.glb",
+      "preview": "previews/ore_mite.png",
+      "sha256": "69ebe9764fcaafb7b2ad217decdb33f06339a3651a6b7cb0fd7efec0708bcd19",
+      "glbSha256": "6c551841ab4e897f0b677dff4791e815f935531b306f425a39ab3820711882f4",
+      "boxes": 47,
+      "parts": 11,
+      "anchors": 8,
+      "bounds": {
+        "min": [
+          -0.15625,
+          0,
+          -0.15625
+        ],
+        "max": [
+          0.15625,
+          0.1875,
+          0.1875
+        ],
+        "size": [
+          0.3125,
+          0.1875,
+          0.34375
+        ],
+        "center": [
+          0,
+          0.09375,
+          0.015625
+        ]
+      }
+    },
+    {
+      "id": "shaft_weasel",
+      "name": "갱도족제비",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "shaft_weasel"
+      },
+      "model": "models/shaft_weasel.voxel.json",
+      "glb": "exports/shaft_weasel.glb",
+      "preview": "previews/shaft_weasel.png",
+      "sha256": "65768d0ed052b93120084332637eff76d2385bc886e9dbdbb3681bf159c7b5db",
+      "glbSha256": "d31a4e6194b7eeb7c9dd12b5a0072d2496471971170c8f3cc8193f44a82b0978",
+      "boxes": 74,
+      "parts": 11,
+      "anchors": 7,
+      "bounds": {
+        "min": [
+          -0.1875,
+          0,
+          -0.65625
+        ],
+        "max": [
+          0.21875,
+          0.5,
+          0.65625
+        ],
+        "size": [
+          0.40625,
+          0.5,
+          1.3125
+        ],
+        "center": [
+          0.015625,
+          0.25,
+          0
+        ]
+      }
+    },
+    {
+      "id": "reed_grazer",
+      "name": "갈대등짐수",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "reed_grazer"
+      },
+      "model": "models/reed_grazer.voxel.json",
+      "glb": "exports/reed_grazer.glb",
+      "preview": "previews/reed_grazer.png",
+      "sha256": "7452927d00b46bbdaad00858ffa31969a4a8aefdb28f3815d6b67520329491f8",
+      "glbSha256": "b1cf60d1433e26dec1be0d52971112cb8081347061543f864b26c255450c76f2",
+      "boxes": 111,
+      "parts": 12,
+      "anchors": 7,
+      "bounds": {
+        "min": [
+          -0.5,
+          0,
+          -1.03125
+        ],
+        "max": [
+          0.5,
+          1.3125,
+          1.0625
+        ],
+        "size": [
+          1,
+          1.3125,
+          2.09375
+        ],
+        "center": [
+          0,
+          0.65625,
+          0.015625
+        ]
+      }
+    },
+    {
+      "id": "mud_croc",
+      "name": "진흙악어",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "mud_croc"
+      },
+      "model": "models/mud_croc.voxel.json",
+      "glb": "exports/mud_croc.glb",
+      "preview": "previews/mud_croc.png",
+      "sha256": "5739e262ab02a18cd70be3afe78d70ece7ac8e3e7279f0975d079a167743c222",
+      "glbSha256": "4b155028ee8a10be885474912a06944f7509e8267d6b8bf97404c1287b114ea5",
+      "boxes": 147,
+      "parts": 9,
+      "anchors": 7,
+      "bounds": {
+        "min": [
+          -0.5,
+          0,
+          -1.5
+        ],
+        "max": [
+          0.5,
+          0.59375,
+          1.5
+        ],
+        "size": [
+          1,
+          0.59375,
+          3
+        ],
+        "center": [
+          0,
+          0.296875,
+          0
+        ]
+      }
+    },
+    {
+      "id": "silt_snail",
+      "name": "침전달팽이",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "silt_snail"
+      },
+      "model": "models/silt_snail.voxel.json",
+      "glb": "exports/silt_snail.glb",
+      "preview": "previews/silt_snail.png",
+      "sha256": "542a8ec6808ed2c54316352d271b34df3ef39d6484d280ac55e7f5f276996375",
+      "glbSha256": "0e2756f4ad0028a83434b7df7bc1fd61b182f2eb600e265529532dff246127fb",
+      "boxes": 40,
+      "parts": 6,
+      "anchors": 2,
+      "bounds": {
+        "min": [
+          -0.21875,
+          0,
+          -0.28125
+        ],
+        "max": [
+          0.21875,
+          0.4375,
+          0.3125
+        ],
+        "size": [
+          0.4375,
+          0.4375,
+          0.59375
+        ],
+        "center": [
+          0,
+          0.21875,
+          0.015625
+        ]
+      }
+    },
+    {
+      "id": "drain_eel",
+      "name": "수로뱀장어",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "drain_eel"
+      },
+      "model": "models/drain_eel.voxel.json",
+      "glb": "exports/drain_eel.glb",
+      "preview": "previews/drain_eel.png",
+      "sha256": "472cc635ef6c263c244af457ea57763c43ac4cfcbeed1d3081efe8017b255ce5",
+      "glbSha256": "faebd5d4e97ff380154857078dd552fb53752f1cec710dd5a3947efc8df44f97",
+      "boxes": 150,
+      "parts": 14,
+      "anchors": 3,
+      "bounds": {
+        "min": [
+          -0.15625,
+          0,
+          -1.1875
+        ],
+        "max": [
+          0.1875,
+          0.34375,
+          1.21875
+        ],
+        "size": [
+          0.34375,
+          0.34375,
+          2.40625
+        ],
+        "center": [
+          0.015625,
+          0.171875,
+          0.015625
+        ]
+      }
+    },
+    {
+      "id": "ash_goat",
+      "name": "재이끼염소",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "ash_goat"
+      },
+      "model": "models/ash_goat.voxel.json",
+      "glb": "exports/ash_goat.glb",
+      "preview": "previews/ash_goat.png",
+      "sha256": "d2850020aebd55d1e98e053064a5fc005363600d224a432e7cef2fb24bd24c57",
+      "glbSha256": "2e7314e273dd3e936f3d37fa05d6ea6b1d82541161c9329087075b34b758f46c",
+      "boxes": 124,
+      "parts": 14,
+      "anchors": 7,
+      "bounds": {
+        "min": [
+          -0.40625,
+          0,
+          -0.84375
+        ],
+        "max": [
+          0.40625,
+          1.1875,
+          0.84375
+        ],
+        "size": [
+          0.8125,
+          1.1875,
+          1.6875
+        ],
+        "center": [
+          0,
+          0.59375,
+          0
+        ]
+      }
+    },
+    {
+      "id": "ember_lizard",
+      "name": "불씨도마뱀",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "ember_lizard"
+      },
+      "model": "models/ember_lizard.voxel.json",
+      "glb": "exports/ember_lizard.glb",
+      "preview": "previews/ember_lizard.png",
+      "sha256": "f018fdd1313a25eebf79ceac8a2f23a576800c9ef2b66daa51a11269013533e9",
+      "glbSha256": "7df0b664bf26b7a4ba41fb83df7c902d172bb2dd026e2a304859d7a8e9a61aa0",
+      "boxes": 108,
+      "parts": 9,
+      "anchors": 7,
+      "bounds": {
+        "min": [
+          -0.40625,
+          0,
+          -1.09375
+        ],
+        "max": [
+          0.40625,
+          0.59375,
+          1.09375
+        ],
+        "size": [
+          0.8125,
+          0.59375,
+          2.1875
+        ],
+        "center": [
+          0,
+          0.296875,
+          0
+        ]
+      }
+    },
+    {
+      "id": "vent_grub",
+      "name": "분기구유충",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "vent_grub"
+      },
+      "model": "models/vent_grub.voxel.json",
+      "glb": "exports/vent_grub.glb",
+      "preview": "previews/vent_grub.png",
+      "sha256": "a79b8a35baedec6643d11a7c6aed01b8795984f4fe09373174c8293cf0b95681",
+      "glbSha256": "d9ad4c230b6ef0319bb75c767c8fccc25a6cddb95e6e96aa21ceebd5fb473b70",
+      "boxes": 107,
+      "parts": 10,
+      "anchors": 3,
+      "bounds": {
+        "min": [
+          -0.125,
+          0,
+          -0.25
+        ],
+        "max": [
+          0.125,
+          0.25,
+          0.25
+        ],
+        "size": [
+          0.25,
+          0.25,
+          0.5
+        ],
+        "center": [
+          0,
+          0.125,
+          0
+        ]
+      }
+    },
+    {
+      "id": "furnace_mantis",
+      "name": "주조사마귀",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "furnace_mantis"
+      },
+      "model": "models/furnace_mantis.voxel.json",
+      "glb": "exports/furnace_mantis.glb",
+      "preview": "previews/furnace_mantis.png",
+      "sha256": "c5f138f025586c8d8f875e4e437bc1d1a8af0283a309b60ce3106214182559be",
+      "glbSha256": "464fb6171e8b1dd884124357e75572787fadb80f4803c6f13204f5d0bf000b29",
+      "boxes": 101,
+      "parts": 11,
+      "anchors": 4,
+      "bounds": {
+        "min": [
+          -0.5,
+          0,
+          -0.90625
+        ],
+        "max": [
+          0.5,
+          1.59375,
+          0.90625
+        ],
+        "size": [
+          1,
+          1.59375,
+          1.8125
+        ],
+        "center": [
+          0,
+          0.796875,
+          0
+        ]
+      }
+    },
+    {
+      "id": "cliff_ibex",
+      "name": "절벽산양",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "cliff_ibex"
+      },
+      "model": "models/cliff_ibex.voxel.json",
+      "glb": "exports/cliff_ibex.glb",
+      "preview": "previews/cliff_ibex.png",
+      "sha256": "847a9567ebc34fdb6ff78e1c2d6efec21f358cbb218c6fa7e8ac4d9bc7e7f7a8",
+      "glbSha256": "d1cc752392460d0717729e2671975df6150ce46df6a252960c047afd7162a209",
+      "boxes": 96,
+      "parts": 14,
+      "anchors": 7,
+      "bounds": {
+        "min": [
+          -0.3125,
+          0,
+          -0.78125
+        ],
+        "max": [
+          0.34375,
+          1.3125,
+          0.8125
+        ],
+        "size": [
+          0.65625,
+          1.3125,
+          1.59375
+        ],
+        "center": [
+          0.015625,
+          0.65625,
+          0.015625
+        ]
+      }
+    },
+    {
+      "id": "gale_raptor",
+      "name": "돌풍맹금",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "gale_raptor"
+      },
+      "model": "models/gale_raptor.voxel.json",
+      "glb": "exports/gale_raptor.glb",
+      "preview": "previews/gale_raptor.png",
+      "sha256": "a70c0a24c5367613678dc74ee5f9d3af2f17c0a81a7c0c049925f8832bdac529",
+      "glbSha256": "806b75cff9f74e77fd0fa2e0b4818795f19421ab8d802353ca04518b5468089e",
+      "boxes": 172,
+      "parts": 8,
+      "anchors": 5,
+      "bounds": {
+        "min": [
+          -1.59375,
+          0,
+          -0.6875
+        ],
+        "max": [
+          1.59375,
+          0.59375,
+          0.71875
+        ],
+        "size": [
+          3.1875,
+          0.59375,
+          1.40625
+        ],
+        "center": [
+          0,
+          0.296875,
+          0.015625
+        ]
+      }
+    },
+    {
+      "id": "tide_crab",
+      "name": "조수게",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "tide_crab"
+      },
+      "model": "models/tide_crab.voxel.json",
+      "glb": "exports/tide_crab.glb",
+      "preview": "previews/tide_crab.png",
+      "sha256": "a257b5ce2e691cfcbd467a97596611c0e517fe2d572e3f37cb8e588f0c56d803",
+      "glbSha256": "33dadefe939fb2d5ecb11a3a482356e6b61a7b73023b5cd9c6b26169ed629cc0",
+      "boxes": 78,
+      "parts": 13,
+      "anchors": 8,
+      "bounds": {
+        "min": [
+          -0.34375,
+          0,
+          -0.40625
+        ],
+        "max": [
+          0.34375,
+          0.34375,
+          0.40625
+        ],
+        "size": [
+          0.6875,
+          0.34375,
+          0.8125
+        ],
+        "center": [
+          0,
+          0.171875,
+          0
+        ]
+      }
+    },
+    {
+      "id": "cistern_serpent",
+      "name": "저수조큰뱀",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "cistern_serpent"
+      },
+      "model": "models/cistern_serpent.voxel.json",
+      "glb": "exports/cistern_serpent.glb",
+      "preview": "previews/cistern_serpent.png",
+      "sha256": "41f80288ffa14fadaf860ea1daf594ceae6d8d1797ebf2e5a8f71755c0eb4c96",
+      "glbSha256": "22971fa5b3ffb79612992e3564b24fc3c93e289531eafadb9e6605844aee48f7",
+      "boxes": 102,
+      "parts": 15,
+      "anchors": 3,
+      "bounds": {
+        "min": [
+          -0.21875,
+          0,
+          -1.59375
+        ],
+        "max": [
+          0.21875,
+          0.4375,
+          1.59375
+        ],
+        "size": [
+          0.4375,
+          0.4375,
+          3.1875
+        ],
+        "center": [
+          0,
+          0.21875,
+          0
+        ]
+      }
+    },
+    {
+      "id": "prism_deer",
+      "name": "유리잎사슴",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "prism_deer"
+      },
+      "model": "models/prism_deer.voxel.json",
+      "glb": "exports/prism_deer.glb",
+      "preview": "previews/prism_deer.png",
+      "sha256": "54f3ad3cff9e74aaf9aff06f33b13586b8ef659f5890534fb55b4e25f2f646a6",
+      "glbSha256": "9f3598bfc9269cb6aebc27ecb2f05cabdd564111cdab8ed60c18f737db94ee46",
+      "boxes": 111,
+      "parts": 14,
+      "anchors": 7,
+      "bounds": {
+        "min": [
+          -0.40625,
+          0,
+          -0.9375
+        ],
+        "max": [
+          0.40625,
+          1.59375,
+          0.96875
+        ],
+        "size": [
+          0.8125,
+          1.59375,
+          1.90625
+        ],
+        "center": [
+          0,
+          0.796875,
+          0.015625
+        ]
+      }
+    },
+    {
+      "id": "veil_cat",
+      "name": "장막표범",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "veil_cat"
+      },
+      "model": "models/veil_cat.voxel.json",
+      "glb": "exports/veil_cat.glb",
+      "preview": "previews/veil_cat.png",
+      "sha256": "f263ce39c212162908b76d7514460b01d1e5c8b35f8537f9f436185b8daeeb80",
+      "glbSha256": "5af3b5d089e6e1d8d515236b3881bd900d7cd81fd1046651a2ed3b7b2060f777",
+      "boxes": 88,
+      "parts": 11,
+      "anchors": 7,
+      "bounds": {
+        "min": [
+          -0.375,
+          0,
+          -1
+        ],
+        "max": [
+          0.375,
+          1,
+          1
+        ],
+        "size": [
+          0.75,
+          1,
+          2
+        ],
+        "center": [
+          0,
+          0.5,
+          0
+        ]
+      }
+    },
+    {
+      "id": "mana_moth",
+      "name": "마나나방",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "mana_moth"
+      },
+      "model": "models/mana_moth.voxel.json",
+      "glb": "exports/mana_moth.glb",
+      "preview": "previews/mana_moth.png",
+      "sha256": "569c1b232495feaca15a80df14f590d7d029b9b21ed977530acfdc95ba0d15af",
+      "glbSha256": "aed1af5411affdd1be4d5ba317dad33f911f436ab168f4e6ff6f5b61518bc8eb",
+      "boxes": 65,
+      "parts": 7,
+      "anchors": 5,
+      "bounds": {
+        "min": [
+          -0.4375,
+          0,
+          -0.15625
+        ],
+        "max": [
+          0.46875,
+          0.1875,
+          0.15625
+        ],
+        "size": [
+          0.90625,
+          0.1875,
+          0.3125
+        ],
+        "center": [
+          0.015625,
+          0.09375,
+          0
+        ]
+      }
+    },
+    {
+      "id": "root_weaver",
+      "name": "뿌리직조거미",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "root_weaver"
+      },
+      "model": "models/root_weaver.voxel.json",
+      "glb": "exports/root_weaver.glb",
+      "preview": "previews/root_weaver.png",
+      "sha256": "f1843d5fe24621b51a21b2e2cbaf3b82329e422539630c7fb02761d409ba07ff",
+      "glbSha256": "6c53ebbc092cb157e5ab8a2266ebb2bc5b638d2cd7da1076ea9ab0a194dfb51a",
+      "boxes": 77,
+      "parts": 13,
+      "anchors": 10,
+      "bounds": {
+        "min": [
+          -0.78125,
+          0,
+          -0.6875
+        ],
+        "max": [
+          0.8125,
+          0.65625,
+          0.71875
+        ],
+        "size": [
+          1.59375,
+          0.65625,
+          1.40625
+        ],
+        "center": [
+          0.015625,
+          0.328125,
+          0.015625
+        ]
+      }
+    },
+    {
+      "id": "candle_hare",
+      "name": "촛빛토끼",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "candle_hare"
+      },
+      "model": "models/candle_hare.voxel.json",
+      "glb": "exports/candle_hare.glb",
+      "preview": "previews/candle_hare.png",
+      "sha256": "479329bf1afb69a7cd8ebfd7c3039cd18136afff4792ebc40e0a2dd67c94eba9",
+      "glbSha256": "098020663a789a7a059454a21fdadce0bd39af40eccf5589f5c7bcec44d360fe",
+      "boxes": 54,
+      "parts": 12,
+      "anchors": 7,
+      "bounds": {
+        "min": [
+          -0.1875,
+          0,
+          -0.40625
+        ],
+        "max": [
+          0.21875,
+          0.5625,
+          0.40625
+        ],
+        "size": [
+          0.40625,
+          0.5625,
+          0.8125
+        ],
+        "center": [
+          0.015625,
+          0.28125,
+          0
+        ]
+      }
+    },
+    {
+      "id": "relic_hound",
+      "name": "성흔들개",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "relic_hound"
+      },
+      "model": "models/relic_hound.voxel.json",
+      "glb": "exports/relic_hound.glb",
+      "preview": "previews/relic_hound.png",
+      "sha256": "f9cc738a9cacf857cdb9ebde7bc322655b2ab91f81b918cf4ae67233a6d61b58",
+      "glbSha256": "57ac051e22e02131ff8490b61dc250d71d640f4017adc8c8b817345aafba8994",
+      "boxes": 95,
+      "parts": 12,
+      "anchors": 7,
+      "bounds": {
+        "min": [
+          -0.34375,
+          0,
+          -0.90625
+        ],
+        "max": [
+          0.34375,
+          1.09375,
+          0.90625
+        ],
+        "size": [
+          0.6875,
+          1.09375,
+          1.8125
+        ],
+        "center": [
+          0,
+          0.546875,
+          0
+        ]
+      }
+    },
+    {
+      "id": "shrine_beetle",
+      "name": "제단딱정",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "shrine_beetle"
+      },
+      "model": "models/shrine_beetle.voxel.json",
+      "glb": "exports/shrine_beetle.glb",
+      "preview": "previews/shrine_beetle.png",
+      "sha256": "4e9c739a27894474e618ec0d7f0d7d3bfca88f74f53a4834f3687cdc6fecf97d",
+      "glbSha256": "c9021ef0ec8d1f0d7f04ca1766503aa80cbce60c1365a953b38c08e0a18f3138",
+      "boxes": 55,
+      "parts": 12,
+      "anchors": 8,
+      "bounds": {
+        "min": [
+          -0.25,
+          0,
+          -0.34375
+        ],
+        "max": [
+          0.25,
+          0.34375,
+          0.34375
+        ],
+        "size": [
+          0.5,
+          0.34375,
+          0.6875
+        ],
+        "center": [
+          0,
+          0.171875,
+          0
+        ]
+      }
+    },
+    {
+      "id": "oath_sentinel",
+      "name": "서약경비체",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "oath_sentinel"
+      },
+      "model": "models/oath_sentinel.voxel.json",
+      "glb": "exports/oath_sentinel.glb",
+      "preview": "previews/oath_sentinel.png",
+      "sha256": "fb894f7ef0cb6fa06c1a960a3045dee22c7c1c87dcf9eec126059c2261b6c452",
+      "glbSha256": "b0f8e0c8f315c74f92c86e53db06dcd99273ae11a00a29e66ff826b49d4649b7",
+      "boxes": 64,
+      "parts": 12,
+      "anchors": 7,
+      "bounds": {
+        "min": [
+          -0.34375,
+          0,
+          -0.4375
+        ],
+        "max": [
+          0.34375,
+          2.1875,
+          0.46875
+        ],
+        "size": [
+          0.6875,
+          2.1875,
+          0.90625
+        ],
+        "center": [
+          0,
+          1.09375,
+          0.015625
+        ]
+      }
+    },
+    {
+      "id": "drift_grazer",
+      "name": "부유각초식수",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "drift_grazer"
+      },
+      "model": "models/drift_grazer.voxel.json",
+      "glb": "exports/drift_grazer.glb",
+      "preview": "previews/drift_grazer.png",
+      "sha256": "7c2a655581736d08e42da880f48678e25e0a5392d5e601076e3f2abdd4928445",
+      "glbSha256": "e4ad0e18cc88ba048a3dc1084a45ff13518463e5c595c2dd6e23fecdae47ff7c",
+      "boxes": 122,
+      "parts": 14,
+      "anchors": 7,
+      "bounds": {
+        "min": [
+          -0.5,
+          0,
+          -1
+        ],
+        "max": [
+          0.5,
+          1.40625,
+          1
+        ],
+        "size": [
+          1,
+          1.40625,
+          2
+        ],
+        "center": [
+          0,
+          0.703125,
+          0
+        ]
+      }
+    },
+    {
+      "id": "phase_stalker",
+      "name": "위상추적수",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "phase_stalker"
+      },
+      "model": "models/phase_stalker.voxel.json",
+      "glb": "exports/phase_stalker.glb",
+      "preview": "previews/phase_stalker.png",
+      "sha256": "9ae2ba1effaa4237f84471970b716c2b362c7b8935e03a3497a0b06df218c10d",
+      "glbSha256": "2070c141af37e488664d6f2a59b3c1cbccf3934c7a05a8cf919c152ef9844228",
+      "boxes": 157,
+      "parts": 11,
+      "anchors": 7,
+      "bounds": {
+        "min": [
+          -0.4375,
+          0,
+          -1.15625
+        ],
+        "max": [
+          0.46875,
+          1.1875,
+          1.15625
+        ],
+        "size": [
+          0.90625,
+          1.1875,
+          2.3125
+        ],
+        "center": [
+          0.015625,
+          0.59375,
+          0
+        ]
+      }
+    },
+    {
+      "id": "anchor_tick",
+      "name": "닻다리진드기",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "anchor_tick"
+      },
+      "model": "models/anchor_tick.voxel.json",
+      "glb": "exports/anchor_tick.glb",
+      "preview": "previews/anchor_tick.png",
+      "sha256": "897fe2a917265059ddd9b45b004b57ee52b67b6fcd65a47fc88eba578c5a16e9",
+      "glbSha256": "bc142b36f17c9f2310acbbf3ddd5ececf4e86af51103ece4789565f56b7973f5",
+      "boxes": 54,
+      "parts": 11,
+      "anchors": 8,
+      "bounds": {
+        "min": [
+          -0.25,
+          0,
+          -0.25
+        ],
+        "max": [
+          0.25,
+          0.3125,
+          0.25
+        ],
+        "size": [
+          0.5,
+          0.3125,
+          0.5
+        ],
+        "center": [
+          0,
+          0.15625,
+          0
+        ]
+      }
+    },
+    {
+      "id": "survey_drone",
+      "name": "측량부유체",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "survey_drone"
+      },
+      "model": "models/survey_drone.voxel.json",
+      "glb": "exports/survey_drone.glb",
+      "preview": "previews/survey_drone.png",
+      "sha256": "95d6e3758619ba605e97ed599dd657701a39ae4a2d752a3cda9fddfb89ff3b12",
+      "glbSha256": "2d965129e253bfb2104f6f54943fe935c3c67ba75df706d555403ed75f177807",
+      "boxes": 31,
+      "parts": 7,
+      "anchors": 5,
+      "bounds": {
+        "min": [
+          -0.53125,
+          0,
+          -0.53125
+        ],
+        "max": [
+          0.5625,
+          0.6875,
+          0.5625
+        ],
+        "size": [
+          1.09375,
+          0.6875,
+          1.09375
+        ],
+        "center": [
+          0.015625,
+          0.34375,
+          0.015625
+        ]
+      }
+    },
+    {
+      "id": "wayfarer_organic",
+      "name": "개척민 유기생명 원형",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "wayfarer_organic"
+      },
+      "model": "models/wayfarer_organic.voxel.json",
+      "glb": "exports/wayfarer_organic.glb",
+      "preview": "previews/wayfarer_organic.png",
+      "sha256": "c1688b57accf19dfd8622bdca7f921beddfdc7f6c0ce1eb58650d27784bea1c7",
+      "glbSha256": "cb2beab39e409fbac94730ab0e0b2363776abf0fb09f390d7d546d053a4109c4",
+      "boxes": 64,
+      "parts": 12,
+      "anchors": 7,
+      "bounds": {
+        "min": [
+          -0.1875,
+          0,
+          -0.28125
+        ],
+        "max": [
+          0.21875,
+          1.8125,
+          0.3125
+        ],
+        "size": [
+          0.40625,
+          1.8125,
+          0.59375
+        ],
+        "center": [
+          0.015625,
+          0.90625,
+          0.015625
+        ]
+      }
+    },
+    {
+      "id": "custodian_inorganic",
+      "name": "관리인 무기생명 원형",
+      "category": "creature",
+      "contentRef": {
+        "file": "design/content/creatures.json",
+        "id": "custodian_inorganic"
+      },
+      "model": "models/custodian_inorganic.voxel.json",
+      "glb": "exports/custodian_inorganic.glb",
+      "preview": "previews/custodian_inorganic.png",
+      "sha256": "f849e55dabc72bf2f20cfdd584d0dfcb980d2dd63a0199b5fab6f529a7788498",
+      "glbSha256": "20535cabe54f488e55f929a2db2bc7acbcd29a4b20aeb14cceab1ccf29db0830",
+      "boxes": 82,
+      "parts": 11,
+      "anchors": 7,
+      "bounds": {
+        "min": [
+          -0.28125,
+          0,
+          -0.375
+        ],
+        "max": [
+          0.3125,
+          1.90625,
+          0.375
+        ],
+        "size": [
+          0.59375,
+          1.90625,
+          0.75
+        ],
+        "center": [
+          0.015625,
+          0.953125,
+          0
+        ]
+      }
+    },
+    {
+      "id": "rootback_beast",
+      "name": "뿌리등짐 짐승",
+      "category": "boss",
+      "contentRef": {
+        "file": "design/content/bosses.json",
+        "id": "rootback_beast"
+      },
+      "model": "models/rootback_beast.voxel.json",
+      "glb": "exports/rootback_beast.glb",
+      "preview": "previews/rootback_beast.png",
+      "sha256": "0374fa8b8715155124104dd25af068cc06522a287cd5fba9c01b0d8acee31e13",
+      "glbSha256": "f02763ff1760081a5d369259b5d7816cbdb3466e6193ce21ca2b2cf60e26ac4d",
+      "boxes": 625,
+      "parts": 12,
+      "anchors": 7,
+      "bounds": {
+        "min": [
+          -1.53125,
+          0,
+          -2
+        ],
+        "max": [
+          1.53125,
+          2.40625,
+          2
+        ],
+        "size": [
+          3.0625,
+          2.40625,
+          4
+        ],
+        "center": [
+          0,
+          1.203125,
+          0
+        ]
+      }
+    },
+    {
+      "id": "mine_carapace",
+      "name": "갱도 갑각수",
+      "category": "boss",
+      "contentRef": {
+        "file": "design/content/bosses.json",
+        "id": "mine_carapace"
+      },
+      "model": "models/mine_carapace.voxel.json",
+      "glb": "exports/mine_carapace.glb",
+      "preview": "previews/mine_carapace.png",
+      "sha256": "806c23d230e03416044109b4636b89d3aaca9c17d45e765d9d1c8e9637e89e44",
+      "glbSha256": "6b10bd6c6a4da30a897ad87ade39c3b24086fb81ad55299fea40db721e2c1d17",
+      "boxes": 294,
+      "parts": 15,
+      "anchors": 10,
+      "bounds": {
+        "min": [
+          -2,
+          0,
+          -2.40625
+        ],
+        "max": [
+          2,
+          2.84375,
+          2.40625
+        ],
+        "size": [
+          4,
+          2.84375,
+          4.8125
+        ],
+        "center": [
+          0,
+          1.421875,
+          0
+        ]
+      }
+    },
+    {
+      "id": "sluice_acidworm",
+      "name": "수문 산성충",
+      "category": "boss",
+      "contentRef": {
+        "file": "design/content/bosses.json",
+        "id": "sluice_acidworm"
+      },
+      "model": "models/sluice_acidworm.voxel.json",
+      "glb": "exports/sluice_acidworm.glb",
+      "preview": "previews/sluice_acidworm.png",
+      "sha256": "4581f7a61e097503588b267b9d57701824820d85d1ba713bd190a271ccfe0305",
+      "glbSha256": "c34ff5c6915cd89ae5134c7a33e7347ac5c2ee6043ff292f59f44e5652891a4d",
+      "boxes": 482,
+      "parts": 31,
+      "anchors": 21,
+      "bounds": {
+        "min": [
+          -1.75,
+          0,
+          -3.5
+        ],
+        "max": [
+          1.75,
+          2.59375,
+          3.46875
+        ],
+        "size": [
+          3.5,
+          2.59375,
+          6.96875
+        ],
+        "center": [
+          0,
+          1.296875,
+          -0.015625
+        ]
+      }
+    },
+    {
+      "id": "furnace_carapace",
+      "name": "용광 등갑수",
+      "category": "boss",
+      "contentRef": {
+        "file": "design/content/bosses.json",
+        "id": "furnace_carapace"
+      },
+      "model": "models/furnace_carapace.voxel.json",
+      "glb": "exports/furnace_carapace.glb",
+      "preview": "previews/furnace_carapace.png",
+      "sha256": "885d9b01f3cd8555508f22c5f20a6f6bb0d0603b833dea1ed908b3987067ecc1",
+      "glbSha256": "89f1bdc57a6a3e6bdb192388a54da1b6b25093b20cfe18165372e69596b090ad",
+      "boxes": 334,
+      "parts": 11,
+      "anchors": 13,
+      "bounds": {
+        "min": [
+          -2.25,
+          0,
+          -2.59375
+        ],
+        "max": [
+          2.28125,
+          3.1875,
+          2.59375
+        ],
+        "size": [
+          4.53125,
+          3.1875,
+          5.1875
+        ],
+        "center": [
+          0.015625,
+          1.59375,
+          0
+        ]
+      }
+    },
+    {
+      "id": "spire_glider",
+      "name": "첨탑 활공수",
+      "category": "boss",
+      "contentRef": {
+        "file": "design/content/bosses.json",
+        "id": "spire_glider"
+      },
+      "model": "models/spire_glider.voxel.json",
+      "glb": "exports/spire_glider.glb",
+      "preview": "previews/spire_glider.png",
+      "sha256": "a5735273b4288589589a70046e228145ed01e5e94ea30d6b9baa471da48d31ae",
+      "glbSha256": "5823280ee27024ac35c2eb0e9ce36f08e98b9100de4f84651940a3e4061a1774",
+      "boxes": 149,
+      "parts": 13,
+      "anchors": 8,
+      "bounds": {
+        "min": [
+          -3.4375,
+          0,
+          -1.8125
+        ],
+        "max": [
+          3.4375,
+          1.96875,
+          1.75
+        ],
+        "size": [
+          6.875,
+          1.96875,
+          3.5625
+        ],
+        "center": [
+          0,
+          0.984375,
+          -0.03125
+        ]
+      }
+    },
+    {
+      "id": "arboretum_symbiote",
+      "name": "수목원 공생체",
+      "category": "boss",
+      "contentRef": {
+        "file": "design/content/bosses.json",
+        "id": "arboretum_symbiote"
+      },
+      "model": "models/arboretum_symbiote.voxel.json",
+      "glb": "exports/arboretum_symbiote.glb",
+      "preview": "previews/arboretum_symbiote.png",
+      "sha256": "2ca7d9f17b186730c7ec1feaa5ef5d6407c94113b14b4ea90c200112391d8e52",
+      "glbSha256": "91c9c7193d1be63bfcc19589ece12ebd64bebee58f10b23171d53bb13858cf4f",
+      "boxes": 339,
+      "parts": 17,
+      "anchors": 10,
+      "bounds": {
+        "min": [
+          -2.03125,
+          0,
+          -2.09375
+        ],
+        "max": [
+          2.03125,
+          5.59375,
+          2.09375
+        ],
+        "size": [
+          4.0625,
+          5.59375,
+          4.1875
+        ],
+        "center": [
+          0,
+          2.796875,
+          0
+        ]
+      }
+    },
+    {
+      "id": "sanctuary_warden",
+      "name": "성역 수호자",
+      "category": "boss",
+      "contentRef": {
+        "file": "design/content/bosses.json",
+        "id": "sanctuary_warden"
+      },
+      "model": "models/sanctuary_warden.voxel.json",
+      "glb": "exports/sanctuary_warden.glb",
+      "preview": "previews/sanctuary_warden.png",
+      "sha256": "e8bbbb0358a5e521ca0e7452184ac4637c6281b10af47f8181146b12e9681a8e",
+      "glbSha256": "21aa7a1f088c599ea01bd4f31b50aff23b1574f991a11c26689c12bba8a70bdf",
+      "boxes": 207,
+      "parts": 14,
+      "anchors": 5,
+      "bounds": {
+        "min": [
+          -2.21875,
+          0,
+          -2.25
+        ],
+        "max": [
+          2.28125,
+          5,
+          2.28125
+        ],
+        "size": [
+          4.5,
+          5,
+          4.53125
+        ],
+        "center": [
+          0.03125,
+          2.5,
+          0.015625
+        ]
+      }
+    },
+    {
+      "id": "observatory_sentinel",
+      "name": "관측탑 무기생명 수호자",
+      "category": "boss",
+      "contentRef": {
+        "file": "design/content/bosses.json",
+        "id": "observatory_sentinel"
+      },
+      "model": "models/observatory_sentinel.voxel.json",
+      "glb": "exports/observatory_sentinel.glb",
+      "preview": "previews/observatory_sentinel.png",
+      "sha256": "491e321643a669b94a77ad28b2d8e9b37bdb2dc89a46ffa3baab3151db65a6f0",
+      "glbSha256": "5387588b1530fa9d455e82f2b82bd6f5f0919bf333f76cfd53ed619aa7b5e876",
+      "boxes": 868,
+      "parts": 10,
+      "anchors": 8,
+      "bounds": {
+        "min": [
+          -2.5,
+          0,
+          -2.5
+        ],
+        "max": [
+          2.5,
+          5.46875,
+          2.5
+        ],
+        "size": [
+          5,
+          5.46875,
+          5
+        ],
+        "center": [
+          0,
+          2.734375,
+          0
+        ]
+      }
+    },
+    {
+      "id": "root_manor",
+      "name": "뿌리에 잠긴 저택",
+      "category": "structure",
+      "contentRef": {
+        "file": "design/content/structures.json",
+        "id": "root_manor"
+      },
+      "model": "models/root_manor.voxel.json",
+      "glb": "exports/root_manor.glb",
+      "preview": "previews/root_manor.png",
+      "sha256": "088443564b7fc8b27dad137d9b336881144e6099ed1e57a2d7173ac19ba75339",
+      "glbSha256": "a93b27283d71d5fde1115b81c5737825dcd70e5a3342d8d2c2cd82c2cd6c59bf",
+      "boxes": 1295,
+      "parts": 21,
+      "anchors": 18,
+      "bounds": {
+        "min": [
+          -15,
+          -1.5,
+          -44
+        ],
+        "max": [
+          107,
+          12.5,
+          34
+        ],
+        "size": [
+          122,
+          14,
+          78
+        ],
+        "center": [
+          46,
+          5.5,
+          -5
+        ]
+      }
+    },
+    {
+      "id": "mining_fort",
+      "name": "폐채굴 요새",
+      "category": "structure",
+      "contentRef": {
+        "file": "design/content/structures.json",
+        "id": "mining_fort"
+      },
+      "model": "models/mining_fort.voxel.json",
+      "glb": "exports/mining_fort.glb",
+      "preview": "previews/mining_fort.png",
+      "sha256": "3ba1b1218995de63ec3b4869edbde22a0620d8607745fde5094bb31c9cdfc092",
+      "glbSha256": "0d1fa7bfee9e1537715c09f71813974a47b6684cbae94fb13f9a635f7d7b2b55",
+      "boxes": 890,
+      "parts": 24,
+      "anchors": 19,
+      "bounds": {
+        "min": [
+          -15,
+          -1.5,
+          -43
+        ],
+        "max": [
+          109,
+          15.5,
+          34
+        ],
+        "size": [
+          124,
+          17,
+          77
+        ],
+        "center": [
+          47,
+          7,
+          -4.5
+        ]
+      }
+    },
+    {
+      "id": "floodworks",
+      "name": "침수된 수문 시설",
+      "category": "structure",
+      "contentRef": {
+        "file": "design/content/structures.json",
+        "id": "floodworks"
+      },
+      "model": "models/floodworks.voxel.json",
+      "glb": "exports/floodworks.glb",
+      "preview": "previews/floodworks.png",
+      "sha256": "d76a4477b9e2a369c77cd763ca472177ea6fa950f3b3f4fc5c7baa654bd8d05a",
+      "glbSha256": "88926524255f022974c442229db1df0f86625fc0a45e42043ab855c3d7be4c77",
+      "boxes": 838,
+      "parts": 28,
+      "anchors": 20,
+      "bounds": {
+        "min": [
+          -15,
+          -1.5,
+          -42.5
+        ],
+        "max": [
+          109,
+          15,
+          49
+        ],
+        "size": [
+          124,
+          16.5,
+          91.5
+        ],
+        "center": [
+          47,
+          6.75,
+          3.25
+        ]
+      }
+    },
+    {
+      "id": "geothermal_foundry",
+      "name": "지열 주조소",
+      "category": "structure",
+      "contentRef": {
+        "file": "design/content/structures.json",
+        "id": "geothermal_foundry"
+      },
+      "model": "models/geothermal_foundry.voxel.json",
+      "glb": "exports/geothermal_foundry.glb",
+      "preview": "previews/geothermal_foundry.png",
+      "sha256": "5deb6b1605cd47cef773d5a7b5d5e37466841d410e1456181e6ef9fef425fc9c",
+      "glbSha256": "3a5df0f3d1fd1fa6a4c56d7437819505b9757d659125208833ac311cbe54164f",
+      "boxes": 908,
+      "parts": 28,
+      "anchors": 21,
+      "bounds": {
+        "min": [
+          -15,
+          -1.5,
+          -51.5
+        ],
+        "max": [
+          111,
+          18,
+          34
+        ],
+        "size": [
+          126,
+          19.5,
+          85.5
+        ],
+        "center": [
+          48,
+          8.25,
+          -8.75
+        ]
+      }
+    },
+    {
+      "id": "cliff_observatory",
+      "name": "절벽 관측성",
+      "category": "structure",
+      "contentRef": {
+        "file": "design/content/structures.json",
+        "id": "cliff_observatory"
+      },
+      "model": "models/cliff_observatory.voxel.json",
+      "glb": "exports/cliff_observatory.glb",
+      "preview": "previews/cliff_observatory.png",
+      "sha256": "b164a55f295ea6b819906f1dd7c256abf89f3d88df40418756db9b4256a778f1",
+      "glbSha256": "7a16e85e37bbfeb581e9cef83ff2c48f62398187e0b50b78dd7c3543437d5f6d",
+      "boxes": 781,
+      "parts": 24,
+      "anchors": 20,
+      "bounds": {
+        "min": [
+          -15,
+          -1.5,
+          -42.5
+        ],
+        "max": [
+          113,
+          22.5,
+          34
+        ],
+        "size": [
+          128,
+          24,
+          76.5
+        ],
+        "center": [
+          49,
+          10.5,
+          -4.25
+        ]
+      }
+    },
+    {
+      "id": "sealed_arboretum",
+      "name": "봉인된 수목원",
+      "category": "structure",
+      "contentRef": {
+        "file": "design/content/structures.json",
+        "id": "sealed_arboretum"
+      },
+      "model": "models/sealed_arboretum.voxel.json",
+      "glb": "exports/sealed_arboretum.glb",
+      "preview": "previews/sealed_arboretum.png",
+      "sha256": "2625a0f51579efb55b60a0ec1b520d15647bff21749cda94b63208629686c011",
+      "glbSha256": "ff3d1f770a135db07f88664704651ea384975dec624ff6022a2811d40a8025f0",
+      "boxes": 1748,
+      "parts": 28,
+      "anchors": 21,
+      "bounds": {
+        "min": [
+          -15,
+          -1.5,
+          -54
+        ],
+        "max": [
+          111,
+          19,
+          34
+        ],
+        "size": [
+          126,
+          20.5,
+          88
+        ],
+        "center": [
+          48,
+          8.75,
+          -10
+        ]
+      }
+    },
+    {
+      "id": "forgotten_monastery",
+      "name": "잊힌 신의 수도원",
+      "category": "structure",
+      "contentRef": {
+        "file": "design/content/structures.json",
+        "id": "forgotten_monastery"
+      },
+      "model": "models/forgotten_monastery.voxel.json",
+      "glb": "exports/forgotten_monastery.glb",
+      "preview": "previews/forgotten_monastery.png",
+      "sha256": "d7d7891e35c5362485c2ec29194e83ffa9aab8b863caf8d886ebbf4c96aec035",
+      "glbSha256": "7ab70d25bda9badea7d03c8964b442bce12e65039c67d17c96ebbd225d9ff418",
+      "boxes": 1200,
+      "parts": 29,
+      "anchors": 21,
+      "bounds": {
+        "min": [
+          -15,
+          -1.5,
+          -44
+        ],
+        "max": [
+          113,
+          18,
+          38
+        ],
+        "size": [
+          128,
+          19.5,
+          82
+        ],
+        "center": [
+          49,
+          8.25,
+          -3
+        ]
+      }
+    },
+    {
+      "id": "inertia_tower",
+      "name": "관성 관측탑",
+      "category": "structure",
+      "contentRef": {
+        "file": "design/content/structures.json",
+        "id": "inertia_tower"
+      },
+      "model": "models/inertia_tower.voxel.json",
+      "glb": "exports/inertia_tower.glb",
+      "preview": "previews/inertia_tower.png",
+      "sha256": "2098b3c703e848992411dc330184eb253e4eb98aac61565a9f1c39a02d9c8da6",
+      "glbSha256": "2568d793361c54af57ecbaca96cf92b11f8a25bdb176f482721383fa85347cde",
+      "boxes": 1187,
+      "parts": 31,
+      "anchors": 22,
+      "bounds": {
+        "min": [
+          -15,
+          -1.5,
+          -51.5
+        ],
+        "max": [
+          115,
+          22.5,
+          38
+        ],
+        "size": [
+          130,
+          24,
+          89.5
+        ],
+        "center": [
+          50,
+          10.5,
+          -6.75
+        ]
+      }
+    },
+    {
+      "id": "grove_supply_camp",
+      "name": "숲 보급 공동체",
+      "category": "structure",
+      "contentRef": {
+        "file": "design/content/structures.json",
+        "id": "grove_supply_camp"
+      },
+      "model": "models/grove_supply_camp.voxel.json",
+      "glb": "exports/grove_supply_camp.glb",
+      "preview": "previews/grove_supply_camp.png",
+      "sha256": "e0c526f80ff39864452145be03dd3ca2c8d0a33b9a6b8ec249cf2e27f85fc045",
+      "glbSha256": "2cff8058c633b032cb606f6798c4d37f767a67c9ed7646a6720750a35b6e3103",
+      "boxes": 526,
+      "parts": 22,
+      "anchors": 10,
+      "bounds": {
+        "min": [
+          -9.5,
+          -0.5,
+          -20
+        ],
+        "max": [
+          42,
+          6.5,
+          20.5
+        ],
+        "size": [
+          51.5,
+          7,
+          40.5
+        ],
+        "center": [
+          16.25,
+          3,
+          0.25
+        ]
+      }
+    },
+    {
+      "id": "ridge_repair_station",
+      "name": "구릉 정비 공동체",
+      "category": "structure",
+      "contentRef": {
+        "file": "design/content/structures.json",
+        "id": "ridge_repair_station"
+      },
+      "model": "models/ridge_repair_station.voxel.json",
+      "glb": "exports/ridge_repair_station.glb",
+      "preview": "previews/ridge_repair_station.png",
+      "sha256": "030fae5ed4a2b2684c9d565555ce458445cb773df2fe51ee27adfe85a442dbab",
+      "glbSha256": "baf4ef323c9fb1aad86edd59fcf28a117332b3ad6b807eb8276057ea7a1c310c",
+      "boxes": 405,
+      "parts": 22,
+      "anchors": 9,
+      "bounds": {
+        "min": [
+          -8,
+          -0.5,
+          -19
+        ],
+        "max": [
+          40,
+          6.5,
+          18.5
+        ],
+        "size": [
+          48,
+          7,
+          37.5
+        ],
+        "center": [
+          16,
+          3,
+          -0.25
+        ]
+      }
+    },
+    {
+      "id": "communal_archive",
+      "name": "공동 연구 기록소",
+      "category": "structure",
+      "contentRef": {
+        "file": "design/content/structures.json",
+        "id": "communal_archive"
+      },
+      "model": "models/communal_archive.voxel.json",
+      "glb": "exports/communal_archive.glb",
+      "preview": "previews/communal_archive.png",
+      "sha256": "35e92b6ecd35164b413e14bde2d5b40e4a3b142a54b3bf8cee67d1c6e108591e",
+      "glbSha256": "d2c16d715ca99672d0f8649218f22887bfe8713952ad4b1ef98587b1362ba57e",
+      "boxes": 316,
+      "parts": 22,
+      "anchors": 8,
+      "bounds": {
+        "min": [
+          -8,
+          -0.5,
+          -18.5
+        ],
+        "max": [
+          40,
+          8,
+          18.5
+        ],
+        "size": [
+          48,
+          8.5,
+          37
+        ],
+        "center": [
+          16,
+          3.75,
+          0
+        ]
+      }
+    },
+    {
+      "id": "pilgrimage_waystation",
+      "name": "순례 보급소",
+      "category": "structure",
+      "contentRef": {
+        "file": "design/content/structures.json",
+        "id": "pilgrimage_waystation"
+      },
+      "model": "models/pilgrimage_waystation.voxel.json",
+      "glb": "exports/pilgrimage_waystation.glb",
+      "preview": "previews/pilgrimage_waystation.png",
+      "sha256": "191450d07ef5ea481513d136b8f9da2a3f4d9f9009ccad4dc1c98d60de664243",
+      "glbSha256": "7f8316dbda1727672b6cebd3ebf788c9286165da5b67d670d3579f16d097135f",
+      "boxes": 395,
+      "parts": 22,
+      "anchors": 9,
+      "bounds": {
+        "min": [
+          -8,
+          -0.5,
+          -20
+        ],
+        "max": [
+          40,
+          7,
+          18.5
+        ],
+        "size": [
+          48,
+          7.5,
+          38.5
+        ],
+        "center": [
+          16,
+          3.25,
+          -0.75
+        ]
+      }
+    },
+    {
+      "id": "grove",
+      "name": "이끼 숲·초원",
+      "category": "environment",
+      "contentRef": {
+        "file": "design/content/environments.json",
+        "id": "grove"
+      },
+      "model": "models/grove.voxel.json",
+      "glb": "exports/grove.glb",
+      "preview": "previews/grove.png",
+      "sha256": "7be10460f56eb7de525778f036366ecc324b4b0494750ac3387f752bf1638083",
+      "glbSha256": "74f24c346f57803336c70f0c44b7146a291eabc2a0f9effa90d9c181ee0b0313",
+      "boxes": 4386,
+      "parts": 7,
+      "anchors": 3,
+      "bounds": {
+        "min": [
+          -112,
+          -16,
+          -96
+        ],
+        "max": [
+          112,
+          14.5,
+          96
+        ],
+        "size": [
+          224,
+          30.5,
+          192
+        ],
+        "center": [
+          0,
+          -0.75,
+          0
+        ]
+      }
+    },
+    {
+      "id": "ridge",
+      "name": "붉은 구릉·광산권",
+      "category": "environment",
+      "contentRef": {
+        "file": "design/content/environments.json",
+        "id": "ridge"
+      },
+      "model": "models/ridge.voxel.json",
+      "glb": "exports/ridge.glb",
+      "preview": "previews/ridge.png",
+      "sha256": "835090f1ec845e24f9f9d1ece18560cf2ed9661f41ac70a7e15a233155c82674",
+      "glbSha256": "b2a6944e1e911d4159ca7f05e4ef9f45b1bacb410dfd5aafb3432e4e5e9f1e28",
+      "boxes": 4807,
+      "parts": 7,
+      "anchors": 3,
+      "bounds": {
+        "min": [
+          -112,
+          -16,
+          -96
+        ],
+        "max": [
+          112,
+          19.5,
+          96
+        ],
+        "size": [
+          224,
+          35.5,
+          192
+        ],
+        "center": [
+          0,
+          1.75,
+          0
+        ]
+      }
+    },
+    {
+      "id": "marsh",
+      "name": "습지·산성 수역",
+      "category": "environment",
+      "contentRef": {
+        "file": "design/content/environments.json",
+        "id": "marsh"
+      },
+      "model": "models/marsh.voxel.json",
+      "glb": "exports/marsh.glb",
+      "preview": "previews/marsh.png",
+      "sha256": "07efdb79ec3001bb87bafed8a9573090a48fcd3e4bbdc6159fa039b8c30bdcb9",
+      "glbSha256": "0dc560f2d5b6fe68d83b425278c966103cba96bc13b8c61f12c9c048f2ed0ca0",
+      "boxes": 2276,
+      "parts": 7,
+      "anchors": 3,
+      "bounds": {
+        "min": [
+          -112,
+          -16,
+          -96
+        ],
+        "max": [
+          112,
+          17,
+          96
+        ],
+        "size": [
+          224,
+          33,
+          192
+        ],
+        "center": [
+          0,
+          0.5,
+          0
+        ]
+      }
+    },
+    {
+      "id": "thermal",
+      "name": "화산·열곡",
+      "category": "environment",
+      "contentRef": {
+        "file": "design/content/environments.json",
+        "id": "thermal"
+      },
+      "model": "models/thermal.voxel.json",
+      "glb": "exports/thermal.glb",
+      "preview": "previews/thermal.png",
+      "sha256": "1309603f520e583be858d91c399744b20694689a1ab7970ca4a0197a518305ec",
+      "glbSha256": "d5e1f5fdd35c240f7bdc965f91cd9404060078ae44c293c6b223623ad7895064",
+      "boxes": 2354,
+      "parts": 7,
+      "anchors": 3,
+      "bounds": {
+        "min": [
+          -112,
+          -16,
+          -96
+        ],
+        "max": [
+          112,
+          22,
+          96
+        ],
+        "size": [
+          224,
+          38,
+          192
+        ],
+        "center": [
+          0,
+          3,
+          0
+        ]
+      }
+    },
+    {
+      "id": "coast",
+      "name": "해안·고원",
+      "category": "environment",
+      "contentRef": {
+        "file": "design/content/environments.json",
+        "id": "coast"
+      },
+      "model": "models/coast.voxel.json",
+      "glb": "exports/coast.glb",
+      "preview": "previews/coast.png",
+      "sha256": "4897ac26e96f3c49763d93f4d1a9d15aa38b1a2f3afa36eb7312280f3cb5b607",
+      "glbSha256": "2515517202948737662d9e78ee2d510128e593a851981f45aea2a44372e99bd8",
+      "boxes": 2278,
+      "parts": 7,
+      "anchors": 3,
+      "bounds": {
+        "min": [
+          -112,
+          -16,
+          -96
+        ],
+        "max": [
+          112,
+          34.5,
+          96
+        ],
+        "size": [
+          224,
+          50.5,
+          192
+        ],
+        "center": [
+          0,
+          9.25,
+          0
+        ]
+      }
+    },
+    {
+      "id": "mana_grove",
+      "name": "마나림",
+      "category": "environment",
+      "contentRef": {
+        "file": "design/content/environments.json",
+        "id": "mana_grove"
+      },
+      "model": "models/mana_grove.voxel.json",
+      "glb": "exports/mana_grove.glb",
+      "preview": "previews/mana_grove.png",
+      "sha256": "696ae9a9b5f4797b6b2c17a97f3dbf9ad53ef8fabdd4bea36e42abbbd90917ec",
+      "glbSha256": "3fe5ed97af443fe222ffd533eac673463a10f35668417c73210efe564d3b22cf",
+      "boxes": 4650,
+      "parts": 7,
+      "anchors": 3,
+      "bounds": {
+        "min": [
+          -112,
+          -16,
+          -96
+        ],
+        "max": [
+          112,
+          21,
+          96
+        ],
+        "size": [
+          224,
+          37,
+          192
+        ],
+        "center": [
+          0,
+          2.5,
+          0
+        ]
+      }
+    },
+    {
+      "id": "sacred",
+      "name": "성역 중첩",
+      "category": "environment",
+      "contentRef": {
+        "file": "design/content/environments.json",
+        "id": "sacred"
+      },
+      "model": "models/sacred.voxel.json",
+      "glb": "exports/sacred.glb",
+      "preview": "previews/sacred.png",
+      "sha256": "a59d872f71b895e68aa91dc626e503f7656c8e19c1e3c7ac58a6c99c9c0e91dd",
+      "glbSha256": "6ca781bd9bf081a515752b7a0eb7771c1a7e7a0c6afa180c560027de4df1b1df",
+      "boxes": 3791,
+      "parts": 7,
+      "anchors": 3,
+      "bounds": {
+        "min": [
+          -112,
+          -16,
+          -96
+        ],
+        "max": [
+          112,
+          20,
+          96
+        ],
+        "size": [
+          224,
+          36,
+          192
+        ],
+        "center": [
+          0,
+          2,
+          0
+        ]
+      }
+    },
+    {
+      "id": "anomaly",
+      "name": "국소 이상대 중첩",
+      "category": "environment",
+      "contentRef": {
+        "file": "design/content/environments.json",
+        "id": "anomaly"
+      },
+      "model": "models/anomaly.voxel.json",
+      "glb": "exports/anomaly.glb",
+      "preview": "previews/anomaly.png",
+      "sha256": "02ca218f6a9a1639edb33d37c282cc79784102d6ac4d745abe7fe2ce1e7cd695",
+      "glbSha256": "4759e8b585aa9b9018393272191a39f27d6d61a88e9d8d66aaf9bb6109eefbd6",
+      "boxes": 4972,
+      "parts": 7,
+      "anchors": 3,
+      "bounds": {
+        "min": [
+          -112,
+          -16,
+          -96
+        ],
+        "max": [
+          112,
+          26.5,
+          96
+        ],
+        "size": [
+          224,
+          42.5,
+          192
+        ],
+        "center": [
+          0,
+          5.25,
+          0
+        ]
+      }
+    }
+  ]
+}

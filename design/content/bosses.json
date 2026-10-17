@@ -1,0 +1,4182 @@
+{
+  "schemaVersion": 1,
+  "status": "proposed",
+  "name": "보스 전투 상세 설계",
+  "units": {
+    "length": "m",
+    "time": "s",
+    "hp": "HP",
+    "mass": "kg",
+    "energy": "EU (game unit); 채널별 별도 ledger, 현실 J 대응 없음, 채널변환은 정의된 component에서만"
+  },
+  "rules": {
+    "partHpSharesBody": true,
+    "partDamageAccounting": "실제 피해는 전신HP에1회만 차감하고 부위 누적파손에 같은양을 기록. 부위HP를 추가 생명력으로 더하지 않음.",
+    "energyDamageFormula": "입사 에너지=spentEU*deliveredFraction. 외피의 재질·남은 shellIntegrity가 흡수할 수 있는 EU를 먼저 차감하여 외피파손에 반영. 잔여EU*damageYieldHpPerEU를 neutralTargetHp로 제한하고 표적반응/방어를 각각 한 번 적용해 bodyHpDamage를 계산. 전신HP와 내부부위 누적에는 bodyHpDamage만 1회 기록. 한 시전이 닿은 여러 외피/부위의 총 EU 지출은 spentEU를 초과하지 않는다.",
+    "damageRounding": "계산 내부 소수 유지, HP UI만 반올림.",
+    "energyProduction": "모든 기술은 공통 game EU를 사용하되 에너지 채널별로 별도 계정에 기록한다. 정의된 변환 component 이외의 채널 교환은 금지. 고갈시4초노출 재충전행동은 유한sourceCharges를 사용한다. 저장고까지 소진되면 접근/방어만 가능, 공짜 공격 없음.",
+    "regenVsEnergy": "칼로리는 HP 회복·생명유지값이다. 이 파일의 EU 저장물과 자동 교환하지 않는다. 유기생명의 무기용 저장물 생산 경로는 생태/가공체계에 연결할 후속 구현 계약.",
+    "skillSchedule": "한 번에 한 시전. windup→active→recovery→interCastGap. cooldown은 시전 시작부터 측정. 기존 위험이 남으면 새로운 공격은 금지. 피격 예고와 판정은 동일한3D형상을 사용.",
+    "attackCollision": "첫 실체 차폐에서 중단. 폭발은 시야가 통하는 부분만 전달. 투사체1개/시전, 속도12m/s, 목표점은 예고 시작에 고정. active는 착탄 후 위험 지속시간이고 비행시간은 별도. 장거리에서는 실제 회피 시간이 더 길어진다.",
+    "phaseRule": "각 entries.phases의 고유HP임계와 state를 적용한다. 임계통과는 영속 이벤트, 다단계관통시최종단계로1회전환, 회복으로이전단계복귀없음. HP0이면격파우선. state는 공격선택·지형·기관노출·이동을구체화하며 시전중형상을소급변경하지 않는다.",
+    "targetRule": "플레이어와 조종/동행 기계를 실제 위치·시야로 인식. 36m 인식반경 안에서 최근10초 누적피해가 높은 대상 우선, 동률은 가까운 대상, 다시동률은안정된entityId. 이미 시전한 기술은 표적갱신 금지. 공중은 실제3D표적점 사용.",
+    "outOfRangeRule": "사거리 밖에서 공격받아도 자동무적·순간회복 금지. 시야 있는 접근/엄폐를 시도, 추격한계 밖이면 둥지로 후퇴하되 피해 유지. 장거리제작물의 유리함을 허용.",
+    "tierVariants": "대표tier 외 자동생성은 비활성. 변형제작시 새baseline HP/DPS로 HP와피해를 재산정, 예고시간은줄이지 않음. 공간·기믹·재료보상을 함께 검토한 별도contentVariantId 필요.",
+    "safeExitRule": "양쪽출구상시개방. 지면지속위험의전체footprint가z[-3,3]띠와겹치면생성취소(중심점만검사하지않음). 즉발공격도피할경로검사실패시취소. 영구차폐제거와청크이탈로사망보관을없애지않음.",
+    "brokenParts": "핵 부위 파손 시 disabledSkillIds를 모든 페이즈 후보에서 제거. fallback도 사거리·쿨다운·EU를 지키며 사용불가하면 접근/재충전. locomotion 파손은 이동속도 저하이며 기능 소멸이 아닌 구조 균열을 뜻함.",
+    "shellVsBody": "shellIntegrity는 외피 복셀 상태이고 bodyHP와 독립. 외피를 깨뜨린 에너지와 신체를 손상시킨 에너지를 구분한다. 외피흡수와 에너지반응배율을 같은 방어계수로 중복 적용하지 않는다. 본초안 baselineEffectiveDPS에는 기준 외피도 포함된 것으로 간주하며 실측때 재보정.",
+    "multiplierStacking": "코어노출1.4와재충전노출1.25는겹칠경우큰값만사용. 에너지반응과장비방어는각각1회. partBreakThreshold는 bodyHpDamage 누적이며 외피피해는포함하지않음."
+  },
+  "entries": [
+    {
+      "id": "rootback_beast",
+      "name": "뿌리등짐 짐승",
+      "environmentId": "grove",
+      "dungeonId": "root_manor",
+      "baselineTier": 2,
+      "entityType": "organic",
+      "civilization": false,
+      "appearance": "낙엽을 먹는 작은 생물을 사냥하며 등에 뿌리와 균류가 얹힌 사족 포식자. 낮은 머리와 높은 등판으로 정면 공격과 등 약점을 구별한다.",
+      "combatRole": "먹이터를 지키는 영역형 보스. 멈춘 공격을 피하고 노출된 등판을 치는 학습 구간.",
+      "stats": {
+        "maxHp": 1440,
+        "massKg": 240,
+        "sizeM": {
+          "width": 3.2,
+          "height": 2.4,
+          "length": 4.0
+        },
+        "moveSpeedMps": 2.3,
+        "turnSpeedDegPerS": 75,
+        "contactDamageHp": 0,
+        "energyDamageMultipliers": {
+          "mechanical": 1,
+          "electrical": 0.95,
+          "thermal": 1.2,
+          "chemical": 0.85,
+          "magic": 1,
+          "divine": 1
+        },
+        "shellContract": {
+          "storage": "voxelShellIntegrity",
+          "bodyHpIndependent": true,
+          "baselineCoverageFraction": 0.35,
+          "construction": "각 보스 외피의 실체 복셀과 재질로 확정할 구현 계약. 입사EU 중 흡수분은 외피에만 기록, 침투분만 몸체HP에 전달. 외피 자동재생 없음."
+        }
+      },
+      "baselineRef": "gear_baseline_t2",
+      "balanceTarget": {
+        "effectiveSoloDps": 12,
+        "soloTtkS": 120.0,
+        "ttkIncludesRecovery": false,
+        "machineEffectiveDpsFactor": 1.6,
+        "machineTtkS": 75.0,
+        "interpretation": "정지 표적 DPS가 아닌 회피·이동·기본 저항을 반영한 유효 DPS. 실측 전 목표이며 회복이 성립하면 길어진다."
+      },
+      "parts": [
+        {
+          "id": "core",
+          "name": "등의 뿌리 접합부",
+          "breakThresholdHp": 173,
+          "damageMultiplier": 1.4,
+          "available": "지정 공격 recovery 중 또는 관련 기믹 비활성화 중",
+          "onBreak": "6초 비틀거림, 해당 핵심 기술1개 영구 사용불가. 남은3기술의 예고 +0.4초. 부위 자동 재생 없음.",
+          "staggerS": 6,
+          "extraWindupS": 0.4,
+          "disabledSkillIds": [
+            "root_sweep"
+          ],
+          "slowedSkillIds": [
+            "root_slam",
+            "root_charge",
+            "root_seed"
+          ],
+          "fallbackSkillIds": [
+            "root_slam",
+            "root_seed"
+          ],
+          "exposureAfterBreak": "always_breached: 파손기관 자체가재생되는것이아니라갈라진외피뒤몸체가계속노출. 같은부위재파손보너스없음;후속phase의after_skill조건을기다리지않음."
+        },
+        {
+          "id": "locomotion",
+          "name": "이동 지지부",
+          "breakThresholdHp": 259,
+          "damageMultiplier": 1,
+          "available": "항상, 실제 부위 형상에 접촉했을 때",
+          "onBreak": "이동속도20%감소. 활공수는 공중시간 감소. 자동 복구 없음.",
+          "speedMultiplierAfterBreak": 0.8
+        }
+      ],
+      "lifeRecovery": {
+        "maxCalories": 1152,
+        "initialCalories": 1152,
+        "naturalRegenHpPerS": 3.6,
+        "caloriesPerHp": 2,
+        "noDamageDelayS": 12,
+        "restWindupS": 4,
+        "maxRegenDurationS": 8,
+        "combatRegenMaxHpFraction": 0.02,
+        "combatRegenMaxActions": 1,
+        "triggerHpFraction": 0.6,
+        "stopOnDamage": true,
+        "restRequires": "생존한 먹이/기관 기믹 근처, 정지 자세. 전투 중에는 피격 없는12초와4초 회복준비를 모두 만족. 전투 밖은 피격없는12초 후 자연회복 가능, 최대HP와칼로리량에서 정지.",
+        "activityCaloriesPerS": 0.1,
+        "offlineRegen": false
+      },
+      "energyReserves": [
+        {
+          "energyType": "mechanical",
+          "capacityEU": 570,
+          "initialEU": 570,
+          "rechargeActionS": 4,
+          "rechargeEU": 228,
+          "maxRechargeActionsPerEncounter": 6,
+          "source": "유한 체내 저장물의 전환",
+          "sourceCharges": 6,
+          "exposedMultiplierDuringRecharge": 1.25
+        }
+      ],
+      "phases": [
+        {
+          "id": "rootback_beast_p1",
+          "name": "먹이터 방어",
+          "hpFractionUpperInclusive": 1,
+          "hpFractionLowerExclusive": 0.75,
+          "onEnter": {
+            "durationS": 2,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "먹이터 방어: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "root_slam",
+            "root_seed",
+            "root_slam",
+            "root_charge"
+          ],
+          "interCastGapS": 1.4,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "전투회복/수리없음. 단계별 자세·기관노출·이동규칙을 적용.",
+          "state": {
+            "behavior": "guard_food",
+            "moveSpeedMultiplier": 1,
+            "coreExposure": {
+              "mode": "after_skill",
+              "skillIds": [
+                "root_slam"
+              ],
+              "durationS": 2
+            },
+            "combatRegenAllowed": false,
+            "foodChargeStaggerS": 3
+          },
+          "designIntent": "먹이 더미 가까이에서 정면을 막고 내려찍기 뒤에만 등의 접합부가 드러난다."
+        },
+        {
+          "id": "rootback_beast_p2",
+          "name": "등짐 균열",
+          "hpFractionUpperInclusive": 0.75,
+          "hpFractionLowerExclusive": 0.4,
+          "onEnter": {
+            "durationS": 2,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "등짐 균열: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "root_charge",
+            "root_seed",
+            "root_sweep",
+            "root_slam"
+          ],
+          "interCastGapS": 1.2,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "2페이즈에서만 전투회복1회. 준비전12초무피격, 준비4초, 회복8초를지킨다.",
+          "state": {
+            "behavior": "circle_food_then_charge",
+            "moveSpeedMultiplier": 1,
+            "coreExposure": {
+              "mode": "after_skill",
+              "skillIds": [
+                "root_slam",
+                "root_charge"
+              ],
+              "durationS": 2.8
+            },
+            "combatRegenAllowed": true,
+            "foodChargeStaggerS": 4
+          },
+          "designIntent": "먹이 주변을 돌며 돌진축을 만든다. 먹이더미 충돌의 비틀거림이 길어지고 돌진 뒤에도 약점이 열린다. 피격을 멈추면 한 번 먹고 회복한다."
+        },
+        {
+          "id": "rootback_beast_p3",
+          "name": "굶주린 저항",
+          "hpFractionUpperInclusive": 0.4,
+          "hpFractionLowerExclusive": 0,
+          "onEnter": {
+            "durationS": 2,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "굶주린 저항: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "root_sweep",
+            "root_seed",
+            "root_charge",
+            "root_slam",
+            "root_seed"
+          ],
+          "interCastGapS": 1.0,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "전투회복/수리없음. 단계별 자세·기관노출·이동규칙을 적용.",
+          "state": {
+            "behavior": "protect_broken_back",
+            "moveSpeedMultiplier": 0.85,
+            "coreExposure": {
+              "mode": "always",
+              "skillIds": [],
+              "durationS": 0
+            },
+            "combatRegenAllowed": false,
+            "foodChargeStaggerS": 4
+          },
+          "designIntent": "등의 뿌리가 벗겨져 핵이 항상 보이며 이동이 느려진다. 회복을 멈추고 남은 세 기술과 고리 공격으로 영역을 방어한다."
+        }
+      ],
+      "skills": [
+        {
+          "id": "root_slam",
+          "name": "뿌리 내려찍기",
+          "energyType": "mechanical",
+          "windupS": 1.6,
+          "activeS": 0.25,
+          "recoveryS": 2.0,
+          "cooldownS": 7,
+          "rangeM": 6,
+          "geometry": {
+            "kind": "cylinder",
+            "radiusM": 2.6,
+            "heightM": 1.2
+          },
+          "damage": {
+            "neutralTargetHp": 26,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 23.92,
+            "baselineHpFraction": 0.2175
+          },
+          "energyCost": {
+            "amount": 39,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.666667
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "앞발을 들어 목표 지점에 뿌리 흙덩이를 내려찍는다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "고정된 원 밖으로 걷고 내려온 등판을 공격.",
+          "machineResponse": "전진 대신 측면 이동; 전면 장갑으로 버티면 접합부에 전달되는 충격을 확인.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 2.95,
+            "walkRequiredS": 1.2219,
+            "runRequiredS": 0.9146,
+            "walkMarginS": 0.3781,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "root_charge",
+          "name": "먹이터 돌진",
+          "energyType": "mechanical",
+          "windupS": 1.6,
+          "activeS": 1,
+          "recoveryS": 2.8,
+          "cooldownS": 10,
+          "rangeM": 14,
+          "geometry": {
+            "kind": "oriented_box",
+            "widthM": 2.8,
+            "lengthM": 14,
+            "heightM": 2.4
+          },
+          "damage": {
+            "neutralTargetHp": 38,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 34.96,
+            "baselineHpFraction": 0.3178
+          },
+          "energyCost": {
+            "amount": 57,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.666667
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "낮은 포효 후 직선 돌진. 음식 더미를 맞히면 3초 비틀거린다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "옆으로 이동하거나 먹이 더미 뒤에서 유도.",
+          "machineResponse": "회전 반경이 큰 차체는 출발 전 측면 정렬. 덩치를 이용해 충격을 받을 수도 있음.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 1.75,
+            "walkRequiredS": 0.8469,
+            "runRequiredS": 0.6646,
+            "walkMarginS": 0.7531,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "root_seed",
+          "name": "등짐 씨앗탄",
+          "energyType": "mechanical",
+          "windupS": 1.4,
+          "activeS": 0.3,
+          "recoveryS": 1.8,
+          "cooldownS": 8,
+          "rangeM": 22,
+          "geometry": {
+            "kind": "sphere",
+            "radiusM": 1.6
+          },
+          "damage": {
+            "neutralTargetHp": 24,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 22.08,
+            "baselineHpFraction": 0.2007
+          },
+          "energyCost": {
+            "amount": 36,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.666667
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "등의 씨앗 주머니가 열리고 예고 시작 위치로 포물선 탄을 보낸다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "위치 고정 후 이동; 기둥으로 탄을 막을 수 있음.",
+          "machineResponse": "비행도 표적이 되지만 방향이 고정되어 회피 가능. 씨앗은 재추적하지 않음.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 1.95,
+            "walkRequiredS": 0.9094,
+            "runRequiredS": 0.7063,
+            "walkMarginS": 0.4906,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "root_sweep",
+          "name": "뿌리 고리 휩쓸기",
+          "energyType": "mechanical",
+          "windupS": 1.6,
+          "activeS": 0.4,
+          "recoveryS": 2.5,
+          "cooldownS": 13,
+          "rangeM": 8,
+          "geometry": {
+            "kind": "annular_cylinder",
+            "innerRadiusM": 3.2,
+            "outerRadiusM": 5.6,
+            "heightM": 1
+          },
+          "damage": {
+            "neutralTargetHp": 31,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 28.52,
+            "baselineHpFraction": 0.2593
+          },
+          "energyCost": {
+            "amount": 47,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.659574
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "몸을 웅크린 뒤 반경 3.2~5.6m의 바닥을 뿌리로 쓸어낸다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "안쪽 빈 공간 또는 바깥으로 이동; 낮은 공격 위로 비행 가능.",
+          "machineResponse": "다리·바퀴가 고리에 걸리면 피격; 차체 중심만 검사하지 않음.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 1.55,
+            "walkRequiredS": 0.7844,
+            "runRequiredS": 0.6229,
+            "walkMarginS": 0.8156,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        }
+      ],
+      "arena": {
+        "owner": "structures",
+        "localOrigin": "boss_arena_floor_center",
+        "widthM": 24,
+        "depthM": 24,
+        "heightM": 10,
+        "bossSpawnM": [
+          0,
+          0,
+          4
+        ],
+        "openExitCount": 2,
+        "exitWidthM": 6,
+        "exitHeightM": 5,
+        "clearCrossWidthM": 8,
+        "protectedEscapeStripZ": [
+          -3,
+          3
+        ],
+        "gimmicks": [
+          {
+            "id": "root_food_cache_west",
+            "positionM": [
+              -7,
+              0,
+              7
+            ]
+          },
+          {
+            "id": "root_food_cache_east",
+            "positionM": [
+              7,
+              0,
+              7
+            ]
+          }
+        ],
+        "gimmickInteractionS": 1,
+        "gimmickUsesEach": 1,
+        "gimmickReset": "횟수·파괴 상태 영속. 재로드/탈주로 복구하지 않음. 소모돼도 일반 회피·약점으로 공략 가능.",
+        "gimmickEffect": "돌진으로 먹이 더미 파괴 시3초비틀거림·회복 먹이1개 제거. 근접 도구로도 파괴 가능.",
+        "gimmickBreakHp": 36,
+        "gimmickContactCollisionDamageHp": 0,
+        "geometryReference": "root_manor:arena"
+      },
+      "persistence": {
+        "bossCountPerDungeon": 1,
+        "summonedCreatureLimit": 0,
+        "simultaneousPersistentHazards": 1,
+        "leashBeyondArenaM": 12,
+        "disengageDelayS": 15,
+        "stateOnDisengage": "위치만 안전한 둥지로 복귀. HP·칼로리·부위·에너지·수리소모 유지; 자동 전량회복 없음.",
+        "onUnload": "교전·투사체·상태 타이머 정지, 오프라인 공격/회복 없음. 저장된 시전은 재개 전 동일한 전체 예고를 다시 표시, 이미 차감한 비용 재차감하지 않음.",
+        "onDeath": "즉시 defeated와 rewardTransactionId를 같은 원자적 트랜잭션에 기록. 공격·위험 제거. 보스와 재료 회수 가능 잔해를 중복 생성하지 않음.",
+        "retry": "미격파 보스만 남은 상태로 재도전. 격파 후 같은 인스턴스 재생성 없음; 다른 던전 인스턴스는 별개.",
+        "deathRecovery": "플레이어 사망 보관은 보스 상태와 별개 영속. 10m 요정 회수, 여러 보관 및 가방 초과분 보존.",
+        "rewardRef": "reward_root_manor",
+        "saveFields": [
+          "instanceId",
+          "bossId",
+          "hp",
+          "phaseId",
+          "phaseEntered",
+          "position",
+          "parts",
+          "calories",
+          "energyReserves",
+          "recoveryCharges",
+          "gimmickStates",
+          "castId",
+          "castState",
+          "cooldownRemaining",
+          "sequenceIndex",
+          "lastDamageElapsed",
+          "defeated",
+          "rewardTransactionId",
+          "rewardClaimedStacks",
+          "regenActionSpent",
+          "repairSupplies",
+          "sourceChargesByEnergy",
+          "flightState",
+          "airborneElapsedS",
+          "rewardUnclaimed",
+          "phaseStateTimers",
+          "completedAttackCount",
+          "phaseWaterDepth",
+          "growthNodeOcclusion",
+          "shellIntegrityByVoxel"
+        ],
+        "rewardKey": "worldId:dungeonInstanceId:bossId:first_defeat",
+        "rewardCommit": "격파확정→보상 entitlement 저장→인벤토리 transfer journal commit. 재로드·수령중단 시 동일 key 재처리, 가방 부족 미수령 유지."
+      }
+    },
+    {
+      "id": "mine_carapace",
+      "name": "갱도 갑각수",
+      "environmentId": "ridge",
+      "dungeonId": "mining_fort",
+      "baselineTier": 3,
+      "entityType": "organic",
+      "civilization": false,
+      "appearance": "광물 분진으로 굳어진 등갑, 양옆의 굴착 집게, 낮은 배를 가진 굴 포식자.",
+      "combatRole": "돌진을 기둥으로 유도하거나 옆으로 돌아 측복부를 노출시키는 전투.",
+      "stats": {
+        "maxHp": 2340,
+        "massKg": 520,
+        "sizeM": {
+          "width": 4,
+          "height": 2.8,
+          "length": 4.8
+        },
+        "moveSpeedMps": 2.1,
+        "turnSpeedDegPerS": 75,
+        "contactDamageHp": 0,
+        "energyDamageMultipliers": {
+          "mechanical": 0.8,
+          "electrical": 1.15,
+          "thermal": 1,
+          "chemical": 0.9,
+          "magic": 1,
+          "divine": 1
+        },
+        "shellContract": {
+          "storage": "voxelShellIntegrity",
+          "bodyHpIndependent": true,
+          "baselineCoverageFraction": 0.35,
+          "construction": "각 보스 외피의 실체 복셀과 재질로 확정할 구현 계약. 입사EU 중 흡수분은 외피에만 기록, 침투분만 몸체HP에 전달. 외피 자동재생 없음."
+        }
+      },
+      "baselineRef": "gear_baseline_t3",
+      "balanceTarget": {
+        "effectiveSoloDps": 18,
+        "soloTtkS": 130.0,
+        "ttkIncludesRecovery": false,
+        "machineEffectiveDpsFactor": 1.6,
+        "machineTtkS": 81.25,
+        "interpretation": "정지 표적 DPS가 아닌 회피·이동·기본 저항을 반영한 유효 DPS. 실측 전 목표이며 회복이 성립하면 길어진다."
+      },
+      "parts": [
+        {
+          "id": "core",
+          "name": "측복부 갑각 연결부",
+          "breakThresholdHp": 281,
+          "damageMultiplier": 1.4,
+          "available": "지정 공격 recovery 중 또는 관련 기믹 비활성화 중",
+          "onBreak": "6초 비틀거림, 해당 핵심 기술1개 영구 사용불가. 남은3기술의 예고 +0.4초. 부위 자동 재생 없음.",
+          "staggerS": 6,
+          "extraWindupS": 0.4,
+          "disabledSkillIds": [
+            "mine_ring"
+          ],
+          "slowedSkillIds": [
+            "mine_claw",
+            "mine_charge",
+            "mine_shard"
+          ],
+          "fallbackSkillIds": [
+            "mine_claw",
+            "mine_shard"
+          ],
+          "exposureAfterBreak": "always_breached: 파손기관 자체가재생되는것이아니라갈라진외피뒤몸체가계속노출. 같은부위재파손보너스없음;후속phase의after_skill조건을기다리지않음."
+        },
+        {
+          "id": "locomotion",
+          "name": "이동 지지부",
+          "breakThresholdHp": 421,
+          "damageMultiplier": 1,
+          "available": "항상, 실제 부위 형상에 접촉했을 때",
+          "onBreak": "이동속도20%감소. 활공수는 공중시간 감소. 자동 복구 없음.",
+          "speedMultiplierAfterBreak": 0.8
+        }
+      ],
+      "lifeRecovery": {
+        "maxCalories": 1872,
+        "initialCalories": 1872,
+        "naturalRegenHpPerS": 5.85,
+        "caloriesPerHp": 2,
+        "noDamageDelayS": 12,
+        "restWindupS": 4,
+        "maxRegenDurationS": 8,
+        "combatRegenMaxHpFraction": 0.02,
+        "combatRegenMaxActions": 1,
+        "triggerHpFraction": 0.6,
+        "stopOnDamage": true,
+        "restRequires": "생존한 먹이/기관 기믹 근처, 정지 자세. 전투 중에는 피격 없는12초와4초 회복준비를 모두 만족. 전투 밖은 피격없는12초 후 자연회복 가능, 최대HP와칼로리량에서 정지.",
+        "activityCaloriesPerS": 0.1,
+        "offlineRegen": false
+      },
+      "energyReserves": [
+        {
+          "energyType": "mechanical",
+          "capacityEU": 800,
+          "initialEU": 800,
+          "rechargeActionS": 4,
+          "rechargeEU": 320,
+          "maxRechargeActionsPerEncounter": 6,
+          "source": "유한 체내 저장물의 전환",
+          "sourceCharges": 6,
+          "exposedMultiplierDuringRecharge": 1.25
+        }
+      ],
+      "phases": [
+        {
+          "id": "mine_carapace_p1",
+          "name": "갱도 봉쇄",
+          "hpFractionUpperInclusive": 1,
+          "hpFractionLowerExclusive": 0.7,
+          "onEnter": {
+            "durationS": 2,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "갱도 봉쇄: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "mine_claw",
+            "mine_shard",
+            "mine_claw",
+            "mine_charge"
+          ],
+          "interCastGapS": 1.4,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "전투회복/수리없음. 단계별 자세·기관노출·이동규칙을 적용.",
+          "state": {
+            "behavior": "face_target",
+            "moveSpeedMultiplier": 1,
+            "coreExposure": {
+              "mode": "after_skill",
+              "skillIds": [
+                "mine_claw"
+              ],
+              "durationS": 2.3
+            },
+            "combatRegenAllowed": false,
+            "chargePillarStaggerS": 3
+          },
+          "designIntent": "좁은 정면을 유지하며 집게 공격 후 측복부가 잠시 드러난다."
+        },
+        {
+          "id": "mine_carapace_p2",
+          "name": "등갑 균열",
+          "hpFractionUpperInclusive": 0.7,
+          "hpFractionLowerExclusive": 0.35,
+          "onEnter": {
+            "durationS": 2,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "등갑 균열: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "mine_charge",
+            "mine_shard",
+            "mine_ring",
+            "mine_claw"
+          ],
+          "interCastGapS": 1.2,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "2페이즈에서만 전투회복1회. 준비전12초무피격, 준비4초, 회복8초를지킨다.",
+          "state": {
+            "behavior": "seek_charge_alignment",
+            "moveSpeedMultiplier": 1,
+            "coreExposure": {
+              "mode": "after_skill",
+              "skillIds": [
+                "mine_charge"
+              ],
+              "durationS": 3
+            },
+            "combatRegenAllowed": true,
+            "chargePillarStaggerS": 6
+          },
+          "designIntent": "기둥으로 돌진축을 잡는다. 충돌 기절이 두 배로 길어지고 돌진 회복창을 통해 갑각 연결부를 공략할 수 있다."
+        },
+        {
+          "id": "mine_carapace_p3",
+          "name": "노출 굴진",
+          "hpFractionUpperInclusive": 0.35,
+          "hpFractionLowerExclusive": 0,
+          "onEnter": {
+            "durationS": 2,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "노출 굴진: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "mine_ring",
+            "mine_shard",
+            "mine_charge",
+            "mine_claw",
+            "mine_shard"
+          ],
+          "interCastGapS": 1.0,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "전투회복/수리없음. 단계별 자세·기관노출·이동규칙을 적용.",
+          "state": {
+            "behavior": "sideways_retreat",
+            "moveSpeedMultiplier": 0.8,
+            "coreExposure": {
+              "mode": "always",
+              "skillIds": [],
+              "durationS": 0
+            },
+            "combatRegenAllowed": false,
+            "chargePillarStaggerS": 6,
+            "bodyReactionOverrides": {
+              "mechanical": 1
+            }
+          },
+          "designIntent": "등갑이 벌어져 핵이 항상 노출되고 역학 피해 감소가 사라진다. 측면으로 물러나는 속도도 느려져 접근 방식이 바뀐다."
+        }
+      ],
+      "skills": [
+        {
+          "id": "mine_claw",
+          "name": "쌍집게 굴착",
+          "energyType": "mechanical",
+          "windupS": 1.5,
+          "activeS": 0.4,
+          "recoveryS": 2.3,
+          "cooldownS": 7,
+          "rangeM": 8,
+          "geometry": {
+            "kind": "oriented_box",
+            "widthM": 3.2,
+            "lengthM": 8,
+            "heightM": 2.4
+          },
+          "damage": {
+            "neutralTargetHp": 35,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 29.75,
+            "baselineHpFraction": 0.238
+          },
+          "energyCost": {
+            "amount": 53,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.660377
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "두 집게가 바닥에 정렬되고 정면 좁은 통로를 연속 절삭한다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "측면 집게 밖으로 이동. 1회 공격당 대상 1회 피해.",
+          "machineResponse": "진입 축을 바꾸거나 교체 가능한 전면판 사용.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 1.95,
+            "walkRequiredS": 0.9094,
+            "runRequiredS": 0.7063,
+            "walkMarginS": 0.5906,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "mine_charge",
+          "name": "광맥 돌진",
+          "energyType": "mechanical",
+          "windupS": 1.8,
+          "activeS": 1.2,
+          "recoveryS": 3,
+          "cooldownS": 12,
+          "rangeM": 18,
+          "geometry": {
+            "kind": "oriented_box",
+            "widthM": 3.4,
+            "lengthM": 18,
+            "heightM": 2.4
+          },
+          "damage": {
+            "neutralTargetHp": 53,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 45.05,
+            "baselineHpFraction": 0.3604
+          },
+          "energyCost": {
+            "amount": 80,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.6625
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "발로 바닥을 긁고 고정 방향으로 돌진. 취약 기둥 충돌 시 등갑 연결부 노출.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "밝아진 기둥으로 유도; 기둥 파괴가 필수는 아님.",
+          "machineResponse": "차량으로 유도 가능하나 무게 자체로 보스를 정지시키려면 실제 충돌 계산 필요.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 2.05,
+            "walkRequiredS": 0.9406,
+            "runRequiredS": 0.7271,
+            "walkMarginS": 0.8594,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "mine_shard",
+          "name": "등갑 파편",
+          "energyType": "mechanical",
+          "windupS": 1.5,
+          "activeS": 0.35,
+          "recoveryS": 2,
+          "cooldownS": 9,
+          "rangeM": 26,
+          "geometry": {
+            "kind": "sphere",
+            "radiusM": 1.8
+          },
+          "damage": {
+            "neutralTargetHp": 34,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 28.9,
+            "baselineHpFraction": 0.2312
+          },
+          "energyCost": {
+            "amount": 51,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.666667
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "등갑 틈에서 한 덩이의 광물 파편을 목표 위치로 발사한다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "벽이나 장애물 뒤로 이동; 착탄 위치는 예고 시작에 고정.",
+          "machineResponse": "비행·원거리 대상도 같은 탄속과 예고 적용.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 2.15,
+            "walkRequiredS": 0.9719,
+            "runRequiredS": 0.7479,
+            "walkMarginS": 0.5281,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "mine_ring",
+          "name": "굴진 진동",
+          "energyType": "mechanical",
+          "windupS": 1.8,
+          "activeS": 0.5,
+          "recoveryS": 2.8,
+          "cooldownS": 14,
+          "rangeM": 10,
+          "geometry": {
+            "kind": "annular_cylinder",
+            "innerRadiusM": 4,
+            "outerRadiusM": 6.4,
+            "heightM": 1
+          },
+          "damage": {
+            "neutralTargetHp": 44,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 37.4,
+            "baselineHpFraction": 0.2992
+          },
+          "energyCost": {
+            "amount": 66,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.666667
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "집게를 박아 반경 4~6.4m의 바닥을 들썩인다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "몸 가까이 또는 고리 밖으로 이동.",
+          "machineResponse": "낮게 달린 바퀴만 피해받을 수 있음. 떠 있는 구조물은 회피 가능.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 1.55,
+            "walkRequiredS": 0.7844,
+            "runRequiredS": 0.6229,
+            "walkMarginS": 1.0156,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        }
+      ],
+      "arena": {
+        "owner": "structures",
+        "localOrigin": "boss_arena_floor_center",
+        "widthM": 28,
+        "depthM": 28,
+        "heightM": 12,
+        "bossSpawnM": [
+          0,
+          0,
+          4
+        ],
+        "openExitCount": 2,
+        "exitWidthM": 6,
+        "exitHeightM": 5,
+        "clearCrossWidthM": 8,
+        "protectedEscapeStripZ": [
+          -3,
+          3
+        ],
+        "gimmicks": [
+          {
+            "id": "mine_brittle_pillar_west",
+            "positionM": [
+              -8,
+              0,
+              8
+            ]
+          },
+          {
+            "id": "mine_brittle_pillar_east",
+            "positionM": [
+              8,
+              0,
+              8
+            ]
+          }
+        ],
+        "gimmickInteractionS": 1,
+        "gimmickUsesEach": 1,
+        "gimmickReset": "횟수·파괴 상태 영속. 재로드/탈주로 복구하지 않음. 소모돼도 일반 회피·약점으로 공략 가능.",
+        "gimmickEffect": "기둥 돌진충돌 또는 채굴 파괴 시등갑핵6초노출. 파괴잔해는 출구띠로 떨어지지 않음.",
+        "gimmickBreakHp": 54,
+        "gimmickContactCollisionDamageHp": 0,
+        "geometryReference": "mining_fort:arena"
+      },
+      "persistence": {
+        "bossCountPerDungeon": 1,
+        "summonedCreatureLimit": 0,
+        "simultaneousPersistentHazards": 1,
+        "leashBeyondArenaM": 12,
+        "disengageDelayS": 15,
+        "stateOnDisengage": "위치만 안전한 둥지로 복귀. HP·칼로리·부위·에너지·수리소모 유지; 자동 전량회복 없음.",
+        "onUnload": "교전·투사체·상태 타이머 정지, 오프라인 공격/회복 없음. 저장된 시전은 재개 전 동일한 전체 예고를 다시 표시, 이미 차감한 비용 재차감하지 않음.",
+        "onDeath": "즉시 defeated와 rewardTransactionId를 같은 원자적 트랜잭션에 기록. 공격·위험 제거. 보스와 재료 회수 가능 잔해를 중복 생성하지 않음.",
+        "retry": "미격파 보스만 남은 상태로 재도전. 격파 후 같은 인스턴스 재생성 없음; 다른 던전 인스턴스는 별개.",
+        "deathRecovery": "플레이어 사망 보관은 보스 상태와 별개 영속. 10m 요정 회수, 여러 보관 및 가방 초과분 보존.",
+        "rewardRef": "reward_mining_fort",
+        "saveFields": [
+          "instanceId",
+          "bossId",
+          "hp",
+          "phaseId",
+          "phaseEntered",
+          "position",
+          "parts",
+          "calories",
+          "energyReserves",
+          "recoveryCharges",
+          "gimmickStates",
+          "castId",
+          "castState",
+          "cooldownRemaining",
+          "sequenceIndex",
+          "lastDamageElapsed",
+          "defeated",
+          "rewardTransactionId",
+          "rewardClaimedStacks",
+          "regenActionSpent",
+          "repairSupplies",
+          "sourceChargesByEnergy",
+          "flightState",
+          "airborneElapsedS",
+          "rewardUnclaimed",
+          "phaseStateTimers",
+          "completedAttackCount",
+          "phaseWaterDepth",
+          "growthNodeOcclusion",
+          "shellIntegrityByVoxel"
+        ],
+        "rewardKey": "worldId:dungeonInstanceId:bossId:first_defeat",
+        "rewardCommit": "격파확정→보상 entitlement 저장→인벤토리 transfer journal commit. 재로드·수령중단 시 동일 key 재처리, 가방 부족 미수령 유지."
+      }
+    },
+    {
+      "id": "sluice_acidworm",
+      "name": "수문 산성충",
+      "environmentId": "marsh",
+      "dungeonId": "floodworks",
+      "baselineTier": 4,
+      "entityType": "organic",
+      "civilization": false,
+      "appearance": "얕은 수로를 이동하는 분절 몸통과 목 아래 산성낭. 산성낭은 공격 전 팽창한다.",
+      "combatRole": "배수 밸브로 액체 위험을 줄이고 긴 몸의 회전 사각을 이용한다.",
+      "stats": {
+        "maxHp": 3780,
+        "massKg": 430,
+        "sizeM": {
+          "width": 3.6,
+          "height": 2.6,
+          "length": 7
+        },
+        "moveSpeedMps": 2.5,
+        "turnSpeedDegPerS": 75,
+        "contactDamageHp": 0,
+        "energyDamageMultipliers": {
+          "mechanical": 1,
+          "electrical": 1.2,
+          "thermal": 1,
+          "chemical": 0.55,
+          "magic": 1,
+          "divine": 1
+        },
+        "shellContract": {
+          "storage": "voxelShellIntegrity",
+          "bodyHpIndependent": true,
+          "baselineCoverageFraction": 0.35,
+          "construction": "각 보스 외피의 실체 복셀과 재질로 확정할 구현 계약. 입사EU 중 흡수분은 외피에만 기록, 침투분만 몸체HP에 전달. 외피 자동재생 없음."
+        }
+      },
+      "baselineRef": "gear_baseline_t4",
+      "balanceTarget": {
+        "effectiveSoloDps": 27,
+        "soloTtkS": 140.0,
+        "ttkIncludesRecovery": false,
+        "machineEffectiveDpsFactor": 1.6,
+        "machineTtkS": 87.5,
+        "interpretation": "정지 표적 DPS가 아닌 회피·이동·기본 저항을 반영한 유효 DPS. 실측 전 목표이며 회복이 성립하면 길어진다."
+      },
+      "parts": [
+        {
+          "id": "core",
+          "name": "목 아래 산성낭",
+          "breakThresholdHp": 454,
+          "damageMultiplier": 1.4,
+          "available": "지정 공격 recovery 중 또는 관련 기믹 비활성화 중",
+          "onBreak": "6초 비틀거림, 해당 핵심 기술1개 영구 사용불가. 남은3기술의 예고 +0.4초. 부위 자동 재생 없음.",
+          "staggerS": 6,
+          "extraWindupS": 0.4,
+          "disabledSkillIds": [
+            "acid_glob"
+          ],
+          "slowedSkillIds": [
+            "acid_spit",
+            "acid_pool",
+            "acid_tail"
+          ],
+          "fallbackSkillIds": [
+            "acid_spit",
+            "acid_tail"
+          ],
+          "exposureAfterBreak": "always_breached: 파손기관 자체가재생되는것이아니라갈라진외피뒤몸체가계속노출. 같은부위재파손보너스없음;후속phase의after_skill조건을기다리지않음."
+        },
+        {
+          "id": "locomotion",
+          "name": "이동 지지부",
+          "breakThresholdHp": 680,
+          "damageMultiplier": 1,
+          "available": "항상, 실제 부위 형상에 접촉했을 때",
+          "onBreak": "이동속도20%감소. 활공수는 공중시간 감소. 자동 복구 없음.",
+          "speedMultiplierAfterBreak": 0.8
+        }
+      ],
+      "lifeRecovery": {
+        "maxCalories": 3024,
+        "initialCalories": 3024,
+        "naturalRegenHpPerS": 9.45,
+        "caloriesPerHp": 2,
+        "noDamageDelayS": 12,
+        "restWindupS": 4,
+        "maxRegenDurationS": 8,
+        "combatRegenMaxHpFraction": 0.02,
+        "combatRegenMaxActions": 1,
+        "triggerHpFraction": 0.6,
+        "stopOnDamage": true,
+        "restRequires": "생존한 먹이/기관 기믹 근처, 정지 자세. 전투 중에는 피격 없는12초와4초 회복준비를 모두 만족. 전투 밖은 피격없는12초 후 자연회복 가능, 최대HP와칼로리량에서 정지.",
+        "activityCaloriesPerS": 0.1,
+        "offlineRegen": false
+      },
+      "energyReserves": [
+        {
+          "energyType": "chemical",
+          "capacityEU": 720,
+          "initialEU": 720,
+          "rechargeActionS": 4,
+          "rechargeEU": 288,
+          "maxRechargeActionsPerEncounter": 6,
+          "source": "유한 체내 저장물의 전환",
+          "sourceCharges": 6,
+          "exposedMultiplierDuringRecharge": 1.25
+        },
+        {
+          "energyType": "mechanical",
+          "capacityEU": 780,
+          "initialEU": 780,
+          "rechargeActionS": 4,
+          "rechargeEU": 312,
+          "maxRechargeActionsPerEncounter": 6,
+          "source": "유한 체내 저장물의 전환",
+          "sourceCharges": 6,
+          "exposedMultiplierDuringRecharge": 1.25
+        }
+      ],
+      "phases": [
+        {
+          "id": "sluice_acidworm_p1",
+          "name": "수문 잠복",
+          "hpFractionUpperInclusive": 1,
+          "hpFractionLowerExclusive": 0.65,
+          "onEnter": {
+            "durationS": 2,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "수문 잠복: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "acid_spit",
+            "acid_tail",
+            "acid_spit",
+            "acid_pool"
+          ],
+          "interCastGapS": 1.4,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "전투회복/수리없음. 단계별 자세·기관노출·이동규칙을 적용.",
+          "state": {
+            "behavior": "follow_shallow_channel",
+            "moveSpeedMultiplier": 1,
+            "coreExposure": {
+              "mode": "after_skill",
+              "skillIds": [
+                "acid_spit"
+              ],
+              "durationS": 2.2
+            },
+            "combatRegenAllowed": false,
+            "northWaterDepthM": 0.2,
+            "northWaterPlayerSpeedMultiplier": 1
+          },
+          "designIntent": "얕은 수로를 따라 이동하며 분사 후 산성낭이 열린다."
+        },
+        {
+          "id": "sluice_acidworm_p2",
+          "name": "산성낭 팽창",
+          "hpFractionUpperInclusive": 0.65,
+          "hpFractionLowerExclusive": 0.3,
+          "onEnter": {
+            "durationS": 2,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "산성낭 팽창: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "acid_pool",
+            "acid_tail",
+            "acid_glob",
+            "acid_spit"
+          ],
+          "interCastGapS": 1.2,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "2페이즈에서만 전투회복1회. 준비전12초무피격, 준비4초, 회복8초를지킨다.",
+          "state": {
+            "behavior": "hold_north_basin",
+            "moveSpeedMultiplier": 1,
+            "coreExposure": {
+              "mode": "after_skill",
+              "skillIds": [
+                "acid_spit",
+                "acid_glob"
+              ],
+              "durationS": 2.2
+            },
+            "combatRegenAllowed": true,
+            "northWaterDepthM": 0.5,
+            "northWaterPlayerSpeedMultiplier": 0.85,
+            "drainValveClearsPhaseWater": true
+          },
+          "designIntent": "북쪽 수조만 수심0.5m가 되고 그 안의 보행속도가15% 줄어든다. 출구 연결띠는 마르며 밸브로 배수할 수 있다. 포말탄 후에도 산성낭이 열린다."
+        },
+        {
+          "id": "sluice_acidworm_p3",
+          "name": "분절 광폭",
+          "hpFractionUpperInclusive": 0.3,
+          "hpFractionLowerExclusive": 0,
+          "onEnter": {
+            "durationS": 2,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "분절 광폭: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "acid_glob",
+            "acid_tail",
+            "acid_pool",
+            "acid_spit",
+            "acid_tail"
+          ],
+          "interCastGapS": 1.0,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "전투회복/수리없음. 단계별 자세·기관노출·이동규칙을 적용.",
+          "state": {
+            "behavior": "leave_drained_basin",
+            "moveSpeedMultiplier": 0.9,
+            "coreExposure": {
+              "mode": "always",
+              "skillIds": [],
+              "durationS": 0
+            },
+            "combatRegenAllowed": false,
+            "northWaterDepthM": 0,
+            "northWaterPlayerSpeedMultiplier": 1
+          },
+          "designIntent": "수조가 빠지고 물 밖으로 나온 분절 몸이 느려진다. 산성낭은 계속 노출되며 회복하지 않는다."
+        }
+      ],
+      "skills": [
+        {
+          "id": "acid_spit",
+          "name": "산성낭 분사",
+          "energyType": "chemical",
+          "windupS": 1.6,
+          "activeS": 0.6,
+          "recoveryS": 2.2,
+          "cooldownS": 8,
+          "rangeM": 20,
+          "geometry": {
+            "kind": "oriented_box",
+            "widthM": 3,
+            "lengthM": 20,
+            "heightM": 2.4
+          },
+          "damage": {
+            "neutralTargetHp": 48,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 37.44,
+            "baselineHpFraction": 0.2582
+          },
+          "energyCost": {
+            "amount": 72,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.666667
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "목 아래 낭이 부풀며 고정 직선으로 산을 분사한다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "측면 이동. 산성낭 타격으로 해당 공격 중단 가능.",
+          "machineResponse": "내식 전면판 또는 옆으로 회전; 유체 용기 노출은 손상 위험.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 1.85,
+            "walkRequiredS": 0.8781,
+            "runRequiredS": 0.6854,
+            "walkMarginS": 0.7219,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "acid_pool",
+          "name": "침전 웅덩이",
+          "energyType": "chemical",
+          "windupS": 1.8,
+          "activeS": 4,
+          "recoveryS": 2.3,
+          "cooldownS": 13,
+          "rangeM": 22,
+          "geometry": {
+            "kind": "cylinder",
+            "radiusM": 2.6,
+            "heightM": 1.2
+          },
+          "damage": {
+            "neutralTargetHp": 45,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 35.1,
+            "baselineHpFraction": 0.2421
+          },
+          "energyCost": {
+            "amount": 68,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.661765
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "고정 위치에 산성 유체를 뱉어 짧게 남긴다. 출구 통로에는 놓지 않는다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "원 밖으로 이동; 배수 밸브로 현재 웅덩이 제거.",
+          "machineResponse": "차륜·착륙 다리의 접촉을 검사. 비행으로 건너갈 수 있음.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 2.95,
+            "walkRequiredS": 1.2219,
+            "runRequiredS": 0.9146,
+            "walkMarginS": 0.5781,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "acid_tail",
+          "name": "분절 꼬리치기",
+          "energyType": "mechanical",
+          "windupS": 1.6,
+          "activeS": 0.35,
+          "recoveryS": 2.5,
+          "cooldownS": 9,
+          "rangeM": 8,
+          "geometry": {
+            "kind": "annular_cylinder",
+            "innerRadiusM": 3,
+            "outerRadiusM": 5.4,
+            "heightM": 1
+          },
+          "damage": {
+            "neutralTargetHp": 52,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 40.56,
+            "baselineHpFraction": 0.2797
+          },
+          "energyCost": {
+            "amount": 78,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.666667
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "몸통이 둥글게 휘며 반경 3~5.4m를 꼬리로 쓸어낸다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "몸 안쪽이나 바깥으로 이동.",
+          "machineResponse": "넓은 차체는 피해 부위를 분산하지만 대상당1회 총량 제한.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 1.55,
+            "walkRequiredS": 0.7844,
+            "runRequiredS": 0.6229,
+            "walkMarginS": 0.8156,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "acid_glob",
+          "name": "수문 포말탄",
+          "energyType": "chemical",
+          "windupS": 1.5,
+          "activeS": 0.3,
+          "recoveryS": 2,
+          "cooldownS": 10,
+          "rangeM": 28,
+          "geometry": {
+            "kind": "sphere",
+            "radiusM": 1.8
+          },
+          "damage": {
+            "neutralTargetHp": 46,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 35.88,
+            "baselineHpFraction": 0.2474
+          },
+          "energyCost": {
+            "amount": 69,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.666667
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "꼬리 끝의 거품이 빛난 뒤 목표의 3차원 위치로 포말탄을 발사한다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "고정 위치에서 벗어나거나 엄폐.",
+          "machineResponse": "공중 대상에 유효하나 추적·즉발·무한 사거리 없음.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 2.15,
+            "walkRequiredS": 0.9719,
+            "runRequiredS": 0.7479,
+            "walkMarginS": 0.5281,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        }
+      ],
+      "arena": {
+        "owner": "structures",
+        "localOrigin": "boss_arena_floor_center",
+        "widthM": 28,
+        "depthM": 28,
+        "heightM": 12,
+        "bossSpawnM": [
+          0,
+          0,
+          4
+        ],
+        "openExitCount": 2,
+        "exitWidthM": 6,
+        "exitHeightM": 5,
+        "clearCrossWidthM": 8,
+        "protectedEscapeStripZ": [
+          -3,
+          3
+        ],
+        "gimmicks": [
+          {
+            "id": "marsh_drain_valve_west",
+            "positionM": [
+              -9,
+              0,
+              9
+            ]
+          },
+          {
+            "id": "marsh_drain_valve_east",
+            "positionM": [
+              9,
+              0,
+              9
+            ]
+          }
+        ],
+        "gimmickInteractionS": 1,
+        "gimmickUsesEach": 1,
+        "gimmickReset": "횟수·파괴 상태 영속. 재로드/탈주로 복구하지 않음. 소모돼도 일반 회피·약점으로 공략 가능.",
+        "gimmickEffect": "배수밸브 사용 시현재 웅덩이 제거, 다음 웅덩이1회 취소.",
+        "gimmickBreakHp": 81,
+        "gimmickContactCollisionDamageHp": 0,
+        "geometryReference": "floodworks:arena",
+        "phaseWaterRegion": {
+          "minM": [
+            -10,
+            0,
+            5
+          ],
+          "maxM": [
+            10,
+            0.5,
+            11
+          ],
+          "damageHp": 0,
+          "escapeStripUnaffected": true
+        }
+      },
+      "persistence": {
+        "bossCountPerDungeon": 1,
+        "summonedCreatureLimit": 0,
+        "simultaneousPersistentHazards": 1,
+        "leashBeyondArenaM": 12,
+        "disengageDelayS": 15,
+        "stateOnDisengage": "위치만 안전한 둥지로 복귀. HP·칼로리·부위·에너지·수리소모 유지; 자동 전량회복 없음.",
+        "onUnload": "교전·투사체·상태 타이머 정지, 오프라인 공격/회복 없음. 저장된 시전은 재개 전 동일한 전체 예고를 다시 표시, 이미 차감한 비용 재차감하지 않음.",
+        "onDeath": "즉시 defeated와 rewardTransactionId를 같은 원자적 트랜잭션에 기록. 공격·위험 제거. 보스와 재료 회수 가능 잔해를 중복 생성하지 않음.",
+        "retry": "미격파 보스만 남은 상태로 재도전. 격파 후 같은 인스턴스 재생성 없음; 다른 던전 인스턴스는 별개.",
+        "deathRecovery": "플레이어 사망 보관은 보스 상태와 별개 영속. 10m 요정 회수, 여러 보관 및 가방 초과분 보존.",
+        "rewardRef": "reward_floodworks",
+        "saveFields": [
+          "instanceId",
+          "bossId",
+          "hp",
+          "phaseId",
+          "phaseEntered",
+          "position",
+          "parts",
+          "calories",
+          "energyReserves",
+          "recoveryCharges",
+          "gimmickStates",
+          "castId",
+          "castState",
+          "cooldownRemaining",
+          "sequenceIndex",
+          "lastDamageElapsed",
+          "defeated",
+          "rewardTransactionId",
+          "rewardClaimedStacks",
+          "regenActionSpent",
+          "repairSupplies",
+          "sourceChargesByEnergy",
+          "flightState",
+          "airborneElapsedS",
+          "rewardUnclaimed",
+          "phaseStateTimers",
+          "completedAttackCount",
+          "phaseWaterDepth",
+          "growthNodeOcclusion",
+          "shellIntegrityByVoxel"
+        ],
+        "rewardKey": "worldId:dungeonInstanceId:bossId:first_defeat",
+        "rewardCommit": "격파확정→보상 entitlement 저장→인벤토리 transfer journal commit. 재로드·수령중단 시 동일 key 재처리, 가방 부족 미수령 유지."
+      }
+    },
+    {
+      "id": "furnace_carapace",
+      "name": "용광 등갑수",
+      "environmentId": "thermal",
+      "dungeonId": "geothermal_foundry",
+      "baselineTier": 5,
+      "entityType": "organic",
+      "civilization": false,
+      "appearance": "내열 등갑 사이에 밝아지는 배열 기관과 측면 배기구가 있는 육중한 생물.",
+      "combatRole": "가열 공격 후 배기구를 공략하고 냉각 밸브로 안전한 접근 시간을 만든다.",
+      "stats": {
+        "maxHp": 6000,
+        "massKg": 850,
+        "sizeM": {
+          "width": 4.6,
+          "height": 3.2,
+          "length": 5.2
+        },
+        "moveSpeedMps": 2.1,
+        "turnSpeedDegPerS": 75,
+        "contactDamageHp": 0,
+        "energyDamageMultipliers": {
+          "mechanical": 0.9,
+          "electrical": 1,
+          "thermal": 0.5,
+          "chemical": 1.15,
+          "magic": 1,
+          "divine": 1
+        },
+        "shellContract": {
+          "storage": "voxelShellIntegrity",
+          "bodyHpIndependent": true,
+          "baselineCoverageFraction": 0.35,
+          "construction": "각 보스 외피의 실체 복셀과 재질로 확정할 구현 계약. 입사EU 중 흡수분은 외피에만 기록, 침투분만 몸체HP에 전달. 외피 자동재생 없음."
+        }
+      },
+      "baselineRef": "gear_baseline_t5",
+      "balanceTarget": {
+        "effectiveSoloDps": 40,
+        "soloTtkS": 150.0,
+        "ttkIncludesRecovery": false,
+        "machineEffectiveDpsFactor": 1.6,
+        "machineTtkS": 93.75,
+        "interpretation": "정지 표적 DPS가 아닌 회피·이동·기본 저항을 반영한 유효 DPS. 실측 전 목표이며 회복이 성립하면 길어진다."
+      },
+      "parts": [
+        {
+          "id": "core",
+          "name": "측면 배기구",
+          "breakThresholdHp": 720,
+          "damageMultiplier": 1.4,
+          "available": "지정 공격 recovery 중 또는 관련 기믹 비활성화 중",
+          "onBreak": "6초 비틀거림, 해당 핵심 기술1개 영구 사용불가. 남은3기술의 예고 +0.4초. 부위 자동 재생 없음.",
+          "staggerS": 6,
+          "extraWindupS": 0.4,
+          "disabledSkillIds": [
+            "furnace_ring"
+          ],
+          "slowedSkillIds": [
+            "furnace_breath",
+            "furnace_impact",
+            "furnace_cinder"
+          ],
+          "fallbackSkillIds": [
+            "furnace_breath",
+            "furnace_cinder"
+          ],
+          "exposureAfterBreak": "always_breached: 파손기관 자체가재생되는것이아니라갈라진외피뒤몸체가계속노출. 같은부위재파손보너스없음;후속phase의after_skill조건을기다리지않음."
+        },
+        {
+          "id": "locomotion",
+          "name": "이동 지지부",
+          "breakThresholdHp": 1080,
+          "damageMultiplier": 1,
+          "available": "항상, 실제 부위 형상에 접촉했을 때",
+          "onBreak": "이동속도20%감소. 활공수는 공중시간 감소. 자동 복구 없음.",
+          "speedMultiplierAfterBreak": 0.8
+        }
+      ],
+      "lifeRecovery": {
+        "maxCalories": 4800,
+        "initialCalories": 4800,
+        "naturalRegenHpPerS": 15.0,
+        "caloriesPerHp": 2,
+        "noDamageDelayS": 12,
+        "restWindupS": 4,
+        "maxRegenDurationS": 8,
+        "combatRegenMaxHpFraction": 0.02,
+        "combatRegenMaxActions": 1,
+        "triggerHpFraction": 0.6,
+        "stopOnDamage": true,
+        "restRequires": "생존한 먹이/기관 기믹 근처, 정지 자세. 전투 중에는 피격 없는12초와4초 회복준비를 모두 만족. 전투 밖은 피격없는12초 후 자연회복 가능, 최대HP와칼로리량에서 정지.",
+        "activityCaloriesPerS": 0.1,
+        "offlineRegen": false
+      },
+      "energyReserves": [
+        {
+          "energyType": "mechanical",
+          "capacityEU": 1200,
+          "initialEU": 1200,
+          "rechargeActionS": 4,
+          "rechargeEU": 480,
+          "maxRechargeActionsPerEncounter": 6,
+          "source": "유한 체내 저장물의 전환",
+          "sourceCharges": 6,
+          "exposedMultiplierDuringRecharge": 1.25
+        },
+        {
+          "energyType": "thermal",
+          "capacityEU": 1070,
+          "initialEU": 1070,
+          "rechargeActionS": 4,
+          "rechargeEU": 428,
+          "maxRechargeActionsPerEncounter": 6,
+          "source": "유한 체내 저장물의 전환",
+          "sourceCharges": 6,
+          "exposedMultiplierDuringRecharge": 1.25
+        }
+      ],
+      "phases": [
+        {
+          "id": "furnace_carapace_p1",
+          "name": "축열",
+          "hpFractionUpperInclusive": 1,
+          "hpFractionLowerExclusive": 0.7,
+          "onEnter": {
+            "durationS": 2,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "축열: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "furnace_breath",
+            "furnace_cinder",
+            "furnace_breath",
+            "furnace_impact"
+          ],
+          "interCastGapS": 1.4,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "전투회복/수리없음. 단계별 자세·기관노출·이동규칙을 적용.",
+          "state": {
+            "behavior": "heat_cycle",
+            "moveSpeedMultiplier": 1,
+            "coreExposure": {
+              "mode": "after_attack_count",
+              "completedAttackCount": 3,
+              "durationS": 3
+            },
+            "combatRegenAllowed": false
+          },
+          "designIntent": "공격3회 후 3초 배열한다. 배기구가 열리는 주기를 관찰하는 단계다."
+        },
+        {
+          "id": "furnace_carapace_p2",
+          "name": "과열 배기",
+          "hpFractionUpperInclusive": 0.7,
+          "hpFractionLowerExclusive": 0.3,
+          "onEnter": {
+            "durationS": 2.5,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "과열 배기: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "furnace_impact",
+            "furnace_cinder",
+            "furnace_ring",
+            "furnace_breath"
+          ],
+          "interCastGapS": 1.2,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "2페이즈에서만 전투회복1회. 준비전12초무피격, 준비4초, 회복8초를지킨다.",
+          "state": {
+            "behavior": "overheat_vent",
+            "moveSpeedMultiplier": 0.9,
+            "coreExposure": {
+              "mode": "after_attack_count",
+              "completedAttackCount": 2,
+              "durationS": 4
+            },
+            "combatRegenAllowed": true
+          },
+          "designIntent": "과열되어 공격2회마다 4초 배열한다. 냉각밸브는 고리 공격을 취소하고 별도 약점창을 만든다."
+        },
+        {
+          "id": "furnace_carapace_p3",
+          "name": "등갑 개방",
+          "hpFractionUpperInclusive": 0.3,
+          "hpFractionLowerExclusive": 0,
+          "onEnter": {
+            "durationS": 3,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "등갑 개방: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "furnace_ring",
+            "furnace_cinder",
+            "furnace_impact",
+            "furnace_breath",
+            "furnace_cinder"
+          ],
+          "interCastGapS": 1.0,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "전투회복/수리없음. 단계별 자세·기관노출·이동규칙을 적용.",
+          "state": {
+            "behavior": "open_vent_crawl",
+            "moveSpeedMultiplier": 0.75,
+            "coreExposure": {
+              "mode": "always",
+              "skillIds": [],
+              "durationS": 0
+            },
+            "combatRegenAllowed": false,
+            "bodyReactionOverrides": {
+              "thermal": 0.8
+            }
+          },
+          "designIntent": "배기구를 닫지 못하고 핵이 항상 노출된다. 움직임이25% 느려지고 열 저항도 완화된다."
+        }
+      ],
+      "skills": [
+        {
+          "id": "furnace_breath",
+          "name": "배기 화염",
+          "energyType": "thermal",
+          "windupS": 1.8,
+          "activeS": 0.7,
+          "recoveryS": 2.6,
+          "cooldownS": 9,
+          "rangeM": 22,
+          "geometry": {
+            "kind": "oriented_box",
+            "widthM": 3.6,
+            "lengthM": 22,
+            "heightM": 2.4
+          },
+          "damage": {
+            "neutralTargetHp": 66,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 47.52,
+            "baselineHpFraction": 0.2795
+          },
+          "energyCost": {
+            "amount": 99,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.666667
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "측면 배기구가 적열하고 고정 방향으로 화염을 내보낸다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "정면을 벗어나 배기구가 열린 동안 공격.",
+          "machineResponse": "내열 장갑이나 측면 회피. 화염이 벽을 통과하지 않음.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 2.15,
+            "walkRequiredS": 0.9719,
+            "runRequiredS": 0.7479,
+            "walkMarginS": 0.8281,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "furnace_impact",
+          "name": "용광 압쇄",
+          "energyType": "mechanical",
+          "windupS": 1.8,
+          "activeS": 0.35,
+          "recoveryS": 2.7,
+          "cooldownS": 8,
+          "rangeM": 7,
+          "geometry": {
+            "kind": "cylinder",
+            "radiusM": 3,
+            "heightM": 1.2
+          },
+          "damage": {
+            "neutralTargetHp": 80,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 57.6,
+            "baselineHpFraction": 0.3388
+          },
+          "energyCost": {
+            "amount": 120,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.666667
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "등갑을 들어 고정 지점을 강하게 내려찍는다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "원 밖으로 걷기; 동작 종료 후 복부 노출.",
+          "machineResponse": "장갑만으로 버티기보다 충격 연결부를 보호.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 3.35,
+            "walkRequiredS": 1.3469,
+            "runRequiredS": 0.9979,
+            "walkMarginS": 0.4531,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "furnace_cinder",
+          "name": "비산 용재",
+          "energyType": "thermal",
+          "windupS": 1.6,
+          "activeS": 0.3,
+          "recoveryS": 2.0,
+          "cooldownS": 10,
+          "rangeM": 28,
+          "geometry": {
+            "kind": "sphere",
+            "radiusM": 2.0
+          },
+          "damage": {
+            "neutralTargetHp": 59,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 42.48,
+            "baselineHpFraction": 0.2499
+          },
+          "energyCost": {
+            "amount": 89,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.662921
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "등갑 틈이 한 곳으로 모여 빛나고 용재 한 덩이를 발사한다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "예고된 위치에서 벗어나거나 장애물 이용.",
+          "machineResponse": "항공기에도 같은 고정점 조준 적용.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 2.35,
+            "walkRequiredS": 1.0344,
+            "runRequiredS": 0.7896,
+            "walkMarginS": 0.5656,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "furnace_ring",
+          "name": "가열 고리",
+          "energyType": "thermal",
+          "windupS": 1.8,
+          "activeS": 0.5,
+          "recoveryS": 3,
+          "cooldownS": 15,
+          "rangeM": 10,
+          "geometry": {
+            "kind": "annular_cylinder",
+            "innerRadiusM": 4,
+            "outerRadiusM": 6.4,
+            "heightM": 1
+          },
+          "damage": {
+            "neutralTargetHp": 71,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 51.12,
+            "baselineHpFraction": 0.3007
+          },
+          "energyCost": {
+            "amount": 107,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.663551
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "반경 4~6.4m 바닥을 가열한다. 냉각 밸브 사용 시 이번 고리를 취소한다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "안쪽·바깥쪽 이동 또는 냉각 밸브 1초 상호작용.",
+          "machineResponse": "바닥에서1m보다 높은 비접촉 부품은 피격되지 않음.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 1.55,
+            "walkRequiredS": 0.7844,
+            "runRequiredS": 0.6229,
+            "walkMarginS": 1.0156,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        }
+      ],
+      "arena": {
+        "owner": "structures",
+        "localOrigin": "boss_arena_floor_center",
+        "widthM": 32,
+        "depthM": 32,
+        "heightM": 14,
+        "bossSpawnM": [
+          0,
+          0,
+          4
+        ],
+        "openExitCount": 2,
+        "exitWidthM": 6,
+        "exitHeightM": 5,
+        "clearCrossWidthM": 8,
+        "protectedEscapeStripZ": [
+          -3,
+          3
+        ],
+        "gimmicks": [
+          {
+            "id": "thermal_cooling_valve_west",
+            "positionM": [
+              -10,
+              0,
+              10
+            ]
+          },
+          {
+            "id": "thermal_cooling_valve_east",
+            "positionM": [
+              10,
+              0,
+              10
+            ]
+          }
+        ],
+        "gimmickInteractionS": 1,
+        "gimmickUsesEach": 1,
+        "gimmickReset": "횟수·파괴 상태 영속. 재로드/탈주로 복구하지 않음. 소모돼도 일반 회피·약점으로 공략 가능.",
+        "gimmickEffect": "냉각밸브 사용 시현재/다음 가열고리1회 취소, 배기구6초노출.",
+        "gimmickBreakHp": 120,
+        "gimmickContactCollisionDamageHp": 0,
+        "geometryReference": "geothermal_foundry:arena"
+      },
+      "persistence": {
+        "bossCountPerDungeon": 1,
+        "summonedCreatureLimit": 0,
+        "simultaneousPersistentHazards": 1,
+        "leashBeyondArenaM": 12,
+        "disengageDelayS": 15,
+        "stateOnDisengage": "위치만 안전한 둥지로 복귀. HP·칼로리·부위·에너지·수리소모 유지; 자동 전량회복 없음.",
+        "onUnload": "교전·투사체·상태 타이머 정지, 오프라인 공격/회복 없음. 저장된 시전은 재개 전 동일한 전체 예고를 다시 표시, 이미 차감한 비용 재차감하지 않음.",
+        "onDeath": "즉시 defeated와 rewardTransactionId를 같은 원자적 트랜잭션에 기록. 공격·위험 제거. 보스와 재료 회수 가능 잔해를 중복 생성하지 않음.",
+        "retry": "미격파 보스만 남은 상태로 재도전. 격파 후 같은 인스턴스 재생성 없음; 다른 던전 인스턴스는 별개.",
+        "deathRecovery": "플레이어 사망 보관은 보스 상태와 별개 영속. 10m 요정 회수, 여러 보관 및 가방 초과분 보존.",
+        "rewardRef": "reward_geothermal_foundry",
+        "saveFields": [
+          "instanceId",
+          "bossId",
+          "hp",
+          "phaseId",
+          "phaseEntered",
+          "position",
+          "parts",
+          "calories",
+          "energyReserves",
+          "recoveryCharges",
+          "gimmickStates",
+          "castId",
+          "castState",
+          "cooldownRemaining",
+          "sequenceIndex",
+          "lastDamageElapsed",
+          "defeated",
+          "rewardTransactionId",
+          "rewardClaimedStacks",
+          "regenActionSpent",
+          "repairSupplies",
+          "sourceChargesByEnergy",
+          "flightState",
+          "airborneElapsedS",
+          "rewardUnclaimed",
+          "phaseStateTimers",
+          "completedAttackCount",
+          "phaseWaterDepth",
+          "growthNodeOcclusion",
+          "shellIntegrityByVoxel"
+        ],
+        "rewardKey": "worldId:dungeonInstanceId:bossId:first_defeat",
+        "rewardCommit": "격파확정→보상 entitlement 저장→인벤토리 transfer journal commit. 재로드·수령중단 시 동일 key 재처리, 가방 부족 미수령 유지."
+      }
+    },
+    {
+      "id": "spire_glider",
+      "name": "첨탑 활공수",
+      "environmentId": "coast",
+      "dungeonId": "cliff_observatory",
+      "baselineTier": 5,
+      "entityType": "organic",
+      "civilization": false,
+      "appearance": "긴 양날개와 부채꼬리를 가진 활공 포식자. 양 날개 관절이 지상에서도 보인다.",
+      "combatRole": "선회와 착지 사이의 창을 읽는 수직 전투. 지상 근접 장비도 정기 착지로 공략 가능.",
+      "stats": {
+        "maxHp": 5600,
+        "massKg": 170,
+        "sizeM": {
+          "width": 6.8,
+          "height": 2,
+          "length": 3.5
+        },
+        "moveSpeedMps": 3.0,
+        "turnSpeedDegPerS": 75,
+        "contactDamageHp": 0,
+        "energyDamageMultipliers": {
+          "mechanical": 1,
+          "electrical": 1.2,
+          "thermal": 1,
+          "chemical": 0.9,
+          "magic": 1,
+          "divine": 1
+        },
+        "shellContract": {
+          "storage": "voxelShellIntegrity",
+          "bodyHpIndependent": true,
+          "baselineCoverageFraction": 0.35,
+          "construction": "각 보스 외피의 실체 복셀과 재질로 확정할 구현 계약. 입사EU 중 흡수분은 외피에만 기록, 침투분만 몸체HP에 전달. 외피 자동재생 없음."
+        }
+      },
+      "baselineRef": "gear_baseline_t5",
+      "balanceTarget": {
+        "effectiveSoloDps": 40,
+        "soloTtkS": 140.0,
+        "ttkIncludesRecovery": false,
+        "machineEffectiveDpsFactor": 1.6,
+        "machineTtkS": 87.5,
+        "interpretation": "정지 표적 DPS가 아닌 회피·이동·기본 저항을 반영한 유효 DPS. 실측 전 목표이며 회복이 성립하면 길어진다."
+      },
+      "parts": [
+        {
+          "id": "core",
+          "name": "양 날개 관절",
+          "breakThresholdHp": 672,
+          "damageMultiplier": 1.4,
+          "available": "지정 공격 recovery 중 또는 관련 기믹 비활성화 중",
+          "onBreak": "6초 비틀거림, 해당 핵심 기술1개 영구 사용불가. 남은3기술의 예고 +0.4초. 부위 자동 재생 없음.",
+          "staggerS": 6,
+          "extraWindupS": 0.4,
+          "disabledSkillIds": [
+            "glider_landing"
+          ],
+          "slowedSkillIds": [
+            "glider_dive",
+            "glider_wind",
+            "glider_feather"
+          ],
+          "fallbackSkillIds": [
+            "glider_dive",
+            "glider_feather"
+          ],
+          "exposureAfterBreak": "always_breached: 파손기관 자체가재생되는것이아니라갈라진외피뒤몸체가계속노출. 같은부위재파손보너스없음;후속phase의after_skill조건을기다리지않음."
+        },
+        {
+          "id": "locomotion",
+          "name": "이동 지지부",
+          "breakThresholdHp": 1008,
+          "damageMultiplier": 1,
+          "available": "항상, 실제 부위 형상에 접촉했을 때",
+          "onBreak": "이동속도20%감소. 활공수는 공중시간 감소. 자동 복구 없음.",
+          "speedMultiplierAfterBreak": 0.8
+        }
+      ],
+      "lifeRecovery": {
+        "maxCalories": 4480,
+        "initialCalories": 4480,
+        "naturalRegenHpPerS": 14.0,
+        "caloriesPerHp": 2,
+        "noDamageDelayS": 12,
+        "restWindupS": 4,
+        "maxRegenDurationS": 8,
+        "combatRegenMaxHpFraction": 0.02,
+        "combatRegenMaxActions": 1,
+        "triggerHpFraction": 0.6,
+        "stopOnDamage": true,
+        "restRequires": "생존한 먹이/기관 기믹 근처, 정지 자세. 전투 중에는 피격 없는12초와4초 회복준비를 모두 만족. 전투 밖은 피격없는12초 후 자연회복 가능, 최대HP와칼로리량에서 정지.",
+        "activityCaloriesPerS": 0.1,
+        "offlineRegen": false
+      },
+      "energyReserves": [
+        {
+          "energyType": "magic",
+          "capacityEU": 860,
+          "initialEU": 860,
+          "rechargeActionS": 4,
+          "rechargeEU": 344,
+          "maxRechargeActionsPerEncounter": 6,
+          "source": "유한 체내 저장물의 전환",
+          "sourceCharges": 6,
+          "exposedMultiplierDuringRecharge": 1.25
+        },
+        {
+          "energyType": "mechanical",
+          "capacityEU": 1200,
+          "initialEU": 1200,
+          "rechargeActionS": 4,
+          "rechargeEU": 480,
+          "maxRechargeActionsPerEncounter": 6,
+          "source": "유한 체내 저장물의 전환",
+          "sourceCharges": 6,
+          "exposedMultiplierDuringRecharge": 1.25
+        }
+      ],
+      "phases": [
+        {
+          "id": "spire_glider_p1",
+          "name": "저공 선회",
+          "hpFractionUpperInclusive": 1,
+          "hpFractionLowerExclusive": 0.75,
+          "onEnter": {
+            "durationS": 1.8,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "저공 선회: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "glider_dive",
+            "glider_feather",
+            "glider_dive",
+            "glider_wind"
+          ],
+          "interCastGapS": 1.4,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "전투회복/수리없음. 단계별 자세·기관노출·이동규칙을 적용.",
+          "state": {
+            "behavior": "low_altitude_circuit",
+            "moveSpeedMultiplier": 1,
+            "coreExposure": {
+              "mode": "grounded",
+              "skillIds": [],
+              "durationS": 0
+            },
+            "combatRegenAllowed": false,
+            "cruiseHeightM": 4,
+            "maxAirborneS": 8,
+            "minimumGroundedS": 5
+          },
+          "designIntent": "4m 저공에서8초까지만 선회하고 최소5초 착지한다. 근접과 원거리 모두 날개관절을 공략한다."
+        },
+        {
+          "id": "spire_glider_p2",
+          "name": "고공 활공",
+          "hpFractionUpperInclusive": 0.75,
+          "hpFractionLowerExclusive": 0.35,
+          "onEnter": {
+            "durationS": 2.2,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "고공 활공: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "glider_wind",
+            "glider_feather",
+            "glider_landing",
+            "glider_dive"
+          ],
+          "interCastGapS": 1.2,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "2페이즈에서만 전투회복1회. 준비전12초무피격, 준비4초, 회복8초를지킨다.",
+          "state": {
+            "behavior": "high_altitude_circuit",
+            "moveSpeedMultiplier": 1,
+            "coreExposure": {
+              "mode": "grounded",
+              "skillIds": [],
+              "durationS": 0
+            },
+            "combatRegenAllowed": true,
+            "cruiseHeightM": 8,
+            "maxAirborneS": 12,
+            "minimumGroundedS": 5
+          },
+          "designIntent": "8m 높이에서 최대12초 활공한다. 정박주 유인으로 착지를 앞당기거나 예고된 공중탄을 피하며 다음 착지를 기다린다."
+        },
+        {
+          "id": "spire_glider_p3",
+          "name": "손상 착지",
+          "hpFractionUpperInclusive": 0.35,
+          "hpFractionLowerExclusive": 0,
+          "onEnter": {
+            "durationS": 2.5,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "손상 착지: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "glider_landing",
+            "glider_feather",
+            "glider_wind",
+            "glider_dive",
+            "glider_feather"
+          ],
+          "interCastGapS": 1.0,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "전투회복/수리없음. 단계별 자세·기관노출·이동규칙을 적용.",
+          "state": {
+            "behavior": "damaged_short_glide",
+            "moveSpeedMultiplier": 0.8,
+            "coreExposure": {
+              "mode": "grounded",
+              "skillIds": [],
+              "durationS": 0
+            },
+            "combatRegenAllowed": false,
+            "cruiseHeightM": 3,
+            "maxAirborneS": 6,
+            "minimumGroundedS": 7
+          },
+          "designIntent": "3m 높이의 짧은 활공만 가능하고 지상체류가7초로 늘어난다. 기계와 개인장비가 마무리 화력을 넣는 창이 길어진다."
+        }
+      ],
+      "skills": [
+        {
+          "id": "glider_dive",
+          "name": "첨탑 급강하",
+          "energyType": "mechanical",
+          "windupS": 1.8,
+          "activeS": 1.2,
+          "recoveryS": 3.4,
+          "cooldownS": 10,
+          "rangeM": 24,
+          "geometry": {
+            "kind": "oriented_box",
+            "widthM": 3.2,
+            "lengthM": 24,
+            "heightM": 2.4
+          },
+          "damage": {
+            "neutralTargetHp": 80,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 57.6,
+            "baselineHpFraction": 0.3388
+          },
+          "energyCost": {
+            "amount": 120,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.666667
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "날개를 접고 착지 직선이 표시된다. 공격 후 3.4초 지상에 머문다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "옆으로 피한 뒤 날개 관절 공격.",
+          "machineResponse": "기계로 경로를 유도하거나 지상 회복창에 화력 집중.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 1.95,
+            "walkRequiredS": 0.9094,
+            "runRequiredS": 0.7063,
+            "walkMarginS": 0.8906,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "glider_wind",
+          "name": "압축 날개바람",
+          "energyType": "magic",
+          "windupS": 1.8,
+          "activeS": 0.5,
+          "recoveryS": 2.4,
+          "cooldownS": 9,
+          "rangeM": 22,
+          "geometry": {
+            "kind": "oriented_box",
+            "widthM": 4,
+            "lengthM": 22,
+            "heightM": 2.4
+          },
+          "damage": {
+            "neutralTargetHp": 57,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 41.04,
+            "baselineHpFraction": 0.2414
+          },
+          "energyCost": {
+            "amount": 86,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.662791
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "날개가 밝아진 후 물성이 부여된 바람을 직선 방출한다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "측면 이동 또는 실체 엄폐. 뒤로 밀림은 최대1m, 추락 즉사 없음.",
+          "machineResponse": "넓은 차체는 장갑 또는 측면 이동; 단순 비행 상태로 무효화하지 않음.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 2.35,
+            "walkRequiredS": 1.0344,
+            "runRequiredS": 0.7896,
+            "walkMarginS": 0.7656,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "glider_feather",
+          "name": "깃창 표적탄",
+          "energyType": "mechanical",
+          "windupS": 1.5,
+          "activeS": 0.3,
+          "recoveryS": 2,
+          "cooldownS": 8,
+          "rangeM": 30,
+          "geometry": {
+            "kind": "sphere",
+            "radiusM": 1.8
+          },
+          "damage": {
+            "neutralTargetHp": 54,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 38.88,
+            "baselineHpFraction": 0.2287
+          },
+          "energyCost": {
+            "amount": 81,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.666667
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "한 날개 끝이 표적 위치를 향해 고정되며 깃창 묶음이 날아간다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "고정점에서 이동, 한 묶음에 한 번만 피해.",
+          "machineResponse": "공중 방향전환으로 회피; 외부 사거리에서 공격해도 자동무적 전환 없음.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 2.15,
+            "walkRequiredS": 0.9719,
+            "runRequiredS": 0.7479,
+            "walkMarginS": 0.5281,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "glider_landing",
+          "name": "착지 분쇄",
+          "energyType": "mechanical",
+          "windupS": 1.9,
+          "activeS": 0.4,
+          "recoveryS": 3.5,
+          "cooldownS": 13,
+          "rangeM": 8,
+          "geometry": {
+            "kind": "cylinder",
+            "radiusM": 3,
+            "heightM": 1.2
+          },
+          "damage": {
+            "neutralTargetHp": 68,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 48.96,
+            "baselineHpFraction": 0.288
+          },
+          "energyCost": {
+            "amount": 102,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.666667
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "원으로 표시한 장소에 내려앉고 날개를 펴며 균형을 잡는다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "착지 원을 피한 후 충분한 지상 타격창 활용.",
+          "machineResponse": "무거운 장비도 다음 착지 위치를 보고 미리 정렬 가능.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 3.35,
+            "walkRequiredS": 1.3469,
+            "runRequiredS": 0.9979,
+            "walkMarginS": 0.5531,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        }
+      ],
+      "arena": {
+        "owner": "structures",
+        "localOrigin": "boss_arena_floor_center",
+        "widthM": 36,
+        "depthM": 36,
+        "heightM": 18,
+        "bossSpawnM": [
+          0,
+          0,
+          4
+        ],
+        "openExitCount": 2,
+        "exitWidthM": 6,
+        "exitHeightM": 5,
+        "clearCrossWidthM": 8,
+        "protectedEscapeStripZ": [
+          -3,
+          3
+        ],
+        "gimmicks": [
+          {
+            "id": "coast_anchor_post_west",
+            "positionM": [
+              -11,
+              0,
+              11
+            ]
+          },
+          {
+            "id": "coast_anchor_post_east",
+            "positionM": [
+              11,
+              0,
+              11
+            ]
+          }
+        ],
+        "gimmickInteractionS": 1,
+        "gimmickUsesEach": 1,
+        "gimmickReset": "횟수·파괴 상태 영속. 재로드/탈주로 복구하지 않음. 소모돼도 일반 회피·약점으로 공략 가능.",
+        "gimmickEffect": "정박주를 작동하면 먹잇감 유인 소리 발생, 다음 기술을 착지분쇄로 선택(정상 쿨다운·예고 적용). 비행 강제무효화 없음.",
+        "gimmickBreakHp": 120,
+        "gimmickContactCollisionDamageHp": 0,
+        "geometryReference": "cliff_observatory:arena"
+      },
+      "persistence": {
+        "bossCountPerDungeon": 1,
+        "summonedCreatureLimit": 0,
+        "simultaneousPersistentHazards": 1,
+        "leashBeyondArenaM": 12,
+        "disengageDelayS": 15,
+        "stateOnDisengage": "위치만 안전한 둥지로 복귀. HP·칼로리·부위·에너지·수리소모 유지; 자동 전량회복 없음.",
+        "onUnload": "교전·투사체·상태 타이머 정지, 오프라인 공격/회복 없음. 저장된 시전은 재개 전 동일한 전체 예고를 다시 표시, 이미 차감한 비용 재차감하지 않음.",
+        "onDeath": "즉시 defeated와 rewardTransactionId를 같은 원자적 트랜잭션에 기록. 공격·위험 제거. 보스와 재료 회수 가능 잔해를 중복 생성하지 않음.",
+        "retry": "미격파 보스만 남은 상태로 재도전. 격파 후 같은 인스턴스 재생성 없음; 다른 던전 인스턴스는 별개.",
+        "deathRecovery": "플레이어 사망 보관은 보스 상태와 별개 영속. 10m 요정 회수, 여러 보관 및 가방 초과분 보존.",
+        "rewardRef": "reward_cliff_observatory",
+        "saveFields": [
+          "instanceId",
+          "bossId",
+          "hp",
+          "phaseId",
+          "phaseEntered",
+          "position",
+          "parts",
+          "calories",
+          "energyReserves",
+          "recoveryCharges",
+          "gimmickStates",
+          "castId",
+          "castState",
+          "cooldownRemaining",
+          "sequenceIndex",
+          "lastDamageElapsed",
+          "defeated",
+          "rewardTransactionId",
+          "rewardClaimedStacks",
+          "regenActionSpent",
+          "repairSupplies",
+          "sourceChargesByEnergy",
+          "flightState",
+          "airborneElapsedS",
+          "rewardUnclaimed",
+          "phaseStateTimers",
+          "completedAttackCount",
+          "phaseWaterDepth",
+          "growthNodeOcclusion",
+          "shellIntegrityByVoxel"
+        ],
+        "rewardKey": "worldId:dungeonInstanceId:bossId:first_defeat",
+        "rewardCommit": "격파확정→보상 entitlement 저장→인벤토리 transfer journal commit. 재로드·수령중단 시 동일 key 재처리, 가방 부족 미수령 유지."
+      },
+      "flight": {
+        "cruiseHeightM": 8,
+        "flightSpeedMps": 5,
+        "maxAirborneS": 12,
+        "minimumGroundedS": 5,
+        "forcedLandingRule": "최대 공중시간 도달 시 안전한 착지분쇄 또는 비공격 착지. 회복시간 포함 최소5초 지상에 머묾. 날개 파손 후 공중최대6초.",
+        "maxAirborneAfterWingBreakS": 6
+      }
+    },
+    {
+      "id": "arboretum_symbiote",
+      "name": "수목원 공생체",
+      "environmentId": "mana_grove",
+      "dungeonId": "sealed_arboretum",
+      "baselineTier": 6,
+      "entityType": "organic",
+      "civilization": false,
+      "appearance": "큰 숙주 줄기와 얽힌 공생 생물이 함께 움직이는 생명체. 실제 핵은 빛나는 수액낭이다.",
+      "combatRole": "새 물성의 예고를 읽고 성장 결절을 차단하여 몸통 접근 창을 확보한다.",
+      "stats": {
+        "maxHp": 8700,
+        "massKg": 610,
+        "sizeM": {
+          "width": 4.2,
+          "height": 5.6,
+          "length": 4.2
+        },
+        "moveSpeedMps": 2.0,
+        "turnSpeedDegPerS": 75,
+        "contactDamageHp": 0,
+        "energyDamageMultipliers": {
+          "mechanical": 1,
+          "electrical": 1,
+          "thermal": 1.15,
+          "chemical": 0.9,
+          "magic": 0.65,
+          "divine": 1.1
+        },
+        "shellContract": {
+          "storage": "voxelShellIntegrity",
+          "bodyHpIndependent": true,
+          "baselineCoverageFraction": 0.35,
+          "construction": "각 보스 외피의 실체 복셀과 재질로 확정할 구현 계약. 입사EU 중 흡수분은 외피에만 기록, 침투분만 몸체HP에 전달. 외피 자동재생 없음."
+        }
+      },
+      "baselineRef": "gear_baseline_t6",
+      "balanceTarget": {
+        "effectiveSoloDps": 58,
+        "soloTtkS": 150.0,
+        "ttkIncludesRecovery": false,
+        "machineEffectiveDpsFactor": 1.6,
+        "machineTtkS": 93.75,
+        "interpretation": "정지 표적 DPS가 아닌 회피·이동·기본 저항을 반영한 유효 DPS. 실측 전 목표이며 회복이 성립하면 길어진다."
+      },
+      "parts": [
+        {
+          "id": "core",
+          "name": "중심 수액낭",
+          "breakThresholdHp": 1044,
+          "damageMultiplier": 1.4,
+          "available": "지정 공격 recovery 중 또는 관련 기믹 비활성화 중",
+          "onBreak": "6초 비틀거림, 해당 핵심 기술1개 영구 사용불가. 남은3기술의 예고 +0.4초. 부위 자동 재생 없음.",
+          "staggerS": 6,
+          "extraWindupS": 0.4,
+          "disabledSkillIds": [
+            "symbiote_fall"
+          ],
+          "slowedSkillIds": [
+            "symbiote_root",
+            "symbiote_bloom",
+            "symbiote_ring"
+          ],
+          "fallbackSkillIds": [
+            "symbiote_root",
+            "symbiote_ring"
+          ],
+          "exposureAfterBreak": "always_breached: 파손기관 자체가재생되는것이아니라갈라진외피뒤몸체가계속노출. 같은부위재파손보너스없음;후속phase의after_skill조건을기다리지않음."
+        },
+        {
+          "id": "locomotion",
+          "name": "이동 지지부",
+          "breakThresholdHp": 1566,
+          "damageMultiplier": 1,
+          "available": "항상, 실제 부위 형상에 접촉했을 때",
+          "onBreak": "이동속도20%감소. 활공수는 공중시간 감소. 자동 복구 없음.",
+          "speedMultiplierAfterBreak": 0.8
+        }
+      ],
+      "lifeRecovery": {
+        "maxCalories": 6960,
+        "initialCalories": 6960,
+        "naturalRegenHpPerS": 21.75,
+        "caloriesPerHp": 2,
+        "noDamageDelayS": 12,
+        "restWindupS": 4,
+        "maxRegenDurationS": 8,
+        "combatRegenMaxHpFraction": 0.02,
+        "combatRegenMaxActions": 1,
+        "triggerHpFraction": 0.6,
+        "stopOnDamage": true,
+        "restRequires": "생존한 먹이/기관 기믹 근처, 정지 자세. 전투 중에는 피격 없는12초와4초 회복준비를 모두 만족. 전투 밖은 피격없는12초 후 자연회복 가능, 최대HP와칼로리량에서 정지.",
+        "activityCaloriesPerS": 0.1,
+        "offlineRegen": false
+      },
+      "energyReserves": [
+        {
+          "energyType": "chemical",
+          "capacityEU": 1260,
+          "initialEU": 1260,
+          "rechargeActionS": 4,
+          "rechargeEU": 504,
+          "maxRechargeActionsPerEncounter": 6,
+          "source": "유한 체내 저장물의 전환",
+          "sourceCharges": 6,
+          "exposedMultiplierDuringRecharge": 1.25
+        },
+        {
+          "energyType": "magic",
+          "capacityEU": 1170,
+          "initialEU": 1170,
+          "rechargeActionS": 4,
+          "rechargeEU": 468,
+          "maxRechargeActionsPerEncounter": 6,
+          "source": "유한 체내 저장물의 전환",
+          "sourceCharges": 6,
+          "exposedMultiplierDuringRecharge": 1.25
+        },
+        {
+          "energyType": "mechanical",
+          "capacityEU": 1520,
+          "initialEU": 1520,
+          "rechargeActionS": 4,
+          "rechargeEU": 608,
+          "maxRechargeActionsPerEncounter": 6,
+          "source": "유한 체내 저장물의 전환",
+          "sourceCharges": 6,
+          "exposedMultiplierDuringRecharge": 1.25
+        }
+      ],
+      "phases": [
+        {
+          "id": "arboretum_symbiote_p1",
+          "name": "숙주 방어",
+          "hpFractionUpperInclusive": 1,
+          "hpFractionLowerExclusive": 0.66,
+          "onEnter": {
+            "durationS": 2,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "숙주 방어: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "symbiote_root",
+            "symbiote_ring",
+            "symbiote_root",
+            "symbiote_bloom",
+            "symbiote_fall"
+          ],
+          "interCastGapS": 1.4,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "전투회복/수리없음. 단계별 자세·기관노출·이동규칙을 적용.",
+          "state": {
+            "behavior": "rooted_guard",
+            "moveSpeedMultiplier": 0.5,
+            "coreExposure": {
+              "mode": "after_skill",
+              "skillIds": [
+                "symbiote_fall"
+              ],
+              "durationS": 3
+            },
+            "combatRegenAllowed": false,
+            "growthNodeOcclusionEnabled": false
+          },
+          "designIntent": "거의 뿌리박힌 자세로 가지를 내린 뒤에만 수액핵이 열린다."
+        },
+        {
+          "id": "arboretum_symbiote_p2",
+          "name": "공생 확산",
+          "hpFractionUpperInclusive": 0.66,
+          "hpFractionLowerExclusive": 0.33,
+          "onEnter": {
+            "durationS": 2.5,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "공생 확산: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "symbiote_bloom",
+            "symbiote_ring",
+            "symbiote_fall",
+            "symbiote_root"
+          ],
+          "interCastGapS": 1.2,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "2페이즈에서만 전투회복1회. 준비전12초무피격, 준비4초, 회복8초를지킨다.",
+          "state": {
+            "behavior": "protect_growth_nodes",
+            "moveSpeedMultiplier": 1,
+            "coreExposure": {
+              "mode": "after_skill",
+              "skillIds": [
+                "symbiote_fall",
+                "symbiote_bloom"
+              ],
+              "durationS": 3
+            },
+            "combatRegenAllowed": true,
+            "growthNodeOcclusionEnabled": true,
+            "growthNodeCoverSizeM": [
+              2,
+              3,
+              2
+            ],
+            "growthNodeMaxCount": 2
+          },
+          "designIntent": "남아 있는 두 성장결절이3m 높이 차폐로 자라며 보스가 이를 지키러 움직인다. 새 생명을 소환하지 않으며 출구를 막지 않는다."
+        },
+        {
+          "id": "arboretum_symbiote_p3",
+          "name": "수액핵 노출",
+          "hpFractionUpperInclusive": 0.33,
+          "hpFractionLowerExclusive": 0,
+          "onEnter": {
+            "durationS": 3,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "수액핵 노출: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "symbiote_fall",
+            "symbiote_ring",
+            "symbiote_bloom",
+            "symbiote_root",
+            "symbiote_ring"
+          ],
+          "interCastGapS": 1.0,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "전투회복/수리없음. 단계별 자세·기관노출·이동규칙을 적용.",
+          "state": {
+            "behavior": "exposed_sap_core",
+            "moveSpeedMultiplier": 0.75,
+            "coreExposure": {
+              "mode": "always",
+              "skillIds": [],
+              "durationS": 0
+            },
+            "combatRegenAllowed": false,
+            "growthNodeOcclusionEnabled": false,
+            "bodyReactionOverrides": {
+              "magic": 0.9
+            }
+          },
+          "designIntent": "결절 차폐가 내려가고 수액핵이 항상 노출된다. 마법저항이 완화되고 회복행동이 끝난다."
+        }
+      ],
+      "skills": [
+        {
+          "id": "symbiote_root",
+          "name": "수액 뿌리창",
+          "energyType": "magic",
+          "windupS": 1.7,
+          "activeS": 0.5,
+          "recoveryS": 2.4,
+          "cooldownS": 8,
+          "rangeM": 22,
+          "geometry": {
+            "kind": "oriented_box",
+            "widthM": 3.2,
+            "lengthM": 22,
+            "heightM": 2.4
+          },
+          "damage": {
+            "neutralTargetHp": 78,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 52.26,
+            "baselineHpFraction": 0.2613
+          },
+          "energyCost": {
+            "amount": 117,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.666667
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "바닥의 맥이 직선으로 빛난 뒤 물성을 부여한 뿌리창이 솟는다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "선에서 벗어나기; 성장 결절 파괴 시 사거리20% 감소.",
+          "machineResponse": "통로 차체는 장갑판/위치변경으로 대응, 바닥 공격이라 상공 회피 가능.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 1.95,
+            "walkRequiredS": 0.9094,
+            "runRequiredS": 0.7063,
+            "walkMarginS": 0.7906,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "symbiote_bloom",
+          "name": "부유 꽃송이",
+          "energyType": "magic",
+          "windupS": 1.7,
+          "activeS": 0.4,
+          "recoveryS": 2.2,
+          "cooldownS": 10,
+          "rangeM": 28,
+          "geometry": {
+            "kind": "sphere",
+            "radiusM": 2
+          },
+          "damage": {
+            "neutralTargetHp": 78,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 52.26,
+            "baselineHpFraction": 0.2613
+          },
+          "energyCost": {
+            "amount": 117,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.666667
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "꽃송이가 표적의 고정된 3차원 지점에서 피어난다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "구 밖으로 이동. 공중에서도 동일한 구형 예고 제공.",
+          "machineResponse": "큰 기계는 일부 부품만 닿아도 1회 총피해 상한.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 2.35,
+            "walkRequiredS": 1.0344,
+            "runRequiredS": 0.7896,
+            "walkMarginS": 0.6656,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "symbiote_ring",
+          "name": "삼투 고리",
+          "energyType": "chemical",
+          "windupS": 1.8,
+          "activeS": 0.5,
+          "recoveryS": 2.8,
+          "cooldownS": 12,
+          "rangeM": 10,
+          "geometry": {
+            "kind": "annular_cylinder",
+            "innerRadiusM": 4,
+            "outerRadiusM": 6.4,
+            "heightM": 1
+          },
+          "damage": {
+            "neutralTargetHp": 84,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 56.28,
+            "baselineHpFraction": 0.2814
+          },
+          "energyCost": {
+            "amount": 126,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.666667
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "반경4~6.4m에 짧은 수액 고리를 형성한다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "안쪽이나 바깥으로 이동. 배합이 달라도 산성 피해만 사용.",
+          "machineResponse": "내식 하부나 비접촉 이동으로 회피.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 1.55,
+            "walkRequiredS": 0.7844,
+            "runRequiredS": 0.6229,
+            "walkMarginS": 1.0156,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "symbiote_fall",
+          "name": "공생 가지 낙하",
+          "energyType": "mechanical",
+          "windupS": 1.9,
+          "activeS": 0.4,
+          "recoveryS": 3.0,
+          "cooldownS": 14,
+          "rangeM": 24,
+          "geometry": {
+            "kind": "cylinder",
+            "radiusM": 3,
+            "heightM": 16
+          },
+          "damage": {
+            "neutralTargetHp": 101,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 67.67,
+            "baselineHpFraction": 0.3383
+          },
+          "energyCost": {
+            "amount": 152,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.664474
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "한 가지가 꺾이는 소리와 그림자로 고정 착탄점을 알린다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "원 밖으로 이동하고 꺾인 쪽 수액낭을 공격.",
+          "machineResponse": "비행 고도보다 위에서 떨어지면 공중도 맞음. 구체적인 수직 범위 표시.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 3.35,
+            "walkRequiredS": 1.3469,
+            "runRequiredS": 0.9979,
+            "walkMarginS": 0.5531,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        }
+      ],
+      "arena": {
+        "owner": "structures",
+        "localOrigin": "boss_arena_floor_center",
+        "widthM": 32,
+        "depthM": 32,
+        "heightM": 16,
+        "bossSpawnM": [
+          0,
+          0,
+          4
+        ],
+        "openExitCount": 2,
+        "exitWidthM": 6,
+        "exitHeightM": 5,
+        "clearCrossWidthM": 8,
+        "protectedEscapeStripZ": [
+          -3,
+          3
+        ],
+        "gimmicks": [
+          {
+            "id": "mana_growth_node_west",
+            "positionM": [
+              -10,
+              0,
+              10
+            ]
+          },
+          {
+            "id": "mana_growth_node_east",
+            "positionM": [
+              10,
+              0,
+              10
+            ]
+          }
+        ],
+        "gimmickInteractionS": 1,
+        "gimmickUsesEach": 1,
+        "gimmickReset": "횟수·파괴 상태 영속. 재로드/탈주로 복구하지 않음. 소모돼도 일반 회피·약점으로 공략 가능.",
+        "gimmickEffect": "성장결절 파괴 시뿌리창 사거리20%감소·자연회복 장소1개 제거.",
+        "gimmickBreakHp": 174,
+        "gimmickContactCollisionDamageHp": 0,
+        "geometryReference": "sealed_arboretum:arena",
+        "growthNodePolicy": "기존기믹2개의외피형상만성장. 새생명체소환아님. 부서진기믹은재성장하지않음;출구띠바깥만차폐."
+      },
+      "persistence": {
+        "bossCountPerDungeon": 1,
+        "summonedCreatureLimit": 0,
+        "simultaneousPersistentHazards": 1,
+        "leashBeyondArenaM": 12,
+        "disengageDelayS": 15,
+        "stateOnDisengage": "위치만 안전한 둥지로 복귀. HP·칼로리·부위·에너지·수리소모 유지; 자동 전량회복 없음.",
+        "onUnload": "교전·투사체·상태 타이머 정지, 오프라인 공격/회복 없음. 저장된 시전은 재개 전 동일한 전체 예고를 다시 표시, 이미 차감한 비용 재차감하지 않음.",
+        "onDeath": "즉시 defeated와 rewardTransactionId를 같은 원자적 트랜잭션에 기록. 공격·위험 제거. 보스와 재료 회수 가능 잔해를 중복 생성하지 않음.",
+        "retry": "미격파 보스만 남은 상태로 재도전. 격파 후 같은 인스턴스 재생성 없음; 다른 던전 인스턴스는 별개.",
+        "deathRecovery": "플레이어 사망 보관은 보스 상태와 별개 영속. 10m 요정 회수, 여러 보관 및 가방 초과분 보존.",
+        "rewardRef": "reward_sealed_arboretum",
+        "saveFields": [
+          "instanceId",
+          "bossId",
+          "hp",
+          "phaseId",
+          "phaseEntered",
+          "position",
+          "parts",
+          "calories",
+          "energyReserves",
+          "recoveryCharges",
+          "gimmickStates",
+          "castId",
+          "castState",
+          "cooldownRemaining",
+          "sequenceIndex",
+          "lastDamageElapsed",
+          "defeated",
+          "rewardTransactionId",
+          "rewardClaimedStacks",
+          "regenActionSpent",
+          "repairSupplies",
+          "sourceChargesByEnergy",
+          "flightState",
+          "airborneElapsedS",
+          "rewardUnclaimed",
+          "phaseStateTimers",
+          "completedAttackCount",
+          "phaseWaterDepth",
+          "growthNodeOcclusion",
+          "shellIntegrityByVoxel"
+        ],
+        "rewardKey": "worldId:dungeonInstanceId:bossId:first_defeat",
+        "rewardCommit": "격파확정→보상 entitlement 저장→인벤토리 transfer journal commit. 재로드·수령중단 시 동일 key 재처리, 가방 부족 미수령 유지."
+      }
+    },
+    {
+      "id": "sanctuary_warden",
+      "name": "성역 수호자",
+      "environmentId": "sacred",
+      "dungeonId": "forgotten_monastery",
+      "baselineTier": 7,
+      "entityType": "inorganic",
+      "civilization": true,
+      "appearance": "오래된 성물을 내장한 석금속 무기생명. 방패판과 가슴의 수리 접속구를 가진다.",
+      "combatRole": "예배 회랑의 수호 규칙을 읽고 수리 연결을 끊는다. 신성을 맞아도 면역이 아니다.",
+      "stats": {
+        "maxHp": 13440,
+        "massKg": 1600,
+        "sizeM": {
+          "width": 4.6,
+          "height": 5,
+          "length": 4.6
+        },
+        "moveSpeedMps": 2.2,
+        "turnSpeedDegPerS": 60,
+        "contactDamageHp": 0,
+        "energyDamageMultipliers": {
+          "mechanical": 0.85,
+          "electrical": 0.95,
+          "thermal": 1,
+          "chemical": 1.15,
+          "magic": 1,
+          "divine": 0.7
+        },
+        "shellContract": {
+          "storage": "voxelShellIntegrity",
+          "bodyHpIndependent": true,
+          "baselineCoverageFraction": 0.35,
+          "construction": "각 보스 외피의 실체 복셀과 재질로 확정할 구현 계약. 입사EU 중 흡수분은 외피에만 기록, 침투분만 몸체HP에 전달. 외피 자동재생 없음."
+        }
+      },
+      "baselineRef": "gear_baseline_t7",
+      "balanceTarget": {
+        "effectiveSoloDps": 84,
+        "soloTtkS": 160.0,
+        "ttkIncludesRecovery": false,
+        "machineEffectiveDpsFactor": 1.6,
+        "machineTtkS": 100.0,
+        "interpretation": "정지 표적 DPS가 아닌 회피·이동·기본 저항을 반영한 유효 DPS. 실측 전 목표이며 회복이 성립하면 길어진다."
+      },
+      "parts": [
+        {
+          "id": "core",
+          "name": "가슴 수리 접속구",
+          "breakThresholdHp": 1613,
+          "damageMultiplier": 1.4,
+          "available": "지정 공격 recovery 중 또는 관련 기믹 비활성화 중",
+          "onBreak": "6초 비틀거림, 해당 핵심 기술1개 영구 사용불가. 남은3기술의 예고 +0.4초. 부위 자동 재생 없음.",
+          "staggerS": 6,
+          "extraWindupS": 0.4,
+          "disabledSkillIds": [
+            "warden_sweep"
+          ],
+          "slowedSkillIds": [
+            "warden_hammer",
+            "warden_ray",
+            "warden_seal"
+          ],
+          "fallbackSkillIds": [
+            "warden_hammer",
+            "warden_seal"
+          ],
+          "exposureAfterBreak": "always_breached: 파손기관 자체가재생되는것이아니라갈라진외피뒤몸체가계속노출. 같은부위재파손보너스없음;후속phase의after_skill조건을기다리지않음."
+        },
+        {
+          "id": "locomotion",
+          "name": "이동 지지부",
+          "breakThresholdHp": 2419,
+          "damageMultiplier": 1,
+          "available": "항상, 실제 부위 형상에 접촉했을 때",
+          "onBreak": "이동속도20%감소. 활공수는 공중시간 감소. 자동 복구 없음.",
+          "speedMultiplierAfterBreak": 0.8
+        }
+      ],
+      "lifeRecovery": {
+        "calories": null,
+        "naturalRegenHpPerS": 0,
+        "repairActionS": 5,
+        "repairHp": 1075,
+        "maxRepairActions": 2,
+        "repairRequirement": "해당 수리 기믹이 온전하고 소모 수리재1개/행동. 5초 정지·접속구 노출. 한 번만 피격돼도 중단되며 소모재는 반환되지 않음.",
+        "repairSupplies": 2,
+        "repairAllowedPhaseIds": [
+          "sanctuary_warden_p2"
+        ],
+        "repairCooldownS": 25,
+        "repairTriggerHpFraction": 0.6
+      },
+      "energyReserves": [
+        {
+          "energyType": "divine",
+          "capacityEU": 1710,
+          "initialEU": 1710,
+          "rechargeActionS": 4,
+          "rechargeEU": 684,
+          "maxRechargeActionsPerEncounter": 6,
+          "source": "유한 내장 전지/성물 저장고",
+          "sourceCharges": 6,
+          "exposedMultiplierDuringRecharge": 1.25
+        },
+        {
+          "energyType": "mechanical",
+          "capacityEU": 1820,
+          "initialEU": 1820,
+          "rechargeActionS": 4,
+          "rechargeEU": 728,
+          "maxRechargeActionsPerEncounter": 6,
+          "source": "유한 내장 전지/성물 저장고",
+          "sourceCharges": 6,
+          "exposedMultiplierDuringRecharge": 1.25
+        }
+      ],
+      "phases": [
+        {
+          "id": "sanctuary_warden_p1",
+          "name": "회랑 경계",
+          "hpFractionUpperInclusive": 1,
+          "hpFractionLowerExclusive": 0.7,
+          "onEnter": {
+            "durationS": 2,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "회랑 경계: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "warden_hammer",
+            "warden_seal",
+            "warden_hammer",
+            "warden_ray"
+          ],
+          "interCastGapS": 1.4,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "전투회복/수리없음. 단계별 자세·기관노출·이동규칙을 적용.",
+          "state": {
+            "behavior": "shield_front",
+            "moveSpeedMultiplier": 1,
+            "coreExposure": {
+              "mode": "rear_arc",
+              "angleDeg": 120,
+              "durationS": 0
+            },
+            "repairAllowed": false,
+            "shieldFrontCoverageDeg": 120
+          },
+          "designIntent": "전면120도 방패로 몸을 가리고 뒤120도에서 접속구가 노출된다. 실제 방패복셀을 우회하거나 파괴한다."
+        },
+        {
+          "id": "sanctuary_warden_p2",
+          "name": "성물 방출",
+          "hpFractionUpperInclusive": 0.7,
+          "hpFractionLowerExclusive": 0.4,
+          "onEnter": {
+            "durationS": 2,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "성물 방출: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "warden_ray",
+            "warden_seal",
+            "warden_sweep",
+            "warden_hammer"
+          ],
+          "interCastGapS": 1.2,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "2페이즈에서만 수리. 최대2회, 공급재를 각각 소비하고25초 간격을 지킨다.",
+          "state": {
+            "behavior": "retreat_to_repair_shrine",
+            "moveSpeedMultiplier": 0.85,
+            "coreExposure": {
+              "mode": "rear_or_repair",
+              "angleDeg": 120,
+              "durationS": 0
+            },
+            "repairAllowed": true,
+            "shieldFrontCoverageDeg": 90
+          },
+          "designIntent": "방패 범위가90도로 줄고 수리성소로 후퇴한다. 수리 중 접속구가 추가로 노출되므로 방해할 선택지가 생긴다."
+        },
+        {
+          "id": "sanctuary_warden_p3",
+          "name": "최후 서약",
+          "hpFractionUpperInclusive": 0.4,
+          "hpFractionLowerExclusive": 0,
+          "onEnter": {
+            "durationS": 2,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "최후 서약: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "warden_sweep",
+            "warden_seal",
+            "warden_ray",
+            "warden_hammer",
+            "warden_seal"
+          ],
+          "interCastGapS": 1.0,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "전투회복/수리없음. 단계별 자세·기관노출·이동규칙을 적용.",
+          "state": {
+            "behavior": "broken_oath_open_stance",
+            "moveSpeedMultiplier": 1,
+            "coreExposure": {
+              "mode": "always",
+              "skillIds": [],
+              "durationS": 0
+            },
+            "repairAllowed": false,
+            "shieldFrontCoverageDeg": 0
+          },
+          "designIntent": "방패를 내려 더 이상 전면을 가리지 않는다. 접속구가 상시 노출되고 수리도 멈추지만 남은 전투기술은 유지한다."
+        }
+      ],
+      "skills": [
+        {
+          "id": "warden_hammer",
+          "name": "서약 망치",
+          "energyType": "mechanical",
+          "windupS": 1.9,
+          "activeS": 0.4,
+          "recoveryS": 2.8,
+          "cooldownS": 8,
+          "rangeM": 8,
+          "geometry": {
+            "kind": "cylinder",
+            "radiusM": 3,
+            "heightM": 1.2
+          },
+          "damage": {
+            "neutralTargetHp": 106,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 65.72,
+            "baselineHpFraction": 0.2797
+          },
+          "energyCost": {
+            "amount": 159,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.666667
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "망치 면과 바닥 원이 빛난 후 내려찍는다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "원 밖으로 이동한 뒤 수리 접속구 공격.",
+          "machineResponse": "전면 충돌로 버티기 가능하나 피해 총량은 재질에 따라 결정.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 3.35,
+            "walkRequiredS": 1.3469,
+            "runRequiredS": 0.9979,
+            "walkMarginS": 0.5531,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "warden_ray",
+          "name": "성물 광선",
+          "energyType": "divine",
+          "windupS": 1.8,
+          "activeS": 0.6,
+          "recoveryS": 2.5,
+          "cooldownS": 10,
+          "rangeM": 28,
+          "geometry": {
+            "kind": "oriented_box",
+            "widthM": 3.6,
+            "lengthM": 28,
+            "heightM": 2.4
+          },
+          "damage": {
+            "neutralTargetHp": 114,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 70.68,
+            "baselineHpFraction": 0.3008
+          },
+          "energyCost": {
+            "amount": 171,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.666667
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "가슴 성물이 고정 방향으로 빛나며 한 줄기 강화 광선을 낸다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "옆으로 이동하거나 엄폐. 신앙·계열로 면역을 요구하지 않음.",
+          "machineResponse": "공중 목표에도 방향만 달라지며 폭·예고는 같음.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 2.15,
+            "walkRequiredS": 0.9719,
+            "runRequiredS": 0.7479,
+            "walkMarginS": 0.8281,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "warden_seal",
+          "name": "축성 인장",
+          "energyType": "divine",
+          "windupS": 1.8,
+          "activeS": 0.4,
+          "recoveryS": 2.5,
+          "cooldownS": 12,
+          "rangeM": 30,
+          "geometry": {
+            "kind": "sphere",
+            "radiusM": 2.2
+          },
+          "damage": {
+            "neutralTargetHp": 102,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 63.24,
+            "baselineHpFraction": 0.2691
+          },
+          "energyCost": {
+            "amount": 153,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.666667
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "고정 표적점에 입체 인장이 닫힌다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "구 밖으로 이동. 기계 중심 대신 실제 접촉 부품 판정.",
+          "machineResponse": "기체 크기에 맞춰 미리 이동하거나 외피로 방어.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 2.55,
+            "walkRequiredS": 1.0969,
+            "runRequiredS": 0.8313,
+            "walkMarginS": 0.7031,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "warden_sweep",
+          "name": "수호 회랑 베기",
+          "energyType": "mechanical",
+          "windupS": 1.9,
+          "activeS": 0.5,
+          "recoveryS": 3.2,
+          "cooldownS": 14,
+          "rangeM": 12,
+          "geometry": {
+            "kind": "annular_cylinder",
+            "innerRadiusM": 4,
+            "outerRadiusM": 6.6,
+            "heightM": 1
+          },
+          "damage": {
+            "neutralTargetHp": 121,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 75.02,
+            "baselineHpFraction": 0.3192
+          },
+          "energyCost": {
+            "amount": 182,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.664835
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "반경4~6.6m의 회랑을 방패 테두리로 쓸어낸다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "안쪽·바깥쪽 이동, 위쪽은 공격 높이 밖이면 안전.",
+          "machineResponse": "비행으로 회피 가능. 지상 차량은 진입 각도를 사전 선택.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 1.65,
+            "walkRequiredS": 0.8156,
+            "runRequiredS": 0.6438,
+            "walkMarginS": 1.0844,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        }
+      ],
+      "arena": {
+        "owner": "structures",
+        "localOrigin": "boss_arena_floor_center",
+        "widthM": 36,
+        "depthM": 36,
+        "heightM": 16,
+        "bossSpawnM": [
+          0,
+          0,
+          4
+        ],
+        "openExitCount": 2,
+        "exitWidthM": 6,
+        "exitHeightM": 5,
+        "clearCrossWidthM": 8,
+        "protectedEscapeStripZ": [
+          -3,
+          3
+        ],
+        "gimmicks": [
+          {
+            "id": "sacred_repair_shrine_west",
+            "positionM": [
+              -11,
+              0,
+              11
+            ]
+          },
+          {
+            "id": "sacred_repair_shrine_east",
+            "positionM": [
+              11,
+              0,
+              11
+            ]
+          }
+        ],
+        "gimmickInteractionS": 1,
+        "gimmickUsesEach": 1,
+        "gimmickReset": "횟수·파괴 상태 영속. 재로드/탈주로 복구하지 않음. 소모돼도 일반 회피·약점으로 공략 가능.",
+        "gimmickEffect": "수리성소 파괴 시수리재1개 비활성화·접속구6초노출.",
+        "gimmickBreakHp": 252,
+        "gimmickContactCollisionDamageHp": 0,
+        "geometryReference": "forgotten_monastery:arena"
+      },
+      "persistence": {
+        "bossCountPerDungeon": 1,
+        "summonedCreatureLimit": 0,
+        "simultaneousPersistentHazards": 1,
+        "leashBeyondArenaM": 12,
+        "disengageDelayS": 15,
+        "stateOnDisengage": "위치만 안전한 둥지로 복귀. HP·칼로리·부위·에너지·수리소모 유지; 자동 전량회복 없음.",
+        "onUnload": "교전·투사체·상태 타이머 정지, 오프라인 공격/회복 없음. 저장된 시전은 재개 전 동일한 전체 예고를 다시 표시, 이미 차감한 비용 재차감하지 않음.",
+        "onDeath": "즉시 defeated와 rewardTransactionId를 같은 원자적 트랜잭션에 기록. 공격·위험 제거. 보스와 재료 회수 가능 잔해를 중복 생성하지 않음.",
+        "retry": "미격파 보스만 남은 상태로 재도전. 격파 후 같은 인스턴스 재생성 없음; 다른 던전 인스턴스는 별개.",
+        "deathRecovery": "플레이어 사망 보관은 보스 상태와 별개 영속. 10m 요정 회수, 여러 보관 및 가방 초과분 보존.",
+        "rewardRef": "reward_forgotten_monastery",
+        "saveFields": [
+          "instanceId",
+          "bossId",
+          "hp",
+          "phaseId",
+          "phaseEntered",
+          "position",
+          "parts",
+          "calories",
+          "energyReserves",
+          "recoveryCharges",
+          "gimmickStates",
+          "castId",
+          "castState",
+          "cooldownRemaining",
+          "sequenceIndex",
+          "lastDamageElapsed",
+          "defeated",
+          "rewardTransactionId",
+          "rewardClaimedStacks",
+          "regenActionSpent",
+          "repairSupplies",
+          "sourceChargesByEnergy",
+          "flightState",
+          "airborneElapsedS",
+          "rewardUnclaimed",
+          "phaseStateTimers",
+          "completedAttackCount",
+          "phaseWaterDepth",
+          "growthNodeOcclusion",
+          "shellIntegrityByVoxel"
+        ],
+        "rewardKey": "worldId:dungeonInstanceId:bossId:first_defeat",
+        "rewardCommit": "격파확정→보상 entitlement 저장→인벤토리 transfer journal commit. 재로드·수령중단 시 동일 key 재처리, 가방 부족 미수령 유지."
+      }
+    },
+    {
+      "id": "observatory_sentinel",
+      "name": "관측탑 무기생명 수호자",
+      "environmentId": "anomaly",
+      "dungeonId": "inertia_tower",
+      "baselineTier": 8,
+      "entityType": "inorganic",
+      "civilization": true,
+      "appearance": "세 겹의 회전 고리와 중심 제어핵을 가진 무기생명. 고리의 회전면 자체가 예고 표면이다.",
+      "combatRole": "관성 축과 방출 방향을 이용해 정밀한 고출력 공격을 유도하고 제어핵을 노출시킨다.",
+      "stats": {
+        "maxHp": 19200,
+        "massKg": 2200,
+        "sizeM": {
+          "width": 5,
+          "height": 5.5,
+          "length": 5
+        },
+        "moveSpeedMps": 2.4,
+        "turnSpeedDegPerS": 60,
+        "contactDamageHp": 0,
+        "energyDamageMultipliers": {
+          "mechanical": 0.7,
+          "electrical": 1.15,
+          "thermal": 1,
+          "chemical": 1,
+          "magic": 1.1,
+          "divine": 0.9
+        },
+        "shellContract": {
+          "storage": "voxelShellIntegrity",
+          "bodyHpIndependent": true,
+          "baselineCoverageFraction": 0.35,
+          "construction": "각 보스 외피의 실체 복셀과 재질로 확정할 구현 계약. 입사EU 중 흡수분은 외피에만 기록, 침투분만 몸체HP에 전달. 외피 자동재생 없음."
+        }
+      },
+      "baselineRef": "gear_baseline_t8",
+      "balanceTarget": {
+        "effectiveSoloDps": 120,
+        "soloTtkS": 160.0,
+        "ttkIncludesRecovery": false,
+        "machineEffectiveDpsFactor": 1.6,
+        "machineTtkS": 100.0,
+        "interpretation": "정지 표적 DPS가 아닌 회피·이동·기본 저항을 반영한 유효 DPS. 실측 전 목표이며 회복이 성립하면 길어진다."
+      },
+      "parts": [
+        {
+          "id": "core",
+          "name": "중심 제어핵",
+          "breakThresholdHp": 2304,
+          "damageMultiplier": 1.4,
+          "available": "지정 공격 recovery 중 또는 관련 기믹 비활성화 중",
+          "onBreak": "6초 비틀거림, 해당 핵심 기술1개 영구 사용불가. 남은3기술의 예고 +0.4초. 부위 자동 재생 없음.",
+          "staggerS": 6,
+          "extraWindupS": 0.4,
+          "disabledSkillIds": [
+            "sentinel_collapse"
+          ],
+          "slowedSkillIds": [
+            "sentinel_rail",
+            "sentinel_arc",
+            "sentinel_ring"
+          ],
+          "fallbackSkillIds": [
+            "sentinel_rail",
+            "sentinel_ring"
+          ],
+          "exposureAfterBreak": "always_breached: 파손기관 자체가재생되는것이아니라갈라진외피뒤몸체가계속노출. 같은부위재파손보너스없음;후속phase의after_skill조건을기다리지않음."
+        },
+        {
+          "id": "locomotion",
+          "name": "이동 지지부",
+          "breakThresholdHp": 3456,
+          "damageMultiplier": 1,
+          "available": "항상, 실제 부위 형상에 접촉했을 때",
+          "onBreak": "이동속도20%감소. 활공수는 공중시간 감소. 자동 복구 없음.",
+          "speedMultiplierAfterBreak": 0.8
+        }
+      ],
+      "lifeRecovery": {
+        "calories": null,
+        "naturalRegenHpPerS": 0,
+        "repairActionS": 5,
+        "repairHp": 1536,
+        "maxRepairActions": 2,
+        "repairRequirement": "해당 수리 기믹이 온전하고 소모 수리재1개/행동. 5초 정지·접속구 노출. 한 번만 피격돼도 중단되며 소모재는 반환되지 않음.",
+        "repairSupplies": 2,
+        "repairAllowedPhaseIds": [
+          "observatory_sentinel_p2"
+        ],
+        "repairCooldownS": 25,
+        "repairTriggerHpFraction": 0.6
+      },
+      "energyReserves": [
+        {
+          "energyType": "electrical",
+          "capacityEU": 2000,
+          "initialEU": 2000,
+          "rechargeActionS": 4,
+          "rechargeEU": 800,
+          "maxRechargeActionsPerEncounter": 6,
+          "source": "유한 내장 전지/성물 저장고",
+          "sourceCharges": 6,
+          "exposedMultiplierDuringRecharge": 1.25
+        },
+        {
+          "energyType": "magic",
+          "capacityEU": 2570,
+          "initialEU": 2570,
+          "rechargeActionS": 4,
+          "rechargeEU": 1028,
+          "maxRechargeActionsPerEncounter": 6,
+          "source": "유한 내장 전지/성물 저장고",
+          "sourceCharges": 6,
+          "exposedMultiplierDuringRecharge": 1.25
+        },
+        {
+          "energyType": "mechanical",
+          "capacityEU": 2340,
+          "initialEU": 2340,
+          "rechargeActionS": 4,
+          "rechargeEU": 936,
+          "maxRechargeActionsPerEncounter": 6,
+          "source": "유한 내장 전지/성물 저장고",
+          "sourceCharges": 6,
+          "exposedMultiplierDuringRecharge": 1.25
+        }
+      ],
+      "phases": [
+        {
+          "id": "observatory_sentinel_p1",
+          "name": "관측 정렬",
+          "hpFractionUpperInclusive": 1,
+          "hpFractionLowerExclusive": 0.6,
+          "onEnter": {
+            "durationS": 2,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "관측 정렬: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "sentinel_rail",
+            "sentinel_ring",
+            "sentinel_rail",
+            "sentinel_arc"
+          ],
+          "interCastGapS": 1.4,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "전투회복/수리없음. 단계별 자세·기관노출·이동규칙을 적용.",
+          "state": {
+            "behavior": "track_from_center",
+            "moveSpeedMultiplier": 1,
+            "coreExposure": {
+              "mode": "after_skill",
+              "skillIds": [
+                "sentinel_rail"
+              ],
+              "durationS": 2.8
+            },
+            "repairAllowed": false,
+            "orbitRadiusM": 0
+          },
+          "designIntent": "중앙에서 고리를 정렬하고 투사선 발사 후에만 제어핵을 연다."
+        },
+        {
+          "id": "observatory_sentinel_p2",
+          "name": "축 회전",
+          "hpFractionUpperInclusive": 0.6,
+          "hpFractionLowerExclusive": 0.25,
+          "onEnter": {
+            "durationS": 2,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "축 회전: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "sentinel_arc",
+            "sentinel_ring",
+            "sentinel_collapse",
+            "sentinel_rail"
+          ],
+          "interCastGapS": 1.2,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "2페이즈에서만 수리. 최대2회, 공급재를 각각 소비하고25초 간격을 지킨다.",
+          "state": {
+            "behavior": "orbit_inertia_anchors",
+            "moveSpeedMultiplier": 1,
+            "coreExposure": {
+              "mode": "after_skill",
+              "skillIds": [
+                "sentinel_rail",
+                "sentinel_arc"
+              ],
+              "durationS": 2.8
+            },
+            "repairAllowed": true,
+            "orbitRadiusM": 6
+          },
+          "designIntent": "반경6m 궤도로 관성닻 사이를 이동한다. 전하낙점 뒤에도 핵이 열리며 닻을 끊어 수리를 차단할 수 있다."
+        },
+        {
+          "id": "observatory_sentinel_p3",
+          "name": "제어핵 노출",
+          "hpFractionUpperInclusive": 0.25,
+          "hpFractionLowerExclusive": 0,
+          "onEnter": {
+            "durationS": 2,
+            "invulnerable": false,
+            "cancelUnresolvedCast": true,
+            "clearPersistentHazards": true,
+            "healHp": 0,
+            "cue": "제어핵 노출: 몸의 핵심 기관 색·자세가 변하고 고유 울음/기계음. HUD에 단계명을 표시."
+          },
+          "schedule": [
+            "sentinel_collapse",
+            "sentinel_ring",
+            "sentinel_arc",
+            "sentinel_rail",
+            "sentinel_ring"
+          ],
+          "interCastGapS": 1.0,
+          "damageMultiplier": 1,
+          "selectionRule": "결정적 순환; 사거리·시야·에너지·안전경로·쿨다운 불충족 항목은 건너뛴다. 가능한 공격이 없으면 접근/재충전. 2회 이상 같은 공격 연속 금지. 파손으로 사용불가한 기술을 제외하며 core.fallbackSkillIds 중 유효한 기술을 우선 선택.",
+          "extraRule": "전투회복/수리없음. 단계별 자세·기관노출·이동규칙을 적용.",
+          "state": {
+            "behavior": "exposed_core_slow_orbit",
+            "moveSpeedMultiplier": 0.75,
+            "coreExposure": {
+              "mode": "always",
+              "skillIds": [],
+              "durationS": 0
+            },
+            "repairAllowed": false,
+            "orbitRadiusM": 3,
+            "bodyReactionOverrides": {
+              "mechanical": 1
+            }
+          },
+          "designIntent": "궤도가3m로 줄고 속도도25% 낮아진다. 제어핵이 항상 노출되며 역학저항이 사라지고 수리하지 않는다."
+        }
+      ],
+      "skills": [
+        {
+          "id": "sentinel_rail",
+          "name": "관성 투사선",
+          "energyType": "mechanical",
+          "windupS": 2,
+          "activeS": 0.45,
+          "recoveryS": 2.8,
+          "cooldownS": 9,
+          "rangeM": 32,
+          "geometry": {
+            "kind": "oriented_box",
+            "widthM": 4,
+            "lengthM": 32,
+            "heightM": 2.4
+          },
+          "damage": {
+            "neutralTargetHp": 156,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 90.48,
+            "baselineHpFraction": 0.329
+          },
+          "energyCost": {
+            "amount": 234,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.666667
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "회전 고리가 정렬되어 고정 선을 따라 추를 발사한다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "선 옆으로 이동하거나 엄폐.",
+          "machineResponse": "질량이 큰 기계도 무조건 관통하지 않으며 벽·장갑의 실제 차폐를 적용.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 2.35,
+            "walkRequiredS": 1.0344,
+            "runRequiredS": 0.7896,
+            "walkMarginS": 0.9656,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "sentinel_arc",
+          "name": "전하 낙점",
+          "energyType": "electrical",
+          "windupS": 1.9,
+          "activeS": 0.4,
+          "recoveryS": 2.4,
+          "cooldownS": 11,
+          "rangeM": 32,
+          "geometry": {
+            "kind": "sphere",
+            "radiusM": 2.2
+          },
+          "damage": {
+            "neutralTargetHp": 133,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 77.14,
+            "baselineHpFraction": 0.2805
+          },
+          "energyCost": {
+            "amount": 200,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.665
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "고정된 3차원 위치를 전기 고리로 표시한 후 방전한다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "구 밖으로 이동, 절연 장비로 피해 경감.",
+          "machineResponse": "공중에도 유효하지만 순간 추적은 없음.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 2.55,
+            "walkRequiredS": 1.0969,
+            "runRequiredS": 0.8313,
+            "walkMarginS": 0.8031,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "sentinel_ring",
+          "name": "역상 관성환",
+          "energyType": "mechanical",
+          "windupS": 2,
+          "activeS": 0.5,
+          "recoveryS": 3.2,
+          "cooldownS": 14,
+          "rangeM": 12,
+          "geometry": {
+            "kind": "annular_cylinder",
+            "innerRadiusM": 4.5,
+            "outerRadiusM": 7.1,
+            "heightM": 1
+          },
+          "damage": {
+            "neutralTargetHp": 152,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 88.16,
+            "baselineHpFraction": 0.3206
+          },
+          "energyCost": {
+            "amount": 228,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.666667
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "반경4.5~7.1m의 바닥에 역방향 고리를 방출한다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "안쪽·바깥으로 이동. 관성 닻을 끊으면 회복시간1초 증가.",
+          "machineResponse": "지상 장비 이동 경로 선택, 높이1m 위 부품은 피격되지 않음.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 1.65,
+            "walkRequiredS": 0.8156,
+            "runRequiredS": 0.6438,
+            "walkMarginS": 1.1844,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        },
+        {
+          "id": "sentinel_collapse",
+          "name": "관측점 붕괴",
+          "energyType": "magic",
+          "windupS": 2,
+          "activeS": 0.4,
+          "recoveryS": 3.2,
+          "cooldownS": 15,
+          "rangeM": 28,
+          "geometry": {
+            "kind": "cylinder",
+            "radiusM": 3,
+            "heightM": 20
+          },
+          "damage": {
+            "neutralTargetHp": 171,
+            "maxHitsPerTargetPerCast": 1,
+            "baselinePlayerHpLost": 99.18,
+            "baselineHpFraction": 0.3607
+          },
+          "energyCost": {
+            "amount": 257,
+            "unit": "EU",
+            "debitAt": "windup_start",
+            "refundOnInterrupt": false,
+            "damageYieldHpPerEU": 0.66537
+          },
+          "aimLock": "windup_start_world_position",
+          "telegraph": {
+            "visual": "고정 관측점 위에 빛의 격자가 모이고 아래로 압축된다.",
+            "audio": "발동 방향에서 재생하는 고유 준비음; 경고 영역과 판정은 같은 geometry 사용",
+            "occlusion": "전장에서는 거리와 방향을 HUD 가장자리로도 표시. 벽 너머 비가시 공격 시작 금지"
+          },
+          "counterplay": "원 밖으로 이동. 남은 출구 통로는 영구 위험지대로 만들지 않음.",
+          "machineResponse": "항공기도 표시된 수직기둥에 있으면 피격; 경고 시 이동 가능.",
+          "flightResponse": "3차원 실제 접촉만 검사. 지면 공격은 높이 밖으로 비행 회피 가능; sphere와 공중 조준 box는 고정 표적점을 공격.",
+          "escapeCheck": {
+            "reactionAllowanceS": 0.3,
+            "avatarRadiusM": 0.35,
+            "worstSafeDistanceM": 3.35,
+            "walkRequiredS": 1.3469,
+            "runRequiredS": 0.9979,
+            "walkMarginS": 0.6531,
+            "assumptions": "평지·빈 이동경로·정지점 조준. 도중 추적하지 않음. 실제 공간에서 경로검사 실패 시 시전 취소."
+          }
+        }
+      ],
+      "arena": {
+        "owner": "structures",
+        "localOrigin": "boss_arena_floor_center",
+        "widthM": 40,
+        "depthM": 40,
+        "heightM": 20,
+        "bossSpawnM": [
+          0,
+          0,
+          4
+        ],
+        "openExitCount": 2,
+        "exitWidthM": 6,
+        "exitHeightM": 5,
+        "clearCrossWidthM": 8,
+        "protectedEscapeStripZ": [
+          -3,
+          3
+        ],
+        "gimmicks": [
+          {
+            "id": "anomaly_inertia_anchor_west",
+            "positionM": [
+              -12,
+              0,
+              12
+            ]
+          },
+          {
+            "id": "anomaly_inertia_anchor_east",
+            "positionM": [
+              12,
+              0,
+              12
+            ]
+          }
+        ],
+        "gimmickInteractionS": 1,
+        "gimmickUsesEach": 1,
+        "gimmickReset": "횟수·파괴 상태 영속. 재로드/탈주로 복구하지 않음. 소모돼도 일반 회피·약점으로 공략 가능.",
+        "gimmickEffect": "관성닻 파괴 시수리재1개 비활성화·역상관성환 recovery+1초.",
+        "gimmickBreakHp": 360,
+        "gimmickContactCollisionDamageHp": 0,
+        "geometryReference": "inertia_tower:arena"
+      },
+      "persistence": {
+        "bossCountPerDungeon": 1,
+        "summonedCreatureLimit": 0,
+        "simultaneousPersistentHazards": 1,
+        "leashBeyondArenaM": 12,
+        "disengageDelayS": 15,
+        "stateOnDisengage": "위치만 안전한 둥지로 복귀. HP·칼로리·부위·에너지·수리소모 유지; 자동 전량회복 없음.",
+        "onUnload": "교전·투사체·상태 타이머 정지, 오프라인 공격/회복 없음. 저장된 시전은 재개 전 동일한 전체 예고를 다시 표시, 이미 차감한 비용 재차감하지 않음.",
+        "onDeath": "즉시 defeated와 rewardTransactionId를 같은 원자적 트랜잭션에 기록. 공격·위험 제거. 보스와 재료 회수 가능 잔해를 중복 생성하지 않음.",
+        "retry": "미격파 보스만 남은 상태로 재도전. 격파 후 같은 인스턴스 재생성 없음; 다른 던전 인스턴스는 별개.",
+        "deathRecovery": "플레이어 사망 보관은 보스 상태와 별개 영속. 10m 요정 회수, 여러 보관 및 가방 초과분 보존.",
+        "rewardRef": "reward_inertia_tower",
+        "saveFields": [
+          "instanceId",
+          "bossId",
+          "hp",
+          "phaseId",
+          "phaseEntered",
+          "position",
+          "parts",
+          "calories",
+          "energyReserves",
+          "recoveryCharges",
+          "gimmickStates",
+          "castId",
+          "castState",
+          "cooldownRemaining",
+          "sequenceIndex",
+          "lastDamageElapsed",
+          "defeated",
+          "rewardTransactionId",
+          "rewardClaimedStacks",
+          "regenActionSpent",
+          "repairSupplies",
+          "sourceChargesByEnergy",
+          "flightState",
+          "airborneElapsedS",
+          "rewardUnclaimed",
+          "phaseStateTimers",
+          "completedAttackCount",
+          "phaseWaterDepth",
+          "growthNodeOcclusion",
+          "shellIntegrityByVoxel"
+        ],
+        "rewardKey": "worldId:dungeonInstanceId:bossId:first_defeat",
+        "rewardCommit": "격파확정→보상 entitlement 저장→인벤토리 transfer journal commit. 재로드·수령중단 시 동일 key 재처리, 가방 부족 미수령 유지."
+      }
+    }
+  ]
+}

@@ -1,0 +1,1345 @@
+{
+  "schemaVersion": 1,
+  "id": "tide_crab",
+  "name": "조수게",
+  "category": "creature",
+  "contentRef": {
+    "file": "design/content/creatures.json",
+    "id": "tide_crab"
+  },
+  "status": "art_prototype",
+  "units": "m",
+  "upAxis": "Y",
+  "forwardAxis": "+Z",
+  "visualGridM": 0.03125,
+  "materials": [
+    {
+      "id": "coat",
+      "color": "#596E7B",
+      "roughness": 0.88,
+      "metallic": 0.03,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "belly",
+      "color": "#CDBA94",
+      "roughness": 0.88,
+      "metallic": 0.03,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "dark",
+      "color": "#2D404B",
+      "roughness": 0.88,
+      "metallic": 0.03,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "accent",
+      "color": "#C87D5D",
+      "roughness": 0.88,
+      "metallic": 0.03,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "ivory",
+      "color": "#EEE4C9",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "ink",
+      "color": "#17212B",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    }
+  ],
+  "parts": [
+    {
+      "id": "root",
+      "parent": null,
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "root",
+      "boxes": []
+    },
+    {
+      "id": "carapace",
+      "parent": "root",
+      "translation": [
+        0,
+        0.1875,
+        -0.1875
+      ],
+      "role": "shell_visual",
+      "boxes": [
+        {
+          "center": [
+            -0.171875,
+            0,
+            0
+          ],
+          "size": [
+            0.03125,
+            0.1875,
+            0.4375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.140625,
+            0.015625,
+            0
+          ],
+          "size": [
+            0.03125,
+            0.15625,
+            0.4375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.140625,
+            -0.078125,
+            -0.1875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.171875,
+            0,
+            0
+          ],
+          "size": [
+            0.03125,
+            0.1875,
+            0.4375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.140625,
+            0.015625,
+            0
+          ],
+          "size": [
+            0.03125,
+            0.15625,
+            0.4375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.140625,
+            -0.078125,
+            -0.1875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0,
+            0,
+            0
+          ],
+          "size": [
+            0.25,
+            0.125,
+            0.4375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0,
+            -0.078125,
+            -0.1875
+          ],
+          "size": [
+            0.25,
+            0.03125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0,
+            0.078125,
+            -0.203125
+          ],
+          "size": [
+            0.25,
+            0.03125,
+            0.03125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0,
+            0.078125,
+            0.1875
+          ],
+          "size": [
+            0.25,
+            0.03125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0,
+            0.09375,
+            -0.015625
+          ],
+          "size": [
+            0.25,
+            0.0625,
+            0.34375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0,
+            -0.09375,
+            0.03125
+          ],
+          "size": [
+            0.3125,
+            0.0625,
+            0.375
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            0.015625,
+            0.140625,
+            -0.015625
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.34375
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.078125,
+            0.140625,
+            -0.109375
+          ],
+          "size": [
+            0.09375,
+            0.03125,
+            0.03125
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            -0.078125,
+            0.140625,
+            0
+          ],
+          "size": [
+            0.09375,
+            0.03125,
+            0.0625
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            -0.078125,
+            0.140625,
+            0.125
+          ],
+          "size": [
+            0.09375,
+            0.03125,
+            0.0625
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            0.078125,
+            0.140625,
+            -0.109375
+          ],
+          "size": [
+            0.09375,
+            0.03125,
+            0.03125
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            0.078125,
+            0.140625,
+            0
+          ],
+          "size": [
+            0.09375,
+            0.03125,
+            0.0625
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            0.078125,
+            0.140625,
+            0.125
+          ],
+          "size": [
+            0.09375,
+            0.03125,
+            0.0625
+          ],
+          "material": "accent"
+        }
+      ]
+    },
+    {
+      "id": "head",
+      "parent": "root",
+      "translation": [
+        0,
+        0.15625,
+        0.09375
+      ],
+      "role": "head_visual",
+      "boxes": [
+        {
+          "center": [
+            0,
+            0,
+            -0.015625
+          ],
+          "size": [
+            0.125,
+            0.125,
+            0.15625
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            0.078125,
+            -0.015625,
+            -0.015625
+          ],
+          "size": [
+            0.03125,
+            0.09375,
+            0.15625
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            0.078125,
+            0.046875,
+            -0.03125
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.078125,
+            -0.015625,
+            -0.015625
+          ],
+          "size": [
+            0.03125,
+            0.09375,
+            0.15625
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.078125,
+            0.046875,
+            -0.03125
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.078125,
+            0.046875,
+            0.046875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            0.078125,
+            0.046875,
+            0.046875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "accent"
+        }
+      ]
+    },
+    {
+      "id": "antenna_-1",
+      "parent": "head",
+      "translation": [
+        -0.0625,
+        0.0625,
+        0.03125
+      ],
+      "role": "antenna_visual",
+      "boxes": [
+        {
+          "center": [
+            -0.015625,
+            0.015625,
+            0
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.0625
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.046875,
+            0.046875,
+            0.046875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.09375
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.078125,
+            0.078125,
+            0.09375
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.0625
+          ],
+          "material": "accent"
+        }
+      ]
+    },
+    {
+      "id": "leg_-1_0",
+      "parent": "root",
+      "translation": [
+        -0.15625,
+        0.15625,
+        -0.03125
+      ],
+      "role": "limb_visual",
+      "boxes": [
+        {
+          "center": [
+            -0.0625,
+            0,
+            0
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.0625
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.140625,
+            0.015625,
+            0
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.0625
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.140625,
+            -0.015625,
+            0.015625
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.140625,
+            -0.0625,
+            -0.03125
+          ],
+          "size": [
+            0.03125,
+            0.125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.15625,
+            -0.140625,
+            -0.046875
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.09375
+          ],
+          "material": "dark"
+        }
+      ]
+    },
+    {
+      "id": "leg_-1_1",
+      "parent": "root",
+      "translation": [
+        -0.15625,
+        0.15625,
+        -0.1875
+      ],
+      "role": "limb_visual",
+      "boxes": [
+        {
+          "center": [
+            -0.0625,
+            0,
+            0.015625
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.03125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.140625,
+            0.015625,
+            0.015625
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.140625,
+            -0.0625,
+            0
+          ],
+          "size": [
+            0.03125,
+            0.125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.15625,
+            -0.140625,
+            0
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.0625
+          ],
+          "material": "dark"
+        }
+      ]
+    },
+    {
+      "id": "leg_-1_2",
+      "parent": "root",
+      "translation": [
+        -0.15625,
+        0.15625,
+        -0.34375
+      ],
+      "role": "limb_visual",
+      "boxes": [
+        {
+          "center": [
+            -0.078125,
+            0,
+            0.015625
+          ],
+          "size": [
+            0.15625,
+            0.0625,
+            0.03125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.140625,
+            -0.0625,
+            0.0625
+          ],
+          "size": [
+            0.03125,
+            0.125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.15625,
+            -0.140625,
+            0.0625
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.0625
+          ],
+          "material": "dark"
+        }
+      ]
+    },
+    {
+      "id": "claw_-1",
+      "parent": "root",
+      "translation": [
+        -0.15625,
+        0.1875,
+        0.0625
+      ],
+      "role": "pincer_visual",
+      "boxes": [
+        {
+          "center": [
+            -0.03125,
+            0,
+            0.0625
+          ],
+          "size": [
+            0.0625,
+            0.0625,
+            0.125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.109375,
+            0,
+            0.046875
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.09375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.140625,
+            0.015625,
+            0.171875
+          ],
+          "size": [
+            0.03125,
+            0.15625,
+            0.15625
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            -0.171875,
+            -0.046875,
+            0.171875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.15625
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            -0.171875,
+            0.078125,
+            0.171875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.15625
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            -0.171875,
+            0.015625,
+            0.15625
+          ],
+          "size": [
+            0.03125,
+            0.09375,
+            0.125
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            -0.09375,
+            -0.046875,
+            0.171875
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.15625
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            -0.09375,
+            0.078125,
+            0.171875
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.15625
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            -0.09375,
+            0.015625,
+            0.15625
+          ],
+          "size": [
+            0.0625,
+            0.09375,
+            0.125
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            -0.09375,
+            0.015625,
+            0.28125
+          ],
+          "size": [
+            0.0625,
+            0.09375,
+            0.125
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            -0.171875,
+            0.015625,
+            0.265625
+          ],
+          "size": [
+            0.03125,
+            0.09375,
+            0.09375
+          ],
+          "material": "belly"
+        }
+      ]
+    },
+    {
+      "id": "antenna_1",
+      "parent": "head",
+      "translation": [
+        0.0625,
+        0.0625,
+        0.03125
+      ],
+      "role": "antenna_visual",
+      "boxes": [
+        {
+          "center": [
+            0.015625,
+            0.015625,
+            0
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.0625
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            0.046875,
+            0.046875,
+            0.046875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.09375
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            0.078125,
+            0.078125,
+            0.09375
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.0625
+          ],
+          "material": "accent"
+        }
+      ]
+    },
+    {
+      "id": "leg_1_0",
+      "parent": "root",
+      "translation": [
+        0.15625,
+        0.15625,
+        -0.03125
+      ],
+      "role": "limb_visual",
+      "boxes": [
+        {
+          "center": [
+            0.0625,
+            0,
+            0
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.0625
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            0.140625,
+            0.015625,
+            0
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.0625
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            0.140625,
+            -0.015625,
+            0.015625
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            0.140625,
+            -0.0625,
+            -0.03125
+          ],
+          "size": [
+            0.03125,
+            0.125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.15625,
+            -0.140625,
+            -0.046875
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.09375
+          ],
+          "material": "dark"
+        }
+      ]
+    },
+    {
+      "id": "leg_1_1",
+      "parent": "root",
+      "translation": [
+        0.15625,
+        0.15625,
+        -0.1875
+      ],
+      "role": "limb_visual",
+      "boxes": [
+        {
+          "center": [
+            0.0625,
+            0,
+            0.015625
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.03125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            0.140625,
+            0.015625,
+            0.015625
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.03125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            0.140625,
+            -0.0625,
+            0
+          ],
+          "size": [
+            0.03125,
+            0.125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.15625,
+            -0.140625,
+            0
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.0625
+          ],
+          "material": "dark"
+        }
+      ]
+    },
+    {
+      "id": "leg_1_2",
+      "parent": "root",
+      "translation": [
+        0.15625,
+        0.15625,
+        -0.34375
+      ],
+      "role": "limb_visual",
+      "boxes": [
+        {
+          "center": [
+            0.078125,
+            0,
+            0.015625
+          ],
+          "size": [
+            0.15625,
+            0.0625,
+            0.03125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            0.140625,
+            -0.0625,
+            0.0625
+          ],
+          "size": [
+            0.03125,
+            0.125,
+            0.0625
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.15625,
+            -0.140625,
+            0.0625
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.0625
+          ],
+          "material": "dark"
+        }
+      ]
+    },
+    {
+      "id": "claw_1",
+      "parent": "root",
+      "translation": [
+        0.15625,
+        0.1875,
+        0.0625
+      ],
+      "role": "pincer_visual",
+      "boxes": [
+        {
+          "center": [
+            0.03125,
+            0,
+            0.0625
+          ],
+          "size": [
+            0.0625,
+            0.0625,
+            0.125
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.109375,
+            0,
+            0.046875
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.09375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.140625,
+            0.015625,
+            0.171875
+          ],
+          "size": [
+            0.03125,
+            0.15625,
+            0.15625
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            0.171875,
+            -0.046875,
+            0.171875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.15625
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            0.171875,
+            0.078125,
+            0.171875
+          ],
+          "size": [
+            0.03125,
+            0.03125,
+            0.15625
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            0.171875,
+            0.015625,
+            0.15625
+          ],
+          "size": [
+            0.03125,
+            0.09375,
+            0.125
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            0.09375,
+            -0.046875,
+            0.171875
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.15625
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            0.09375,
+            0.078125,
+            0.171875
+          ],
+          "size": [
+            0.0625,
+            0.03125,
+            0.15625
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            0.09375,
+            0.015625,
+            0.15625
+          ],
+          "size": [
+            0.0625,
+            0.09375,
+            0.125
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            0.09375,
+            0.015625,
+            0.28125
+          ],
+          "size": [
+            0.0625,
+            0.09375,
+            0.125
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            0.171875,
+            0.015625,
+            0.265625
+          ],
+          "size": [
+            0.03125,
+            0.09375,
+            0.09375
+          ],
+          "material": "belly"
+        }
+      ]
+    }
+  ],
+  "anchors": [
+    {
+      "id": "leg_-1_0_contact",
+      "partId": "leg_-1_0",
+      "position": [
+        -0.15625,
+        -0.15625,
+        0
+      ],
+      "purpose": "visual contact locator"
+    },
+    {
+      "id": "leg_-1_1_contact",
+      "partId": "leg_-1_1",
+      "position": [
+        -0.15625,
+        -0.15625,
+        0
+      ],
+      "purpose": "visual contact locator"
+    },
+    {
+      "id": "leg_-1_2_contact",
+      "partId": "leg_-1_2",
+      "position": [
+        -0.15625,
+        -0.15625,
+        0
+      ],
+      "purpose": "visual contact locator"
+    },
+    {
+      "id": "leg_1_0_contact",
+      "partId": "leg_1_0",
+      "position": [
+        0.15625,
+        -0.15625,
+        0
+      ],
+      "purpose": "visual contact locator"
+    },
+    {
+      "id": "leg_1_1_contact",
+      "partId": "leg_1_1",
+      "position": [
+        0.15625,
+        -0.15625,
+        0
+      ],
+      "purpose": "visual contact locator"
+    },
+    {
+      "id": "leg_1_2_contact",
+      "partId": "leg_1_2",
+      "position": [
+        0.15625,
+        -0.15625,
+        0
+      ],
+      "purpose": "visual contact locator"
+    },
+    {
+      "id": "shell_center",
+      "partId": "carapace",
+      "position": [
+        0,
+        0.09375,
+        0
+      ],
+      "purpose": "visual shell inspection anchor"
+    },
+    {
+      "id": "ground_origin",
+      "partId": "root",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "purpose": "visual placement origin"
+    }
+  ],
+  "instances": [],
+  "notes": [
+    "재사용 가능한 절차적 복셀 시각 원본. 게임·충돌·HP·공격·부위 기능·애니메이션은 미통합.",
+    "전체 실루엣(뿔·날개·소지 시각소품 포함)을 설계 L/W/H 0.8/0.7/0.35m에 맞춤. 표현 격자 0.03125m로 반올림. 질량·장기 물성은 시각 모델에서 계산하지 않음.",
+    "해조와 사체를 처리한다. 집게를 벌린 채 옆걸음으로 경고하고 먹이를 두고 도주한다.",
+    "전면 +Z, 지면 Y=0. 부위 parent와 피벗은 편집·애니메이션 준비용이며 생물 기능 연결의 구현을 뜻하지 않음."
+  ],
+  "collision": {
+    "enabled": true,
+    "ownerScope": "entity_instance",
+    "selfCollision": false,
+    "externalCollision": true,
+    "shape": "part_cuboid_compound",
+    "jointOverlapAllowed": true
+  },
+  "geometry": {
+    "authoringTool": "feral_voxel_builder_v1",
+    "occupancy": "exclusive_within_part",
+    "independentPartOverlap": "preserve_joint_allowance",
+    "surfaceMeshing": "remove_shared_same_medium_or_opaque_faces_within_part"
+  }
+}

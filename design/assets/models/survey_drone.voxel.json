@@ -1,0 +1,632 @@
+{
+  "schemaVersion": 1,
+  "id": "survey_drone",
+  "name": "측량부유체",
+  "category": "creature",
+  "contentRef": {
+    "file": "design/content/creatures.json",
+    "id": "survey_drone"
+  },
+  "status": "art_prototype",
+  "units": "m",
+  "upAxis": "Y",
+  "forwardAxis": "+Z",
+  "visualGridM": 0.03125,
+  "materials": [
+    {
+      "id": "coat",
+      "color": "#8C9FA4",
+      "roughness": 0.88,
+      "metallic": 0.65,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "belly",
+      "color": "#DBD7BF",
+      "roughness": 0.88,
+      "metallic": 0.65,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "dark",
+      "color": "#35485A",
+      "roughness": 0.88,
+      "metallic": 0.65,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "accent",
+      "color": "#8ED1D3",
+      "roughness": 0.88,
+      "metallic": 0.65,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "ivory",
+      "color": "#EEE4C9",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "ink",
+      "color": "#17212B",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    }
+  ],
+  "parts": [
+    {
+      "id": "root",
+      "parent": null,
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "root",
+      "boxes": []
+    },
+    {
+      "id": "central_hull",
+      "parent": "root",
+      "translation": [
+        0.03125,
+        0.25,
+        0.03125
+      ],
+      "role": "hull_visual",
+      "boxes": [
+        {
+          "center": [
+            -0.265625,
+            0,
+            0.015625
+          ],
+          "size": [
+            0.09375,
+            0.25,
+            0.59375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            0.234375,
+            0,
+            0.015625
+          ],
+          "size": [
+            0.09375,
+            0.25,
+            0.59375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.015625,
+            -0.015625,
+            0.015625
+          ],
+          "size": [
+            0.40625,
+            0.21875,
+            0.59375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.015625,
+            0.109375,
+            -0.234375
+          ],
+          "size": [
+            0.40625,
+            0.03125,
+            0.09375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.015625,
+            0.109375,
+            0.265625
+          ],
+          "size": [
+            0.40625,
+            0.03125,
+            0.09375
+          ],
+          "material": "coat"
+        },
+        {
+          "center": [
+            -0.015625,
+            0.140625,
+            0.015625
+          ],
+          "size": [
+            0.40625,
+            0.09375,
+            0.40625
+          ],
+          "material": "belly"
+        },
+        {
+          "center": [
+            -0.015625,
+            -0.140625,
+            0.015625
+          ],
+          "size": [
+            0.40625,
+            0.03125,
+            0.46875
+          ],
+          "material": "dark"
+        }
+      ]
+    },
+    {
+      "id": "thruster_0",
+      "parent": "root",
+      "translation": [
+        0.03125,
+        0.15625,
+        -0.375
+      ],
+      "role": "thruster_visual",
+      "boxes": [
+        {
+          "center": [
+            -0.140625,
+            -0.015625,
+            0
+          ],
+          "size": [
+            0.03125,
+            0.21875,
+            0.3125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            0.109375,
+            -0.015625,
+            0
+          ],
+          "size": [
+            0.03125,
+            0.21875,
+            0.3125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.015625,
+            0,
+            0
+          ],
+          "size": [
+            0.21875,
+            0.1875,
+            0.3125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.015625,
+            -0.109375,
+            -0.140625
+          ],
+          "size": [
+            0.21875,
+            0.03125,
+            0.03125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.015625,
+            -0.109375,
+            0.140625
+          ],
+          "size": [
+            0.21875,
+            0.03125,
+            0.03125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.015625,
+            -0.125,
+            0
+          ],
+          "size": [
+            0.21875,
+            0.0625,
+            0.25
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            -0.015625,
+            0.109375,
+            0
+          ],
+          "size": [
+            0.28125,
+            0.03125,
+            0.3125
+          ],
+          "material": "belly"
+        }
+      ]
+    },
+    {
+      "id": "thruster_1",
+      "parent": "root",
+      "translation": [
+        -0.375,
+        0.15625,
+        0.28125
+      ],
+      "role": "thruster_visual",
+      "boxes": [
+        {
+          "center": [
+            -0.140625,
+            -0.015625,
+            -0.015625
+          ],
+          "size": [
+            0.03125,
+            0.21875,
+            0.28125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            0.109375,
+            -0.015625,
+            -0.015625
+          ],
+          "size": [
+            0.03125,
+            0.21875,
+            0.28125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.015625,
+            0,
+            -0.015625
+          ],
+          "size": [
+            0.21875,
+            0.1875,
+            0.28125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.015625,
+            -0.109375,
+            -0.140625
+          ],
+          "size": [
+            0.21875,
+            0.03125,
+            0.03125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.015625,
+            -0.125,
+            0
+          ],
+          "size": [
+            0.21875,
+            0.0625,
+            0.25
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            -0.015625,
+            0.109375,
+            -0.015625
+          ],
+          "size": [
+            0.28125,
+            0.03125,
+            0.34375
+          ],
+          "material": "belly"
+        }
+      ]
+    },
+    {
+      "id": "thruster_2",
+      "parent": "root",
+      "translation": [
+        0.40625,
+        0.15625,
+        0.28125
+      ],
+      "role": "thruster_visual",
+      "boxes": [
+        {
+          "center": [
+            -0.109375,
+            -0.015625,
+            -0.015625
+          ],
+          "size": [
+            0.03125,
+            0.21875,
+            0.28125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            0.140625,
+            -0.015625,
+            -0.015625
+          ],
+          "size": [
+            0.03125,
+            0.21875,
+            0.28125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            0.015625,
+            0,
+            -0.015625
+          ],
+          "size": [
+            0.21875,
+            0.1875,
+            0.28125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            0.015625,
+            -0.109375,
+            -0.140625
+          ],
+          "size": [
+            0.21875,
+            0.03125,
+            0.03125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            0.015625,
+            -0.125,
+            0
+          ],
+          "size": [
+            0.21875,
+            0.0625,
+            0.25
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            0.015625,
+            0.109375,
+            -0.015625
+          ],
+          "size": [
+            0.28125,
+            0.03125,
+            0.34375
+          ],
+          "material": "belly"
+        }
+      ]
+    },
+    {
+      "id": "sensor",
+      "parent": "root",
+      "translation": [
+        0.03125,
+        0.25,
+        0.40625
+      ],
+      "role": "visual",
+      "boxes": [
+        {
+          "center": [
+            -0.015625,
+            0,
+            0.015625
+          ],
+          "size": [
+            0.34375,
+            0.1875,
+            0.15625
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.015625,
+            0,
+            0.109375
+          ],
+          "size": [
+            0.21875,
+            0.0625,
+            0.03125
+          ],
+          "material": "accent"
+        },
+        {
+          "center": [
+            -0.015625,
+            0,
+            0.140625
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "ivory"
+        }
+      ]
+    },
+    {
+      "id": "top_antenna",
+      "parent": "root",
+      "translation": [
+        0.03125,
+        0.4375,
+        -0.03125
+      ],
+      "role": "visual",
+      "boxes": [
+        {
+          "center": [
+            -0.015625,
+            0.09375,
+            -0.015625
+          ],
+          "size": [
+            0.03125,
+            0.1875,
+            0.03125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.015625,
+            0.21875,
+            -0.015625
+          ],
+          "size": [
+            0.15625,
+            0.0625,
+            0.09375
+          ],
+          "material": "accent"
+        }
+      ]
+    }
+  ],
+  "anchors": [
+    {
+      "id": "thrust_locator_0",
+      "partId": "thruster_0",
+      "position": [
+        0,
+        -0.15625,
+        0
+      ],
+      "purpose": "visual thruster locator; no propulsion function"
+    },
+    {
+      "id": "thrust_locator_1",
+      "partId": "thruster_1",
+      "position": [
+        0,
+        -0.15625,
+        0
+      ],
+      "purpose": "visual thruster locator; no propulsion function"
+    },
+    {
+      "id": "thrust_locator_2",
+      "partId": "thruster_2",
+      "position": [
+        0,
+        -0.15625,
+        0
+      ],
+      "purpose": "visual thruster locator; no propulsion function"
+    },
+    {
+      "id": "survey_origin",
+      "partId": "sensor",
+      "position": [
+        0,
+        0,
+        0.1875
+      ],
+      "purpose": "visual scan and aim origin"
+    },
+    {
+      "id": "ground_origin",
+      "partId": "root",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "purpose": "visual placement origin"
+    }
+  ],
+  "instances": [],
+  "notes": [
+    "재사용 가능한 절차적 복셀 시각 원본. 게임·충돌·HP·공격·부위 기능·애니메이션은 미통합.",
+    "전체 실루엣(뿔·날개·소지 시각소품 포함)을 설계 L/W/H 1.1/1.1/0.7m에 맞춤. 표현 격자 0.03125m로 반올림. 질량·장기 물성은 시각 모델에서 계산하지 않음.",
+    "월드 기원의 무기생명 경비. 탐조선을 바닥에 그은 뒤 전격을 방출하고 발광 축전부가 취약점이다.",
+    "전면 +Z, 지면 Y=0. 부위 parent와 피벗은 편집·애니메이션 준비용이며 생물 기능 연결의 구현을 뜻하지 않음."
+  ],
+  "collision": {
+    "enabled": true,
+    "ownerScope": "entity_instance",
+    "selfCollision": false,
+    "externalCollision": true,
+    "shape": "part_cuboid_compound",
+    "jointOverlapAllowed": true
+  },
+  "geometry": {
+    "authoringTool": "feral_voxel_builder_v1",
+    "occupancy": "exclusive_within_part",
+    "independentPartOverlap": "preserve_joint_allowance",
+    "surfaceMeshing": "remove_shared_same_medium_or_opaque_faces_within_part"
+  }
+}

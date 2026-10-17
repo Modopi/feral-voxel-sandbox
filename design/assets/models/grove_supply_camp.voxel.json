@@ -1,0 +1,7323 @@
+{
+  "schemaVersion": 1,
+  "id": "grove_supply_camp",
+  "name": "숲 보급 공동체",
+  "category": "structure",
+  "contentRef": {
+    "file": "design/content/structures.json",
+    "id": "grove_supply_camp"
+  },
+  "status": "art_prototype",
+  "units": "m",
+  "upAxis": "Y",
+  "forwardAxis": "+Z",
+  "visualGridM": 0.5,
+  "materials": [
+    {
+      "id": "plank",
+      "color": "#A77A50",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true,
+      "blockId": "plank"
+    },
+    {
+      "id": "stone",
+      "color": "#92948B",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true,
+      "blockId": "stone"
+    },
+    {
+      "id": "log",
+      "color": "#73503A",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true,
+      "blockId": "log"
+    },
+    {
+      "id": "moss",
+      "color": "#65844D",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true,
+      "blockId": "moss"
+    },
+    {
+      "id": "weathered_wall",
+      "color": "#725039",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true,
+      "blockId": "plank"
+    },
+    {
+      "id": "worn_wall",
+      "color": "#BC9465",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true,
+      "blockId": "plank"
+    },
+    {
+      "id": "deep_moss",
+      "color": "#46623E",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true,
+      "blockId": "moss"
+    },
+    {
+      "id": "sunlit_leaves",
+      "color": "#8BA65B",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true,
+      "blockId": "leaves"
+    }
+  ],
+  "parts": [
+    {
+      "id": "root",
+      "parent": null,
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "root",
+      "boxes": []
+    },
+    {
+      "id": "floor_mesh",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "floor",
+      "boxes": [
+        {
+          "center": [
+            16,
+            -0.25,
+            -15.5
+          ],
+          "size": [
+            12,
+            0.5,
+            3
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            16,
+            -0.25,
+            -10.5
+          ],
+          "size": [
+            20,
+            0.5,
+            7
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            8,
+            -0.25,
+            -6
+          ],
+          "size": [
+            4,
+            0.5,
+            2
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            24,
+            -0.25,
+            -6
+          ],
+          "size": [
+            4,
+            0.5,
+            2
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            16,
+            -0.25,
+            -4
+          ],
+          "size": [
+            44,
+            0.5,
+            2
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            16,
+            -0.25,
+            0
+          ],
+          "size": [
+            48,
+            0.5,
+            6
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            16,
+            -0.25,
+            4
+          ],
+          "size": [
+            44,
+            0.5,
+            2
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            8,
+            -0.25,
+            6
+          ],
+          "size": [
+            4,
+            0.5,
+            2
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            24,
+            -0.25,
+            6
+          ],
+          "size": [
+            4,
+            0.5,
+            2
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            16,
+            -0.25,
+            10.5
+          ],
+          "size": [
+            20,
+            0.5,
+            7
+          ],
+          "material": "stone"
+        },
+        {
+          "center": [
+            16,
+            -0.25,
+            15.5
+          ],
+          "size": [
+            12,
+            0.5,
+            3
+          ],
+          "material": "stone"
+        }
+      ]
+    },
+    {
+      "id": "room_walls",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "wall",
+      "boxes": [
+        {
+          "center": [
+            -6.5,
+            2.5,
+            -4.5
+          ],
+          "size": [
+            1,
+            5,
+            3
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            -6.5,
+            2.5,
+            4.5
+          ],
+          "size": [
+            1,
+            5,
+            3
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            6.5,
+            4.5,
+            0
+          ],
+          "size": [
+            1,
+            1,
+            12
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            -5,
+            2.5,
+            -5.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            0,
+            2.5,
+            -5.5
+          ],
+          "size": [
+            4,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            5,
+            2.5,
+            -5.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            3,
+            1,
+            -5.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            3,
+            4.5,
+            -5.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            -3,
+            1,
+            -5.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            -3,
+            4.5,
+            -5.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            -5,
+            2.5,
+            5.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            0,
+            2.5,
+            5.5
+          ],
+          "size": [
+            4,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            5,
+            2.5,
+            5.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            3,
+            1,
+            5.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            3,
+            4.5,
+            5.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            -3,
+            1,
+            5.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            -3,
+            4.5,
+            5.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            9.5,
+            4.5,
+            -12
+          ],
+          "size": [
+            1,
+            1,
+            12
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            9.5,
+            2,
+            -16
+          ],
+          "size": [
+            1,
+            4,
+            4
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            22.5,
+            4.5,
+            -12
+          ],
+          "size": [
+            1,
+            1,
+            12
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            22.5,
+            2,
+            -16
+          ],
+          "size": [
+            1,
+            4,
+            4
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            11,
+            2.5,
+            -17.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            16,
+            2.5,
+            -17.5
+          ],
+          "size": [
+            4,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            21,
+            2.5,
+            -17.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            19,
+            1,
+            -17.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            19,
+            4.5,
+            -17.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            13,
+            1,
+            -17.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            13,
+            4.5,
+            -17.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            11,
+            2.5,
+            -6.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            16,
+            2.5,
+            -6.5
+          ],
+          "size": [
+            4,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            21,
+            2.5,
+            -6.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            19,
+            1,
+            -6.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            19,
+            4.5,
+            -6.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            13,
+            1,
+            -6.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            13,
+            4.5,
+            -6.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            9.5,
+            4.5,
+            12
+          ],
+          "size": [
+            1,
+            1,
+            12
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            9.5,
+            2,
+            16
+          ],
+          "size": [
+            1,
+            4,
+            4
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            22.5,
+            4.5,
+            12
+          ],
+          "size": [
+            1,
+            1,
+            12
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            22.5,
+            2,
+            16
+          ],
+          "size": [
+            1,
+            4,
+            4
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            11,
+            2.5,
+            6.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            16,
+            2.5,
+            6.5
+          ],
+          "size": [
+            4,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            21,
+            2.5,
+            6.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            19,
+            1,
+            6.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            19,
+            4.5,
+            6.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            13,
+            1,
+            6.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            13,
+            4.5,
+            6.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            11,
+            2.5,
+            17.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            16,
+            2.5,
+            17.5
+          ],
+          "size": [
+            4,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            21,
+            2.5,
+            17.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            19,
+            1,
+            17.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            19,
+            4.5,
+            17.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            13,
+            1,
+            17.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            13,
+            4.5,
+            17.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            25.5,
+            4.5,
+            0
+          ],
+          "size": [
+            1,
+            1,
+            12
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            38.5,
+            2.5,
+            -4.5
+          ],
+          "size": [
+            1,
+            5,
+            3
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            38.5,
+            2.5,
+            4.5
+          ],
+          "size": [
+            1,
+            5,
+            3
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            27,
+            2.5,
+            -5.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            32,
+            2.5,
+            -5.5
+          ],
+          "size": [
+            4,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            37,
+            2.5,
+            -5.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            35,
+            1,
+            -5.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            35,
+            4.5,
+            -5.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            29,
+            1,
+            -5.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            29,
+            4.5,
+            -5.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            27,
+            2.5,
+            5.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            32,
+            2.5,
+            5.5
+          ],
+          "size": [
+            4,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            37,
+            2.5,
+            5.5
+          ],
+          "size": [
+            2,
+            5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            35,
+            1,
+            5.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            35,
+            4.5,
+            5.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            29,
+            1,
+            5.5
+          ],
+          "size": [
+            2,
+            2,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            29,
+            4.5,
+            5.5
+          ],
+          "size": [
+            2,
+            1,
+            1
+          ],
+          "material": "plank"
+        }
+      ]
+    },
+    {
+      "id": "corridor_walls",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "wall",
+      "boxes": [
+        {
+          "center": [
+            5.5,
+            2,
+            -7
+          ],
+          "size": [
+            1,
+            4,
+            4
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            10.5,
+            2,
+            -6
+          ],
+          "size": [
+            1,
+            4,
+            2
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            5.5,
+            2,
+            -12
+          ],
+          "size": [
+            1,
+            4,
+            6
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            8,
+            2,
+            -14.5
+          ],
+          "size": [
+            4,
+            4,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            5.5,
+            2,
+            7
+          ],
+          "size": [
+            1,
+            4,
+            4
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            10.5,
+            2,
+            6
+          ],
+          "size": [
+            1,
+            4,
+            2
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            5.5,
+            2,
+            12
+          ],
+          "size": [
+            1,
+            4,
+            6
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            8,
+            2,
+            14.5
+          ],
+          "size": [
+            4,
+            4,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            21.5,
+            2,
+            -6
+          ],
+          "size": [
+            1,
+            4,
+            2
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            26.5,
+            2,
+            -10
+          ],
+          "size": [
+            1,
+            4,
+            10
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            24,
+            2,
+            -14.5
+          ],
+          "size": [
+            4,
+            4,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            21.5,
+            2,
+            6
+          ],
+          "size": [
+            1,
+            4,
+            2
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            26.5,
+            2,
+            10
+          ],
+          "size": [
+            1,
+            4,
+            10
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            24,
+            2,
+            14.5
+          ],
+          "size": [
+            4,
+            4,
+            1
+          ],
+          "material": "plank"
+        }
+      ]
+    },
+    {
+      "id": "exterior_details",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "landmark",
+      "boxes": [
+        {
+          "center": [
+            -6.75,
+            3.75,
+            -6
+          ],
+          "size": [
+            0.5,
+            3.5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            -7.25,
+            4,
+            -6
+          ],
+          "size": [
+            0.5,
+            3,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            -7,
+            2.75,
+            6
+          ],
+          "size": [
+            1,
+            5.5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            7,
+            4.75,
+            -6
+          ],
+          "size": [
+            1,
+            1.5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            7,
+            4.75,
+            6
+          ],
+          "size": [
+            1,
+            1.5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            -5.25,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            -2.75,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            -0.75,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            1,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            3,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            5.25,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            0,
+            3.25,
+            5.75
+          ],
+          "size": [
+            12,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            -3.25,
+            0.75,
+            6.5
+          ],
+          "size": [
+            0.5,
+            1.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            -3.75,
+            0.75,
+            6.75
+          ],
+          "size": [
+            0.5,
+            1.5,
+            0.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            -3.5,
+            1.75,
+            6.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            -3,
+            2.25,
+            6.25
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            -0.5,
+            1.25,
+            6.5
+          ],
+          "size": [
+            1,
+            2.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            -1,
+            2.75,
+            6.25
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            2.5,
+            0.75,
+            6.5
+          ],
+          "size": [
+            1,
+            1.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            2.5,
+            2.5,
+            6.5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            2.5,
+            1.75,
+            6.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            2.5,
+            3.25,
+            6.25
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            9.25,
+            3.75,
+            -18
+          ],
+          "size": [
+            0.5,
+            3.5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            8.75,
+            4,
+            -18
+          ],
+          "size": [
+            0.5,
+            3,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            9,
+            4.75,
+            -6
+          ],
+          "size": [
+            1,
+            1.5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            23,
+            2.75,
+            -18
+          ],
+          "size": [
+            1,
+            5.5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            23,
+            4.75,
+            -6
+          ],
+          "size": [
+            1,
+            1.5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            10.75,
+            3.25,
+            -18.25
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            13.25,
+            3.25,
+            -18.25
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            15.25,
+            3.25,
+            -18.25
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            17,
+            3.25,
+            -18.25
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            19,
+            3.25,
+            -18.25
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            21.25,
+            3.25,
+            -18.25
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            16,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            12,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            12.75,
+            0.75,
+            -5.5
+          ],
+          "size": [
+            0.5,
+            1.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            12.25,
+            0.75,
+            -5.25
+          ],
+          "size": [
+            0.5,
+            1.5,
+            0.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            12.5,
+            1.75,
+            -5.25
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            13,
+            2.25,
+            -5.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            15.5,
+            1.25,
+            -5.5
+          ],
+          "size": [
+            1,
+            2.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            15,
+            2.75,
+            -5.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            18.5,
+            0.75,
+            -5.5
+          ],
+          "size": [
+            1,
+            1.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            18.5,
+            2.5,
+            -5.5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            18.5,
+            1.75,
+            -5.25
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            18.5,
+            3.25,
+            -5.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            9,
+            4.75,
+            6
+          ],
+          "size": [
+            1,
+            1.5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            9,
+            2.75,
+            18
+          ],
+          "size": [
+            1,
+            5.5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            23,
+            4.75,
+            6
+          ],
+          "size": [
+            1,
+            1.5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            22.75,
+            3.25,
+            18
+          ],
+          "size": [
+            0.5,
+            4.5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            23.25,
+            4,
+            18
+          ],
+          "size": [
+            0.5,
+            3,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            23.25,
+            1.25,
+            17.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            10.75,
+            3.25,
+            5.75
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            13.25,
+            3.25,
+            5.75
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            15.25,
+            3.25,
+            5.75
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            17,
+            3.25,
+            5.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            19,
+            3.25,
+            5.75
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            21.25,
+            3.25,
+            5.75
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            16,
+            3.25,
+            17.75
+          ],
+          "size": [
+            12,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            12.75,
+            0.75,
+            18.5
+          ],
+          "size": [
+            0.5,
+            1.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            12.25,
+            0.75,
+            18.75
+          ],
+          "size": [
+            0.5,
+            1.5,
+            0.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            12.5,
+            1.75,
+            18.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            13,
+            2.25,
+            18.25
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            15.5,
+            1.25,
+            18.5
+          ],
+          "size": [
+            1,
+            2.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            15,
+            2.75,
+            18.25
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            18.5,
+            0.75,
+            18.5
+          ],
+          "size": [
+            1,
+            1.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            18.5,
+            2.5,
+            18.5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            18.5,
+            1.75,
+            18.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            18.5,
+            3.25,
+            18.25
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            25,
+            4.75,
+            -6
+          ],
+          "size": [
+            1,
+            1.5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            25,
+            4.75,
+            6
+          ],
+          "size": [
+            1,
+            1.5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            39,
+            2.75,
+            -6
+          ],
+          "size": [
+            1,
+            5.5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            38.75,
+            3.25,
+            6
+          ],
+          "size": [
+            0.5,
+            4.5,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            39.25,
+            4,
+            6
+          ],
+          "size": [
+            0.5,
+            3,
+            1
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            39.25,
+            1.25,
+            5.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "plank"
+        },
+        {
+          "center": [
+            26.75,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            29.25,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            31.25,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            33,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            35,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            37.25,
+            3.25,
+            -6.25
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            32,
+            3.25,
+            5.75
+          ],
+          "size": [
+            12,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            28.75,
+            0.75,
+            6.5
+          ],
+          "size": [
+            0.5,
+            1.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            28.25,
+            0.75,
+            6.75
+          ],
+          "size": [
+            0.5,
+            1.5,
+            0.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            28.5,
+            1.75,
+            6.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            29,
+            2.25,
+            6.25
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            31.5,
+            1.25,
+            6.5
+          ],
+          "size": [
+            1,
+            2.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            31,
+            2.75,
+            6.25
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            34.5,
+            0.75,
+            6.5
+          ],
+          "size": [
+            1,
+            1.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            34.5,
+            2.5,
+            6.5
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            34.5,
+            1.75,
+            6.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            34.5,
+            3.25,
+            6.25
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            -4.25,
+            1.75,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -2.5,
+            1.75,
+            -6.25
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -4.25,
+            4.25,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -2.5,
+            4.25,
+            -6.25
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -4.25,
+            3,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -1.75,
+            3,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            2.75,
+            1.75,
+            -6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            2.75,
+            4.25,
+            -6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            1.75,
+            3,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -4.25,
+            1.75,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -2.5,
+            1.75,
+            6.25
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -4.25,
+            4.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -2.5,
+            4.25,
+            6.25
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -4.25,
+            2.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -4.25,
+            3.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -1.75,
+            3,
+            6.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            2.75,
+            1.75,
+            6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            2.25,
+            4.25,
+            6.25
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            3.75,
+            4.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            1.75,
+            3,
+            6.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            -3.75,
+            2.5,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            -3.75,
+            2.5,
+            6.25
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            0.25,
+            2.5,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            0.25,
+            2.5,
+            6.25
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            4.25,
+            2.5,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            4.25,
+            2.5,
+            6.25
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            -6.5,
+            0.25,
+            -7.25
+          ],
+          "size": [
+            1,
+            0.5,
+            1.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            -7.25,
+            0.25,
+            -7.5
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            -6.75,
+            0.75,
+            -7.75
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            -6.25,
+            1.25,
+            -6.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            -6.25,
+            0.75,
+            -7
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            -7,
+            0.75,
+            -7
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            -7,
+            1.25,
+            -7.25
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            -6.75,
+            1.5,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            1,
+            1.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            -7.5,
+            1.25,
+            -6.25
+          ],
+          "size": [
+            1,
+            0.5,
+            1.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            -7.5,
+            1.75,
+            -6.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            -7.25,
+            2,
+            -6
+          ],
+          "size": [
+            0.5,
+            1,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            -7.75,
+            1.75,
+            -6
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            -8,
+            2.25,
+            -6
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            -7.75,
+            3,
+            -6
+          ],
+          "size": [
+            0.5,
+            1,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            -8.25,
+            2.75,
+            -6
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            -8.5,
+            3.5,
+            -6
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            -6.25,
+            0.5,
+            -6
+          ],
+          "size": [
+            0.5,
+            1,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            -6.75,
+            0.5,
+            -6
+          ],
+          "size": [
+            0.5,
+            1,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            -7.5,
+            0.75,
+            -6
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            -7.5,
+            0.25,
+            -5.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            -7.25,
+            0.25,
+            -6.5
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            -7.75,
+            0.25,
+            -6.5
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            -8.5,
+            0.25,
+            -6.25
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            -8.75,
+            0.25,
+            -7
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            -4.75,
+            4.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            -4.25,
+            3.75,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            -4.75,
+            3.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "sunlit_leaves"
+        },
+        {
+          "center": [
+            -4.25,
+            2.75,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            -0.75,
+            4.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            -0.25,
+            3.75,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            -0.75,
+            3.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "sunlit_leaves"
+        },
+        {
+          "center": [
+            -0.25,
+            2.75,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            3.25,
+            4.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            3.75,
+            3.75,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            3.25,
+            3.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "sunlit_leaves"
+        },
+        {
+          "center": [
+            3.75,
+            2.75,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            11.75,
+            1.75,
+            -18.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            13.5,
+            1.75,
+            -18.25
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            11.75,
+            4.25,
+            -18.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            13.5,
+            4.25,
+            -18.25
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            11.75,
+            3,
+            -18.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            14.25,
+            3,
+            -18.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            18.75,
+            1.75,
+            -18.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            18.75,
+            4.25,
+            -18.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            17.75,
+            3,
+            -18.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            11.75,
+            1.75,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            13.5,
+            1.75,
+            -5.75
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            11.75,
+            4.25,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            13.5,
+            4.25,
+            -5.75
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            11.75,
+            2.25,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            11.75,
+            3.25,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            14.25,
+            3,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            18.75,
+            1.75,
+            -5.75
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            18.25,
+            4.25,
+            -5.75
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            19.75,
+            4.25,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            17.75,
+            3,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            12.25,
+            2.5,
+            -18.25
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            12.25,
+            2.5,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            16.25,
+            2.5,
+            -18.25
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            16.25,
+            2.5,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            20.25,
+            2.5,
+            -18.25
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            20.25,
+            2.5,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            9.5,
+            0.25,
+            -19.25
+          ],
+          "size": [
+            1,
+            0.5,
+            1.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            8.75,
+            0.25,
+            -19.5
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            9.25,
+            0.75,
+            -19.75
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            9.75,
+            1.25,
+            -18.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            9.75,
+            0.75,
+            -19
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            9,
+            0.75,
+            -19
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            9,
+            1.25,
+            -19.25
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            9.25,
+            1.5,
+            -18.25
+          ],
+          "size": [
+            0.5,
+            1,
+            1.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            8.5,
+            1.25,
+            -18.25
+          ],
+          "size": [
+            1,
+            0.5,
+            1.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            8.5,
+            1.75,
+            -18.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            8.75,
+            2,
+            -18
+          ],
+          "size": [
+            0.5,
+            1,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            8.25,
+            1.75,
+            -18
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            8,
+            2.25,
+            -18
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            8.25,
+            3,
+            -18
+          ],
+          "size": [
+            0.5,
+            1,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            7.75,
+            2.75,
+            -18
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            7.5,
+            3.5,
+            -18
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            9.75,
+            0.5,
+            -18
+          ],
+          "size": [
+            0.5,
+            1,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            9.25,
+            0.5,
+            -18
+          ],
+          "size": [
+            0.5,
+            1,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            8.5,
+            0.75,
+            -18
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            8.5,
+            0.25,
+            -17.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            8.75,
+            0.25,
+            -18.5
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            8.25,
+            0.25,
+            -18.5
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            7.5,
+            0.25,
+            -18.25
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            7.25,
+            0.25,
+            -19
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            11.25,
+            4.25,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            11.75,
+            3.75,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            11.25,
+            3.25,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "sunlit_leaves"
+        },
+        {
+          "center": [
+            11.75,
+            2.75,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            15.25,
+            4.25,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            15.75,
+            3.75,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            15.25,
+            3.25,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "sunlit_leaves"
+        },
+        {
+          "center": [
+            15.75,
+            2.75,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            19.25,
+            4.25,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            19.75,
+            3.75,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            19.25,
+            3.25,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "sunlit_leaves"
+        },
+        {
+          "center": [
+            19.75,
+            2.75,
+            -5.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            11.75,
+            1.75,
+            5.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            13.5,
+            1.75,
+            5.75
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            11.75,
+            4.25,
+            5.75
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            13.5,
+            4.25,
+            5.75
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            11.75,
+            3,
+            5.75
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            14.25,
+            3,
+            5.75
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            18.75,
+            1.75,
+            5.75
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            18.75,
+            4.25,
+            5.75
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            17.75,
+            3,
+            5.75
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            11.75,
+            1.75,
+            18.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            13.5,
+            1.75,
+            18.25
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            11.75,
+            4.25,
+            18.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            13.5,
+            4.25,
+            18.25
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            11.75,
+            2.25,
+            18.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            11.75,
+            3.25,
+            18.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            14.25,
+            3,
+            18.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            18.75,
+            1.75,
+            18.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            18.25,
+            4.25,
+            18.25
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            19.75,
+            4.25,
+            18.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            17.75,
+            3,
+            18.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            12.25,
+            2.5,
+            5.75
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            12.25,
+            2.5,
+            18.25
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            16.25,
+            2.5,
+            5.75
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            16.25,
+            2.5,
+            18.25
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            20.25,
+            2.5,
+            5.75
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            20.25,
+            2.5,
+            18.25
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            23.25,
+            0.25,
+            19.75
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            23.25,
+            0.75,
+            20.25
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            22.75,
+            1,
+            19.25
+          ],
+          "size": [
+            0.5,
+            1,
+            1.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            23.5,
+            0.75,
+            19.25
+          ],
+          "size": [
+            1,
+            0.5,
+            1.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            23.5,
+            1.25,
+            19.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            24.25,
+            1.5,
+            18.75
+          ],
+          "size": [
+            0.5,
+            1,
+            1.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            23.5,
+            1.25,
+            18.75
+          ],
+          "size": [
+            1,
+            0.5,
+            1.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            23.5,
+            1.75,
+            19
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            23.25,
+            2,
+            18
+          ],
+          "size": [
+            0.5,
+            1,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            23.75,
+            1.75,
+            18
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            24,
+            2.25,
+            18
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            23.75,
+            3,
+            18
+          ],
+          "size": [
+            0.5,
+            1,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            24.25,
+            2.75,
+            18
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            24.5,
+            3.5,
+            18
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            22.75,
+            0.5,
+            18
+          ],
+          "size": [
+            0.5,
+            1,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            23.25,
+            0.5,
+            18
+          ],
+          "size": [
+            0.5,
+            1,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            24,
+            0.75,
+            18
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            24,
+            0.25,
+            17.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            23.75,
+            0.25,
+            18.5
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            24.25,
+            0.25,
+            18.5
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            25,
+            0.25,
+            18.25
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            25.25,
+            0.25,
+            19
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            11.25,
+            4.25,
+            18.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            11.75,
+            3.75,
+            18.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            11.25,
+            3.25,
+            18.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "sunlit_leaves"
+        },
+        {
+          "center": [
+            11.75,
+            2.75,
+            18.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            15.25,
+            4.25,
+            18.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            15.75,
+            3.75,
+            18.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            15.25,
+            3.25,
+            18.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "sunlit_leaves"
+        },
+        {
+          "center": [
+            15.75,
+            2.75,
+            18.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            19.25,
+            4.25,
+            18.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            19.75,
+            3.75,
+            18.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            19.25,
+            3.25,
+            18.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "sunlit_leaves"
+        },
+        {
+          "center": [
+            19.75,
+            2.75,
+            18.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            27.75,
+            1.75,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            29.5,
+            1.75,
+            -6.25
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            27.75,
+            4.25,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            29.5,
+            4.25,
+            -6.25
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            27.75,
+            3,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            30.25,
+            3,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            34.75,
+            1.75,
+            -6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            34.75,
+            4.25,
+            -6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            33.75,
+            3,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            27.75,
+            1.75,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            29.5,
+            1.75,
+            6.25
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            27.75,
+            4.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            29.5,
+            4.25,
+            6.25
+          ],
+          "size": [
+            2,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            27.75,
+            2.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            27.75,
+            3.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            30.25,
+            3,
+            6.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            34.75,
+            1.75,
+            6.25
+          ],
+          "size": [
+            2.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            34.25,
+            4.25,
+            6.25
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            35.75,
+            4.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            33.75,
+            3,
+            6.25
+          ],
+          "size": [
+            0.5,
+            2,
+            0.5
+          ],
+          "material": "worn_wall"
+        },
+        {
+          "center": [
+            28.25,
+            2.5,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            28.25,
+            2.5,
+            6.25
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            32.25,
+            2.5,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            32.25,
+            2.5,
+            6.25
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            36.25,
+            2.5,
+            -6.25
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            36.25,
+            2.5,
+            6.25
+          ],
+          "size": [
+            0.5,
+            5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            39.25,
+            0.25,
+            7.75
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            39.25,
+            0.75,
+            8.25
+          ],
+          "size": [
+            1.5,
+            0.5,
+            0.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            38.75,
+            1,
+            7.25
+          ],
+          "size": [
+            0.5,
+            1,
+            1.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            39.5,
+            0.75,
+            7.25
+          ],
+          "size": [
+            1,
+            0.5,
+            1.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            39.5,
+            1.25,
+            7.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            40.25,
+            1.5,
+            6.75
+          ],
+          "size": [
+            0.5,
+            1,
+            1.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            39.5,
+            1.25,
+            6.75
+          ],
+          "size": [
+            1,
+            0.5,
+            1.5
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            39.5,
+            1.75,
+            7
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            39.25,
+            2,
+            6
+          ],
+          "size": [
+            0.5,
+            1,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            39.75,
+            1.75,
+            6
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            40,
+            2.25,
+            6
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            39.75,
+            3,
+            6
+          ],
+          "size": [
+            0.5,
+            1,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            40.25,
+            2.75,
+            6
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            40.5,
+            3.5,
+            6
+          ],
+          "size": [
+            1,
+            1,
+            1
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            38.75,
+            0.5,
+            6
+          ],
+          "size": [
+            0.5,
+            1,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            39.25,
+            0.5,
+            6
+          ],
+          "size": [
+            0.5,
+            1,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            40,
+            0.75,
+            6
+          ],
+          "size": [
+            1,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            40,
+            0.25,
+            5.75
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            39.75,
+            0.25,
+            6.5
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            40.25,
+            0.25,
+            6.5
+          ],
+          "size": [
+            0.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            41,
+            0.25,
+            6.25
+          ],
+          "size": [
+            1,
+            0.5,
+            0.5
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            41.25,
+            0.25,
+            7
+          ],
+          "size": [
+            1.5,
+            0.5,
+            1
+          ],
+          "material": "weathered_wall"
+        },
+        {
+          "center": [
+            27.25,
+            4.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            27.75,
+            3.75,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            27.25,
+            3.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "sunlit_leaves"
+        },
+        {
+          "center": [
+            27.75,
+            2.75,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            31.25,
+            4.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            31.75,
+            3.75,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            31.25,
+            3.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "sunlit_leaves"
+        },
+        {
+          "center": [
+            31.75,
+            2.75,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            35.25,
+            4.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            35.75,
+            3.75,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            35.25,
+            3.25,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "sunlit_leaves"
+        },
+        {
+          "center": [
+            35.75,
+            2.75,
+            6.25
+          ],
+          "size": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "material": "deep_moss"
+        }
+      ]
+    },
+    {
+      "id": "interior_landmarks",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "landmark",
+      "boxes": []
+    },
+    {
+      "id": "corridor_roof_0",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            8.5,
+            4.25,
+            0
+          ],
+          "size": [
+            5,
+            0.5,
+            6
+          ],
+          "material": "log"
+        }
+      ]
+    },
+    {
+      "id": "corridor_roof_1",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            8,
+            4.25,
+            -6
+          ],
+          "size": [
+            4,
+            0.5,
+            18
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            10.5,
+            4.25,
+            -2
+          ],
+          "size": [
+            1,
+            0.5,
+            10
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            5.5,
+            4.25,
+            -10
+          ],
+          "size": [
+            1,
+            0.5,
+            10
+          ],
+          "material": "log"
+        }
+      ]
+    },
+    {
+      "id": "corridor_roof_2",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            7.5,
+            4.25,
+            -12
+          ],
+          "size": [
+            5,
+            0.5,
+            6
+          ],
+          "material": "log"
+        }
+      ]
+    },
+    {
+      "id": "corridor_roof_3",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            8.5,
+            4.25,
+            0
+          ],
+          "size": [
+            5,
+            0.5,
+            6
+          ],
+          "material": "log"
+        }
+      ]
+    },
+    {
+      "id": "corridor_roof_4",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            8,
+            4.25,
+            6
+          ],
+          "size": [
+            4,
+            0.5,
+            18
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            10.5,
+            4.25,
+            2
+          ],
+          "size": [
+            1,
+            0.5,
+            10
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            5.5,
+            4.25,
+            10
+          ],
+          "size": [
+            1,
+            0.5,
+            10
+          ],
+          "material": "log"
+        }
+      ]
+    },
+    {
+      "id": "corridor_roof_5",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            7.5,
+            4.25,
+            12
+          ],
+          "size": [
+            5,
+            0.5,
+            6
+          ],
+          "material": "log"
+        }
+      ]
+    },
+    {
+      "id": "corridor_roof_6",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            24.5,
+            4.25,
+            -12
+          ],
+          "size": [
+            5,
+            0.5,
+            6
+          ],
+          "material": "log"
+        }
+      ]
+    },
+    {
+      "id": "corridor_roof_7",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            24,
+            4.25,
+            -6
+          ],
+          "size": [
+            4,
+            0.5,
+            18
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            26.5,
+            4.25,
+            -10
+          ],
+          "size": [
+            1,
+            0.5,
+            10
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            21.5,
+            4.25,
+            -2
+          ],
+          "size": [
+            1,
+            0.5,
+            10
+          ],
+          "material": "log"
+        }
+      ]
+    },
+    {
+      "id": "corridor_roof_8",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            23.5,
+            4.25,
+            0
+          ],
+          "size": [
+            5,
+            0.5,
+            6
+          ],
+          "material": "log"
+        }
+      ]
+    },
+    {
+      "id": "corridor_roof_9",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            24.5,
+            4.25,
+            12
+          ],
+          "size": [
+            5,
+            0.5,
+            6
+          ],
+          "material": "log"
+        }
+      ]
+    },
+    {
+      "id": "corridor_roof_10",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            24,
+            4.25,
+            6
+          ],
+          "size": [
+            4,
+            0.5,
+            18
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            26.5,
+            4.25,
+            10
+          ],
+          "size": [
+            1,
+            0.5,
+            10
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            21.5,
+            4.25,
+            2
+          ],
+          "size": [
+            1,
+            0.5,
+            10
+          ],
+          "material": "log"
+        }
+      ]
+    },
+    {
+      "id": "corridor_roof_11",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            23.5,
+            4.25,
+            0
+          ],
+          "size": [
+            5,
+            0.5,
+            6
+          ],
+          "material": "log"
+        }
+      ]
+    },
+    {
+      "id": "roof_room_0",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            0,
+            5.25,
+            -4
+          ],
+          "size": [
+            14,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            0,
+            5.25,
+            -2
+          ],
+          "size": [
+            14,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            -6.25,
+            5.75,
+            0
+          ],
+          "size": [
+            1.5,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            -0.75,
+            5.75,
+            0
+          ],
+          "size": [
+            2.5,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            6.5,
+            5.75,
+            0
+          ],
+          "size": [
+            1,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            0,
+            5.25,
+            2
+          ],
+          "size": [
+            14,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            0,
+            5.25,
+            4
+          ],
+          "size": [
+            14,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            -4.5,
+            5.75,
+            -3
+          ],
+          "size": [
+            1,
+            0.5,
+            2
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            -1,
+            5.75,
+            -3
+          ],
+          "size": [
+            3,
+            0.5,
+            3
+          ],
+          "material": "sunlit_leaves"
+        },
+        {
+          "center": [
+            -0.75,
+            6.25,
+            -3
+          ],
+          "size": [
+            2.5,
+            0.5,
+            2
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            2.25,
+            5.75,
+            -3
+          ],
+          "size": [
+            3.5,
+            0.5,
+            3
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            -3.75,
+            5.75,
+            0
+          ],
+          "size": [
+            3.5,
+            0.5,
+            3
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            2,
+            5.75,
+            0
+          ],
+          "size": [
+            3,
+            0.5,
+            3
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            4.75,
+            5.75,
+            0
+          ],
+          "size": [
+            2.5,
+            0.5,
+            3
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            2,
+            5.75,
+            3
+          ],
+          "size": [
+            3,
+            0.5,
+            3
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            4.75,
+            5.75,
+            3
+          ],
+          "size": [
+            2.5,
+            0.5,
+            3
+          ],
+          "material": "sunlit_leaves"
+        },
+        {
+          "center": [
+            4.75,
+            6.25,
+            3
+          ],
+          "size": [
+            1.5,
+            0.5,
+            2
+          ],
+          "material": "deep_moss"
+        }
+      ]
+    },
+    {
+      "id": "roof_room_1",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            16,
+            5.25,
+            -16
+          ],
+          "size": [
+            14,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            16,
+            5.25,
+            -14
+          ],
+          "size": [
+            14,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            9.75,
+            5.75,
+            -12
+          ],
+          "size": [
+            1.5,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            16,
+            5.75,
+            -12
+          ],
+          "size": [
+            7,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            22.5,
+            5.75,
+            -12
+          ],
+          "size": [
+            1,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            16,
+            5.25,
+            -10
+          ],
+          "size": [
+            14,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            16,
+            5.25,
+            -8
+          ],
+          "size": [
+            14,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            15.75,
+            5.75,
+            -15
+          ],
+          "size": [
+            0.5,
+            0.5,
+            2
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            19.5,
+            5.75,
+            -15
+          ],
+          "size": [
+            1,
+            0.5,
+            2
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            11.5,
+            5.75,
+            -15
+          ],
+          "size": [
+            2,
+            0.5,
+            3
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            11.5,
+            6.25,
+            -15
+          ],
+          "size": [
+            1,
+            0.5,
+            2
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            14.5,
+            5.75,
+            -15
+          ],
+          "size": [
+            2,
+            0.5,
+            3
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            11.5,
+            5.75,
+            -12
+          ],
+          "size": [
+            2,
+            0.5,
+            3
+          ],
+          "material": "sunlit_leaves"
+        },
+        {
+          "center": [
+            20.75,
+            5.75,
+            -12
+          ],
+          "size": [
+            2.5,
+            0.5,
+            3
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            20.75,
+            6.25,
+            -12
+          ],
+          "size": [
+            1.5,
+            0.5,
+            2
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            12,
+            5.75,
+            -9
+          ],
+          "size": [
+            3,
+            0.5,
+            3
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            12.25,
+            6.25,
+            -9
+          ],
+          "size": [
+            2.5,
+            0.5,
+            2
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            14.5,
+            5.75,
+            -9
+          ],
+          "size": [
+            2,
+            0.5,
+            3
+          ],
+          "material": "sunlit_leaves"
+        },
+        {
+          "center": [
+            14.5,
+            6.25,
+            -9
+          ],
+          "size": [
+            1,
+            0.5,
+            2
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            17.5,
+            5.75,
+            -9
+          ],
+          "size": [
+            2,
+            0.5,
+            3
+          ],
+          "material": "deep_moss"
+        }
+      ]
+    },
+    {
+      "id": "roof_room_2",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            16,
+            5.25,
+            8
+          ],
+          "size": [
+            14,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            16,
+            5.25,
+            10
+          ],
+          "size": [
+            14,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            11.25,
+            5.75,
+            12
+          ],
+          "size": [
+            4.5,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            16,
+            5.75,
+            12
+          ],
+          "size": [
+            1,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            20.75,
+            5.75,
+            12
+          ],
+          "size": [
+            4.5,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            16,
+            5.25,
+            14
+          ],
+          "size": [
+            14,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            16,
+            5.25,
+            16
+          ],
+          "size": [
+            14,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            19.25,
+            5.75,
+            9
+          ],
+          "size": [
+            0.5,
+            0.5,
+            2
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            12,
+            5.75,
+            9
+          ],
+          "size": [
+            3,
+            0.5,
+            3
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            12.25,
+            6.25,
+            9
+          ],
+          "size": [
+            2.5,
+            0.5,
+            2
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            15,
+            5.75,
+            9
+          ],
+          "size": [
+            3,
+            0.5,
+            3
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            15.25,
+            6.25,
+            9
+          ],
+          "size": [
+            2.5,
+            0.5,
+            2
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            17.5,
+            5.75,
+            9
+          ],
+          "size": [
+            2,
+            0.5,
+            3
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            20.5,
+            5.75,
+            9
+          ],
+          "size": [
+            2,
+            0.5,
+            3
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            20.5,
+            6.25,
+            9
+          ],
+          "size": [
+            1,
+            0.5,
+            2
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            14.5,
+            5.75,
+            12
+          ],
+          "size": [
+            2,
+            0.5,
+            3
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            17.5,
+            5.75,
+            12
+          ],
+          "size": [
+            2,
+            0.5,
+            3
+          ],
+          "material": "sunlit_leaves"
+        },
+        {
+          "center": [
+            12.25,
+            5.75,
+            15
+          ],
+          "size": [
+            3.5,
+            0.5,
+            3
+          ],
+          "material": "sunlit_leaves"
+        },
+        {
+          "center": [
+            18,
+            5.75,
+            15
+          ],
+          "size": [
+            3,
+            0.5,
+            3
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            20.5,
+            5.75,
+            15
+          ],
+          "size": [
+            2,
+            0.5,
+            3
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            20.5,
+            6.25,
+            15
+          ],
+          "size": [
+            1,
+            0.5,
+            2
+          ],
+          "material": "deep_moss"
+        }
+      ]
+    },
+    {
+      "id": "roof_room_3",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "roof",
+      "boxes": [
+        {
+          "center": [
+            32,
+            5.25,
+            -4
+          ],
+          "size": [
+            14,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            32,
+            5.25,
+            -2
+          ],
+          "size": [
+            14,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            25.75,
+            5.75,
+            0
+          ],
+          "size": [
+            1.5,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            33.5,
+            5.75,
+            0
+          ],
+          "size": [
+            4,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            38.5,
+            5.75,
+            0
+          ],
+          "size": [
+            1,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            32,
+            5.25,
+            2
+          ],
+          "size": [
+            14,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            32,
+            5.25,
+            4
+          ],
+          "size": [
+            14,
+            0.5,
+            2
+          ],
+          "material": "log"
+        },
+        {
+          "center": [
+            27.5,
+            5.75,
+            -3
+          ],
+          "size": [
+            1,
+            0.5,
+            2
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            31.5,
+            5.75,
+            -3
+          ],
+          "size": [
+            1,
+            0.5,
+            2
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            34,
+            5.75,
+            -3
+          ],
+          "size": [
+            3,
+            0.5,
+            3
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            34.25,
+            6.25,
+            -3
+          ],
+          "size": [
+            2.5,
+            0.5,
+            2
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            36.75,
+            5.75,
+            -3
+          ],
+          "size": [
+            2.5,
+            0.5,
+            3
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            28,
+            5.75,
+            0
+          ],
+          "size": [
+            3,
+            0.5,
+            3
+          ],
+          "material": "sunlit_leaves"
+        },
+        {
+          "center": [
+            28.25,
+            6.25,
+            0
+          ],
+          "size": [
+            2.5,
+            0.5,
+            2
+          ],
+          "material": "deep_moss"
+        },
+        {
+          "center": [
+            30.5,
+            5.75,
+            0
+          ],
+          "size": [
+            2,
+            0.5,
+            3
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            36.75,
+            5.75,
+            0
+          ],
+          "size": [
+            2.5,
+            0.5,
+            3
+          ],
+          "material": "sunlit_leaves"
+        },
+        {
+          "center": [
+            28,
+            5.75,
+            3
+          ],
+          "size": [
+            3,
+            0.5,
+            3
+          ],
+          "material": "sunlit_leaves"
+        },
+        {
+          "center": [
+            30.5,
+            5.75,
+            3
+          ],
+          "size": [
+            2,
+            0.5,
+            3
+          ],
+          "material": "moss"
+        },
+        {
+          "center": [
+            30.5,
+            6.25,
+            3
+          ],
+          "size": [
+            1,
+            0.5,
+            2
+          ],
+          "material": "deep_moss"
+        }
+      ]
+    }
+  ],
+  "anchors": [
+    {
+      "id": "front",
+      "partId": "root",
+      "position": [
+        -6,
+        0,
+        0
+      ],
+      "purpose": "Open entrance 6m wide, 5m high; no combat lock"
+    },
+    {
+      "id": "rear",
+      "partId": "root",
+      "position": [
+        38,
+        0,
+        0
+      ],
+      "purpose": "Open entrance 6m wide, 5m high; no combat lock"
+    },
+    {
+      "id": "room_room_0",
+      "partId": "root",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "purpose": "공동 식탁"
+    },
+    {
+      "id": "room_room_1",
+      "partId": "root",
+      "position": [
+        16,
+        0,
+        -12
+      ],
+      "purpose": "휴식소"
+    },
+    {
+      "id": "room_room_2",
+      "partId": "root",
+      "position": [
+        16,
+        0,
+        12
+      ],
+      "purpose": "목재 작업장"
+    },
+    {
+      "id": "room_room_3",
+      "partId": "root",
+      "position": [
+        32,
+        0,
+        0
+      ],
+      "purpose": "공용 창고"
+    },
+    {
+      "id": "food_supply",
+      "partId": "root",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "purpose": "Community service locator; no resident or stock spawned"
+    },
+    {
+      "id": "rest",
+      "partId": "root",
+      "position": [
+        16,
+        0,
+        -12
+      ],
+      "purpose": "Community service locator; no resident or stock spawned"
+    },
+    {
+      "id": "wood_processing",
+      "partId": "root",
+      "position": [
+        16,
+        0,
+        12
+      ],
+      "purpose": "Community service locator; no resident or stock spawned"
+    },
+    {
+      "id": "contribution",
+      "partId": "root",
+      "position": [
+        32,
+        0,
+        0
+      ],
+      "purpose": "Community service locator; no resident or stock spawned"
+    }
+  ],
+  "instances": [],
+  "notes": [
+    "Single-floor art prototype. Room clear sizes and doorway/corridor widths come directly from structures.json. Roof and roof decorations have role=roof for inspection cutaway.",
+    "Closed room walls are carved against open corridor and entrance volumes. Exterior detail is clipped against rooms, passages and bypass. Visual GLB is not runtime collision or navigation validation.",
+    "Facade trim, stepped roof shapes and rooftop instruments are cosmetic; no extra story, usable technology, energy supply or generated loot is implied.",
+    "Water is a visual layer below walking level; its simulation, ecosystem stock, damage and persistent inventory remain gameplay work.",
+    "Gimmick, component, reward and room anchors preserve source data locations. Runtime requires source-of-truth content and actual component assembly."
+  ],
+  "collision": {
+    "enabled": true,
+    "ownerScope": "entity_instance",
+    "selfCollision": false,
+    "externalCollision": true,
+    "shape": "part_cuboid_compound",
+    "jointOverlapAllowed": true
+  },
+  "geometry": {
+    "authoringTool": "feral_voxel_builder_v1",
+    "occupancy": "exclusive_within_part",
+    "independentPartOverlap": "preserve_joint_allowance",
+    "surfaceMeshing": "remove_shared_same_medium_or_opaque_faces_within_part"
+  }
+}

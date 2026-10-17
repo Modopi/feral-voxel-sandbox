@@ -24,3 +24,12 @@
 
 - 공개 저장소는 raw.githubusercontent.com의 updates 브랜치에서 토큰 없이 조회. 서명·파일 해시·네이티브 호환성 검증은 유지.
 - 앱 버전과 동봉 게임 버전은 별개. `tools/version.mjs`가 생성하는 `assets/game-version.json`으로 동봉 게임 코드/표시 버전을 읽으며 APK versionCode를 게임 코드로 사용하지 않음.
+
+## 복셀 에셋·엔티티 충돌 규칙
+
+- 형상/모델/충돌 변경 시 `docs/VOXEL-ASSET-RULES.md`를 따른다(사용자 확정).
+- 새 복셀 에셋은 반드시 `VoxelAssetBuilder` 또는 이를 공유하는 `generators/shared.mjs` 제작 API로 만든다. 화면 편집은 `design/assets/author.html`을 사용한다. 최종 `parts[].boxes`를 직접 쓰거나 빌드 후보정으로 중복을 숨기지 않는다.
+- 기본 추가는 같은 부위의 중복 점유를 즉시 거부한다. 의도적인 변경은 명시적인 교체/빈 공간 채우기/삭제 명령으로 수행한다. 관절 부위의 움직임 여유·피벗은 보존한다.
+- 같은 엔티티 인스턴스의 모든 자식 복셀/관절 몸체는 자기 충돌 제외. 다른 엔티티와 외부 고체 지형에는 충돌한다. 종/에셋 ID를 owner ID로 쓰지 않는다.
+- 외곽 AABB로 빈 공간을 막는 충돌 대체 금지. 물 등 비고체는 투명도와 별도로 충돌 제외를 명시한다.
+- 관련 변경은 `npm run check:assets`와 실제 물리 회귀검사를 통과해야 한다. GitHub의 Voxel asset harness 검사를 유지하고 우회하지 않는다. 원본·GLB·렌더를 함께 갱신하고, 도감 물리 검증을 게임 런타임 전체 통합으로 표현하지 않는다.

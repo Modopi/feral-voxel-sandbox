@@ -1,0 +1,1895 @@
+{
+  "schemaVersion": 1,
+  "status": "proposed",
+  "world": {
+    "generatorVersion": "content_world_proposal_1",
+    "chunkSizeM": 16,
+    "ecologyCellSizeM": 64,
+    "placementRegionSizeM": 512,
+    "voxelCellSizeM": 0.5,
+    "seaLevelM": 0,
+    "coordinateContract": {
+      "origin": "immutable initial spawn",
+      "horizontal": "signed integer chunk coordinates plus local half-metre cells",
+      "vertical": "signed chunked coordinates, no fixed world height",
+      "serialization": "decimal strings for chunk coordinates; fixed-width local integers",
+      "hash": "SHA-256 UTF-8 JSON array [seed, generatorVersion, namespace, decimalChunkX, decimalChunkY, decimalChunkZ, candidateIndex] first 53 bits unsigned big-endian / 2^53; exact [0,1) double",
+      "namespaceIsolation": [
+        "climate",
+        "height",
+        "water",
+        "ores",
+        "trees",
+        "difficulty",
+        "overlays",
+        "structures",
+        "population",
+        "micro"
+      ],
+      "negativeCoordinates": "floor division; remainder 0..chunkCellCount-1",
+      "runtimeRandomForbiddenForGeneration": true
+    },
+    "baseEnvironmentSelection": {
+      "selectionOrder": [
+        "coast",
+        "thermal",
+        "marsh",
+        "mana_grove",
+        "ridge",
+        "grove"
+      ],
+      "rules": {
+        "coast": "abs(coastSignedDistanceM)<128 OR (elevation>64 AND moisture<0.5)",
+        "thermal": "geothermalNoise>0.90",
+        "marsh": "moisture>0.80 AND elevation<6",
+        "mana_grove": "manaNoise>0.75 AND moisture>0.50",
+        "ridge": "moisture<0.45 OR elevation>48",
+        "grove": "fallback"
+      },
+      "noise": "smooth lattice value noise; independent named seed; scales 1024m climate / 512m geology / 256m height / 32m detail",
+      "seaMask": "smooth continental noise at wavelength4096m below0.22; inland sea boundary gives coast distance; spawn island repaired to mainland route",
+      "heightGenerationOrder": "continental mask and raw elevation first; classify environment; remap elevation using profile and blend; enforce drainage last",
+      "overlayOrder": [
+        "sacred",
+        "anomaly"
+      ],
+      "overlayMutualExclusion": true,
+      "sacredPatchRadiusM": [
+        48,
+        96
+      ],
+      "sacredCandidateProbabilityPerRegion": 0.08,
+      "anomalyPatchRadiusM": [
+        48,
+        96
+      ],
+      "anomalyCandidateProbabilityPerRegion": 0.04,
+      "anomalyMinimumRadiusFromSpawnM": 1536,
+      "rawElevationFormula": "-16 + 112*N(height,256m) + 16*N(detail,32m); continental sea mask overrides below sea before biome classification",
+      "profileHeightFormula": "for each selected neighbouring biome: h=min+(max-min)*(0.7*N(height,256)+0.2*N(detail,32)+0.1*N(micro,8)); smoothstep blend at32m boundary then apply pattern and final drainage; clamp to profile range before drainage"
+    },
+    "difficulty": {
+      "radialBands": [
+        {
+          "minM": 0,
+          "maxM": 128,
+          "tier": 1
+        },
+        {
+          "minM": 128,
+          "maxM": 384,
+          "tier": 2
+        },
+        {
+          "minM": 384,
+          "maxM": 768,
+          "tier": 3
+        },
+        {
+          "minM": 768,
+          "maxM": 1536,
+          "tier": 4
+        },
+        {
+          "minM": 1536,
+          "maxM": 3072,
+          "tier": 5
+        },
+        {
+          "minM": 3072,
+          "maxM": null,
+          "tierWeights": {
+            "5": 0.6,
+            "6": 0.4
+          }
+        }
+      ],
+      "tierNoiseCellM": 256,
+      "patchTiers": [
+        {
+          "tier": 7,
+          "minimumRadiusM": 4096
+        },
+        {
+          "tier": 8,
+          "minimumRadiusM": 6144
+        },
+        {
+          "tier": 9,
+          "minimumRadiusM": 8192
+        },
+        {
+          "tier": 10,
+          "minimumRadiusM": 12288
+        }
+      ],
+      "patchRadiusM": [
+        64,
+        96
+      ],
+      "cardinalSectorHalfAngleDegrees": 25,
+      "maxHighTierCoveragePer4096MRegion": 0.06,
+      "preferredHighTierCoverage": 0.03,
+      "maxHighTierPatchPer512MRegion": 1,
+      "patchCandidateProbability": 0.2,
+      "warningBufferM": 40,
+      "spawnHostileExclusionRadiusM": 64,
+      "starterBiomeRadiusM": 128,
+      "starterGuaranteedResourcesWithinM": 96,
+      "starterResourceGuarantees": {
+        "logCells": 64,
+        "stoneCells": 64,
+        "edibleProducerPatches": 4,
+        "drinkableWaterM3": 2,
+        "rawTimberHandUnits": 8,
+        "looseStoneHandUnits": 8,
+        "plantFiberHandUnits": 8,
+        "berryHandUnits": 12,
+        "berryBushNodes": 6
+      }
+    },
+    "bypass": {
+      "navigationGridM": 4,
+      "minWidthM": 12,
+      "maxSlopeDegrees": 25,
+      "maxStepM": 0.5,
+      "maxWaterDepthM": 0.5,
+      "maxTierAboveLocalBase": 1,
+      "hazardsAllowed": false,
+      "twoVertexDisjointRoutesRequired": true,
+      "maxDetourLengthRatio": 2.5,
+      "patchSeparationM": 96,
+      "boundaryClearanceM": 32,
+      "validateArea": "patch AABB expanded128m; connect opposite low-risk perimeter gates via two vertex-disjoint paths; 512m macro-region boundary low-risk portals must stay connected",
+      "failurePolicy": "reject candidate; deterministic retries8; then skip patch, never block bypass to meet quota",
+      "cardinalGuarantee": "For each tier and cardinal direction propose one seed-jittered anchor outside minimum radius. Search next 32 radial bands of512m until valid; generation validation fails if no anchor exists. No unsafe forced placement."
+    },
+    "placement": {
+      "dungeonProbabilityPerRegion": 0.32,
+      "dungeonMaxPerRegion": 1,
+      "communityProbabilityPerRegion": 0.18,
+      "communityMaxPerRegion": 1,
+      "smallRuinProbabilityPerRegion": 0.65,
+      "smallRuinMaxPerRegion": 2,
+      "minDungeonCommunityDistanceM": 160,
+      "maxCandidateRetries": 16,
+      "reservationOrder": [
+        "spawn_resources",
+        "rivers_and_fords",
+        "bypass_portals",
+        "communities",
+        "dungeons",
+        "small_ruins",
+        "ore_veins",
+        "vegetation",
+        "population"
+      ],
+      "crossBoundaryOwnership": "candidate anchor region owns placement; adjacent regions query deterministic candidates in radius2 regions; lexicographic candidate priority resolves overlap"
+    },
+    "population": {
+      "activeRadiusM": 96,
+      "maxActiveOutdoorIndividuals": 48,
+      "maxActiveOutdoorPredators": 8,
+      "birthEvaluationIntervalS": 60,
+      "spawnBatchLimitPerTick": 2,
+      "unloadedEcologyStepS": 60,
+      "unloadedCatchupMaxSteps": 120,
+      "excessCatchup": "bounded aggregate resource-limited update; retain timestamp and population, never reset to cap",
+      "dungeonBudgetSeparate": true,
+      "populationId": "seed/owner ecology cell/species/birth serial",
+      "overlayAllocation": "overlay total floor(host totalCap*0.4); weights5:1:4 largest remainders then cap grazer2/predator1/small2; host uses remainder; combined predator cap2",
+      "spawnRule": "Create only initial seed population or persisted births; cap is not automatic replenish. Creation needs habitat, food and species reproduction predicates. Realization is visual activation of existing individual only."
+    },
+    "validation": {
+      "seedCount": 64,
+      "radialSampleRangesM": [
+        [
+          0,
+          128
+        ],
+        [
+          128,
+          384
+        ],
+        [
+          384,
+          768
+        ],
+        [
+          768,
+          1536
+        ],
+        [
+          1536,
+          3072
+        ],
+        [
+          3072,
+          4096
+        ],
+        [
+          4096,
+          8192
+        ],
+        [
+          8192,
+          16384
+        ],
+        [
+          16384,
+          32768
+        ]
+      ],
+      "samplesPerOuterAnnulusPerSeed": 4096,
+      "sampleDistribution": "uniform area: r=sqrt(rMin^2+u*(rMax^2-rMin^2)), theta=2*pi*v",
+      "outerMeanTierAllowed": [
+        5,
+        6
+      ],
+      "outerMeanMeasuredBeyondM": 3072,
+      "maxObservedHighTierAreaFraction": 0.06,
+      "requiredOrderings": [
+        "spiral",
+        "reverse_spiral",
+        "random_permutation"
+      ],
+      "determinismBytesEqual": true,
+      "bypassFailureTolerance": 0,
+      "resourceAvailabilityFailureTolerance": 0,
+      "performed": false,
+      "starterGuaranteesIncludeContainerFreeDrinking": true,
+      "starterPlaythroughSeedCount": 100,
+      "ecologySimulationDurationsS": [
+        1800,
+        7200
+      ]
+    },
+    "terrainStorage": {
+      "coarseCellSizeM": 1,
+      "detailCellSizeM": 0.5,
+      "coarsePolicy": "homogeneous 1m cell may be packed; gameplay sees 8 identical .5m cells",
+      "depthBelowSurface": "metres below final solid surface, after river/cave carving",
+      "orePattern": "one seeded start per vein; 6-neighbour connected random walk, retry neighbour up to6; replace bedrock only; max attempts4x target count; stop rather than overwrite cavity",
+      "treePattern": "0.5m trunk 1x1..2x2 cells; length sampled integer half-metres; ellipsoid canopy radius2m; generate whole candidate by owner chunk, clip only writes not candidate",
+      "plantPattern": "Poisson-disc patch centres min4m spacing; within patch density0.65 hash threshold; producer pools owned by patch, shared by plants and fauna",
+      "cavePattern": "one candidate per64m cell Bernoulli(p); capsule path length16..32m orientation uniform0..360; ceiling minimum3m; exclude structure reservation and bypass; cave remains host environment",
+      "rangeSampling": "continuous uniform for physical lengths then quantize to0.5m; integer inclusive uniform for counts; one draw per named candidate field; fixed for generatorVersion"
+    },
+    "harvestNodes": [
+      {
+        "id": "fallen_branch",
+        "name": "떨어진 가지",
+        "resourceId": "raw_timber",
+        "candidateCountPer4096M2": 8,
+        "regrowS": 0,
+        "condition": "dry_ground",
+        "sourceId": "source_raw_timber"
+      },
+      {
+        "id": "loose_stone",
+        "name": "굴러다니는 돌",
+        "resourceId": "loose_stone",
+        "candidateCountPer4096M2": 8,
+        "regrowS": 0,
+        "condition": "dry_ground",
+        "sourceId": "source_loose_stone"
+      },
+      {
+        "id": "berry_bush",
+        "name": "열매 관목",
+        "resourceId": "berry",
+        "candidateCountPer4096M2": 4,
+        "regrowS": 600,
+        "condition": "soil_light",
+        "sourceId": "source_berry"
+      },
+      {
+        "id": "herb_patch",
+        "name": "약초 군락",
+        "resourceId": "herb",
+        "candidateCountPer4096M2": 4,
+        "regrowS": 900,
+        "condition": "soil_light",
+        "sourceId": "source_herb"
+      },
+      {
+        "id": "sap_tap",
+        "name": "수액 채취점",
+        "resourceId": "sap",
+        "candidateCountPer4096M2": 3,
+        "regrowS": 600,
+        "condition": "living_log",
+        "sourceId": "source_sap"
+      },
+      {
+        "id": "freshwater",
+        "name": "담수 채취점",
+        "resourceId": "water",
+        "candidateCountPer4096M2": 2,
+        "regrowS": 0,
+        "condition": "water_acid_fraction_zero",
+        "sourceId": "source_water"
+      },
+      {
+        "id": "fiber_patch",
+        "name": "섬유 초본",
+        "resourceId": "plant_fiber",
+        "candidateCountPer4096M2": 4,
+        "regrowS": 600,
+        "condition": "producer_patch",
+        "sourceId": "source_plant_fiber"
+      },
+      {
+        "id": "acid_reed",
+        "name": "산성 갈대",
+        "resourceId": "acid_sap",
+        "candidateCountPer4096M2": 4,
+        "regrowS": 600,
+        "condition": "acidic_plant_patch; marsh acid-pool edge preferred, rare grove patch permitted",
+        "sourceId": "source_acid_sap"
+      },
+      {
+        "id": "clay_bank",
+        "name": "점토 노출부",
+        "resourceId": "clay",
+        "candidateCountPer4096M2": 4,
+        "regrowS": 0,
+        "condition": "clay",
+        "sourceId": "source_clay"
+      },
+      {
+        "id": "sand_bank",
+        "name": "모래 노출부",
+        "resourceId": "sand",
+        "candidateCountPer4096M2": 4,
+        "regrowS": 0,
+        "condition": "sand",
+        "sourceId": "source_sand"
+      },
+      {
+        "id": "seed_head",
+        "name": "씨앗 이삭",
+        "resourceId": "seed",
+        "sourceId": "source_seed",
+        "candidateCountPer4096M2": 4,
+        "regrowS": 600,
+        "condition": "living_seed_producer"
+      }
+    ],
+    "harvestRule": "regrowS0 means no timer regrowth; water drains actual fluid amount(1 resource unit=1L), minerals deplete actual cells; plants require living parent and biomass; branch/stone consumed once; output quantity, action time, tools owned by progression sourceId",
+    "harvestRules": {
+      "biomassCostPerPlantAction": 1,
+      "unitLitresForWater": 1,
+      "minimumHandDrinkLitres": 0.25,
+      "containerToolId": "bark_cup",
+      "miningToolId": "stone_pick",
+      "miningHardTierGate": false
+    }
+  },
+  "entries": [
+    {
+      "id": "grove",
+      "name": "이끼 숲·초원",
+      "mode": "base",
+      "compatibleBaseEnvironments": [],
+      "climate": {
+        "temperatureC": [
+          8,
+          26
+        ],
+        "moisture": [
+          0.45,
+          0.9
+        ],
+        "inheritsHost": false
+      },
+      "terrain": {
+        "heightAboveSeaM": [
+          2,
+          34
+        ],
+        "inheritsHost": false,
+        "macroWavelengthM": 256,
+        "detailWavelengthM": 32,
+        "blendWidthM": 32,
+        "soilThicknessM": [
+          0.5,
+          2.5
+        ],
+        "surfaceBlockId": "grass",
+        "subsoilBlockId": "dirt",
+        "bedrockBlockId": "stone",
+        "soilProfileInherited": false
+      },
+      "water": {
+        "surfaceCoverageFraction": [
+          0.25,
+          0.55
+        ],
+        "inheritsHost": false,
+        "riverWidthM": [
+          3,
+          8
+        ],
+        "fordMaxDepthM": 0.5,
+        "acidPoolsFractionOfWater": 0
+      },
+      "decoration": {
+        "blockIds": [
+          "log",
+          "leaves",
+          "moss"
+        ],
+        "treesPer1024M2": 6,
+        "treeHeightM": [
+          4,
+          8
+        ],
+        "treeMinimumSpacingM": 4,
+        "producerPatchRadiusM": [
+          2,
+          5
+        ],
+        "producerPatchesPer4096M2": 8,
+        "overlayCoverageFraction": 0
+      },
+      "oreVeins": [
+        {
+          "blockId": "iron_ore",
+          "depthBelowSurfaceM": [
+            4,
+            28
+          ],
+          "veinsPer4096M2": 1,
+          "veinCellCount": [
+            8,
+            24
+          ]
+        }
+      ],
+      "spawning": {
+        "ecologyCellSizeM": 64,
+        "totalCap": 14,
+        "inheritsHostBudget": false,
+        "overlayBudgetFraction": 0,
+        "producerBiomassUnitsPerPatch": 10,
+        "producerRegrowthUnitsPerSecond": 0.004,
+        "producerConsumerUnitContract": "1 biomass unit BU = 100 calorie points CP; species conversion and diet in creatures.json",
+        "rules": [
+          {
+            "speciesId": "moss_deer",
+            "role": "grazer",
+            "weight": 5,
+            "capPerEcologyCell": 8,
+            "groupSize": [
+              2,
+              4
+            ],
+            "time": "day",
+            "minDistanceToPlayerM": 32,
+            "habitat": "forage_patch"
+          },
+          {
+            "speciesId": "copper_fox",
+            "role": "predator",
+            "weight": 1,
+            "capPerEcologyCell": 2,
+            "groupSize": [
+              1,
+              1
+            ],
+            "time": "night",
+            "minDistanceToPlayerM": 32,
+            "habitat": "cover_edge"
+          },
+          {
+            "speciesId": "azure_beetle",
+            "role": "small_consumer",
+            "weight": 4,
+            "capPerEcologyCell": 4,
+            "groupSize": [
+              2,
+              4
+            ],
+            "time": "any",
+            "minDistanceToPlayerM": 32,
+            "habitat": "producer_patch"
+          }
+        ],
+        "populationEvaluationIntervalS": 60,
+        "realizationMinPlayerDistanceM": 32,
+        "realizationMaxPlayerDistanceM": 96,
+        "attemptsPerPopulationEvaluation": 8,
+        "spawnInvalidatesWithinPlayerBuildM": 12
+      },
+      "building": {
+        "dungeonId": "root_manor",
+        "maxCandidateSlopeDegrees": 12,
+        "minDryEntranceRadiusM": 6,
+        "minDistanceToSpawnM": 160,
+        "entranceApproachWidthM": 6,
+        "terrainModificationMaxHeightM": 2,
+        "structureSpecOwnsFinalFootprint": true
+      },
+      "hazards": {
+        "passiveBaseClimateDamage": false,
+        "localizedHazards": null
+      },
+      "tierAssignment": "distance_field; environment never locks a tier",
+      "resourceExclusivity": "preferred yield only; all research and manufactured results have non-dungeon routes",
+      "pattern": {
+        "landform": "rolling_lowlands",
+        "heightOctaveAmplitudesM": [
+          12,
+          4,
+          1
+        ],
+        "forestClusterRadiusM": [
+          12,
+          24
+        ],
+        "clearingCoverageFraction": 0.35,
+        "minClearingDiameterM": 12,
+        "caveChancePerCell": 0.1,
+        "caveRadiusM": [
+          2,
+          4
+        ],
+        "caveDepthM": [
+          6,
+          16
+        ]
+      },
+      "harvestNodeIds": [
+        "fallen_branch",
+        "loose_stone",
+        "berry_bush",
+        "herb_patch",
+        "sap_tap",
+        "freshwater",
+        "fiber_patch",
+        "seed_head",
+        "clay_bank",
+        "acid_reed"
+      ]
+    },
+    {
+      "id": "ridge",
+      "name": "붉은 구릉·광산권",
+      "mode": "base",
+      "compatibleBaseEnvironments": [],
+      "climate": {
+        "temperatureC": [
+          10,
+          34
+        ],
+        "moisture": [
+          0.1,
+          0.45
+        ],
+        "inheritsHost": false
+      },
+      "terrain": {
+        "heightAboveSeaM": [
+          12,
+          72
+        ],
+        "inheritsHost": false,
+        "macroWavelengthM": 256,
+        "detailWavelengthM": 32,
+        "blendWidthM": 32,
+        "soilThicknessM": [
+          0.5,
+          1.5
+        ],
+        "surfaceBlockId": "dry_grass",
+        "subsoilBlockId": "dirt",
+        "bedrockBlockId": "stone",
+        "soilProfileInherited": false
+      },
+      "water": {
+        "surfaceCoverageFraction": [
+          0.02,
+          0.08
+        ],
+        "inheritsHost": false,
+        "riverWidthM": [
+          3,
+          8
+        ],
+        "fordMaxDepthM": 0.5,
+        "acidPoolsFractionOfWater": 0
+      },
+      "decoration": {
+        "blockIds": [
+          "rubble",
+          "dry_grass"
+        ],
+        "treesPer1024M2": 2,
+        "treeHeightM": [
+          4,
+          8
+        ],
+        "treeMinimumSpacingM": 4,
+        "producerPatchRadiusM": [
+          2,
+          5
+        ],
+        "producerPatchesPer4096M2": 8,
+        "overlayCoverageFraction": 0
+      },
+      "oreVeins": [
+        {
+          "blockId": "iron_ore",
+          "depthBelowSurfaceM": [
+            4,
+            28
+          ],
+          "veinsPer4096M2": 3,
+          "veinCellCount": [
+            8,
+            24
+          ]
+        },
+        {
+          "blockId": "titanium_ore",
+          "depthBelowSurfaceM": [
+            16,
+            56
+          ],
+          "veinsPer4096M2": 1,
+          "veinCellCount": [
+            4,
+            12
+          ]
+        },
+        {
+          "blockId": "nickel_ore",
+          "depthBelowSurfaceM": [
+            12,
+            48
+          ],
+          "veinsPer4096M2": 1,
+          "veinCellCount": [
+            6,
+            16
+          ]
+        },
+        {
+          "blockId": "mana_crystal_ore",
+          "depthBelowSurfaceM": [
+            16,
+            40
+          ],
+          "veinsPer4096M2": 1,
+          "veinCellCount": [
+            2,
+            6
+          ]
+        }
+      ],
+      "spawning": {
+        "ecologyCellSizeM": 64,
+        "totalCap": 12,
+        "inheritsHostBudget": false,
+        "overlayBudgetFraction": 0,
+        "producerBiomassUnitsPerPatch": 10,
+        "producerRegrowthUnitsPerSecond": 0.004,
+        "producerConsumerUnitContract": "1 biomass unit BU = 100 calorie points CP; species conversion and diet in creatures.json",
+        "rules": [
+          {
+            "speciesId": "scree_hare",
+            "role": "grazer",
+            "weight": 5,
+            "capPerEcologyCell": 6,
+            "groupSize": [
+              2,
+              4
+            ],
+            "time": "day",
+            "minDistanceToPlayerM": 32,
+            "habitat": "forage_patch"
+          },
+          {
+            "speciesId": "flint_jackal",
+            "role": "predator",
+            "weight": 1,
+            "capPerEcologyCell": 2,
+            "groupSize": [
+              1,
+              1
+            ],
+            "time": "night",
+            "minDistanceToPlayerM": 32,
+            "habitat": "cover_edge"
+          },
+          {
+            "speciesId": "ore_mite",
+            "role": "small_consumer",
+            "weight": 4,
+            "capPerEcologyCell": 4,
+            "groupSize": [
+              2,
+              4
+            ],
+            "time": "any",
+            "minDistanceToPlayerM": 32,
+            "habitat": "producer_patch"
+          }
+        ],
+        "populationEvaluationIntervalS": 60,
+        "realizationMinPlayerDistanceM": 32,
+        "realizationMaxPlayerDistanceM": 96,
+        "attemptsPerPopulationEvaluation": 8,
+        "spawnInvalidatesWithinPlayerBuildM": 12
+      },
+      "building": {
+        "dungeonId": "mining_fort",
+        "maxCandidateSlopeDegrees": 18,
+        "minDryEntranceRadiusM": 6,
+        "minDistanceToSpawnM": 384,
+        "entranceApproachWidthM": 6,
+        "terrainModificationMaxHeightM": 2,
+        "structureSpecOwnsFinalFootprint": true
+      },
+      "hazards": {
+        "passiveBaseClimateDamage": false,
+        "localizedHazards": null
+      },
+      "tierAssignment": "distance_field; environment never locks a tier",
+      "resourceExclusivity": "preferred yield only; all research and manufactured results have non-dungeon routes",
+      "pattern": {
+        "landform": "parallel_eroded_ridges",
+        "ridgeSpacingM": 64,
+        "ridgeAmplitudeM": 20,
+        "ridgeOrientationDegrees": "seed uniform0..180",
+        "screeMaxSlopeDegrees": 40,
+        "caveChancePerCell": 0.3,
+        "caveRadiusM": [
+          2,
+          5
+        ],
+        "caveDepthM": [
+          8,
+          32
+        ]
+      },
+      "harvestNodeIds": [
+        "loose_stone",
+        "fiber_patch",
+        "herb_patch",
+        "freshwater",
+        "sand_bank"
+      ]
+    },
+    {
+      "id": "marsh",
+      "name": "습지·산성 수역",
+      "mode": "base",
+      "compatibleBaseEnvironments": [],
+      "climate": {
+        "temperatureC": [
+          15,
+          32
+        ],
+        "moisture": [
+          0.8,
+          1
+        ],
+        "inheritsHost": false
+      },
+      "terrain": {
+        "heightAboveSeaM": [
+          -2,
+          6
+        ],
+        "inheritsHost": false,
+        "macroWavelengthM": 256,
+        "detailWavelengthM": 32,
+        "blendWidthM": 32,
+        "soilThicknessM": [
+          1,
+          4
+        ],
+        "surfaceBlockId": "reed",
+        "subsoilBlockId": "clay",
+        "bedrockBlockId": "stone",
+        "soilProfileInherited": false
+      },
+      "water": {
+        "surfaceCoverageFraction": [
+          0.4,
+          0.65
+        ],
+        "inheritsHost": false,
+        "riverWidthM": [
+          3,
+          8
+        ],
+        "fordMaxDepthM": 0.5,
+        "acidPoolsFractionOfWater": 0.12
+      },
+      "decoration": {
+        "blockIds": [
+          "reed",
+          "algae"
+        ],
+        "treesPer1024M2": 1,
+        "treeHeightM": [
+          4,
+          8
+        ],
+        "treeMinimumSpacingM": 4,
+        "producerPatchRadiusM": [
+          2,
+          5
+        ],
+        "producerPatchesPer4096M2": 8,
+        "overlayCoverageFraction": 0
+      },
+      "oreVeins": [
+        {
+          "blockId": "iron_ore",
+          "depthBelowSurfaceM": [
+            4,
+            28
+          ],
+          "veinsPer4096M2": 1,
+          "veinCellCount": [
+            8,
+            24
+          ]
+        },
+        {
+          "blockId": "nickel_ore",
+          "depthBelowSurfaceM": [
+            12,
+            48
+          ],
+          "veinsPer4096M2": 1,
+          "veinCellCount": [
+            6,
+            16
+          ]
+        },
+        {
+          "blockId": "sulfur_deposit",
+          "depthBelowSurfaceM": [
+            1,
+            8
+          ],
+          "veinsPer4096M2": 2,
+          "veinCellCount": [
+            8,
+            16
+          ]
+        }
+      ],
+      "spawning": {
+        "ecologyCellSizeM": 64,
+        "totalCap": 14,
+        "inheritsHostBudget": false,
+        "overlayBudgetFraction": 0,
+        "producerBiomassUnitsPerPatch": 10,
+        "producerRegrowthUnitsPerSecond": 0.004,
+        "producerConsumerUnitContract": "1 biomass unit BU = 100 calorie points CP; species conversion and diet in creatures.json",
+        "rules": [
+          {
+            "speciesId": "reed_grazer",
+            "role": "grazer",
+            "weight": 5,
+            "capPerEcologyCell": 6,
+            "groupSize": [
+              2,
+              4
+            ],
+            "time": "day",
+            "minDistanceToPlayerM": 32,
+            "habitat": "forage_patch"
+          },
+          {
+            "speciesId": "mud_croc",
+            "role": "predator",
+            "weight": 1,
+            "capPerEcologyCell": 2,
+            "groupSize": [
+              1,
+              1
+            ],
+            "time": "night",
+            "minDistanceToPlayerM": 32,
+            "habitat": "cover_edge"
+          },
+          {
+            "speciesId": "silt_snail",
+            "role": "small_consumer",
+            "weight": 4,
+            "capPerEcologyCell": 6,
+            "groupSize": [
+              2,
+              4
+            ],
+            "time": "any",
+            "minDistanceToPlayerM": 32,
+            "habitat": "producer_patch"
+          }
+        ],
+        "populationEvaluationIntervalS": 60,
+        "realizationMinPlayerDistanceM": 32,
+        "realizationMaxPlayerDistanceM": 96,
+        "attemptsPerPopulationEvaluation": 8,
+        "spawnInvalidatesWithinPlayerBuildM": 12
+      },
+      "building": {
+        "dungeonId": "floodworks",
+        "maxCandidateSlopeDegrees": 8,
+        "minDryEntranceRadiusM": 6,
+        "minDistanceToSpawnM": 384,
+        "entranceApproachWidthM": 6,
+        "terrainModificationMaxHeightM": 2,
+        "structureSpecOwnsFinalFootprint": true
+      },
+      "hazards": {
+        "passiveBaseClimateDamage": false,
+        "localizedHazards": {
+          "type": "acid_pool",
+          "contactDamageHpPerSecond": 4,
+          "telegraphDistanceM": 8,
+          "maxCoverageFraction": 0.08
+        }
+      },
+      "tierAssignment": "distance_field; environment never locks a tier",
+      "resourceExclusivity": "preferred yield only; all research and manufactured results have non-dungeon routes",
+      "pattern": {
+        "landform": "shallow_basin_islands",
+        "islandRadiusM": [
+          6,
+          16
+        ],
+        "waterDepthM": [
+          0.5,
+          2.5
+        ],
+        "dryLandMinConnectedFraction": 0.35,
+        "acidPoolRadiusM": [
+          2,
+          4
+        ],
+        "acidPoolMinSpacingM": 24,
+        "caveChancePerCell": 0,
+        "caveRadiusM": [
+          0,
+          0
+        ],
+        "caveDepthM": [
+          0,
+          0
+        ]
+      },
+      "harvestNodeIds": [
+        "fiber_patch",
+        "acid_reed",
+        "freshwater",
+        "clay_bank",
+        "seed_head",
+        "herb_patch"
+      ]
+    },
+    {
+      "id": "thermal",
+      "name": "화산·열곡",
+      "mode": "base",
+      "compatibleBaseEnvironments": [],
+      "climate": {
+        "temperatureC": [
+          28,
+          48
+        ],
+        "moisture": [
+          0.05,
+          0.35
+        ],
+        "inheritsHost": false
+      },
+      "terrain": {
+        "heightAboveSeaM": [
+          16,
+          100
+        ],
+        "inheritsHost": false,
+        "macroWavelengthM": 256,
+        "detailWavelengthM": 32,
+        "blendWidthM": 32,
+        "soilThicknessM": [
+          0.5,
+          2
+        ],
+        "surfaceBlockId": "ash",
+        "subsoilBlockId": "basalt",
+        "bedrockBlockId": "basalt",
+        "soilProfileInherited": false
+      },
+      "water": {
+        "surfaceCoverageFraction": [
+          0.01,
+          0.05
+        ],
+        "inheritsHost": false,
+        "riverWidthM": [
+          3,
+          8
+        ],
+        "fordMaxDepthM": 0.5,
+        "acidPoolsFractionOfWater": 0
+      },
+      "decoration": {
+        "blockIds": [
+          "ash_lichen"
+        ],
+        "treesPer1024M2": 1,
+        "treeHeightM": [
+          4,
+          8
+        ],
+        "treeMinimumSpacingM": 4,
+        "producerPatchRadiusM": [
+          2,
+          5
+        ],
+        "producerPatchesPer4096M2": 5,
+        "overlayCoverageFraction": 0
+      },
+      "oreVeins": [
+        {
+          "blockId": "iron_ore",
+          "depthBelowSurfaceM": [
+            4,
+            28
+          ],
+          "veinsPer4096M2": 1,
+          "veinCellCount": [
+            8,
+            24
+          ]
+        },
+        {
+          "blockId": "titanium_ore",
+          "depthBelowSurfaceM": [
+            16,
+            56
+          ],
+          "veinsPer4096M2": 1,
+          "veinCellCount": [
+            4,
+            12
+          ]
+        },
+        {
+          "blockId": "nickel_ore",
+          "depthBelowSurfaceM": [
+            12,
+            48
+          ],
+          "veinsPer4096M2": 1,
+          "veinCellCount": [
+            6,
+            16
+          ]
+        },
+        {
+          "blockId": "sulfur_deposit",
+          "depthBelowSurfaceM": [
+            2,
+            12
+          ],
+          "veinsPer4096M2": 1,
+          "veinCellCount": [
+            4,
+            12
+          ]
+        }
+      ],
+      "spawning": {
+        "ecologyCellSizeM": 64,
+        "totalCap": 10,
+        "inheritsHostBudget": false,
+        "overlayBudgetFraction": 0,
+        "producerBiomassUnitsPerPatch": 10,
+        "producerRegrowthUnitsPerSecond": 0.002,
+        "producerConsumerUnitContract": "1 biomass unit BU = 100 calorie points CP; species conversion and diet in creatures.json",
+        "rules": [
+          {
+            "speciesId": "ash_goat",
+            "role": "grazer",
+            "weight": 5,
+            "capPerEcologyCell": 4,
+            "groupSize": [
+              2,
+              4
+            ],
+            "time": "day",
+            "minDistanceToPlayerM": 32,
+            "habitat": "forage_patch"
+          },
+          {
+            "speciesId": "ember_lizard",
+            "role": "predator",
+            "weight": 1,
+            "capPerEcologyCell": 2,
+            "groupSize": [
+              1,
+              1
+            ],
+            "time": "night",
+            "minDistanceToPlayerM": 32,
+            "habitat": "cover_edge"
+          },
+          {
+            "speciesId": "vent_grub",
+            "role": "small_consumer",
+            "weight": 4,
+            "capPerEcologyCell": 4,
+            "groupSize": [
+              2,
+              4
+            ],
+            "time": "any",
+            "minDistanceToPlayerM": 32,
+            "habitat": "producer_patch"
+          }
+        ],
+        "populationEvaluationIntervalS": 60,
+        "realizationMinPlayerDistanceM": 32,
+        "realizationMaxPlayerDistanceM": 96,
+        "attemptsPerPopulationEvaluation": 8,
+        "spawnInvalidatesWithinPlayerBuildM": 12
+      },
+      "building": {
+        "dungeonId": "geothermal_foundry",
+        "maxCandidateSlopeDegrees": 15,
+        "minDryEntranceRadiusM": 6,
+        "minDistanceToSpawnM": 384,
+        "entranceApproachWidthM": 6,
+        "terrainModificationMaxHeightM": 2,
+        "structureSpecOwnsFinalFootprint": true
+      },
+      "hazards": {
+        "passiveBaseClimateDamage": false,
+        "localizedHazards": {
+          "type": "hot_vent",
+          "contactDamageHpPerSecond": 6,
+          "telegraphDistanceM": 12,
+          "maxCoverageFraction": 0.06
+        }
+      },
+      "tierAssignment": "distance_field; environment never locks a tier",
+      "resourceExclusivity": "preferred yield only; all research and manufactured results have non-dungeon routes",
+      "pattern": {
+        "landform": "basalt_terraces_and_vents",
+        "terraceHeightM": 4,
+        "terraceWidthM": [
+          12,
+          24
+        ],
+        "ventRadiusM": [
+          2,
+          4
+        ],
+        "ventMinSpacingM": 32,
+        "caveChancePerCell": 0.2,
+        "caveRadiusM": [
+          2,
+          4
+        ],
+        "caveDepthM": [
+          8,
+          24
+        ]
+      },
+      "harvestNodeIds": [
+        "loose_stone",
+        "herb_patch",
+        "freshwater"
+      ]
+    },
+    {
+      "id": "coast",
+      "name": "해안·고원",
+      "mode": "base",
+      "compatibleBaseEnvironments": [],
+      "climate": {
+        "temperatureC": [
+          5,
+          26
+        ],
+        "moisture": [
+          0.3,
+          0.8
+        ],
+        "inheritsHost": false
+      },
+      "terrain": {
+        "heightAboveSeaM": [
+          -12,
+          96
+        ],
+        "inheritsHost": false,
+        "macroWavelengthM": 256,
+        "detailWavelengthM": 32,
+        "blendWidthM": 32,
+        "soilThicknessM": [
+          0.5,
+          2
+        ],
+        "surfaceBlockId": "salt_grass",
+        "subsoilBlockId": "sand",
+        "bedrockBlockId": "stone",
+        "soilProfileInherited": false
+      },
+      "water": {
+        "surfaceCoverageFraction": [
+          0.2,
+          0.55
+        ],
+        "inheritsHost": false,
+        "riverWidthM": [
+          3,
+          8
+        ],
+        "fordMaxDepthM": 0.5,
+        "acidPoolsFractionOfWater": 0
+      },
+      "decoration": {
+        "blockIds": [
+          "salt_grass",
+          "algae"
+        ],
+        "treesPer1024M2": 2,
+        "treeHeightM": [
+          4,
+          8
+        ],
+        "treeMinimumSpacingM": 4,
+        "producerPatchRadiusM": [
+          2,
+          5
+        ],
+        "producerPatchesPer4096M2": 8,
+        "overlayCoverageFraction": 0
+      },
+      "oreVeins": [
+        {
+          "blockId": "iron_ore",
+          "depthBelowSurfaceM": [
+            4,
+            28
+          ],
+          "veinsPer4096M2": 1,
+          "veinCellCount": [
+            8,
+            24
+          ]
+        },
+        {
+          "blockId": "titanium_ore",
+          "depthBelowSurfaceM": [
+            16,
+            56
+          ],
+          "veinsPer4096M2": 1,
+          "veinCellCount": [
+            4,
+            12
+          ]
+        }
+      ],
+      "spawning": {
+        "ecologyCellSizeM": 64,
+        "totalCap": 12,
+        "inheritsHostBudget": false,
+        "overlayBudgetFraction": 0,
+        "producerBiomassUnitsPerPatch": 10,
+        "producerRegrowthUnitsPerSecond": 0.004,
+        "producerConsumerUnitContract": "1 biomass unit BU = 100 calorie points CP; species conversion and diet in creatures.json",
+        "rules": [
+          {
+            "speciesId": "cliff_ibex",
+            "role": "grazer",
+            "weight": 5,
+            "capPerEcologyCell": 6,
+            "groupSize": [
+              2,
+              4
+            ],
+            "time": "day",
+            "minDistanceToPlayerM": 32,
+            "habitat": "forage_patch"
+          },
+          {
+            "speciesId": "gale_raptor",
+            "role": "predator",
+            "weight": 1,
+            "capPerEcologyCell": 2,
+            "groupSize": [
+              1,
+              1
+            ],
+            "time": "night",
+            "minDistanceToPlayerM": 32,
+            "habitat": "cover_edge"
+          },
+          {
+            "speciesId": "tide_crab",
+            "role": "small_consumer",
+            "weight": 4,
+            "capPerEcologyCell": 4,
+            "groupSize": [
+              2,
+              4
+            ],
+            "time": "any",
+            "minDistanceToPlayerM": 32,
+            "habitat": "producer_patch"
+          }
+        ],
+        "populationEvaluationIntervalS": 60,
+        "realizationMinPlayerDistanceM": 32,
+        "realizationMaxPlayerDistanceM": 96,
+        "attemptsPerPopulationEvaluation": 8,
+        "spawnInvalidatesWithinPlayerBuildM": 12
+      },
+      "building": {
+        "dungeonId": "cliff_observatory",
+        "maxCandidateSlopeDegrees": 18,
+        "minDryEntranceRadiusM": 6,
+        "minDistanceToSpawnM": 384,
+        "entranceApproachWidthM": 6,
+        "terrainModificationMaxHeightM": 2,
+        "structureSpecOwnsFinalFootprint": true
+      },
+      "hazards": {
+        "passiveBaseClimateDamage": false,
+        "localizedHazards": null
+      },
+      "tierAssignment": "distance_field; environment never locks a tier",
+      "resourceExclusivity": "preferred yield only; all research and manufactured results have non-dungeon routes",
+      "pattern": {
+        "landform": "beach_cliff_plateau",
+        "beachWidthM": [
+          12,
+          24
+        ],
+        "cliffHeightM": [
+          12,
+          32
+        ],
+        "plateauWidthM": [
+          32,
+          96
+        ],
+        "tidalAmplitudeM": 0.5,
+        "caveChancePerCell": 0.15,
+        "caveRadiusM": [
+          2,
+          5
+        ],
+        "caveDepthM": [
+          4,
+          12
+        ]
+      },
+      "harvestNodeIds": [
+        "loose_stone",
+        "fiber_patch",
+        "freshwater",
+        "sand_bank",
+        "berry_bush"
+      ]
+    },
+    {
+      "id": "mana_grove",
+      "name": "마나림",
+      "mode": "base",
+      "compatibleBaseEnvironments": [],
+      "climate": {
+        "temperatureC": [
+          10,
+          28
+        ],
+        "moisture": [
+          0.5,
+          0.95
+        ],
+        "inheritsHost": false
+      },
+      "terrain": {
+        "heightAboveSeaM": [
+          4,
+          48
+        ],
+        "inheritsHost": false,
+        "macroWavelengthM": 256,
+        "detailWavelengthM": 32,
+        "blendWidthM": 32,
+        "soilThicknessM": [
+          1,
+          3
+        ],
+        "surfaceBlockId": "mana_fern",
+        "subsoilBlockId": "dirt",
+        "bedrockBlockId": "stone",
+        "soilProfileInherited": false
+      },
+      "water": {
+        "surfaceCoverageFraction": [
+          0.15,
+          0.3
+        ],
+        "inheritsHost": false,
+        "riverWidthM": [
+          3,
+          8
+        ],
+        "fordMaxDepthM": 0.5,
+        "acidPoolsFractionOfWater": 0
+      },
+      "decoration": {
+        "blockIds": [
+          "mana_log",
+          "leaves",
+          "mana_fern"
+        ],
+        "treesPer1024M2": 5,
+        "treeHeightM": [
+          5,
+          10
+        ],
+        "treeMinimumSpacingM": 4,
+        "producerPatchRadiusM": [
+          2,
+          5
+        ],
+        "producerPatchesPer4096M2": 8,
+        "overlayCoverageFraction": 0
+      },
+      "oreVeins": [
+        {
+          "blockId": "iron_ore",
+          "depthBelowSurfaceM": [
+            4,
+            28
+          ],
+          "veinsPer4096M2": 1,
+          "veinCellCount": [
+            8,
+            24
+          ]
+        },
+        {
+          "blockId": "mana_crystal_ore",
+          "depthBelowSurfaceM": [
+            8,
+            32
+          ],
+          "veinsPer4096M2": 2,
+          "veinCellCount": [
+            4,
+            12
+          ]
+        }
+      ],
+      "spawning": {
+        "ecologyCellSizeM": 64,
+        "totalCap": 12,
+        "inheritsHostBudget": false,
+        "overlayBudgetFraction": 0,
+        "producerBiomassUnitsPerPatch": 10,
+        "producerRegrowthUnitsPerSecond": 0.004,
+        "producerConsumerUnitContract": "1 biomass unit BU = 100 calorie points CP; species conversion and diet in creatures.json",
+        "rules": [
+          {
+            "speciesId": "prism_deer",
+            "role": "grazer",
+            "weight": 5,
+            "capPerEcologyCell": 6,
+            "groupSize": [
+              2,
+              4
+            ],
+            "time": "day",
+            "minDistanceToPlayerM": 32,
+            "habitat": "forage_patch"
+          },
+          {
+            "speciesId": "veil_cat",
+            "role": "predator",
+            "weight": 1,
+            "capPerEcologyCell": 2,
+            "groupSize": [
+              1,
+              1
+            ],
+            "time": "night",
+            "minDistanceToPlayerM": 32,
+            "habitat": "cover_edge"
+          },
+          {
+            "speciesId": "mana_moth",
+            "role": "small_consumer",
+            "weight": 4,
+            "capPerEcologyCell": 4,
+            "groupSize": [
+              2,
+              4
+            ],
+            "time": "any",
+            "minDistanceToPlayerM": 32,
+            "habitat": "producer_patch"
+          }
+        ],
+        "populationEvaluationIntervalS": 60,
+        "realizationMinPlayerDistanceM": 32,
+        "realizationMaxPlayerDistanceM": 96,
+        "attemptsPerPopulationEvaluation": 8,
+        "spawnInvalidatesWithinPlayerBuildM": 12
+      },
+      "building": {
+        "dungeonId": "sealed_arboretum",
+        "maxCandidateSlopeDegrees": 12,
+        "minDryEntranceRadiusM": 6,
+        "minDistanceToSpawnM": 384,
+        "entranceApproachWidthM": 6,
+        "terrainModificationMaxHeightM": 2,
+        "structureSpecOwnsFinalFootprint": true
+      },
+      "hazards": {
+        "passiveBaseClimateDamage": false,
+        "localizedHazards": null
+      },
+      "tierAssignment": "distance_field; environment never locks a tier",
+      "resourceExclusivity": "preferred yield only; all research and manufactured results have non-dungeon routes",
+      "pattern": {
+        "landform": "groves_around_mana_clearings",
+        "forestClusterRadiusM": [
+          16,
+          28
+        ],
+        "clearingCoverageFraction": 0.3,
+        "minClearingDiameterM": 16,
+        "caveChancePerCell": 0.15,
+        "caveRadiusM": [
+          2,
+          4
+        ],
+        "caveDepthM": [
+          6,
+          20
+        ]
+      },
+      "harvestNodeIds": [
+        "fallen_branch",
+        "berry_bush",
+        "herb_patch",
+        "sap_tap",
+        "freshwater"
+      ]
+    },
+    {
+      "id": "sacred",
+      "name": "성역 중첩",
+      "mode": "overlay",
+      "compatibleBaseEnvironments": [
+        "grove",
+        "ridge",
+        "marsh",
+        "thermal",
+        "coast",
+        "mana_grove"
+      ],
+      "climate": {
+        "temperatureC": null,
+        "moisture": null,
+        "inheritsHost": true
+      },
+      "terrain": {
+        "heightAboveSeaM": null,
+        "inheritsHost": true,
+        "macroWavelengthM": 256,
+        "detailWavelengthM": 32,
+        "blendWidthM": 32,
+        "soilThicknessM": null,
+        "surfaceBlockId": "luminous_moss",
+        "subsoilBlockId": "dirt",
+        "bedrockBlockId": "stone",
+        "soilProfileInherited": true
+      },
+      "water": {
+        "surfaceCoverageFraction": null,
+        "inheritsHost": true,
+        "riverWidthM": null,
+        "fordMaxDepthM": null,
+        "acidPoolsFractionOfWater": null,
+        "inheritancePolicy": "all water fields inherit host; null means no override"
+      },
+      "decoration": {
+        "blockIds": [
+          "luminous_moss",
+          "sacred_stone"
+        ],
+        "treesPer1024M2": 0,
+        "treeHeightM": [
+          4,
+          8
+        ],
+        "treeMinimumSpacingM": 4,
+        "producerPatchRadiusM": [
+          2,
+          5
+        ],
+        "producerPatchesPer4096M2": 8,
+        "overlayCoverageFraction": 0.4
+      },
+      "oreVeins": [],
+      "spawning": {
+        "ecologyCellSizeM": 64,
+        "totalCap": null,
+        "inheritsHostBudget": true,
+        "overlayBudgetFraction": 0.4,
+        "producerBiomassUnitsPerPatch": 10,
+        "producerRegrowthUnitsPerSecond": 0.004,
+        "producerConsumerUnitContract": "1 biomass unit BU = 100 calorie points CP; species conversion and diet in creatures.json",
+        "rules": [
+          {
+            "speciesId": "candle_hare",
+            "role": "grazer",
+            "weight": 5,
+            "capPerEcologyCell": 2,
+            "groupSize": [
+              1,
+              2
+            ],
+            "time": "day",
+            "minDistanceToPlayerM": 32,
+            "habitat": "forage_patch"
+          },
+          {
+            "speciesId": "relic_hound",
+            "role": "predator",
+            "weight": 1,
+            "capPerEcologyCell": 1,
+            "groupSize": [
+              1,
+              1
+            ],
+            "time": "night",
+            "minDistanceToPlayerM": 32,
+            "habitat": "cover_edge"
+          },
+          {
+            "speciesId": "shrine_beetle",
+            "role": "small_consumer",
+            "weight": 4,
+            "capPerEcologyCell": 2,
+            "groupSize": [
+              1,
+              2
+            ],
+            "time": "any",
+            "minDistanceToPlayerM": 32,
+            "habitat": "producer_patch"
+          }
+        ],
+        "populationEvaluationIntervalS": 60,
+        "realizationMinPlayerDistanceM": 32,
+        "realizationMaxPlayerDistanceM": 96,
+        "attemptsPerPopulationEvaluation": 8,
+        "spawnInvalidatesWithinPlayerBuildM": 12
+      },
+      "building": {
+        "dungeonId": "forgotten_monastery",
+        "maxCandidateSlopeDegrees": 12,
+        "minDryEntranceRadiusM": 6,
+        "minDistanceToSpawnM": 384,
+        "entranceApproachWidthM": 6,
+        "terrainModificationMaxHeightM": 2,
+        "structureSpecOwnsFinalFootprint": true
+      },
+      "hazards": {
+        "passiveBaseClimateDamage": false,
+        "localizedHazards": null
+      },
+      "tierAssignment": "distance_field; environment never locks a tier",
+      "resourceExclusivity": "preferred yield only; all research and manufactured results have non-dungeon routes",
+      "pattern": {
+        "landform": "host_inherited_sacred_clearings",
+        "surfaceReplacementFraction": 0.12,
+        "maxHeightDeltaM": 0,
+        "caveChancePerCell": 0,
+        "caveRadiusM": [
+          0,
+          0
+        ],
+        "caveDepthM": [
+          0,
+          0
+        ]
+      },
+      "harvestNodeIds": [
+        "herb_patch"
+      ]
+    },
+    {
+      "id": "anomaly",
+      "name": "국소 이상대 중첩",
+      "mode": "overlay",
+      "compatibleBaseEnvironments": [
+        "grove",
+        "ridge",
+        "marsh",
+        "thermal",
+        "coast",
+        "mana_grove"
+      ],
+      "climate": {
+        "temperatureC": null,
+        "moisture": null,
+        "inheritsHost": true
+      },
+      "terrain": {
+        "heightAboveSeaM": null,
+        "inheritsHost": true,
+        "macroWavelengthM": 256,
+        "detailWavelengthM": 32,
+        "blendWidthM": 32,
+        "soilThicknessM": null,
+        "surfaceBlockId": "mineral_lichen",
+        "subsoilBlockId": "anomaly_stone",
+        "bedrockBlockId": "stone",
+        "soilProfileInherited": true
+      },
+      "water": {
+        "surfaceCoverageFraction": null,
+        "inheritsHost": true,
+        "riverWidthM": null,
+        "fordMaxDepthM": null,
+        "acidPoolsFractionOfWater": null,
+        "inheritancePolicy": "all water fields inherit host; null means no override"
+      },
+      "decoration": {
+        "blockIds": [
+          "mineral_lichen",
+          "anomaly_stone"
+        ],
+        "treesPer1024M2": 0,
+        "treeHeightM": [
+          4,
+          8
+        ],
+        "treeMinimumSpacingM": 4,
+        "producerPatchRadiusM": [
+          2,
+          5
+        ],
+        "producerPatchesPer4096M2": 5,
+        "overlayCoverageFraction": 0.4
+      },
+      "oreVeins": [],
+      "spawning": {
+        "ecologyCellSizeM": 64,
+        "totalCap": null,
+        "inheritsHostBudget": true,
+        "overlayBudgetFraction": 0.4,
+        "producerBiomassUnitsPerPatch": 10,
+        "producerRegrowthUnitsPerSecond": 0.002,
+        "producerConsumerUnitContract": "1 biomass unit BU = 100 calorie points CP; species conversion and diet in creatures.json",
+        "rules": [
+          {
+            "speciesId": "drift_grazer",
+            "role": "grazer",
+            "weight": 5,
+            "capPerEcologyCell": 2,
+            "groupSize": [
+              1,
+              2
+            ],
+            "time": "day",
+            "minDistanceToPlayerM": 32,
+            "habitat": "forage_patch"
+          },
+          {
+            "speciesId": "phase_stalker",
+            "role": "predator",
+            "weight": 1,
+            "capPerEcologyCell": 1,
+            "groupSize": [
+              1,
+              1
+            ],
+            "time": "night",
+            "minDistanceToPlayerM": 32,
+            "habitat": "cover_edge"
+          },
+          {
+            "speciesId": "anchor_tick",
+            "role": "small_consumer",
+            "weight": 4,
+            "capPerEcologyCell": 2,
+            "groupSize": [
+              1,
+              2
+            ],
+            "time": "any",
+            "minDistanceToPlayerM": 32,
+            "habitat": "producer_patch"
+          }
+        ],
+        "populationEvaluationIntervalS": 60,
+        "realizationMinPlayerDistanceM": 32,
+        "realizationMaxPlayerDistanceM": 96,
+        "attemptsPerPopulationEvaluation": 8,
+        "spawnInvalidatesWithinPlayerBuildM": 12
+      },
+      "building": {
+        "dungeonId": "inertia_tower",
+        "maxCandidateSlopeDegrees": 15,
+        "minDryEntranceRadiusM": 6,
+        "minDistanceToSpawnM": 384,
+        "entranceApproachWidthM": 6,
+        "terrainModificationMaxHeightM": 2,
+        "structureSpecOwnsFinalFootprint": true
+      },
+      "hazards": {
+        "passiveBaseClimateDamage": false,
+        "localizedHazards": {
+          "type": "inertial_pulse",
+          "contactDamageHpPerSecond": 0,
+          "telegraphDistanceM": 16,
+          "maxCoverageFraction": 0.08
+        }
+      },
+      "tierAssignment": "distance_field; environment never locks a tier",
+      "resourceExclusivity": "preferred yield only; all research and manufactured results have non-dungeon routes",
+      "pattern": {
+        "landform": "host_inherited_fracture_patches",
+        "surfaceReplacementFraction": 0.18,
+        "maxHeightDeltaM": 2,
+        "fractureWidthM": [
+          1,
+          3
+        ],
+        "caveChancePerCell": 0,
+        "caveRadiusM": [
+          0,
+          0
+        ],
+        "caveDepthM": [
+          0,
+          0
+        ]
+      },
+      "harvestNodeIds": [
+        "loose_stone"
+      ]
+    }
+  ]
+}

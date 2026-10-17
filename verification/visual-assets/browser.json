@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "cards": 62,
+  "structureFilter": 12,
+  "roof": {
+    "before": 988,
+    "after": 702
+  },
+  "dragAndZoom": true,
+  "errors": []
+}
