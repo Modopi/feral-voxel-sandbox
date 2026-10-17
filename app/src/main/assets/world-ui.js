@@ -3,12 +3,13 @@ import * as T from "./vendor/three.module.js";
 // Unity-style world-space canvases: fixed metre-sized meshes, rendered by the scene camera.
 // Two reusable textures bound cost regardless of the number of animals or blocks in the world.
 export class WorldUI {
-  constructor(scene, camera, world) {
+  constructor(scene, camera) {
     this.camera = camera;
-    this.world = world;
     this.labels = new Map();
     this.root = new T.Group();
     this.root.name = "world-space-ui";
+    // Perspective stays world-space; this transparent group draws after world geometry.
+    this.root.renderOrder = 1000;
     scene.add(this.root);
     this.right = new T.Vector3();
     this.up = new T.Vector3();
@@ -24,18 +25,19 @@ export class WorldUI {
       texture.magFilter = T.LinearFilter;
       texture.generateMipmaps = false;
       const material = new T.MeshBasicMaterial({
-        map: texture, transparent: true, depthTest: true, depthWrite: false,
-        side: T.DoubleSide, toneMapped: false,
+        map: texture, transparent: true, depthTest: false, depthWrite: false,
+        side: T.DoubleSide, toneMapped: false, fog: false,
       });
       const mesh = new T.Mesh(new T.PlaneGeometry(2.4, 0.9), material);
       mesh.name = `world-ui-${id}`;
+      mesh.renderOrder = 1;
       mesh.visible = false;
       this.root.add(mesh);
       const line = new T.Line(new T.BufferGeometry().setFromPoints([new T.Vector3(), new T.Vector3()]),
-        new T.LineBasicMaterial({ color: 0xc3e2c9, transparent: true, opacity: 0.65, depthTest: true, depthWrite: false }));
+        new T.LineBasicMaterial({ color: 0xc3e2c9, transparent: true, opacity: 0.65, depthTest: false, depthWrite: false, fog: false }));
       line.visible = false;
       this.root.add(line);
-      this.labels.set(id, { mesh, line, canvas, texture, signature: "", data: null, occluded: false });
+      this.labels.set(id, { mesh, line, canvas, texture, signature: "", data: null });
     }
   }
   set(id, data) {
@@ -83,9 +85,6 @@ export class WorldUI {
           Math.abs(this.projected.x) > 1.2 || Math.abs(this.projected.y) > 1.2) {
         mesh.visible = line.visible = false; continue;
       }
-      const hit = this.world().raycast(this.camera.position, this.delta.normalize(), distance);
-      label.occluded = !!hit && hit.distance < distance - 0.18;
-      if (label.occluded) { mesh.visible = line.visible = false; continue; }
       const side = data.side || (this.projected.x > 0.3 ? -1 : 1);
       mesh.position.copy(this.anchor).addScaledVector(this.right, side * 1.3).addScaledVector(this.up, 0.57);
       mesh.quaternion.copy(this.camera.quaternion);

@@ -1,0 +1,17 @@
+{
+  "nativeCspReproduction": true,
+  "wasmBoot": true,
+  "javascriptEvalBlocked": true,
+  "healthAck": true,
+  "failedVersionRetryButton": true,
+  "retryBusyState": true,
+  "interruptedLabel": true,
+  "crawlTunnel": true,
+  "ceilingClearance": true,
+  "stanceSaveRestore": true,
+  "multiTouchCancel": true,
+  "portraitLandscapeBothHands": true,
+  "hudEditor": true,
+  "flightControls": true,
+  "errors": []
+}

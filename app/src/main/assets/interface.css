@@ -1,4 +1,6 @@
 /* Shared game chrome for menus, inventory, world selection and the layout editor. */
+#hud #actBtn,#hud #useBtn,#hud #jumpBtn,#hud #descendBtn {touch-action:none;}
+#hud .held {background:#647554;border-color:#e4d2a2;}
 :root { --ui-face:#263532; --ui-inset:#172320; --ui-button:#3e5147; --ui-hi:#849483; --ui-lo:#101b19; --ui-ink:#f0e6cc; --ui-muted:#b0bba4; --ui-gold:#d7bc76; --ui-slot:#425349; }
 :root[data-ui-theme=sand] { --ui-face:#c6bc9e; --ui-inset:#a59f83; --ui-button:#b3ac8d; --ui-hi:#f3e9c6; --ui-lo:#6e7058; --ui-ink:#29352b; --ui-muted:#4c5b44; --ui-gold:#6a5629; --ui-slot:#8f9579; }
 #pauseScreen .panel,#pauseScreen:not(.inventoryMode) .panel,#pauseScreen.inventoryMode .panel,.gameWindow,.worldMenu main,.worldMenu dialog,#hudInspector,.editorToolbar {
@@ -127,6 +129,7 @@ body.layoutEditing #hud #flightReadout,body.layoutEditing #hud #descendBtn,body.
   #hud #movementState {bottom:157px;}
   #hud #descendBtn {right:86px;bottom:283px;width:56px;height:56px;}
   body.leftHand #hud #descendBtn {left:86px;right:auto;}
+  body.freeFlying #hud #rangeBtn {bottom:350px;}
   #hud #toast {top:auto;bottom:352px;}
   #hud #toolLabel {left:190px;right:16px;bottom:109px;transform:none;max-width:none;text-align:right;}
   body.leftHand #hud #toolLabel {left:16px;right:190px;text-align:left;}

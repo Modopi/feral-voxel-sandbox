@@ -1,6 +1,8 @@
 const { chromium } = require("playwright");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
+const out = "verification/0.7.1";
+fs.mkdirSync(out, { recursive: true });
 
 (async () => {
   const browser = await chromium.launch({ executablePath: process.env.FERAL_CHROME || "/usr/bin/chromium", headless: true,
@@ -30,7 +32,7 @@ const fs = require("node:fs");
       f.view.rebuild(100);
     });
     await page.waitForFunction(() => FERAL.view.worldUI.labels.get("focus").data?.title.includes("이끼사슴") && FERAL.view.worldUI.labels.get("focus").mesh.visible, null, { timeout: 10000 }).catch(async e => {
-      console.log(await page.evaluate(() => { const l = FERAL.view.worldUI.labels.get("focus"); return { data: l.data, occluded: l.occluded, mesh: l.mesh.position, camera: FERAL.view.camera.position, subject: { x: subject.x, y: subject.y, z: subject.z }, target: document.getElementById("target").innerText }; }));
+      console.log(await page.evaluate(() => { const l = FERAL.view.worldUI.labels.get("focus"); return { data: l.data, mesh: l.mesh.position, camera: FERAL.view.camera.position, subject: { x: subject.x, y: subject.y, z: subject.z }, target: document.getElementById("target").innerText }; }));
       await page.screenshot({ path: "build/world-ui-failure.png" }); throw e;
     });
     const inspect = () => page.evaluate(() => {
@@ -46,13 +48,13 @@ const fs = require("node:fs");
         planes: ui.labels.size };
     });
     const near = await inspect();
-    assert.ok(near.sceneParent && near.depthTest && near.domHidden && near.planes === 2);
-    await page.screenshot({ path: "verification/world-ui-0.5.2-near.png" });
+    assert.ok(near.sceneParent && !near.depthTest && near.domHidden && near.planes === 2);
+    await page.screenshot({ path: "verification/0.7.1/world-ui-near.png" });
     await page.evaluate(() => FERAL.setCamera(80, 13.36, 82, 0, Math.atan2(-0.58, 6)));
     await page.waitForTimeout(350);
     const far = await inspect();
     assert.ok(near.width > far.width * 1.35, JSON.stringify({ near, far }));
-    await page.screenshot({ path: "verification/world-ui-0.5.2-far.png" });
+    await page.screenshot({ path: "verification/0.7.1/world-ui-far.png" });
     const follow = await page.evaluate(() => {
       const ui = FERAL.view.worldUI, l = ui.labels.get("focus"), before = l.mesh.position.x;
       subject.x += 0.4; ui.update();
@@ -63,14 +65,46 @@ const fs = require("node:fs");
       return { delta, reusedTexture: texture === l.texture };
     });
     assert.ok(Math.abs(follow.delta - 0.4) < 0.001 && follow.reusedTexture);
-    const occlusion = await page.evaluate(() => {
+    const occlusion = await page.evaluate(async () => {
+      const T = await import("./vendor/three.module.js");
       const f = FERAL, ui = f.view.worldUI, l = ui.labels.get("focus");
       for (let x = 79; x <= 81; x++) for (let y = 12; y <= 15; y++) f.world.set(x, y, 79, 3);
-      ui.update(); const hidden = !l.mesh.visible && l.occluded;
+      ui.update();
+      const visibleBehindTerrain = l.mesh.visible && l.line.visible;
       for (let x = 79; x <= 81; x++) for (let y = 12; y <= 15; y++) f.world.set(x, y, 79, 0);
-      ui.update(); return { hidden, restored: l.mesh.visible };
+      // An opaque or transparent object nearer the camera must not cover the label.
+      const wall = new T.Mesh(new T.PlaneGeometry(20, 20), new T.MeshBasicMaterial({ color: 0xff0000 }));
+      wall.position.copy(f.view.camera.position).add(new T.Vector3(0, 0, -1).applyQuaternion(f.view.camera.quaternion));
+      wall.quaternion.copy(f.view.camera.quaternion);
+      f.view.scene.add(wall);
+      const renderer = f.view.renderer, gl = renderer.getContext();
+      const p = l.mesh.position.clone().project(f.view.camera);
+      const pixel = () => {
+        renderer.render(f.view.scene, f.view.camera);
+        const rgb = new Uint8Array(4);
+        gl.readPixels(Math.floor((p.x + 1) * gl.drawingBufferWidth / 2), Math.floor((p.y + 1) * gl.drawingBufferHeight / 2), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, rgb);
+        return [...rgb];
+      };
+      const samples = [];
+      for (const transparent of [false, true]) {
+        wall.material.transparent = transparent;
+        wall.material.opacity = transparent ? 0.95 : 1;
+        wall.material.needsUpdate = true;
+        ui.root.visible = false; const covered = pixel();
+        ui.root.visible = true; const overlay = pixel();
+        samples.push({ transparent, covered, overlay });
+      }
+      const screenshot = renderer.domElement.toDataURL("image/png").split(",")[1];
+      wall.removeFromParent(); wall.geometry.dispose(); wall.material.dispose();
+      return { visibleBehindTerrain, samples, screenshot };
     });
-    assert.deepEqual(occlusion, { hidden: true, restored: true });
+    assert.ok(occlusion.visibleBehindTerrain);
+    for (const s of occlusion.samples) {
+      assert.ok(s.covered[0] > 200 && s.covered[1] < 80, JSON.stringify(s));
+      assert.ok(s.overlay[0] < s.covered[0] - 80, "label pixels draw above foreground geometry: " + JSON.stringify(s));
+    }
+    fs.writeFileSync(`${out}/world-ui-over-geometry.png`, Buffer.from(occlusion.screenshot, "base64"));
+    delete occlusion.screenshot;
     await page.evaluate(() => { FERAL.setCamera(80, 13.36, 79, 0, Math.atan2(-0.58, 3)); FERAL.use(); });
     await page.waitForTimeout(250);
     const hit = await inspect();
@@ -93,7 +127,7 @@ const fs = require("node:fs");
     await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: action.x + action.width / 2, y: action.y + action.height / 2, id: 1 }] });
     await page.waitForFunction(() => FERAL.view.worldUI.labels.get("focus").data?.value > 0);
     const mining = await page.evaluate(() => FERAL.view.worldUI.labels.get("focus").data.value);
-    await page.screenshot({ path: "verification/world-ui-0.5.2-mining.png" });
+    await page.screenshot({ path: "verification/0.7.1/world-ui-mining.png" });
     await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
 
     await page.evaluate(() => {
@@ -102,7 +136,7 @@ const fs = require("node:fs");
       window.villageName = v.name;
     });
     await page.waitForFunction(() => { const l = FERAL.view.worldUI.labels.get("context"); return l.data?.title === villageName && l.mesh.visible; }, null, { timeout: 10000 });
-    await page.screenshot({ path: "verification/world-ui-0.5.2-village.png" });
+    await page.screenshot({ path: "verification/0.7.1/world-ui-village.png" });
     await page.tap("#interactBtn");
     assert.equal(await page.locator("#frontierPanel").getAttribute("data-page"), "society");
     await page.tap("#frontierClose");
@@ -121,7 +155,7 @@ const fs = require("node:fs");
       });
       assert.ok(Object.values(layout).every(Boolean), JSON.stringify({ width, layout }));
       layouts.push({ width, height, ...layout });
-      await page.screenshot({ path: `verification/game-status-0.5.2-${width}.png` });
+      await page.screenshot({ path: `verification/0.7.1/game-status-${width}.png` });
       await page.tap("#frontierClose");
     }
     // Supply slots act on the same survival state and inventory, not display-only UI.
@@ -136,11 +170,11 @@ const fs = require("node:fs");
     await page.tap("#resumeBtn");
     await page.tap("#menuBtn");
     await page.tap('[data-tab="settings"]');
-    await page.screenshot({ path: "verification/game-menu-0.5.2.png" });
+    await page.screenshot({ path: "verification/0.7.1/game-menu.png" });
     await page.tap("#resumeBtn");
     assert.deepEqual(errors, []);
     const result = { near, far, follow, occlusion, damage: near.hp - hit.hp, dead, mining, villageLabelAndInteraction: true, layouts, supplyUse: true, inventoryTransition: true, errors };
-    fs.writeFileSync("verification/world-ui-results-0.5.2.json", JSON.stringify(result, null, 2));
+    fs.writeFileSync("verification/0.7.1/world-ui-results.json", JSON.stringify(result, null, 2));
     console.log(JSON.stringify(result, null, 2));
   } finally { await browser.close(); }
 })().catch(e => { console.error(e); process.exitCode = 1; });

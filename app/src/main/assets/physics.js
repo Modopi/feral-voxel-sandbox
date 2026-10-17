@@ -10,6 +10,8 @@ export const STANCES = Object.freeze({
 });
 export const bodyHeight = (p) => STANCES[p.stance]?.height || BODY_HEIGHT;
 const EPS = 1e-7;
+// At 60 Hz, 7 m/s against 18 m/s² reaches 1.303 m above takeoff.
+const JUMP_SPEED = 7;
 export function solidAt(world, x, y, z) {
   return !!world.getCell(
     Math.floor(x * 2),
@@ -207,7 +209,7 @@ export class CharacterController {
       this.horizontal("z", dz);
       const support = this.supported();
       if (pressed && support && p.stance === "stand") {
-        p.vy = 6.2;
+        p.vy = JUMP_SPEED;
         p.grounded = false;
       } else if (support && p.vy <= 0) {
         p.vy = 0;
