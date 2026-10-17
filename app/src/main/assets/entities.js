@@ -1,3 +1,4 @@
+import { visibleAnimalDetails, rayArtBox } from "./animal-art.js";
 import { SIZE, B, clamp, hash } from "./world.js";
 import { anatomy, attachmentIntact } from "./anatomy.js";
 import { voxelComponents } from "./structure.js";
@@ -697,6 +698,40 @@ export class Ecology {
           }
         }
         if (hit?.entity === e) break;
+      }
+      // Detailed silhouettes are selectable too. Route their hits to the saved
+      // anatomical cell so targeting, wounds and visual removal agree.
+      const rays = new Map();
+      for (const d of visibleAnimalDetails(e, sp.parts)) {
+        if (!rays.has(d.part)) {
+          const p = sp.parts[d.part],
+            o = toLocal(e, p, d.part, [origin.x, origin.y, origin.z], time),
+            end = toLocal(
+              e,
+              p,
+              d.part,
+              [origin.x + dir.x, origin.y + dir.y, origin.z + dir.z],
+              time,
+            );
+          rays.set(d.part, { o, d: end.map((v, i) => v - o[i]) });
+        }
+        const r = rays.get(d.part),
+          t = rayArtBox(r.o, r.d, d, best);
+        if (t !== null) {
+          best = t;
+          hit = {
+            entity: e,
+            part: d.part,
+            voxel: d.voxel,
+            point: [
+              origin.x + dir.x * t,
+              origin.y + dir.y * t,
+              origin.z + dir.z * t,
+            ],
+            distance: t,
+            detail: d.feature,
+          };
+        }
       }
     }
     return hit;
