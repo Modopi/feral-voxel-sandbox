@@ -1,0 +1,294 @@
+{
+  "schemaVersion": 1,
+  "id": "controller",
+  "name": "제어부",
+  "category": "equipment",
+  "contentRef": {
+    "file": "design/content/progression.json",
+    "id": "controller"
+  },
+  "status": "art_prototype",
+  "units": "m",
+  "upAxis": "Y",
+  "forwardAxis": "+Z",
+  "visualGridM": 0.03125,
+  "materials": [
+    {
+      "id": "body",
+      "color": "#9B734B",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true,
+      "sourceMaterialId": "wood"
+    },
+    {
+      "id": "dark",
+      "color": "#343F45",
+      "roughness": 0.88,
+      "metallic": 0.45,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "edge",
+      "color": "#C4CDD0",
+      "roughness": 0.45,
+      "metallic": 0.8,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "wood",
+      "color": "#91643E",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true,
+      "blockId": "log"
+    },
+    {
+      "id": "stone",
+      "color": "#8A8C83",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true,
+      "blockId": "stone"
+    },
+    {
+      "id": "copper",
+      "color": "#B47B4F",
+      "roughness": 0.88,
+      "metallic": 0.75,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "cloth",
+      "color": "#686D4C",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "mana",
+      "color": "#6DAFAE",
+      "roughness": 0.35,
+      "metallic": 0,
+      "emission": 0.12,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "sacred",
+      "color": "#CAB879",
+      "roughness": 0.45,
+      "metallic": 0.5,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "physics",
+      "color": "#7487BF",
+      "roughness": 0.88,
+      "metallic": 0.65,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "glass",
+      "color": "#A0CBCD",
+      "roughness": 0.2,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 0.7,
+      "collision": true,
+      "blockId": "glass"
+    }
+  ],
+  "parts": [
+    {
+      "id": "root",
+      "parent": null,
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "root",
+      "boxes": []
+    },
+    {
+      "id": "housing",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "component",
+      "boxes": [
+        {
+          "center": [
+            0,
+            0.15625,
+            0.015625
+          ],
+          "size": [
+            0.5,
+            0.3125,
+            0.34375
+          ],
+          "material": "body"
+        },
+        {
+          "center": [
+            0,
+            0.21875,
+            0.203125
+          ],
+          "size": [
+            0.3125,
+            0.125,
+            0.03125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.15625,
+            0.09375,
+            0.21875
+          ],
+          "size": [
+            0.0625,
+            0.0625,
+            0.0625
+          ],
+          "material": "edge"
+        },
+        {
+          "center": [
+            0,
+            0.09375,
+            0.21875
+          ],
+          "size": [
+            0.0625,
+            0.0625,
+            0.0625
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.15625,
+            0.09375,
+            0.21875
+          ],
+          "size": [
+            0.0625,
+            0.0625,
+            0.0625
+          ],
+          "material": "edge"
+        }
+      ]
+    },
+    {
+      "id": "shaft",
+      "parent": "root",
+      "translation": [
+        0,
+        0.25,
+        0
+      ],
+      "role": "moving_part",
+      "boxes": [
+        {
+          "center": [
+            0.15625,
+            0.15625,
+            0
+          ],
+          "size": [
+            0.0625,
+            0.25,
+            0.0625
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            0.15625,
+            0.328125,
+            0
+          ],
+          "size": [
+            0.125,
+            0.09375,
+            0.125
+          ],
+          "material": "wood"
+        }
+      ]
+    }
+  ],
+  "anchors": [
+    {
+      "id": "mount",
+      "partId": "housing",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "purpose": "slot:component_mount; 기능 부품의 하부 접합면"
+    },
+    {
+      "id": "control",
+      "partId": "housing",
+      "position": [
+        0,
+        0.25,
+        0.375
+      ],
+      "purpose": "상호작용 위치; 정의된 컴포넌트 기능만 실행"
+    }
+  ],
+  "instances": [],
+  "notes": [
+    "제작 시점 SDK가 같은 부위의 중복 점유를 차단한다. 의도된 합집합은 fill, 재질 덧칠은 paint로 즉시 처리한다. 사후 중복 제거를 하지 않는다.",
+    "시각 모델의 외형·앵커는 설치와 장착의 기준이다. 기능·에너지 입출력·내구·질량·실제 용량은 progression 데이터와 런타임 계약을 사용한다.",
+    "부위의 parent/translation을 보존하며 같은 소유자에 속한 장구·관절 부위는 자기 충돌을 하지 않는다."
+  ],
+  "collision": {
+    "enabled": true,
+    "ownerScope": "entity_instance",
+    "selfCollision": false,
+    "externalCollision": true,
+    "shape": "part_cuboid_compound",
+    "jointOverlapAllowed": true
+  },
+  "geometry": {
+    "authoringTool": "feral_voxel_builder_v1",
+    "occupancy": "exclusive_within_part",
+    "independentPartOverlap": "preserve_joint_allowance",
+    "surfaceMeshing": "remove_shared_same_medium_or_opaque_faces_within_part"
+  },
+  "equipmentKind": "component",
+  "tier": 1,
+  "sourceRecipeId": "assemble_controller",
+  "referenceMaterialId": "wood"
+}

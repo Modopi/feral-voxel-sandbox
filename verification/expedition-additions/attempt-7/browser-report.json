@@ -1,0 +1,2169 @@
+{
+  "scope": "Prepared-save browser integration evidence only; fixtures provide starting inventory, research, and position. This is not normal-progression or mobile-device evidence.",
+  "environment": "Headless Chromium / Linux / SwiftShader software WebGL",
+  "seed": 63026,
+  "preparationPolicy": "Direct runtime setup is limited to inventory, research, player position, natural world generation, and a one-time electrical test-energy escrow. The escrow remains unclaimed until storage is installed through the UI. All crafting, delivery, attunement, device installation/operation, machine assembly/charging/firing, attacking, and saving use visible UI or keyboard/pointer input.",
+  "normalProgressionEvidence": false,
+  "mobilePerformanceEvidence": false,
+  "scenarios": {
+    "additions-weapon": {
+      "status": "not_run"
+    },
+    "additions-faith": {
+      "status": "not_run"
+    },
+    "additions-root-manor-device": {
+      "status": "not_run"
+    },
+    "additions-machine-fire": {
+      "preparation": {
+        "allowedFixture": {
+          "items": {
+            "gear_baseline_t8": 1,
+            "wood": 1000,
+            "battery": 1,
+            "controller": 1,
+            "arc_thrower": 1
+          },
+          "research": [
+            "power",
+            "mechanisms"
+          ],
+          "initialTestEnergyEscrowEU": {
+            "electrical": 60
+          }
+        },
+        "target": "structure:63026:starter-manor:root_manor:boss"
+      },
+      "fixturePlayer": {
+        "x": 236,
+        "y": 4.55,
+        "z": -10,
+        "yaw": 1.5707963267948966,
+        "pitch": 0,
+        "hp": 275,
+        "maxHp": 275,
+        "calories": 2400,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": false,
+        "stance": "stand",
+        "lastDamageAt": -100,
+        "resting": false
+      },
+      "actions": [
+        {
+          "input": "inventory battery placement, explicit fixed-energy escrow transfer",
+          "initialTestEnergyEscrowEU": 60
+        },
+        {
+          "input": "machine name/grid/voxel/component selectors, install and fixed-store charge buttons",
+          "chargedEUThroughUI": 40
+        }
+      ],
+      "checks": {
+        "batteryPlacedThroughUI": true,
+        "escrowExplicitlyMovedToFixedBattery": true,
+        "fixedOwnerId": "fixture:1",
+        "fixedElectricalEU": 60,
+        "machineCreatedThroughUI": true,
+        "controllerInstalledThroughUI": true,
+        "arcThrowerInstalledThroughUI": true,
+        "weaponSelectedThroughUI": true,
+        "initialChargeThroughUI": true,
+        "clearShot": {
+          "shots": 1,
+          "electricalEUSpent": 20,
+          "bossDamage": 28.5
+        }
+      },
+      "status": "failed",
+      "failure": "TimeoutError: page.waitForFunction: Timeout 12000ms exceeded."
+    },
+    "optional-wind-vane": {
+      "status": "not_run"
+    }
+  },
+  "steps": [
+    {
+      "label": "additions-machine-fire-loaded",
+      "at": "2026-10-17T16:44:29.052Z",
+      "scenario": "additions-machine-fire",
+      "fixtureNotes": {
+        "allowedFixture": {
+          "items": {
+            "gear_baseline_t8": 1,
+            "wood": 1000,
+            "battery": 1,
+            "controller": 1,
+            "arc_thrower": 1
+          },
+          "research": [
+            "power",
+            "mechanisms"
+          ],
+          "initialTestEnergyEscrowEU": {
+            "electrical": 60
+          }
+        },
+        "target": "structure:63026:starter-manor:root_manor:boss"
+      },
+      "state": {
+        "time": 0.39999999999999997,
+        "player": {
+          "x": 236,
+          "y": 4.507996364682913,
+          "z": -10,
+          "yaw": 1.5707963267948966,
+          "pitch": 0,
+          "hp": 275,
+          "maxHp": 275,
+          "calories": 2399.9600000000028,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "gear_baseline_t8": 1,
+          "wood": 1000,
+          "battery": 1,
+          "controller": 1,
+          "arc_thrower": 1
+        },
+        "energy": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 0
+        },
+        "energyCapacity": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 100
+        },
+        "energyOverflow": {
+          "mechanical": 0,
+          "electrical": 60,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 0
+        },
+        "worldFixtures": [],
+        "research": [
+          "mechanisms",
+          "power"
+        ],
+        "stations": {},
+        "armaments": {
+          "schemaVersion": 1,
+          "nextId": 1,
+          "clock": 0.39999999999999997,
+          "weapons": [],
+          "equippedId": null,
+          "jobs": [],
+          "attackClaims": []
+        },
+        "faith": {
+          "schemaVersion": 1,
+          "clock": 0.39999999999999997,
+          "membership": null,
+          "quests": {},
+          "trials": {}
+        },
+        "boss": null,
+        "dungeon": null,
+        "machine": null,
+        "coverMachine": null,
+        "currentAim": {
+          "kind": "structure",
+          "id": "structure:63026:starter-manor:root_manor",
+          "partId": "room_walls",
+          "point": {
+            "x": 230,
+            "y": 5.867996364682913,
+            "z": -10
+          },
+          "distance": 6
+        },
+        "physicsReady": true
+      }
+    },
+    {
+      "label": "machine-battery-installed-through-ui",
+      "at": "2026-10-17T16:44:32.343Z",
+      "scenario": "additions-machine-fire",
+      "ids": {
+        "instanceId": "structure:63026:starter-manor:root_manor",
+        "bossId": "structure:63026:starter-manor:root_manor:boss"
+      },
+      "fixedOwnerId": "fixture:1",
+      "energyEU": 60,
+      "state": {
+        "time": 1.8999999999999981,
+        "player": {
+          "x": 236,
+          "y": 4.507996364682913,
+          "z": -10,
+          "yaw": 1.5707963267948966,
+          "pitch": 0,
+          "hp": 275,
+          "maxHp": 275,
+          "calories": 2399.810000000013,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "gear_baseline_t8": 1,
+          "wood": 1000,
+          "controller": 1,
+          "arc_thrower": 1
+        },
+        "energy": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 0
+        },
+        "energyCapacity": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 100
+        },
+        "energyOverflow": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 0
+        },
+        "worldFixtures": [
+          {
+            "id": "fixture:1",
+            "assetId": "battery",
+            "position": [
+              233,
+              4.5,
+              -10
+            ],
+            "hp": 78
+          }
+        ],
+        "research": [
+          "mechanisms",
+          "power"
+        ],
+        "stations": {},
+        "armaments": {
+          "schemaVersion": 1,
+          "nextId": 1,
+          "clock": 1.8999999999999981,
+          "weapons": [],
+          "equippedId": null,
+          "jobs": [],
+          "attackClaims": []
+        },
+        "faith": {
+          "schemaVersion": 1,
+          "clock": 1.8999999999999981,
+          "membership": null,
+          "quests": {},
+          "trials": {}
+        },
+        "boss": {
+          "id": "structure:63026:starter-manor:root_manor:boss",
+          "hp": 1440,
+          "maxHp": 1440,
+          "position": {
+            "x": 241.77016949210562,
+            "y": 4.499965616634802,
+            "z": 4.34853350443128
+          },
+          "defeated": false
+        },
+        "dungeon": {
+          "id": "structure:63026:starter-manor:root_manor",
+          "templateId": "root_manor",
+          "puzzle": {
+            "phase": "locked",
+            "elapsedS": 0,
+            "durationS": 0,
+            "paid": false
+          },
+          "deviceState": {
+            "schemaVersion": 1,
+            "parts": {
+              "root_manor_device_0": {
+                "componentId": "joint",
+                "installed": false,
+                "healthHp": 100,
+                "maxHealthHp": 100,
+                "ownerId": null
+              }
+            },
+            "structureParts": {
+              "puzzle_gate": {
+                "healthHp": 100,
+                "maxHealthHp": 100,
+                "installed": true
+              }
+            },
+            "supplies": {},
+            "energy": {
+              "mechanical": 0,
+              "electrical": 0,
+              "thermal": 0,
+              "chemical": 0,
+              "magic": 0,
+              "divine": 0
+            },
+            "metrics": {
+              "consumedEU": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "transferredInEU": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "transferredOutEU": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "manualInputEU": 0,
+              "heatLostEU": 0,
+              "spilledLiters": 0
+            },
+            "solved": false,
+            "legacySolved": false,
+            "work": {
+              "progressEU": 0,
+              "progressM": 0,
+              "active": false,
+              "legacyPaid": false,
+              "legacyProgressS": 0
+            },
+            "claims": [],
+            "ecologyBasin": {
+              "initialLiters": 48000,
+              "volumeLiters": 48000,
+              "spilledLiters": 0,
+              "breached": false
+            },
+            "fluid": null,
+            "heat": null,
+            "wind": null,
+            "altar": null,
+            "motion": null
+          },
+          "gateGeometry": [
+            {
+              "center": [
+                197,
+                6.5,
+                0
+              ],
+              "size": [
+                1,
+                4,
+                5
+              ]
+            }
+          ],
+          "status": {
+            "instanceId": "structure:63026:starter-manor:root_manor",
+            "templateId": "root_manor",
+            "phase": "locked",
+            "solved": false,
+            "summary": "0/1개 부품 설치",
+            "actions": [
+              {
+                "id": "install:root_manor_device_0",
+                "label": "장치 설치 · joint",
+                "items": {
+                  "joint": 1
+                },
+                "hold": false,
+                "disabled": false,
+                "detail": "joint"
+              },
+              {
+                "id": "replace:root_manor_device_0",
+                "label": "장치 교체 · joint",
+                "items": {
+                  "joint": 1
+                },
+                "hold": false,
+                "disabled": true,
+                "detail": "joint"
+              },
+              {
+                "id": "lift_gate",
+                "label": "운반문 들어 올리기",
+                "items": {},
+                "hold": true,
+                "disabled": true
+              },
+              {
+                "id": "lower_gate",
+                "label": "운반문 내리기",
+                "items": {},
+                "hold": true,
+                "disabled": true
+              }
+            ],
+            "parts": [
+              {
+                "id": "root_manor_device_0",
+                "componentId": "joint",
+                "position": [
+                  181,
+                  4.5,
+                  -4
+                ],
+                "installed": false,
+                "healthHp": 100,
+                "maxHealthHp": 100,
+                "ownerId": null
+              }
+            ],
+            "work": {
+              "progressEU": 0,
+              "progressM": 0,
+              "active": false,
+              "legacyPaid": false,
+              "legacyProgressS": 0
+            },
+            "supplies": [],
+            "energy": {
+              "reservedEU": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "reserveCapacityEU": {
+                "mechanical": 80,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "supplies": [],
+              "metrics": {
+                "consumedEU": {
+                  "mechanical": 0,
+                  "electrical": 0,
+                  "thermal": 0,
+                  "chemical": 0,
+                  "magic": 0,
+                  "divine": 0
+                },
+                "transferredInEU": {
+                  "mechanical": 0,
+                  "electrical": 0,
+                  "thermal": 0,
+                  "chemical": 0,
+                  "magic": 0,
+                  "divine": 0
+                },
+                "transferredOutEU": {
+                  "mechanical": 0,
+                  "electrical": 0,
+                  "thermal": 0,
+                  "chemical": 0,
+                  "magic": 0,
+                  "divine": 0
+                },
+                "manualInputEU": 0,
+                "heatLostEU": 0,
+                "spilledLiters": 0
+              }
+            },
+            "fluid": null,
+            "heat": null,
+            "wind": null,
+            "altar": null,
+            "motion": null,
+            "ecologyBasin": {
+              "initialLiters": 48000,
+              "volumeLiters": 48000,
+              "spilledLiters": 0,
+              "breached": false,
+              "conserved": true
+            }
+          }
+        },
+        "machine": null,
+        "coverMachine": null,
+        "currentAim": {
+          "kind": "structure",
+          "id": "structure:63026:starter-manor:root_manor",
+          "partId": "room_walls",
+          "point": {
+            "x": 230,
+            "y": 5.867996364682913,
+            "z": -10
+          },
+          "distance": 6
+        },
+        "physicsReady": true
+      }
+    },
+    {
+      "label": "machine-assembled-and-charged",
+      "at": "2026-10-17T16:44:45.401Z",
+      "scenario": "additions-machine-fire",
+      "ids": {
+        "instanceId": "structure:63026:starter-manor:root_manor",
+        "bossId": "structure:63026:starter-manor:root_manor:boss",
+        "machineId": "machine:1"
+      },
+      "state": {
+        "time": 7.183333333333313,
+        "player": {
+          "x": 236,
+          "y": 4.507996364682913,
+          "z": -10,
+          "yaw": 3.523945511975561,
+          "pitch": -0.0076318359374999995,
+          "hp": 261.08,
+          "maxHp": 275,
+          "calories": 2399.2816666667163,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": 3.6666666666666585,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "gear_baseline_t8": 1,
+          "wood": 750
+        },
+        "energy": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 0
+        },
+        "energyCapacity": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 100
+        },
+        "energyOverflow": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 0
+        },
+        "worldFixtures": [
+          {
+            "id": "fixture:1",
+            "assetId": "battery",
+            "position": [
+              233,
+              4.5,
+              -10
+            ],
+            "hp": 78
+          }
+        ],
+        "research": [
+          "mechanisms",
+          "power"
+        ],
+        "stations": {},
+        "armaments": {
+          "schemaVersion": 1,
+          "nextId": 1,
+          "clock": 7.183333333333313,
+          "weapons": [],
+          "equippedId": null,
+          "jobs": [],
+          "attackClaims": []
+        },
+        "faith": {
+          "schemaVersion": 1,
+          "clock": 7.183333333333313,
+          "membership": null,
+          "quests": {},
+          "trials": {}
+        },
+        "boss": {
+          "id": "structure:63026:starter-manor:root_manor:boss",
+          "hp": 1440,
+          "maxHp": 1440,
+          "position": {
+            "x": 241.7701469597404,
+            "y": 4.502988873234554,
+            "z": 4.34852421026862
+          },
+          "defeated": false
+        },
+        "dungeon": {
+          "id": "structure:63026:starter-manor:root_manor",
+          "templateId": "root_manor",
+          "puzzle": {
+            "phase": "locked",
+            "elapsedS": 0,
+            "durationS": 0,
+            "paid": false
+          },
+          "deviceState": {
+            "schemaVersion": 1,
+            "parts": {
+              "root_manor_device_0": {
+                "componentId": "joint",
+                "installed": false,
+                "healthHp": 100,
+                "maxHealthHp": 100,
+                "ownerId": null
+              }
+            },
+            "structureParts": {
+              "puzzle_gate": {
+                "healthHp": 100,
+                "maxHealthHp": 100,
+                "installed": true
+              }
+            },
+            "supplies": {},
+            "energy": {
+              "mechanical": 0,
+              "electrical": 0,
+              "thermal": 0,
+              "chemical": 0,
+              "magic": 0,
+              "divine": 0
+            },
+            "metrics": {
+              "consumedEU": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "transferredInEU": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "transferredOutEU": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "manualInputEU": 0,
+              "heatLostEU": 0,
+              "spilledLiters": 0
+            },
+            "solved": false,
+            "legacySolved": false,
+            "work": {
+              "progressEU": 0,
+              "progressM": 0,
+              "active": false,
+              "legacyPaid": false,
+              "legacyProgressS": 0
+            },
+            "claims": [],
+            "ecologyBasin": {
+              "initialLiters": 48000,
+              "volumeLiters": 48000,
+              "spilledLiters": 0,
+              "breached": false
+            },
+            "fluid": null,
+            "heat": null,
+            "wind": null,
+            "altar": null,
+            "motion": null
+          },
+          "gateGeometry": [
+            {
+              "center": [
+                197,
+                6.5,
+                0
+              ],
+              "size": [
+                1,
+                4,
+                5
+              ]
+            }
+          ],
+          "status": {
+            "instanceId": "structure:63026:starter-manor:root_manor",
+            "templateId": "root_manor",
+            "phase": "locked",
+            "solved": false,
+            "summary": "0/1개 부품 설치",
+            "actions": [
+              {
+                "id": "install:root_manor_device_0",
+                "label": "장치 설치 · joint",
+                "items": {
+                  "joint": 1
+                },
+                "hold": false,
+                "disabled": false,
+                "detail": "joint"
+              },
+              {
+                "id": "replace:root_manor_device_0",
+                "label": "장치 교체 · joint",
+                "items": {
+                  "joint": 1
+                },
+                "hold": false,
+                "disabled": true,
+                "detail": "joint"
+              },
+              {
+                "id": "lift_gate",
+                "label": "운반문 들어 올리기",
+                "items": {},
+                "hold": true,
+                "disabled": true
+              },
+              {
+                "id": "lower_gate",
+                "label": "운반문 내리기",
+                "items": {},
+                "hold": true,
+                "disabled": true
+              }
+            ],
+            "parts": [
+              {
+                "id": "root_manor_device_0",
+                "componentId": "joint",
+                "position": [
+                  181,
+                  4.5,
+                  -4
+                ],
+                "installed": false,
+                "healthHp": 100,
+                "maxHealthHp": 100,
+                "ownerId": null
+              }
+            ],
+            "work": {
+              "progressEU": 0,
+              "progressM": 0,
+              "active": false,
+              "legacyPaid": false,
+              "legacyProgressS": 0
+            },
+            "supplies": [],
+            "energy": {
+              "reservedEU": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "reserveCapacityEU": {
+                "mechanical": 80,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "supplies": [],
+              "metrics": {
+                "consumedEU": {
+                  "mechanical": 0,
+                  "electrical": 0,
+                  "thermal": 0,
+                  "chemical": 0,
+                  "magic": 0,
+                  "divine": 0
+                },
+                "transferredInEU": {
+                  "mechanical": 0,
+                  "electrical": 0,
+                  "thermal": 0,
+                  "chemical": 0,
+                  "magic": 0,
+                  "divine": 0
+                },
+                "transferredOutEU": {
+                  "mechanical": 0,
+                  "electrical": 0,
+                  "thermal": 0,
+                  "chemical": 0,
+                  "magic": 0,
+                  "divine": 0
+                },
+                "manualInputEU": 0,
+                "heatLostEU": 0,
+                "spilledLiters": 0
+              }
+            },
+            "fluid": null,
+            "heat": null,
+            "wind": null,
+            "altar": null,
+            "motion": null,
+            "ecologyBasin": {
+              "initialLiters": 48000,
+              "volumeLiters": 48000,
+              "spilledLiters": 0,
+              "breached": false,
+              "conserved": true
+            }
+          }
+        },
+        "machine": {
+          "id": "machine:1",
+          "name": "Verification gun",
+          "position": {
+            "x": 236.93238830566406,
+            "y": 4.499967098236084,
+            "z": -7.680009365081787
+          },
+          "voxels": [
+            {
+              "id": "voxel:2",
+              "cell": [
+                0,
+                0,
+                0
+              ],
+              "hp": 45,
+              "maxHp": 45
+            },
+            {
+              "id": "voxel:3",
+              "cell": [
+                0,
+                1,
+                0
+              ],
+              "hp": 45,
+              "maxHp": 45
+            }
+          ],
+          "components": [
+            {
+              "id": "mounted:4",
+              "componentId": "controller",
+              "voxelId": "voxel:3",
+              "energy": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "shotsFired": null,
+              "fireLedger": [],
+              "fireCache": []
+            },
+            {
+              "id": "mounted:5",
+              "componentId": "arc_thrower",
+              "voxelId": "voxel:2",
+              "energy": {
+                "mechanical": 0,
+                "electrical": 40,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "shotsFired": 0,
+              "fireLedger": [],
+              "fireCache": []
+            }
+          ],
+          "damageClaims": [],
+          "metrics": {
+            "generated": 40,
+            "consumed": 0,
+            "loss": 0
+          }
+        },
+        "coverMachine": null,
+        "currentAim": null,
+        "physicsReady": true
+      }
+    },
+    {
+      "label": "machine-first-shot-damaged-boss",
+      "at": "2026-10-17T16:44:51.877Z",
+      "scenario": "additions-machine-fire",
+      "ids": {
+        "instanceId": "structure:63026:starter-manor:root_manor",
+        "bossId": "structure:63026:starter-manor:root_manor:boss",
+        "machineId": "machine:1"
+      },
+      "shot": {
+        "before": {
+          "shots": 1,
+          "energy": 20,
+          "hp": 1411.5
+        },
+        "after": {
+          "shots": 2,
+          "energy": 0,
+          "hp": 1383,
+          "packet": {
+            "rayOrigin": {
+              "x": 237.1817481360751,
+              "y": 5.2187240142815625,
+              "z": -6.741858122007612
+            },
+            "targetPoint": {
+              "x": 238.9578258665514,
+              "y": 6.6822108148382,
+              "z": -2.8384880544002242
+            },
+            "shotId": "machine-shot:machine:1:mounted:5:2"
+          },
+          "machineBlocked": false
+        }
+      },
+      "state": {
+        "time": 10.883333333333454,
+        "player": {
+          "x": 237.181721583502,
+          "y": 5.579966429129267,
+          "z": -7.429329739386977,
+          "yaw": 3.5107289592411854,
+          "pitch": -0.05231536865234374,
+          "hp": 261.08,
+          "maxHp": 275,
+          "calories": 2398.911666666742,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": 3.6666666666666585,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "gear_baseline_t8": 1,
+          "wood": 750
+        },
+        "energy": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 0
+        },
+        "energyCapacity": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 100
+        },
+        "energyOverflow": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 0
+        },
+        "worldFixtures": [
+          {
+            "id": "fixture:1",
+            "assetId": "battery",
+            "position": [
+              233,
+              4.5,
+              -10
+            ],
+            "hp": 78
+          }
+        ],
+        "research": [
+          "mechanisms",
+          "power"
+        ],
+        "stations": {},
+        "armaments": {
+          "schemaVersion": 1,
+          "nextId": 1,
+          "clock": 10.883333333333454,
+          "weapons": [],
+          "equippedId": null,
+          "jobs": [],
+          "attackClaims": []
+        },
+        "faith": {
+          "schemaVersion": 1,
+          "clock": 10.883333333333454,
+          "membership": null,
+          "quests": {},
+          "trials": {}
+        },
+        "boss": {
+          "id": "structure:63026:starter-manor:root_manor:boss",
+          "hp": 1383,
+          "maxHp": 1440,
+          "position": {
+            "x": 239.07194799504933,
+            "y": 4.52726367287353,
+            "z": -2.5447247999194493
+          },
+          "defeated": false
+        },
+        "dungeon": {
+          "id": "structure:63026:starter-manor:root_manor",
+          "templateId": "root_manor",
+          "puzzle": {
+            "phase": "locked",
+            "elapsedS": 0,
+            "durationS": 0,
+            "paid": false
+          },
+          "deviceState": {
+            "schemaVersion": 1,
+            "parts": {
+              "root_manor_device_0": {
+                "componentId": "joint",
+                "installed": false,
+                "healthHp": 100,
+                "maxHealthHp": 100,
+                "ownerId": null
+              }
+            },
+            "structureParts": {
+              "puzzle_gate": {
+                "healthHp": 100,
+                "maxHealthHp": 100,
+                "installed": true
+              }
+            },
+            "supplies": {},
+            "energy": {
+              "mechanical": 0,
+              "electrical": 0,
+              "thermal": 0,
+              "chemical": 0,
+              "magic": 0,
+              "divine": 0
+            },
+            "metrics": {
+              "consumedEU": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "transferredInEU": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "transferredOutEU": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "manualInputEU": 0,
+              "heatLostEU": 0,
+              "spilledLiters": 0
+            },
+            "solved": false,
+            "legacySolved": false,
+            "work": {
+              "progressEU": 0,
+              "progressM": 0,
+              "active": false,
+              "legacyPaid": false,
+              "legacyProgressS": 0
+            },
+            "claims": [],
+            "ecologyBasin": {
+              "initialLiters": 48000,
+              "volumeLiters": 48000,
+              "spilledLiters": 0,
+              "breached": false
+            },
+            "fluid": null,
+            "heat": null,
+            "wind": null,
+            "altar": null,
+            "motion": null
+          },
+          "gateGeometry": [
+            {
+              "center": [
+                197,
+                6.5,
+                0
+              ],
+              "size": [
+                1,
+                4,
+                5
+              ]
+            }
+          ],
+          "status": {
+            "instanceId": "structure:63026:starter-manor:root_manor",
+            "templateId": "root_manor",
+            "phase": "locked",
+            "solved": false,
+            "summary": "0/1개 부품 설치",
+            "actions": [
+              {
+                "id": "install:root_manor_device_0",
+                "label": "장치 설치 · joint",
+                "items": {
+                  "joint": 1
+                },
+                "hold": false,
+                "disabled": false,
+                "detail": "joint"
+              },
+              {
+                "id": "replace:root_manor_device_0",
+                "label": "장치 교체 · joint",
+                "items": {
+                  "joint": 1
+                },
+                "hold": false,
+                "disabled": true,
+                "detail": "joint"
+              },
+              {
+                "id": "lift_gate",
+                "label": "운반문 들어 올리기",
+                "items": {},
+                "hold": true,
+                "disabled": true
+              },
+              {
+                "id": "lower_gate",
+                "label": "운반문 내리기",
+                "items": {},
+                "hold": true,
+                "disabled": true
+              }
+            ],
+            "parts": [
+              {
+                "id": "root_manor_device_0",
+                "componentId": "joint",
+                "position": [
+                  181,
+                  4.5,
+                  -4
+                ],
+                "installed": false,
+                "healthHp": 100,
+                "maxHealthHp": 100,
+                "ownerId": null
+              }
+            ],
+            "work": {
+              "progressEU": 0,
+              "progressM": 0,
+              "active": false,
+              "legacyPaid": false,
+              "legacyProgressS": 0
+            },
+            "supplies": [],
+            "energy": {
+              "reservedEU": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "reserveCapacityEU": {
+                "mechanical": 80,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "supplies": [],
+              "metrics": {
+                "consumedEU": {
+                  "mechanical": 0,
+                  "electrical": 0,
+                  "thermal": 0,
+                  "chemical": 0,
+                  "magic": 0,
+                  "divine": 0
+                },
+                "transferredInEU": {
+                  "mechanical": 0,
+                  "electrical": 0,
+                  "thermal": 0,
+                  "chemical": 0,
+                  "magic": 0,
+                  "divine": 0
+                },
+                "transferredOutEU": {
+                  "mechanical": 0,
+                  "electrical": 0,
+                  "thermal": 0,
+                  "chemical": 0,
+                  "magic": 0,
+                  "divine": 0
+                },
+                "manualInputEU": 0,
+                "heatLostEU": 0,
+                "spilledLiters": 0
+              }
+            },
+            "fluid": null,
+            "heat": null,
+            "wind": null,
+            "altar": null,
+            "motion": null,
+            "ecologyBasin": {
+              "initialLiters": 48000,
+              "volumeLiters": 48000,
+              "spilledLiters": 0,
+              "breached": false,
+              "conserved": true
+            }
+          }
+        },
+        "machine": {
+          "id": "machine:1",
+          "name": "Verification gun",
+          "position": {
+            "x": 236.93173217773438,
+            "y": 4.499967098236084,
+            "z": -7.679343223571777
+          },
+          "voxels": [
+            {
+              "id": "voxel:2",
+              "cell": [
+                0,
+                0,
+                0
+              ],
+              "hp": 26,
+              "maxHp": 45
+            },
+            {
+              "id": "voxel:3",
+              "cell": [
+                0,
+                1,
+                0
+              ],
+              "hp": 26,
+              "maxHp": 45
+            }
+          ],
+          "components": [
+            {
+              "id": "mounted:4",
+              "componentId": "controller",
+              "voxelId": "voxel:3",
+              "energy": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "shotsFired": null,
+              "fireLedger": [],
+              "fireCache": []
+            },
+            {
+              "id": "mounted:5",
+              "componentId": "arc_thrower",
+              "voxelId": "voxel:2",
+              "energy": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "shotsFired": 2,
+              "fireLedger": [
+                {
+                  "claimId": "machine-shot:63026:2",
+                  "signature": "{\"targetId\":\"structure:63026:starter-manor:root_manor:boss\",\"kind\":\"boss\",\"point\":{\"x\":239.99877460871923,\"y\":6.752452006417087,\"z\":-0.4032163352331672}}",
+                  "shotId": "machine-shot:machine:1:mounted:5:1"
+                },
+                {
+                  "claimId": "machine-shot:63026:18",
+                  "signature": "{\"targetId\":\"structure:63026:starter-manor:root_manor:boss\",\"kind\":\"boss\",\"point\":{\"x\":238.9578258665514,\"y\":6.6822108148382,\"z\":-2.8384880544002242}}",
+                  "shotId": "machine-shot:machine:1:mounted:5:2"
+                }
+              ],
+              "fireCache": [
+                {
+                  "claimId": "machine-shot:63026:2",
+                  "result": {
+                    "ok": true,
+                    "duplicate": false,
+                    "blocked": false,
+                    "shotId": "machine-shot:machine:1:mounted:5:1",
+                    "packet": {
+                      "amount": 30,
+                      "energyType": "electrical",
+                      "energyEU": 20,
+                      "attackMode": "pierce",
+                      "sourceId": "machine:1",
+                      "attackerPosition": {
+                        "x": 237.18193916993073,
+                        "y": 5.218707704562344,
+                        "z": -6.742114045783639
+                      },
+                      "excludeOwnerId": "machine:1",
+                      "rayOrigin": {
+                        "x": 237.18193916993073,
+                        "y": 5.218707704562344,
+                        "z": -6.742114045783639
+                      },
+                      "targetId": "structure:63026:starter-manor:root_manor:boss",
+                      "targetKind": "boss",
+                      "targetPoint": {
+                        "x": 239.99877460871923,
+                        "y": 6.752452006417087,
+                        "z": -0.4032163352331672
+                      },
+                      "distanceM": 7.1041225818188645,
+                      "range": 24,
+                      "attackPeriod": 1.25,
+                      "shotId": "machine-shot:machine:1:mounted:5:1"
+                    }
+                  }
+                },
+                {
+                  "claimId": "machine-shot:63026:18",
+                  "result": {
+                    "ok": true,
+                    "duplicate": false,
+                    "blocked": false,
+                    "shotId": "machine-shot:machine:1:mounted:5:2",
+                    "packet": {
+                      "amount": 30,
+                      "energyType": "electrical",
+                      "energyEU": 20,
+                      "attackMode": "pierce",
+                      "sourceId": "machine:1",
+                      "attackerPosition": {
+                        "x": 237.1817481360751,
+                        "y": 5.2187240142815625,
+                        "z": -6.741858122007612
+                      },
+                      "excludeOwnerId": "machine:1",
+                      "rayOrigin": {
+                        "x": 237.1817481360751,
+                        "y": 5.2187240142815625,
+                        "z": -6.741858122007612
+                      },
+                      "targetId": "structure:63026:starter-manor:root_manor:boss",
+                      "targetKind": "boss",
+                      "targetPoint": {
+                        "x": 238.9578258665514,
+                        "y": 6.6822108148382,
+                        "z": -2.8384880544002242
+                      },
+                      "distanceM": 4.5312849838418465,
+                      "range": 24,
+                      "attackPeriod": 1.25,
+                      "shotId": "machine-shot:machine:1:mounted:5:2"
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "damageClaims": [
+            "boss:structure:63026:starter-manor:root_manor:boss:structure:63026:starter-manor:root_manor:boss:cast:2"
+          ],
+          "metrics": {
+            "generated": 40,
+            "consumed": 40,
+            "loss": 0
+          }
+        },
+        "coverMachine": null,
+        "currentAim": {
+          "kind": "boss",
+          "id": "structure:63026:starter-manor:root_manor:boss",
+          "partId": "core",
+          "point": {
+            "x": 238.96439825913174,
+            "y": 6.681252563833881,
+            "z": -2.821380593249639
+          },
+          "distance": 4.947531134547635
+        },
+        "physicsReady": true
+      }
+    },
+    {
+      "label": "machine-cover-built-through-ui",
+      "at": "2026-10-17T16:44:55.303Z",
+      "scenario": "additions-machine-fire",
+      "ids": {
+        "instanceId": "structure:63026:starter-manor:root_manor",
+        "bossId": "structure:63026:starter-manor:root_manor:boss",
+        "machineId": "machine:1",
+        "coverMachineId": "machine:6"
+      },
+      "state": {
+        "time": 12.883333333333553,
+        "player": {
+          "x": 237.18160967072419,
+          "y": 5.508067638426726,
+          "z": -7.429292735836539,
+          "yaw": 3.5107289592411854,
+          "pitch": -0.05231536865234374,
+          "hp": 261.08,
+          "maxHp": 275,
+          "calories": 2398.7116666667557,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": 3.6666666666666585,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "gear_baseline_t8": 1,
+          "wood": 500
+        },
+        "energy": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 0
+        },
+        "energyCapacity": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 100
+        },
+        "energyOverflow": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 0
+        },
+        "worldFixtures": [
+          {
+            "id": "fixture:1",
+            "assetId": "battery",
+            "position": [
+              233,
+              4.5,
+              -10
+            ],
+            "hp": 78
+          }
+        ],
+        "research": [
+          "mechanisms",
+          "power"
+        ],
+        "stations": {},
+        "armaments": {
+          "schemaVersion": 1,
+          "nextId": 1,
+          "clock": 12.883333333333553,
+          "weapons": [],
+          "equippedId": null,
+          "jobs": [],
+          "attackClaims": []
+        },
+        "faith": {
+          "schemaVersion": 1,
+          "clock": 12.883333333333553,
+          "membership": null,
+          "quests": {},
+          "trials": {}
+        },
+        "boss": {
+          "id": "structure:63026:starter-manor:root_manor:boss",
+          "hp": 1383,
+          "maxHp": 1440,
+          "position": {
+            "x": 239.07194799504933,
+            "y": 4.52726367287353,
+            "z": -2.5447247999194493
+          },
+          "defeated": false
+        },
+        "dungeon": {
+          "id": "structure:63026:starter-manor:root_manor",
+          "templateId": "root_manor",
+          "puzzle": {
+            "phase": "locked",
+            "elapsedS": 0,
+            "durationS": 0,
+            "paid": false
+          },
+          "deviceState": {
+            "schemaVersion": 1,
+            "parts": {
+              "root_manor_device_0": {
+                "componentId": "joint",
+                "installed": false,
+                "healthHp": 100,
+                "maxHealthHp": 100,
+                "ownerId": null
+              }
+            },
+            "structureParts": {
+              "puzzle_gate": {
+                "healthHp": 100,
+                "maxHealthHp": 100,
+                "installed": true
+              }
+            },
+            "supplies": {},
+            "energy": {
+              "mechanical": 0,
+              "electrical": 0,
+              "thermal": 0,
+              "chemical": 0,
+              "magic": 0,
+              "divine": 0
+            },
+            "metrics": {
+              "consumedEU": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "transferredInEU": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "transferredOutEU": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "manualInputEU": 0,
+              "heatLostEU": 0,
+              "spilledLiters": 0
+            },
+            "solved": false,
+            "legacySolved": false,
+            "work": {
+              "progressEU": 0,
+              "progressM": 0,
+              "active": false,
+              "legacyPaid": false,
+              "legacyProgressS": 0
+            },
+            "claims": [],
+            "ecologyBasin": {
+              "initialLiters": 48000,
+              "volumeLiters": 48000,
+              "spilledLiters": 0,
+              "breached": false
+            },
+            "fluid": null,
+            "heat": null,
+            "wind": null,
+            "altar": null,
+            "motion": null
+          },
+          "gateGeometry": [
+            {
+              "center": [
+                197,
+                6.5,
+                0
+              ],
+              "size": [
+                1,
+                4,
+                5
+              ]
+            }
+          ],
+          "status": {
+            "instanceId": "structure:63026:starter-manor:root_manor",
+            "templateId": "root_manor",
+            "phase": "locked",
+            "solved": false,
+            "summary": "0/1개 부품 설치",
+            "actions": [
+              {
+                "id": "install:root_manor_device_0",
+                "label": "장치 설치 · joint",
+                "items": {
+                  "joint": 1
+                },
+                "hold": false,
+                "disabled": false,
+                "detail": "joint"
+              },
+              {
+                "id": "replace:root_manor_device_0",
+                "label": "장치 교체 · joint",
+                "items": {
+                  "joint": 1
+                },
+                "hold": false,
+                "disabled": true,
+                "detail": "joint"
+              },
+              {
+                "id": "lift_gate",
+                "label": "운반문 들어 올리기",
+                "items": {},
+                "hold": true,
+                "disabled": true
+              },
+              {
+                "id": "lower_gate",
+                "label": "운반문 내리기",
+                "items": {},
+                "hold": true,
+                "disabled": true
+              }
+            ],
+            "parts": [
+              {
+                "id": "root_manor_device_0",
+                "componentId": "joint",
+                "position": [
+                  181,
+                  4.5,
+                  -4
+                ],
+                "installed": false,
+                "healthHp": 100,
+                "maxHealthHp": 100,
+                "ownerId": null
+              }
+            ],
+            "work": {
+              "progressEU": 0,
+              "progressM": 0,
+              "active": false,
+              "legacyPaid": false,
+              "legacyProgressS": 0
+            },
+            "supplies": [],
+            "energy": {
+              "reservedEU": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "reserveCapacityEU": {
+                "mechanical": 80,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "supplies": [],
+              "metrics": {
+                "consumedEU": {
+                  "mechanical": 0,
+                  "electrical": 0,
+                  "thermal": 0,
+                  "chemical": 0,
+                  "magic": 0,
+                  "divine": 0
+                },
+                "transferredInEU": {
+                  "mechanical": 0,
+                  "electrical": 0,
+                  "thermal": 0,
+                  "chemical": 0,
+                  "magic": 0,
+                  "divine": 0
+                },
+                "transferredOutEU": {
+                  "mechanical": 0,
+                  "electrical": 0,
+                  "thermal": 0,
+                  "chemical": 0,
+                  "magic": 0,
+                  "divine": 0
+                },
+                "manualInputEU": 0,
+                "heatLostEU": 0,
+                "spilledLiters": 0
+              }
+            },
+            "fluid": null,
+            "heat": null,
+            "wind": null,
+            "altar": null,
+            "motion": null,
+            "ecologyBasin": {
+              "initialLiters": 48000,
+              "volumeLiters": 48000,
+              "spilledLiters": 0,
+              "breached": false,
+              "conserved": true
+            }
+          }
+        },
+        "machine": {
+          "id": "machine:1",
+          "name": "Verification gun",
+          "position": {
+            "x": 236.93142700195312,
+            "y": 4.499967098236084,
+            "z": -7.67893648147583
+          },
+          "voxels": [
+            {
+              "id": "voxel:2",
+              "cell": [
+                0,
+                0,
+                0
+              ],
+              "hp": 26,
+              "maxHp": 45
+            },
+            {
+              "id": "voxel:3",
+              "cell": [
+                0,
+                1,
+                0
+              ],
+              "hp": 26,
+              "maxHp": 45
+            }
+          ],
+          "components": [
+            {
+              "id": "mounted:4",
+              "componentId": "controller",
+              "voxelId": "voxel:3",
+              "energy": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "shotsFired": null,
+              "fireLedger": [],
+              "fireCache": []
+            },
+            {
+              "id": "mounted:5",
+              "componentId": "arc_thrower",
+              "voxelId": "voxel:2",
+              "energy": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "shotsFired": 2,
+              "fireLedger": [
+                {
+                  "claimId": "machine-shot:63026:2",
+                  "signature": "{\"targetId\":\"structure:63026:starter-manor:root_manor:boss\",\"kind\":\"boss\",\"point\":{\"x\":239.99877460871923,\"y\":6.752452006417087,\"z\":-0.4032163352331672}}",
+                  "shotId": "machine-shot:machine:1:mounted:5:1"
+                },
+                {
+                  "claimId": "machine-shot:63026:18",
+                  "signature": "{\"targetId\":\"structure:63026:starter-manor:root_manor:boss\",\"kind\":\"boss\",\"point\":{\"x\":238.9578258665514,\"y\":6.6822108148382,\"z\":-2.8384880544002242}}",
+                  "shotId": "machine-shot:machine:1:mounted:5:2"
+                }
+              ],
+              "fireCache": [
+                {
+                  "claimId": "machine-shot:63026:2",
+                  "result": {
+                    "ok": true,
+                    "duplicate": false,
+                    "blocked": false,
+                    "shotId": "machine-shot:machine:1:mounted:5:1",
+                    "packet": {
+                      "amount": 30,
+                      "energyType": "electrical",
+                      "energyEU": 20,
+                      "attackMode": "pierce",
+                      "sourceId": "machine:1",
+                      "attackerPosition": {
+                        "x": 237.18193916993073,
+                        "y": 5.218707704562344,
+                        "z": -6.742114045783639
+                      },
+                      "excludeOwnerId": "machine:1",
+                      "rayOrigin": {
+                        "x": 237.18193916993073,
+                        "y": 5.218707704562344,
+                        "z": -6.742114045783639
+                      },
+                      "targetId": "structure:63026:starter-manor:root_manor:boss",
+                      "targetKind": "boss",
+                      "targetPoint": {
+                        "x": 239.99877460871923,
+                        "y": 6.752452006417087,
+                        "z": -0.4032163352331672
+                      },
+                      "distanceM": 7.1041225818188645,
+                      "range": 24,
+                      "attackPeriod": 1.25,
+                      "shotId": "machine-shot:machine:1:mounted:5:1"
+                    }
+                  }
+                },
+                {
+                  "claimId": "machine-shot:63026:18",
+                  "result": {
+                    "ok": true,
+                    "duplicate": false,
+                    "blocked": false,
+                    "shotId": "machine-shot:machine:1:mounted:5:2",
+                    "packet": {
+                      "amount": 30,
+                      "energyType": "electrical",
+                      "energyEU": 20,
+                      "attackMode": "pierce",
+                      "sourceId": "machine:1",
+                      "attackerPosition": {
+                        "x": 237.1817481360751,
+                        "y": 5.2187240142815625,
+                        "z": -6.741858122007612
+                      },
+                      "excludeOwnerId": "machine:1",
+                      "rayOrigin": {
+                        "x": 237.1817481360751,
+                        "y": 5.2187240142815625,
+                        "z": -6.741858122007612
+                      },
+                      "targetId": "structure:63026:starter-manor:root_manor:boss",
+                      "targetKind": "boss",
+                      "targetPoint": {
+                        "x": 238.9578258665514,
+                        "y": 6.6822108148382,
+                        "z": -2.8384880544002242
+                      },
+                      "distanceM": 4.5312849838418465,
+                      "range": 24,
+                      "attackPeriod": 1.25,
+                      "shotId": "machine-shot:machine:1:mounted:5:2"
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "damageClaims": [
+            "boss:structure:63026:starter-manor:root_manor:boss:structure:63026:starter-manor:root_manor:boss:cast:2"
+          ],
+          "metrics": {
+            "generated": 40,
+            "consumed": 40,
+            "loss": 0
+          }
+        },
+        "coverMachine": {
+          "id": "machine:6",
+          "name": "Verification cover",
+          "position": {
+            "x": 238.08363342285156,
+            "y": 4.499963760375977,
+            "z": -5.097607135772705
+          },
+          "voxels": [
+            {
+              "id": "voxel:7",
+              "cell": [
+                0,
+                0,
+                0
+              ],
+              "hp": 45,
+              "maxHp": 45
+            },
+            {
+              "id": "voxel:8",
+              "cell": [
+                0,
+                1,
+                0
+              ],
+              "hp": 45,
+              "maxHp": 45
+            }
+          ],
+          "components": [],
+          "damageClaims": [],
+          "metrics": {
+            "generated": 0,
+            "consumed": 0,
+            "loss": 0
+          }
+        },
+        "currentAim": {
+          "kind": "boss",
+          "id": "structure:63026:starter-manor:root_manor:boss",
+          "partId": "core",
+          "point": {
+            "x": 238.9049313109887,
+            "y": 6.617967769619887,
+            "z": -2.974767364335034
+          },
+          "distance": 4.782800822272636
+        },
+        "physicsReady": true
+      }
+    },
+    {
+      "label": "additions-machine-fire-blocked",
+      "at": "2026-10-17T16:45:12.282Z",
+      "scenario": "additions-machine-fire",
+      "failure": "TimeoutError: page.waitForFunction: Timeout 12000ms exceeded.",
+      "state": {
+        "time": 23.766666666666598,
+        "player": {
+          "x": 237.17975313230306,
+          "y": 5.579966426287573,
+          "z": -7.426713254221113,
+          "yaw": 3.5109816447880595,
+          "pitch": -0.21847061157226563,
+          "hp": 256.53999999999724,
+          "maxHp": 275,
+          "calories": 2388.6233333335194,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": 15.650000000000357,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "gear_baseline_t8": 1,
+          "wood": 500
+        },
+        "energy": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 0
+        },
+        "energyCapacity": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 100
+        },
+        "energyOverflow": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 0
+        },
+        "worldFixtures": [
+          {
+            "id": "fixture:1",
+            "assetId": "battery",
+            "position": [
+              233,
+              4.5,
+              -10
+            ],
+            "hp": 78
+          }
+        ],
+        "research": [
+          "mechanisms",
+          "power"
+        ],
+        "stations": {},
+        "armaments": {
+          "schemaVersion": 1,
+          "nextId": 1,
+          "clock": 23.766666666666598,
+          "weapons": [],
+          "equippedId": null,
+          "jobs": [],
+          "attackClaims": []
+        },
+        "faith": {
+          "schemaVersion": 1,
+          "clock": 23.766666666666598,
+          "membership": null,
+          "quests": {},
+          "trials": {}
+        },
+        "boss": null,
+        "dungeon": null,
+        "machine": null,
+        "coverMachine": null,
+        "currentAim": {
+          "kind": "boss",
+          "id": "structure:63026:starter-manor:root_manor:boss",
+          "partId": "body",
+          "point": {
+            "x": 238.73314473550587,
+            "y": 5.984755385149666,
+            "z": -3.414444434101347
+          },
+          "distance": 4.407238896510834
+        },
+        "physicsReady": true
+      }
+    }
+  ],
+  "errors": [
+    "additions-machine-fire: page.waitForFunction: Timeout 12000ms exceeded.\n    at waitFor (/workspace/feral-voxel-sandbox/tools/verify-expedition-additions.mjs:294:14)\n    at fireOnceViaUI (/workspace/feral-voxel-sandbox/tools/verify-expedition-additions.mjs:606:11)\n    at async runMachineScenario (/workspace/feral-voxel-sandbox/tools/verify-expedition-additions.mjs:701:23)\n    at async runScenario (/workspace/feral-voxel-sandbox/tools/verify-expedition-additions.mjs:772:5)\n    at async file:///workspace/feral-voxel-sandbox/tools/verify-expedition-additions.mjs:804:5"
+  ],
+  "consoleErrors": [
+    {
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "location": {
+        "url": "http://127.0.0.1:37395/favicon.ico",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    }
+  ],
+  "failedRequests": [],
+  "startedAt": "2026-10-17T16:44:24.266Z",
+  "selectedScenarios": [
+    "additions-machine-fire"
+  ],
+  "updatedAt": "2026-10-17T16:45:13.994Z",
+  "finishedAt": "2026-10-17T16:45:13.774Z",
+  "ok": false
+}

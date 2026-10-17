@@ -1,0 +1,1264 @@
+{
+  "schemaVersion": 1,
+  "environment": "Linux headless Chromium, SwiftShader software WebGL; not Android/mobile hardware",
+  "scope": "Prepared saved workshop, UI-only actions after setup. Inventory grants, all research, a test platform and workshop installation are setup fixtures, NOT evidence of progression from an empty inventory.",
+  "startedAt": "2026-10-17T15:24:44.713Z",
+  "codeBefore": {
+    "progression.js": "7f7365e6408201756a3310213a67b5b157ae5c3e9f954aeea739addd6d8dcea7",
+    "fixture-energy.js": "7cedb826d8b340ee49abc67666445e7b5d45a2619742604632a7413d5ddd8709",
+    "fixture-energy-panel.js": "82c1547a286ba23bf276e4ad8ffce834e9c1106f9b877a4962574fe74ae7dfb8",
+    "entry.js": "794aa6976ff69bb505181b1ae85a2639944afc8f3e8a35179b904ac8322288f0",
+    "runtime.js": "aab2f70856810fd85521836ed98ef2d4725de46684899a9f97026a90798cee11"
+  },
+  "pageErrors": [],
+  "consoleErrors": [
+    "Failed to load resource: the server responded with a status of 404 (File not found)"
+  ],
+  "steps": [
+    {
+      "name": "first-relic-explicit-reservation",
+      "state": {
+        "time": 2.5999999999999956,
+        "inventory": {
+          "raw_timber": 3,
+          "wood": 29,
+          "stone": 18,
+          "clay": 20,
+          "scrap_iron": 20,
+          "steel": 4,
+          "nickel": 4,
+          "bark_cup": 1,
+          "liquid_mana": 3,
+          "mana_steel": 3,
+          "gear_baseline_t5": 1
+        },
+        "personal": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 0
+        },
+        "network": {
+          "enabled": true,
+          "rules": {
+            "maxDistanceM": 8,
+            "maximumLinks": 1024,
+            "materials": {
+              "mechanical": {
+                "wood": 0.25
+              },
+              "electrical": {
+                "scrap_iron": 0.1
+              },
+              "thermal": {
+                "scrap_iron": 0.1
+              },
+              "chemical": {
+                "clay": 0.1
+              },
+              "magic": {
+                "clay": 0.1
+              },
+              "divine": {
+                "stone": 0.1
+              }
+            },
+            "status": "proposed",
+            "costUnit": "material L per cable metre, rounded upward to 0.001 L",
+            "fluidFlowLitersPerSecond": 1
+          },
+          "nodes": [
+            {
+              "ownerId": "fixture:1",
+              "assetId": "heat_engine",
+              "position": {
+                "x": -2,
+                "y": 10,
+                "z": 1
+              },
+              "energy": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "fuel": {},
+              "sources": {},
+              "fluidType": "liquid_mana",
+              "health": 143,
+              "maxHealth": 143,
+              "active": true,
+              "accessible": true,
+              "ports": {
+                "inputs": [
+                  "thermal"
+                ],
+                "outputs": [
+                  "mechanical"
+                ],
+                "stores": [],
+                "rate": 80,
+                "mode": "component",
+                "description": "Only catalog-declared functions and ports."
+              },
+              "capacities": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "sourceOptions": [
+                {
+                  "kind": "energy_source",
+                  "id": "manual_crank",
+                  "name": "수동 역학 입력",
+                  "energy": "mechanical",
+                  "power": 10,
+                  "requiredComponent": null,
+                  "inputs": {},
+                  "constraint": "held interaction; player cannot attack simultaneously; calorie upkeep belongs to organic movement model",
+                  "variableDictionary": "P-ENERGY"
+                },
+                {
+                  "kind": "energy_source",
+                  "id": "wood_fire",
+                  "name": "땔감 연소",
+                  "energy": "thermal",
+                  "power": 20,
+                  "inputs": {
+                    "raw_timber": 1
+                  },
+                  "duration": 20,
+                  "totalEnergy": 400,
+                  "requiredComponent": null,
+                  "variableDictionary": "P-ENERGY"
+                }
+              ]
+            },
+            {
+              "ownerId": "fixture:2",
+              "assetId": "generator",
+              "position": {
+                "x": -2,
+                "y": 10,
+                "z": -1
+              },
+              "energy": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "fuel": {},
+              "sources": {},
+              "fluidType": "liquid_mana",
+              "health": 110,
+              "maxHealth": 110,
+              "active": true,
+              "accessible": true,
+              "ports": {
+                "inputs": [
+                  "mechanical"
+                ],
+                "outputs": [
+                  "electrical"
+                ],
+                "stores": [],
+                "rate": 40,
+                "mode": "component",
+                "description": "Only catalog-declared functions and ports."
+              },
+              "capacities": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "sourceOptions": []
+            },
+            {
+              "ownerId": "fixture:3",
+              "assetId": "battery",
+              "position": {
+                "x": 0,
+                "y": 10,
+                "z": -1
+              },
+              "energy": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "fuel": {},
+              "sources": {},
+              "fluidType": "liquid_mana",
+              "health": 78,
+              "maxHealth": 78,
+              "active": true,
+              "accessible": true,
+              "ports": {
+                "inputs": [
+                  "electrical"
+                ],
+                "outputs": [
+                  "electrical"
+                ],
+                "stores": [
+                  "electrical"
+                ],
+                "rate": 20,
+                "mode": "storage",
+                "description": "Only catalog-declared functions and ports."
+              },
+              "capacities": {
+                "mechanical": 0,
+                "electrical": 400,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "sourceOptions": []
+            },
+            {
+              "ownerId": "fixture:4",
+              "assetId": "physics_station_t6",
+              "position": {
+                "x": 2,
+                "y": 10,
+                "z": -1
+              },
+              "energy": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "fuel": {},
+              "sources": {},
+              "fluidType": "liquid_mana",
+              "health": 700,
+              "maxHealth": 700,
+              "active": true,
+              "accessible": true,
+              "ports": {
+                "inputs": [
+                  "mechanical",
+                  "electrical"
+                ],
+                "outputs": [],
+                "stores": [],
+                "rate": 100,
+                "mode": "process_endpoint",
+                "description": "Recipe inputs only. Charged EU is reserved for queued work, never an output battery."
+              },
+              "capacities": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "sourceOptions": [
+                {
+                  "kind": "energy_source",
+                  "id": "manual_crank",
+                  "name": "수동 역학 입력",
+                  "energy": "mechanical",
+                  "power": 10,
+                  "requiredComponent": null,
+                  "inputs": {},
+                  "constraint": "held interaction; player cannot attack simultaneously; calorie upkeep belongs to organic movement model",
+                  "variableDictionary": "P-ENERGY"
+                },
+                {
+                  "kind": "energy_source",
+                  "id": "wood_fire",
+                  "name": "땔감 연소",
+                  "energy": "thermal",
+                  "power": 20,
+                  "inputs": {
+                    "raw_timber": 1
+                  },
+                  "duration": 20,
+                  "totalEnergy": 400,
+                  "requiredComponent": null,
+                  "variableDictionary": "P-ENERGY"
+                }
+              ]
+            },
+            {
+              "ownerId": "fixture:5",
+              "assetId": "mana_condenser",
+              "position": {
+                "x": 0,
+                "y": 10,
+                "z": 2
+              },
+              "energy": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "fuel": {},
+              "sources": {},
+              "fluidType": "liquid_mana",
+              "health": 117,
+              "maxHealth": 117,
+              "active": true,
+              "accessible": true,
+              "ports": {
+                "inputs": [],
+                "outputs": [
+                  "magic"
+                ],
+                "stores": [],
+                "rate": 2,
+                "mode": "source",
+                "description": "Only catalog-declared functions and ports."
+              },
+              "capacities": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "sourceOptions": [
+                {
+                  "kind": "energy_source",
+                  "id": "ambient_mana",
+                  "name": "대기 마나 응집",
+                  "energy": "magic",
+                  "power": 2,
+                  "inputs": {},
+                  "requiredComponent": "mana_condenser",
+                  "constraint": "finite rate at any environment; no unique biome required",
+                  "variableDictionary": "P-ENERGY"
+                }
+              ]
+            },
+            {
+              "ownerId": "fixture:6",
+              "assetId": "fluid_container",
+              "position": {
+                "x": 2,
+                "y": 10,
+                "z": 2
+              },
+              "energy": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "fuel": {},
+              "sources": {},
+              "fluidType": "liquid_mana",
+              "health": 25,
+              "maxHealth": 25,
+              "active": true,
+              "accessible": true,
+              "ports": {
+                "inputs": [
+                  "magic"
+                ],
+                "outputs": [
+                  "magic"
+                ],
+                "stores": [
+                  "magic"
+                ],
+                "rate": 100,
+                "mode": "fluid_storage",
+                "description": "Selected liquid only; 1 L/s pipe flow proposal. No conversion or generation without paid liquid."
+              },
+              "capacities": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 1000,
+                "divine": 0
+              },
+              "sourceOptions": [
+                {
+                  "kind": "energy_source",
+                  "id": "acid_extractor",
+                  "name": "산성액 에너지 추출",
+                  "energy": "chemical",
+                  "power": 10,
+                  "inputs": {
+                    "acid_fluid": 1
+                  },
+                  "duration": 4,
+                  "totalEnergy": 40,
+                  "requiredComponent": "fluid_container",
+                  "variableDictionary": "P-ENERGY"
+                }
+              ]
+            },
+            {
+              "ownerId": "fixture:7",
+              "assetId": "consecration_table",
+              "position": {
+                "x": 0,
+                "y": 10,
+                "z": -3
+              },
+              "energy": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 20
+              },
+              "fuel": {},
+              "sources": {},
+              "fluidType": "liquid_mana",
+              "health": 148,
+              "maxHealth": 148,
+              "active": true,
+              "accessible": true,
+              "ports": {
+                "inputs": [
+                  "divine"
+                ],
+                "outputs": [],
+                "stores": [],
+                "rate": 100,
+                "mode": "process_endpoint",
+                "description": "Recipe inputs only. Charged EU is reserved for queued work, never an output battery."
+              },
+              "capacities": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 20
+              },
+              "sourceOptions": [
+                {
+                  "kind": "energy_source",
+                  "id": "manual_crank",
+                  "name": "수동 역학 입력",
+                  "energy": "mechanical",
+                  "power": 10,
+                  "requiredComponent": null,
+                  "inputs": {},
+                  "constraint": "held interaction; player cannot attack simultaneously; calorie upkeep belongs to organic movement model",
+                  "variableDictionary": "P-ENERGY"
+                },
+                {
+                  "kind": "energy_source",
+                  "id": "wood_fire",
+                  "name": "땔감 연소",
+                  "energy": "thermal",
+                  "power": 20,
+                  "inputs": {
+                    "raw_timber": 1
+                  },
+                  "duration": 20,
+                  "totalEnergy": 400,
+                  "requiredComponent": null,
+                  "variableDictionary": "P-ENERGY"
+                }
+              ]
+            },
+            {
+              "ownerId": "fixture:8",
+              "assetId": "fluid_container",
+              "position": {
+                "x": 16,
+                "y": 10,
+                "z": 0
+              },
+              "energy": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "fuel": {},
+              "sources": {},
+              "fluidType": "liquid_mana",
+              "health": 25,
+              "maxHealth": 25,
+              "active": true,
+              "accessible": false,
+              "ports": {
+                "inputs": [
+                  "magic"
+                ],
+                "outputs": [
+                  "magic"
+                ],
+                "stores": [
+                  "magic"
+                ],
+                "rate": 100,
+                "mode": "fluid_storage",
+                "description": "Selected liquid only; 1 L/s pipe flow proposal. No conversion or generation without paid liquid."
+              },
+              "capacities": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 1000,
+                "divine": 0
+              },
+              "sourceOptions": [
+                {
+                  "kind": "energy_source",
+                  "id": "acid_extractor",
+                  "name": "산성액 에너지 추출",
+                  "energy": "chemical",
+                  "power": 10,
+                  "inputs": {
+                    "acid_fluid": 1
+                  },
+                  "duration": 4,
+                  "totalEnergy": 40,
+                  "requiredComponent": "fluid_container",
+                  "variableDictionary": "P-ENERGY"
+                }
+              ]
+            }
+          ],
+          "links": [],
+          "legacyEscrow": {
+            "mechanical": 0,
+            "electrical": 0,
+            "thermal": 0,
+            "chemical": 0,
+            "magic": 0,
+            "divine": 0
+          },
+          "metrics": {
+            "generated": {
+              "mechanical": 0,
+              "electrical": 0,
+              "thermal": 0,
+              "chemical": 0,
+              "magic": 4.399999999999994,
+              "divine": 0
+            },
+            "consumed": {
+              "mechanical": 0,
+              "electrical": 0,
+              "thermal": 0,
+              "chemical": 0,
+              "magic": 0,
+              "divine": 0
+            },
+            "dissipated": {
+              "mechanical": 0,
+              "electrical": 0,
+              "thermal": 0,
+              "chemical": 0,
+              "magic": 4.399999999999994,
+              "divine": 0
+            },
+            "imported": {
+              "mechanical": 0,
+              "electrical": 0,
+              "thermal": 0,
+              "chemical": 0,
+              "magic": 0,
+              "divine": 20
+            },
+            "exported": {
+              "mechanical": 0,
+              "electrical": 0,
+              "thermal": 0,
+              "chemical": 0,
+              "magic": 0,
+              "divine": 0
+            },
+            "conversionLoss": 0
+          }
+        },
+        "jobs": [
+          {
+            "id": "craft:1",
+            "type": "craft",
+            "recipeId": "assemble_relic",
+            "count": 1,
+            "progress": 0,
+            "autoInstall": false,
+            "fixtureId": "fixture:7"
+          }
+        ],
+        "player": {
+          "x": 0,
+          "y": 10.007981822267174,
+          "z": 0
+        }
+      }
+    },
+    {
+      "name": "first-relic-produced",
+      "state": {
+        "time": 32.6166666666661,
+        "inventory": {
+          "raw_timber": 3,
+          "wood": 29,
+          "stone": 18,
+          "clay": 20,
+          "scrap_iron": 20,
+          "steel": 4,
+          "nickel": 4,
+          "bark_cup": 1,
+          "liquid_mana": 3,
+          "mana_steel": 3,
+          "gear_baseline_t5": 1,
+          "relic": 1
+        },
+        "personal": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 0
+        },
+        "network": {
+          "enabled": true,
+          "rules": {
+            "maxDistanceM": 8,
+            "maximumLinks": 1024,
+            "materials": {
+              "mechanical": {
+                "wood": 0.25
+              },
+              "electrical": {
+                "scrap_iron": 0.1
+              },
+              "thermal": {
+                "scrap_iron": 0.1
+              },
+              "chemical": {
+                "clay": 0.1
+              },
+              "magic": {
+                "clay": 0.1
+              },
+              "divine": {
+                "stone": 0.1
+              }
+            },
+            "status": "proposed",
+            "costUnit": "material L per cable metre, rounded upward to 0.001 L",
+            "fluidFlowLitersPerSecond": 1
+          },
+          "nodes": [
+            {
+              "ownerId": "fixture:1",
+              "assetId": "heat_engine",
+              "position": {
+                "x": -2,
+                "y": 10,
+                "z": 1
+              },
+              "energy": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "fuel": {},
+              "sources": {},
+              "fluidType": "liquid_mana",
+              "health": 143,
+              "maxHealth": 143,
+              "active": true,
+              "accessible": true,
+              "ports": {
+                "inputs": [
+                  "thermal"
+                ],
+                "outputs": [
+                  "mechanical"
+                ],
+                "stores": [],
+                "rate": 80,
+                "mode": "component",
+                "description": "Only catalog-declared functions and ports."
+              },
+              "capacities": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "sourceOptions": [
+                {
+                  "kind": "energy_source",
+                  "id": "manual_crank",
+                  "name": "수동 역학 입력",
+                  "energy": "mechanical",
+                  "power": 10,
+                  "requiredComponent": null,
+                  "inputs": {},
+                  "constraint": "held interaction; player cannot attack simultaneously; calorie upkeep belongs to organic movement model",
+                  "variableDictionary": "P-ENERGY"
+                },
+                {
+                  "kind": "energy_source",
+                  "id": "wood_fire",
+                  "name": "땔감 연소",
+                  "energy": "thermal",
+                  "power": 20,
+                  "inputs": {
+                    "raw_timber": 1
+                  },
+                  "duration": 20,
+                  "totalEnergy": 400,
+                  "requiredComponent": null,
+                  "variableDictionary": "P-ENERGY"
+                }
+              ]
+            },
+            {
+              "ownerId": "fixture:2",
+              "assetId": "generator",
+              "position": {
+                "x": -2,
+                "y": 10,
+                "z": -1
+              },
+              "energy": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "fuel": {},
+              "sources": {},
+              "fluidType": "liquid_mana",
+              "health": 110,
+              "maxHealth": 110,
+              "active": true,
+              "accessible": true,
+              "ports": {
+                "inputs": [
+                  "mechanical"
+                ],
+                "outputs": [
+                  "electrical"
+                ],
+                "stores": [],
+                "rate": 40,
+                "mode": "component",
+                "description": "Only catalog-declared functions and ports."
+              },
+              "capacities": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "sourceOptions": []
+            },
+            {
+              "ownerId": "fixture:3",
+              "assetId": "battery",
+              "position": {
+                "x": 0,
+                "y": 10,
+                "z": -1
+              },
+              "energy": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "fuel": {},
+              "sources": {},
+              "fluidType": "liquid_mana",
+              "health": 78,
+              "maxHealth": 78,
+              "active": true,
+              "accessible": true,
+              "ports": {
+                "inputs": [
+                  "electrical"
+                ],
+                "outputs": [
+                  "electrical"
+                ],
+                "stores": [
+                  "electrical"
+                ],
+                "rate": 20,
+                "mode": "storage",
+                "description": "Only catalog-declared functions and ports."
+              },
+              "capacities": {
+                "mechanical": 0,
+                "electrical": 400,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "sourceOptions": []
+            },
+            {
+              "ownerId": "fixture:4",
+              "assetId": "physics_station_t6",
+              "position": {
+                "x": 2,
+                "y": 10,
+                "z": -1
+              },
+              "energy": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "fuel": {},
+              "sources": {},
+              "fluidType": "liquid_mana",
+              "health": 700,
+              "maxHealth": 700,
+              "active": true,
+              "accessible": true,
+              "ports": {
+                "inputs": [
+                  "mechanical",
+                  "electrical"
+                ],
+                "outputs": [],
+                "stores": [],
+                "rate": 100,
+                "mode": "process_endpoint",
+                "description": "Recipe inputs only. Charged EU is reserved for queued work, never an output battery."
+              },
+              "capacities": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "sourceOptions": [
+                {
+                  "kind": "energy_source",
+                  "id": "manual_crank",
+                  "name": "수동 역학 입력",
+                  "energy": "mechanical",
+                  "power": 10,
+                  "requiredComponent": null,
+                  "inputs": {},
+                  "constraint": "held interaction; player cannot attack simultaneously; calorie upkeep belongs to organic movement model",
+                  "variableDictionary": "P-ENERGY"
+                },
+                {
+                  "kind": "energy_source",
+                  "id": "wood_fire",
+                  "name": "땔감 연소",
+                  "energy": "thermal",
+                  "power": 20,
+                  "inputs": {
+                    "raw_timber": 1
+                  },
+                  "duration": 20,
+                  "totalEnergy": 400,
+                  "requiredComponent": null,
+                  "variableDictionary": "P-ENERGY"
+                }
+              ]
+            },
+            {
+              "ownerId": "fixture:5",
+              "assetId": "mana_condenser",
+              "position": {
+                "x": 0,
+                "y": 10,
+                "z": 2
+              },
+              "energy": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "fuel": {},
+              "sources": {},
+              "fluidType": "liquid_mana",
+              "health": 117,
+              "maxHealth": 117,
+              "active": true,
+              "accessible": true,
+              "ports": {
+                "inputs": [],
+                "outputs": [
+                  "magic"
+                ],
+                "stores": [],
+                "rate": 2,
+                "mode": "source",
+                "description": "Only catalog-declared functions and ports."
+              },
+              "capacities": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "sourceOptions": [
+                {
+                  "kind": "energy_source",
+                  "id": "ambient_mana",
+                  "name": "대기 마나 응집",
+                  "energy": "magic",
+                  "power": 2,
+                  "inputs": {},
+                  "requiredComponent": "mana_condenser",
+                  "constraint": "finite rate at any environment; no unique biome required",
+                  "variableDictionary": "P-ENERGY"
+                }
+              ]
+            },
+            {
+              "ownerId": "fixture:6",
+              "assetId": "fluid_container",
+              "position": {
+                "x": 2,
+                "y": 10,
+                "z": 2
+              },
+              "energy": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "fuel": {},
+              "sources": {},
+              "fluidType": "liquid_mana",
+              "health": 25,
+              "maxHealth": 25,
+              "active": true,
+              "accessible": true,
+              "ports": {
+                "inputs": [
+                  "magic"
+                ],
+                "outputs": [
+                  "magic"
+                ],
+                "stores": [
+                  "magic"
+                ],
+                "rate": 100,
+                "mode": "fluid_storage",
+                "description": "Selected liquid only; 1 L/s pipe flow proposal. No conversion or generation without paid liquid."
+              },
+              "capacities": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 1000,
+                "divine": 0
+              },
+              "sourceOptions": [
+                {
+                  "kind": "energy_source",
+                  "id": "acid_extractor",
+                  "name": "산성액 에너지 추출",
+                  "energy": "chemical",
+                  "power": 10,
+                  "inputs": {
+                    "acid_fluid": 1
+                  },
+                  "duration": 4,
+                  "totalEnergy": 40,
+                  "requiredComponent": "fluid_container",
+                  "variableDictionary": "P-ENERGY"
+                }
+              ]
+            },
+            {
+              "ownerId": "fixture:7",
+              "assetId": "consecration_table",
+              "position": {
+                "x": 0,
+                "y": 10,
+                "z": -3
+              },
+              "energy": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "fuel": {},
+              "sources": {},
+              "fluidType": "liquid_mana",
+              "health": 148,
+              "maxHealth": 148,
+              "active": true,
+              "accessible": true,
+              "ports": {
+                "inputs": [
+                  "divine"
+                ],
+                "outputs": [],
+                "stores": [],
+                "rate": 100,
+                "mode": "process_endpoint",
+                "description": "Recipe inputs only. Charged EU is reserved for queued work, never an output battery."
+              },
+              "capacities": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "sourceOptions": [
+                {
+                  "kind": "energy_source",
+                  "id": "manual_crank",
+                  "name": "수동 역학 입력",
+                  "energy": "mechanical",
+                  "power": 10,
+                  "requiredComponent": null,
+                  "inputs": {},
+                  "constraint": "held interaction; player cannot attack simultaneously; calorie upkeep belongs to organic movement model",
+                  "variableDictionary": "P-ENERGY"
+                },
+                {
+                  "kind": "energy_source",
+                  "id": "wood_fire",
+                  "name": "땔감 연소",
+                  "energy": "thermal",
+                  "power": 20,
+                  "inputs": {
+                    "raw_timber": 1
+                  },
+                  "duration": 20,
+                  "totalEnergy": 400,
+                  "requiredComponent": null,
+                  "variableDictionary": "P-ENERGY"
+                }
+              ]
+            },
+            {
+              "ownerId": "fixture:8",
+              "assetId": "fluid_container",
+              "position": {
+                "x": 16,
+                "y": 10,
+                "z": 0
+              },
+              "energy": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 0,
+                "divine": 0
+              },
+              "fuel": {},
+              "sources": {},
+              "fluidType": "liquid_mana",
+              "health": 25,
+              "maxHealth": 25,
+              "active": true,
+              "accessible": false,
+              "ports": {
+                "inputs": [
+                  "magic"
+                ],
+                "outputs": [
+                  "magic"
+                ],
+                "stores": [
+                  "magic"
+                ],
+                "rate": 100,
+                "mode": "fluid_storage",
+                "description": "Selected liquid only; 1 L/s pipe flow proposal. No conversion or generation without paid liquid."
+              },
+              "capacities": {
+                "mechanical": 0,
+                "electrical": 0,
+                "thermal": 0,
+                "chemical": 0,
+                "magic": 1000,
+                "divine": 0
+              },
+              "sourceOptions": [
+                {
+                  "kind": "energy_source",
+                  "id": "acid_extractor",
+                  "name": "산성액 에너지 추출",
+                  "energy": "chemical",
+                  "power": 10,
+                  "inputs": {
+                    "acid_fluid": 1
+                  },
+                  "duration": 4,
+                  "totalEnergy": 40,
+                  "requiredComponent": "fluid_container",
+                  "variableDictionary": "P-ENERGY"
+                }
+              ]
+            }
+          ],
+          "links": [],
+          "legacyEscrow": {
+            "mechanical": 0,
+            "electrical": 0,
+            "thermal": 0,
+            "chemical": 0,
+            "magic": 0,
+            "divine": 0
+          },
+          "metrics": {
+            "generated": {
+              "mechanical": 0,
+              "electrical": 0,
+              "thermal": 0,
+              "chemical": 0,
+              "magic": 64.43333333333224,
+              "divine": 0
+            },
+            "consumed": {
+              "mechanical": 0,
+              "electrical": 0,
+              "thermal": 0,
+              "chemical": 0,
+              "magic": 0,
+              "divine": 20.00000000000053
+            },
+            "dissipated": {
+              "mechanical": 0,
+              "electrical": 0,
+              "thermal": 0,
+              "chemical": 0,
+              "magic": 64.43333333333224,
+              "divine": 0
+            },
+            "imported": {
+              "mechanical": 0,
+              "electrical": 0,
+              "thermal": 0,
+              "chemical": 0,
+              "magic": 0,
+              "divine": 20
+            },
+            "exported": {
+              "mechanical": 0,
+              "electrical": 0,
+              "thermal": 0,
+              "chemical": 0,
+              "magic": 0,
+              "divine": 0
+            },
+            "conversionLoss": 0
+          }
+        },
+        "jobs": [],
+        "player": {
+          "x": 0,
+          "y": 10.007981822267174,
+          "z": 0
+        }
+      }
+    }
+  ],
+  "setup": {
+    "ids": {
+      "engine": "fixture:1",
+      "generator": "fixture:2",
+      "battery": "fixture:3",
+      "consumer": "fixture:4",
+      "condenser": "fixture:5",
+      "tank": "fixture:6",
+      "altar": "fixture:7",
+      "remote": "fixture:8"
+    },
+    "baseY": 10,
+    "names": {
+      "engine": "열기관",
+      "generator": "발전부",
+      "battery": "전지",
+      "consumer": "6티어 관성가공 설비",
+      "condenser": "마나 응집부",
+      "tank": "유체 용기",
+      "altar": "축성대",
+      "remote": "유체 용기"
+    },
+    "recipe": "관성합금 가공",
+    "relicRecipe": "성물 조립"
+  },
+  "ok": true,
+  "finishedAt": "2026-10-17T15:27:32.933Z",
+  "codeAfter": {
+    "progression.js": "7f7365e6408201756a3310213a67b5b157ae5c3e9f954aeea739addd6d8dcea7",
+    "fixture-energy.js": "7cedb826d8b340ee49abc67666445e7b5d45a2619742604632a7413d5ddd8709",
+    "fixture-energy-panel.js": "82c1547a286ba23bf276e4ad8ffce834e9c1106f9b877a4962574fe74ae7dfb8",
+    "entry.js": "bc505a1e378b22f36fcc43b3c25e0adc3395f8f9fc0a5533d2bd268d1ca21d5a",
+    "runtime.js": "0c43ade65ef40a7d6f22f64a6095b33838b33872bbf514922a2fccdcb2fbddcb"
+  },
+  "changedFiles": [
+    "entry.js",
+    "runtime.js"
+  ]
+}

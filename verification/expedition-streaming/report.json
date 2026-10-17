@@ -1,0 +1,810 @@
+{
+  "schemaVersion": 1,
+  "limits": {
+    "defaultActiveChunks": 96,
+    "stressActiveChunks": 4,
+    "outdoor": 48,
+    "predators": 8,
+    "corpses": 32,
+    "resources": 48,
+    "twoGenerationUtf16Bytes": 5242880,
+    "deathRecords": 128,
+    "objects": 16,
+    "offlineSeconds": 7200
+  },
+  "points": [
+    [
+      1024,
+      512
+    ],
+    [
+      -1024,
+      512
+    ],
+    [
+      512,
+      -1024
+    ],
+    [
+      -1024,
+      -1024
+    ],
+    [
+      8192,
+      4096
+    ],
+    [
+      -8192,
+      4096
+    ],
+    [
+      4096,
+      -8192
+    ],
+    [
+      -8192,
+      -8192
+    ],
+    [
+      32768,
+      16384
+    ],
+    [
+      -32768,
+      16384
+    ],
+    [
+      16384,
+      -32768
+    ],
+    [
+      -32768,
+      -32768
+    ]
+  ],
+  "runs": [
+    {
+      "name": "roundtrip",
+      "elapsedMs": 10801.370874,
+      "initial": {
+        "position": [
+          0,
+          0
+        ],
+        "activeChunks": 0,
+        "pendingChunks": 0,
+        "chunkJobs": 0,
+        "descriptors": {
+          "creature": 47,
+          "structure": 2,
+          "resource": 48
+        },
+        "regions": 10,
+        "entities": 70,
+        "corpses": 0,
+        "seenRegions": 9,
+        "structures": 2,
+        "objects": 0,
+        "edits": 0
+      },
+      "outbound": [
+        {
+          "position": [
+            1024,
+            512
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 35,
+            "resource": 37
+          },
+          "regions": 19,
+          "entities": 133,
+          "corpses": 1,
+          "seenRegions": 18,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        },
+        {
+          "position": [
+            -1024,
+            512
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 40,
+            "resource": 34
+          },
+          "regions": 28,
+          "entities": 198,
+          "corpses": 1,
+          "seenRegions": 27,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        },
+        {
+          "position": [
+            512,
+            -1024
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 45,
+            "resource": 34
+          },
+          "regions": 37,
+          "entities": 262,
+          "corpses": 1,
+          "seenRegions": 36,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        },
+        {
+          "position": [
+            -1024,
+            -1024
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 34,
+            "resource": 19
+          },
+          "regions": 46,
+          "entities": 328,
+          "corpses": 1,
+          "seenRegions": 45,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        },
+        {
+          "position": [
+            8192,
+            4096
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 37,
+            "resource": 10
+          },
+          "regions": 55,
+          "entities": 390,
+          "corpses": 1,
+          "seenRegions": 54,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        },
+        {
+          "position": [
+            -8192,
+            4096
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 44,
+            "resource": 12
+          },
+          "regions": 64,
+          "entities": 454,
+          "corpses": 1,
+          "seenRegions": 63,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        },
+        {
+          "position": [
+            4096,
+            -8192
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 36,
+            "resource": 33
+          },
+          "regions": 73,
+          "entities": 514,
+          "corpses": 1,
+          "seenRegions": 72,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        },
+        {
+          "position": [
+            -8192,
+            -8192
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 28,
+            "resource": 48
+          },
+          "regions": 82,
+          "entities": 572,
+          "corpses": 1,
+          "seenRegions": 81,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        },
+        {
+          "position": [
+            32768,
+            16384
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 37,
+            "resource": 25
+          },
+          "regions": 91,
+          "entities": 642,
+          "corpses": 1,
+          "seenRegions": 90,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        },
+        {
+          "position": [
+            -32768,
+            16384
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 38,
+            "resource": 34
+          },
+          "regions": 100,
+          "entities": 707,
+          "corpses": 1,
+          "seenRegions": 99,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        },
+        {
+          "position": [
+            16384,
+            -32768
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 41,
+            "resource": 47
+          },
+          "regions": 109,
+          "entities": 772,
+          "corpses": 1,
+          "seenRegions": 108,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        },
+        {
+          "position": [
+            -32768,
+            -32768
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 44,
+            "resource": 48
+          },
+          "regions": 118,
+          "entities": 836,
+          "corpses": 1,
+          "seenRegions": 117,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        }
+      ],
+      "returnRows": [
+        {
+          "position": [
+            -32768,
+            -32768
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 44,
+            "resource": 48
+          },
+          "regions": 118,
+          "entities": 836,
+          "corpses": 1,
+          "seenRegions": 117,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        },
+        {
+          "position": [
+            16384,
+            -32768
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 41,
+            "resource": 47
+          },
+          "regions": 118,
+          "entities": 836,
+          "corpses": 1,
+          "seenRegions": 117,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        },
+        {
+          "position": [
+            -32768,
+            16384
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 38,
+            "resource": 34
+          },
+          "regions": 118,
+          "entities": 836,
+          "corpses": 1,
+          "seenRegions": 117,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        },
+        {
+          "position": [
+            32768,
+            16384
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 37,
+            "resource": 25
+          },
+          "regions": 118,
+          "entities": 836,
+          "corpses": 1,
+          "seenRegions": 117,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        },
+        {
+          "position": [
+            -8192,
+            -8192
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 28,
+            "resource": 48
+          },
+          "regions": 118,
+          "entities": 836,
+          "corpses": 1,
+          "seenRegions": 117,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        },
+        {
+          "position": [
+            4096,
+            -8192
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 36,
+            "resource": 33
+          },
+          "regions": 118,
+          "entities": 836,
+          "corpses": 1,
+          "seenRegions": 117,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        },
+        {
+          "position": [
+            -8192,
+            4096
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 44,
+            "resource": 12
+          },
+          "regions": 118,
+          "entities": 836,
+          "corpses": 1,
+          "seenRegions": 117,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        },
+        {
+          "position": [
+            8192,
+            4096
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 37,
+            "resource": 10
+          },
+          "regions": 118,
+          "entities": 836,
+          "corpses": 1,
+          "seenRegions": 117,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        },
+        {
+          "position": [
+            -1024,
+            -1024
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 34,
+            "resource": 19
+          },
+          "regions": 118,
+          "entities": 836,
+          "corpses": 1,
+          "seenRegions": 117,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        },
+        {
+          "position": [
+            512,
+            -1024
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 45,
+            "resource": 34
+          },
+          "regions": 118,
+          "entities": 836,
+          "corpses": 1,
+          "seenRegions": 117,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        },
+        {
+          "position": [
+            -1024,
+            512
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 40,
+            "resource": 34
+          },
+          "regions": 118,
+          "entities": 836,
+          "corpses": 1,
+          "seenRegions": 117,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        },
+        {
+          "position": [
+            1024,
+            512
+          ],
+          "activeChunks": 1,
+          "pendingChunks": 0,
+          "chunkJobs": 0,
+          "descriptors": {
+            "creature": 35,
+            "resource": 37
+          },
+          "regions": 118,
+          "entities": 836,
+          "corpses": 1,
+          "seenRegions": 117,
+          "structures": 2,
+          "objects": 16,
+          "edits": 115
+        }
+      ],
+      "returned": {
+        "position": [
+          0,
+          0
+        ],
+        "activeChunks": 1,
+        "pendingChunks": 0,
+        "chunkJobs": 0,
+        "descriptors": {
+          "creature": 46,
+          "structure": 2,
+          "resource": 48,
+          "machine": 1,
+          "object": 16,
+          "fixture": 1
+        },
+        "regions": 118,
+        "entities": 836,
+        "corpses": 1,
+        "seenRegions": 117,
+        "structures": 2,
+        "objects": 16,
+        "edits": 115
+      },
+      "reloaded": {
+        "position": [
+          0,
+          0
+        ],
+        "activeChunks": 0,
+        "pendingChunks": 0,
+        "chunkJobs": 0,
+        "descriptors": {
+          "creature": 46,
+          "structure": 2,
+          "resource": 48,
+          "machine": 1,
+          "object": 16,
+          "fixture": 1
+        },
+        "regions": 118,
+        "entities": 836,
+        "corpses": 1,
+        "seenRegions": 117,
+        "structures": 2,
+        "objects": 16,
+        "edits": 115
+      },
+      "outwardJsonUtf8Bytes": 1942840,
+      "finalJsonUtf8Bytes": 1942820,
+      "twoGenerationCharacters": 272096,
+      "twoGenerationEstimatedUtf16Bytes": 544192,
+      "retainedState": "Visited ecology regions, species owners, corpses, structure instances, player edits and claims remain resident and serialized. No paging/eviction of persistent ecology is asserted."
+    },
+    {
+      "name": "bounded-transient-state",
+      "rows": [
+        {
+          "position": [
+            0,
+            0
+          ],
+          "activeChunks": 4,
+          "jobCount": 0,
+          "columns": 3089,
+          "samples": 3098,
+          "hashes": 1226,
+          "edits": 1
+        },
+        {
+          "position": [
+            -0.01,
+            -0.01
+          ],
+          "activeChunks": 4,
+          "jobCount": 0,
+          "columns": 6168,
+          "samples": 6180,
+          "hashes": 2346,
+          "edits": 2
+        },
+        {
+          "position": [
+            -16,
+            -16
+          ],
+          "activeChunks": 4,
+          "jobCount": 0,
+          "columns": 6168,
+          "samples": 6180,
+          "hashes": 2346,
+          "edits": 3
+        },
+        {
+          "position": [
+            32768,
+            -32768
+          ],
+          "activeChunks": 4,
+          "jobCount": 0,
+          "columns": 8192,
+          "samples": 8192,
+          "hashes": 3356,
+          "edits": 4
+        },
+        {
+          "position": [
+            -32768,
+            32768
+          ],
+          "activeChunks": 4,
+          "jobCount": 0,
+          "columns": 8192,
+          "samples": 8192,
+          "hashes": 4649,
+          "edits": 5
+        },
+        {
+          "position": [
+            0,
+            0
+          ],
+          "activeChunks": 4,
+          "jobCount": 0,
+          "columns": 8192,
+          "samples": 8192,
+          "hashes": 4649,
+          "edits": 5
+        }
+      ],
+      "headlessModelsVisited": 20,
+      "maxSimultaneousHeadlessModels": 1,
+      "limitation": "Headless scene graph allocation/release only. No WebGL renderer, GPU memory or all-model total cap is asserted."
+    },
+    {
+      "name": "inactive-ecology",
+      "elapsedMs": 2562.109951000002,
+      "before": {
+        "time": 0,
+        "entities": 70,
+        "regions": 10,
+        "ids": [
+          "-1,-1:initial:moss_deer:0",
+          "-1,-1:initial:moss_deer:1",
+          "-1,-1:initial:moss_deer:2",
+          "-1,-1:initial:moss_deer:3",
+          "-1,-1:initial:azure_beetle:0",
+          "-1,-1:initial:azure_beetle:1",
+          "-1,-1:initial:azure_beetle:2",
+          "0,-1:initial:moss_deer:0",
+          "0,-1:initial:moss_deer:1",
+          "0,-1:initial:moss_deer:2",
+          "0,-1:initial:moss_deer:3",
+          "0,-1:initial:azure_beetle:0",
+          "0,-1:initial:azure_beetle:1",
+          "0,-1:initial:azure_beetle:2",
+          "1,-1:initial:moss_deer:0",
+          "1,-1:initial:moss_deer:1",
+          "1,-1:initial:copper_fox:0",
+          "1,-1:initial:azure_beetle:0",
+          "1,-1:initial:azure_beetle:1",
+          "1,-1:initial:azure_beetle:2",
+          "1,-1:initial:azure_beetle:3",
+          "-1,0:initial:moss_deer:0",
+          "-1,0:initial:moss_deer:1",
+          "-1,0:initial:azure_beetle:0",
+          "-1,0:initial:azure_beetle:1",
+          "-1,0:initial:azure_beetle:2",
+          "-1,0:initial:azure_beetle:3",
+          "0,0:initial:moss_deer:0",
+          "0,0:initial:moss_deer:1",
+          "0,0:initial:moss_deer:2",
+          "0,0:initial:azure_beetle:0",
+          "0,0:initial:azure_beetle:1",
+          "0,0:initial:azure_beetle:2",
+          "0,0:initial:azure_beetle:3",
+          "1,0:initial:moss_deer:0",
+          "1,0:initial:moss_deer:1",
+          "1,0:initial:moss_deer:2",
+          "1,0:initial:moss_deer:3",
+          "1,0:initial:copper_fox:0",
+          "1,0:initial:azure_beetle:0",
+          "1,0:initial:azure_beetle:1",
+          "1,0:initial:azure_beetle:2",
+          "1,0:initial:azure_beetle:3",
+          "-1,1:initial:moss_deer:0",
+          "-1,1:initial:moss_deer:1",
+          "-1,1:initial:moss_deer:2",
+          "-1,1:initial:copper_fox:0",
+          "-1,1:initial:azure_beetle:0",
+          "-1,1:initial:azure_beetle:1",
+          "-1,1:initial:azure_beetle:2",
+          "-1,1:initial:azure_beetle:3",
+          "0,1:initial:moss_deer:0",
+          "0,1:initial:moss_deer:1",
+          "0,1:initial:copper_fox:0",
+          "0,1:initial:azure_beetle:0",
+          "0,1:initial:azure_beetle:1",
+          "0,1:initial:azure_beetle:2",
+          "1,1:initial:cliff_ibex:0",
+          "1,1:initial:cliff_ibex:1",
+          "1,1:initial:gale_raptor:0",
+          "1,1:initial:tide_crab:0",
+          "1,1:initial:tide_crab:1",
+          "1,1:initial:tide_crab:2",
+          "1,1:initial:tide_crab:3",
+          "structure:31415:starter-supply:grove_supply_camp:resident:wayfarer_organic:0",
+          "structure:31415:starter-supply:grove_supply_camp:resident:wayfarer_organic:1",
+          "structure:31415:starter-supply:grove_supply_camp:resident:wayfarer_organic:2",
+          "structure:31415:starter-supply:grove_supply_camp:resident:wayfarer_organic:3",
+          "structure:31415:starter-supply:grove_supply_camp:resident:wayfarer_organic:4",
+          "structure:31415:starter-supply:grove_supply_camp:resident:wayfarer_organic:5"
+        ]
+      },
+      "after": {
+        "time": 7500,
+        "entities": 100,
+        "dead": 20,
+        "regions": 10,
+        "corpses": 20
+      },
+      "processedSeconds": 7200,
+      "pendingProcessedSeconds": 300,
+      "limitation": "Biology catch-up API only; not 2h full player/physics/render simulation. Inactive ecology updates every 60s but currently scans retained owner maps every 0.25s."
+    }
+  ],
+  "scope": "Pure Node state-model probes with direct player coordinate assignment and explicit setup material grants. Not normal-play travel, GPU/model memory, Android or mobile memory evidence.",
+  "generatedAt": "2026-10-17T15:26:24.527Z",
+  "node": "v24.19.0",
+  "codeHashes": {
+    "runtime.js": "005a16bdd2029a95641376294697ab1d5d8db62bfc4a66d8bb67e966275d075a",
+    "atlas.js": "5c988c051937bfa032b5ba09855e58152a81fbae5faa89bea73e5789559a4478",
+    "creatures.js": "169b8b0f81d11e3ffb047299b377e5cae2ab66acf5719ced6efb65b0cad32090",
+    "scene.js": "f5f6986743766346cb80f1c403ac3572b578580fd1ec92cc717dffc9d884f619",
+    "save.js": "84e259c6a48743cbe3a918bd1cffa7895a62a5844d62f9f34f4bc806780af8d5"
+  }
+}

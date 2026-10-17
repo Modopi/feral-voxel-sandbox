@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-17T16:48:39.814Z",
+  "fixture": {
+    "path": "verification/expedition-progression/0.11.0-paid-route.json.gz",
+    "sha256": "61e7082812603e695523b80e73f6d2f435bc758fc2497877721af3caea19c5a8",
+    "bytes": 7392166,
+    "keys": [
+      "complete",
+      "report",
+      "progression",
+      "atlas"
+    ]
+  },
+  "codeHashes": {
+    "save.js": "84e259c6a48743cbe3a918bd1cffa7895a62a5844d62f9f34f4bc806780af8d5",
+    "save-worker.js": "b128b8538467b99a510f960b5997028ea9df9b3c09e57acc1c89d00d87962f98",
+    "autosave.js": "269a4724825dfddd9e4140c12cd8de7f0fbd13c7eae240ad5427819d08c979e0"
+  },
+  "scenario": "Immutable actual high-tier resource-consumption route snapshot, with finite player defaults added. Same snapshot saved three times synchronously and three times via a real browser module Worker.",
+  "limitations": [
+    "Isolated desktop Chromium persistence harness, no rendering or game loop; not Android or mobile hardware validation.",
+    "Input snapshot is already serialized by runtime. runtime.serialize() cost remains on the main thread and is excluded.",
+    "Worker main-call timing includes JSON stringify and postMessage; commit timing includes raw equality verification and localStorage writes.",
+    "50ms Long Tasks API entries measure main-thread tasks, while wall time includes background compression/validation.",
+    "Worker fallback preserves correctness but still performs compression synchronously on a deferred task.",
+    "Other agents may run browsers concurrently; elapsed times are environment observations, not device guarantees."
+  ],
+  "rows": [
+    {
+      "sequence": 1,
+      "mode": "sync",
+      "elapsedMs": 3203.7000000029802,
+      "mainCallMs": 3203.7000000029802,
+      "wallMs": 3203.7000000029802,
+      "longTasks": [
+        {
+          "start": 6963.69999999553,
+          "ms": 3204
+        }
+      ],
+      "longTaskTotalMs": 3204,
+      "longTaskMaxMs": 3204
+    },
+    {
+      "sequence": 2,
+      "mode": "worker",
+      "preparationMs": 2973,
+      "commitMs": 21.399999998509884,
+      "elapsedMs": 3095.5,
+      "mainCallMs": 93.70000000298023,
+      "wallMs": 3095.7000000029802,
+      "longTasks": [
+        {
+          "start": 10938.10000000149,
+          "ms": 93
+        }
+      ],
+      "longTaskTotalMs": 93,
+      "longTaskMaxMs": 93
+    },
+    {
+      "sequence": 3,
+      "mode": "sync",
+      "elapsedMs": 2719.2999999970198,
+      "mainCallMs": 2719.2999999970198,
+      "wallMs": 2719.2999999970198,
+      "longTasks": [
+        {
+          "start": 15258.10000000149,
+          "ms": 2719
+        }
+      ],
+      "longTaskTotalMs": 2719,
+      "longTaskMaxMs": 2719
+    },
+    {
+      "sequence": 4,
+      "mode": "worker",
+      "preparationMs": 3827.5999999940395,
+      "commitMs": 18.30000000447035,
+      "elapsedMs": 3951.5,
+      "mainCallMs": 96.60000000149012,
+      "wallMs": 3951.7000000029802,
+      "longTasks": [],
+      "longTaskTotalMs": 0,
+      "longTaskMaxMs": 0
+    },
+    {
+      "sequence": 5,
+      "mode": "sync",
+      "elapsedMs": 3384.2999999970198,
+      "mainCallMs": 3384.2999999970198,
+      "wallMs": 3384.2999999970198,
+      "longTasks": [
+        {
+          "start": 24191.5,
+          "ms": 3384
+        }
+      ],
+      "longTaskTotalMs": 3384,
+      "longTaskMaxMs": 3384
+    },
+    {
+      "sequence": 6,
+      "mode": "worker",
+      "preparationMs": 3406.9000000059605,
+      "commitMs": 14.699999995529652,
+      "elapsedMs": 3562.2999999970198,
+      "mainCallMs": 112.10000000149012,
+      "wallMs": 3562.2999999970198,
+      "longTasks": [
+        {
+          "start": 28518.29999999702,
+          "ms": 112
+        }
+      ],
+      "longTaskTotalMs": 112,
+      "longTaskMaxMs": 112
+    }
+  ],
+  "originalCharacters": 7392216,
+  "generationCharacters": [
+    595501,
+    595501
+  ],
+  "environment": {
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+    "hardwareConcurrency": 5
+  },
+  "longTaskThresholdMs": 50,
+  "roundtripExact": true,
+  "pageErrors": []
+}

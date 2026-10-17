@@ -1,0 +1,1119 @@
+{
+  "environment": "Headless Chromium / Linux / SwiftShader software WebGL; not a mobile-device measurement",
+  "seed": 63026,
+  "restriction": "Only keyboard, pointer and DOM UI actions mutate game state. FERAL reads only.",
+  "consoleErrors": [
+    {
+      "text": "Failed to load resource: the server responded with a status of 404 (File not found)",
+      "location": {
+        "url": "http://127.0.0.1:8081/favicon.ico",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    }
+  ],
+  "pageErrors": [],
+  "failedRequests": [],
+  "steps": [
+    {
+      "name": "resumed-ui-save",
+      "wallTime": "2026-10-17T16:01:41.463Z",
+      "state": {
+        "player": {
+          "x": 60.72193569247728,
+          "y": 5.007959660653032,
+          "z": 36.72182420016352,
+          "yaw": 4.025852068262639,
+          "pitch": 3.469446951953614e-16,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2353.7616666678837,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "berry": 2,
+          "plant_fiber": 1,
+          "raw_timber": 2
+        },
+        "research": [
+          "observation",
+          "joinery",
+          "material:wood"
+        ],
+        "stations": {
+          "field_bench": 1
+        },
+        "placements": [
+          {
+            "id": "fixture:1",
+            "assetId": "field_bench",
+            "kind": "station",
+            "entityType": "machine",
+            "position": [
+              3.96875,
+              4,
+              13.5625
+            ],
+            "maxHp": 50,
+            "revision": 0,
+            "motion": {
+              "mode": "fixed",
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0,
+                "w": 1
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "angularVelocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "settled": false
+            },
+            "hp": 50
+          }
+        ],
+        "fixtureModels": [
+          {
+            "id": "fixture:1",
+            "assetId": "field_bench",
+            "position": {
+              "x": 3.96875,
+              "y": 4,
+              "z": 13.5625
+            }
+          }
+        ],
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 317.31666666670674,
+        "stats": {
+          "running": true,
+          "version": "0.11.0",
+          "versionCode": 1100,
+          "player": {
+            "x": 60.72193569247728,
+            "y": 5.007959660653032,
+            "z": 36.72182420016352,
+            "yaw": 4.025852068262639,
+            "pitch": 3.469446951953614e-16,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2353.7616666678837,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 12,
+          "models": 100,
+          "chunks": 11
+        },
+        "renderFrames": 98,
+        "browserElapsedMs": 6974.20000000298
+      }
+    },
+    {
+      "name": "resumed-bag",
+      "wallTime": "2026-10-17T16:01:42.310Z",
+      "state": {
+        "player": {
+          "x": 60.72193569247728,
+          "y": 5.007959660653032,
+          "z": 36.72182420016352,
+          "yaw": 4.025852068262639,
+          "pitch": 3.469446951953614e-16,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2353.678333334556,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "berry": 2,
+          "plant_fiber": 1,
+          "raw_timber": 2
+        },
+        "research": [
+          "observation",
+          "joinery",
+          "material:wood"
+        ],
+        "stations": {
+          "field_bench": 1
+        },
+        "placements": [
+          {
+            "id": "fixture:1",
+            "assetId": "field_bench",
+            "kind": "station",
+            "entityType": "machine",
+            "position": [
+              3.96875,
+              4,
+              13.5625
+            ],
+            "maxHp": 50,
+            "revision": 0,
+            "motion": {
+              "mode": "fixed",
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0,
+                "w": 1
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "angularVelocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "settled": false
+            },
+            "hp": 50
+          }
+        ],
+        "fixtureModels": [
+          {
+            "id": "fixture:1",
+            "assetId": "field_bench",
+            "position": {
+              "x": 3.96875,
+              "y": 4,
+              "z": 13.5625
+            }
+          }
+        ],
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 318.1500000000393,
+        "stats": {
+          "running": true,
+          "version": "0.11.0",
+          "versionCode": 1100,
+          "player": {
+            "x": 60.72193569247728,
+            "y": 5.007959660653032,
+            "z": 36.72182420016352,
+            "yaw": 4.025852068262639,
+            "pitch": 3.469446951953614e-16,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2353.678333334556,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 12,
+          "models": 100,
+          "chunks": 13
+        },
+        "renderFrames": 114,
+        "browserElapsedMs": 7827.60000000149
+      }
+    },
+    {
+      "name": "harvest-raw_timber",
+      "wallTime": "2026-10-17T16:02:56.358Z",
+      "node": "harvest:0,0:fallen_branch:5",
+      "state": {
+        "player": {
+          "x": 41.10010723904422,
+          "y": 5.507998397152071,
+          "z": 58.07867569373368,
+          "yaw": 3.033361376123967,
+          "pitch": -0.9821221923828123,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2337.6850000010845,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "berry": 2,
+          "plant_fiber": 1,
+          "raw_timber": 3
+        },
+        "research": [
+          "observation",
+          "joinery",
+          "material:wood"
+        ],
+        "stations": {
+          "field_bench": 1
+        },
+        "placements": [
+          {
+            "id": "fixture:1",
+            "assetId": "field_bench",
+            "kind": "station",
+            "entityType": "machine",
+            "position": [
+              3.96875,
+              4,
+              13.5625
+            ],
+            "maxHp": 50,
+            "revision": 0,
+            "motion": {
+              "mode": "fixed",
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0,
+                "w": 1
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "angularVelocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "settled": false
+            },
+            "hp": 50
+          }
+        ],
+        "fixtureModels": [
+          {
+            "id": "fixture:1",
+            "assetId": "field_bench",
+            "position": {
+              "x": 3.96875,
+              "y": 4,
+              "z": 13.5625
+            }
+          }
+        ],
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 386.91666666664344,
+        "stats": {
+          "running": true,
+          "version": "0.11.0",
+          "versionCode": 1100,
+          "player": {
+            "x": 41.10010723904422,
+            "y": 5.507998397152071,
+            "z": 58.07867569373368,
+            "yaw": 3.033361376123967,
+            "pitch": -0.9821221923828123,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2337.6850000010845,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 15,
+          "models": 100,
+          "chunks": 69
+        },
+        "renderFrames": 1173,
+        "browserElapsedMs": 81875.5
+      }
+    },
+    {
+      "name": "harvest-loose_stone",
+      "wallTime": "2026-10-17T16:03:16.382Z",
+      "node": "harvest:0,0:loose_stone:7",
+      "state": {
+        "player": {
+          "x": 43.7218474636375,
+          "y": 7.007998749854206,
+          "z": 62.221884035317885,
+          "yaw": 3.6820707877450602,
+          "pitch": -0.4662884521484373,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2333.656666667743,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "berry": 2,
+          "plant_fiber": 1,
+          "raw_timber": 3,
+          "loose_stone": 1
+        },
+        "research": [
+          "observation",
+          "joinery",
+          "material:wood"
+        ],
+        "stations": {
+          "field_bench": 1
+        },
+        "placements": [
+          {
+            "id": "fixture:1",
+            "assetId": "field_bench",
+            "kind": "station",
+            "entityType": "machine",
+            "position": [
+              3.96875,
+              4,
+              13.5625
+            ],
+            "maxHp": 50,
+            "revision": 0,
+            "motion": {
+              "mode": "fixed",
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0,
+                "w": 1
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "angularVelocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "settled": false
+            },
+            "hp": 50
+          }
+        ],
+        "fixtureModels": [
+          {
+            "id": "fixture:1",
+            "assetId": "field_bench",
+            "position": {
+              "x": 3.96875,
+              "y": 4,
+              "z": 13.5625
+            }
+          }
+        ],
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 406.19999999995923,
+        "stats": {
+          "running": true,
+          "version": "0.11.0",
+          "versionCode": 1100,
+          "player": {
+            "x": 43.7218474636375,
+            "y": 7.007998749854206,
+            "z": 62.221884035317885,
+            "yaw": 3.6820707877450602,
+            "pitch": -0.4662884521484373,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2333.656666667743,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 15,
+          "models": 100,
+          "chunks": 96
+        },
+        "renderFrames": 1495,
+        "browserElapsedMs": 101899.5
+      }
+    },
+    {
+      "name": "harvest-loose_stone",
+      "wallTime": "2026-10-17T16:04:07.673Z",
+      "node": "harvest:0,1:loose_stone:7",
+      "state": {
+        "player": {
+          "x": 16.092006765184415,
+          "y": 6.507932151960625,
+          "z": 72.4694102923436,
+          "yaw": 2.3272676261239678,
+          "pitch": -0.5829042053222654,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2321.611666667615,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "berry": 2,
+          "plant_fiber": 1,
+          "raw_timber": 3,
+          "loose_stone": 2
+        },
+        "research": [
+          "observation",
+          "joinery",
+          "material:wood"
+        ],
+        "stations": {
+          "field_bench": 1
+        },
+        "placements": [
+          {
+            "id": "fixture:1",
+            "assetId": "field_bench",
+            "kind": "station",
+            "entityType": "machine",
+            "position": [
+              3.96875,
+              4,
+              13.5625
+            ],
+            "maxHp": 50,
+            "revision": 0,
+            "motion": {
+              "mode": "fixed",
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0,
+                "w": 1
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "angularVelocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "settled": false
+            },
+            "hp": 50
+          }
+        ],
+        "fixtureModels": [
+          {
+            "id": "fixture:1",
+            "assetId": "field_bench",
+            "position": {
+              "x": 3.96875,
+              "y": 4,
+              "z": 13.5625
+            }
+          }
+        ],
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 456.2166666665804,
+        "stats": {
+          "running": true,
+          "version": "0.11.0",
+          "versionCode": 1100,
+          "player": {
+            "x": 16.092006765184415,
+            "y": 6.507932151960625,
+            "z": 72.4694102923436,
+            "yaw": 2.3272676261239678,
+            "pitch": -0.5829042053222654,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2321.611666667615,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 18,
+          "models": 99,
+          "chunks": 96
+        },
+        "renderFrames": 2267,
+        "browserElapsedMs": 153187.1000000015
+      }
+    },
+    {
+      "name": "craft-stone_pick",
+      "wallTime": "2026-10-17T16:04:33.858Z",
+      "state": {
+        "player": {
+          "x": 16.092006765184415,
+          "y": 6.507932151960625,
+          "z": 72.4694102923436,
+          "yaw": 2.3272676261239678,
+          "pitch": -0.5829042053222654,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2319.5200000010927,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "berry": 2,
+          "raw_timber": 2,
+          "stone_pick": 1
+        },
+        "research": [
+          "observation",
+          "joinery",
+          "material:wood"
+        ],
+        "stations": {
+          "field_bench": 1
+        },
+        "placements": [
+          {
+            "id": "fixture:1",
+            "assetId": "field_bench",
+            "kind": "station",
+            "entityType": "machine",
+            "position": [
+              3.96875,
+              4,
+              13.5625
+            ],
+            "maxHp": 50,
+            "revision": 0,
+            "motion": {
+              "mode": "fixed",
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0,
+                "w": 1
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "angularVelocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "settled": false
+            },
+            "hp": 50
+          }
+        ],
+        "fixtureModels": [
+          {
+            "id": "fixture:1",
+            "assetId": "field_bench",
+            "position": {
+              "x": 3.96875,
+              "y": 4,
+              "z": 13.5625
+            }
+          }
+        ],
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 477.13333333322805,
+        "stats": {
+          "running": true,
+          "version": "0.11.0",
+          "versionCode": 1100,
+          "player": {
+            "x": 16.092006765184415,
+            "y": 6.507932151960625,
+            "z": 72.4694102923436,
+            "yaw": 2.3272676261239678,
+            "pitch": -0.5829042053222654,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2319.5200000010927,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 18,
+          "models": 99,
+          "chunks": 96
+        },
+        "renderFrames": 2486,
+        "browserElapsedMs": 179375
+      }
+    },
+    {
+      "name": "craft-wood",
+      "wallTime": "2026-10-17T16:05:21.777Z",
+      "state": {
+        "player": {
+          "x": 6.120943096330969,
+          "y": 4.007595834926436,
+          "z": 14.850642349123952,
+          "yaw": 0.11792787392670212,
+          "pitch": 1.6653345369377348e-16,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2311.7966666677357,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "berry": 2,
+          "stone_pick": 1,
+          "wood": 1
+        },
+        "research": [
+          "observation",
+          "joinery",
+          "material:wood"
+        ],
+        "stations": {
+          "field_bench": 1
+        },
+        "placements": [
+          {
+            "id": "fixture:1",
+            "assetId": "field_bench",
+            "kind": "station",
+            "entityType": "machine",
+            "position": [
+              3.96875,
+              4,
+              13.5625
+            ],
+            "maxHp": 50,
+            "revision": 0,
+            "motion": {
+              "mode": "fixed",
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0,
+                "w": 1
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "angularVelocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "settled": false
+            },
+            "hp": 50
+          }
+        ],
+        "fixtureModels": [
+          {
+            "id": "fixture:1",
+            "assetId": "field_bench",
+            "position": {
+              "x": 3.96875,
+              "y": 4,
+              "z": 13.5625
+            }
+          }
+        ],
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 513.4999999998616,
+        "stats": {
+          "running": true,
+          "version": "0.11.0",
+          "versionCode": 1100,
+          "player": {
+            "x": 6.120943096330969,
+            "y": 4.007595834926436,
+            "z": 14.850642349123952,
+            "yaw": 0.11792787392670212,
+            "pitch": 1.6653345369377348e-16,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2311.7966666677357,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 18,
+          "models": 99,
+          "chunks": 61
+        },
+        "renderFrames": 3007,
+        "browserElapsedMs": 227292.1000000015
+      }
+    },
+    {
+      "name": "completed-first-progression",
+      "wallTime": "2026-10-17T16:05:23.506Z",
+      "state": {
+        "player": {
+          "x": 6.120943096330969,
+          "y": 4.007595834926436,
+          "z": 14.850642349123952,
+          "yaw": 1.0314618094735772,
+          "pitch": -0.3750993347167967,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2311.658333334412,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "berry": 2,
+          "stone_pick": 1,
+          "wood": 1
+        },
+        "research": [
+          "observation",
+          "joinery",
+          "material:wood"
+        ],
+        "stations": {
+          "field_bench": 1
+        },
+        "placements": [
+          {
+            "id": "fixture:1",
+            "assetId": "field_bench",
+            "kind": "station",
+            "entityType": "machine",
+            "position": [
+              3.96875,
+              4,
+              13.5625
+            ],
+            "maxHp": 50,
+            "revision": 0,
+            "motion": {
+              "mode": "fixed",
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0,
+                "w": 1
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "angularVelocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "settled": false
+            },
+            "hp": 50
+          }
+        ],
+        "fixtureModels": [
+          {
+            "id": "fixture:1",
+            "assetId": "field_bench",
+            "position": {
+              "x": 3.96875,
+              "y": 4,
+              "z": 13.5625
+            }
+          }
+        ],
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 514.8833333331937,
+        "stats": {
+          "running": true,
+          "version": "0.11.0",
+          "versionCode": 1100,
+          "player": {
+            "x": 6.120943096330969,
+            "y": 4.007595834926436,
+            "z": 14.850642349123952,
+            "yaw": 1.0314618094735772,
+            "pitch": -0.3750993347167967,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2311.658333334412,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 18,
+          "models": 99,
+          "chunks": 63
+        },
+        "renderFrames": 3024,
+        "browserElapsedMs": 229024.1000000015
+      }
+    },
+    {
+      "name": "menu-save-reconnect",
+      "wallTime": "2026-10-17T16:05:27.970Z",
+      "preserved": true,
+      "state": {
+        "player": {
+          "x": 6.120943096330969,
+          "y": 4.007595834926436,
+          "z": 14.850642349123952,
+          "yaw": 1.0314618094735772,
+          "pitch": -0.3750993347167967,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2311.498333334423,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "berry": 2,
+          "stone_pick": 1,
+          "wood": 1
+        },
+        "research": [
+          "observation",
+          "joinery",
+          "material:wood"
+        ],
+        "stations": {
+          "field_bench": 1
+        },
+        "placements": [
+          {
+            "id": "fixture:1",
+            "assetId": "field_bench",
+            "kind": "station",
+            "entityType": "machine",
+            "position": [
+              3.96875,
+              4,
+              13.5625
+            ],
+            "maxHp": 50,
+            "revision": 0,
+            "motion": {
+              "mode": "fixed",
+              "rotation": {
+                "x": 0,
+                "y": 0,
+                "z": 0,
+                "w": 1
+              },
+              "velocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "angularVelocity": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+              },
+              "settled": false
+            },
+            "hp": 50
+          }
+        ],
+        "fixtureModels": [
+          {
+            "id": "fixture:1",
+            "assetId": "field_bench",
+            "position": {
+              "x": 3.96875,
+              "y": 4,
+              "z": 13.5625
+            }
+          }
+        ],
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 516.4833333331923,
+        "stats": {
+          "running": true,
+          "version": "0.11.0",
+          "versionCode": 1100,
+          "player": {
+            "x": 6.120943096330969,
+            "y": 4.007595834926436,
+            "z": 14.850642349123952,
+            "yaw": 1.0314618094735772,
+            "pitch": -0.3750993347167967,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2311.498333334423,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 18,
+          "models": 99,
+          "chunks": 2
+        },
+        "renderFrames": 22,
+        "browserElapsedMs": 2571.39999999851
+      }
+    }
+  ],
+  "startedAt": "2026-10-17T16:01:34.474Z",
+  "uiReconnectPreserved": true,
+  "ok": true,
+  "uiSavePreserved": true,
+  "finishedAt": "2026-10-17T16:05:29.329Z",
+  "storageEvidence": {
+    "resumed": true,
+    "inputBytes": 229108,
+    "inputSha256": "6201124623274f6d98c192a9af377a8d30d1956a1b2b7c5ae80acd13e348fcea",
+    "outputBytes": 278736,
+    "outputSha256": "b87155a433a00ec97739667e1f1890cfa49d691fa75cd52b9c61e6a5b9e4f15f"
+  }
+}

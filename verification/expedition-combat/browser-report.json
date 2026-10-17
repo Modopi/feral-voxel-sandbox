@@ -1,0 +1,2768 @@
+{
+  "scope": "Prepared-save browser combat and separate machine integration; not initial progression or mobile performance evidence",
+  "seed": 63026,
+  "preparation": {
+    "loadout": "gear_baseline_t8",
+    "items": {
+      "food": 12,
+      "wood": 24
+    },
+    "player": {
+      "x": 242,
+      "y": 4.55,
+      "z": -5,
+      "yaw": 3.141592653589793,
+      "pitch": 0,
+      "hp": 275,
+      "maxHp": 275,
+      "calories": 2400,
+      "maxCalories": 2400,
+      "vy": 0,
+      "grounded": false,
+      "stance": "stand",
+      "lastDamageAt": -100,
+      "resting": false
+    },
+    "bossId": "structure:63026:starter-manor:root_manor:boss"
+  },
+  "actions": [
+    {
+      "type": "key",
+      "at": 1792250369386,
+      "code": "KeyD",
+      "simulationMilliseconds": 800
+    },
+    {
+      "type": "mouse-look",
+      "at": 1792250374195,
+      "target": {
+        "x": 235,
+        "y": 5.8678469740499715,
+        "z": 7
+      }
+    },
+    {
+      "type": "key",
+      "at": 1792250374223,
+      "code": "KeyW",
+      "simulationMilliseconds": 600
+    },
+    {
+      "type": "mouse-look",
+      "at": 1792250379956,
+      "target": {
+        "x": 235,
+        "y": 5.8675725898760085,
+        "z": 7
+      }
+    },
+    {
+      "type": "key",
+      "at": 1792250379956,
+      "code": "KeyW",
+      "simulationMilliseconds": 600
+    },
+    {
+      "type": "mouse-look",
+      "at": 1792250383076,
+      "target": {
+        "x": 235,
+        "y": 5.866457938831818,
+        "z": 7
+      }
+    },
+    {
+      "type": "key",
+      "at": 1792250383076,
+      "code": "KeyW",
+      "simulationMilliseconds": 600
+    },
+    {
+      "type": "mouse-look",
+      "at": 1792250386000,
+      "target": {
+        "x": 235,
+        "y": 5.855750948034629,
+        "z": 7
+      }
+    },
+    {
+      "type": "key",
+      "at": 1792250386000,
+      "code": "KeyW",
+      "simulationMilliseconds": 600
+    },
+    {
+      "type": "mouse-look",
+      "at": 1792250388988,
+      "target": {
+        "x": 235,
+        "y": 5.859218068293931,
+        "z": 7
+      }
+    },
+    {
+      "type": "key",
+      "at": 1792250388988,
+      "code": "KeyW",
+      "simulationMilliseconds": 600
+    },
+    {
+      "type": "mouse-look",
+      "at": 1792250394972,
+      "target": {
+        "x": 235,
+        "y": 5.85919478203542,
+        "z": 7
+      }
+    },
+    {
+      "type": "key",
+      "at": 1792250394972,
+      "code": "KeyW",
+      "simulationMilliseconds": 600
+    },
+    {
+      "type": "mouse-look",
+      "at": 1792250398695,
+      "target": {
+        "x": 235,
+        "y": 5.867989413353289,
+        "z": 7
+      }
+    },
+    {
+      "type": "key",
+      "at": 1792250398696,
+      "code": "KeyW",
+      "simulationMilliseconds": 120
+    },
+    {
+      "type": "interact-key",
+      "at": 1792250399207,
+      "anchor": "gimmick:root_food_cache_west"
+    },
+    {
+      "type": "mouse-look",
+      "at": 1792250407090,
+      "target": {
+        "x": 242.1290827869807,
+        "y": 6.787008218741115,
+        "z": 4.044576370624665
+      }
+    },
+    {
+      "type": "key",
+      "at": 1792250407104,
+      "code": "KeyW",
+      "simulationMilliseconds": 500
+    },
+    {
+      "type": "mouse-look",
+      "at": 1792250411506,
+      "target": {
+        "x": 242.06953789283617,
+        "y": 6.776744867310454,
+        "z": 4.137526207561227
+      }
+    },
+    {
+      "type": "key",
+      "at": 1792250411523,
+      "code": "KeyW",
+      "simulationMilliseconds": 500
+    },
+    {
+      "type": "mouse-look",
+      "at": 1792250414463,
+      "target": {
+        "x": 242.17123864298733,
+        "y": 6.736783195455587,
+        "z": 4.080299210456779
+      }
+    },
+    {
+      "type": "attack-button-hold",
+      "at": 1792250414481,
+      "simulationSeconds": 1.2
+    },
+    {
+      "type": "mouse-look",
+      "at": 1792250421987,
+      "target": {
+        "x": 241.96429548182465,
+        "y": 6.823265455016653,
+        "z": 3.932971953780304
+      }
+    },
+    {
+      "type": "attack-button-hold",
+      "at": 1792250421994,
+      "simulationSeconds": 1.2
+    },
+    {
+      "type": "mouse-look",
+      "at": 1792250427095,
+      "target": {
+        "x": 242.0316582831548,
+        "y": 6.786225591105052,
+        "z": 4.072064062482227
+      }
+    },
+    {
+      "type": "attack-button-hold",
+      "at": 1792250427108,
+      "simulationSeconds": 1.2
+    },
+    {
+      "type": "mouse-look",
+      "at": 1792250432924,
+      "target": {
+        "x": 241.98715586362636,
+        "y": 6.835731846201342,
+        "z": 4.048554305852005
+      }
+    },
+    {
+      "type": "attack-button-hold",
+      "at": 1792250432978,
+      "simulationSeconds": 1.2
+    },
+    {
+      "type": "mouse-look",
+      "at": 1792250439000,
+      "target": {
+        "x": 242.0729082517014,
+        "y": 6.751931028806133,
+        "z": 3.975495892865105
+      }
+    },
+    {
+      "type": "attack-button-hold",
+      "at": 1792250439007,
+      "simulationSeconds": 1.2
+    },
+    {
+      "type": "mouse-look",
+      "at": 1792250443925,
+      "target": {
+        "x": 242,
+        "y": 5.8679744757577375,
+        "z": 0
+      }
+    },
+    {
+      "type": "key",
+      "at": 1792250443925,
+      "code": "KeyW",
+      "simulationMilliseconds": 600
+    },
+    {
+      "type": "mouse-look",
+      "at": 1792250448916,
+      "target": {
+        "x": 242,
+        "y": 5.867982174917788,
+        "z": 0
+      }
+    },
+    {
+      "type": "key",
+      "at": 1792250448916,
+      "code": "KeyW",
+      "simulationMilliseconds": 452.3708369213612
+    },
+    {
+      "type": "mouse-look",
+      "at": 1792250454258,
+      "target": {
+        "x": 242,
+        "y": 7.5,
+        "z": 0
+      }
+    }
+  ],
+  "observations": [
+    {
+      "label": "loaded-prepared-save",
+      "time": 0,
+      "player": {
+        "x": 242,
+        "y": 4.55,
+        "z": -5,
+        "yaw": 3.141592653589793,
+        "pitch": 0,
+        "hp": 275,
+        "maxHp": 275,
+        "calories": 2400,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": false,
+        "stance": "stand",
+        "lastDamageAt": -100,
+        "resting": false,
+        "desiredStance": "stand"
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 1440,
+        "maxHp": 1440,
+        "position": {
+          "x": 242,
+          "y": 4.5,
+          "z": 4
+        },
+        "parts": {
+          "core": {
+            "damage": 0,
+            "broken": false
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": null,
+        "phaseId": "rootback_beast_p1",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": null,
+        "defeated": false
+      },
+      "aim": null,
+      "models": 36,
+      "pending": 0,
+      "triangles": 18082,
+      "claims": {},
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24
+      },
+      "deaths": []
+    },
+    {
+      "label": "windup-before-dodge",
+      "time": 1.100000000000001,
+      "player": {
+        "x": 242,
+        "y": 4.507671565702185,
+        "z": -5,
+        "yaw": 3.141592653589793,
+        "pitch": 0,
+        "hp": 275,
+        "maxHp": 275,
+        "calories": 2399.8900000000076,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": -100,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 1440,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.07483787763698,
+          "y": 4.502636621467248,
+          "z": 4.074849442137069
+        },
+        "parts": {
+          "core": {
+            "damage": 0,
+            "broken": false
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": {
+          "id": "structure:63026:starter-manor:root_manor:boss:cast:1",
+          "skillId": "root_seed",
+          "stage": "windup",
+          "remaining": 1.3000000000000003,
+          "windupS": 1.4,
+          "origin": {
+            "x": 242,
+            "y": 5.50264514487483,
+            "z": 4.000014225140453
+          },
+          "aim": {
+            "x": 242,
+            "y": 5.257671565702185,
+            "z": -5
+          },
+          "targetOwnerId": "player",
+          "originBody": {
+            "x": 242,
+            "y": 4.50264514487483,
+            "z": 4.000014225140453
+          },
+          "shape": {
+            "kind": "sphere",
+            "radiusM": 1.6,
+            "center": {
+              "x": 242,
+              "y": 5.257671565702185,
+              "z": -5
+            }
+          },
+          "projectilePosition": {
+            "x": 242,
+            "y": 5.50264514487483,
+            "z": 4.000014225140453
+          },
+          "hitOwners": [],
+          "spentEU": 36,
+          "remainingEU": 36,
+          "activeElapsed": 0
+        },
+        "phaseId": "rootback_beast_p1",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": null,
+        "defeated": false
+      },
+      "aim": null,
+      "models": 36,
+      "pending": 0,
+      "triangles": 19524,
+      "claims": {},
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24
+      },
+      "deaths": []
+    },
+    {
+      "label": "after-keyboard-dodge",
+      "time": 2.2999999999999967,
+      "player": {
+        "x": 239.12005258724093,
+        "y": 4.507846974049971,
+        "z": -5.000013150668376,
+        "yaw": 3.141592653589793,
+        "pitch": 0,
+        "hp": 275,
+        "maxHp": 275,
+        "calories": 2399.590000000004,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": -100,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 1440,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.07484436035156,
+          "y": 4.507833054938907,
+          "z": 4.074868914125322
+        },
+        "parts": {
+          "core": {
+            "damage": 0,
+            "broken": false
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": {
+          "id": "structure:63026:starter-manor:root_manor:boss:cast:1",
+          "skillId": "root_seed",
+          "stage": "windup",
+          "remaining": 0.09999999999999992,
+          "windupS": 1.4,
+          "origin": {
+            "x": 242,
+            "y": 5.50264514487483,
+            "z": 4.000014225140453
+          },
+          "aim": {
+            "x": 242,
+            "y": 5.257671565702185,
+            "z": -5
+          },
+          "targetOwnerId": "player",
+          "originBody": {
+            "x": 242,
+            "y": 4.50264514487483,
+            "z": 4.000014225140453
+          },
+          "shape": {
+            "kind": "sphere",
+            "radiusM": 1.6,
+            "center": {
+              "x": 242,
+              "y": 5.257671565702185,
+              "z": -5
+            }
+          },
+          "projectilePosition": {
+            "x": 242,
+            "y": 5.50264514487483,
+            "z": 4.000014225140453
+          },
+          "hitOwners": [],
+          "spentEU": 36,
+          "remainingEU": 36,
+          "activeElapsed": 0
+        },
+        "phaseId": "rootback_beast_p1",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": null,
+        "defeated": false
+      },
+      "aim": null,
+      "models": 33,
+      "pending": 0,
+      "triangles": 18098,
+      "claims": {},
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24
+      },
+      "deaths": []
+    },
+    {
+      "label": "gimmick-before-use",
+      "time": 10.700000000000111,
+      "player": {
+        "x": 235.59628079467592,
+        "y": 4.5079157327209485,
+        "z": 5.198283009009851,
+        "yaw": 2.821990297632762,
+        "pitch": 0,
+        "hp": 259.92,
+        "maxHp": 275,
+        "calories": 2397.8700000000026,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": 8.299999999999992,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 1440,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.07772958249538,
+          "y": 4.5328067479791665,
+          "z": 4.076628861161423
+        },
+        "parts": {
+          "core": {
+            "damage": 0,
+            "broken": false
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": null,
+        "phaseId": "rootback_beast_p1",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": null,
+        "defeated": false
+      },
+      "aim": {
+        "kind": "structure",
+        "id": "structure:63026:starter-manor:root_manor",
+        "partId": "interior_landmarks",
+        "point": {
+          "x": 235.00000588885905,
+          "y": 5.867915732720949,
+          "z": 7
+        },
+        "distance": 1.8978218775558244
+      },
+      "models": 38,
+      "pending": 0,
+      "triangles": 14298,
+      "claims": {},
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24
+      },
+      "deaths": []
+    },
+    {
+      "label": "gimmick-after-real-wait",
+      "time": 11.90000000000017,
+      "player": {
+        "x": 235.59628079467592,
+        "y": 4.5079157327209485,
+        "z": 5.198283009009851,
+        "yaw": 2.821990297632762,
+        "pitch": 0,
+        "hp": 259.92,
+        "maxHp": 275,
+        "calories": 2397.750000000011,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": 8.299999999999992,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 1440,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.07772958249538,
+          "y": 4.5328067479791665,
+          "z": 4.076628861161423
+        },
+        "parts": {
+          "core": {
+            "damage": 0,
+            "broken": false
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": null,
+        "phaseId": "rootback_beast_p1",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 0,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": null,
+        "defeated": false
+      },
+      "aim": {
+        "kind": "structure",
+        "id": "structure:63026:starter-manor:root_manor",
+        "partId": "interior_landmarks",
+        "point": {
+          "x": 235.00000588885905,
+          "y": 5.867915732720949,
+          "z": 7
+        },
+        "distance": 1.8978218775558244
+      },
+      "models": 38,
+      "pending": 0,
+      "triangles": 14300,
+      "claims": {},
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24
+      },
+      "deaths": []
+    },
+    {
+      "label": "attack-cycle-0",
+      "time": 12.200000000000186,
+      "player": {
+        "x": 235.59628079467592,
+        "y": 4.5079157327209485,
+        "z": 5.198283009009851,
+        "yaw": 2.821990297632762,
+        "pitch": 0,
+        "hp": 259.92,
+        "maxHp": 275,
+        "calories": 2397.720000000013,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": 8.299999999999992,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 1440,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.06867374411297,
+          "y": 4.538532324464571,
+          "z": 4.092886167861442
+        },
+        "parts": {
+          "core": {
+            "damage": 0,
+            "broken": false
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": null,
+        "phaseId": "rootback_beast_p1",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 0,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": null,
+        "defeated": false
+      },
+      "aim": {
+        "kind": "structure",
+        "id": "structure:63026:starter-manor:root_manor",
+        "partId": "interior_landmarks",
+        "point": {
+          "x": 235.00000588885905,
+          "y": 5.867915732720949,
+          "z": 7
+        },
+        "distance": 1.8978218775558244
+      },
+      "models": 38,
+      "pending": 0,
+      "triangles": 14300,
+      "claims": {},
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24
+      },
+      "deaths": []
+    },
+    {
+      "label": "aim-0",
+      "time": 13.30000000000024,
+      "player": {
+        "x": 235.59628079467592,
+        "y": 4.5079157327209485,
+        "z": 5.198283009009851,
+        "yaw": 4.8871886618905735,
+        "pitch": 0.13766845703125,
+        "hp": 259.92,
+        "maxHp": 275,
+        "calories": 2397.6100000000206,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": 8.299999999999992,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 1440,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.06524858877188,
+          "y": 4.545439450771507,
+          "z": 4.098065597676574
+        },
+        "parts": {
+          "core": {
+            "damage": 0,
+            "broken": false
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": null,
+        "phaseId": "rootback_beast_p1",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 0,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": null,
+        "defeated": false
+      },
+      "aim": {
+        "kind": "boss",
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "partId": "core",
+        "point": {
+          "x": 241.52607735295157,
+          "y": 6.702171258530449,
+          "z": 4.151068817890547
+        },
+        "distance": 6.079072878898816
+      },
+      "models": 37,
+      "pending": 0,
+      "triangles": 23074,
+      "claims": {},
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24
+      },
+      "deaths": []
+    },
+    {
+      "label": "attack-cycle-1",
+      "time": 14.10000000000028,
+      "player": {
+        "x": 237.17189894997654,
+        "y": 4.507042957954627,
+        "z": 4.920025619456959,
+        "yaw": 4.8871886618905735,
+        "pitch": 0.13766845703125,
+        "hp": 259.92,
+        "maxHp": 275,
+        "calories": 2397.4300000000194,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": 8.299999999999992,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 1440,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.06604702476818,
+          "y": 4.547527502036132,
+          "z": 4.0966489264392765
+        },
+        "parts": {
+          "core": {
+            "damage": 0,
+            "broken": false
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": null,
+        "phaseId": "rootback_beast_p1",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 0,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": null,
+        "defeated": false
+      },
+      "aim": {
+        "kind": "boss",
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "partId": "core",
+        "point": {
+          "x": 240.95139096803106,
+          "y": 6.398774876550461,
+          "z": 4.252559604791595
+        },
+        "distance": 3.874636709231557
+      },
+      "models": 38,
+      "pending": 0,
+      "triangles": 22096,
+      "claims": {},
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24
+      },
+      "deaths": []
+    },
+    {
+      "label": "aim-1",
+      "time": 14.600000000000305,
+      "player": {
+        "x": 237.17189894997654,
+        "y": 4.507042957954627,
+        "z": 4.920025619456959,
+        "yaw": 4.8708205588632305,
+        "pitch": 0.18140045166015625,
+        "hp": 259.92,
+        "maxHp": 275,
+        "calories": 2397.380000000023,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": 8.299999999999992,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 1440,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.06604702476818,
+          "y": 4.547527502036132,
+          "z": 4.0966489264392765
+        },
+        "parts": {
+          "core": {
+            "damage": 0,
+            "broken": false
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": null,
+        "phaseId": "rootback_beast_p1",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 0,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": null,
+        "defeated": false
+      },
+      "aim": {
+        "kind": "boss",
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "partId": "core",
+        "point": {
+          "x": 241.2995359403704,
+          "y": 6.633722546147612,
+          "z": 4.260550588367646
+        },
+        "distance": 4.249716700210691
+      },
+      "models": 38,
+      "pending": 0,
+      "triangles": 22758,
+      "claims": {},
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24
+      },
+      "deaths": []
+    },
+    {
+      "label": "attack-cycle-2",
+      "time": 15.10000000000033,
+      "player": {
+        "x": 238.75178235405264,
+        "y": 4.507974475757737,
+        "z": 4.667605857143593,
+        "yaw": 4.8708205588632305,
+        "pitch": 0.18140045166015625,
+        "hp": 259.92,
+        "maxHp": 275,
+        "calories": 2397.2300000000196,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": 8.299999999999992,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 1440,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.06500868692459,
+          "y": 4.549419554861089,
+          "z": 4.09821170895937
+        },
+        "parts": {
+          "core": {
+            "damage": 0,
+            "broken": false
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": {
+          "id": "structure:63026:starter-manor:root_manor:boss:cast:3",
+          "skillId": "root_charge",
+          "stage": "windup",
+          "remaining": 1.2166666666666681,
+          "windupS": 1.6,
+          "origin": {
+            "x": 242.06500868692459,
+            "y": 5.549419554861089,
+            "z": 4.09821170895937
+          },
+          "aim": {
+            "x": 237.54055661344108,
+            "y": 5.257451000686205,
+            "z": 4.861124958621753
+          },
+          "targetOwnerId": "player",
+          "originBody": {
+            "x": 242.06500868692459,
+            "y": 4.549419554861089,
+            "z": 4.09821170895937
+          },
+          "shape": {
+            "kind": "oriented_box",
+            "widthM": 2.8,
+            "lengthM": 14,
+            "heightM": 2.4,
+            "center": {
+              "x": 235.1624501496931,
+              "y": 5.549419554861089,
+              "z": 5.262121344666841
+            },
+            "axes": [
+              {
+                "x": 0.16627280510106732,
+                "y": 0,
+                "z": 0.9860797910330698
+              },
+              {
+                "x": 0,
+                "y": 1,
+                "z": 0
+              },
+              {
+                "x": -0.9860797910330695,
+                "y": 0,
+                "z": 0.1662728051010673
+              }
+            ],
+            "halfSize": [
+              1.4,
+              1.2,
+              7
+            ],
+            "direction": {
+              "x": -0.9860797910330695,
+              "y": 0,
+              "z": 0.1662728051010673
+            }
+          },
+          "projectilePosition": {
+            "x": 242.06500868692459,
+            "y": 5.549419554861089,
+            "z": 4.09821170895937
+          },
+          "hitOwners": [],
+          "spentEU": 57,
+          "remainingEU": 57,
+          "activeElapsed": 0
+        },
+        "phaseId": "rootback_beast_p1",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 0,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": null,
+        "defeated": false
+      },
+      "aim": {
+        "kind": "boss",
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "partId": "core",
+        "point": {
+          "x": 241.07370009568243,
+          "y": 6.299254392599665,
+          "z": 4.296631670602539
+        },
+        "distance": 2.390591184758732
+      },
+      "models": 38,
+      "pending": 0,
+      "triangles": 21400,
+      "claims": {},
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24
+      },
+      "deaths": []
+    },
+    {
+      "label": "aim-2",
+      "time": 15.600000000000355,
+      "player": {
+        "x": 238.75178235405264,
+        "y": 4.507974475757737,
+        "z": 4.667605857143593,
+        "yaw": 4.882483766871043,
+        "pitch": 0.24536575317382814,
+        "hp": 259.92,
+        "maxHp": 275,
+        "calories": 2397.180000000023,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": 8.299999999999992,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 1440,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.06500868692459,
+          "y": 4.549419554861089,
+          "z": 4.09821170895937
+        },
+        "parts": {
+          "core": {
+            "damage": 0,
+            "broken": false
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": {
+          "id": "structure:63026:starter-manor:root_manor:boss:cast:3",
+          "skillId": "root_charge",
+          "stage": "windup",
+          "remaining": 0.716666666666668,
+          "windupS": 1.6,
+          "origin": {
+            "x": 242.06500868692459,
+            "y": 5.549419554861089,
+            "z": 4.09821170895937
+          },
+          "aim": {
+            "x": 237.54055661344108,
+            "y": 5.257451000686205,
+            "z": 4.861124958621753
+          },
+          "targetOwnerId": "player",
+          "originBody": {
+            "x": 242.06500868692459,
+            "y": 4.549419554861089,
+            "z": 4.09821170895937
+          },
+          "shape": {
+            "kind": "oriented_box",
+            "widthM": 2.8,
+            "lengthM": 14,
+            "heightM": 2.4,
+            "center": {
+              "x": 235.1624501496931,
+              "y": 5.549419554861089,
+              "z": 5.262121344666841
+            },
+            "axes": [
+              {
+                "x": 0.16627280510106732,
+                "y": 0,
+                "z": 0.9860797910330698
+              },
+              {
+                "x": 0,
+                "y": 1,
+                "z": 0
+              },
+              {
+                "x": -0.9860797910330695,
+                "y": 0,
+                "z": 0.1662728051010673
+              }
+            ],
+            "halfSize": [
+              1.4,
+              1.2,
+              7
+            ],
+            "direction": {
+              "x": -0.9860797910330695,
+              "y": 0,
+              "z": 0.1662728051010673
+            }
+          },
+          "projectilePosition": {
+            "x": 242.06500868692459,
+            "y": 5.549419554861089,
+            "z": 4.09821170895937
+          },
+          "hitOwners": [],
+          "spentEU": 57,
+          "remainingEU": 57,
+          "activeElapsed": 0
+        },
+        "phaseId": "rootback_beast_p1",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 0,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": null,
+        "defeated": false
+      },
+      "aim": {
+        "kind": "boss",
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "partId": "core",
+        "point": {
+          "x": 241.35573860032946,
+          "y": 6.529582450195844,
+          "z": 4.220364906029314
+        },
+        "distance": 2.7236625548547275
+      },
+      "models": 38,
+      "pending": 0,
+      "triangles": 21400,
+      "claims": {},
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24
+      },
+      "deaths": []
+    },
+    {
+      "label": "attack-cycle-3",
+      "time": 16.900000000000322,
+      "player": {
+        "x": 238.75178235405264,
+        "y": 4.507974475757737,
+        "z": 4.667605857143593,
+        "yaw": 4.882483766871043,
+        "pitch": 0.24536575317382814,
+        "hp": 259.92,
+        "maxHp": 275,
+        "calories": 2397.050000000032,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": 8.299999999999992,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 1255.385,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.06049146718516,
+          "y": 4.55392566770079,
+          "z": 4.062986062631149
+        },
+        "parts": {
+          "core": {
+            "damage": 184.61499999999998,
+            "broken": true
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": {
+          "id": "structure:63026:starter-manor:root_manor:boss:cast:3",
+          "skillId": "root_charge",
+          "stage": "windup",
+          "remaining": 0.3166666666666674,
+          "windupS": 1.6,
+          "origin": {
+            "x": 242.06500868692459,
+            "y": 5.549419554861089,
+            "z": 4.09821170895937
+          },
+          "aim": {
+            "x": 237.54055661344108,
+            "y": 5.257451000686205,
+            "z": 4.861124958621753
+          },
+          "targetOwnerId": "player",
+          "originBody": {
+            "x": 242.06500868692459,
+            "y": 4.549419554861089,
+            "z": 4.09821170895937
+          },
+          "shape": {
+            "kind": "oriented_box",
+            "widthM": 2.8,
+            "lengthM": 14,
+            "heightM": 2.4,
+            "center": {
+              "x": 235.1624501496931,
+              "y": 5.549419554861089,
+              "z": 5.262121344666841
+            },
+            "axes": [
+              {
+                "x": 0.16627280510106732,
+                "y": 0,
+                "z": 0.9860797910330698
+              },
+              {
+                "x": 0,
+                "y": 1,
+                "z": 0
+              },
+              {
+                "x": -0.9860797910330695,
+                "y": 0,
+                "z": 0.1662728051010673
+              }
+            ],
+            "halfSize": [
+              1.4,
+              1.2,
+              7
+            ],
+            "direction": {
+              "x": -0.9860797910330695,
+              "y": 0,
+              "z": 0.1662728051010673
+            }
+          },
+          "projectilePosition": {
+            "x": 242.06500868692459,
+            "y": 5.549419554861089,
+            "z": 4.09821170895937
+          },
+          "hitOwners": [],
+          "spentEU": 57,
+          "remainingEU": 57,
+          "activeElapsed": 0
+        },
+        "phaseId": "rootback_beast_p1",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 0,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": null,
+        "defeated": false
+      },
+      "aim": {
+        "kind": "boss",
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "partId": "core",
+        "point": {
+          "x": 241.2444946858271,
+          "y": 6.501317819771405,
+          "z": 4.239471538177541
+        },
+        "distance": 2.607304653365896
+      },
+      "models": 38,
+      "pending": 0,
+      "triangles": 21400,
+      "claims": {},
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24
+      },
+      "deaths": []
+    },
+    {
+      "label": "aim-3",
+      "time": 17.400000000000293,
+      "player": {
+        "x": 238.75178235405264,
+        "y": 4.507974475757737,
+        "z": 4.667605857143593,
+        "yaw": 4.937202394800731,
+        "pitch": 0.28214920043945313,
+        "hp": 259.92,
+        "maxHp": 275,
+        "calories": 2397.0000000000355,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": 8.299999999999992,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 1255.385,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.06049146718516,
+          "y": 4.55392566770079,
+          "z": 4.062986062631149
+        },
+        "parts": {
+          "core": {
+            "damage": 184.61499999999998,
+            "broken": true
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": {
+          "id": "structure:63026:starter-manor:root_manor:boss:cast:3",
+          "skillId": "root_charge",
+          "stage": "windup",
+          "remaining": 0.3166666666666674,
+          "windupS": 1.6,
+          "origin": {
+            "x": 242.06500868692459,
+            "y": 5.549419554861089,
+            "z": 4.09821170895937
+          },
+          "aim": {
+            "x": 237.54055661344108,
+            "y": 5.257451000686205,
+            "z": 4.861124958621753
+          },
+          "targetOwnerId": "player",
+          "originBody": {
+            "x": 242.06500868692459,
+            "y": 4.549419554861089,
+            "z": 4.09821170895937
+          },
+          "shape": {
+            "kind": "oriented_box",
+            "widthM": 2.8,
+            "lengthM": 14,
+            "heightM": 2.4,
+            "center": {
+              "x": 235.1624501496931,
+              "y": 5.549419554861089,
+              "z": 5.262121344666841
+            },
+            "axes": [
+              {
+                "x": 0.16627280510106732,
+                "y": 0,
+                "z": 0.9860797910330698
+              },
+              {
+                "x": 0,
+                "y": 1,
+                "z": 0
+              },
+              {
+                "x": -0.9860797910330695,
+                "y": 0,
+                "z": 0.1662728051010673
+              }
+            ],
+            "halfSize": [
+              1.4,
+              1.2,
+              7
+            ],
+            "direction": {
+              "x": -0.9860797910330695,
+              "y": 0,
+              "z": 0.1662728051010673
+            }
+          },
+          "projectilePosition": {
+            "x": 242.06500868692459,
+            "y": 5.549419554861089,
+            "z": 4.09821170895937
+          },
+          "hitOwners": [],
+          "spentEU": 57,
+          "remainingEU": 57,
+          "activeElapsed": 0
+        },
+        "phaseId": "rootback_beast_p1",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 0,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": null,
+        "defeated": false
+      },
+      "aim": {
+        "kind": "boss",
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "partId": "core",
+        "point": {
+          "x": 241.43131973341875,
+          "y": 6.664776915206383,
+          "z": 4.054851878071914
+        },
+        "distance": 2.8618668965903513
+      },
+      "models": 37,
+      "pending": 0,
+      "triangles": 20572,
+      "claims": {},
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24
+      },
+      "deaths": []
+    },
+    {
+      "label": "attack-cycle-4",
+      "time": 18.70000000000022,
+      "player": {
+        "x": 238.75178235405264,
+        "y": 4.507974475757737,
+        "z": 4.667605857143593,
+        "yaw": 4.937202394800731,
+        "pitch": 0.28214920043945313,
+        "hp": 260.54499999999945,
+        "maxHp": 275,
+        "calories": 2394.995000000049,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": 8.299999999999992,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 996.924,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.06049146718516,
+          "y": 4.55392566770079,
+          "z": 4.062986062631149
+        },
+        "parts": {
+          "core": {
+            "damage": 443.076,
+            "broken": true
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": null,
+        "phaseId": "rootback_beast_p2",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 0,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": null,
+        "defeated": false
+      },
+      "aim": {
+        "kind": "boss",
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "partId": "core",
+        "point": {
+          "x": 241.70426630487057,
+          "y": 6.745941856455819,
+          "z": 3.9924347238948434
+        },
+        "distance": 3.153386157859474
+      },
+      "models": 37,
+      "pending": 0,
+      "triangles": 23636,
+      "claims": {},
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24
+      },
+      "deaths": []
+    },
+    {
+      "label": "aim-4",
+      "time": 19.300000000000185,
+      "player": {
+        "x": 238.75178235405264,
+        "y": 4.507974475757737,
+        "z": 4.667605857143593,
+        "yaw": 4.892006471949169,
+        "pitch": 0.2687948608398438,
+        "hp": 261.44499999999863,
+        "maxHp": 275,
+        "calories": 2392.2350000000597,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": 8.299999999999992,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 996.924,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.05648916141686,
+          "y": 4.563611222923582,
+          "z": 4.031776385906143
+        },
+        "parts": {
+          "core": {
+            "damage": 443.076,
+            "broken": true
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": null,
+        "phaseId": "rootback_beast_p2",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 0,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": null,
+        "defeated": false
+      },
+      "aim": {
+        "kind": "boss",
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "partId": "core",
+        "point": {
+          "x": 241.50267362761736,
+          "y": 6.638128225273338,
+          "z": 4.168114473860287
+        },
+        "distance": 2.900005386002193
+      },
+      "models": 37,
+      "pending": 0,
+      "triangles": 24464,
+      "claims": {},
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24
+      },
+      "deaths": []
+    },
+    {
+      "label": "attack-cycle-5",
+      "time": 20.8000000000001,
+      "player": {
+        "x": 238.75178235405264,
+        "y": 4.507974475757737,
+        "z": 4.667605857143593,
+        "yaw": 4.892006471949169,
+        "pitch": 0.2687948608398438,
+        "hp": 263.6949999999966,
+        "maxHp": 275,
+        "calories": 2385.3350000000864,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": 8.299999999999992,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 480.00199999999995,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.05648916141686,
+          "y": 4.563611222923582,
+          "z": 4.031776385906143
+        },
+        "parts": {
+          "core": {
+            "damage": 959.998,
+            "broken": true
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": null,
+        "phaseId": "rootback_beast_p3",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 0,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": null,
+        "defeated": false
+      },
+      "aim": {
+        "kind": "boss",
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "partId": "core",
+        "point": {
+          "x": 241.43985234067614,
+          "y": 6.620540452847683,
+          "z": 4.1795212102207655
+        },
+        "distance": 2.8337788243653046
+      },
+      "models": 37,
+      "pending": 0,
+      "triangles": 24464,
+      "claims": {},
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24
+      },
+      "deaths": []
+    },
+    {
+      "label": "aim-5",
+      "time": 21.30000000000007,
+      "player": {
+        "x": 238.75178235405264,
+        "y": 4.507974475757737,
+        "z": 4.667605857143593,
+        "yaw": 4.9014425071054175,
+        "pitch": 0.28574813842773433,
+        "hp": 264.4449999999959,
+        "maxHp": 275,
+        "calories": 2383.0350000000954,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": 8.299999999999992,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 480.00199999999995,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.06006106959387,
+          "y": 4.568958307140441,
+          "z": 4.048809393455494
+        },
+        "parts": {
+          "core": {
+            "damage": 959.998,
+            "broken": true
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": null,
+        "phaseId": "rootback_beast_p3",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 0,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": null,
+        "defeated": false
+      },
+      "aim": {
+        "kind": "boss",
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "partId": "core",
+        "point": {
+          "x": 241.45641762829234,
+          "y": 6.676978626044281,
+          "z": 4.150104904779662
+        },
+        "distance": 2.8700778591425213
+      },
+      "models": 37,
+      "pending": 0,
+      "triangles": 23746,
+      "claims": {},
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24
+      },
+      "deaths": []
+    },
+    {
+      "label": "attack-cycle-6",
+      "time": 22.999999999999975,
+      "player": {
+        "x": 238.75178235405264,
+        "y": 4.507974475757737,
+        "z": 4.667605857143593,
+        "yaw": 4.9014425071054175,
+        "pitch": 0.28574813842773433,
+        "hp": 266.9949999999936,
+        "maxHp": 275,
+        "calories": 2375.2150000001257,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": 8.299999999999992,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 221.54099999999994,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.06006106959387,
+          "y": 4.568958307140441,
+          "z": 4.048809393455494
+        },
+        "parts": {
+          "core": {
+            "damage": 1218.459,
+            "broken": true
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": {
+          "id": "structure:63026:starter-manor:root_manor:boss:cast:4",
+          "skillId": "root_seed",
+          "stage": "windup",
+          "remaining": 1.450000000000001,
+          "windupS": 1.7999999999999998,
+          "origin": {
+            "x": 242.06006106959387,
+            "y": 5.568958307140441,
+            "z": 4.048809393455494
+          },
+          "aim": {
+            "x": 238.75178235405264,
+            "y": 5.257974475757737,
+            "z": 4.667605857143593
+          },
+          "targetOwnerId": "player",
+          "originBody": {
+            "x": 242.06006106959387,
+            "y": 4.568958307140441,
+            "z": 4.048809393455494
+          },
+          "shape": {
+            "kind": "sphere",
+            "radiusM": 1.6,
+            "center": {
+              "x": 238.75178235405264,
+              "y": 5.257974475757737,
+              "z": 4.667605857143593
+            }
+          },
+          "projectilePosition": {
+            "x": 242.06006106959387,
+            "y": 5.568958307140441,
+            "z": 4.048809393455494
+          },
+          "hitOwners": [],
+          "spentEU": 36,
+          "remainingEU": 36,
+          "activeElapsed": 0
+        },
+        "phaseId": "rootback_beast_p3",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 0,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": null,
+        "defeated": false
+      },
+      "aim": {
+        "kind": "boss",
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "partId": "core",
+        "point": {
+          "x": 241.76894692434382,
+          "y": 6.770461654976109,
+          "z": 4.090306006980502
+        },
+        "distance": 3.2017245774538847
+      },
+      "models": 37,
+      "pending": 0,
+      "triangles": 25186,
+      "claims": {},
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24
+      },
+      "deaths": []
+    },
+    {
+      "label": "aim-6",
+      "time": 23.499999999999947,
+      "player": {
+        "x": 238.75178235405264,
+        "y": 4.507974475757737,
+        "z": 4.667605857143593,
+        "yaw": 4.917844484644479,
+        "pitch": 0.25489608764648436,
+        "hp": 267.7449999999929,
+        "maxHp": 275,
+        "calories": 2372.9150000001346,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": 8.299999999999992,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 221.54099999999994,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.06006106959387,
+          "y": 4.568958307140441,
+          "z": 4.048809393455494
+        },
+        "parts": {
+          "core": {
+            "damage": 1218.459,
+            "broken": true
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": {
+          "id": "structure:63026:starter-manor:root_manor:boss:cast:4",
+          "skillId": "root_seed",
+          "stage": "windup",
+          "remaining": 0.9500000000000025,
+          "windupS": 1.7999999999999998,
+          "origin": {
+            "x": 242.06006106959387,
+            "y": 5.568958307140441,
+            "z": 4.048809393455494
+          },
+          "aim": {
+            "x": 238.75178235405264,
+            "y": 5.257974475757737,
+            "z": 4.667605857143593
+          },
+          "targetOwnerId": "player",
+          "originBody": {
+            "x": 242.06006106959387,
+            "y": 4.568958307140441,
+            "z": 4.048809393455494
+          },
+          "shape": {
+            "kind": "sphere",
+            "radiusM": 1.6,
+            "center": {
+              "x": 238.75178235405264,
+              "y": 5.257974475757737,
+              "z": 4.667605857143593
+            }
+          },
+          "projectilePosition": {
+            "x": 242.06006106959387,
+            "y": 5.568958307140441,
+            "z": 4.048809393455494
+          },
+          "hitOwners": [],
+          "spentEU": 36,
+          "remainingEU": 36,
+          "activeElapsed": 0
+        },
+        "phaseId": "rootback_beast_p3",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 0,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": null,
+        "defeated": false
+      },
+      "aim": {
+        "kind": "boss",
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "partId": "core",
+        "point": {
+          "x": 241.53776244857855,
+          "y": 6.609495595159108,
+          "z": 4.087018586802815
+        },
+        "distance": 2.940853657714818
+      },
+      "models": 37,
+      "pending": 0,
+      "triangles": 25042,
+      "claims": {},
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24
+      },
+      "deaths": []
+    },
+    {
+      "label": "attack-cycle-7",
+      "time": 24.799999999999873,
+      "player": {
+        "x": 238.75178235405264,
+        "y": 4.507974475757737,
+        "z": 4.667605857143593,
+        "yaw": 4.917844484644479,
+        "pitch": 0.25489608764648436,
+        "hp": 269.6949999999911,
+        "maxHp": 275,
+        "calories": 2366.9350000001577,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": 8.299999999999992,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 0,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.06006106959387,
+          "y": 4.568958307140441,
+          "z": 4.048809393455494
+        },
+        "parts": {
+          "core": {
+            "damage": 1440,
+            "broken": true
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": null,
+        "phaseId": "rootback_beast_p3",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 0,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": {
+          "key": "structure:63026:starter-manor:root_manor:rootback_beast:first_defeat",
+          "poolId": "reward_root_manor",
+          "claimed": false
+        },
+        "defeated": true
+      },
+      "aim": {
+        "kind": "boss",
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "partId": "body",
+        "point": {
+          "x": 240.04350200327627,
+          "y": 6.211780737018207,
+          "z": 4.398416573752126
+        },
+        "distance": 1.3635267755952394
+      },
+      "models": 37,
+      "pending": 0,
+      "triangles": 23662,
+      "claims": {},
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24
+      },
+      "deaths": []
+    },
+    {
+      "label": "combat-end",
+      "time": 24.799999999999873,
+      "player": {
+        "x": 238.75178235405264,
+        "y": 4.507974475757737,
+        "z": 4.667605857143593,
+        "yaw": 4.917844484644479,
+        "pitch": 0.25489608764648436,
+        "hp": 269.6949999999911,
+        "maxHp": 275,
+        "calories": 2366.9350000001577,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": 8.299999999999992,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 0,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.06006106959387,
+          "y": 4.568958307140441,
+          "z": 4.048809393455494
+        },
+        "parts": {
+          "core": {
+            "damage": 1440,
+            "broken": true
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": null,
+        "phaseId": "rootback_beast_p3",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 0,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": {
+          "key": "structure:63026:starter-manor:root_manor:rootback_beast:first_defeat",
+          "poolId": "reward_root_manor",
+          "claimed": false
+        },
+        "defeated": true
+      },
+      "aim": {
+        "kind": "boss",
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "partId": "body",
+        "point": {
+          "x": 240.04350200327627,
+          "y": 6.211780737018207,
+          "z": 4.398416573752126
+        },
+        "distance": 1.3635267755952394
+      },
+      "models": 37,
+      "pending": 0,
+      "triangles": 23662,
+      "claims": {},
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24
+      },
+      "deaths": []
+    },
+    {
+      "label": "boss-reward-claimed",
+      "time": 27.64999999999971,
+      "player": {
+        "x": 240.9442416486251,
+        "y": 4.502234445375552,
+        "z": 1.5162927645840174,
+        "yaw": 5.674962862330027,
+        "pitch": 0.725255889892578,
+        "hp": 273.96999999998724,
+        "maxHp": 275,
+        "calories": 2353.5850000001924,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": 8.299999999999992,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 0,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.06006106959387,
+          "y": 4.568958307140441,
+          "z": 4.048809393455494
+        },
+        "parts": {
+          "core": {
+            "damage": 1440,
+            "broken": true
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": null,
+        "phaseId": "rootback_beast_p3",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 0,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": {
+          "key": "structure:63026:starter-manor:root_manor:rootback_beast:first_defeat",
+          "poolId": "reward_root_manor",
+          "claimed": false
+        },
+        "defeated": true
+      },
+      "aim": null,
+      "models": 36,
+      "pending": 0,
+      "triangles": 14640,
+      "claims": {
+        "boss": {
+          "claimId": "structure:63026:starter-manor:root_manor:reward:boss",
+          "time": 27.549999999999716
+        }
+      },
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24,
+        "stone": 4
+      },
+      "deaths": []
+    },
+    {
+      "label": "boss-reward-repeat",
+      "time": 27.64999999999971,
+      "player": {
+        "x": 240.9442416486251,
+        "y": 4.502234445375552,
+        "z": 1.5162927645840174,
+        "yaw": 5.674962862330027,
+        "pitch": 0.725255889892578,
+        "hp": 273.96999999998724,
+        "maxHp": 275,
+        "calories": 2353.5850000001924,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": 8.299999999999992,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 0,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.06006106959387,
+          "y": 4.568958307140441,
+          "z": 4.048809393455494
+        },
+        "parts": {
+          "core": {
+            "damage": 1440,
+            "broken": true
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": null,
+        "phaseId": "rootback_beast_p3",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 0,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": {
+          "key": "structure:63026:starter-manor:root_manor:rootback_beast:first_defeat",
+          "poolId": "reward_root_manor",
+          "claimed": false
+        },
+        "defeated": true
+      },
+      "aim": null,
+      "models": 36,
+      "pending": 0,
+      "triangles": 14640,
+      "claims": {
+        "boss": {
+          "claimId": "structure:63026:starter-manor:root_manor:reward:boss",
+          "time": 27.549999999999716
+        }
+      },
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24,
+        "stone": 4
+      },
+      "deaths": []
+    },
+    {
+      "label": "saved-via-menu",
+      "time": 27.64999999999971,
+      "player": {
+        "x": 240.9442416486251,
+        "y": 4.502234445375552,
+        "z": 1.5162927645840174,
+        "yaw": 5.674962862330027,
+        "pitch": 0.725255889892578,
+        "hp": 273.96999999998724,
+        "maxHp": 275,
+        "calories": 2353.5850000001924,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": 8.299999999999992,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 0,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.06006106959387,
+          "y": 4.568958307140441,
+          "z": 4.048809393455494
+        },
+        "parts": {
+          "core": {
+            "damage": 1440,
+            "broken": true
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": null,
+        "phaseId": "rootback_beast_p3",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 0,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": {
+          "key": "structure:63026:starter-manor:root_manor:rootback_beast:first_defeat",
+          "poolId": "reward_root_manor",
+          "claimed": false
+        },
+        "defeated": true
+      },
+      "aim": null,
+      "models": 36,
+      "pending": 0,
+      "triangles": 14896,
+      "claims": {
+        "boss": {
+          "claimId": "structure:63026:starter-manor:root_manor:reward:boss",
+          "time": 27.549999999999716
+        }
+      },
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24,
+        "stone": 4
+      },
+      "deaths": []
+    },
+    {
+      "label": "restored-page",
+      "time": 27.64999999999971,
+      "player": {
+        "x": 240.9442416486251,
+        "y": 4.502234445375552,
+        "z": 1.5162927645840174,
+        "yaw": 5.674962862330027,
+        "pitch": 0.725255889892578,
+        "hp": 273.96999999998724,
+        "maxHp": 275,
+        "calories": 2353.5850000001924,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": true,
+        "stance": "stand",
+        "lastDamageAt": 8.299999999999992,
+        "resting": false,
+        "desiredStance": "stand",
+        "stanceBlocked": false,
+        "bodyHeight": 1.5,
+        "sprinting": false
+      },
+      "boss": {
+        "id": "structure:63026:starter-manor:root_manor:boss",
+        "hp": 0,
+        "maxHp": 1440,
+        "position": {
+          "x": 242.06006106959387,
+          "y": 4.568958307140441,
+          "z": 4.048809393455494
+        },
+        "parts": {
+          "core": {
+            "damage": 1440,
+            "broken": true
+          },
+          "locomotion": {
+            "damage": 0,
+            "broken": false
+          }
+        },
+        "cast": null,
+        "phaseId": "rootback_beast_p3",
+        "gimmicks": {
+          "root_food_cache_west": {
+            "hp": 36,
+            "uses": 0,
+            "broken": false
+          },
+          "root_food_cache_east": {
+            "hp": 36,
+            "uses": 1,
+            "broken": false
+          }
+        },
+        "reward": {
+          "key": "structure:63026:starter-manor:root_manor:rootback_beast:first_defeat",
+          "poolId": "reward_root_manor",
+          "claimed": false
+        },
+        "defeated": true
+      },
+      "aim": null,
+      "models": 2,
+      "pending": 34,
+      "triangles": 9742,
+      "claims": {
+        "boss": {
+          "claimId": "structure:63026:starter-manor:root_manor:reward:boss",
+          "time": 27.549999999999716
+        }
+      },
+      "inventory": {
+        "gear_baseline_t8": 1,
+        "food": 12,
+        "wood": 24,
+        "stone": 4
+      },
+      "deaths": []
+    }
+  ],
+  "checks": {
+    "warning": true,
+    "dodgeMoved": true,
+    "dodgeHpPreserved": true,
+    "gimmickApproached": true,
+    "gimmickUsed": true,
+    "bossDefeated": true,
+    "caloriesConsumed": true,
+    "rewardApproached": true,
+    "rewardClaimed": true,
+    "rewardIdempotent": true,
+    "savedBossHp": true,
+    "savedParts": true
+  },
+  "errors": [],
+  "machine": {
+    "scope": "Separate prepared actual MachineSystem + Rapier integration, not browser controls or natural progression",
+    "initialHp": 90,
+    "damagedHp": 64,
+    "repairedHp": 90,
+    "bossHits": 1,
+    "coverBlocked": true,
+    "fuelUnitsConsumed": 1,
+    "repairWood": 72.22222222222217,
+    "metrics": {
+      "generated": 67.28890311111076,
+      "consumed": 21.196004479999992,
+      "loss": 46.09289863111094
+    },
+    "damageClaims": [
+      "boss:boss:1:rootback_beast:boss:1:rootback_beast:cast:1"
+    ],
+    "savedPose": {
+      "x": 2.999958038330078,
+      "y": -0.0000235140323638916,
+      "z": 0.00019687414169311523
+    },
+    "checks": {
+      "fuel": true,
+      "bossDamage": true,
+      "cover": true,
+      "repair": true,
+      "saveLedger": true
+    }
+  }
+}

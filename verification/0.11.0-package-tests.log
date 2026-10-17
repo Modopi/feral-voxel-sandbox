@@ -1,0 +1,12 @@
+✔ fixed generator network transfers finite EU to and from a rotated machine host with conserved save state (17.331022ms)
+✔ rejects out-of-range, incompatible, depleted, and over-capacity transfers without partial ledger writes (3.507879ms)
+✔ machine panel selects a nearby compatible fixture and calls the explicit 10 EU transfer (8.115044ms)
+✔ actual release bundle matches the pinned Android verification key and payload (2617.550154ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2733.174623

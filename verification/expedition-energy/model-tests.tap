@@ -1,0 +1,202 @@
+TAP version 13
+# Subtest: unlinked nearby and distant stores remain isolated; explicit paid links carry power and removal stops transfer
+ok 1 - unlinked nearby and distant stores remain isolated; explicit paid links carry power and removal stops transfer
+  ---
+  duration_ms: 56.51364
+  type: 'test'
+  ...
+# Subtest: station energy requires directed ports and linked converters; leaving the work site pauses the job
+ok 2 - station energy requires directed ports and linked converters; leaving the work site pauses the job
+  ---
+  duration_ms: 36.768997
+  type: 'test'
+  ...
+# Subtest: fuel remains local and finite across range changes, save and link removal
+ok 3 - fuel remains local and finite across range changes, save and link removal
+  ---
+  duration_ms: 60.531077
+  type: 'test'
+  ...
+# Subtest: personal divinity funds the first relic only after explicit reservation at its actual workbench
+ok 4 - personal divinity funds the first relic only after explicit reservation at its actual workbench
+  ---
+  duration_ms: 26.306295
+  type: 'test'
+  ...
+# Subtest: legacy nonpositional mode is unchanged; migration quarantines pooled energy instead of assigning it to a distant store
+ok 5 - legacy nonpositional mode is unchanged; migration quarantines pooled energy instead of assigning it to a distant store
+  ---
+  duration_ms: 4.411723
+  type: 'test'
+  ...
+# Subtest: avatar mana uses paid growth and actual liquid without summing fixed tanks or the cup
+ok 6 - avatar mana uses paid growth and actual liquid without summing fixed tanks or the cup
+  ---
+  duration_ms: 3.703612
+  type: 'test'
+  ...
+# Subtest: two simulated hours preserve source, storage, dissipation budgets without charging distant or personal stores
+ok 7 - two simulated hours preserve source, storage, dissipation budgets without charging distant or personal stores
+  ---
+  duration_ms: 5197.444215
+  type: 'test'
+  ...
+# Subtest: breakage cuts links and repair never silently reconnects; a single player cannot multiply manual power
+ok 8 - breakage cuts links and repair never silently reconnects; a single player cannot multiply manual power
+  ---
+  duration_ms: 38.66104
+  type: 'test'
+  ...
+# Subtest: legacy queued input and work survive explicit station binding; live reservations cannot move
+ok 9 - legacy queued input and work survive explicit station binding; live reservations cannot move
+  ---
+  duration_ms: 57.471588
+  type: 'test'
+  ...
+# Subtest: mana investments spend existing authored materials, increase avatar capacity and never grant energy
+ok 10 - mana investments spend existing authored materials, increase avatar capacity and never grant energy
+  ---
+  duration_ms: 25.740496
+  type: 'test'
+  ...
+# Subtest: one owned focus changes capacity; unequip reserves excess without reusable free mana or reserve refill while unequipped
+ok 11 - one owned focus changes capacity; unequip reserves excess without reusable free mana or reserve refill while unequipped
+  ---
+  duration_ms: 2.6507
+  type: 'test'
+  ...
+# Subtest: death-style inventory removal, save and recovery preserve the exact existing mana budget
+ok 12 - death-style inventory removal, save and recovery preserve the exact existing mana budget
+  ---
+  duration_ms: 7.928094
+  type: 'test'
+  ...
+# Subtest: cup storage stays separate from avatar mana and cannot bypass its capacity
+ok 13 - cup storage stays separate from avatar mana and cannot bypass its capacity
+  ---
+  duration_ms: 1.244813
+  type: 'test'
+  ...
+# Subtest: investment and focus maxima are bounded and a full capacity investment never charges materials twice
+ok 14 - investment and focus maxima are bounded and a full capacity investment never charges materials twice
+  ---
+  duration_ms: 1.614334
+  type: 'test'
+  ...
+# Subtest: empty inventory bootstraps wood, stone and kiln using actual harvest, samples and timed costs
+ok 15 - empty inventory bootstraps wood, stone and kiln using actual harvest, samples and timed costs
+  ---
+  duration_ms: 24.153268
+  type: 'test'
+  ...
+# Subtest: harvest requires time, tool, source environment, depletion and persistent unique claim
+ok 16 - harvest requires time, tool, source environment, depletion and persistent unique claim
+  ---
+  duration_ms: 7.546238
+  type: 'test'
+  ...
+# Subtest: inventory debit and energy costs are atomic, overflow remains reclaimable, legacy IDs are rejected
+ok 17 - inventory debit and energy costs are atomic, overflow remains reclaimable, legacy IDs are rejected
+  ---
+  duration_ms: 1.516607
+  type: 'test'
+  ...
+# Subtest: research pause/save/resume charges samples once; discovered blueprints immediately unlock
+ok 18 - research pause/save/resume charges samples once; discovered blueprints immediately unlock
+  ---
+  duration_ms: 26.643856
+  type: 'test'
+  ...
+# Subtest: craft reserves inputs, pauses without energy, survives save and never repeats output
+ok 19 - craft reserves inputs, pauses without energy, survives save and never repeats output
+  ---
+  duration_ms: 73.784588
+  type: 'test'
+  ...
+# Subtest: all 39 research nodes execute from samples without discovery, preserving four freely mixed fields
+ok 20 - all 39 research nodes execute from samples without discovery, preserving four freely mixed fields
+  ---
+  duration_ms: 42.342004
+  type: 'test'
+  ...
+# Subtest: all 142 crafting contracts execute with finite debited energy and exact item output
+ok 21 - all 142 crafting contracts execute with finite debited energy and exact item output
+  ---
+  duration_ms: 3401.227228
+  type: 'test'
+  ...
+# Subtest: mechanical-electric-mechanical loop never creates energy and battery discharge obeys rated power
+ok 22 - mechanical-electric-mechanical loop never creates energy and battery discharge obeys rated power
+  ---
+  duration_ms: 5.386663
+  type: 'test'
+  ...
+# Subtest: first divinity comes from paid community work, then an intact relic generates at .1 EU/s
+ok 23 - first divinity comes from paid community work, then an intact relic generates at .1 EU/s
+  ---
+  duration_ms: 17.187189
+  type: 'test'
+  ...
+# Subtest: mana condenser and ordinary fluid container work without a preexisting mana item
+ok 24 - mana condenser and ordinary fluid container work without a preexisting mana item
+  ---
+  duration_ms: 17.169533
+  type: 'test'
+  ...
+# Subtest: machine material properties cannot invent functions or multiply component cores without spending them
+ok 25 - machine material properties cannot invent functions or multiply component cores without spending them
+  ---
+  duration_ms: 1.581773
+  type: 'test'
+  ...
+# Subtest: reward claims, kit ownership and save validation reject duplication or invalid state
+ok 26 - reward claims, kit ownership and save validation reject duplication or invalid state
+  ---
+  duration_ms: 1.931762
+  type: 'test'
+  ...
+# Subtest: manual mechanical supply and a real generator power a mixed-channel recipe with a conserved budget
+ok 27 - manual mechanical supply and a real generator power a mixed-channel recipe with a conserved budget
+  ---
+  duration_ms: 59.328672
+  type: 'test'
+  ...
+# Subtest: acid extraction debits fluid once and stores the unspent chemical energy in the correct tank
+ok 28 - acid extraction debits fluid once and stores the unspent chemical energy in the correct tank
+  ---
+  duration_ms: 10.999481
+  type: 'test'
+  ...
+# Subtest: finite mining tool wear persists through save and replacement requires a second crafted tool
+ok 29 - finite mining tool wear persists through save and replacement requires a second crafted tool
+  ---
+  duration_ms: 2.564627
+  type: 'test'
+  ...
+# Subtest: physical workshop access is local, changes atomically and survives reload without duplicating counts
+ok 30 - physical workshop access is local, changes atomically and survives reload without duplicating counts
+  ---
+  duration_ms: 1.562872
+  type: 'test'
+  ...
+# Subtest: community activity request retries preserve the original job and consume inputs once across reload
+ok 31 - community activity request retries preserve the original job and consume inputs once across reload
+  ---
+  duration_ms: 0.708717
+  type: 'test'
+  ...
+# Subtest: legacy tick-local assembly caches match uncached stepping and expire between calls
+ok 32 - legacy tick-local assembly caches match uncached stepping and expire between calls
+  ---
+  duration_ms: 125.365035
+  type: 'test'
+  ...
+1..32
+# tests 32
+# suites 0
+# pass 32
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 5762.598148

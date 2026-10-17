@@ -1,0 +1,563 @@
+{
+  "environment": "Headless Chromium / Linux / SwiftShader software WebGL; not a mobile-device measurement",
+  "seed": 63026,
+  "restriction": "Only keyboard, pointer and DOM UI actions mutate game state. FERAL reads only.",
+  "consoleErrors": [
+    {
+      "text": "Failed to load resource: the server responded with a status of 404 (File not found)",
+      "location": {
+        "url": "http://127.0.0.1:8081/favicon.ico",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    }
+  ],
+  "pageErrors": [],
+  "failedRequests": [],
+  "steps": [
+    {
+      "name": "fresh-world",
+      "wallTime": "2026-10-17T15:06:19.155Z",
+      "state": {
+        "player": {
+          "x": 0,
+          "y": 4.007988474819103,
+          "z": 0,
+          "yaw": 3.141592653589793,
+          "pitch": 0,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2399.5483333333646,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {},
+        "research": [],
+        "stations": {},
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 4.516666666666656,
+        "stats": {
+          "running": true,
+          "version": "content-runtime",
+          "player": {
+            "x": 0,
+            "y": 4.007988474819103,
+            "z": 0,
+            "yaw": 3.141592653589793,
+            "pitch": 0,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2399.5483333333646,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 9,
+          "models": 98,
+          "chunks": 6
+        },
+        "renderFrames": 67,
+        "browserElapsedMs": 6509.300000000745
+      }
+    },
+    {
+      "name": "empty-bag",
+      "wallTime": "2026-10-17T15:06:20.062Z",
+      "state": {
+        "player": {
+          "x": 0,
+          "y": 4.007988474819103,
+          "z": 0,
+          "yaw": 3.141592653589793,
+          "pitch": 0,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2399.4733333333697,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {},
+        "research": [],
+        "stations": {},
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 5.266666666666653,
+        "stats": {
+          "running": true,
+          "version": "content-runtime",
+          "player": {
+            "x": 0,
+            "y": 4.007988474819103,
+            "z": 0,
+            "yaw": 3.141592653589793,
+            "pitch": 0,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2399.4733333333697,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 9,
+          "models": 98,
+          "chunks": 8
+        },
+        "renderFrames": 79,
+        "browserElapsedMs": 7433.5
+      }
+    },
+    {
+      "name": "research-observation",
+      "wallTime": "2026-10-17T15:07:02.054Z",
+      "state": {
+        "player": {
+          "x": 5.603708270937204,
+          "y": 4.007562218415205,
+          "z": 16.624135930091143,
+          "yaw": 2.2416010459237783,
+          "pitch": -0.7777288818359374,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2394.700000000161,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {},
+        "research": [
+          "observation"
+        ],
+        "stations": {},
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 37.93333333333246,
+        "stats": {
+          "running": true,
+          "version": "content-runtime",
+          "player": {
+            "x": 5.603708270937204,
+            "y": 4.007562218415205,
+            "z": 16.624135930091143,
+            "yaw": 2.2416010459237783,
+            "pitch": -0.7777288818359374,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2394.700000000161,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 9,
+          "models": 98,
+          "chunks": 45
+        },
+        "renderFrames": 531,
+        "browserElapsedMs": 49428.5
+      }
+    },
+    {
+      "name": "research-joinery",
+      "wallTime": "2026-10-17T15:08:11.782Z",
+      "state": {
+        "player": {
+          "x": 16.248673966154456,
+          "y": 4.007953309610733,
+          "z": 9.919777068519036,
+          "yaw": 5.79646249611909,
+          "pitch": -0.6999999999999998,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2388.358333333773,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "berry": 2,
+          "plant_fiber": 1
+        },
+        "research": [
+          "observation",
+          "joinery"
+        ],
+        "stations": {},
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 89.6499999999962,
+        "stats": {
+          "running": true,
+          "version": "content-runtime",
+          "player": {
+            "x": 16.248673966154456,
+            "y": 4.007953309610733,
+            "z": 9.919777068519036,
+            "yaw": 5.79646249611909,
+            "pitch": -0.6999999999999998,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2388.358333333773,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 9,
+          "models": 98,
+          "chunks": 87
+        },
+        "renderFrames": 1127,
+        "browserElapsedMs": 119156.30000000075
+      }
+    },
+    {
+      "name": "craft-field_bench",
+      "wallTime": "2026-10-17T15:11:58.459Z",
+      "state": {
+        "player": {
+          "x": 3.976039228029549,
+          "y": 4.007705719937511,
+          "z": 16.23960004139226,
+          "yaw": 5.883276766138618,
+          "pitch": -0.8007321166992184,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2372.8033333344324,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "berry": 2,
+          "plant_fiber": 1,
+          "field_bench": 1
+        },
+        "research": [
+          "observation",
+          "joinery"
+        ],
+        "stations": {},
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 214.73333333339636,
+        "stats": {
+          "running": true,
+          "version": "content-runtime",
+          "player": {
+            "x": 3.976039228029549,
+            "y": 4.007705719937511,
+            "z": 16.23960004139226,
+            "yaw": 5.883276766138618,
+            "pitch": -0.8007321166992184,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2372.8033333344324,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 9,
+          "models": 98,
+          "chunks": 96
+        },
+        "renderFrames": 2598,
+        "browserElapsedMs": 345833.5
+      }
+    },
+    {
+      "name": "placed-field-bench",
+      "wallTime": "2026-10-17T15:12:04.265Z",
+      "state": {
+        "player": {
+          "x": 3.976039228029549,
+          "y": 4.007705719937511,
+          "z": 16.23960004139226,
+          "yaw": 6.283185365992133,
+          "pitch": 4.128641872824801e-16,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2372.5016666677866,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "berry": 2,
+          "plant_fiber": 1
+        },
+        "research": [
+          "observation",
+          "joinery"
+        ],
+        "stations": {
+          "field_bench": 1
+        },
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 217.75000000006543,
+        "stats": {
+          "running": true,
+          "version": "content-runtime",
+          "player": {
+            "x": 3.976039228029549,
+            "y": 4.007705719937511,
+            "z": 16.23960004139226,
+            "yaw": 6.283185365992133,
+            "pitch": 4.128641872824801e-16,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2372.5016666677866,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 9,
+          "models": 99,
+          "chunks": 96
+        },
+        "renderFrames": 2630,
+        "browserElapsedMs": 351638.8999999985
+      }
+    },
+    {
+      "name": "research-material-wood",
+      "wallTime": "2026-10-17T15:13:41.220Z",
+      "state": {
+        "player": {
+          "x": 6.8163121389225125,
+          "y": 4.007913050074584,
+          "z": 11.85276907074731,
+          "yaw": 2.5946279319100998,
+          "pitch": 5.967448757360216e-16,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2365.163333334575,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "berry": 2,
+          "plant_fiber": 1
+        },
+        "research": [
+          "observation",
+          "joinery",
+          "material:wood"
+        ],
+        "stations": {
+          "field_bench": 1
+        },
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 262.86666666675626,
+        "stats": {
+          "running": true,
+          "version": "content-runtime",
+          "player": {
+            "x": 6.8163121389225125,
+            "y": 4.007913050074584,
+            "z": 11.85276907074731,
+            "yaw": 2.5946279319100998,
+            "pitch": 5.967448757360216e-16,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2365.163333334575,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 12,
+          "models": 99,
+          "chunks": 88
+        },
+        "renderFrames": 3177,
+        "browserElapsedMs": 448591.5
+      }
+    },
+    {
+      "name": "blocked",
+      "wallTime": "2026-10-17T15:15:22.427Z",
+      "state": {
+        "player": {
+          "x": 60.713837135496554,
+          "y": 5.0079976257071355,
+          "z": 36.721884282058724,
+          "yaw": 4.025400942164006,
+          "pitch": 5.828670879282072e-16,
+          "hp": 100,
+          "maxHp": 100,
+          "calories": 2351.83833333445,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "berry": 2,
+          "plant_fiber": 1,
+          "raw_timber": 2
+        },
+        "research": [
+          "observation",
+          "joinery",
+          "material:wood"
+        ],
+        "stations": {
+          "field_bench": 1
+        },
+        "jobs": [],
+        "researchJob": null,
+        "harvest": null,
+        "time": 319.45000000003813,
+        "stats": {
+          "running": true,
+          "version": "content-runtime",
+          "player": {
+            "x": 60.713837135496554,
+            "y": 5.0079976257071355,
+            "z": 36.721884282058724,
+            "yaw": 4.025400942164006,
+            "pitch": 5.828670879282072e-16,
+            "hp": 100,
+            "maxHp": 100,
+            "calories": 2351.83833333445,
+            "maxCalories": 2400,
+            "vy": 0,
+            "grounded": true,
+            "stance": "stand",
+            "lastDamageAt": -100,
+            "resting": false,
+            "desiredStance": "stand",
+            "stanceBlocked": false,
+            "bodyHeight": 1.5,
+            "sprinting": false
+          },
+          "regions": 12,
+          "models": 100,
+          "chunks": 66
+        },
+        "renderFrames": 3758,
+        "browserElapsedMs": 549800.5
+      }
+    }
+  ],
+  "startedAt": "2026-10-17T15:06:12.503Z",
+  "ok": false,
+  "failure": "Error: Movement timed out: harvest:1,0:fallen_branch:3\n    at moveTo (file:///workspace/feral-voxel-sandbox/tools/verify-expedition-browser.mjs:24:9)\n    at async gather (file:///workspace/feral-voxel-sandbox/tools/verify-expedition-browser.mjs:31:59)\n    at async file:///workspace/feral-voxel-sandbox/tools/verify-expedition-browser.mjs:49:81",
+  "finishedAt": "2026-10-17T15:15:23.098Z"
+}

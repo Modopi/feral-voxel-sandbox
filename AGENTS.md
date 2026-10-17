@@ -1,5 +1,13 @@
 # FERAL 개발·배포 규칙
 
+## 사용자 지정 에이전트 설정
+
+- 주 대화 모델 선호: **GPT-6.1 Sol**. 현재 주 모델을 도구로 바꿀 수 없을 때는 변경했다고 주장하지 않고 앱에서 선택이 필요함을 알린다.
+- 서브에이전트는 **`gpt-6-luna` / `reasoning_effort: max`**로 생성한다. 모델 지정 시 `fork_turns: none`을 사용하고 필요한 작업·파일·계약만 짧게 인계한다. 사용자가 변경하기 전에는 이전 고비용 에이전트를 재개하지 않는다.
+- 사용량을 줄이기 위해 필요한 독립 작업만 위임하고, 완료된 설계·검증을 반복하지 않는다. 같은 장기 검사와 브라우저 시나리오를 중복 실행하지 않는다.
+
+## 개발·배포
+
 - 자동 업데이트 도입 기준 버전은 **0.2.5**이며 현재 버전은 `version.json` 확인. 사용자 결정에 따라 개인 GitHub `Modopi/feral-voxel-sandbox`는 공개 저장소로 운영.
 - 배포 정보의 기준은 `version.json`. 게임 변경을 배포할 때 SemVer와 단조 증가하는 `versionCode`를 함께 올리고 `node tools/version.mjs` 실행. 배포한 버전의 파일 교체 금지.
 - 게임 HTML/JS/CSS/자산 변경은 호환되는 `minNativeCode`를 유지할 수 있음. Java·권한·업데이트 검증 키 변경은 새 APK가 필요하며 `minNativeCode = nativeCode`로 지정(분리 전 버전은 versionCode 사용).

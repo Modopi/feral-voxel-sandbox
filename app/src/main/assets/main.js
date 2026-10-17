@@ -400,6 +400,7 @@ function updateToolLabel() {
     : ITEMS[id]?.block
       ? `보유 ${inventory.count(id)} · 설치 ${buildSize === 1 ? 8 : 1}조각`
       : "선택한 아이템 사용";
+  if(g?.attackMode)$("toolHelp").textContent += g.attackMode === "pierce" ? " · 내부 관통" : " · 충격 전달";
   $("rangeBtn").textContent =
     (selected === 3 ? "설치 " : "채굴 ") +
     editSizeLabel(selected === 3 ? buildSize : miningSize) +
@@ -663,7 +664,7 @@ function use(intent = "selected", repeated = false) {
         SPECIES[e.type].name +
           " · " +
           SPECIES[e.type].parts[ent.part].name +
-          ` · 체력 ${Math.ceil(e.hp)}/${e.maxHP} · 머리·몸통 파괴 또는 HP 0이면 사망 · 에너지 ` +
+          ` · 체력 ${Math.ceil(e.hp)}/${e.maxHP} · HP 0이면 사망 · 뼈대 파손은 행동을 제한 · 에너지 ` +
           Math.round(e.energy) +
           " · 다리 " +
           eco.legs(e) +
@@ -704,6 +705,7 @@ function use(intent = "selected", repeated = false) {
         world.time,
         g === GEAR.pulse && inventory.unlocks.has("pulse") ? 0.3 : g.radius,
         g === GEAR.pulse && inventory.unlocks.has("blade") ? 24 : g.damage,
+        { attackMode: g.attackMode ?? "strike" },
       );
       const e = ent.entity;
       toast(
@@ -711,7 +713,7 @@ function use(intent = "selected", repeated = false) {
           ? `${SPECIES[e.type].name} 처치 · ${e.deathCause}`
           : ent.layer === "structure"
             ? `골격 타격 · 피해 ${Math.ceil(before - e.hp)} · ${e.bodyPose.label}`
-            : `외피 파손 · 골격 보존 · ${e.bodyPose.label}`,
+            : `피해 ${Math.ceil(before - e.hp)} · HP ${Math.ceil(e.hp)}/${e.maxHP} · ${e.bodyPose.label}`,
       );
       document.getElementById("crosshair")?.animate(
         [

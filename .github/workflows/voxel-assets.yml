@@ -8,6 +8,7 @@ on:
       - 'design/content/**'
       - 'tools/asset-pipeline/**'
       - 'tools/*visual-assets*'
+      - 'tools/build-runtime-content.mjs'
       - 'tools/audit-content-design.mjs'
       - 'tests/**'
       - 'app/src/main/assets/**'
@@ -20,6 +21,7 @@ on:
       - 'design/content/**'
       - 'tools/asset-pipeline/**'
       - 'tools/*visual-assets*'
+      - 'tools/build-runtime-content.mjs'
       - 'tools/audit-content-design.mjs'
       - 'tests/**'
       - 'app/src/main/assets/**'
@@ -37,7 +39,9 @@ concurrency:
 jobs:
   verify-authoring:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Full paid progression traverses all four research fields; the measured
+    # uncached route alone exceeded 16 minutes before further asset checks.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -50,3 +54,5 @@ jobs:
         run: npm run audit:design
       - name: Verify committed assets without overwriting them
         run: npm run check:assets
+      - name: Verify browser runtime package against canonical sources
+        run: node tools/build-runtime-content.mjs --check

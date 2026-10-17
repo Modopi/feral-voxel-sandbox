@@ -1,0 +1,30 @@
+{
+  "scope": "Separate prepared actual MachineSystem + Rapier integration, not browser controls or natural progression",
+  "initialHp": 90,
+  "damagedHp": 64,
+  "repairedHp": 90,
+  "bossHits": 1,
+  "coverBlocked": true,
+  "fuelUnitsConsumed": 1,
+  "repairWood": 72.22222222222217,
+  "metrics": {
+    "generated": 67.28890311111076,
+    "consumed": 21.196004479999992,
+    "loss": 46.09289863111094
+  },
+  "damageClaims": [
+    "boss:boss:1:rootback_beast:boss:1:rootback_beast:cast:1"
+  ],
+  "savedPose": {
+    "x": 2.999958038330078,
+    "y": -0.0000235140323638916,
+    "z": 0.00019687414169311523
+  },
+  "checks": {
+    "fuel": true,
+    "bossDamage": true,
+    "cover": true,
+    "repair": true,
+    "saveLedger": true
+  }
+}

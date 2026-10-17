@@ -1,0 +1,625 @@
+{
+  "scope": "Prepared-save browser integration evidence only; fixtures provide starting inventory, research, and position. This is not normal-progression or mobile-device evidence.",
+  "environment": "Headless Chromium / Linux / SwiftShader software WebGL",
+  "seed": 63026,
+  "preparationPolicy": "Direct runtime setup is limited to inventory, research, player position, natural world generation, and a one-time electrical test-energy escrow. The escrow remains unclaimed until storage is installed through the UI. All crafting, delivery, attunement, device installation/operation, machine assembly/charging/firing, attacking, and saving use visible UI or keyboard/pointer input.",
+  "normalProgressionEvidence": false,
+  "mobilePerformanceEvidence": false,
+  "scenarios": {
+    "additions-weapon": {
+      "preparation": {
+        "allowedFixture": {
+          "items": {
+            "gear_baseline_t8": 1,
+            "field_bench": 1,
+            "wood": 20,
+            "plant_fiber": 10
+          },
+          "research": [
+            "material:wood"
+          ]
+        },
+        "target": "structure:63026:starter-manor:root_manor:boss"
+      },
+      "fixturePlayer": {
+        "x": 242,
+        "y": 4.55,
+        "z": -10,
+        "yaw": -1.5707963267948966,
+        "pitch": 0,
+        "hp": 275,
+        "maxHp": 275,
+        "calories": 2400,
+        "maxCalories": 2400,
+        "vy": 0,
+        "grounded": false,
+        "stance": "stand",
+        "lastDamageAt": -100,
+        "resting": false
+      },
+      "actions": [
+        {
+          "input": "weapon shape/material selects and craft/equip buttons",
+          "quote": {
+            "patternId": "weapon_pierce",
+            "materialId": "wood",
+            "inputs": {
+              "wood": 0.8999999999999999,
+              "plant_fiber": 0.2
+            },
+            "seconds": 25
+          }
+        }
+      ],
+      "checks": {
+        "stationInstalledThroughUI": true,
+        "actualCraftCostPaid": true,
+        "materialSelectedThroughUI": true,
+        "shapeSelectedThroughUI": true,
+        "equippedThroughUI": true,
+        "craftSeconds": 25,
+        "craftInputs": {
+          "wood": 0.8999999999999999,
+          "plant_fiber": 0.2
+        },
+        "runtimeWeaponName": "목재 관통 무기",
+        "matchingUiRows": [
+          {
+            "title": "목재 관통 무기",
+            "buttons": [
+              {
+                "text": "제작",
+                "disabled": false
+              }
+            ]
+          },
+          {
+            "title": "목재 관통 무기",
+            "buttons": [
+              {
+                "text": "장착",
+                "disabled": false
+              }
+            ]
+          }
+        ]
+      },
+      "status": "failed",
+      "failure": "TimeoutError: page.waitForFunction: Timeout 12000ms exceeded."
+    },
+    "additions-faith": {
+      "status": "not_run"
+    },
+    "additions-root-manor-device": {
+      "status": "not_run"
+    },
+    "additions-machine-fire": {
+      "status": "not_run"
+    },
+    "optional-wind-vane": {
+      "status": "not_run"
+    }
+  },
+  "steps": [
+    {
+      "label": "additions-weapon-loaded",
+      "at": "2026-10-17T16:34:13.968Z",
+      "scenario": "additions-weapon",
+      "fixtureNotes": {
+        "allowedFixture": {
+          "items": {
+            "gear_baseline_t8": 1,
+            "field_bench": 1,
+            "wood": 20,
+            "plant_fiber": 10
+          },
+          "research": [
+            "material:wood"
+          ]
+        },
+        "target": "structure:63026:starter-manor:root_manor:boss"
+      },
+      "state": {
+        "time": 0.3833333333333333,
+        "player": {
+          "x": 242,
+          "y": 4.5079688444973725,
+          "z": -10,
+          "yaw": -1.5707963267948966,
+          "pitch": 0,
+          "hp": 275,
+          "maxHp": 275,
+          "calories": 2399.9616666666693,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "gear_baseline_t8": 1,
+          "field_bench": 1,
+          "wood": 20,
+          "plant_fiber": 10
+        },
+        "energy": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 0
+        },
+        "energyCapacity": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 100
+        },
+        "energyOverflow": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 0
+        },
+        "worldFixtures": [],
+        "research": [
+          "material:wood"
+        ],
+        "stations": {},
+        "armaments": {
+          "schemaVersion": 1,
+          "nextId": 1,
+          "clock": 0.3833333333333333,
+          "weapons": [],
+          "equippedId": null,
+          "jobs": [],
+          "attackClaims": []
+        },
+        "faith": {
+          "schemaVersion": 1,
+          "clock": 0.3833333333333333,
+          "membership": null,
+          "quests": {},
+          "trials": {}
+        },
+        "boss": null,
+        "dungeon": null,
+        "machine": null,
+        "coverMachine": null,
+        "currentAim": null,
+        "physicsReady": true
+      }
+    },
+    {
+      "label": "weapon-bench-installed",
+      "at": "2026-10-17T16:34:16.416Z",
+      "scenario": "additions-weapon",
+      "ids": {
+        "bossId": "structure:63026:starter-manor:root_manor:boss"
+      },
+      "state": {
+        "time": 1.6833333333333322,
+        "player": {
+          "x": 242,
+          "y": 4.5079688444973725,
+          "z": -10,
+          "yaw": -1.5707963267948966,
+          "pitch": 0,
+          "hp": 275,
+          "maxHp": 275,
+          "calories": 2399.8316666666783,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": -100,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "gear_baseline_t8": 1,
+          "wood": 20,
+          "plant_fiber": 10
+        },
+        "energy": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 0
+        },
+        "energyCapacity": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 100
+        },
+        "energyOverflow": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 0
+        },
+        "worldFixtures": [
+          {
+            "id": "fixture:1",
+            "assetId": "field_bench",
+            "position": [
+              245,
+              4.5,
+              -10
+            ],
+            "hp": 50
+          }
+        ],
+        "research": [
+          "material:wood"
+        ],
+        "stations": {
+          "field_bench": 1
+        },
+        "armaments": {
+          "schemaVersion": 1,
+          "nextId": 1,
+          "clock": 1.6833333333333322,
+          "weapons": [],
+          "equippedId": null,
+          "jobs": [],
+          "attackClaims": []
+        },
+        "faith": {
+          "schemaVersion": 1,
+          "clock": 1.6833333333333322,
+          "membership": null,
+          "quests": {},
+          "trials": {}
+        },
+        "boss": {
+          "id": "structure:63026:starter-manor:root_manor:boss",
+          "hp": 1440,
+          "maxHp": 1440,
+          "position": {
+            "x": 241.92362232743716,
+            "y": 4.499982106773305,
+            "z": 4.0763751354114435
+          },
+          "defeated": false
+        },
+        "dungeon": null,
+        "machine": null,
+        "coverMachine": null,
+        "currentAim": null,
+        "physicsReady": true
+      }
+    },
+    {
+      "label": "weapon-crafted-through-ui",
+      "at": "2026-10-17T16:35:15.506Z",
+      "scenario": "additions-weapon",
+      "quote": {
+        "ok": true,
+        "id": "weapon_pierce",
+        "patternId": "weapon_pierce",
+        "kind": "pierce",
+        "weaponKind": "pierce",
+        "shapeId": "weapon_pierce",
+        "name": "목재 관통 무기",
+        "materialId": "wood",
+        "materialTier": 1,
+        "materialVolumeLiters": 0.3,
+        "massKg": 0.56,
+        "maxDurability": 24,
+        "hitDamage": 9.969479999999999,
+        "range": 4.4,
+        "attackPeriod": 0.9,
+        "attackMode": "pierce",
+        "station": "field_bench",
+        "research": "material:wood",
+        "originRecipeId": "make_wood",
+        "inputs": {
+          "wood": 0.8999999999999999,
+          "plant_fiber": 0.2
+        },
+        "energy": {},
+        "seconds": 25
+      },
+      "fixtureInventoryBeforeCraft": {
+        "gear_baseline_t8": 1,
+        "wood": 20,
+        "plant_fiber": 10
+      },
+      "ids": {
+        "bossId": "structure:63026:starter-manor:root_manor:boss"
+      },
+      "state": {
+        "time": 27.61666666666638,
+        "player": {
+          "x": 242,
+          "y": 4.5079688444973725,
+          "z": -10,
+          "yaw": -1.5707963267948966,
+          "pitch": 0,
+          "hp": 194.95999999999995,
+          "maxHp": 275,
+          "calories": 2397.238333333524,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": 26.499999999999776,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "gear_baseline_t8": 1,
+          "wood": 19.1,
+          "plant_fiber": 9.8
+        },
+        "energy": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 0
+        },
+        "energyCapacity": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 100
+        },
+        "energyOverflow": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 0
+        },
+        "worldFixtures": [
+          {
+            "id": "fixture:1",
+            "assetId": "field_bench",
+            "position": [
+              245,
+              4.5,
+              -10
+            ],
+            "hp": 50
+          }
+        ],
+        "research": [
+          "material:wood"
+        ],
+        "stations": {
+          "field_bench": 1
+        },
+        "armaments": {
+          "schemaVersion": 1,
+          "nextId": 2,
+          "clock": 27.61666666666638,
+          "weapons": [
+            {
+              "id": "armament:1",
+              "name": "목재 관통 무기",
+              "weaponKind": "pierce",
+              "shapeId": "weapon_pierce",
+              "materialId": "wood",
+              "materialTier": 1,
+              "materialVolumeLiters": 0.3,
+              "massKg": 0.56,
+              "durability": 24,
+              "maxDurability": 24,
+              "hitDamage": 9.969479999999999,
+              "range": 4.4,
+              "attackPeriod": 0.9,
+              "attackMode": "pierce",
+              "nextAttackAt": 0,
+              "createdAt": 27.566666666666382
+            }
+          ],
+          "equippedId": null,
+          "jobs": [],
+          "attackClaims": []
+        },
+        "faith": {
+          "schemaVersion": 1,
+          "clock": 27.61666666666638,
+          "membership": null,
+          "quests": {},
+          "trials": {}
+        },
+        "boss": {
+          "id": "structure:63026:starter-manor:root_manor:boss",
+          "hp": 1440,
+          "maxHp": 1440,
+          "position": {
+            "x": 242,
+            "y": 4.558991440634508,
+            "z": -7.135633730977537
+          },
+          "defeated": false
+        },
+        "dungeon": null,
+        "machine": null,
+        "coverMachine": null,
+        "currentAim": null,
+        "physicsReady": true
+      }
+    },
+    {
+      "label": "additions-weapon-blocked",
+      "at": "2026-10-17T16:35:33.062Z",
+      "scenario": "additions-weapon",
+      "failure": "TimeoutError: page.waitForFunction: Timeout 12000ms exceeded.",
+      "state": {
+        "time": 35.79999999999925,
+        "player": {
+          "x": 242.00000049820284,
+          "y": 4.507962347755711,
+          "z": -10.687806887552142,
+          "yaw": -3.1415925304081775,
+          "pitch": -0.0031341552734374997,
+          "hp": 172.91999999999996,
+          "maxHp": 275,
+          "calories": 2396.4200000002475,
+          "maxCalories": 2400,
+          "vy": 0,
+          "grounded": true,
+          "stance": "stand",
+          "lastDamageAt": 31.799999999999475,
+          "resting": false,
+          "desiredStance": "stand",
+          "stanceBlocked": false,
+          "bodyHeight": 1.5,
+          "sprinting": false
+        },
+        "inventory": {
+          "gear_baseline_t8": 1,
+          "wood": 19.1,
+          "plant_fiber": 9.8
+        },
+        "energy": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 0
+        },
+        "energyCapacity": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 100
+        },
+        "energyOverflow": {
+          "mechanical": 0,
+          "electrical": 0,
+          "thermal": 0,
+          "chemical": 0,
+          "magic": 0,
+          "divine": 0
+        },
+        "worldFixtures": [
+          {
+            "id": "fixture:1",
+            "assetId": "field_bench",
+            "position": [
+              245,
+              4.5,
+              -10
+            ],
+            "hp": 50
+          }
+        ],
+        "research": [
+          "material:wood"
+        ],
+        "stations": {
+          "field_bench": 1
+        },
+        "armaments": {
+          "schemaVersion": 1,
+          "nextId": 2,
+          "clock": 35.79999999999925,
+          "weapons": [
+            {
+              "id": "armament:1",
+              "name": "목재 관통 무기",
+              "weaponKind": "pierce",
+              "shapeId": "weapon_pierce",
+              "materialId": "wood",
+              "materialTier": 1,
+              "materialVolumeLiters": 0.3,
+              "massKg": 0.56,
+              "durability": 17,
+              "maxDurability": 24,
+              "hitDamage": 9.969479999999999,
+              "range": 4.4,
+              "attackPeriod": 0.9,
+              "attackMode": "pierce",
+              "nextAttackAt": 36.216666666665944,
+              "createdAt": 27.566666666666382
+            }
+          ],
+          "equippedId": "armament:1",
+          "jobs": [],
+          "attackClaims": []
+        },
+        "faith": {
+          "schemaVersion": 1,
+          "clock": 35.79999999999925,
+          "membership": null,
+          "quests": {},
+          "trials": {}
+        },
+        "boss": null,
+        "dungeon": null,
+        "machine": null,
+        "coverMachine": null,
+        "currentAim": {
+          "kind": "boss",
+          "id": "structure:63026:starter-manor:root_manor:boss",
+          "partId": "body",
+          "point": {
+            "x": 242.00000056902877,
+            "y": 5.866160291052419,
+            "z": -10.11283511826217
+          },
+          "distance": 0.5749745932550476
+        },
+        "physicsReady": true
+      }
+    }
+  ],
+  "errors": [
+    "additions-weapon: page.waitForFunction: Timeout 12000ms exceeded.\n    at waitFor (/workspace/feral-voxel-sandbox/tools/verify-expedition-additions.mjs:294:14)\n    at attackOnceUntil (/workspace/feral-voxel-sandbox/tools/verify-expedition-additions.mjs:320:11)\n    at async runWeaponScenario (/workspace/feral-voxel-sandbox/tools/verify-expedition-additions.mjs:391:3)\n    at async runScenario (/workspace/feral-voxel-sandbox/tools/verify-expedition-additions.mjs:767:5)\n    at async file:///workspace/feral-voxel-sandbox/tools/verify-expedition-additions.mjs:799:5"
+  ],
+  "consoleErrors": [
+    {
+      "text": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "location": {
+        "url": "http://127.0.0.1:43743/favicon.ico",
+        "line": 0,
+        "column": 0,
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    }
+  ],
+  "failedRequests": [],
+  "startedAt": "2026-10-17T16:34:09.427Z",
+  "selectedScenarios": [
+    "additions-weapon"
+  ],
+  "updatedAt": "2026-10-17T16:35:35.571Z",
+  "finishedAt": "2026-10-17T16:35:35.300Z",
+  "ok": false
+}

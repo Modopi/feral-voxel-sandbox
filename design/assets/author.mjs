@@ -88,7 +88,7 @@ async function fetchAsset(id,trail=[]){
 }
 function validateDocument(data){
   if(!data||data.schemaVersion!==1||data.status!=='art_prototype'||data.units!=='m'||data.upAxis!=='Y'||data.forwardAxis!=='+Z')throw Error('FERAL 복셀 에셋 v1 JSON을 선택하세요.');
-  if(typeof data.id!=='string'||!/^[A-Za-z0-9_-]+$/.test(data.id)||typeof data.name!=='string'||!data.name.trim()||!['creature','boss','structure','environment'].includes(data.category)||!Number.isFinite(data.visualGridM)||data.visualGridM<=0)throw Error('에셋 이름·ID·분류·격자 정보가 올바르지 않습니다.');
+  if(typeof data.id!=='string'||!/^[A-Za-z0-9_-]+$/.test(data.id)||typeof data.name!=='string'||!data.name.trim()||!['creature','boss','structure','environment','equipment'].includes(data.category)||!Number.isFinite(data.visualGridM)||data.visualGridM<=0)throw Error('에셋 이름·ID·분류·격자 정보가 올바르지 않습니다.');
   for(const key of ['materials','parts','anchors','instances','notes'])if(!Array.isArray(data[key]))throw Error(`필수 목록이 없습니다: ${key}`);
   if(!data.contentRef||data.contentRef.id!==data.id||typeof data.contentRef.file!=='string')throw Error('콘텐츠 원본 참조가 올바르지 않습니다.');
   const ids=new Set();for(const m of data.materials){if(typeof m.id!=='string'||!m.id||ids.has(m.id)||!/^#[0-9a-fA-F]{6}$/.test(m.color))throw Error('재질 ID 또는 색상이 올바르지 않습니다.');ids.add(m.id);for(const key of ['roughness','metallic','opacity'])if(!Number.isFinite(m[key])||m[key]<0||m[key]>1)throw Error('재질 수치 범위가 올바르지 않습니다.');if(!Number.isFinite(m.emission)||m.emission<0||m.emission>5)throw Error('발광 표현 수치 범위가 올바르지 않습니다.');}
@@ -145,7 +145,7 @@ window.addEventListener('keydown',e=>{if(e.target instanceof HTMLInputElement||e
 window.addEventListener('beforeunload',e=>{if(revision>savedRevision||[...drafts.entries()].some(([id,d])=>id!==current?.id&&d.revision>(d.savedRevision||0))){e.preventDefault();e.returnValue='';}});
 try{
   const response=await fetch('manifest.json');if(!response.ok)throw Error('에셋 목록을 불러오지 못했습니다. HTTP 서버로 이 페이지를 열어 주세요.');const data=await response.json();
-  const labels={creature:'생명체',boss:'보스',structure:'건축물',environment:'환경'};
+  const labels={creature:'생명체',boss:'보스',structure:'건축물',environment:'환경',equipment:'도구·설비·장비'};
   for(const e of data.entries){manifestEntries.set(e.id,e);$('asset').add(option(e.id,`${labels[e.category]} · ${e.name}`));}
   $('asset').disabled=false;const q=new URLSearchParams(location.search).get('asset'),id=manifestEntries.has(q)?q:data.entries[0].id;await openAsset(await fetchAsset(id));
 }catch(e){status(`제작 도구를 준비하지 못했습니다. ${errorMessage(e)}`,'error');}

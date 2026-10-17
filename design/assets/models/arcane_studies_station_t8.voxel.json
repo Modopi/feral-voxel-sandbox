@@ -1,0 +1,1803 @@
+{
+  "schemaVersion": 1,
+  "id": "arcane_studies_station_t8",
+  "name": "8티어 마나육성 설비",
+  "category": "equipment",
+  "contentRef": {
+    "file": "design/content/progression.json",
+    "id": "arcane_studies_station_t8"
+  },
+  "status": "art_prototype",
+  "units": "m",
+  "upAxis": "Y",
+  "forwardAxis": "+Z",
+  "visualGridM": 0.03125,
+  "materials": [
+    {
+      "id": "body",
+      "color": "#8DADB7",
+      "roughness": 0.88,
+      "metallic": 0.65,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true,
+      "sourceMaterialId": "steel"
+    },
+    {
+      "id": "dark",
+      "color": "#343F45",
+      "roughness": 0.88,
+      "metallic": 0.45,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "edge",
+      "color": "#C4CDD0",
+      "roughness": 0.45,
+      "metallic": 0.8,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "wood",
+      "color": "#91643E",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true,
+      "blockId": "log"
+    },
+    {
+      "id": "stone",
+      "color": "#8A8C83",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true,
+      "blockId": "stone"
+    },
+    {
+      "id": "copper",
+      "color": "#B47B4F",
+      "roughness": 0.88,
+      "metallic": 0.75,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "cloth",
+      "color": "#686D4C",
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "mana",
+      "color": "#6DAFAE",
+      "roughness": 0.35,
+      "metallic": 0,
+      "emission": 0.12,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "sacred",
+      "color": "#CAB879",
+      "roughness": 0.45,
+      "metallic": 0.5,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "physics",
+      "color": "#7487BF",
+      "roughness": 0.88,
+      "metallic": 0.65,
+      "emission": 0,
+      "opacity": 1,
+      "collision": true
+    },
+    {
+      "id": "glass",
+      "color": "#A0CBCD",
+      "roughness": 0.2,
+      "metallic": 0,
+      "emission": 0,
+      "opacity": 0.7,
+      "collision": true,
+      "blockId": "glass"
+    }
+  ],
+  "parts": [
+    {
+      "id": "root",
+      "parent": null,
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "root",
+      "boxes": []
+    },
+    {
+      "id": "frame",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "station_frame",
+      "boxes": [
+        {
+          "center": [
+            -1.25,
+            0.375,
+            -0.75
+          ],
+          "size": [
+            0.125,
+            0.75,
+            0.125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -1.25,
+            0.375,
+            0.75
+          ],
+          "size": [
+            0.125,
+            0.75,
+            0.125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            1.25,
+            0.375,
+            -0.75
+          ],
+          "size": [
+            0.125,
+            0.75,
+            0.125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            1.25,
+            0.375,
+            0.75
+          ],
+          "size": [
+            0.125,
+            0.75,
+            0.125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            0,
+            0.8125,
+            0
+          ],
+          "size": [
+            2.75,
+            0.125,
+            1.75
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            0,
+            0.265625,
+            -0.734375
+          ],
+          "size": [
+            2.375,
+            0.09375,
+            0.09375
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            0,
+            0.265625,
+            0.765625
+          ],
+          "size": [
+            2.375,
+            0.09375,
+            0.09375
+          ],
+          "material": "dark"
+        }
+      ]
+    },
+    {
+      "id": "work_surface",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "work_surface",
+      "boxes": [
+        {
+          "center": [
+            0,
+            0.90625,
+            0
+          ],
+          "size": [
+            2.625,
+            0.0625,
+            1.625
+          ],
+          "material": "body"
+        },
+        {
+          "center": [
+            -0.5,
+            0.96875,
+            -0.296875
+          ],
+          "size": [
+            0.1875,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.5,
+            0.96875,
+            -0.265625
+          ],
+          "size": [
+            0.3125,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.5,
+            0.96875,
+            -0.234375
+          ],
+          "size": [
+            0.4375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.671875,
+            0.96875,
+            -0.203125
+          ],
+          "size": [
+            0.15625,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.328125,
+            0.96875,
+            -0.203125
+          ],
+          "size": [
+            0.15625,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.6875,
+            0.96875,
+            -0.171875
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.3125,
+            0.96875,
+            -0.171875
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.71875,
+            0.96875,
+            -0.140625
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.28125,
+            0.96875,
+            -0.140625
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.734375,
+            0.96875,
+            -0.109375
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.265625,
+            0.96875,
+            -0.109375
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.765625,
+            0.96875,
+            -0.078125
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.234375,
+            0.96875,
+            -0.078125
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.765625,
+            0.96875,
+            -0.046875
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.234375,
+            0.96875,
+            -0.046875
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.765625,
+            0.96875,
+            -0.015625
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.234375,
+            0.96875,
+            -0.015625
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.765625,
+            0.96875,
+            0.015625
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.234375,
+            0.96875,
+            0.015625
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.765625,
+            0.96875,
+            0.046875
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.234375,
+            0.96875,
+            0.046875
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.765625,
+            0.96875,
+            0.078125
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.234375,
+            0.96875,
+            0.078125
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.734375,
+            0.96875,
+            0.109375
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.265625,
+            0.96875,
+            0.109375
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.71875,
+            0.96875,
+            0.140625
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.28125,
+            0.96875,
+            0.140625
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.6875,
+            0.96875,
+            0.171875
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.3125,
+            0.96875,
+            0.171875
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.671875,
+            0.96875,
+            0.203125
+          ],
+          "size": [
+            0.15625,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.328125,
+            0.96875,
+            0.203125
+          ],
+          "size": [
+            0.15625,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.5,
+            0.96875,
+            0.234375
+          ],
+          "size": [
+            0.4375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.5,
+            0.96875,
+            0.265625
+          ],
+          "size": [
+            0.3125,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            -0.5,
+            0.96875,
+            0.296875
+          ],
+          "size": [
+            0.1875,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.5,
+            0.96875,
+            -0.296875
+          ],
+          "size": [
+            0.1875,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.5,
+            0.96875,
+            -0.265625
+          ],
+          "size": [
+            0.3125,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.5,
+            0.96875,
+            -0.234375
+          ],
+          "size": [
+            0.4375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.328125,
+            0.96875,
+            -0.203125
+          ],
+          "size": [
+            0.15625,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.671875,
+            0.96875,
+            -0.203125
+          ],
+          "size": [
+            0.15625,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.3125,
+            0.96875,
+            -0.171875
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.6875,
+            0.96875,
+            -0.171875
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.28125,
+            0.96875,
+            -0.140625
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.71875,
+            0.96875,
+            -0.140625
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.265625,
+            0.96875,
+            -0.109375
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.734375,
+            0.96875,
+            -0.109375
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.234375,
+            0.96875,
+            -0.078125
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.765625,
+            0.96875,
+            -0.078125
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.234375,
+            0.96875,
+            -0.046875
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.765625,
+            0.96875,
+            -0.046875
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.234375,
+            0.96875,
+            -0.015625
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.765625,
+            0.96875,
+            -0.015625
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.234375,
+            0.96875,
+            0.015625
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.765625,
+            0.96875,
+            0.015625
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.234375,
+            0.96875,
+            0.046875
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.765625,
+            0.96875,
+            0.046875
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.234375,
+            0.96875,
+            0.078125
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.765625,
+            0.96875,
+            0.078125
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.265625,
+            0.96875,
+            0.109375
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.734375,
+            0.96875,
+            0.109375
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.28125,
+            0.96875,
+            0.140625
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.71875,
+            0.96875,
+            0.140625
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.3125,
+            0.96875,
+            0.171875
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.6875,
+            0.96875,
+            0.171875
+          ],
+          "size": [
+            0.125,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.328125,
+            0.96875,
+            0.203125
+          ],
+          "size": [
+            0.15625,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.671875,
+            0.96875,
+            0.203125
+          ],
+          "size": [
+            0.15625,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.5,
+            0.96875,
+            0.234375
+          ],
+          "size": [
+            0.4375,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.5,
+            0.96875,
+            0.265625
+          ],
+          "size": [
+            0.3125,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0.5,
+            0.96875,
+            0.296875
+          ],
+          "size": [
+            0.1875,
+            0.0625,
+            0.03125
+          ],
+          "material": "copper"
+        },
+        {
+          "center": [
+            0,
+            0.96875,
+            0.90625
+          ],
+          "size": [
+            0.625,
+            0.1875,
+            0.125
+          ],
+          "material": "dark"
+        },
+        {
+          "center": [
+            -0.25,
+            1,
+            0.984375
+          ],
+          "size": [
+            0.0625,
+            0.0625,
+            0.03125
+          ],
+          "material": "mana"
+        },
+        {
+          "center": [
+            -0.125,
+            1,
+            0.984375
+          ],
+          "size": [
+            0.0625,
+            0.0625,
+            0.03125
+          ],
+          "material": "mana"
+        },
+        {
+          "center": [
+            0,
+            1,
+            0.984375
+          ],
+          "size": [
+            0.0625,
+            0.0625,
+            0.03125
+          ],
+          "material": "mana"
+        }
+      ]
+    },
+    {
+      "id": "growth_chamber",
+      "parent": "root",
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "role": "growth_chamber",
+      "boxes": [
+        {
+          "center": [
+            -1.109375,
+            1.625,
+            -0.609375
+          ],
+          "size": [
+            0.09375,
+            1.375,
+            0.09375
+          ],
+          "material": "wood"
+        },
+        {
+          "center": [
+            -1.109375,
+            1.625,
+            0.640625
+          ],
+          "size": [
+            0.09375,
+            1.375,
+            0.09375
+          ],
+          "material": "wood"
+        },
+        {
+          "center": [
+            1.140625,
+            1.625,
+            -0.609375
+          ],
+          "size": [
+            0.09375,
+            1.375,
+            0.09375
+          ],
+          "material": "wood"
+        },
+        {
+          "center": [
+            1.140625,
+            1.625,
+            0.640625
+          ],
+          "size": [
+            0.09375,
+            1.375,
+            0.09375
+          ],
+          "material": "wood"
+        },
+        {
+          "center": [
+            -1.1875,
+            2.28125,
+            0
+          ],
+          "size": [
+            0.0625,
+            0.0625,
+            1.4375
+          ],
+          "material": "glass"
+        },
+        {
+          "center": [
+            0.015625,
+            2.28125,
+            0
+          ],
+          "size": [
+            2.15625,
+            0.0625,
+            1.4375
+          ],
+          "material": "glass"
+        },
+        {
+          "center": [
+            1.203125,
+            2.28125,
+            0
+          ],
+          "size": [
+            0.03125,
+            0.0625,
+            1.4375
+          ],
+          "material": "glass"
+        },
+        {
+          "center": [
+            1.140625,
+            2.28125,
+            -0.6875
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.0625
+          ],
+          "material": "glass"
+        },
+        {
+          "center": [
+            1.140625,
+            2.28125,
+            0.015625
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            1.15625
+          ],
+          "material": "glass"
+        },
+        {
+          "center": [
+            1.140625,
+            2.28125,
+            0.703125
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "glass"
+        },
+        {
+          "center": [
+            -1.109375,
+            2.28125,
+            -0.6875
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.0625
+          ],
+          "material": "glass"
+        },
+        {
+          "center": [
+            -1.109375,
+            2.28125,
+            0.015625
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            1.15625
+          ],
+          "material": "glass"
+        },
+        {
+          "center": [
+            -1.109375,
+            2.28125,
+            0.703125
+          ],
+          "size": [
+            0.09375,
+            0.0625,
+            0.03125
+          ],
+          "material": "glass"
+        },
+        {
+          "center": [
+            0,
+            1.40625,
+            0
+          ],
+          "size": [
+            0.1875,
+            0.9375,
+            0.1875
+          ],
+          "material": "wood"
+        },
+        {
+          "center": [
+            0.234375,
+            1.265625,
+            0
+          ],
+          "size": [
+            0.28125,
+            0.09375,
+            0.125
+          ],
+          "material": "wood"
+        },
+        {
+          "center": [
+            0.453125,
+            1.34375,
+            0
+          ],
+          "size": [
+            0.15625,
+            0.125,
+            0.3125
+          ],
+          "material": "mana"
+        },
+        {
+          "center": [
+            0.265625,
+            1.359375,
+            0
+          ],
+          "size": [
+            0.21875,
+            0.09375,
+            0.3125
+          ],
+          "material": "mana"
+        },
+        {
+          "center": [
+            0.265625,
+            1.296875,
+            -0.109375
+          ],
+          "size": [
+            0.21875,
+            0.03125,
+            0.09375
+          ],
+          "material": "mana"
+        },
+        {
+          "center": [
+            0.265625,
+            1.296875,
+            0.109375
+          ],
+          "size": [
+            0.21875,
+            0.03125,
+            0.09375
+          ],
+          "material": "mana"
+        },
+        {
+          "center": [
+            -0.234375,
+            1.390625,
+            0
+          ],
+          "size": [
+            0.28125,
+            0.09375,
+            0.125
+          ],
+          "material": "wood"
+        },
+        {
+          "center": [
+            -0.453125,
+            1.46875,
+            0
+          ],
+          "size": [
+            0.15625,
+            0.125,
+            0.3125
+          ],
+          "material": "mana"
+        },
+        {
+          "center": [
+            -0.265625,
+            1.484375,
+            0
+          ],
+          "size": [
+            0.21875,
+            0.09375,
+            0.3125
+          ],
+          "material": "mana"
+        },
+        {
+          "center": [
+            -0.265625,
+            1.421875,
+            -0.109375
+          ],
+          "size": [
+            0.21875,
+            0.03125,
+            0.09375
+          ],
+          "material": "mana"
+        },
+        {
+          "center": [
+            -0.265625,
+            1.421875,
+            0.109375
+          ],
+          "size": [
+            0.21875,
+            0.03125,
+            0.09375
+          ],
+          "material": "mana"
+        },
+        {
+          "center": [
+            0.234375,
+            1.515625,
+            0
+          ],
+          "size": [
+            0.28125,
+            0.09375,
+            0.125
+          ],
+          "material": "wood"
+        },
+        {
+          "center": [
+            0.453125,
+            1.59375,
+            0
+          ],
+          "size": [
+            0.15625,
+            0.125,
+            0.3125
+          ],
+          "material": "mana"
+        },
+        {
+          "center": [
+            0.265625,
+            1.609375,
+            0
+          ],
+          "size": [
+            0.21875,
+            0.09375,
+            0.3125
+          ],
+          "material": "mana"
+        },
+        {
+          "center": [
+            0.265625,
+            1.546875,
+            -0.109375
+          ],
+          "size": [
+            0.21875,
+            0.03125,
+            0.09375
+          ],
+          "material": "mana"
+        },
+        {
+          "center": [
+            0.265625,
+            1.546875,
+            0.109375
+          ],
+          "size": [
+            0.21875,
+            0.03125,
+            0.09375
+          ],
+          "material": "mana"
+        },
+        {
+          "center": [
+            -0.234375,
+            1.640625,
+            0
+          ],
+          "size": [
+            0.28125,
+            0.09375,
+            0.125
+          ],
+          "material": "wood"
+        },
+        {
+          "center": [
+            -0.453125,
+            1.71875,
+            0
+          ],
+          "size": [
+            0.15625,
+            0.125,
+            0.3125
+          ],
+          "material": "mana"
+        },
+        {
+          "center": [
+            -0.265625,
+            1.734375,
+            0
+          ],
+          "size": [
+            0.21875,
+            0.09375,
+            0.3125
+          ],
+          "material": "mana"
+        },
+        {
+          "center": [
+            -0.265625,
+            1.671875,
+            -0.109375
+          ],
+          "size": [
+            0.21875,
+            0.03125,
+            0.09375
+          ],
+          "material": "mana"
+        },
+        {
+          "center": [
+            -0.265625,
+            1.671875,
+            0.109375
+          ],
+          "size": [
+            0.21875,
+            0.03125,
+            0.09375
+          ],
+          "material": "mana"
+        },
+        {
+          "center": [
+            0.234375,
+            1.765625,
+            0
+          ],
+          "size": [
+            0.28125,
+            0.09375,
+            0.125
+          ],
+          "material": "wood"
+        },
+        {
+          "center": [
+            0.453125,
+            1.84375,
+            0
+          ],
+          "size": [
+            0.15625,
+            0.125,
+            0.3125
+          ],
+          "material": "mana"
+        },
+        {
+          "center": [
+            0.265625,
+            1.859375,
+            0
+          ],
+          "size": [
+            0.21875,
+            0.09375,
+            0.3125
+          ],
+          "material": "mana"
+        },
+        {
+          "center": [
+            0.265625,
+            1.796875,
+            -0.109375
+          ],
+          "size": [
+            0.21875,
+            0.03125,
+            0.09375
+          ],
+          "material": "mana"
+        },
+        {
+          "center": [
+            0.265625,
+            1.796875,
+            0.109375
+          ],
+          "size": [
+            0.21875,
+            0.03125,
+            0.09375
+          ],
+          "material": "mana"
+        }
+      ]
+    }
+  ],
+  "anchors": [
+    {
+      "id": "mount",
+      "partId": "frame",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "purpose": "slot:station_ground; 설치 원점"
+    },
+    {
+      "id": "work",
+      "partId": "work_surface",
+      "position": [
+        0,
+        0.9375,
+        0
+      ],
+      "purpose": "제작 작업 슬롯"
+    },
+    {
+      "id": "material_input",
+      "partId": "work_surface",
+      "position": [
+        -1.375,
+        0.9375,
+        0
+      ],
+      "purpose": "원료 투입 위치; 실제 처리량은 제작 데이터가 결정"
+    },
+    {
+      "id": "material_output",
+      "partId": "work_surface",
+      "position": [
+        1.375,
+        0.9375,
+        0
+      ],
+      "purpose": "가공품 배출 위치; 자동 생성 기능을 의미하지 않음"
+    },
+    {
+      "id": "power_input",
+      "partId": "work_surface",
+      "position": [
+        0,
+        0.5,
+        -0.875
+      ],
+      "purpose": "동력 연결 위치; 컴포넌트 기능 계약에 연결"
+    },
+    {
+      "id": "interaction",
+      "partId": "work_surface",
+      "position": [
+        0,
+        0.9375,
+        1.125
+      ],
+      "purpose": "플레이어 조작 지점"
+    }
+  ],
+  "instances": [],
+  "notes": [
+    "제작 시점 SDK가 같은 부위의 중복 점유를 차단한다. 의도된 합집합은 fill, 재질 덧칠은 paint로 즉시 처리한다. 사후 중복 제거를 하지 않는다.",
+    "시각 모델의 외형·앵커는 설치와 장착의 기준이다. 기능·에너지 입출력·내구·질량·실제 용량은 progression 데이터와 런타임 계약을 사용한다.",
+    "부위의 parent/translation을 보존하며 같은 소유자에 속한 장구·관절 부위는 자기 충돌을 하지 않는다."
+  ],
+  "collision": {
+    "enabled": true,
+    "ownerScope": "entity_instance",
+    "selfCollision": false,
+    "externalCollision": true,
+    "shape": "part_cuboid_compound",
+    "jointOverlapAllowed": true
+  },
+  "geometry": {
+    "authoringTool": "feral_voxel_builder_v1",
+    "occupancy": "exclusive_within_part",
+    "independentPartOverlap": "preserve_joint_allowance",
+    "surfaceMeshing": "remove_shared_same_medium_or_opaque_faces_within_part"
+  },
+  "equipmentKind": "station",
+  "tier": 8,
+  "sourceRecipeId": "build_arcane_studies_station_t8",
+  "referenceMaterialId": "steel",
+  "visualDimensionsPolicy": "Station frame grows by tier; dimensions are visual design, not implicit crafting capacity or mass."
+}

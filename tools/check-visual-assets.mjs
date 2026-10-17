@@ -9,7 +9,7 @@ import { exportGlb } from './asset-pipeline/glb.mjs';
 // Read-only reproducibility gate: never rebuild over the evidence being checked.
 const root = fileURLToPath(new URL('../', import.meta.url));
 const directory = path.join(root, 'design/assets');
-const kinds = [['creatures', 'creature'], ['bosses', 'boss'], ['structures', 'structure'], ['environments', 'environment']];
+const kinds = [['creatures', 'creature'], ['bosses', 'boss'], ['structures', 'structure'], ['environments', 'environment'], ['equipment', 'equipment']];
 const jsonBytes = value => Buffer.from(JSON.stringify(value, null, 2) + '\n');
 const hash = bytes => createHash('sha256').update(bytes).digest('hex');
 const fail = message => { throw new Error(message); };
@@ -29,14 +29,15 @@ function checkAuthoredHeader(asset, generated) {
 }
 
 try {
-  const content = Object.fromEntries(await Promise.all([...kinds.map(([name]) => name), 'blocks'].map(async name => [
+  const content = Object.fromEntries(await Promise.all(['creatures', 'bosses', 'structures', 'environments', 'blocks', 'progression'].map(async name => [
     name, JSON.parse(await fs.readFile(path.join(root, `design/content/${name}.json`), 'utf8')),
   ])));
   const assets = [];
   for (const [name, category] of kinds) {
     const { generate } = await import(new URL(`../design/assets/generators/${name}.mjs`, import.meta.url));
     const generated = generate(content);
-    const expected = new Set(content[name].entries.map(entry => entry.id));
+    const entries = name === 'equipment' ? content.progression.entries.filter(e => ['tool', 'station', 'component', 'gear_baseline', 'weapon_pattern'].includes(e.kind)) : content[name].entries;
+    const expected = new Set(entries.map(entry => entry.id));
     for (const asset of generated) {
       if (!/^[a-z0-9_-]+$/.test(asset.id) || !expected.delete(asset.id) || asset.category !== category) {
         fail(`${name}: unexpected or duplicate generated asset ${asset.id}`);

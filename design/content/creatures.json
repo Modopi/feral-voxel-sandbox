@@ -8,7 +8,7 @@
     "initialCalorieSampling": "초기 생성시 max×initialFraction, 무작위 아님. 출생은 newbornCalorieFraction, 로드는 저장값 유지",
     "regenRule": "HP 부족 AND (피격 후 regenDelayS 경과 OR 안전 휴식 중); 당 프레임 피격은 회복을 중단. minReserve 이상 CP만 사용. restMultiplier는 HP 회복 속도에 적용하고 비용/HP는 동일. HP 회복은 끊어진 복셀·골격을 재생하지 않음",
     "regenEquation": "heal=max(0,min(missingHP,regenHpPerS*dt*restMultiplierIfRest,(calories-maxCp*minimumReserveFraction)/regenCpPerHp)); calories-=heal*regenCpPerHp",
-    "structuralRule": "외피·골격 HP는 개체HP와 합산하지 않음. 한 충격은 전달 모델로 각 층에 분배하고 총 전달 예산을 초과해 중복차감하지 않음. core/vital 연결 파괴시 개체HP와 무관하게 사망; 세부 hit adapter 구현 필요",
+    "structuralRule": "전체 HP가 0일 때만 사망. 외피 유효 타격도 방어 후 전체 HP에 한 번 누적. 골격·기관 파손은 행동과 기능을 바꾸며 core/vital 파괴만으로 강제 사망하지 않음. 관통·충격의 내부 구조 손상은 같은 공격의 유한 피해·에너지 예산으로 분배; 전체 HP 중복 차감 금지",
     "tierScaling": {
       "hpPerTierMultiplier": 1.35,
       "damagePerTierMultiplier": 1.2,
@@ -72,7 +72,7 @@
         0.55,
         1
       ],
-      "effect": "3다리 절뚝임, 2다리 대각지지이면0.22/그외0.12; 머리 연결 또는 척추 파괴 시 사망; 꼬리 손상은 회전속도0.8"
+      "effect": "3다리 절뚝임, 2다리 대각지지이면0.22/그외0.12; 머리 연결 또는 척추 파괴 시 공격·섭식·이동 기능 저하; 전체 HP가 0일 때만 사망; 꼬리 손상은 회전속도0.8"
     },
     "arthropod": {
       "name": "절지",
@@ -4279,7 +4279,7 @@
         "reproductionCalorieFraction": null,
         "foodAvailabilityFraction": 0.4,
         "newbornCalorieFraction": null,
-        "replacementRule": "핵심이 살아있는 기존 개체를 정비; 사망 개체 재생성 없음",
+        "replacementRule": "전체 HP가 남은 기존 개체를 정비; 골격 기능 복구는 별도 부위 수리이며 사망 개체 재생성 없음",
         "dungeonGroupMin": 1,
         "dungeonGroupMax": 2
       },
@@ -4831,7 +4831,7 @@
         "reproductionCalorieFraction": null,
         "foodAvailabilityFraction": 0.4,
         "newbornCalorieFraction": null,
-        "replacementRule": "핵심이 살아있는 기존 개체를 정비; 사망 개체 재생성 없음",
+        "replacementRule": "전체 HP가 남은 기존 개체를 정비; 골격 기능 복구는 별도 부위 수리이며 사망 개체 재생성 없음",
         "dungeonGroupMin": 1,
         "dungeonGroupMax": 2
       },

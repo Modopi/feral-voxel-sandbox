@@ -1,0 +1,18 @@
+{
+  "version": "0.11.0",
+  "versionCode": 1100,
+  "nativeVersion": "0.3.3",
+  "nativeCode": 303,
+  "minNativeCode": 303,
+  "saveSchema": 2,
+  "archiveBytes": 2781642,
+  "expandedBytes": 11469147,
+  "archiveSha256": "f285230b77f01291b2d47b96590760e20dcb8dd38fd9f2a532fd0a092ba87c3a",
+  "nativeSha256": "946352359b7a7f8e664e6be24c58d232d8822be9b54dd15ed5b33278a379d548",
+  "fileCount": 118,
+  "packageBytes": 3724239,
+  "packageSha256": "c8606cca2dd550a749b1aec073b64eeadd52412e61f209e07416e3a5aa763abd",
+  "allFileHashesVerified": true,
+  "apkEmbeddedAssetsMatchPackage": true,
+  "apkSha256": "50ba6dc8a7344ab6cfd5b16957e4e1352122ddd285c3300fae169e73ba4819b1"
+}
