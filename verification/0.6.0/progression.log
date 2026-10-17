@@ -1,0 +1,131 @@
+FLOOR {"footRange":0,"cameraRange":0,"eye":1.3599999999999994}
+MINE_PICKUP {"before":16,"after":25,"coarseRemoved":true,"halfRemoved":true,"neighborIntact":true,"collected":10}
+COMBAT {"fragments":6,"collected":2}
+BUILD {"before":25,"after":24,"placed":2,"size":0.5}
+{
+  "floor": {
+    "footRange": 0,
+    "cameraRange": 0,
+    "eye": 1.3599999999999994
+  },
+  "mining": {
+    "before": 16,
+    "after": 25,
+    "coarseRemoved": true,
+    "halfRemoved": true,
+    "neighborIntact": true,
+    "collected": 10
+  },
+  "combat": {
+    "fragments": 6,
+    "collected": 2
+  },
+  "hammer": {
+    "owned": true,
+    "size": 0.5
+  },
+  "building": {
+    "before": 25,
+    "after": 24,
+    "placed": 2,
+    "size": 0.5
+  },
+  "beforeSave": {
+    "dirt": 24,
+    "plank": 0,
+    "subcells": 17,
+    "inventory": {
+      "items": {
+        "pick": 1,
+        "pulse": 1,
+        "dirt": 24,
+        "wood": 2,
+        "stone": 4,
+        "seed": 5,
+        "bio": 2
+      },
+      "unlocks": [
+        "hammer"
+      ],
+      "equipment": {
+        "weapon": "pulse",
+        "tool": "pick"
+      },
+      "wear": {},
+      "slots": [
+        {
+          "id": "pick",
+          "count": 1
+        },
+        {
+          "id": "pulse",
+          "count": 1
+        },
+        {
+          "id": "dirt",
+          "count": 24
+        },
+        {
+          "id": "wood",
+          "count": 2
+        },
+        {
+          "id": "stone",
+          "count": 4
+        },
+        {
+          "id": "seed",
+          "count": 5
+        },
+        null,
+        {
+          "id": "bio",
+          "count": 2
+        },
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "selectedSlot": 2,
+      "overflow": []
+    }
+  },
+  "restored": {
+    "dirt": 24,
+    "plank": 0,
+    "subcells": 17,
+    "hammer": true,
+    "cell": 2
+  },
+  "legacy": {
+    "running": true,
+    "dirt": 16,
+    "finite": true
+  },
+  "errors": []
+}

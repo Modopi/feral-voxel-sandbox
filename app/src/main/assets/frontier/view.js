@@ -2,6 +2,7 @@ import { activeGear, gearId } from "../equipment.js";
 import { itemArt } from "../item-art.js";
 import { T } from "../render.js";
 import { FACTIONS } from "./model.js";
+import { AssemblyView } from "./assembly-view.js";
 import { FrontierMotion } from "./motion.js";
 import { evaluate, TYPES } from "../machine/model.js";
 const $ = (id) => document.getElementById(id);
@@ -15,7 +16,8 @@ const escape = (s) =>
   );
 const distance = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 const avatar = `<div class="voxelAvatar" aria-hidden="true"><i class="head"></i><i class="body"></i><i class="arm a"></i><i class="arm b"></i><i class="leg a"></i><i class="leg b"></i></div>`;
-const pips = (kind) => `<div class="pipTrack ${kind}" aria-hidden="true">${"<i><b></b></i>".repeat(10)}</div>`;
+const pips = (kind) =>
+  `<div class="pipTrack ${kind}" aria-hidden="true">${"<i><b></b></i>".repeat(10)}</div>`;
 function fillPips(track, value) {
   const amount = Math.ceil(Math.max(0, Math.min(100, value)) / 5);
   if (track.dataset.amount === String(amount)) return;
@@ -28,6 +30,7 @@ export class FrontierView {
   constructor(ctx) {
     this.c = ctx;
     this.motion = new FrontierMotion(ctx);
+    this.assembly = new AssemblyView(ctx, this.motion);
     this.tab = "map";
     this.waypoint = null;
     this.revision = -1;
@@ -61,9 +64,9 @@ export class FrontierView {
       .forEach((b) => (b.onclick = () => this.open(b.dataset.frontierTab)));
     panel.addEventListener("keydown", (e) => {
       if (e.key !== "Tab") return;
-      const buttons = [...panel.querySelectorAll("button, select, summary")].filter(
-        (e) => !e.disabled && e.offsetParent,
-      );
+      const buttons = [
+        ...panel.querySelectorAll("button, select, summary"),
+      ].filter((e) => !e.disabled && e.offsetParent);
       const first = buttons[0],
         last = buttons.at(-1);
       if (e.shiftKey && document.activeElement === first) {
@@ -172,7 +175,7 @@ export class FrontierView {
       1,
       0x71d6cb,
     );
-    this.vehicle = new T.Group();
+    this.vehicle = this.assembly.group;
     this.group.add(this.vehicle);
     this.support = new T.Group();
     this.group.add(this.support);
@@ -222,45 +225,13 @@ export class FrontierView {
       world.surface(b.x + 7, b.z + 4),
       b.z + 4,
     );
-    if (s.machine && this.revision !== s.machine.revision) {
-      this.vehicle.clear();
-      for (const part of s.machine.blueprint) {
-        const hp = s.machine.hp[part.id] / TYPES[part.type].hp;
-        if (hp <= 0) continue;
-        const color = new T.Color(TYPES[part.type].color)
-          .multiplyScalar(0.4 + hp * 0.6)
-          .getHex();
-        this.box(
-          this.vehicle,
-          part.x * 0.5,
-          part.y * 0.5 + 0.25,
-          part.z * 0.5,
-          part.type === "rotor" ? 1.2 : 0.47,
-          part.type === "rotor" ? 0.12 : 0.47,
-          0.47,
-          color,
-        );
-        if (part.type === "cannon")
-          this.box(
-            this.vehicle,
-            part.x * 0.5,
-            part.y * 0.5 + 0.3,
-            part.z * 0.5 - 0.55,
-            0.18,
-            0.18,
-            0.9,
-            0x625d4d,
-          );
-      }
-      this.revision = s.machine.revision;
-    }
-    this.vehicle.visible = !!s.machine;
-    this.vehicle.position.set(
-      s.riding ? p.x : 77.5,
-      s.riding ? p.y : world.surface(77.5, 87.5),
-      s.riding ? p.z : 87.5,
-    );
-    this.vehicle.rotation.y = s.riding ? p.yaw : 0;
+    this.assembly.draw();
+  }
+  assemblyUse(intent, held, block, entityDistance) {
+    return this.assembly.use(intent, held, block, entityDistance);
+  }
+  assemblyAim(held, block, entityDistance) {
+    return this.assembly.aim(held, block, entityDistance);
   }
   beforeStep(input, dt) {
     return this.motion.beforeStep(input, dt);
@@ -337,12 +308,13 @@ export class FrontierView {
     player.flying = s.airborne;
     this.c.toast(
       s.airborne
-        ? "간이 비행 · 점프로 상승 / Q로 하강 / 시선 방향으로 이동"
+        ? "회전익 작동 · 점프로 상승 / Q로 하강 / 이동으로 추진·조향"
         : "비행 해제 · 착륙",
     );
   }
   interact() {
     const { model: s, player: p } = this.c;
+    if (this.assembly.ride()) return;
     const village = s.region.villages.find((v) => distance(p, v) < 12);
     if (village) {
       this.open("society");
@@ -368,7 +340,7 @@ export class FrontierView {
       `체력 ${Math.ceil(s.hp)} / ${s.maxHP} · Lv.${s.level}`;
     $("health").max = s.maxHP;
     $("health").value = s.hp;
-    fillPips($("vitals").querySelector(".hearts"), s.hp / s.maxHP * 100);
+    fillPips($("vitals").querySelector(".hearts"), (s.hp / s.maxHP) * 100);
     fillPips($("vitals").querySelector(".hunger"), s.hunger);
     $("levelHUD").textContent = s.level;
     $("experienceHUD").value = s.xp % 80;
@@ -376,8 +348,7 @@ export class FrontierView {
       `포만 ${Math.ceil(s.hunger)} · ${s.riding ? (s.airborne ? "비행 중" : "탑승 중") : "도보"}`;
     const b = s.region.boss,
       near = !b.defeated && distance(p, b) < 28;
-    const bossName =
-      `${["", "이끼 수호자", "구리 거신", "심연 파수꾼"][s.info.tier]} · 위험 ${s.info.tier}`;
+    const bossName = `${["", "이끼 수호자", "구리 거신", "심연 파수꾼"][s.info.tier]} · 위험 ${s.info.tier}`;
     const bossWarning =
       b.warning > 0
         ? "충격파! 붉은 원 밖으로 피하세요"
@@ -388,12 +359,24 @@ export class FrontierView {
       this.c.view.highlight.visible = false;
       this.c.view.worldUI.set("focus", null);
     }
-    this.c.view.worldUI.set("context", near ? {
-      title: bossName,
-      detail: `HP ${Math.ceil(b.hp)} / ${b.maxHP}`, value: Math.ceil(b.hp), max: b.maxHP,
-      hint: bossWarning, color: "#f1b08f", maxDistance: 28,
-      follow: () => b.defeated ? null : { x: b.x, y: this.c.world.surface(b.x, b.z) + 2.8, z: b.z },
-    } : null);
+    this.c.view.worldUI.set(
+      "context",
+      near
+        ? {
+            title: bossName,
+            detail: `HP ${Math.ceil(b.hp)} / ${b.maxHP}`,
+            value: Math.ceil(b.hp),
+            max: b.maxHP,
+            hint: bossWarning,
+            color: "#f1b08f",
+            maxDistance: 28,
+            follow: () =>
+              b.defeated
+                ? null
+                : { x: b.x, y: this.c.world.surface(b.x, b.z) + 2.8, z: b.z },
+          }
+        : null,
+    );
     $("vitals").classList.toggle("hurt", s.hurtClock > 0);
     if (this.waypoint) {
       const dx = this.waypoint.x - p.x,
@@ -414,20 +397,37 @@ export class FrontierView {
         `${arrow} ${this.waypoint.name} · ${Math.round(distance(p, this.waypoint))} m`;
     }
     const village = s.region.villages.find((v) => distance(p, v) < 12);
-    if (village && !near) this.c.view.worldUI.set("context", {
-      title: village.name, detail: `${FACTIONS[village.faction]} · 평판 ${s.reputation[village.faction]}`,
-      hint: "사용 / R · 교역과 대화", color: "#c9db9f", maxDistance: 14, side: -1,
-      position: { x: village.x, y: this.c.world.surface(village.x, village.z) + 2.4, z: village.z },
-    });
-    $("interactBtn").firstChild.textContent = village
-      ? "교역·대화 "
-      : distance(p, s.info.dungeon) < 6
-        ? "유적 회수 "
-        : s.riding
-          ? "하차 "
-          : "상호작용 ";
-    $("interactBtn").hidden = !village && distance(p, s.info.dungeon) >= 6 &&
-      distance(p, { x: 77.5, z: 84.5 }) >= 12 && !s.riding;
+    if (village && !near)
+      this.c.view.worldUI.set("context", {
+        title: village.name,
+        detail: `${FACTIONS[village.faction]} · 평판 ${s.reputation[village.faction]}`,
+        hint: "사용 / R · 교역과 대화",
+        color: "#c9db9f",
+        maxDistance: 14,
+        side: -1,
+        position: {
+          x: village.x,
+          y: this.c.world.surface(village.x, village.z) + 2.4,
+          z: village.z,
+        },
+      });
+    $("interactBtn").firstChild.textContent = s.riding
+      ? "하차 "
+      : this.assembly.near()
+        ? "탑승 "
+        : village
+          ? "교역·대화 "
+          : distance(p, s.info.dungeon) < 6
+            ? "유적 회수 "
+            : s.riding
+              ? "하차 "
+              : "상호작용 ";
+    $("interactBtn").hidden =
+      !village &&
+      distance(p, s.info.dungeon) >= 6 &&
+      distance(p, { x: 77.5, z: 84.5 }) >= 12 &&
+      !s.riding &&
+      !this.assembly.near();
     $("biome").textContent = s.info.name;
     $("flyBtn").classList.toggle("enabled", s.airborne);
     $("flyBtn").classList.toggle(
@@ -448,13 +448,18 @@ export class FrontierView {
     $("frontierPanel").hidden = false;
     this.tab = tab;
     $("frontierPanel").dataset.page = tab;
-    $("frontierTitle").textContent = { map: "원정 지도", society: "공동체", machine: "기계 조립", journal: "캐릭터 상태" }[tab];
+    $("frontierTitle").textContent = {
+      map: "원정 지도",
+      society: "공동체",
+      machine: "기계 조립",
+      journal: "캐릭터 상태",
+    }[tab];
     $("frontierPanel")
       .querySelectorAll("[data-frontier-tab]")
-      .forEach((b) =>
-        { b.classList.toggle("active", b.dataset.frontierTab === tab);
-          b.setAttribute("aria-pressed", String(b.dataset.frontierTab === tab)); },
-      );
+      .forEach((b) => {
+        b.classList.toggle("active", b.dataset.frontierTab === tab);
+        b.setAttribute("aria-pressed", String(b.dataset.frontierTab === tab));
+      });
     this.feedback("");
     this.render();
     $("frontierContent").scrollTop = 0;
@@ -542,7 +547,8 @@ export class FrontierView {
       const wins = Object.values(s.regions).filter(
         (r) => r.boss.defeated,
       ).length;
-      const weapon = activeGear(inv, "weapon"), tool = activeGear(inv, "tool");
+      const weapon = activeGear(inv, "weapon"),
+        tool = activeGear(inv, "tool");
       const armor = inv.unlocks.has("armor");
       root.innerHTML = `<div class="characterSheet"><div class="characterFigure"><div class="characterStage ${armor ? "armored" : ""}">${avatar}<span>개척자</span></div><div class="equippedSlots"><div title="${escape(weapon.name)}">${itemArt(gearId(inv, "weapon"))}<small>무기</small></div><div title="${escape(tool.name)}">${itemArt(gearId(inv, "tool"))}<small>도구</small></div><div class="armorSlot ${armor ? "equipped" : ""}" title="${armor ? "개척 갑옷 · 피해 35% 감소" : "갑옷 미착용"}"><b>⛨</b><small>${armor ? "갑옷" : "없음"}</small></div></div></div>
       <div class="characterStats"><div class="characterName"><h3>개척자 <small>LV.</small> ${s.level}</h3><span>${s.riding ? (s.airborne ? "비행 중" : "탑승 중") : "탐험 중"}</span></div>
@@ -575,17 +581,20 @@ export class FrontierView {
         ],
       ]) {
         const button = this.button(
-            label,
-            () => {
-              const result = fn();
-              if (!$("frontierPanel").hidden) this.render();
-              return result;
-            },
-            id,
-          );
+          label,
+          () => {
+            const result = fn();
+            if (!$("frontierPanel").hidden) this.render();
+            return result;
+          },
+          id,
+        );
         button.setAttribute("aria-label", label);
-        const item = id === "eatFood" ? "food" : id === "useMedicine" ? "medicine" : null;
-        button.innerHTML = item ? `${itemArt(item)}<b class="supplyCount">${inv.count(item)}</b><small>${item === "food" ? "먹기" : "회복"}</small>` : `<b aria-hidden="true">${id === "campRest" ? "⌂" : id === "frontierBag" ? "▦" : "▣"}</b><small>${id === "campRest" ? "휴식" : id === "frontierBag" ? "가방" : "저장"}</small>`;
+        const item =
+          id === "eatFood" ? "food" : id === "useMedicine" ? "medicine" : null;
+        button.innerHTML = item
+          ? `${itemArt(item)}<b class="supplyCount">${inv.count(item)}</b><small>${item === "food" ? "먹기" : "회복"}</small>`
+          : `<b aria-hidden="true">${id === "campRest" ? "⌂" : id === "frontierBag" ? "▦" : "▣"}</b><small>${id === "campRest" ? "휴식" : id === "frontierBag" ? "가방" : "저장"}</small>`;
         if (item) button.disabled = inv.count(item) === 0;
         $("supplies").append(button);
       }
@@ -613,92 +622,15 @@ export class FrontierView {
     dialog.querySelector("button").focus();
   }
   machinePanel(root) {
-    const { model: s, inventory: inv } = this.c;
-    s.provisionMachine(inv);
-    if (!s.machine) {
-      root.innerHTML =
-        "<h3>나의 복셀 기계</h3><p>가방에서 동력 연구와 기본 차량 설계를 제작하세요.<br>연구 기록은 장소 발견·유적 탐사·마을 지원으로 얻습니다.</p>";
-      root.append(
-        this.button("가방 · 제작 열기", () => {
-          this.close();
-          this.c.openBag();
-        }),
-      );
-      return;
-    }
-    const f = evaluate(s.machine);
-    root.innerHTML = `<h3>설계도와 부품 상태 <small>합금 ${inv.count("iron")}</small></h3><p>질량 ${f.mass} · 동력 ${Math.round(f.power)} · 접지 ${Math.round(f.grip * 100)}% · 포탑 ${f.weapons.toFixed(1)} · 회전익 ${f.lift.toFixed(1)}<br>원점 차체와 면으로 연결 · 0.5m 격자 · 파괴된 부품도 설계도에는 남아 수리 가능</p>
-      <div class="frontierButtons"><select id="frontierPart" aria-label="기계 부품">${Object.entries(
-        TYPES,
-      )
-        .map(
-          ([id, t]) =>
-            `<option value="${id}">${t.label} · 합금 ${t.cost}</option>`,
-        )
-        .join(
-          "",
-        )}</select><select id="frontierLayer" aria-label="기계 층"><option value="0">0층</option><option value="1">1층</option><option value="2">2층</option></select><select id="frontierEdit" aria-label="기계 편집"><option value="add">배치</option><option value="repair">수리</option><option value="remove">제거·회수</option></select></div>
-      <div id="frontierMachineGrid" role="group" aria-label="원정 기계 조립 격자"></div><p id="partInfo"></p><div id="rideActions" class="frontierButtons"></div>
-      <p>포탑: 투사체 연구 필요 · 펄스로 조준 사격 · 돌 1개/발<br>비행: 회전익 연구 + 연결된 회전익 2개 · 탑승 후 F/비행 버튼<br>기계는 야영지에서 보관하며 조립/탑승도 야영지에서 가능합니다.</p>`;
-    const drawGrid = () => {
-      const grid = $("frontierMachineGrid");
-      grid.replaceChildren();
-      for (let z = -3; z <= 3; z++)
-        for (let x = -3; x <= 3; x++) {
-          const y = Number($("frontierLayer").value),
-            part = s.machine.blueprint.find(
-              (p) => p.x === x && p.y === y && p.z === z,
-            );
-          const b = this.button(
-            part
-              ? TYPES[part.type].label.slice(0, 1)
-              : x === 0 && z === 0
-                ? "◎"
-                : "·",
-            () => {
-              if (distance(this.c.player, { x: 77.5, z: 84.5 }) > 12)
-                return "야영지로 돌아와 조립하세요.";
-              const result = s.editMachine(
-                inv,
-                $("frontierEdit").value,
-                x,
-                y,
-                z,
-                $("frontierPart").value,
-              );
-              drawGrid();
-              $("partInfo").textContent =
-                `${result} · 합금 ${inv.count("iron")}`;
-              return result;
-            },
-          );
-          b.setAttribute(
-            "aria-label",
-            `${x},${y},${z} ${part ? TYPES[part.type].label + " HP " + Math.ceil(s.machine.hp[part.id]) : "빈 칸"}`,
-          );
-          if (part) {
-            b.style.borderColor = "#" + TYPES[part.type].color.toString(16);
-            b.classList.toggle("broken", s.machine.hp[part.id] === 0);
-          }
-          b.disabled = s.riding;
-          grid.append(b);
-        }
-    };
-    $("frontierLayer").onchange = drawGrid;
-    drawGrid();
-    $("rideActions").append(
-      this.button(
-        s.riding ? "하차" : "차량 탑승",
-        () => {
-          if (!s.riding && distance(this.c.player, { x: 77.5, z: 84.5 }) > 12)
-            return "야영지에서 탑승하세요.";
-          const r = s.toggleRide(inv);
-          if (s.riding) this.c.pause(false);
-          else this.render();
-          return r;
-        },
-        "rideVehicle",
-      ),
+    const { model: s } = this.c,
+      f = s.machine && evaluate(s.machine);
+    root.innerHTML = `<h3>월드에서 조립</h3><p>가방에서 차체·바퀴·모터를 제작해 하단 아이템 칸에 놓으세요. 차체를 바닥에 놓고, 부품을 들고 면을 조준해 사용하면 붙습니다.</p><p>렌치: 공격으로 회수, 사용으로 고정/해제<br>합금: 손상된 부품을 조준하고 사용해 수리<br>가까이에서 R / 상호작용으로 탑승·하차<br>이동으로 추진·조향, 점프로 제동. 비행 중에는 점프로 상승, Q로 하강합니다.</p>${f ? `<p>질량 ${Math.round(f.mass)} kg · 동력 ${Math.round(f.power)} · 바퀴 접지 능력 ${Math.round(f.grip * 100)}%<br>조립체 위치: ${s.machine.pose?.region || s.key} 지역 · 분리된 조각 ${s.machine.fragments?.length || 0}개</p>` : ""}`;
+    root.append(
+      this.button("월드로 돌아가기", () => this.c.pause(false)),
+      this.button("가방 · 부품 제작", () => {
+        this.close();
+        this.c.openBag();
+      }),
     );
   }
 }

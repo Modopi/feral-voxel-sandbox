@@ -1,67 +1,94 @@
-// Terrain-aware prototype vehicle rules, independent of rendering and input devices.
-import { evaluate, damage } from "../machine/model.js";
+import {
+  AssemblyPhysics,
+  initialPose,
+  worldPoint,
+} from "../machine/assembly-physics.js";
+import { evaluate } from "../machine/model.js";
 export class FrontierMotion {
   constructor(context) {
     this.c = context;
   }
+  prepare() {
+    const { model: s, inventory, world } = this.c;
+    s.provisionMachine(inventory);
+    if (this.terrain !== world) {
+      this.physics?.dispose();
+      this.physics = new AssemblyPhysics(world);
+      this.terrain = world;
+    }
+    if (s.machine && !s.machine.pose) {
+      s.machine.pose = initialPose(
+        77.5,
+        world.surface(77.5, 87.5) + 0.05,
+        87.5,
+        s.key,
+      );
+      s.machine.assembly = true;
+    }
+    return s.machine?.pose.region === s.key ? s.machine : null;
+  }
   beforeStep(input, dt) {
-    const { model: s, inventory: inv, player: p } = this.c;
-    this.oldPosition = { x: p.x, y: p.y, z: p.z };
-    s.provisionMachine(inv);
-    p.flying = !!(s.riding && s.airborne);
-    if (!s.riding) return { ...input, speedScale: 1 };
-    const f = evaluate(s.machine);
-    // Prototype vehicle motion shares the terrain collision controller. Power/mass and
-    // damaged connected components govern speed; no rigid-body suspension is implied.
-    const scale =
-      Math.min(2.5, f.power / f.mass / 2) *
-      (s.airborne ? Math.min(1, f.lift / 2) : f.grip);
-    this.speed = scale * 3.2;
-    this.vehicleMoving = Math.hypot(input.forward || 0, input.side || 0) > 0.05;
-    return {
-      ...input,
-      sprint: false,
-      jump: s.airborne && input.jump,
-      speedScale: scale,
+    const s = this.c.model,
+      machine = this.prepare();
+    this.wasRiding = s.riding;
+    this.previous = {
+      x: this.c.player.x,
+      y: this.c.player.y,
+      z: this.c.player.z,
     };
+    if (machine) {
+      if (s.riding) machine.pose.anchored = false;
+      this.physics.step(machine, dt, input, s.riding, s.airborne);
+    } else s.riding = s.airborne = false;
+    if (s.riding) this.c.player.flying = false;
+    return { ...input, speedScale: 1 };
   }
   afterStep(dt) {
-    const { model: s, inventory: inv, player: p, world } = this.c;
-    if (s.riding && this.oldPosition) {
-      const f = evaluate(s.machine),
-        radius = f.radius,
-        old = this.oldPosition;
-      let blocked = false;
-      for (const x of [-radius, 0, radius])
-        for (const z of [-radius, 0, radius]) {
-          const xx = Math.floor(p.x + x),
-            zz = Math.floor(p.z + z);
-          if (xx < 1 || zz < 1 || xx > 158 || zz > 158) blocked = true;
-          const floor = world.surface(xx, zz);
-          if (!s.airborne && floor > old.y + 1.1) blocked = true;
-          if (s.airborne && world.get(xx, Math.floor(p.y + 0.5), zz))
-            blocked = true;
-        }
-      if (blocked) {
-        p.x = old.x;
-        p.z = old.z;
-        if (s.airborne) p.y = old.y;
-        if (
-          (this.collisionClock || 0) <= s.time &&
-          this.speed > 2 &&
-          this.vehicleMoving
-        ) {
-          const part =
-            s.machine.blueprint.find(
-              (v) => s.machine.hp[v.id] > 0 && v.type === "wheel",
-            ) || s.machine.blueprint[0];
-          if (part) damage(s.machine, part.id, 3);
-          this.collisionClock = s.time + 1;
-        }
+    const { model: s, inventory, player: p } = this.c;
+    if (
+      !s.riding &&
+      s.machine?.pose.region === s.key &&
+      this.previous &&
+      !p.flying
+    )
+      this.physics.moveCharacter(this.previous, p);
+    if (s.riding && s.machine?.pose) {
+      const seat = worldPoint(s.machine.pose, { x: 0, y: 1.05, z: 0 });
+      Object.assign(p, seat, { vy: 0, grounded: false });
+    }
+    const event = s.tick(dt, p, inventory);
+    if (this.wasRiding && !s.riding && event !== "respawn") this.dismount();
+    return event;
+  }
+  dismount() {
+    const { model: s, world, player: p } = this.c;
+    if (!s.machine?.pose) return;
+    const radius = evaluate(s.machine).radius + 0.8;
+    for (const [x, z] of [
+      [radius, 0],
+      [-radius, 0],
+      [0, radius],
+      [0, -radius],
+    ]) {
+      const point = worldPoint(s.machine.pose, { x, y: 0, z });
+      if (point.x < 1 || point.z < 1 || point.x > 159 || point.z > 159)
+        continue;
+      const y = world.surface(point.x, point.z);
+      if (y <= s.machine.pose.position.y + 2) {
+        Object.assign(p, {
+          x: point.x,
+          y: Math.max(y, point.y),
+          z: point.z,
+          vy: Math.max(-30, Math.min(30, s.machine.pose.velocity.y)),
+          grounded: y >= point.y,
+        });
+        return;
       }
     }
-    const event = s.tick(dt, p, inv);
-    if (!s.riding) p.flying = false;
-    return event;
+    // Emergency exit above the machine when every side is obstructed.
+    Object.assign(p, {
+      ...worldPoint(s.machine.pose, { x: 0, y: 2.5, z: 0 }),
+      vy: 0,
+    });
   }
 }

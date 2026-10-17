@@ -98,11 +98,18 @@ export class World {
     if (this.blocks[i] === v && !this.subcells.has(i)) return false;
     this.subcells.delete(i);
     this.blocks[i] = v;
+    this.markCollision(x, z);
     if (record) this.edits.set(i, v);
     if (v) this.fluids.delete(i);
     this.mark(x, z);
     this.rescan(x, z);
     return true;
+  }
+  markCollision(x, z) {
+    this.collisionRevision = (this.collisionRevision || 0) + 1;
+    this.collisionChunks ||= new Map();
+    const key = `${x >> 4},${z >> 4}`;
+    this.collisionChunks.set(key, (this.collisionChunks.get(key) || 0) + 1);
   }
   mark(x, z) {
     for (const [dx, dz] of [
@@ -186,6 +193,7 @@ export class World {
     }
     if (fine[j] === value) return false;
     fine[j] = value;
+    this.markCollision(x, z);
     if (fine.every((v) => v === fine[0])) {
       this.subcells.delete(i);
       this.blocks[i] = fine[0];

@@ -209,39 +209,36 @@ test("starvation and defeat recover at camp without deleting inventory or bluepr
   assert.equal(s.hp, s.maxHP);
 });
 
-test("vehicle controls use power and mass, collision damages parts only while moving", async () => {
-  const { FrontierMotion } = await import(
-    "../app/src/main/assets/frontier/motion.js"
-  );
+test("vehicle movement belongs to the assembly and dismount preserves its world position", async () => {
+  const { FrontierMotion } =
+    await import("../app/src/main/assets/frontier/motion.js");
   const s = new Frontier(),
     inv = invWith({});
   inv.unlocks.add("rover");
-  s.provisionMachine(inv);
-  s.toggleRide(inv);
-  const player = { ...camp, y: 12, flying: false };
-  const world = { surface: () => 20, get: () => 0 };
+  const player = { ...camp, y: 10, vy: 0 },
+    world = { surface: () => 10, get: () => 0 };
   const motion = new FrontierMotion({
     model: s,
     inventory: inv,
     player,
     world,
   });
-  let input = motion.beforeStep({ forward: 1, side: 0 }, 1 / 60);
-  assert.ok(input.speedScale > 1);
-  const originalHP = { ...s.machine.hp };
-  player.x += 1;
-  motion.afterStep(1 / 60);
-  assert.equal(player.x, camp.x);
+  motion.prepare();
+  s.toggleRide(inv);
+  for (let i = 0; i < 120; i++) {
+    motion.beforeStep({ forward: 1 }, 1 / 60);
+    motion.afterStep(1 / 60);
+  }
+  const pose = structuredClone(s.machine.pose);
+  assert.ok(pose.position.z < 86);
+  assert.ok(Math.abs(player.x - pose.position.x) < 1);
+  s.toggleRide(inv);
+  motion.dismount();
+  assert.deepEqual(s.machine.pose, pose);
   assert.ok(
-    Object.keys(originalHP).some((k) => s.machine.hp[k] < originalHP[k]),
+    Math.hypot(player.x - pose.position.x, player.z - pose.position.z) > 1,
   );
-  const after = JSON.stringify(s.machine.hp);
-  s.time += 2;
-  motion.beforeStep({ forward: 0, side: 0 }, 1 / 60);
-  motion.afterStep(1 / 60);
-  assert.equal(JSON.stringify(s.machine.hp), after);
-  const motor = s.machine.blueprint.find((p) => p.type === "motor");
-  damage(s.machine, motor.id, 70);
-  input = motion.beforeStep({ forward: 1 }, 1 / 60);
-  assert.ok(input.speedScale < 1);
+  const loaded = Frontier.load(s.save());
+  assert.deepEqual(loaded.machine.pose, pose);
+  motion.physics.dispose();
 });

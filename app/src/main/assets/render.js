@@ -28,7 +28,7 @@ export function chunkGeometry(w, cx, cz) {
       x = [0, 0, 0],
       q = [0, 0, 0];
     q[d] = 1;
-    for (x[d] = -1; x[d] < dims[d]; ) {
+    for (x[d] = -1; x[d] < dims[d];) {
       let n = 0;
       for (x[v] = 0; x[v] < dims[v]; x[v]++)
         for (x[u] = 0; x[u] < dims[u]; x[u]++) {
@@ -47,7 +47,7 @@ export function chunkGeometry(w, cx, cz) {
       x[d]++;
       n = 0;
       for (let j = 0; j < dims[v]; j++)
-        for (let i = 0; i < dims[u]; ) {
+        for (let i = 0; i < dims[u];) {
           const m = mask[n];
           if (!m) {
             i++;
@@ -304,7 +304,7 @@ export class View {
     this.toolKick = 0;
   }
   setHeldItem(id) {
-    if (ITEMS[id]?.gear) {
+    if (ITEMS[id]?.gear || ITEMS[id]?.assemblyTool) {
       if (this.heldCube) {
         this.camera.remove(this.heldCube);
         this.heldCube.material.dispose();
@@ -326,7 +326,9 @@ export class View {
       this.cube,
       new T.MeshLambertMaterial({ color: ITEMS[id]?.color || 0x9b7654 }),
     );
-    this.heldCube.scale.setScalar(ITEMS[id]?.block ? 0.1 : 0.06);
+    this.heldCube.scale.setScalar(
+      ITEMS[id]?.block || ITEMS[id]?.machinePart ? 0.1 : 0.06,
+    );
     this.heldCube.position.set(0.22, -0.17, -0.4);
     this.heldCube.rotation.set(0.1, 0.6, 0.1);
     this.camera.add(this.heldCube);
@@ -355,7 +357,11 @@ export class View {
       return mesh;
     };
     add(0x76563a, 0.37, -0.34, -0.51, 0.065, 0.42, 0.065);
-    if (id === "bow" || id === "crystalbow") {
+    if (id === "wrench") {
+      add(0xbfcad1, 0.37, -0.12, -0.51, 0.23, 0.08, 0.07);
+      add(0xbfcad1, 0.26, -0.06, -0.51, 0.06, 0.18, 0.07);
+      add(0xbfcad1, 0.48, -0.06, -0.51, 0.06, 0.18, 0.07);
+    } else if (id === "bow" || id === "crystalbow") {
       add(0xba8b50, 0.37, -0.12, -0.58, 0.055, 0.4, 0.06);
       add(0xba8b50, 0.37, -0.52, -0.58, 0.055, 0.35, 0.06);
       add(0xe4dac0, 0.37, -0.3, -0.45, 0.015, 0.75, 0.015);
@@ -427,12 +433,13 @@ export class View {
       if (++n >= count) break;
     }
   }
-  instance(mesh, index, pos, scale, color, rx = 0, yaw = 0) {
+  instance(mesh, index, pos, scale, color, rx = 0, yaw = 0, body = null) {
     if (index >= mesh.instanceMatrix.count) return false;
     const o = this.o;
     o.position.set(...pos);
     o.scale.set(...scale);
-    o.rotation.set(rx, yaw, 0, "YXZ");
+    o.rotation.set(body?.pitch || 0, yaw, body?.roll || 0, "YXZ");
+    o.rotateX(rx);
     o.updateMatrix();
     mesh.setMatrixAt(index, o.matrix);
     this.color.setHex(color);
@@ -478,7 +485,7 @@ export class View {
         if (e.lost & (1 << pi)) continue;
         const p = sp.parts[pi],
           angle = pose(e, p, pi, time).angle;
-        if (fine || (e.damage[pi] && dist < 20)) {
+        if (fine || e.damage[pi]) {
           for (let j = 0; j < p.count; j++)
             if (occupied(e, pi, j) && near < 24000) {
               const v = cellPosition(p, j),
@@ -492,6 +499,7 @@ export class View {
                 shade,
                 angle,
                 e.yaw,
+                e.bodyPose,
               );
             }
         } else {
@@ -504,6 +512,7 @@ export class View {
             p.color,
             angle,
             e.yaw,
+            e.bodyPose,
           );
         }
       }
@@ -519,6 +528,7 @@ export class View {
             0x172e2d,
             0,
             e.yaw,
+            e.bodyPose,
           );
       }
     }

@@ -1,3 +1,4 @@
+import { TYPES } from "./machine/model.js";
 import { GEAR } from "./equipment.js";
 import { B, clamp } from "./world.js";
 import { solidAt } from "./physics.js";
@@ -30,10 +31,47 @@ for (const [id, g] of Object.entries(GEAR))
     icon: "",
     limit: 1,
   };
+for (const [type, part] of Object.entries(TYPES))
+  ITEMS[`${type}_part`] = {
+    name: part.label + " 블록",
+    color: part.color,
+    machinePart: type,
+    frontier: true,
+  };
+ITEMS.wrench = {
+  name: "조립 렌치",
+  color: 0xbfcad1,
+  assemblyTool: true,
+  limit: 1,
+  frontier: true,
+};
 export const SLOT_COUNT = 36,
   STACK_LIMIT = 64;
 export const stackLimit = (id) => ITEMS[id]?.limit || STACK_LIMIT;
 export const RECIPES = [
+  {
+    id: "wrench",
+    name: "조립 렌치",
+    description:
+      "공격: 고정된 부품 회수 · 사용: 고정/해제 · 합금을 들고 사용하면 수리",
+    cost: { iron: 2, wood: 1 },
+    give: { wrench: 1 },
+    frontier: true,
+  },
+  ...Object.entries(TYPES).map(([type, p]) => ({
+    id: `${type}_part`,
+    name: p.label + " 블록",
+    description: "0.5m 부품 · 월드에서 면에 직접 붙이기",
+    cost: { iron: p.cost },
+    give: { [`${type}_part`]: 1 },
+    requires:
+      type === "rotor"
+        ? "aviation"
+        : type === "cannon"
+          ? "ballistics"
+          : "engineering",
+    frontier: true,
+  })),
   {
     id: "cooked_meat",
     name: "구운 고기 × 2",
