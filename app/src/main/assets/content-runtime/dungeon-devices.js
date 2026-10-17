@@ -3,6 +3,8 @@
 import { FIXTURE_LINK_RULES } from './fixture-energy.js';
 import { VoxelAssetBuilder } from './voxel/authoring.mjs';
 
+const STRUCTURE_RESTORE_COST = Object.freeze({ wood: 2, stone: 2 });
+const STRUCTURE_PART_NAMES = Object.freeze({ windvane: '풍향판', platform: '운반대', altar: '제단 구조', mana_vine: '마나 수관' });
 const VERSION = 1;
 const TYPES = ['mechanical', 'electrical', 'thermal', 'chemical', 'magic', 'divine'];
 const EPS = 1e-8;
@@ -219,6 +221,20 @@ export class DungeonDeviceSystem {
       instance.revision++; this._refresh(id); return success({ part: copy(part), componentId: anchor.componentId, consumed: { [anchor.componentId]: 1 } });
     }
 
+    const restore = /^restore:(windvane|platform|altar|mana_vine)$/.exec(actionId);
+    if (restore) {
+      // Destroyed puzzle structures must stay recoverable or the passage can never be solved again.
+      const partId = restore[1], structurePart = state.structureParts[partId];
+      if (!structurePart) return fail('unknown_device_part');
+      if (structurePart.installed && structurePart.healthHp >= structurePart.maxHealthHp) return success({ duplicate: true, partId });
+      if (!progression?.spend) return fail('progression_required');
+      const receipt = progression.spend(STRUCTURE_RESTORE_COST, { claimId: this._claim(id, actionId, claimId, String(structurePart.restorations || 0)) });
+      if (!receipt?.ok || receipt.duplicate) return fail(receipt?.reason || 'items_required');
+      Object.assign(structurePart, { healthHp: structurePart.maxHealthHp, installed: true, restorations: (structurePart.restorations || 0) + 1 });
+      if (partId === 'windvane' && state.wind) state.wind.vaneAttached = true;
+      if (partId === 'mana_vine' && state.fluid) state.fluid.leak = false;
+      instance.revision++; this._refresh(id); return success({ partId, structurePart: copy(structurePart), consumed: { ...STRUCTURE_RESTORE_COST } });
+    }
     if (actionId === 'repair_bridge' && instance.templateId === 'mining_fort') {
       if (!this._requirementsMet(id, actionId)) return fail('components_required');
       if (!progression?.spend) return fail('progression_required');
@@ -319,7 +335,9 @@ export class DungeonDeviceSystem {
     if (!state || !instance?.puzzle || !TYPES.includes(type)) return fail('unknown_instance_or_type');
     const link = state.supplies[type]; if (!link) return fail('unknown_supply');
     const grid = progression?.fixtureEnergy, node = grid?.nodes?.get(link.ownerId);
-    if (!node || !progression.fixtureAccess?.includes(link.ownerId)) return fail('out_of_range');
+    if (!grid) return fail('progression_required');
+    // A dismantled source leaves a dead link; clearing it must not require reaching a fixture that no longer exists.
+    if (node &&!progression.fixtureAccess?.includes(link.ownerId)) return fail('out_of_range');
     delete state.supplies[type]; instance.revision++;
     return success({ disconnected: true, ownerId: link.ownerId, type, materialRefund: {} });
   }
@@ -514,6 +532,7 @@ export class DungeonDeviceSystem {
       { id: `replace:${a.id}`, label: `장치 교체 · ${a.componentId}`, items: { [a.componentId]: 1 }, hold: false, disabled: state.parts[a.id].healthHp >= state.parts[a.id].maxHealthHp, detail: a.componentId },
     ]);
     const addAction = (id, label, { items = {}, hold = false, disabled = false, detail = null } = {}) => actions.push({ id, label, items, hold, disabled, ...(detail ? { detail } : {}) });
+    for (const [partId, structurePart] of Object.entries(state.structureParts)) if (STRUCTURE_PART_NAMES[partId] && structurePart.healthHp < structurePart.maxHealthHp) addAction(`restore:${partId}`, `${STRUCTURE_PART_NAMES[partId]} 복구`, { items: { ...STRUCTURE_RESTORE_COST } });
     const missing = rules.parts.filter(component => !this._partInstalled(id, component));
     const gateDisabled = missing.length > 0;
     switch (instance.templateId) {

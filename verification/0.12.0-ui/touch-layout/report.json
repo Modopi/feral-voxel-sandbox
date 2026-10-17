@@ -1,0 +1,163 @@
+{
+  "scope": "Actual Chromium touch input and viewport layout; desktop SwiftShader, not Android hardware or thermal/lifecycle qualification.",
+  "checks": [
+    {
+      "width": 390,
+      "height": 844,
+      "controlsInside": true,
+      "touchModeCycle": true,
+      "touchCraftScroll": true,
+      "boxes": {
+        "openBag": {
+          "x": 262.53125,
+          "y": 26,
+          "w": 69.46875,
+          "h": 44
+        },
+        "openMenu": {
+          "x": 336,
+          "y": 26,
+          "w": 44,
+          "h": 44
+        },
+        "attackMode": {
+          "x": 206.53125,
+          "y": 628,
+          "w": 171.46875,
+          "h": 43
+        },
+        "attack": {
+          "x": 298,
+          "y": 679,
+          "w": 80,
+          "h": 43
+        },
+        "jump": {
+          "x": 206.53125,
+          "y": 730,
+          "w": 83.46875,
+          "h": 43
+        },
+        "use": {
+          "x": 206.53125,
+          "y": 679,
+          "w": 83.46875,
+          "h": 43
+        },
+        "movePad": {
+          "x": 18,
+          "y": 714,
+          "w": 105,
+          "h": 105
+        }
+      }
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "controlsInside": true,
+      "touchModeCycle": true,
+      "touchCraftScroll": true,
+      "boxes": {
+        "openBag": {
+          "x": 667.953125,
+          "y": 14.5,
+          "w": 92.046875,
+          "h": 44
+        },
+        "openMenu": {
+          "x": 768,
+          "y": 14.5,
+          "w": 60,
+          "h": 44
+        },
+        "attackMode": {
+          "x": 635.953125,
+          "y": 171,
+          "w": 188.046875,
+          "h": 45
+        },
+        "attack": {
+          "x": 736,
+          "y": 224,
+          "w": 88,
+          "h": 45
+        },
+        "jump": {
+          "x": 635.953125,
+          "y": 277,
+          "w": 92.046875,
+          "h": 45
+        },
+        "use": {
+          "x": 635.953125,
+          "y": 224,
+          "w": 92.046875,
+          "h": 45
+        },
+        "movePad": {
+          "x": 28,
+          "y": 277,
+          "w": 95,
+          "h": 95
+        }
+      }
+    },
+    {
+      "width": 360,
+      "height": 640,
+      "controlsInside": true,
+      "touchModeCycle": true,
+      "touchCraftScroll": true,
+      "boxes": {
+        "openBag": {
+          "x": 202.484375,
+          "y": 43,
+          "w": 74.328125,
+          "h": 44
+        },
+        "openMenu": {
+          "x": 280.8125,
+          "y": 43,
+          "w": 69.1875,
+          "h": 44
+        },
+        "attackMode": {
+          "x": 176.53125,
+          "y": 424,
+          "w": 171.46875,
+          "h": 43
+        },
+        "attack": {
+          "x": 268,
+          "y": 475,
+          "w": 80,
+          "h": 43
+        },
+        "jump": {
+          "x": 176.53125,
+          "y": 526,
+          "w": 83.46875,
+          "h": 43
+        },
+        "use": {
+          "x": 176.53125,
+          "y": 475,
+          "w": 83.46875,
+          "h": 43
+        },
+        "movePad": {
+          "x": 18,
+          "y": 510,
+          "w": 105,
+          "h": 105
+        }
+      }
+    }
+  ],
+  "errors": [],
+  "look": true,
+  "joystick": true,
+  "menuPause": true,
+  "saveReload": true
+}

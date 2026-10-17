@@ -157,3 +157,8 @@ body.leftHand #hud #target {left:auto;right:16px;}
 }
 
 .itemSource{display:block;margin-top:6px;color:#c5cfb6;line-height:1.5}#sourceGuide{margin-top:8px;font-size:12px;line-height:1.5}#sourceGuide summary{min-height:44px;padding:10px 0;cursor:pointer;touch-action:pan-y}#sourceGuide p{margin:5px 0}
+body.showRadar #hud #radar, body.showEvents #hud #events {display:block;}
+/* Optional minimap: top centre-left keeps clear of the right-hand action column; the UI editor can move it. */
+body.showRadar #hud #radar {right:auto;left:calc(50% - 150px);top:10px;width:96px;padding:5px;}
+body.showRadar #hud #map {width:86px;height:86px;}
+body.layoutEditing #hud #radar {display:block!important;}

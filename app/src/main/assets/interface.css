@@ -122,7 +122,7 @@ body.leftHand #hud #crouchBtn {right:76px;left:auto;}
 body.leftHand #hud #crawlBtn {right:130px;left:auto;}
 body.leftHand #hud #movementState {right:24px;left:auto;}
 body.leftHand #hud #descendBtn {left:174px;right:auto;}
-body.layoutEditing #hud #flightReadout,body.layoutEditing #hud #descendBtn,body.layoutEditing #hud .posture {display:block!important;}
+body.layoutEditing #hud #flightReadout,body.layoutEditing #hud #descendBtn,body.layoutEditing #hud .posture,body.layoutEditing #hud #interactBtn {display:block!important;}
 @media(orientation:portrait) {
   #hud #stick {bottom:169px;}
   #hud .posture {bottom:109px;}

@@ -51,7 +51,7 @@ export class MachinePanel {
    const effects=this.card(parent,'물성 부여와 축성','선택 복셀에 마법으로 새 물성을 더하거나 신성으로 기존 물성을 강화합니다. 가공 설비와 실제 에너지가 필요합니다.');
    this.field(effects,'property','물성',Object.entries(MATERIAL_EFFECT_RULES).map(([id,r])=>[id,`${r.name} · ${ENERGY_NAMES[r.kind]} ${r.energyPerLiter} EU/L`]));
    this.action(effects,'가공 시작',()=>{const r=MATERIAL_EFFECT_RULES[d.property],method=r.kind==='magic'?'queueImprint':'queueConsecrate';return rt.materialEffects[method](m.id,d.voxel,d.property,{claimId:rt.id('material-effect')});});
-   for(const job of rt.materialEffects.jobs.filter(j=>m.voxels.some(v=>v.id===j.voxelId)))effects.append(el('p',`${MATERIAL_EFFECT_RULES[job.property].name} · ${(job.progress/job.seconds*100).toFixed(0)}%`));
+   for(const job of rt.materialEffects.jobs.filter(j=>m.voxels.some(v=>v.id===j.voxelId))){const line=el('p',`${MATERIAL_EFFECT_RULES[job.property].name} · ${(job.progress/job.seconds*100).toFixed(0)}% · ${job.sourceComponentId?'구조물의 가공 컴포넌트에 에너지를 공급해야 진행됩니다.':'개인 에너지로 미리 지불했습니다.'}`);effects.append(line);this.action(line,'가공 취소 (쓴 에너지는 돌아오지 않음)',()=>rt.materialEffects.cancelJob(job.claimId));}
   }
   const component=this.card(parent,'기능 컴포넌트','가방에서 제작한 컴포넌트를 선택 복셀에 설치합니다. 에너지 포트를 연결해야 동력이 전달됩니다.');
   const cores=p.list('component').filter(e=>p.count(e.id)>0).map(e=>[e.id,`${e.name} × ${p.count(e.id)}`]);

@@ -186,6 +186,16 @@
             <button id="herdBtn" class="secondary">근처에 24마리</button
             ><button id="stressBtn" class="primary">3,000 개체 실험</button>
           </div>
+          <h3 class="sandboxTitle">샌드박스 도구 <small>섬 전용 · 사용 버튼으로 실행</small></h3>
+          <div class="buttonRow" id="sandboxTools">
+            <button data-sandbox-tool="0" class="secondary">관찰 렌즈</button
+            ><button data-sandbox-tool="4" class="secondary">물 붓기</button
+            ><button data-sandbox-tool="5" class="secondary">불 붙이기</button
+            ><button data-sandbox-tool="6" class="secondary">산 붓기</button
+            ><button data-sandbox-tool="8" class="secondary">개체 생성</button
+            ><button data-sandbox-tool="-1" class="secondary">들고 있는 아이템으로</button>
+          </div>
+          <p id="sandboxNote">도구를 고르면 탐험으로 돌아갑니다. 사용 버튼으로 실행하세요. 물·산은 재료 없이 추가하며 불은 조준한 칸에 붙습니다. 핫바를 바꾸면 해제됩니다.</p>
           <p id="benchmarkText">
             수천 개체는 성능 실험입니다. 실제 기기에서 FPS를 확인하세요.
           </p>
@@ -219,6 +229,12 @@
             >도구 소리 <input id="sound" type="checkbox" checked /></label
           ><label class="setting"
             >왼손 조작 <input id="leftHand" type="checkbox"
+          /></label
+          ><label class="setting"
+            >미니맵·좌표 <input id="showRadar" type="checkbox"
+          /></label
+          ><label class="setting"
+            >주변 사건 알림 <input id="showEvents" type="checkbox"
           /></label>
           <p>
             프레임이 낮으면 먼저 절전 모드를 선택하세요. 상세 복셀은 가까운

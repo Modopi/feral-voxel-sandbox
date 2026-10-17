@@ -214,6 +214,43 @@ export class Progression {
     job.fixtureId = fixtureId; job.autoInstall = false;
     return success({ jobId, fixtureId, progress: job.progress });
   }
+  // Recipe outputs only appear at completion, so cancelling returns the paid item inputs.
+  // Energy already spent or charged into a workbench for this job is not refunded.
+  cancelJob(jobId, { claimId } = {}) {
+    if (!this._claim(claimId)) return fail('claim_required');
+    if (this.claims.has(claimId)) return success({ duplicate: true });
+    const index = this.jobs.findIndex(j => j.id === jobId);
+    if (index < 0) return fail('job_not_found');
+    const job = this.jobs[index];
+    if (job.type !== 'craft') return fail('job_not_cancellable');
+    const r = this.catalog.get(job.recipeId), refund = Object.fromEntries(Object.entries(r.inputs).map(([id, n]) => [id, n * job.count]));
+    this.jobs.splice(index, 1);
+    for (const [id, n] of Object.entries(refund)) this._put(id, n);
+    this.claims.add(claimId);
+    return success({ jobId, refund: copy(refund) });
+  }
+  // Only the first queued job progresses; moving one forward never changes paid inputs or reservations.
+  prioritizeJob(jobId) {
+    const index = this.jobs.findIndex(j => j.id === jobId);
+    if (index < 0) return fail('job_not_found');
+    if (index > 0) this.jobs.unshift(...this.jobs.splice(index, 1));
+    return success({ jobId });
+  }
+  jobStatus(job) {
+    if (job?.type === 'activity') { const a = this.catalog.get(job.activityId); return { total: a.secondsPerRepetition, progress: job.progress, blocked: null, energy: {} }; }
+    const r = this.catalog.get(job?.recipeId); if (r?.kind !== 'recipe') return { total: 0, progress: 0, blocked: 'job_not_found', energy: {} };
+    const total = r.seconds * job.count, energy = Object.fromEntries(Object.entries(r.energy).map(([t, n]) => [t, n / r.seconds]));
+    let blocked = null;
+    if (r.research && !this.research.has(r.research)) blocked = 'research_required';
+    else if (!this._station(r.station)) blocked = 'station_required';
+    else if (this.fixtureEnergy.enabled && r.station !== 'hand') {
+      const fixture = this.worldFixtures.find(f => f.ownerId === job.fixtureId);
+      if (!fixture) blocked = 'physical_station_required';
+      else if (!fixture.active || fixture.health <= 0) blocked = 'fixture_unavailable';
+      else if (!this.fixtureAccess?.includes(job.fixtureId)) blocked = 'station_out_of_reach';
+    }
+    return { total, progress: job.progress, blocked, energy, fixtureId: job.fixtureId ?? null };
+  }
   buildStation(id) { const station = this.catalog.get(id); return station?.kind === 'station' ? this.queueCraft(station.origin.recipe, { autoInstall: true }) : fail('unknown_station'); }
   installStation(id) {
     if (this.fixtureEnergy.enabled) return fail('world_placement_required');

@@ -1,0 +1,94 @@
+{
+  "scope": "Chromium SwiftShader with touch input. Prepared items/positions are listed per check; this is not Android hardware or normal-progression evidence.",
+  "expedition": [
+    {
+      "name": "sprint button inside viewport at three sizes",
+      "layout": [
+        {
+          "width": 390,
+          "height": 844,
+          "sprint": {
+            "x": 206.53125,
+            "y": 781,
+            "w": 83.46875,
+            "h": 43
+          }
+        },
+        {
+          "width": 844,
+          "height": 390,
+          "sprint": {
+            "x": 635.953125,
+            "y": 330,
+            "w": 92.046875,
+            "h": 45
+          }
+        },
+        {
+          "width": 360,
+          "height": 640,
+          "sprint": {
+            "x": 176.53125,
+            "y": 577,
+            "w": 83.46875,
+            "h": 43
+          }
+        }
+      ]
+    },
+    {
+      "name": "touch sprint toggle",
+      "walkM": 3.145828929169699,
+      "sprintM": 4.717247597878359
+    },
+    {
+      "name": "touch machine descend/brake",
+      "prepared": "machine created by script",
+      "brake": true,
+      "pitch": -1
+    },
+    {
+      "name": "warning banner and toast queue",
+      "toasts": [
+        "첫 번째 알림",
+        "두 번째 알림",
+        "세 번째 알림"
+      ]
+    },
+    {
+      "name": "research pause and resume",
+      "prepared": "samples granted",
+      "pausedWork": 1.7166666666666655
+    },
+    {
+      "name": "craft queue batch/prioritize/cancel",
+      "prepared": "inputs granted",
+      "recipe": "make_bark_cup"
+    },
+    {
+      "name": "tool durability and translated reasons"
+    },
+    {
+      "name": "reward marker, claim, journal, device details and supply disconnect",
+      "prepared": "teleport to dungeon; dead supply link injected",
+      "template": "root_manor",
+      "supplyInjected": true
+    }
+  ],
+  "island": [
+    {
+      "name": "empty-hand observe lens"
+    },
+    {
+      "name": "sandbox water tool via menu and use button",
+      "waterBefore": 4571,
+      "waterAfter": 4576
+    },
+    {
+      "name": "minimap setting and discovery toast",
+      "prepared": "teleport to landmark",
+      "landmark": "잊힌 관측소"
+    }
+  ],
+  "errors": []
+}

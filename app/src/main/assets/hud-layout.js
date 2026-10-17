@@ -5,9 +5,9 @@ export const HUD_ELEMENTS = {
   flightReadout: "비행 계기", flyBtn: "비행", rangeBtn: "편집 크기", hotbar: "아이템 핫바", vitals: "체력 · 포만",
   inventoryBtn: "가방 버튼", menuBtn: "메뉴 버튼", journalBtn: "지도 버튼", statusBtn: "상태 버튼",
   journeyHUD: "여정 · 현재 목표",
-  interactBtn: "상호작용", toolLabel: "아이템 이름", waypoint: "목적지", toast: "알림",
+  interactBtn: "상호작용", toolLabel: "아이템 이름", waypoint: "목적지", toast: "알림", radar: "미니맵",
 };
-export const OPTIONAL_HUD = new Set(["toolLabel", "waypoint", "toast", "movementState"]);
+export const OPTIONAL_HUD = new Set(["toolLabel", "waypoint", "toast", "movementState", "radar"]);
 export function readLayout(storage) {
   try { return cleanLayout(JSON.parse(storage.getItem(LAYOUT_KEY))); }
   catch { return cleanLayout(null); }
