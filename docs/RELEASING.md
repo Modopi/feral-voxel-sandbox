@@ -61,7 +61,7 @@
 
 게임 1200 / 앱·최소 앱 303 / 저장 스키마 2. Java·권한·키 변경이 없는 게임 전용 릴리스다. 이미 구현된 기능을 화면·터치 입력·알림에 연결했다. 콘텐츠 탐험 저장에는 연구 일시정지와 제작 취소가 기존 필드만으로 기록된다. 던전 구조 부품 복구 횟수(`restorations`)는 선택 필드로 추가하며 이전 저장도 그대로 읽는다. 기본 섬의 미니맵·사건 알림 설정은 기존 `feral.settings`의 선택 필드다.
 
-검증과 병합 후 기존 공식 `updates/catalog.json`, `updates/stable.feral` 및 불변 `updates/versions/0.12.0.feral`로 게시한다. 이미 배포한 0.11.0 이하의 파일·버전 선택 항목을 덮어쓰지 않는다. 변경 목록은 `docs/UI-REACHABILITY.md`, 검증은 `verification/0.12.0.md`. Android 실기기 성능·생명주기 검증은 아직 미완료다.
+2026-10-17 18:51 UTC [PR #18](https://github.com/Modopi/feral-voxel-sandbox/pull/18) 병합 커밋 `dd7b800`에서 [배포 Actions](https://github.com/Modopi/feral-voxel-sandbox/actions/runs/39059274447)가 성공해 [v0.12.0 Release](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.12.0)와 기존 공식 `updates/catalog.json`, `updates/stable.feral`, 불변 `updates/versions/0.12.0.feral`로 게시됐다. stable과 버전 패키지는 같은 파일(SHA256 `8c9a94e3…5981`)이고 내부 아카이브 SHA256 `f7e55691…3e34`가 카탈로그와 일치한다. 0.11.0 이하의 카탈로그 항목과 패키지 파일은 바뀌지 않았다. 변경 목록은 `docs/UI-REACHABILITY.md`, 검증은 `verification/0.12.0.md`. Android 실기기 성능·생명주기 검증은 아직 미완료다.
 
 ### 0.11.0 — 콘텐츠 탐험 통합
 

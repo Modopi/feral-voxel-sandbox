@@ -1,6 +1,6 @@
 # FERAL 진행 현황 — 게임 0.12.0
 
-> 작성일: 2026-10-17 · 기준: 게임 0.12.0(직전 공개 버전 0.11.0) / Android 앱 0.3.3
+> 작성일: 2026-10-17 · 기준: 공개 배포 게임 0.12.0 / Android 앱 0.3.3
 >
 > 구현·검증·배포 기록을 모은 현황 문서다. 장기 방향은 [게임 비전](GAME-VISION.md), 전체 완료 기준은 [구현 Goal](IMPLEMENTATION-GOAL.md), 요구사항별 근거는 [구현 추적표](content/IMPLEMENTATION-STATUS.md), 버전별 변경은 [CHANGELOG](../CHANGELOG.md)를 참조한다.
 
@@ -142,11 +142,11 @@ flowchart LR
 | 항목 | 값 |
 | --- | --- |
 | 공개 저장소 | [Modopi/feral-voxel-sandbox](https://github.com/Modopi/feral-voxel-sandbox) |
-| 게임 / 코드 | **0.12.0 / 1200** (직전 공개 0.11.0 / 1100) |
+| 게임 / 코드 | **0.12.0 / 1200** |
 | Android 앱 / 최소 앱 | **0.3.3 / 303** |
 | 저장 스키마 / 채널 | **2 / stable** (콘텐츠 탐험 저장은 자체 schema 1) |
-| 0.11.0 릴리스 기준 커밋 | `9740e38840a841da2c33e5bd0853ca6ba7623ded` ([PR #16](https://github.com/Modopi/feral-voxel-sandbox/pull/16)) |
-| 공개 릴리스 | [v0.11.0](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.11.0) · 2026-10-17 17:13 UTC 게시. 0.12.0은 병합 후 [릴리스 목록](https://github.com/Modopi/feral-voxel-sandbox/releases)에 게시 |
+| 게임 릴리스 기준 커밋 | `dd7b8000970bf58915e303045becb5fea83303b7` ([PR #18](https://github.com/Modopi/feral-voxel-sandbox/pull/18)) |
+| 공개 릴리스 | [v0.12.0](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.12.0) · 2026-10-17 18:51 UTC 게시. 직전 [v0.11.0](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.11.0)은 17:13 UTC 게시 |
 
 앱 0.3.3 사용자는 **메뉴 → 업데이트 → 지금 확인 → 저장 후 적용**, 버전을 고정한 사용자는 **게임 버전 → 0.12.0**을 선택한다. 처음 설치하거나 앱 0.3.2 이하라면 릴리스의 `Feral-0.3.3-android.apk`를 기존 앱 위에 설치한다. 수동 버전 전환은 빌드별 저장을 분리하며 처음 선택한 빌드는 새 저장으로 시작한다. 상세한 적용·복구 범위는 [배포 안내](RELEASING.md)를 따른다.
 
