@@ -21,7 +21,7 @@ export const PRESETS = {
   expedition: {
     name: "FERAL 탐험", summary: "연구 · 던전 · 자유 제작", engine: "runtime", terrain: "infinite",
     description: "끝없이 이어지는 세계입니다. 출발지에서 멀어질수록 위험해집니다.",
-    rules: { survival: true, startStructures: true },
+    rules: { survival: true, sandbox: false, startStructures: true },
   },
   island: {
     name: "기본 탐험 맵", summary: "복셀 섬 · 생태 관찰", engine: "runtime", terrain: "island",

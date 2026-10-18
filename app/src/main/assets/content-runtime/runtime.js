@@ -13,7 +13,7 @@ import {WorldObjects} from './objects.js';
 import {FaithSystem} from './faith.js';
 import {Armaments} from './armaments.js';
 import {reasonText} from './reasons.js';
-import {mapFor,BUILD_BLOCKS,miningProfile,minedItem,TOOL_GEAR,BARE_GEAR} from './maps.js';
+import {generatorFor,savedGenerator,worldRules,STARTER_KIT,BUILD_BLOCKS,miningProfile,minedItem,TOOL_GEAR,BARE_GEAR} from './maps.js';
 import {miningWorkFor,MINING_PERIOD_S} from '../equipment.js';
 import {hitShapeFor,hitShapeForMode,shapeCut,IMPACT_REACH_M} from './creature-animation.js';
 const clone = value => JSON.parse(JSON.stringify(value));
@@ -25,28 +25,28 @@ const BLOCKS = new Map(CONTENT.blocks.entries.map(e=>[e.id,e]));
 const BOSS_ACTIONS = {repair:'수리',rest:'휴식',recharge:'재충전'};
 export class ExpeditionRuntime {
  /** onProgress(step,done,total) reports loading steps; pause lets the screen repaint before synchronous construction. */
- static async create(seed,state=null,{onProgress=()=>{},pause=null,map='expedition',rules={},starter=true}={}){
+ static async create(seed,state=null,{onProgress=()=>{},pause=null,config=null}={}){
   const assets=new Map(),total=CONTENT.structures.entries.length;let done=0;
   await Promise.all(CONTENT.structures.entries.map(async e=>{assets.set(e.id,await loadAsset(e.id));onProgress('assets',++done,total);}));
   onProgress('world',0,1);if(pause)await pause();
-  const runtime=new ExpeditionRuntime(seed,state,assets,map,{rules,starter});
+  const runtime=new ExpeditionRuntime(seed,state,assets,{config});
   onProgress('placements',0,1);if(pause)await pause();
   await runtime.placements.ready;runtime.placements.syncAccess(runtime.player);return runtime;
  }
- constructor(seed,state,assets,mapId='expedition',{rules={},starter=true}={}){
+ constructor(seed,state,assets,{config=null}={}){
   this.calorieRule=CONTENT.progression.entries.find(e=>e.id==='calorie_baseline');
-  // A map preset only picks terrain, rules, start and places; every system below is shared.
-  // The world's own settings (kept by the launcher) override the preset's rules.
-  const preset=mapFor(state?.map??mapId);this.map={...preset,rules:{...preset.rules,...rules}};
+  // The world config (kept by the launcher) names the terrain generator and the rules; every system
+  // below is shared. A save keeps the generator it was made with.
+  this.generator=generatorFor(savedGenerator(state)??config?.terrain?.generator);this.rules=worldRules(config);
   this.seed=seed;this.time=state?.time||0;this.nextId=state?.nextId||1;
-  this.atlas=new this.map.atlas(CONTENT,{seed,state:state?.atlas,maxActiveChunks:96});
+  this.atlas=new this.generator.atlas(CONTENT,{seed,state:state?.atlas,maxActiveChunks:96});
   this.progression=new Progression(CONTENT,state?.progression||{});
   this.armaments=new Armaments(this.progression,state?.armaments||{});
   // Five staggered AI groups: about 3 game ticks apart instead of every creature on one tick.
   this.creatures=new CreatureSystem(CONTENT,{seed,state:state?.creatures,terrain:this.atlas,slices:5});
   this.bosses=new BossSystem(CONTENT,state?.bosses);
-  this.dungeons=new DungeonSystem({catalog:CONTENT,seed,state:state?.dungeons,atlas:this.atlas,assets,starterStructures:this.map.rules.structures!==false});
-  const spawn=this.map.spawn;
+  this.dungeons=new DungeonSystem({catalog:CONTENT,seed,state:state?.dungeons,atlas:this.atlas,assets,starterStructures:this.rules.startStructures});
+  const spawn=this.generator.spawn;
   this.player=state?.player?clone(state.player):{x:spawn.x,y:this.atlas.heightAt(spawn.x,spawn.z)+.05,z:spawn.z,yaw:spawn.yaw,pitch:0,hp:100,maxHp:100,calories:this.calorieRule.capacity,maxCalories:this.calorieRule.capacity,vy:0,grounded:false,stance:'stand',lastDamageAt:-100,resting:false};
   this.deaths=clone(state?.deaths||[]);this.seenRegions=new Set(state?.seenRegions||[]);
   this.discoveredLandmarks=new Set(state?.discoveredLandmarks||[]);this.conversion=state?.conversion?clone(state.conversion):null;
@@ -69,8 +69,7 @@ export class ExpeditionRuntime {
   this.terrainDamage=Object.fromEntries(Object.entries(clone(state?.terrainDamage||{})).map(([key,d])=>[key,d.hp==null?d:{blockId:d.blockId,damage:Math.min(.99,Math.max(0,1-d.hp/(BLOCKS.get(d.blockId)?.durabilityHpPerCell||1)))}]));
   this.equipmentExposureProfiles=new Map();
   this.nodes=[];this.nearbyStructures=[];
-  // A converted original save brings its own items instead of the new-world kit.
-  if(!state&&starter&&Object.keys(this.map.starter).length)this.progression.grant(this.map.starter,{claimId:`map-start:${this.map.id}`});
+  if(!state&&this.rules.starterKit)this.progression.grant(STARTER_KIT,{claimId:`map-start:${this.generator.id}`});
   this.refreshWorld();
  }
  id(prefix){return `${prefix}:${this.seed}:${this.nextId++}`;}
@@ -137,8 +136,8 @@ export class ExpeditionRuntime {
   const cx=Math.floor(p.x/64),cz=Math.floor(p.z/64);
   for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){
    const x=(cx+dx)*64+32,z=(cz+dz)*64+32,s=this.atlas.sample(x,z),regionId=`${cx+dx},${cz+dz}`;
-   if(!this.map.region(x,z))continue;
-   const nearSpawn=this.map.rules.survival&&Math.hypot(x-this.map.spawn.x,z-this.map.spawn.z)<96;
+   if(!this.generator.region(x,z))continue;
+   const nearSpawn=this.rules.survival&&Math.hypot(x-this.generator.spawn.x,z-this.generator.spawn.z)<96;
    this.creatures.ensureRegion(regionId,{environmentId:s.environmentId,x,z,tier:s.tier,safeBypass:s.safeBypass||s.hostileSpawnsAllowed===false||nearSpawn});this.seenRegions.add(regionId);
   }
   for(const inst of this.nearbyStructures){
@@ -172,9 +171,9 @@ export class ExpeditionRuntime {
   }
   const loadout=this.progression.evaluateLoadout(),p=this.player;p.maxHp=loadout.maxHp;p.hp=Math.min(p.hp,p.maxHp);
   const rule=this.calorieRule;
-  // Peaceful maps (the basic island) keep food and health full; the rules are otherwise the same.
-  if(!this.map.rules.survival){p.calories=p.maxCalories;p.hp=p.maxHp;}
-  p.calories=Math.max(0,p.calories-dt*(!this.map.rules.survival?0:moving ? rule.activeDrainPerSecond : rule.idleDrainPerSecond));
+  // Without the survival setting (peaceful worlds) food and health stay full; the rules are otherwise the same.
+  if(!this.rules.survival){p.calories=p.maxCalories;p.hp=p.maxHp;}
+  p.calories=Math.max(0,p.calories-dt*(!this.rules.survival?0:moving ? rule.activeDrainPerSecond : rule.idleDrainPerSecond));
   if(p.hp<p.maxHp&&p.calories>0&&(p.resting||this.time-p.lastDamageAt>=rule.noHitDelaySeconds)){
    const heal=Math.min(p.maxHp-p.hp,dt*rule.hpRegenPerSecond*(p.resting?rule.restMultiplier:1),p.calories/rule.caloriesPerHp);p.hp+=heal;p.calories-=heal*rule.caloriesPerHp;
   }
@@ -211,14 +210,14 @@ export class ExpeditionRuntime {
   }
   if(p.hp<=0)this.die();
  }
- hurt(amount,source){if(!Number.isFinite(amount)||amount<=0||!this.map.rules.survival)return;this.player.hp=Math.max(0,this.player.hp-amount);this.player.lastDamageAt=this.time;this.player.resting=false;this.events.push({type:'player_hit',amount,source});if(this.events.length>64)this.events.shift();}
+ hurt(amount,source){if(!Number.isFinite(amount)||amount<=0||!this.rules.survival)return;this.player.hp=Math.max(0,this.player.hp-amount);this.player.lastDamageAt=this.time;this.player.resting=false;this.events.push({type:'player_hit',amount,source});if(this.events.length>64)this.events.shift();}
  die(){
   const p=this.player,inventory=this.progression.inventory,overflow=this.progression.overflow,items={...inventory};
   if(this.drivingMachineId)this.machines.control(this.drivingMachineId,{throttle:0,steer:0,pitch:0,brake:true});
   for(const[id,n]of Object.entries(overflow))items[id]=(items[id]||0)+n;
   this.deaths.push({id:this.id('death'),position:{x:p.x,y:p.y,z:p.z},items,weapons:this.armaments.drainCarried(),recovered:false});
   this.progression.inventory={};this.progression.overflow={};this.progression.equipped=null;
-  const spawn=this.map.spawn;
+  const spawn=this.generator.spawn;
   Object.assign(p,{x:spawn.x,y:this.atlas.heightAt(spawn.x,spawn.z)+.05,z:spawn.z,hp:100,maxHp:100,calories:600,vy:0,lastDamageAt:this.time});
   this.interactionAction=null;this.drivingMachineId=null;this.player.resting=false;this.message('출발지에서 깨어났습니다. 사망 장소 10m 안에 가면 요정이 소지품을 돌려줍니다.');
  }
@@ -238,7 +237,7 @@ export class ExpeditionRuntime {
   return changed;
  }
  /** Block a held item places on sandbox maps (the basic island), or null. */
- buildableBlock(itemId){return this.map.rules.sandbox?BUILD_BLOCKS[itemId]??null:null;}
+ buildableBlock(itemId){return this.rules.sandbox?BUILD_BLOCKS[itemId]??null:null;}
  /** Place 0.5 m or 1 m of terrain on the aimed face, one unit of the item per 0.5 m cell. */
  placeBlocks(hit,itemId,size=.5){
   const blockId=this.buildableBlock(itemId);if(!blockId)return {ok:false,reason:'not_buildable'};
@@ -450,5 +449,5 @@ export class ExpeditionRuntime {
   rows.push(...getResourceDescriptors(this),...this.machines.sceneModels().filter(e=>distance(p,e.position)<160),...this.objects.sceneModels().filter(e=>distance(p,e.position)<160),...this.placements.descriptors().filter(e=>distance(p,e.position)<160));
   return rows;
  }
- serialize(){return {schema:1,map:this.map.id,seed:this.seed,time:this.time,nextId:this.nextId,player:clone(this.player),atlas:this.atlas.serialize(),progression:this.progression.serialize(),armaments:this.armaments.serialize(),creatures:this.creatures.serialize(),dungeons:this.dungeons.serialize(),bosses:this.bosses.serialize(),machines:this.machines.serialize(),materialEffects:this.materialEffects.serialize(),objects:this.objects.serialize(),pendingDetach:[...this.pendingDetach],placements:this.placements.serialize(),community:this.community.serialize(),faith:this.faith.serialize(),terrainDamage:clone(this.terrainDamage),deaths:clone(this.deaths),seenRegions:[...this.seenRegions],discoveredLandmarks:[...this.discoveredLandmarks],conversion:this.conversion?clone(this.conversion):null};}
+ serialize(){return {schema:1,terrain:this.generator.id,seed:this.seed,time:this.time,nextId:this.nextId,player:clone(this.player),atlas:this.atlas.serialize(),progression:this.progression.serialize(),armaments:this.armaments.serialize(),creatures:this.creatures.serialize(),dungeons:this.dungeons.serialize(),bosses:this.bosses.serialize(),machines:this.machines.serialize(),materialEffects:this.materialEffects.serialize(),objects:this.objects.serialize(),pendingDetach:[...this.pendingDetach],placements:this.placements.serialize(),community:this.community.serialize(),faith:this.faith.serialize(),terrainDamage:clone(this.terrainDamage),deaths:clone(this.deaths),seenRegions:[...this.seenRegions],discoveredLandmarks:[...this.discoveredLandmarks],conversion:this.conversion?clone(this.conversion):null};}
 }

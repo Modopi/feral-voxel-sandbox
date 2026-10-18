@@ -149,10 +149,7 @@
         </section>
         <section data-panel="world">
           <button id="resumeWorld" class="resumeWorld">▶ 탐험 계속</button>
-          <p>
-            160 × 160 × 40 m의 유한한 섬입니다. 5개의 장소를 탐험하고 주변
-            생태의 변화를 관찰하세요.
-          </p>
+          <p>월드를 불러오는 중입니다.</p>
           <div class="buttonRow">
             <a href="index.html" id="worldListBtn" class="secondary">저장 후 런처로</a><button id="saveBtn" class="primary">지금 저장</button
             ><button id="homeBtn" class="secondary">출발 지점</button
@@ -166,7 +163,7 @@
             <div><span>월드 시드</span><b id="seedValue">63026</b></div>
           </div></details>
           <div id="resetConfirm" class="confirm hidden">
-            현재 저장을 지우고 새 섬을 생성합니다.
+            현재 저장을 지우고 이 월드를 새로 만듭니다.
             <div class="buttonRow">
               <button id="confirmReset" class="primary">새로 만들기</button
               ><button id="cancelReset" class="secondary">취소</button>
@@ -175,9 +172,9 @@
         </section>
         <section data-panel="life" class="hidden">
           <div class="speciesRow">
-            <span>◈ 이끼사슴 <b id="herbCount">0</b></span
-            ><span>◆ 구리여우 <b id="predCount">0</b></span
-            ><span>⬡ 청금딱정 <b id="beetleCount">0</b></span>
+            <span>◈ <span id="herbName">이끼사슴</span> <b id="herbCount">0</b></span
+            ><span>◆ <span id="predName">구리여우</span> <b id="predCount">0</b></span
+            ><span>⬡ <span id="beetleName">청금딱정</span> <b id="beetleCount">0</b></span>
           </div>
           <div class="metricGrid">
             <div><span>섭식량</span><b id="grazed">0</b></div>
@@ -192,7 +189,7 @@
             <button id="herdBtn" class="secondary">근처에 24마리</button
             ><button id="stressBtn" class="primary">3,000 개체 실험</button>
           </div>
-          <h3 class="sandboxTitle">샌드박스 도구 <small>섬 전용 · 사용 버튼으로 실행</small></h3>
+          <h3 class="sandboxTitle">샌드박스 도구 <small>샌드박스 설정 · 사용 버튼으로 실행</small></h3>
           <div class="buttonRow" id="sandboxTools">
             <button data-sandbox-tool="0" class="secondary">관찰 렌즈</button
             ><button data-sandbox-tool="4" class="secondary">물 붓기</button
