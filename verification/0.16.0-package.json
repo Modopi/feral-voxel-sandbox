@@ -1,0 +1,37 @@
+{
+  "version": "0.16.0",
+  "versionCode": 1600,
+  "minNativeCode": 303,
+  "files": 112,
+  "nativeFileLimit": 128,
+  "mjsFiles": [],
+  "newFiles": [
+    "content-runtime/first-signal-view.js",
+    "content-runtime/signal-assets.js"
+  ],
+  "removedFiles": [
+    "render.js",
+    "art-direction.js",
+    "animal-view.js",
+    "character-body-view.js",
+    "edit-grid.js",
+    "loose-view.js",
+    "loose-physics.js",
+    "impact-physics.js",
+    "machine/assembly-physics.js",
+    "frontier/view.js",
+    "frontier/campaign-view.js",
+    "frontier/assembly-view.js",
+    "frontier/motion.js",
+    "frontier/model.js"
+  ],
+  "archiveBytes": 2808619,
+  "expandedBytes": 11524280,
+  "archiveSha256": "3e39cdd0acb7471cae8cc0694dd29ca1faad451ec1db91209c1cac9fc9313855",
+  "packageSha256": "aac042d6010a663df4f264d997218bf233d11a0a9f605702f0595ecd7644fecb",
+  "apkSha256": "d04fc660369bc28d0902a82aeed29efc251f52ad4886400af58632639cfb977f",
+  "apkAssetsIdenticalToUpdate": true,
+  "mainJsStub": true,
+  "withinLimits": true,
+  "note": "Local build with the shared test signing key; CI rebuilds and publishes after merge. main.js stays as a stub because the app's update check requires it."
+}

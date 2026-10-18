@@ -2,7 +2,7 @@
 :root { --slot-edge:#343434; --slot-face:#8b8b8b; --slot-light:#eee; }
 .itemIcon { width:100%; height:100%; display:block; pointer-events:none; filter:drop-shadow(2px 2px 0 #0005); }
 #hud #hotbar { position:absolute; left:50%; bottom:max(18px,env(safe-area-inset-bottom)); transform:translateX(-50%); display:grid; grid-template-columns:repeat(9,46px); gap:3px; padding:4px; background:#252525b8; border:2px solid #121212; border-radius:0; max-width:none; overflow:visible; }
-body.frontier #hotbar .slot:nth-child(n), #hud .slot { display:block; width:46px; height:46px; min-width:0; padding:4px; border:2px solid; border-color:#565656 #161616 #161616 #565656; background:#787878b8; border-radius:0; position:relative; touch-action:manipulation; }
+#hud .slot { display:block; width:46px; height:46px; min-width:0; padding:4px; border:2px solid; border-color:#565656 #161616 #161616 #565656; background:#787878b8; border-radius:0; position:relative; touch-action:manipulation; }
 #hud .slot.selected { border-color:#fff; outline:2px solid #242424; background:#a5a393cc; box-shadow:inset 0 0 0 1px #fff; transform:none; }
 #hud .slot .num { position:absolute; top:0;left:2px;color:#ddd;font-size:9px;opacity:.65; }
 .stackCount { position:absolute; bottom:1px;right:2px;color:white;font-size:14px;line-height:1;text-shadow:1px 1px #111, -1px -1px #333; font-weight:700;pointer-events:none; }

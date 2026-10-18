@@ -126,12 +126,6 @@ p {
   margin: 0 0 22px;
   font-size: 13px;
 }
-.startActions {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-}
 .primary {
   background: var(--gold);
   color: var(--dark);
