@@ -24,7 +24,7 @@ function colorFor(id) {
  return 0x777e79;
 }
 // Reused padded volume: the chunk plus one face-adjacent cell on each side.
-let PADDED=new Uint16Array(0),MASK=new Int32Array(0);
+let PADDED=new Uint16Array(0),MASK=new Int32Array(0);const BORDER=new Uint16Array(6144);
 const paletteIndex=new WeakMap(),paletteColor=new WeakMap();
 /** Greedy-meshed exposed faces of one chunk. Neighbour cells are read once into a
  * padded volume so the sweep is pure index arithmetic with no per-cell allocation. */
@@ -35,8 +35,11 @@ export function chunkGeometry(atlas,chunk) {
  let index=paletteIndex.get(palette);if(!index){index=new Map();palette.forEach((id,i)=>{if(!index.has(id))index.set(id,i);});paletteIndex.set(palette,index);}
  let colors=paletteColor.get(palette);if(!colors){colors=new Map();paletteColor.set(palette,colors);}
  for(let y=0;y<size;y++)for(let z=0;z<size;z++){const from=z*size+y*size*size,to=1+(z+1)*W+(y+1)*W2;for(let x=0;x<size;x++)vol[to+x]=blocks[from+x];}
- const gx=chunk.cx*size,gy=chunk.cy*size,gz=chunk.cz*size,outside=(x,y,z)=>{const id=atlas.getCell(gx+x,gy+y,gz+z);vol[(x+1)+(z+1)*W+(y+1)*W2]=id?index.get(id)??0:0;};
- for(let a=0;a<size;a++)for(let b=0;b<size;b++){outside(-1,a,b);outside(size,a,b);outside(a,-1,b);outside(a,size,b);outside(a,b,-1);outside(a,b,size);}
+ // The cells just outside the six faces come from the atlas (loaded neighbours, or the worker's border).
+ const border=atlas.chunkBorder(chunk,BORDER);
+ for(let f=0;f<6;f++){const axis=f>>1,o=f&1?size:-1;for(let a=0;a<size;a++)for(let b=0;b<size;b++){
+  const x=axis===0?o:a,y=axis===0?a:axis===1?o:b,z=axis===2?o:b;vol[(x+1)+(z+1)*W+(y+1)*W2]=border[f*1024+a*32+b];
+ }}
  const stride=[1,W2,W],p=[],n=[],c=[],x=[0,0,0],corner=[0,0,0];
  for(let d=0;d<3;d++){
   const u=(d+1)%3,v=(d+2)%3,sd=stride[d],su=stride[u],sv=stride[v];

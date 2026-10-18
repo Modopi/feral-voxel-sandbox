@@ -23,7 +23,9 @@ const columnKey = (x,z)=>`${x},${z}`;
 const floorDiv = (x,n)=>Math.floor(x/n);
 const safeInteger = n=>Number.isSafeInteger(n);
 const finitePosition = n=>Number.isFinite(n)&&Math.abs(n)<=Number.MAX_SAFE_INTEGER/4;
-const EMPTY_SET = Object.freeze(new Set());
+const EMPTY_SET = Object.freeze(new Set()), EMPTY_MAP = Object.freeze(new Map());
+/** Int16 marker of a dry column in a chunk's natural water summary. */
+export const NO_WATER = -32768;
 function memo(map,key,compute,limit){if(map.has(key))return map.get(key);const value=compute();map.set(key,value);if(map.size>limit)map.delete(map.keys().next().value);return value;}
 const SHA_K = new Uint32Array([0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2]);
 const rotate=(x,n)=>(x>>>n)|(x<<(32-n));
@@ -422,13 +424,15 @@ export class WorldAtlas {
     return{steps,pendingSeconds:this._simulationAccumulator,fluidCells:this._fluidActive.size,burningCells:this.burning.size,environmentRevision:this.environmentRevision};
   }
   fluidTotals(){let volumeM3=0,acidM3=0,thermalEu=0;for(const f of this.fluidCells.values()){volumeM3+=f.volumeM3;acidM3+=f.acidM3;thermalEu+=f.thermalEu;}return{volumeM3,acidM3,thermalEu,scope:'materialized_cells_only'};}
-  _newChunkJob(cx,cy,cz){return{key:cellKey(cx,cy,cz),cx,cy,cz,size:32,cellSize:CELL_SIZE,blocks:new Uint16Array(32768),palette:this.palette,revision:this.revision,cursor:0,columnIndex:-1,column:null,flora:null};}
+  _newChunkJob(cx,cy,cz){return{key:cellKey(cx,cy,cz),cx,cy,cz,size:32,cellSize:CELL_SIZE,blocks:new Uint16Array(32768),water:new Int16Array(2048),palette:this.palette,revision:this.revision,cursor:0,columnIndex:-1,column:null,flora:null};}
   _advanceChunk(job,limit,deadline=Infinity){
     let processed=0;
     while(job.cursor<32768&&processed<limit){
       if((processed&63)===0&&performance.now()>=deadline)break;
       const col=Math.floor(job.cursor/32),y=job.cursor%32,x=col%32,z=Math.floor(col/32),hx=job.cx*32+x,hy=job.cy*32+y,hz=job.cz*32+z;
       if(job.columnIndex!==col){job.columnIndex=col;job.column=this._column(hx,hz);job.flora=new Map();const c=job.column;
+        // Natural water of the column (surface cell and floor), the same test the water view makes per column.
+        const wet=c.waterLevel!==null&&c.waterLevel>c.height;job.water[col*2]=wet?Math.ceil(c.waterLevel*2)-1:NO_WATER;job.water[col*2+1]=wet?Math.floor(c.height*2):NO_WATER;
         const low=Math.max(job.cy*32,c.topCell+1),high=Math.min(job.cy*32+31,c.topCell+24);
         for(let yy=low;yy<=high;yy++){const id=this._vegetationAt(hx,yy,hz,c);if(id!==null)job.flora.set(yy,id);}
       }
@@ -449,8 +453,36 @@ export class WorldAtlas {
   _finishChunk(job){
     // Edits may have arrived after a cell was generated during an earlier frame.
     for(const [key,id]of this.chunkEdits.get(job.key)??[]){const [x,y,z]=decodeCell(key);if(floorDiv(x,32)===job.cx&&floorDiv(y,32)===job.cy&&floorDiv(z,32)===job.cz)job.blocks[(x-job.cx*32)+(z-job.cz*32)*32+(y-job.cy*32)*1024]=this.blockNumbers.get(id);}
-    const {key,cx,cy,cz,size,cellSize,blocks,palette}=job;return{key,cx,cy,cz,size,cellSize,blocks,palette,revision:this.revision};
+    const {key,cx,cy,cz,size,cellSize,blocks,palette}=job;
+    return{key,cx,cy,cz,size,cellSize,blocks,palette,revision:this.revision,water:job.water??null,border:job.border??null,generation:job.generation??this.generationRevision};
   }
+  /** Palette numbers of the cells just outside a loaded chunk on its six faces (x-, x+, y-, y+, z-, z+, 32 × 32
+   * each as face·1024 + a·32 + b, the order chunkGeometry walks): a loaded neighbour's cells, else the border the
+   * worker built for this base terrain with the neighbour's edits on top, else the cell lookup (which generates
+   * base cells here). */
+  chunkBorder(chunk,out){
+    const {cx,cy,cz}=chunk,border=chunk.border&&chunk.generation===this.generationRevision?chunk.border:null;
+    for(let f=0;f<6;f++){
+      const axis=f>>1,o=f&1?32:-1,nx=cx+(axis===0?(f&1?1:-1):0),ny=cy+(axis===1?(f&1?1:-1):0),nz=cz+(axis===2?(f&1?1:-1):0),base=f*1024;
+      const neighbor=this._chunkAt(nx,ny,nz);
+      for(let a=0;a<32;a++)for(let b=0;b<32;b++){
+        const x=axis===0?o:a,y=axis===0?a:axis===1?o:b,z=axis===2?o:b,i=base+a*32+b;
+        if(neighbor)out[i]=neighbor.blocks[(x-(nx-cx)*32)+(z-(nz-cz)*32)*32+(y-(ny-cy)*32)*1024];
+        else if(border)out[i]=border[i];
+        else{const id=this.getCell(cx*32+x,cy*32+y,cz*32+z);out[i]=id===null?0:this.blockNumbers.get(id)??0;}
+      }
+      if(neighbor||!border)continue;
+      for(const [key,id]of this.chunkEdits.get(cellKey(nx,ny,nz))??EMPTY_MAP){
+        const [hx,hy,hz]=decodeCell(key),x=hx-cx*32,y=hy-cy*32,z=hz-cz*32;
+        if((axis===0?x:axis===1?y:z)!==o)continue;
+        out[base+(axis===0?y:x)*32+(axis===2?y:z)]=this.blockNumbers.get(id)??0;
+      }
+    }
+    return out;
+  }
+  /** Natural water per column of a loaded chunk column (cx, cz): Int16Array of 1024 × [surface cell, floor cell],
+   * NO_WATER where dry; null when no chunk of that column is loaded. Chunk generation records it. */
+  naturalWater(cx,cz){for(const c of this.activeChunks.values())if(c.cx===cx&&c.cz===cz&&c.water)return c.water;return null;}
   _generateChunk(cx,cy,cz){const job=this._newChunkJob(cx,cy,cz);this._advanceChunk(job,32768);return this._finishChunk(job);}
   loadAround(x,z,{radiusChunks=2,verticalRadius=0,y,chunkBudget=4,arrivalBudget=4,workBudgetMs=8,maxCellsPerLoad=32768}={}){
     validatePosition(x,z);if(!(workBudgetMs>0)||!(maxCellsPerLoad>0))throw new RangeError('Invalid incremental work budget');const started=performance.now(),deadline=started+workBudgetMs;if(![radiusChunks,verticalRadius,chunkBudget].every(Number.isFinite))throw new RangeError('Invalid chunk loading budget');if(y!==undefined&&!finitePosition(y))throw new RangeError('Invalid load height');
@@ -484,7 +516,7 @@ export class WorldAtlas {
       for(const [key,msg]of g.arrived){
         if(generated>=arrivals)break;
         g.arrived.delete(key);if(!keys.has(key)||this.activeChunks.has(key))continue;
-        this._installChunk(this._finishChunk({key,cx:msg.cx,cy:msg.cy,cz:msg.cz,size:32,cellSize:CELL_SIZE,blocks:msg.blocks,palette:this.palette}),cx,cz);generated++;
+        this._installChunk(this._finishChunk({key,cx:msg.cx,cy:msg.cy,cz:msg.cz,size:32,cellSize:CELL_SIZE,blocks:msg.blocks,water:msg.water,border:msg.border,generation:msg.generation,palette:this.palette}),cx,cz);generated++;
       }
       for(const c of selected){
         if(g.waiting>=g.inflight)break;
@@ -545,7 +577,7 @@ export class WorldAtlas {
     g.waiting=Math.max(0,g.waiting-1);
     if(msg.generation!==this.generationRevision)return;
     g.requested.delete(msg.key);
-    if(!(msg.blocks instanceof Uint16Array)||msg.blocks.length!==32768){this._generatorFailed(g,'invalid chunk');return;}
+    if(!(msg.blocks instanceof Uint16Array)||msg.blocks.length!==32768||!(msg.water instanceof Int16Array)||msg.water.length!==2048||!(msg.border instanceof Uint16Array)||msg.border.length!==6144){this._generatorFailed(g,'invalid chunk');return;}
     g.arrived.set(msg.key,msg);
   }
   _reservationsChanged(){

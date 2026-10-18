@@ -1,12 +1,15 @@
 // Off-thread terrain generation (P2, docs/ARCHITECTURE.md §7): a worker copy of the atlas builds chunks that
 // equal the main thread's, with edits, reservations and region terrain versions, drops results of an older
 // base terrain, and the atlas falls back to building chunks itself when the worker fails or is not ready.
+// A worker chunk also carries the base cells around it (meshing before its neighbours load) and its natural water.
 // The worker runs on a MessageChannel in this thread with the same handler the browser worker installs.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {CONTENT} from '../app/src/main/assets/content-runtime/catalog.generated.js';
 import {generatorFor} from '../app/src/main/assets/content-runtime/maps.js';
 import {terrainWorker, createTerrainGenerator} from '../app/src/main/assets/content-runtime/terrain-worker.js';
+import {NO_WATER} from '../app/src/main/assets/content-runtime/atlas.js';
+import {chunkGeometry} from '../app/src/main/assets/content-runtime/scene.js';
 
 const make = (id, options = {}) => new (generatorFor(id).atlas)(CONTENT, { seed: 63026, ...options });
 const LOAD = { radiusChunks: 0, verticalRadius: 1, chunkBudget: 4, workBudgetMs: Infinity, maxCellsPerLoad: Infinity };
@@ -85,4 +88,38 @@ test('until the worker is ready, and after it fails, the atlas builds chunks its
   assert.deepEqual([other._generator, other.generatorFailure, failing.terminated], [null, 'boom', true]);
   streamMain(other, 8, 8);
   sameChunks(other, atlas);
+});
+
+test('a worker chunk meshes like a main-thread chunk before its neighbours load, with their edits, and carries its natural water', async () => {
+  // The starter pond at (80, 24) on the expedition terrain: water in the chunk column (5, 1).
+  const main = make('infinite'), atlas = make('infinite'), { port, close } = channel();
+  try {
+    streamMain(main, 80, 24);
+    atlas.attachGenerator(port);await ready(atlas);
+    await streamWorker(atlas, 80, 24);
+    // Keep one chunk alone in both atlases so its six neighbours are unloaded.
+    const key = [...main.activeChunks.keys()].sort()[0], lone = (a) => { const c = a.activeChunks.get(key); a.activeChunks.clear(); a.activeChunks.set(key, c); return c; };
+    const m = lone(main), w = lone(atlas);
+    assert.equal(m.border, null);assert.ok(w.border instanceof Uint16Array);
+    // An edit in the unloaded +x neighbour's layer next to a solid cell of the chunk opens a face.
+    let edit = null;
+    for (let y = 0; y < 32 && !edit; y++) for (let z = 0; z < 32 && !edit; z++) {
+      const hx = (m.cx + 1) * 32, hy = m.cy * 32 + y, hz = m.cz * 32 + z;
+      if (m.blocks[31 + z * 32 + y * 1024] && main.getCell(hx, hy, hz) !== null) edit = [hx, hy, hz, null];
+    }
+    assert.ok(edit, 'a buried face to open');
+    for (const a of [main, atlas]) a.setCell(...edit);
+    const meshes = [main, atlas].map((a) => chunkGeometry(a, a.activeChunks.get(key)).attributes.position.array);
+    assert.ok(Buffer.from(meshes[0].buffer).equals(Buffer.from(meshes[1].buffer)), 'the same mesh from the worker border and from cell lookups');
+    // Natural water: the same columns the water view finds by sampling each column.
+    const water = atlas.naturalWater(5, 1);let wet = 0;
+    assert.ok(water instanceof Int16Array);
+    for (let i = 0; i < 1024; i++) {
+      const hx = 5 * 32 + i % 32, hz = 32 + Math.floor(i / 32), s = main.sample(hx * .5 + .25, hz * .5 + .25), open = s.waterLevel !== null && s.waterLevel > s.height;
+      assert.deepEqual([water[i * 2], water[i * 2 + 1]], open ? [Math.ceil(s.waterLevel * 2) - 1, Math.floor(s.height * 2)] : [NO_WATER, NO_WATER], `column ${hx},${hz}`);
+      if (open) wet++;
+    }
+    assert.ok(wet > 20, `${wet} pond columns`);
+    assert.equal(atlas.naturalWater(40, 40), null, 'no chunk of that column is loaded');
+  } finally { atlas.detachGenerator(); close(); }
 });
