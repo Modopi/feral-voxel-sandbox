@@ -164,7 +164,7 @@ Android 앱 (네이티브)                플랫폼: 게임 파일 버전·서�
 
 통합 런타임이 쓰는 공용 부품: `shell.js`(알림·입력·메뉴·현장 HUD·장부 창·상태/지도 페이지), `settings.js`(전역 설정 부품), `updates.js`(업데이트 화면 부품), `inventory-ui.js`(가방), `hud-editor.js`, `equipment.js`(개척 원정 채굴 공식), `physics.js`(캐릭터 이동), `world-slots.js`(월드 목록·설정). 개척 원정의 지형·캠페인 규칙(`world.js`, `frontier/terrain.js`·`campaign.js`·`content.js`)은 통합 런타임이 그대로 쓴다.
 
-0.16.0에서 개척 원정 엔진(`main.js` 계열: `render.js`, `frontier/view.js`·`model.js`·`motion.js` 등 15개 파일)을 지웠다. `main.js`만 설명 한 줄짜리 빈 모듈로 남는다: 설치된 앱 0.3.3의 업데이트 검사가 `main.js`가 없는 패키지를 거부하기 때문이다(아래 [바꿀 수 없는 제약](#바꿀-수-없는-제약)).
+0.16.0에서 개척 원정 엔진(`main.js` 계열: `render.js`, `frontier/view.js`·`model.js`·`motion.js` 등 14개 파일)을 지웠다. `main.js`만 설명 한 줄짜리 빈 모듈로 남는다: 설치된 앱 0.3.3의 업데이트 검사가 `main.js`가 없는 패키지를 거부하기 때문이다(아래 [바꿀 수 없는 제약](#바꿀-수-없는-제약)).
 
 ### 알려진 구조 문제 [현재]
 
