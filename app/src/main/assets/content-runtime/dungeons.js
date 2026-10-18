@@ -29,9 +29,9 @@ function subtractBox(source, removed) {
   return result;
 }
 export class DungeonSystem {
-  constructor({ catalog, seed = 1, state = null, atlas = null, assets = null, firstStructureDistance = 160 } = {}) {
+  constructor({ catalog, seed = 1, state = null, atlas = null, assets = null, firstStructureDistance = 160, starterStructures = true } = {}) {
     if (!catalog?.structures?.entries || !Number.isSafeInteger(seed)) throw Error('던전 카탈로그와 정수 시드가 필요합니다.');
-    this.catalog = catalog; this.seed = seed; this.atlas = atlas; this.assets = assets;
+    this.catalog = catalog; this.seed = seed; this.atlas = atlas; this.assets = assets; this.starterStructures = starterStructures;
     this.templates = new Map(catalog.structures.entries.map(e => [e.id, e]));
     this.blocks = new Map((catalog.blocks?.entries || []).map(e => [e.id, e]));
     this.rewards = new Map((catalog.progression?.entries || []).filter(e => e.kind === 'reward_pool').map(e => [e.id, e]));
@@ -105,6 +105,8 @@ export class DungeonSystem {
     this._reserve(instance); this.instances.set(id, instance); this._indexInstance(instance); return instance;
   }
   bootstrap() {
+    // Map presets without the expedition's starter manor and supply camp (the basic island) skip them.
+    if (!this.starterStructures) return [];
     const savedFirst=this.instances.get(`structure:${this.seed}:starter-manor:root_manor`);
     const y = savedFirst?.origin[1] ?? this._height(0, 0) + GRID, result = [];
     if (this.templates.has('root_manor')) {

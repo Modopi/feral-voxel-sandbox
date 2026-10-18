@@ -70,7 +70,8 @@ const assert = require("node:assert/strict");
   assert.deepEqual(await page.evaluate(() => window.__calls.healthy), [
     version.versionCode,
   ]);
-  await page.click("#startBtn");
+  // The default world (the basic island, on the shared runtime from 0.14.0) starts without a title button.
+  if (await page.locator("#startBtn").isVisible()) await page.click("#startBtn");
   await page.click("#menuBtn");
   await page.click('[data-tab="updates"]');
   assert.equal(
@@ -109,13 +110,15 @@ const assert = require("node:assert/strict");
     window.FeralUpdates.refresh();
   }, { code: version.versionCode + 1, next: nextVersion });
   assert.equal(await page.locator("#applyUpdate").isVisible(), true);
+  // The shared runtime saves in two generations (feral.world.v1.a/.b); applying writes a newer one first.
+  const generation = () =>
+    page.evaluate(() =>
+      Math.max(0, ...["a", "b"].map((slot) => JSON.parse(localStorage.getItem(`feral.world.v1.${slot}`) ?? "{}").sequence ?? 0)),
+    );
+  const before = await generation();
   await page.click("#applyUpdate");
   assert.equal(await page.evaluate(() => window.__calls.applied), 1);
-  assert.ok(
-    await page.evaluate(
-      () => JSON.parse(localStorage.getItem("feral.world.v1")).inventory,
-    ),
-  );
+  assert.ok((await generation()) > before, "the world is saved before the update is applied");
   await page.evaluate(() => {
     window.__originalSet = Storage.prototype.setItem;
     Storage.prototype.setItem = () => {

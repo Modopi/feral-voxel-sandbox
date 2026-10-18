@@ -35,6 +35,7 @@ import {
   showMovementState,
   changeStance,
   changeSprint,
+  SANDBOX_TOOLS,
 } from "./shell.js";
 import {
   DEFAULT_EDIT_SIZE,
@@ -375,7 +376,6 @@ function updateToolLabel() {
   view?.setCharacterArmor(inventory.unlocks.has("armor"));
   $("hint").textContent = "1–9 아이템 · I 가방";
 }
-const SANDBOX_TOOLS = { 0: ["관찰 렌즈", "생명·지형 정보 읽기"], 4: ["물 붓기", "조준한 곳에 물 추가"], 5: ["불 붙이기", "조준한 칸에 불 붙이기"], 6: ["산 붓기", "조준한 곳에 산 추가"], 8: ["개체 생성", "조준한 곳에 동물 1마리"] };
 // Island-only sandbox tools stay selected until the hotbar changes; frontier keeps its own interactions.
 function sandboxTool() {
   return !frontierUI && selected in SANDBOX_TOOLS && sandboxSelected ? selected : null;

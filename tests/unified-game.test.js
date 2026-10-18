@@ -18,8 +18,7 @@ test('every world type except the machine field opens the one game screen', () =
   assert.match(worldURL({ id: 'beta', type: 'machine' }), /^machine\.html/, 'the machine field moves in the map-preset step');
   assert.deepEqual(DEFAULTS.map(w => w.type), ['island', 'frontier', 'machine']);
   const entry = read('game.js');
-  assert.match(entry, /\.\/content-runtime\/game\.js/);
-  assert.match(entry, /\.\/main\.js/);
+  assert.match(entry, /\["expedition", "island"\]\.includes\(world\.type\) \? "\.\/content-runtime\/game\.js" : "\.\/main\.js"/, 'the island and the expedition run on the one runtime; the frontier moves next');
   assert.match(read('index.html'), /<script type="module" src="game\.js"><\/script>/);
   const old = read('expedition.html');
   assert.doesNotMatch(old, /stylesheet|type="module"/, 'the old expedition page only forwards to index.html');

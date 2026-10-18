@@ -1,3 +1,6 @@
+// Historical check of the original island engine (main.js island mode), valid up to 0.13.0. From 0.14.0 the
+// basic island runs on the shared runtime; its start, touch movement, digging, herd button and save/reopen are
+// checked in tools/verify-ui-reachability.mjs (island) and tests/island-map.test.js. Removed with main.js in 0.16.
 const { chromium } = require("playwright");
 const fs = require("fs");
 const assert = require("node:assert/strict");

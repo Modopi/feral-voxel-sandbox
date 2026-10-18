@@ -18,12 +18,13 @@ import {FixtureEnergyPanel} from './fixture-energy-panel.js';
 import {CreatureFragments} from './creature-fragments.js';
 import {AnchorMarkers} from './anchor-markers.js';
 import {ItemSlots,designCatalog} from './item-slots.js';
+import {applyLegacyIsland} from './maps.js';
 import {VERSION} from '../version.js';
 import {reasonText} from './reasons.js';
 import {InventoryUI,drawHotbar} from '../inventory-ui.js';
 import {HudEditor} from '../hud-editor.js';
 import {installHUDArt} from '../ui-art.js';
-import {createInput,createNotifier,showDiscovery,initSettings,bindMenuTabs,selectTab,showPauseScreen,bindBackground,installErrorScreen,mountFieldHUD,mountJourney,setJourney,setVitals,waypointText,GameWindow,showMovementState,changeStance,changeSprint} from '../shell.js';
+import {createInput,createNotifier,showDiscovery,initSettings,bindMenuTabs,selectTab,showPauseScreen,bindBackground,installErrorScreen,mountFieldHUD,mountJourney,setJourney,setVitals,waypointText,GameWindow,showMovementState,changeStance,changeSprint,SANDBOX_TOOLS} from '../shell.js';
 const $=id=>document.getElementById(id);
 const loading=window.FeralLoading??{set(){},step(){},finish(){},fail(){},timings:[]};
 const notify=createNotifier($('toast'),{translate:reasonText});
@@ -31,6 +32,7 @@ let runtime,view,bossView,environmentView,equipmentView,feedbackView,machinePane
 let ready=false,paused=false,last=0,accum=0,saveClock=0,hudClock=0,tabClock=0,fpsFrames=0,fpsTime=0,fps=0,sprintLatched=false,actionHeld=false,manual=false,manualDeviceId=null;
 let communityTarget=null,deviceTarget=null,deviceAngleRad=0,weaponPattern='weapon_slash',weaponMaterial='wood',hitFlash=null,jobWatch={id:null,progress:0,since:0},destination=null,researchQuery='',bagSignature='';
 const held={descend:false,brake:false},ledgerPointers=new Set(),discovered=new Set();
+let sandboxTool=null,converted=null,minimapClock=0,buildSize=.5;
 const input=createInput({canControl:()=>ready&&!paused,isEditing:()=>hudEditor?.editing===true,rotateLook});
 const energyNames={mechanical:'역학',electrical:'전기',thermal:'열',chemical:'화학',magic:'마법',divine:'신성'};
 const attackStyles={strike:'일반 타격',pierce:'관통 찌르기',impact:'충격 전달'};
@@ -71,7 +73,12 @@ function openBag(){pause(true,{quiet:true});selectTab('bag',updatePanels);}
 function refreshPanels(){if(!ready)return;if(ledger?.isOpen)ledger.render();if(paused&&$('pauseScreen').classList.contains('inventoryMode'))bag.render();renderHotbar();}
 function updatePanels(tab){
  if(!ready)return;
- $('foundCount').textContent=`${runtime.nearbyStructures.filter(d=>d.visitedRooms.length).length}`;
+ const places=runtime.map.landmarks.length;
+ $('foundCount').textContent=places?`${runtime.discoveredLandmarks.size} / ${places}`:`${runtime.nearbyStructures.filter(d=>d.visitedRooms.length).length}`;
+ if(runtime.map.rules.sandbox){
+  const alive=runtime.creatures.entities.filter(e=>!e.dead),count=id=>alive.filter(e=>e.speciesId===id).length,r=runtime.atlas.reactions;
+  for(const [id,n]of [['herbCount',count('moss_deer')],['predCount',count('copper_fox')],['beetleCount',count('azure_beetle')],['grazed','—'],['birthDeath',`${[...(runtime.creatures.regions?.values?.()??[])].reduce((t,g)=>t+(g.births??0),0)} / ${runtime.creatures.entities.length-alive.length}`],['reactionCount',`${r.dissolvedCells} / ${r.burnedCells}`],['visibleCount',runtime.creatures.visibleEntities(runtime.player).length],['triangleCount',view.renderer.info.render.triangles.toLocaleString()],['benchFps',fps.toFixed(0)]])$(id).textContent=n;
+ }
  $('elapsed').textContent=`${Math.floor(runtime.time/60)}:${String(Math.floor(runtime.time%60)).padStart(2,'0')}`;
  $('seedValue').textContent=world.seed;
  if(tab==='bag'||$('pauseScreen').classList.contains('inventoryMode'))bag.render();
@@ -79,7 +86,7 @@ function updatePanels(tab){
 }
 
 function selectHotbar(n){
- slots.select(n);const id=slots.held,d=id&&runtime.progression.catalog.get(id);
+ slots.select(n);sandboxTool=null;const id=slots.held,d=id&&runtime.progression.catalog.get(id);
  if(d?.kind==='gear_baseline'&&runtime.progression.equipped!==id){const r=runtime.progression.equip(id);if(r.ok)notify(`${d.name} 장착`);}
  renderHotbar();updateToolLabel();buttonLabels();
 }
@@ -88,9 +95,14 @@ function updateToolLabel(){
  const id=slots.held,d=id&&runtime.progression.catalog.get(id),weapon=runtime.armaments.loadout(),wear=id&&catalog.durability(id);
  $('toolName').textContent=weapon?weapon.name:id?d.name:'맨손';
  $('toolHelp').textContent=weapon?`${attackStyles[weapon.attackMode]} · 내구 ${weapon.durability}/${weapon.maxDurability}`:wear?`도구 내구 ${wear.value}/${wear.max}`:id==='food'?'사용: 먹기':d?.kind==='station'||d?.kind==='component'?'사용: 앞에 설치':`공격 방식 ${attackStyles[runtime.player.attackStyle??'strike']}`;
- $('rangeBtn').textContent=`방식: ${attackStyles[weapon?.attackMode??runtime.player.attackStyle??'strike']} ↻`;
- $('rangeBtn').disabled=!!weapon;
+ if(sandboxTool!==null){$('toolName').textContent=SANDBOX_TOOLS[sandboxTool][0];$('toolHelp').textContent=SANDBOX_TOOLS[sandboxTool][1];}
+ const block=runtime.buildableBlock(id);
+ if(block&&sandboxTool===null)$('toolHelp').textContent=`보유 ${Number(runtime.progression.count(id).toFixed(2))} · 설치 ${buildSize>=1?8:1}칸 · ${CONTENT.blocks.entries.find(b=>b.id===block)?.name??block}`;
+ $('rangeBtn').textContent=block?`설치 ${buildSize>=1?'1 m':'0.5 m'} ↻`:`방식: ${attackStyles[weapon?.attackMode??runtime.player.attackStyle??'strike']} ↻`;
+ $('rangeBtn').disabled=!block&&!!weapon;
 }
+// The range button sizes block placement while a buildable item is held, otherwise it cycles the attack style.
+function cycleRange(){if(runtime.buildableBlock(slots.held)){buildSize=buildSize>=1?.5:1;updateToolLabel();buttonLabels();return;}cycleAttackStyle();}
 function cycleAttackStyle(){
  if(runtime.armaments.loadout()){notify('장착한 무기의 공격 방식을 사용합니다.');return;}
  const modes=Object.keys(attackStyles),mode=modes[(modes.indexOf(runtime.player.attackStyle??'strike')+1)%modes.length];runtime.player.attackStyle=mode;
@@ -115,7 +127,11 @@ function secondary(){
  if(!ready||paused)return;
  const id=slots.held,d=id&&runtime.progression.catalog.get(id);
  if(physical.objectPhysics.held||runtime.drivingMachineId){interact();return;}
+ if(sandboxTool!==null){useSandbox(sandboxTool);return;}
+ // On sandbox maps an empty hand observes, like the original island; the interact button still interacts.
+ if(!id&&runtime.map.rules.sandbox){observe(view.aim({range:8}));return;}
  if(id==='food'){report(runtime.eat(),'음식을 먹었습니다.');return;}
+ if(runtime.buildableBlock(id)){const r=runtime.placeBlocks(view.aim({range:6.5}),id,buildSize);if(!r.ok)notify(r.reason);renderHotbar();return;}
  if(d?.kind==='station'||d?.kind==='component'){placeEquipment(id).catch(e=>notify(e.message));return;}
  interact();
 }
@@ -172,6 +188,65 @@ function interactLabel(hit){
  if(hit?.kind==='creature'&&hit.distance<4){const e=runtime.creatures.get(hit.id);if(e?.dead)return '전리품';if(e?.civilization)return '대화';}
  const a=nearbyAnchors()[0];if(a)return a.kind==='reward'?(a.claimed?'살펴보기':'보상 회수'):a.kind==='gimmick'?'장치 작동':a.kind==='puzzle'?'장치 패널':a.kind==='inspect'?'관찰':'이용';
  const n=runtime.terrainResource(hit)??nearestNode();return n&&(n.distance??distance(runtime.player,n))<5?'채집':'';
+}
+
+// ---- Sandbox tools (maps with sandbox rules, like the basic island) ----
+function selectSandboxTool(n){
+ if(!runtime.map.rules.sandbox)return;
+ if(n<0){sandboxTool=null;pause(false);notify('들고 있는 아이템으로 돌아왔습니다.');}
+ else{sandboxTool=n;pause(false);notify(`${SANDBOX_TOOLS[n][0]} 선택 · 사용 버튼으로 실행`);}
+ updateToolLabel();buttonLabels();
+}
+function observe(hit){
+ const e=hit?.kind==='creature'?runtime.creatures.get(hit.id):null;
+ if(e){notify(`${name(e.speciesId)} · HP ${Math.ceil(e.hp)}/${e.maxHp} · ${e.dead?'쓰러짐':e.state??'배회'} · 칼로리 ${Math.round(e.calories??0)}`);return;}
+ if(hit?.point&&hit.distance<=8){const n=hit.normal??{x:0,y:1,z:0},cell=['x','y','z'].map(k=>Math.floor((hit.point[k]-(n[k]??0)*.001)*2)),id=hit.kind==='terrain'?runtime.atlas.getCell(...cell):null;
+  notify(`지형 ${id?CONTENT.blocks.entries.find(b=>b.id===id)?.name??id:hit.kind==='structure'?'구조물':'표면'} · 0.5 m · 거리 ${hit.distance.toFixed(2)} m`);return;}
+ notify('8 m 이내의 생명이나 지표를 관찰하세요.');
+}
+function islandSpecies(){return CONTENT.environments.entries.find(e=>e.id==='grove').spawning.rules;}
+function spawnCreature(position,speciesId){
+ const regionId=`${Math.floor(position.x/64)},${Math.floor(position.z/64)}`;
+ return runtime.creatures.spawn(speciesId,{x:position.x,z:position.z},{regionId,environmentId:runtime.atlas.sample(position.x,position.z).environmentId});
+}
+function useSandbox(tool){
+ const hit=view.aim({range:8});
+ if(tool===0){observe(hit);return;}
+ if(!hit?.point){notify('8 m 이내의 표면을 조준하세요.');return;}
+ const p=hit.point,n=hit.normal??{x:0,y:1,z:0},out={x:p.x+(n.x??0)*.3,y:p.y+(n.y??0)*.3,z:p.z+(n.z??0)*.3};
+ if(tool===4||tool===6){const added=runtime.atlas.pour(out.x,out.y,out.z,tool===4?.5:.3,{acidFraction:tool===6?.95:0});notify(added>0?`${tool===4?'물':'산'} ${(added*1000).toFixed(0)} L 추가`:'부을 빈 공간을 조준하세요.');}
+ else if(tool===5){const cell=['x','y','z'].map(k=>Math.floor((p[k]-(n[k]??0)*.001)*2));notify(runtime.atlas.igniteCell(...cell)?'불을 붙였습니다.':'탈 수 있는 칸(나무·풀)을 조준하세요.');}
+ else if(tool===8){const rules=islandSpecies(),total=rules.reduce((t,r)=>t+r.weight,0);let roll=Math.random()*total,rule=rules[0];for(const r of rules){roll-=r.weight;if(roll<=0){rule=r;break;}}
+  const e=spawnCreature(out,rule.speciesId);notify(`${name(e.speciesId)} 생성`);}
+}
+function herd(){
+ const p=runtime.player;
+ for(let i=0;i<24;i++)spawnCreature({x:p.x+(Math.random()-.5)*15,z:p.z+(Math.random()-.5)*15},i%8===0?'copper_fox':'moss_deer');
+ updatePanels();notify('근처에 24마리를 놓았습니다.');
+}
+
+// ---- Places, minimap and the original-save report ----
+function landmarks(){
+ const p=runtime.player;let closest=null;
+ for(const l of runtime.map.landmarks){const d=Math.hypot(p.x-l.x,p.z-l.z);if(!closest||d<closest.d)closest={...l,d};
+  if(d<13&&!runtime.discoveredLandmarks.has(l.name)){runtime.discoveredLandmarks.add(l.name);showDiscovery(runtime.discoveredLandmarks.size,l.name);notify(`새 장소 발견 · ${l.name} (${runtime.discoveredLandmarks.size}/${runtime.map.landmarks.length})`,{queue:true});}}
+ return closest;
+}
+function drawMinimap(){
+ if(!document.body.classList.contains('showRadar'))return;
+ const c=$('map'),ctx=c.getContext('2d'),p=runtime.player,island=runtime.map.id==='island',size=160,origin=island?{x:0,z:0}:{x:Math.round(p.x)-80,z:Math.round(p.z)-80},k=150/size;
+ for(let z=0;z<size;z+=4)for(let x=0;x<size;x+=4){const s=runtime.atlas.sample(origin.x+x+2,origin.z+z+2);
+  ctx.fillStyle=s.waterLevel!==null?(s.waterType==='acid'?'#7f8a4a':'#4c7f84'):s.environmentId==='thermal'?'#7a6d63':s.environmentId==='ridge'?'#a29567':s.height>24?'#8a9474':'#55764e';ctx.fillRect(x*k,z*k,4*k+.5,4*k+.5);}
+ for(const e of runtime.creatures.visibleEntities(p,160)){if(e.dead)continue;ctx.fillStyle=e.attack?.targetId==='player'?'#df9e76':'#bed39a';ctx.fillRect((e.x-origin.x)*k,(e.z-origin.z)*k,1.6,1.6);}
+ for(const l of runtime.map.landmarks){ctx.strokeStyle=runtime.discoveredLandmarks.has(l.name)?'#ebce8a':'#8fa17d';ctx.strokeRect((l.x-origin.x)*k-2,(l.z-origin.z)*k-2,4,4);}
+ for(const d of runtime.nearbyStructures){ctx.strokeStyle='#d6b377';ctx.strokeRect((d.origin[0]-origin.x)*k-3,(d.origin[2]-origin.z)*k-3,6,6);}
+ ctx.save();ctx.translate((p.x-origin.x)*k,(p.z-origin.z)*k);ctx.rotate(-p.yaw);ctx.fillStyle='#ffe4a7';ctx.beginPath();ctx.moveTo(0,-5);ctx.lineTo(3,4);ctx.lineTo(0,2);ctx.lineTo(-3,4);ctx.closePath();ctx.fill();ctx.restore();
+}
+function renderConversion(append){
+ const c=runtime.conversion;if(!c)return;
+ const items=Object.entries(c.items??{}).map(([id,n])=>`${name(id)} ${Number(n.toFixed(2))}`).join(' · ')||'없음';
+ append('기존 섬 저장을 옮겼습니다',`원래 저장(${c.from})은 그대로 남아 있습니다. 위치·지형 편집·발견 장소와 다음 아이템을 옮겼습니다: ${items}`);
+ for(const u of c.unmapped??[])append(`옮기지 못한 항목 · ${u.name}`,u.detail);
 }
 
 // ---- Ledger window pages ----
@@ -231,11 +306,14 @@ function renderLedger(tab,list){
  ledger.feedback(`${work}제작 대기 ${p.jobs.length}${energy?' · '+energy:''}`);
 }
 function objective(){
- const g=runtime.progression;
+ const g=runtime.progression,places=runtime.map.landmarks;
+ if(places.length&&runtime.discoveredLandmarks.size<places.length)return [`섬의 다섯 장소 탐험 · ${runtime.discoveredLandmarks.size}/${places.length}`,'지도 버튼의 여정에서 다음 장소를 목적지로 표시할 수 있습니다.'];
  return g.research.has('joinery')?['장비와 운반 구조물을 준비하고 동쪽의 저택을 탐험하세요.','던전에서 보상과 연구 기록을 찾으세요.']:g.research.has('observation')?['식물 섬유와 나뭇가지를 모아 구조와 접합을 연구하세요.','연구 탭에서 구조와 접합을 시작하세요.']:['주변의 나뭇가지와 돌을 모아 관찰과 기록을 연구하세요.','채집한 표본으로 연구 탭에서 관찰을 시작하세요.'];
 }
 function renderJourney(list,append){
  const [goal,hint]=objective();append(goal,`${hint}\n연구 ${runtime.progression.research.size}/${runtime.progression.list('research').length}`);
+ for(const l of runtime.map.landmarks)append(l.name,`${runtime.discoveredLandmarks.has(l.name)?'발견함':'아직 찾지 못함'} · 지금 ${Math.round(Math.hypot(runtime.player.x-l.x,runtime.player.z-l.z))}m ${runtime.directionTo({x:l.x,z:l.z})}`,'목적지',()=>{destination={...l,y:runtime.atlas.heightAt(l.x,l.z)};pause(false);});
+ renderConversion(append);
  if(destination)append(`목적지 · ${destination.name}`,`${Math.round(distance(runtime.player,destination))}m ${runtime.directionTo(destination)}`,'표시 해제',()=>{destination=null;renderLedger('journey',list);});
  for(const d of runtime.nearbyStructures){const def=CONTENT.structures.entries.find(e=>e.id===d.templateId),rewards=runtime.dungeons.anchors(d.id).filter(a=>a.kind==='reward'),origin={x:d.origin[0],y:d.origin[1],z:d.origin[2]};
   append(def.name,`장소 ${d.tier}티어 · 지역 ${d.regionTier}티어 · 출발지로부터 ${Math.round(Math.hypot(d.origin[0],d.origin[2]))}m · 지금 ${Math.round(distance(runtime.player,origin))}m ${runtime.directionTo(origin)} · 탐색한 방 ${d.visitedRooms.length}/${def.rooms.length}${def.puzzle?` · ${def.puzzle.name} ${d.deviceState?.solved||d.puzzle?.phase==='open'?'해결':'미해결'}`:''}${d.boss?` · 수호자 ${d.boss.defeated?'격파':'생존'}`:''}${rewards.length?' · '+rewards.map(a=>`${a.name} ${a.claimed?'회수함':'남음'}`).join(', '):''}`,'목적지',()=>{destination={name:def.name,...origin};pause(false);});}
@@ -358,7 +436,7 @@ function contextCard(){
 }
 function hud(){
  const p=runtime.player,g=runtime.progression,e=CONTENT.environments.entries.find(e=>e.id===runtime.region.environmentId);
- $('biome').textContent=`${e?.name??''} · ${runtime.region.tier}티어`;
+ const place=landmarks();$('biome').textContent=place?place.name:`${e?.name??''} · ${runtime.region.tier}티어`;
  $('population').textContent=`생명체 ${runtime.creatures.visibleEntities(p).length}`;
  $('coords').textContent=`${Math.round(p.x)} / ${Math.round(p.z)}`;
  const job=g.researchJob,current=job&&g.catalog.get(job.id),progress=current?g.researchProgress[current.id]?.work??0:0;
@@ -383,7 +461,7 @@ function hud(){
 function buttonLabels(){
  const p=runtime.player,driving=!!runtime.drivingMachineId,heldItem=slots.held,d=heldItem&&runtime.progression.catalog.get(heldItem);
  $('actBtn').querySelector('small').textContent=physical?.objectPhysics.held?'던지기':driving?'무장 발사':p.attackEnergy?`${energyNames[p.attackEnergy]} 공격`:'공격·채집';
- $('useBtn').querySelector('small').textContent=driving?'내리기':physical?.objectPhysics.held?'놓기':heldItem==='food'?'먹기':d?.kind==='station'||d?.kind==='component'?'설치':'상호작용';
+ $('useBtn').querySelector('small').textContent=driving?'내리기':physical?.objectPhysics.held?'놓기':sandboxTool!==null?SANDBOX_TOOLS[sandboxTool][0]:heldItem==='food'?'먹기':runtime.buildableBlock(heldItem)?`놓기 ×${buildSize>=1?8:1}`:d?.kind==='station'||d?.kind==='component'?'설치':!heldItem&&runtime.map.rules.sandbox?'관찰':'상호작용';
 }
 // First entry into a structure shows the same discovery banner as the island's landmarks.
 function discover(){
@@ -394,6 +472,8 @@ function discover(){
 }
 function nearestUnexplored(){
  let best=null;
+ for(const l of runtime.map.landmarks){if(runtime.discoveredLandmarks.has(l.name))continue;const dist=Math.hypot(runtime.player.x-l.x,runtime.player.z-l.z);if(!best||dist<best.dist)best={...l,dist};}
+ if(best)return best;
  for(const d of runtime.nearbyStructures){const def=CONTENT.structures.entries.find(e=>e.id===d.templateId);if(!def||d.visitedRooms.length>=def.rooms.length)continue;const pos={x:d.origin[0],y:d.origin[1],z:d.origin[2]},dist=distance(runtime.player,pos);if(!best||dist<best.dist)best={name:def.name,...pos,dist};}
  const death=runtime.deaths.find(d=>!d.recovered);if(death)return {name:'요정이 지키는 소지품',...death.position};
  return best;
@@ -430,6 +510,7 @@ function frame(now){
  view.draw(runtime.player,controller.eye);
  hudClock+=dt;tabClock+=dt;
  if(hudClock>.2){hudClock=0;hud();}
+ minimapClock+=dt;if(minimapClock>.5){minimapClock=0;drawMinimap();}
  if(tabClock>1){tabClock=0;
   if(ledger.isOpen&&!manual&&!manualDeviceId&&!ledgerPointers.size&&!document.activeElement?.matches('#frontierContent input, #frontierContent select, #frontierContent textarea'))ledger.render();
   const signature=JSON.stringify([runtime.progression.inventory,runtime.progression.jobs.map(j=>[j.id,Math.round(j.progress)]),slots.revision]);
@@ -442,10 +523,17 @@ function frame(now){
 function bind(){
  document.body.classList.add('field','expedition');
  $('flyBtn').hidden=true;$('rangeBtn').classList.remove('hidden');
- document.querySelector('[data-tab="life"]').hidden=true;
- document.querySelector('[data-panel="world"] > p').textContent='끝없이 이어지는 세계입니다. 출발지에서 멀어질수록 위험해집니다. 던전·공동체·유적을 찾고, 채집한 표본으로 연구해 제작과 설비를 넓혀 가세요.';
+ const map=runtime.map;
+ document.querySelector('[data-tab="life"]').hidden=!map.rules.sandbox;
+ document.querySelector('[data-panel="world"] > p').textContent=map.description;
+ $('vitals').hidden=!map.rules.survival;
+ if(map.rules.sandbox){
+  for(const b of document.querySelectorAll('[data-sandbox-tool]'))b.onclick=()=>selectSandboxTool(+b.dataset.sandboxTool);
+  $('herdBtn').onclick=herd;$('stressBtn').hidden=true;
+  $('benchmarkText').textContent='샌드박스 도구는 재료 없이 실행합니다. 생명체는 섬의 생태 규칙(먹이·번식·포식)을 따릅니다.';
+ }
  $('homeBtn').textContent='휴식하기';$('homeBtn').onclick=rest;
- $('hint').textContent='1–9 핫바 · I 가방 · R 상호작용 · J 여정';
+ $('hint').textContent=map.rules.sandbox?'1–9 핫바 · I 가방 · R 상호작용 · 빈 손 사용: 관찰':'1–9 핫바 · I 가방 · R 상호작용 · J 여정';
  $('inventoryBtn').onclick=openBag;
  $('menuBtn').onclick=()=>{pause(true);selectTab('world',updatePanels);};
  $('resumeBtn').onclick=$('backToGame').onclick=$('resumeWorld').onclick=()=>pause(false);
@@ -453,7 +541,7 @@ function bind(){
  $('saveBtn').onclick=()=>{if(save())notify('탐험을 저장했습니다.');};
  $('newBtn').onclick=()=>$('resetConfirm').classList.remove('hidden');$('cancelReset').onclick=()=>$('resetConfirm').classList.add('hidden');
  $('confirmReset').onclick=()=>{ready=false;for(const suffix of ['','.a','.b'])localStorage.removeItem(saveKey(world)+suffix);location.reload();};
- $('rangeBtn').onclick=cycleAttackStyle;
+ $('rangeBtn').onclick=cycleRange;
  $('sprintBtn').onclick=()=>{if(!ready||paused||runtime.drivingMachineId)return;sprintLatched=changeSprint(controller,runtime.player,sprintLatched,notify);movementHud();};
  $('crouchBtn').onclick=()=>toggleStance('crouch');$('crawlBtn').onclick=()=>toggleStance('crawl');
  input.holdButton($('actBtn'),()=>{actionHeld=true;attack();},()=>actionHeld=false);
@@ -468,6 +556,7 @@ function bind(){
   if(!e.repeat&&e.code==='Space'&&runtime.player.stance!=='stand'&&!runtime.drivingMachineId){toggleStance(runtime.player.stance);return;}
   if(!e.repeat&&(e.code==='KeyE'||e.code==='KeyR')){interact();return;}
   if(!e.repeat&&e.code==='KeyJ'){ledger.open('journey');return;}
+  if(!e.repeat&&e.code==='KeyB'){cycleRange();return;}
   input.keys.add(e.code);
   if(/^Digit[1-9]$/.test(e.code))selectHotbar(+e.code.slice(-1)-1);
  }});
@@ -491,9 +580,14 @@ const LOAD_STEPS={world:['세계와 생태계를 구성하는 중',55],placement
 async function boot(){
  $('startBtn').hidden=true;$('continueBtn').hidden=true;
  await stage('저장을 확인하는 중',6);
- world=currentWorld(localStorage,'expedition',location.search);saveStore=new ExpeditionSave(localStorage,saveKey(world));const saved=saveStore.load();
+ world=currentWorld(localStorage,['island','expedition'],location.search);saveStore=new ExpeditionSave(localStorage,saveKey(world));const saved=saveStore.load();
+ const mapId=world.type==='island'?'island':'expedition';
+ let legacyIsland=null;
+ if(!saved&&mapId==='island'){try{const old=JSON.parse(localStorage.getItem(saveKey(world))??'null');if([1,2].includes(old?.version)&&old.world)legacyIsland=old;}catch(e){console.warn('기존 섬 저장을 읽지 못했습니다',e);}}
  await stage('건축물 모델을 불러오는 중',10);
- runtime=await ExpeditionRuntime.create(world.seed,saved,{pause:paint,onProgress:(step,done,total)=>step==='assets'?loading.step(`건축물 모델을 불러오는 중 ${done}/${total}`,10+40*done/total):loading.set(...LOAD_STEPS[step])});
+ runtime=await ExpeditionRuntime.create(world.seed,saved,{map:mapId,starter:!legacyIsland,pause:paint,onProgress:(step,done,total)=>step==='assets'?loading.step(`건축물 모델을 불러오는 중 ${done}/${total}`,10+40*done/total):loading.set(...LOAD_STEPS[step])});
+ // An original island save (same key, without the .a/.b generations) is carried over once; the original stays.
+ if(legacyIsland){await stage('기존 섬 저장을 옮기는 중',70);converted=applyLegacyIsland(runtime,legacyIsland);}
  await stage('장면을 준비하는 중',72);
  view=new ExpeditionScene($('world'),runtime.atlas);controller=new CharacterController(runtime.terrain,runtime.player);
  settings=initSettings({view,onLeftHand:()=>hudEditor?.apply()});view.camera.fov=+$('fov').value;view.camera.updateProjectionMatrix();if(!view.loadRadiusChunks)view.qualitySet($('quality').value);
@@ -517,6 +611,7 @@ async function boot(){
  fragments=new CreatureFragments(CONTENT,runtime.creatures,runtime.objects,{getModelRecord:id=>view.models.get(id),getPartPhysics:(owner,part)=>physical.getPartPhysics?.(owner,part)});
  for(const d of runtime.dungeons.instances.values())if(d.discovered)discovered.add(d.id);
  ready=true;bind();renderHotbar();updateToolLabel();
+ if(converted){save();notify(`기존 섬 저장을 옮겼습니다${converted.unmapped.length?` · 옮기지 못한 항목 ${converted.unmapped.length}개는 지도 버튼의 여정에서 확인하세요.`:'.'}`);}
  loading.finish();$('titleScreen').classList.add('hidden');$('hud').classList.remove('hidden');hudEditor.apply();
  installErrorScreen();
  window.FERAL={ready:true,map:'expedition',bootTimings:loading.timings,runtime,view,controller,physics:physical,slots,bag,ledger,save,pause,interact,openBag,selectHotbar,stats:()=>({running:ready&&!paused,paused,rewardMarkers:anchorMarkers.markers.size,warning:$('warning').textContent,toast:$('toast').textContent,version:VERSION.version,versionCode:VERSION.versionCode,player:{...runtime.player},regions:runtime.seenRegions.size,models:view.models.size,chunks:runtime.atlas.activeChunks.size,held:slots.held})};

@@ -1,6 +1,5 @@
 import {CONTENT} from './catalog.generated.js';
 import {ASSETS,loadAsset} from './assets.generated.js';
-import {WorldAtlas} from './atlas.js';
 import {Progression} from './progression.js';
 import {CreatureSystem} from './creatures.js';
 import {DungeonSystem} from './dungeons.js';
@@ -14,6 +13,7 @@ import {WorldObjects} from './objects.js';
 import {FaithSystem} from './faith.js';
 import {Armaments} from './armaments.js';
 import {reasonText} from './reasons.js';
+import {mapFor,BUILD_BLOCKS} from './maps.js';
 const clone = value => JSON.parse(JSON.stringify(value));
 export const distance = (a,b) => Math.hypot(a.x-b.x,(a.y||0)-(b.y||0),a.z-b.z);
 const asPoint = v => Array.isArray(v) ? {x:v[0],y:v[1],z:v[2]} : v;
@@ -22,25 +22,29 @@ const SPECIES = new Map(CONTENT.creatures.entries.map(e=>[e.id,e]));
 const BOSS_ACTIONS = {repair:'수리',rest:'휴식',recharge:'재충전'};
 export class ExpeditionRuntime {
  /** onProgress(step,done,total) reports loading steps; pause lets the screen repaint before synchronous construction. */
- static async create(seed,state=null,{onProgress=()=>{},pause=null}={}){
+ static async create(seed,state=null,{onProgress=()=>{},pause=null,map='expedition',starter=true}={}){
   const assets=new Map(),total=CONTENT.structures.entries.length;let done=0;
   await Promise.all(CONTENT.structures.entries.map(async e=>{assets.set(e.id,await loadAsset(e.id));onProgress('assets',++done,total);}));
   onProgress('world',0,1);if(pause)await pause();
-  const runtime=new ExpeditionRuntime(seed,state,assets);
+  const runtime=new ExpeditionRuntime(seed,state,assets,map,{starter});
   onProgress('placements',0,1);if(pause)await pause();
   await runtime.placements.ready;runtime.placements.syncAccess(runtime.player);return runtime;
  }
- constructor(seed,state,assets){
+ constructor(seed,state,assets,mapId='expedition',{starter=true}={}){
   this.calorieRule=CONTENT.progression.entries.find(e=>e.id==='calorie_baseline');
+  // A map preset only picks terrain, rules, start and places; every system below is shared.
+  this.map=mapFor(state?.map??mapId);
   this.seed=seed;this.time=state?.time||0;this.nextId=state?.nextId||1;
-  this.atlas=new WorldAtlas(CONTENT,{seed,state:state?.atlas,maxActiveChunks:96});
+  this.atlas=new this.map.atlas(CONTENT,{seed,state:state?.atlas,maxActiveChunks:96});
   this.progression=new Progression(CONTENT,state?.progression||{});
   this.armaments=new Armaments(this.progression,state?.armaments||{});
   this.creatures=new CreatureSystem(CONTENT,{seed,state:state?.creatures,terrain:this.atlas});
   this.bosses=new BossSystem(CONTENT,state?.bosses);
-  this.dungeons=new DungeonSystem({catalog:CONTENT,seed,state:state?.dungeons,atlas:this.atlas,assets});
-  this.player=state?.player?clone(state.player):{x:0,y:this.atlas.heightAt(0,0)+.05,z:0,yaw:Math.PI,pitch:0,hp:100,maxHp:100,calories:this.calorieRule.capacity,maxCalories:this.calorieRule.capacity,vy:0,grounded:false,stance:'stand',lastDamageAt:-100,resting:false};
+  this.dungeons=new DungeonSystem({catalog:CONTENT,seed,state:state?.dungeons,atlas:this.atlas,assets,starterStructures:this.map.rules.structures!==false});
+  const spawn=this.map.spawn;
+  this.player=state?.player?clone(state.player):{x:spawn.x,y:this.atlas.heightAt(spawn.x,spawn.z)+.05,z:spawn.z,yaw:spawn.yaw,pitch:0,hp:100,maxHp:100,calories:this.calorieRule.capacity,maxCalories:this.calorieRule.capacity,vy:0,grounded:false,stance:'stand',lastDamageAt:-100,resting:false};
   this.deaths=clone(state?.deaths||[]);this.seenRegions=new Set(state?.seenRegions||[]);
+  this.discoveredLandmarks=new Set(state?.discoveredLandmarks||[]);this.conversion=state?.conversion?clone(state.conversion):null;
   this.messages=[];this.warnings=[];this.events=[];this.playerPush=null;this.harvestAction=null;this.lastStrike=0;this.populationClock=Infinity;
   this.terrain={unbounded:true,getCell:(x,y,z)=>this.isSolid(x*.5+.25,y*.5+.25,z*.5+.25)?1:0,
    isSolidCell:(x,y,z)=>this.isSolid(x*.5+.25,y*.5+.25,z*.5+.25),heightAt:(x,z,y)=>this.surfaceHeight(x,z,y),
@@ -58,7 +62,10 @@ export class ExpeditionRuntime {
   this.faith=new FaithSystem(this,state?.faith||{});
   this.terrainDamage=clone(state?.terrainDamage||{});
   this.equipmentExposureProfiles=new Map();
-  this.nodes=[];this.nearbyStructures=[];this.refreshWorld();
+  this.nodes=[];this.nearbyStructures=[];
+  // A converted original save brings its own items instead of the new-world kit.
+  if(!state&&starter&&Object.keys(this.map.starter).length)this.progression.grant(this.map.starter,{claimId:`map-start:${this.map.id}`});
+  this.refreshWorld();
  }
  id(prefix){return `${prefix}:${this.seed}:${this.nextId++}`;}
  message(text){this.messages.push(String(text));if(this.messages.length>30)this.messages.shift();}
@@ -124,7 +131,9 @@ export class ExpeditionRuntime {
   const cx=Math.floor(p.x/64),cz=Math.floor(p.z/64);
   for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){
    const x=(cx+dx)*64+32,z=(cz+dz)*64+32,s=this.atlas.sample(x,z),regionId=`${cx+dx},${cz+dz}`;
-   this.creatures.ensureRegion(regionId,{environmentId:s.environmentId,x,z,tier:s.tier,safeBypass:s.safeBypass||s.hostileSpawnsAllowed===false||Math.hypot(x,z)<96});this.seenRegions.add(regionId);
+   if(!this.map.region(x,z))continue;
+   const nearSpawn=this.map.rules.survival&&Math.hypot(x-this.map.spawn.x,z-this.map.spawn.z)<96;
+   this.creatures.ensureRegion(regionId,{environmentId:s.environmentId,x,z,tier:s.tier,safeBypass:s.safeBypass||s.hostileSpawnsAllowed===false||nearSpawn});this.seenRegions.add(regionId);
   }
   for(const inst of this.nearbyStructures){
    const template=CONTENT.structures.entries.find(e=>e.id===inst.templateId);
@@ -157,7 +166,9 @@ export class ExpeditionRuntime {
   }
   const loadout=this.progression.evaluateLoadout(),p=this.player;p.maxHp=loadout.maxHp;p.hp=Math.min(p.hp,p.maxHp);
   const rule=this.calorieRule;
-  p.calories=Math.max(0,p.calories-dt*(moving ? rule.activeDrainPerSecond : rule.idleDrainPerSecond));
+  // Peaceful maps (the basic island) keep food and health full; the rules are otherwise the same.
+  if(!this.map.rules.survival){p.calories=p.maxCalories;p.hp=p.maxHp;}
+  p.calories=Math.max(0,p.calories-dt*(!this.map.rules.survival?0:moving ? rule.activeDrainPerSecond : rule.idleDrainPerSecond));
   if(p.hp<p.maxHp&&p.calories>0&&(p.resting||this.time-p.lastDamageAt>=rule.noHitDelaySeconds)){
    const heal=Math.min(p.maxHp-p.hp,dt*rule.hpRegenPerSecond*(p.resting?rule.restMultiplier:1),p.calories/rule.caloriesPerHp);p.hp+=heal;p.calories-=heal*rule.caloriesPerHp;
   }
@@ -203,14 +214,15 @@ export class ExpeditionRuntime {
   }
   if(p.hp<=0)this.die();
  }
- hurt(amount,source){if(!Number.isFinite(amount)||amount<=0)return;this.player.hp=Math.max(0,this.player.hp-amount);this.player.lastDamageAt=this.time;this.player.resting=false;this.events.push({type:'player_hit',amount,source});if(this.events.length>64)this.events.shift();}
+ hurt(amount,source){if(!Number.isFinite(amount)||amount<=0||!this.map.rules.survival)return;this.player.hp=Math.max(0,this.player.hp-amount);this.player.lastDamageAt=this.time;this.player.resting=false;this.events.push({type:'player_hit',amount,source});if(this.events.length>64)this.events.shift();}
  die(){
   const p=this.player,inventory=this.progression.inventory,overflow=this.progression.overflow,items={...inventory};
   if(this.drivingMachineId)this.machines.control(this.drivingMachineId,{throttle:0,steer:0,pitch:0,brake:true});
   for(const[id,n]of Object.entries(overflow))items[id]=(items[id]||0)+n;
   this.deaths.push({id:this.id('death'),position:{x:p.x,y:p.y,z:p.z},items,weapons:this.armaments.drainCarried(),recovered:false});
   this.progression.inventory={};this.progression.overflow={};this.progression.equipped=null;
-  Object.assign(p,{x:0,y:this.atlas.heightAt(0,0)+.05,z:0,hp:100,maxHp:100,calories:600,vy:0,lastDamageAt:this.time});
+  const spawn=this.map.spawn;
+  Object.assign(p,{x:spawn.x,y:this.atlas.heightAt(spawn.x,spawn.z)+.05,z:spawn.z,hp:100,maxHp:100,calories:600,vy:0,lastDamageAt:this.time});
   this.harvestAction=null;this.interactionAction=null;this.drivingMachineId=null;this.player.resting=false;this.message('출발지에서 깨어났습니다. 사망 장소 10m 안에 가면 요정이 소지품을 돌려줍니다.');
  }
  recoverDeath(death){
@@ -227,6 +239,30 @@ export class ExpeditionRuntime {
   const changed=result.ok||recoveredWeapons.acceptedIds.length>0;
   if(changed)this.message(death.recovered?'요정이 남겨 둔 소지품을 가져왔습니다.':'요정이 가방에 들어가는 소지품을 돌려줬습니다. 남은 물품은 현장에 보관합니다.');
   return changed;
+ }
+ /** Block a held item places on sandbox maps (the basic island), or null. */
+ buildableBlock(itemId){return this.map.rules.sandbox?BUILD_BLOCKS[itemId]??null:null;}
+ /** Place 0.5 m or 1 m of terrain on the aimed face, one unit of the item per 0.5 m cell. */
+ placeBlocks(hit,itemId,size=.5){
+  const blockId=this.buildableBlock(itemId);if(!blockId)return {ok:false,reason:'not_buildable'};
+  if(!hit?.normal||!hit.point||hit.distance>6.5)return {ok:false,reason:'6.5 m 안의 표면을 조준하세요.'};
+  const n=size>=1?2:1,face=['x','y','z'].map(k=>Math.floor((hit.point[k]+hit.normal[k]*.01)*2)),start=n===1?face:face.map(v=>Math.floor(v/2)*2),cells=[];
+  for(let dy=0;dy<n;dy++)for(let dz=0;dz<n;dz++)for(let dx=0;dx<n;dx++)cells.push([start[0]+dx,start[1]+dy,start[2]+dz]);
+  if(cells.some(c=>this.atlas.getCell(...c)!==null||this.dungeons.solidAt({x:c[0]*.5+.25,y:c[1]*.5+.25,z:c[2]*.5+.25})))return {ok:false,reason:'빈 공간을 조준하세요.'};
+  const p=this.player,top=p.y+(p.bodyHeight??1.5);
+  if(cells.some(([x,y,z])=>x*.5<p.x+.28&&x*.5+.5>p.x-.28&&z*.5<p.z+.28&&z*.5+.5>p.z-.28&&y*.5<top&&y*.5+.5>p.y))return {ok:false,reason:'캐릭터와 겹치는 곳에는 설치할 수 없습니다.'};
+  if(this.progression.count(itemId)+1e-9<cells.length)return {ok:false,reason:`${this.progression.catalog.get(itemId)?.name??itemId} ${cells.length}개가 필요합니다.`};
+  const paid=this.progression.spend({[itemId]:cells.length},{claimId:this.id('place-block')});if(!paid.ok)return paid;
+  // Water or acid in a placed cell is pushed up above the new blocks instead of disappearing.
+  let displaced=0,lost=0;const topY=(start[1]+n)*.5+.25;
+  for(const [x,y,z]of cells){
+   const at={x:x*.5+.25,y:y*.5+.25,z:z*.5+.25},f=this.atlas._fluidState(x,y,z);if(f.volumeM3<=1e-9)continue;
+   const out=this.atlas.takeFluid(at.x,at.y,at.z,f.volumeM3);displaced+=out.volumeM3;let left=out.volumeM3;
+   for(const lift of [0,.5,1]){if(left<=1e-9)break;left-=this.atlas.pour(at.x,topY+lift,at.z,left,{acidFraction:out.acidFraction,temperatureC:Math.max(20,out.temperatureC)});}
+   lost+=Math.max(0,left);
+  }
+  for(const c of cells)this.atlas.setCell(...c,blockId);
+  return {ok:true,blockId,cells:cells.length,displacedM3:displaced,lostM3:lost};
  }
  eat(id='food'){
   if(id!=='food')return {ok:false,reason:'먹을 수 있는 음식이 아닙니다.'};
@@ -349,5 +385,5 @@ export class ExpeditionRuntime {
   rows.push(...getResourceDescriptors(this),...this.machines.sceneModels().filter(e=>distance(p,e.position)<160),...this.objects.sceneModels().filter(e=>distance(p,e.position)<160),...this.placements.descriptors().filter(e=>distance(p,e.position)<160));
   return rows;
  }
- serialize(){return {schema:1,seed:this.seed,time:this.time,nextId:this.nextId,player:clone(this.player),atlas:this.atlas.serialize(),progression:this.progression.serialize(),armaments:this.armaments.serialize(),creatures:this.creatures.serialize(),dungeons:this.dungeons.serialize(),bosses:this.bosses.serialize(),machines:this.machines.serialize(),materialEffects:this.materialEffects.serialize(),objects:this.objects.serialize(),pendingDetach:[...this.pendingDetach],placements:this.placements.serialize(),community:this.community.serialize(),faith:this.faith.serialize(),terrainDamage:clone(this.terrainDamage),deaths:clone(this.deaths),seenRegions:[...this.seenRegions]};}
+ serialize(){return {schema:1,map:this.map.id,seed:this.seed,time:this.time,nextId:this.nextId,player:clone(this.player),atlas:this.atlas.serialize(),progression:this.progression.serialize(),armaments:this.armaments.serialize(),creatures:this.creatures.serialize(),dungeons:this.dungeons.serialize(),bosses:this.bosses.serialize(),machines:this.machines.serialize(),materialEffects:this.materialEffects.serialize(),objects:this.objects.serialize(),pendingDetach:[...this.pendingDetach],placements:this.placements.serialize(),community:this.community.serialize(),faith:this.faith.serialize(),terrainDamage:clone(this.terrainDamage),deaths:clone(this.deaths),seenRegions:[...this.seenRegions],discoveredLandmarks:[...this.discoveredLandmarks],conversion:this.conversion?clone(this.conversion):null};}
 }

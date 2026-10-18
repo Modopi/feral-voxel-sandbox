@@ -1,0 +1,18 @@
+{
+  "version": "0.14.0",
+  "versionCode": 1400,
+  "minNativeCode": 303,
+  "files": 123,
+  "nativeFileLimit": 128,
+  "mjsFiles": [],
+  "newFiles": [
+    "content-runtime/maps.js"
+  ],
+  "archiveBytes": 2816521,
+  "expandedBytes": 11563288,
+  "archiveSha256": "0383b3c6d39bd9f215704feabc9f4b5c14eb3287f312c451bc663da57b900046",
+  "packageSha256": "0328f6812e1efd053f90db736aa3e251aefe5768c32c9360ccaea24dbfaa1235",
+  "apkAssetsIdenticalToUpdate": true,
+  "withinLimits": true,
+  "note": "Local build with the shared test signing key; CI rebuilds and publishes after merge."
+}

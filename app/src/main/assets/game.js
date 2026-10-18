@@ -1,5 +1,5 @@
 // The single game entry. Every world opens index.html; the world's map type decides what runs
-// on the shared screen. The machine test field moves onto this page in a later step.
+// on the shared screen. The frontier and the machine test field move onto the one runtime in later steps.
 import { listWorlds, DEFAULTS } from "./world-slots.js";
 
 const loading = window.FeralLoading;
@@ -18,7 +18,8 @@ if (!world) {
   location.replace(`machine.html${location.search}`);
 } else {
   document.body.dataset.map = world.type;
-  import(world.type === "expedition" ? "./content-runtime/game.js" : "./main.js").catch(
+  // The basic island and the content expedition run on the one runtime; the frontier moves next.
+  import(["expedition", "island"].includes(world.type) ? "./content-runtime/game.js" : "./main.js").catch(
     (e) => {
       console.error(e);
       loading.fail(`게임 파일을 불러오지 못했습니다: ${e.message}`);

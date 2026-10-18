@@ -1,6 +1,6 @@
-# FERAL 진행 현황 — 게임 0.13.0
+# FERAL 진행 현황 — 게임 0.14.0
 
-> 작성일: 2026-10-18 · 기준: 게임 0.13.0(직전 공개 버전 0.12.1) / Android 앱 0.3.3
+> 작성일: 2026-10-18 · 기준: 게임 0.14.0(직전 공개 버전 0.13.0) / Android 앱 0.3.3
 >
 > 구현·검증·배포 기록을 모은 현황 문서다. 장기 방향은 [게임 비전](GAME-VISION.md), 전체 완료 기준은 [구현 Goal](IMPLEMENTATION-GOAL.md), 요구사항별 근거는 [구현 추적표](content/IMPLEMENTATION-STATUS.md), 버전별 변경은 [CHANGELOG](../CHANGELOG.md)를 참조한다.
 
@@ -8,9 +8,9 @@
 
 **기존 캠페인·물리 샌드박스 위에, 기획 데이터와 복셀 모델 119개를 실제로 플레이할 수 있는 ‘콘텐츠 탐험’ 월드를 추가해 공개 배포한 단계다.** 게임 0.11.0은 [PR #16](https://github.com/Modopi/feral-voxel-sandbox/pull/16)으로 main에 병합됐고 APK·게임 업데이트가 모두 게시됐다.
 
-**0.13.0부터 FERAL을 하나의 게임으로 합치는 작업을 시작했다.** 0.12.1까지는 진입 화면마다 화면·조작·아이템·규칙이 다른 게임이 붙어 있었다. 사용자 결정에 따라 화면은 기존 UI 하나, 규칙·데이터와 런타임은 콘텐츠 런타임 하나로 쓰고, 기존 맵은 그 위의 맵 설정으로 옮긴다. 0.13.0(1단계)에서 모든 월드(기계 시험장 제외)가 `index.html` 한 화면과 공용 `shell.js`을 쓰도록 했다. 콘텐츠 탐험도 기존 HUD·핫바·36칸 가방·장부 창·메뉴·설정·UI 편집기를 쓴다. 남은 단계와 기준은 [하나의 게임으로 통합](UNIFIED-GAME.md)에 있다.
+**0.13.0부터 FERAL을 하나의 게임으로 합치는 작업을 시작했다.** 0.12.1까지는 진입 화면마다 화면·조작·아이템·규칙이 다른 게임이 붙어 있었다. 사용자 결정에 따라 화면은 기존 UI 하나, 규칙·데이터와 런타임은 콘텐츠 런타임 하나로 쓰고, 기존 맵은 그 위의 맵 설정으로 옮긴다. 0.13.0(1단계)에서 모든 월드(기계 시험장 제외)가 `index.html` 한 화면과 공용 `shell.js`를 쓰도록 했다. 콘텐츠 탐험도 기존 HUD·핫바·36칸 가방·장부 창·메뉴·설정·UI 편집기를 쓴다. 남은 단계와 기준은 [하나의 게임으로 통합](UNIFIED-GAME.md)에 있다.
 
-규칙·데이터·런타임은 아직 두 층으로 나뉜다(통합 2·3단계에서 합친다).
+**0.14.0(2단계)에서 기본 섬이 콘텐츠 탐험과 같은 런타임으로 옮겨졌다.** 섬은 맵 설정(지형 생성기·평화 규칙·시작 소지품·장소)만 다르고 생명체·아이템·연구·제작·저장은 같은 시스템이다. 지형은 원본 섬 생성기 그대로, 생태는 설계 데이터의 같은 세 종이다. 샌드박스 도구·블록 쌓기·장소 발견·미니맵을 옮겼고, 기존 섬 저장은 원본을 보존한 채 변환한다. 개척 원정과 기계 시험장은 아직 기존 런타임이며 다음 단계에서 옮긴다.
 
 - **기존 월드 유형(0.10.x까지):** 기본 섬, 기계 시험장, 개척 원정. 첫 신호 캠페인, 실제 아이템 인벤토리, 직접 기계 조립·공기역학, 외피/골격 손상, 지형의 독립 물체화와 운반을 포함한다. 아이템 47종·제작법 51개.
 - **콘텐츠 탐험(0.11.0 신규):** 무한 청크 지형, 8환경·34종 생명체, 12건축물(던전 8)·8보스와 9~10티어 변형 4종, 39연구·142제작법·27설비, 재료형 무기, 위치·포트별 에너지 망, 신앙·시련, 사망 회수와 압축 저장을 하나의 런타임에 연결했다.
@@ -25,12 +25,12 @@
 
 | 월드 유형 | 진입 | 주요 내용 | 상세 |
 | --- | --- | --- | --- |
-| 기본 섬 | 내 월드 → 기본 맵 | 160×160m 섬, 반 칸 채굴·건축, 생태·유체·화학 | [README](../README.md#세계와-시뮬레이션) |
+| 기본 섬 (통합 런타임) | 내 월드 → 기본 탐험 맵 | 원본과 같은 160×160m 섬, 평화 규칙, 샌드박스 도구·블록 쌓기, 설계 생명체 생태, 연구·제작 | [통합](UNIFIED-GAME.md#p2-완료-기준) |
 | 기계 시험장 | 내 월드 → 기계 베타 맵 | 7×3×7 격자 조립·주행 시험 | [기계 구조](MACHINE-ARCHITECTURE.md) |
 | 개척 원정 | 내 월드 → 새 월드 → 개척 원정 | 첫 신호 캠페인, 지역 전환, 기계·비행, 운반·물리 샌드박스 | [첫 신호](FIRST-SIGNAL.md), [구조 샌드박스](STRUCTURAL-SANDBOX.md) |
 | **콘텐츠 탐험** | 내 월드 → 새 월드 → FERAL 탐험 | 무한 청크, 설계 생명체·던전·보스, 연구·제작·설비·기계·에너지 | [콘텐츠 위키](content/README.md), [추적표](content/IMPLEMENTATION-STATUS.md) |
 
-기존 월드와 저장은 그대로 유지한다. 기계 시험장을 뺀 모든 월드는 같은 `index.html` 화면에서 시작한다. 기존 저장에서 새 콘텐츠를 이용하려면 아직 콘텐츠 탐험 월드를 새로 만들어야 하며, 기존 맵의 프리셋 이식과 저장 변환은 통합 3단계에서 한다.
+기존 월드와 저장은 그대로 유지한다. 기계 시험장을 뺀 모든 월드는 같은 `index.html` 화면에서 시작한다. 기본 섬 저장은 0.14.0에서 처음 열 때 원본을 남긴 채 통합 런타임 형식으로 변환된다. 개척 원정 저장은 다음 단계(0.15.x)에서 변환한다.
 
 ## 3. 콘텐츠 탐험 구현 현황 (0.11.0)
 
@@ -111,7 +111,8 @@ flowchart LR
 | 책임 | 주요 코드 | 역할 |
 | --- | --- | --- |
 | 하나의 게임 화면 | [index.html](../app/src/main/assets/index.html), [game.js](../app/src/main/assets/game.js), [shell.js](../app/src/main/assets/shell.js), [inventory-ui.js](../app/src/main/assets/inventory-ui.js), [hud-editor.js](../app/src/main/assets/hud-editor.js) | 월드별 시작, 조작·알림·설정·메뉴·로딩·현장 HUD·장부 창, 36칸 가방, UI 배치 편집 (모든 맵 공통) |
-| 콘텐츠 탐험 진행 | [content-runtime/game.js](../app/src/main/assets/content-runtime/game.js), [item-slots.js](../app/src/main/assets/content-runtime/item-slots.js), [runtime.js](../app/src/main/assets/content-runtime/runtime.js), [scene.js](../app/src/main/assets/content-runtime/scene.js) | 공용 화면 위의 프레임 루프·장부 페이지, 설계 아이템의 가방 칸, 시스템 조립, 장면 생성 |
+| 맵 설정 | [content-runtime/maps.js](../app/src/main/assets/content-runtime/maps.js) | 맵별 지형 생성기(섬은 원본 생성기 재사용)·규칙·시작 소지품·장소, 기존 아이템·블록·종 대응표와 섬 저장 변환 |
+| 콘텐츠 탐험·기본 섬 진행 | [content-runtime/game.js](../app/src/main/assets/content-runtime/game.js), [item-slots.js](../app/src/main/assets/content-runtime/item-slots.js), [runtime.js](../app/src/main/assets/content-runtime/runtime.js), [scene.js](../app/src/main/assets/content-runtime/scene.js) | 공용 화면 위의 프레임 루프·장부 페이지, 설계 아이템의 가방 칸, 시스템 조립, 장면 생성 |
 | 월드·생명체·던전·보스 | [atlas.js](../app/src/main/assets/content-runtime/atlas.js), [creatures.js](../app/src/main/assets/content-runtime/creatures.js), [dungeons.js](../app/src/main/assets/content-runtime/dungeons.js), [dungeon-devices.js](../app/src/main/assets/content-runtime/dungeon-devices.js), [bosses.js](../app/src/main/assets/content-runtime/bosses.js) | 청크 생성, 생태, 던전 배치·장치, 보스 페이즈·기술 |
 | 성장·장비·기계·에너지 | [progression.js](../app/src/main/assets/content-runtime/progression.js), [armaments.js](../app/src/main/assets/content-runtime/armaments.js), [machines.js](../app/src/main/assets/content-runtime/machines.js), [fixture-energy.js](../app/src/main/assets/content-runtime/fixture-energy.js), [placements.js](../app/src/main/assets/content-runtime/placements.js) | 연구·제작·사망 회수, 무기, 기계 SDK, 설비 전력망, 설치 |
 | 신앙·공동체·재질 반응 | [faith.js](../app/src/main/assets/content-runtime/faith.js), [community.js](../app/src/main/assets/content-runtime/community.js), [material-effects.js](../app/src/main/assets/content-runtime/material-effects.js) | 의뢰·시련 원장, 공동체 거래, 에너지→피해·물성 |
@@ -122,9 +123,13 @@ flowchart LR
 | 복셀 제작 도구 | [design/assets/author.html](../design/assets/author.html), [generators/](../design/assets/generators) | 모든 신규 복셀 에셋의 필수 제작 경로. [규칙](VOXEL-ASSET-RULES.md) |
 | 버전·배포 | [version.json](../version.json), [배포 워크플로](../.github/workflows/release.yml), [제작 하네스](../.github/workflows/voxel-assets.yml) | 앱/게임 버전 분리, 검사·빌드·공개 게시 |
 
-상태·규칙·표현을 나누는 방향으로 모듈을 확장했다. 0.13.0부터 화면 계층은 모든 맵이 공유한다. 규칙·데이터(`inventory.js`·`entities.js`·`world.js` 대 `content-runtime/`)와 기계 시험장은 아직 분리되어 있으며 [통합 단계](UNIFIED-GAME.md#4-단계)에서 하나로 합친다.
+상태·규칙·표현을 나누는 방향으로 모듈을 확장했다. 0.13.0부터 화면 계층은 모든 맵이 공유한다. 0.14.0부터 기본 섬도 콘텐츠 런타임에서 돈다. 개척 원정(`main.js`·`inventory.js`·`entities.js`·`world.js` 시뮬레이션)과 기계 시험장은 아직 분리되어 있으며 [통합 단계](UNIFIED-GAME.md#4-단계)에서 하나로 합친다.
 
 ## 7. 검증과 공개 배포
+
+### 0.14.0에서 확인된 결과
+
+로컬 전체 회귀 **518개 통과, 실패 0**(신규 섬 맵 검사 6개 포함). 통합 런타임의 섬 지형은 원본 섬 생성기와 같은 칸을 만든다. 앱 규칙 서버의 브라우저 검증 17개 경로(콘텐츠 탐험 9·개척 원정 1·기본 섬 6·로딩 실패 1)가 실제 터치로 통과했고, 기본 섬은 기존 저장 변환·관찰·물 도구·블록 쌓기·장소 발견·새 섬의 이동·땅 파기·저장 복원을 확인했다. 기존 화면 검사 19개 중 12개 통과, 5개는 0.13.0 기록과 같은 값으로 실패하는 오래된 검사, 기존 섬 엔진 전용 2개는 기록으로 남겼다. APK와 업데이트 패키지(123개 파일)는 바이트 단위로 같다. 근거는 [0.14.0 검증 기록](../verification/0.14.0.md).
 
 ### 0.13.0에서 확인된 결과
 
@@ -151,13 +156,13 @@ flowchart LR
 | 항목 | 값 |
 | --- | --- |
 | 공개 저장소 | [Modopi/feral-voxel-sandbox](https://github.com/Modopi/feral-voxel-sandbox) |
-| 게임 / 코드 | **0.13.0 / 1300** (직전 공개 0.12.1 / 1201) |
+| 게임 / 코드 | **0.14.0 / 1400** (직전 공개 0.13.0 / 1300) |
 | Android 앱 / 최소 앱 | **0.3.3 / 303** |
 | 저장 스키마 / 채널 | **2 / stable** (콘텐츠 탐험 저장은 자체 schema 1) |
-| 게임 릴리스 기준 커밋 | `6c0824bd7aad30139953df04962a51766cedddb3` ([PR #20](https://github.com/Modopi/feral-voxel-sandbox/pull/20)) |
-| 공개 릴리스 | [v0.12.1](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.12.1) · 2026-10-18 01:02 UTC 게시. 0.13.0은 병합 후 [릴리스 목록](https://github.com/Modopi/feral-voxel-sandbox/releases)에 게시 |
+| 게임 릴리스 기준 커밋 | `984c586315cfcdb73d78d1e5ff767f71077842f0` ([PR #21](https://github.com/Modopi/feral-voxel-sandbox/pull/21)) |
+| 공개 릴리스 | [v0.13.0](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.13.0) · 2026-10-18 02:44 UTC 게시. 0.14.0은 병합 후 [릴리스 목록](https://github.com/Modopi/feral-voxel-sandbox/releases)에 게시 |
 
-앱 0.3.3 사용자는 **메뉴 → 업데이트 → 지금 확인 → 저장 후 적용**, 버전을 고정한 사용자는 **게임 버전 → 0.13.0**을 선택한다. 처음 설치하거나 앱 0.3.2 이하라면 릴리스의 `Feral-0.3.3-android.apk`를 기존 앱 위에 설치한다. 수동 버전 전환은 빌드별 저장을 분리하며 처음 선택한 빌드는 새 저장으로 시작한다. 상세한 적용·복구 범위는 [배포 안내](RELEASING.md)를 따른다.
+앱 0.3.3 사용자는 **메뉴 → 업데이트 → 지금 확인 → 저장 후 적용**, 버전을 고정한 사용자는 **게임 버전 → 0.14.0**을 선택한다. 처음 설치하거나 앱 0.3.2 이하라면 릴리스의 `Feral-0.3.3-android.apk`를 기존 앱 위에 설치한다. 수동 버전 전환은 빌드별 저장을 분리하며 처음 선택한 빌드는 새 저장으로 시작한다. 상세한 적용·복구 범위는 [배포 안내](RELEASING.md)를 따른다.
 
 ## 8. 주요 개발 이력
 
@@ -177,6 +182,7 @@ flowchart LR
 | 0.12.0 | 화면 연결 감사: 터치 조작·연구·제작 대기열·보스/생명체 예고·보상 표식·던전 장치·한국어 안내, 기본 섬 관찰·샌드박스 도구·미니맵 |
 | 0.12.1 | Android 앱의 콘텐츠 탐험 로딩 실패(`.mjs` 모듈 MIME) 수정, 로딩 진행도·실패 안내 |
 | 0.13.0 | 하나의 게임으로 통합 1단계: 모든 월드(기계 시험장 제외)가 `index.html`과 `shell.js` 공용 화면·조작·가방·장부 창·설정 사용 |
+| 0.14.0 | 통합 2단계: 기본 섬을 통합 런타임의 맵 설정으로(원본 지형·같은 세 종·평화 규칙·샌드박스 도구·블록 쌓기), 기존 섬 저장 변환 |
 
 ## 9. 남은 과제와 다음 우선순위
 
@@ -184,8 +190,8 @@ flowchart LR
 
 | 우선순위 | 과제 | 완료를 판단할 증거 |
 | --- | --- | --- |
-| 1 | 통합 2단계: 설계 카탈로그를 유일한 아이템·제작 기준으로, 기존 전용 기능(운반·충격·공기역학·구조체·농사·샌드박스 도구·캐릭터 표시)을 런타임으로 이식 | 기존 아이템 대응표, 이식한 기능별 런타임 테스트와 화면 확인 ([통합 문서](UNIFIED-GAME.md)) |
-| 1 | 통합 3단계: 섬·개척 원정·기계 시험장을 맵 프리셋으로, 기존 저장 변환 | 원본 보존 변환, 대응 불가 항목 목록, 기존 런타임 은퇴 |
+| 1 | 통합 3단계: 개척 원정(첫 신호 캠페인·마을·지역·기계 비행·운반·충격 피해)을 통합 런타임으로, 저장 변환 | 캠페인 진행·마을 교역의 런타임 테스트, 원본 보존 변환과 대응 불가 목록 ([통합 문서](UNIFIED-GAME.md)) |
+| 1 | 통합 4단계: 기계 시험장 이식, 기존 런타임(`main.js` 등) 은퇴 | 모든 월드가 한 런타임, 기존 런타임 파일 제거 |
 | 1 | 새 콘텐츠 탐험 월드에서 정상 입력만으로 보스까지 진행 | 자원 지급 없이 채집→연구→제작→장비·기계→던전·보스의 브라우저 완주 기록 |
 | 1 | 실제 Android에서 설치·업데이트·장시간 플레이 | 기기·SoC·RAM·OS/WebView, 30분·2시간 세션의 p50/p95 프레임, 메모리 증가, 열 제한, 백그라운드 복귀·프로세스 종료 후 저장 복원 |
 | 2 | 무한 월드의 장거리 메모리 상한 | 방문 이력·보존 개체의 분할 저장 또는 상한 정책과 장거리 왕복 측정 |
