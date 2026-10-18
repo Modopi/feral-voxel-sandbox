@@ -15,6 +15,34 @@ const identity = () => ({ x: 0, y: 0, z: 0, w: 1 });
 const colors = { grass:'#688b49', dirt:'#80644b', stone:'#858b87', sand:'#c4b483', log:'#725238', plank:'#a58a5c', leaves:'#54743f', moss:'#4c6a42', basalt:'#41464a', ash:'#7c776d', clay:'#9b6c52', glass:'#a4cad1' };
 const color = id => colors[id] ?? (/mana|crystal/.test(id) ? '#7b79bd' : /sacred|holy/.test(id) ? '#e0c98a' : /ore|iron/.test(id) ? '#866f58' : /nickel/.test(id) ? '#9ca795' : /titan/.test(id) ? '#889ba0' : /leaf|grass|peat/.test(id) ? '#627b45' : '#777e79');
 
+/** Cells relative to a search origin (each axis within ±16383) in an open-addressing table of typed arrays, reused
+ * by every support search: membership and a small value per cell with no allocation per cell. */
+class CellTable {
+  constructor(bits = 14) { this._alloc(bits); }
+  _alloc(bits) { const n = 1 << bits; this.mask = n - 1; this.xs = new Int16Array(n); this.ys = new Int16Array(n); this.zs = new Int16Array(n); this.values = new Int8Array(n); this.stamps = new Uint32Array(n); this.generation = 1; this.size = 0; }
+  clear() { this.size = 0; if (++this.generation === 0xffffffff) { this.stamps.fill(0); this.generation = 1; } }
+  _slot(x, y, z) {
+    let h = (Math.imul(x, 73856093) ^ Math.imul(y, 19349663) ^ Math.imul(z, 83492791)) & this.mask;
+    while (this.stamps[h] === this.generation && (this.xs[h] !== x || this.ys[h] !== y || this.zs[h] !== z)) h = (h + 1) & this.mask;
+    return h;
+  }
+  /** The value stored for the cell, or -1. */
+  get(x, y, z) { const h = this._slot(x, y, z); return this.stamps[h] === this.generation ? this.values[h] : -1; }
+  set(x, y, z, value) {
+    const h = this._slot(x, y, z);
+    if (this.stamps[h] !== this.generation) {
+      if ((this.size + 1) * 2 > this.mask + 1) { this._grow(); return this.set(x, y, z, value); }
+      this.stamps[h] = this.generation; this.xs[h] = x; this.ys[h] = y; this.zs[h] = z; this.size++;
+    }
+    this.values[h] = value;
+  }
+  _grow() {
+    const { xs, ys, zs, values, stamps, generation } = this; this._alloc(Math.log2(this.mask + 1) + 1);
+    for (let i = 0; i < stamps.length; i++) if (stamps[i] === generation) this.set(xs[i], ys[i], zs[i], values[i]);
+  }
+}
+const QUEUED = new CellTable(), EXAMINED = new CellTable(), ANCHORS = new CellTable();
+
 /** Detached world material remains an object, with no manufactured components.
  * This registry never integrates motion: the Rapier bridge is the sole pose driver.
  * Its snapshot must be saved atomically with atlas edits, just like inventory/world.
@@ -61,28 +89,39 @@ export class WorldObjects {
     if (length < 1e-9) throw Error('Zero object quaternion');
     return { x: q.x / length, y: q.y / length, z: q.z / length, w: q.w / length };
   }
-  _fixed(cell, block) {
+  // The support search runs after every broken terrain cell. It walks breadth-first from the cells touching the
+  // broken one; a walk into the ground goes on to maxComponentCells, so cells are kept relative to the broken cell
+  // in reused typed tables (CellTable) and each cell's anchor test is remembered: nothing is allocated per visited
+  // cell. Order, limit and anchors are those of the original search (an anchored building or fixture cell, or a
+  // block that never detaches, holds).
+  _anchored(x, y, z, o) {
+    const dx = x - o[0], dy = y - o[1], dz = z - o[2];let anchored = ANCHORS.get(dx, dy, dz);
+    if (anchored < 0) ANCHORS.set(dx, dy, dz, anchored = this.atlas.isAnchoredCell?.(x, y, z) ? 1 : 0);
+    return anchored === 1;
+  }
+  _fixedAt(x, y, z, o, block) {
     if (!block || block.detachesWhenUnsupported !== true) return true;
     // Integrators can expose immovable foundations or contact with fixed buildings.
-    return Boolean(this.atlas.isAnchoredCell?.(...cell));
+    return this._anchored(x, y, z, o);
   }
-  _component(start, examined) {
-    const queue = [start], queued = new Set([key(start)]), cells = [];
-    for (let cursor = 0; cursor < queue.length; cursor++) {
-      if (cursor >= this.maxComponentCells) { for (const c of queue) examined.add(key(c)); return { reason: 'component_limit', cells: [] }; }
-      const cell = queue[cursor], blockId = this.atlas.getCell(...cell), block = this.blocks.get(blockId);
-      examined.add(key(cell));
+  _component(sx, sy, sz, o) {
+    const qx = [sx], qy = [sy], qz = [sz], cells = [];
+    QUEUED.clear(); QUEUED.set(sx - o[0], sy - o[1], sz - o[2], 1);
+    for (let cursor = 0; cursor < qx.length; cursor++) {
+      if (cursor >= this.maxComponentCells) { for (let i = 0; i < qx.length; i++) EXAMINED.set(qx[i] - o[0], qy[i] - o[1], qz[i] - o[2], 1); return { reason: 'component_limit', cells: [] }; }
+      const x = qx[cursor], y = qy[cursor], z = qz[cursor], blockId = this.atlas.getCell(x, y, z), block = this.blocks.get(blockId);
+      EXAMINED.set(x - o[0], y - o[1], z - o[2], 1);
       if (blockId == null) continue;
-      if (this._fixed(cell, block)) return { reason: 'anchored', cells: [] };
-      cells.push({ cell, blockId });
+      if (this._fixedAt(x, y, z, o, block)) return { reason: 'anchored', cells: [] };
+      cells.push({ cell: [x, y, z], blockId });
       for (const d of DIRS) {
-        const neighbor = cell.map((v, i) => v + d[i]), k = key(neighbor);
-        if (queued.has(k)) continue;
-        if (this.atlas.isAnchoredCell?.(...neighbor)) return { reason: 'anchored', cells: [] };
-        const adjacentId = this.atlas.getCell(...neighbor);
+        const nx = x + d[0], ny = y + d[1], nz = z + d[2];
+        if (QUEUED.get(nx - o[0], ny - o[1], nz - o[2]) === 1) continue;
+        if (this._anchored(nx, ny, nz, o)) return { reason: 'anchored', cells: [] };
+        const adjacentId = this.atlas.getCell(nx, ny, nz);
         if (adjacentId == null) continue;
-        if (this._fixed(neighbor, this.blocks.get(adjacentId))) return { reason: 'anchored', cells: [] };
-        queued.add(k); queue.push(neighbor);
+        if (this._fixedAt(nx, ny, nz, o, this.blocks.get(adjacentId))) return { reason: 'anchored', cells: [] };
+        QUEUED.set(nx - o[0], ny - o[1], nz - o[2], 1); qx.push(nx); qy.push(ny); qz.push(nz);
       }
     }
     return { cells };
@@ -90,11 +129,13 @@ export class WorldObjects {
   detachAround(cell) {
     if (!validCell(cell)) throw Error('Destroyed cell must use integer half-metre coordinates');
     if (this.atlas.getCell(...cell) != null) return { objects: [], detachedCells: 0, reasons: ['cell_not_destroyed'] };
-    const examined = new Set(), created = [], reasons = [];
+    // Cells are kept relative to the broken cell: a search stays within maxComponentCells (2048) of it.
+    const created = [], reasons = [];
+    EXAMINED.clear(); ANCHORS.clear();
     for (const d of DIRS) {
-      const start = cell.map((v, i) => v + d[i]);
-      if (examined.has(key(start)) || this.atlas.getCell(...start) == null) continue;
-      const found = this._component(start, examined);
+      const sx = cell[0] + d[0], sy = cell[1] + d[1], sz = cell[2] + d[2];
+      if (EXAMINED.get(d[0], d[1], d[2]) === 1 || this.atlas.getCell(sx, sy, sz) == null) continue;
+      const found = this._component(sx, sy, sz, cell);
       if (found.reason) { reasons.push(found.reason); continue; }
       if (!found.cells.length) continue;
       const originCell = [0, 1, 2].map(axis => Math.min(...found.cells.map(c => c.cell[axis])));
@@ -242,10 +283,12 @@ export class WorldObjects {
     const p = position == null ? o.position : vec(position), v = velocity == null ? o.velocity : vec(velocity), w = angularVelocity == null ? o.angularVelocity : vec(angularVelocity);
     if (![p, v, w].every(validVector)) return false;
     let q; try { q = rotation == null ? o.rotation : this._rotation(rotation); } catch { return false; }
-    Object.assign(o, { position: copy(p), rotation: q, velocity: copy(v), angularVelocity: copy(w) }); return true;
+    // Plain copies, not structuredClone: the physics bridge calls this for every moving piece each step.
+    Object.assign(o, { position: { x: p.x, y: p.y, z: p.z }, rotation: q, velocity: { x: v.x, y: v.y, z: v.z }, angularVelocity: { x: w.x, y: w.y, z: w.z } }); return true;
   }
-  physicsBodies() { return [...this.objects.values()].map(o => ({ id: o.id, ownerId: o.id, entityType: 'object', position: o.position, rotation: o.rotation,
-    velocity: o.velocity, angularVelocity: o.angularVelocity, massKg: o.massKg, boxes: o.boxes, revision: o.revision, anchored: !!o.anchored })); }
+  /** The pieces themselves (id, pose, velocities, boxes, anchored), not copies: the physics bridge reads them every
+   * step and rebuilds a body only when a piece's boxes array is replaced. */
+  physicsBodies() { return this.objects.values(); }
   sceneModels() { return [...this.objects.values()].map(o => ({ id: o.id, ownerId: o.id, assetId: o.id, kind: 'object', entityType: 'object',
     asset: o.asset, model: o.asset, position: o.position, rotation: o.rotation, velocity: o.velocity, angularVelocity: o.angularVelocity,
     mass: o.massKg, massKg: o.massKg, revision: o.revision, fragment: o.fragment ? copy(o.fragment) : null })); }

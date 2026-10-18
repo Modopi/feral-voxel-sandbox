@@ -1,6 +1,6 @@
 import * as T from '../vendor/three.module.js';
 import {ASSETS, loadAssetLibrary} from './assets.generated.js';
-import {buildPartMeshes} from './render-surfaces.js';
+import {buildPartMeshes,SectionedSurfaces,syncBatchMeshes} from './render-surfaces.js';
 import {flattenAsset} from './voxel/model.js';
 import {animateCreatureModel,creatureBodyPart,creatureBones,woundedBoxes,BONE_MATERIAL} from './creature-animation.js';
 import {animateBossModel,bossLogicalPart} from './boss-animation.js';
@@ -146,8 +146,10 @@ export class ExpeditionScene {
  async makeModel(desc){
   const library=desc.asset?new Map([[desc.asset.id,desc.asset]]):await loadAssetLibrary(desc.assetId),asset=desc.asset??library.get(desc.assetId),group=new T.Group();
   const partGroups=new Map(),dynamicGeometry=[];
+  // A loose piece (one part) is meshed per section and changed in place when its cells change (updatePiece).
+  const piece=desc.kind==='object'&&asset.parts.length===1;
   for(const p of asset.parts){const node=new T.Group();node.name=p.id;node.position.set(...p.translation);node.userData.part=p;partGroups.set(p.id,node);}
-  for(const p of asset.parts){const node=partGroups.get(p.id);(p.parent===null?group:partGroups.get(p.parent)).add(node);
+  for(const p of asset.parts){const node=partGroups.get(p.id);(p.parent===null?group:partGroups.get(p.parent)).add(node);if(piece)continue;
    const mutable=['machine','object'].includes(desc.kind),cacheKey=asset.id+':'+p.id;let cached=mutable?null:this.geometryCache.get(cacheKey);
    if(!cached){cached=buildPartMeshes(p.boxes,asset.materials);if(!mutable)this.geometryCache.set(cacheKey,cached);}
    for(const cachedMesh of cached){const mesh=new T.Mesh(cachedMesh.geometry,cachedMesh.material);mesh.userData={id:desc.id,kind:desc.kind,partId:p.id};node.add(mesh);if(mutable)dynamicGeometry.push(mesh);}
@@ -159,9 +161,16 @@ export class ExpeditionScene {
    for(const c of cached){const mesh=new T.Mesh(c.geometry,c.material);mesh.userData={id:desc.id,kind:desc.kind,partId:p.id,layer:'bone'};partGroups.get(p.id).add(mesh);}
   }
   const value={group,parts:partGroups,asset,library,boxes:flattenAsset(asset,library),desc,revision:desc.revision,dynamicGeometry};
+  if(piece){value.surfaces=new SectionedSurfaces();value.batchMeshes=new Map();this.updatePiece(value,asset);}
   if(desc.getBoxes)this.rebuildStructure(value,desc);
   if(this.wanted.has(desc.id)){this.models.set(desc.id,value);this.scene.add(group);}else releaseModel(value);
   this.pending.delete(desc.id);return value;
+ }
+ /** A loose piece's new cells (a broken cell, a split, an attached block): only the sections that changed are meshed
+  * again and the model keeps its group, so the piece never disappears while it is rebuilt. */
+ updatePiece(model,asset){
+  const part=asset.parts[0];model.asset=asset;model.library=new Map([[asset.id,asset]]);model.boxes=flattenAsset(asset,model.library);
+  model.dynamicGeometry=syncBatchMeshes(model.parts.get(part.id),model.batchMeshes,model.surfaces.update(part.boxes,asset.materials),{id:model.desc.id,kind:model.desc.kind,partId:part.id});
  }
  rebuildStructure(model,desc){
   if(!model.structureParts){model.group.clear();model.parts.clear();model.structureParts=new Map();}
@@ -199,7 +208,7 @@ export class ExpeditionScene {
   for(const d of descriptors){
    if(!d.asset&&!ASSETS[d.assetId])continue;
    let m=this.models.get(d.id);
-   if(m&&d.asset&&m.asset!==d.asset){releaseModel(m);this.models.delete(d.id);m=null;}
+   if(m&&d.asset&&m.asset!==d.asset){if(m.surfaces&&d.asset.parts.length===1&&d.asset.parts[0].id===m.asset.parts[0].id){m.desc=d;this.updatePiece(m,d.asset);}else{releaseModel(m);this.models.delete(d.id);m=null;}}
    if(!m){if(!this.pending.has(d.id)){this.pending.add(d.id);this.makeModel(d).catch(e=>{this.pending.delete(d.id);this.lastError=e;});}continue;}
    m.desc=d;if(d.getBoxes&&m.revision!==d.revision)this.rebuildStructure(m,d);
    const p=d.position;

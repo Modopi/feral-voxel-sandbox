@@ -38,8 +38,8 @@ test('severed trunk transfers exact original cell mass and volume with exclusive
   assertAuthoringInvariant(o.asset); assertCreatedByTool(o.asset);
   assert.equal(o.asset.parts[0].boxes.length, 4); assert.equal(o.asset.category, 'object');
   assert.equal(o.asset.materials.find(m=>m.id==='leaves').collision, false);
-  assert.equal(s.physicsBodies()[0].boxes.filter(b=>b.collision).length, 2);
-  assert.equal(s.physicsBodies()[0].boxes.reduce((n,b)=>n+b.massKg,0), o.massKg);
+  assert.equal([...s.physicsBodies()][0].boxes.filter(b=>b.collision).length, 2);
+  assert.equal([...s.physicsBodies()][0].boxes.reduce((n,b)=>n+b.massKg,0), o.massKg);
   assert.equal(s.sceneModels()[0].kind, 'object'); assert.equal(s.sceneModels()[0].ownerId, o.id);
   assert.equal(s.detachAround([0,0,0]).objects.length, 0);
 });

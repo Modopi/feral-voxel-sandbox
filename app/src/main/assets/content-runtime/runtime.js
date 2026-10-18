@@ -68,7 +68,7 @@ export class ExpeditionRuntime {
   this.objects=new WorldObjects(CONTENT,this.atlas,state?.objects);
   this.pendingDetach=new Set(state?.pendingDetach||[]);
   this.atlas.onCellDestroyed=cell=>this.pendingDetach.add(cell.join(','));
-  this.atlas.isAnchoredCell=(x,y,z)=>{const p={x:x*.5+.25,y:y*.5+.25,z:z*.5+.25};return !!this.dungeons.solidAt(p)||!!this.placements.solidAt(p);};
+  this.atlas.isAnchoredCell=(x,y,z)=>{if(!this.dungeons.instances.size&&!this.placements.records.size)return false;const p={x:x*.5+.25,y:y*.5+.25,z:z*.5+.25};return !!this.dungeons.solidAt(p)||!!this.placements.solidAt(p);};
   this.community=new CommunitySystem(this,state?.community||{});
   this.faith=new FaithSystem(this,state?.faith||{});
   // Terrain wounds are the mined fraction of a cell (frontier rule); saves before 0.14 stored remaining HP.
