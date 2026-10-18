@@ -155,6 +155,8 @@ export class FrontierAtlas extends IslandAtlas {
   /** Places of the region under (x, z), in world metres. */
   regionLandmarks(x,z){const at=this._islandAt(x,z);return at?at.world.landmarks.map(l=>({...l,x:l.x+at.ox,z:l.z+at.oz})):[];}
   serialize(){const state=super.serialize();if(this.regionTerrain.size)state.regionTerrain=[...this.regionTerrain].sort(([a],[b])=>a.localeCompare(b));return state;}
+  /** A worker copy builds each region with the same terrain version. */
+  _generatorOptions(){return {regionTerrain:[...this.regionTerrain]};}
 }
 
 // The machine field (S3): the old field's 46 m test ground, centred on the origin, as terrain. A flat floor

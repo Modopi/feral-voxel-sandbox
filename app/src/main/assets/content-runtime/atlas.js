@@ -67,7 +67,7 @@ export class WorldAtlas {
     this._solid=Uint8Array.from(this.palette,id=>id!==null&&this.blocks.get(id)?.collision!==false?1:0);
     // Section change log: per-section serials plus an ordered log consumers read with changesSince().
     this._changeSerial=0;this._resetSerial=0;this._terrainSections=new Map();this._fluidSectionKeys=new Map();this._changeKeys=[];this._changeSerials=[];this._changeFloor=0;
-    this.pendingChunkCount=0;this.revision=0;this.onCellDestroyed=options.onCellDestroyed??null;
+    this.pendingChunkCount=0;this.revision=0;this.generationRevision=0;this._generator=null;this.generatorFailure=null;this.onCellDestroyed=options.onCellDestroyed??null;
     this.rules=content.environments.world;
     this.fluidCells=new Map();this._fluidChunkKeys=new Map();this._fluidActive=new Set();this._flowCursor=0;this.burning=new Map();this.fuelRemaining=new Map();this.thermalCells=new Map();this.cellDamage=new Map();
     this.simulationTime=state?.simulationTime??0;this._simulationAccumulator=state?.simulationAccumulator??0;this._thermalCursor=state?.thermalCursor??0;this.environmentRevision=0;
@@ -99,7 +99,7 @@ export class WorldAtlas {
     this.reservations.set(id,next);this._columns.clear();this._samples.clear();this._trees.clear();this._ores.clear();this._caves.clear();
     for(const [key,c] of this.activeChunks)if([r,previous].filter(Boolean).some(q=>c.cx*16<q.maxX&&(c.cx+1)*16>q.minX&&c.cz*16<q.maxZ&&(c.cz+1)*16>q.minZ))this.activeChunks.delete(key);
     for(const c of this.activeChunks.values())if([r,previous].filter(Boolean).some(q=>c.cx*16<q.maxX+.5&&(c.cx+1)*16>q.minX-.5&&c.cz*16<q.maxZ+.5&&(c.cz+1)*16>q.minZ-.5))c.revision=this.revision+1;
-    this._jobs.clear();this._loadPlan=null;this.revision++;this._resetSections();return true;
+    this._jobs.clear();this._loadPlan=null;this.revision++;this._resetSections();this._reservationsChanged();return true;
   }
   /** Base terrain changed over a region (reservation): every cached section is stale. */
   _resetSections(){this._resetSerial=++this._changeSerial;this._changeKeys.length=0;this._changeSerials.length=0;this._changeFloor=this._resetSerial;}
@@ -452,7 +452,7 @@ export class WorldAtlas {
     const {key,cx,cy,cz,size,cellSize,blocks,palette}=job;return{key,cx,cy,cz,size,cellSize,blocks,palette,revision:this.revision};
   }
   _generateChunk(cx,cy,cz){const job=this._newChunkJob(cx,cy,cz);this._advanceChunk(job,32768);return this._finishChunk(job);}
-  loadAround(x,z,{radiusChunks=2,verticalRadius=0,y,chunkBudget=4,workBudgetMs=8,maxCellsPerLoad=32768}={}){
+  loadAround(x,z,{radiusChunks=2,verticalRadius=0,y,chunkBudget=4,arrivalBudget=4,workBudgetMs=8,maxCellsPerLoad=32768}={}){
     validatePosition(x,z);if(!(workBudgetMs>0)||!(maxCellsPerLoad>0))throw new RangeError('Invalid incremental work budget');const started=performance.now(),deadline=started+workBudgetMs;if(![radiusChunks,verticalRadius,chunkBudget].every(Number.isFinite))throw new RangeError('Invalid chunk loading budget');if(y!==undefined&&!finitePosition(y))throw new RangeError('Invalid load height');
     this._focus={x,z,radius:Math.max(64,(radiusChunks+1)*16)};
     const r=clamp(Math.floor(radiusChunks),0,8),v=clamp(Math.floor(verticalRadius),0,4),budget=clamp(Math.floor(chunkBudget),0,this.maxActiveChunks),cx=floorDiv(x,16),cz=floorDiv(z,16);
@@ -476,15 +476,82 @@ export class WorldAtlas {
     this.unloadExcept(keys);
     for(const key of this._fluidActive){const [hx,,hz]=decodeCell(key);if(!this._simulationNear(hx,hz))this._fluidActive.delete(key);}
     for(const key of keys){if(this._fluidActive.size>=2048)break;for(const fluidKey of this._fluidChunkKeys.get(key)??[]){if(this._fluidActive.size>=2048)break;if(this.fluidCells.get(fluidKey).volumeM3>1e-9)this._fluidActive.add(fluidKey);}}
-    let generated=0,processed=0;
-    for(const c of selected){
+    let generated=0,processed=0;const g=this._generator?.ready?this._generator:null;
+    if(g){
+      // Off-thread generation: install chunks the worker finished (request order is priority order), then keep
+      // the worker supplied. A finished chunk no longer wanted is dropped; installing only replays edits.
+      const arrivals=clamp(Math.floor(arrivalBudget),0,this.maxActiveChunks);
+      for(const [key,msg]of g.arrived){
+        if(generated>=arrivals)break;
+        g.arrived.delete(key);if(!keys.has(key)||this.activeChunks.has(key))continue;
+        this._installChunk(this._finishChunk({key,cx:msg.cx,cy:msg.cy,cz:msg.cz,size:32,cellSize:CELL_SIZE,blocks:msg.blocks,palette:this.palette}),cx,cz);generated++;
+      }
+      for(const c of selected){
+        if(g.waiting>=g.inflight)break;
+        if(this.activeChunks.has(c.key)||g.requested.has(c.key)||g.arrived.has(c.key))continue;
+        g.requested.add(c.key);g.waiting++;g.port.postMessage({type:'chunk',key:c.key,cx:c.cx,cy:c.cy,cz:c.cz,generation:this.generationRevision});
+      }
+    }else for(const c of selected){
       if(this.activeChunks.has(c.key)||generated>=budget||processed>=maxCellsPerLoad||performance.now()>=deadline)continue;
       if(!this._jobs.has(c.key))this._jobs.set(c.key,this._newChunkJob(c.cx,c.cy,c.cz));
       const job=this._jobs.get(c.key);processed+=this._advanceChunk(job,maxCellsPerLoad-processed,deadline);
-      if(job.cursor===32768){if(this.activeChunks.size>=this.maxActiveChunks){const victim=[...this.activeChunks.values()].sort((a,b)=>((b.cx-cx)**2+(b.cz-cz)**2)-((a.cx-cx)**2+(a.cz-cz)**2))[0];if(victim)this.activeChunks.delete(victim.key);}this.activeChunks.set(c.key,this._finishChunk(job));this._jobs.delete(c.key);generated++;}
+      if(job.cursor===32768){this._installChunk(this._finishChunk(job),cx,cz);this._jobs.delete(c.key);generated++;}
     }
     this.lastLoadWork={processedCells:processed,completedChunks:generated};
     this.pendingChunkCount=prepared?selected.filter(c=>!this.activeChunks.has(c.key)).length:Math.max(1,Math.min(plan.horizontal.length*(2*v+1),this.maxActiveChunks)-selected.filter(c=>this.activeChunks.has(c.key)).length);return [...this.activeChunks.values()];
+  }
+  /** Adds a finished chunk, evicting the farthest loaded one when the limit is reached. */
+  _installChunk(chunk,cx,cz){
+    if(this.activeChunks.size>=this.maxActiveChunks){let victim=null,far=-1;for(const c of this.activeChunks.values()){const d=(c.cx-cx)**2+(c.cz-cz)**2;if(d>far){far=d;victim=c;}}if(victim)this.activeChunks.delete(victim.key);}
+    this.activeChunks.set(chunk.key,chunk);
+  }
+  // ---- Off-thread generation (docs/ARCHITECTURE.md §7) ----
+  // A worker (terrain-worker.js) keeps a copy of this atlas: same generator, seed, generator options and
+  // reservations, no edits. It builds a chunk's base cells; _finishChunk replays this atlas's edits when the
+  // chunk arrives, so a worker chunk equals one built here. Requests carry generationRevision, which changes
+  // with the base terrain (reserveArea), and a result of an older generation is dropped.
+  /** Generator options besides seed and reservations that a copy of this atlas needs (structured-cloneable). */
+  _generatorOptions(){return {};}
+  /** Replaces every reservation; a worker copy follows the main atlas with this. */
+  setReservations(list){
+    this.reservations.clear();this._columns.clear();this._samples.clear();this._trees.clear();this._ores.clear();this._caves.clear();
+    for(const r of list)this.reserveArea(r.id,r);
+  }
+  /** Generates chunks through `port` (a Worker or MessagePort running terrain-worker.js) once it reports ready.
+   * Until then, and after a failure, chunks are built here within the frame budget as before. */
+  attachGenerator(port,{inflight=6}={}){
+    this.detachGenerator();
+    const g=this._generator={port,ready:false,inflight:clamp(Math.floor(inflight),1,16),waiting:0,requested:new Set(),arrived:new Map()};
+    port.onmessage=event=>this._generated(g,event.data);
+    port.onmessageerror=()=>this._generatorFailed(g,'messageerror');
+    if('onerror' in port)port.onerror=event=>{event?.preventDefault?.();this._generatorFailed(g,event?.message??'error');};
+    port.postMessage({type:'init',generatorId:this.generatorId,seed:this.seed,options:this._generatorOptions(),reservations:[...this.reservations.values()],generation:this.generationRevision});
+    return true;
+  }
+  /** Where chunks are built: 'worker', 'starting' (worker loading, built here meanwhile), 'failed' or 'main'. */
+  get generatorState(){return this._generator?.ready?'worker':this._generator?'starting':this.generatorFailure?'failed':'main';}
+  detachGenerator(){
+    const g=this._generator;if(!g)return;this._generator=null;
+    g.port.onmessage=null;g.port.onmessageerror=null;if('onerror' in g.port)g.port.onerror=null;
+    g.port.terminate?.();g.port.close?.();
+  }
+  _generatorFailed(g,reason){if(this._generator!==g)return;this.generatorFailure=String(reason);this.detachGenerator();}
+  _generated(g,msg){
+    if(this._generator!==g)return;
+    if(msg?.type==='error'){this._generatorFailed(g,msg.error);return;}
+    // Main-thread jobs stop when the worker takes over; their chunks are requested again.
+    if(msg?.type==='ready'){g.ready=true;this._jobs.clear();return;}
+    if(msg?.type!=='chunk')return;
+    g.waiting=Math.max(0,g.waiting-1);
+    if(msg.generation!==this.generationRevision)return;
+    g.requested.delete(msg.key);
+    if(!(msg.blocks instanceof Uint16Array)||msg.blocks.length!==32768){this._generatorFailed(g,'invalid chunk');return;}
+    g.arrived.set(msg.key,msg);
+  }
+  _reservationsChanged(){
+    this.generationRevision++;const g=this._generator;if(!g)return;
+    g.requested.clear();g.arrived.clear();
+    g.port.postMessage({type:'reserve',reservations:[...this.reservations.values()],generation:this.generationRevision});
   }
   unloadExcept(keys){const keep=keys instanceof Set?keys:new Set(keys);for(const key of this.activeChunks.keys())if(!keep.has(key))this.activeChunks.delete(key);for(const key of this._jobs.keys())if(!keep.has(key))this._jobs.delete(key);}
   findBuildingSites(x,z,radius=512){

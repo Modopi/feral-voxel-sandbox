@@ -8,6 +8,7 @@ import { generatorFor, FIELD_FLOOR, FIELD_WALL, FIELD_PILLARS, FIELD_SCRAP } fro
 import { FIELD_KIT, FIELD_START, exampleDesign } from '../app/src/main/assets/content-runtime/machine-field.js';
 import { WHEEL_DRIVE } from '../app/src/main/assets/content-runtime/machines.js';
 import { RuntimePhysics } from '../app/src/main/assets/content-runtime/physics.js';
+import { MASS_TOLERANCE } from '../app/src/main/assets/content-runtime/machine-physics.js';
 import { PRESETS, worldConfig } from '../app/src/main/assets/world-slots.js';
 
 const config = worldConfig({ id: 'beta', name: '기계 베타 맵', type: 'machine', seed: 63026 });
@@ -127,4 +128,23 @@ test('the heavy example is slower; a machine on its side has no traction', async
   s.terrain = flat;Object.assign(m.rotation, { x: 0, y: 0, z: Math.SQRT1_2, w: Math.SQRT1_2 });
   const stats = s.evaluate(id), w = s._wheelContact(m, stats, stats.mass);
   assert.deepEqual([w.count, w.share], [4, 0]);
+});
+
+test('the physics body follows the machine mass as fuel burns, without setting masses again for grams', async () => {
+  const rt = make(), s = rt.machines;
+  const id = s.importDesign({ ...exampleDesign(false), position: { x: 0, y: .06, z: 0 }, yaw: 0 }).machineId;
+  s.terrain = flat;
+  const host = { atlas: flat, terrain: flat, player: { x: 0, y: 0, z: 20 }, nearbyStructures: [], machines: s, progression: rt.progression };
+  const p = await RuntimePhysics.create(host, null, { terrainRadius: 4 });
+  try {
+    p.synchronize(new Map(), host.player);p.step(1 / 60);
+    const cache = p.machinePhysics.bodies.get(id), body = cache.entry.body;let sets = 0;
+    for (const c of cache.entry.colliders) { const original = c.setMass.bind(c); c.setMass = (kg) => { sets++; return original(kg); }; }
+    for (let i = 0; i < 30; i++) p.step(1 / 60);
+    assert.equal(sets, 0, 'the idling engine burns grams: nothing is set in half a second');
+    const before = body.mass();
+    s.control(id, { throttle: 1 });for (let i = 0; i < 240; i++) p.step(1 / 60);
+    assert.ok(sets > 0 && body.mass() < before, `fuel burnt: ${before.toFixed(3)} → ${body.mass().toFixed(3)} kg`);
+    assert.ok(Math.abs(body.mass() - s.evaluate(id).mass) <= MASS_TOLERANCE * s.evaluate(id).mass, 'the body carries the machine mass within 0.1 %');
+  } finally { p.dispose(); }
 });

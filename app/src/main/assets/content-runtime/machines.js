@@ -250,8 +250,8 @@ export class MachineSystem {
  evaluate(id){
   const m=this.machines.get(id);if(!m)return null;
   const cells=m.voxels.map(v=>({x:(v.cell[0]+.5)*m.gridM,y:(v.cell[1]+.5)*m.gridM,z:(v.cell[2]+.5)*m.gridM,mass:v.massKg,size:m.gridM}));
-  for(const c of m.components){const v=m.voxels.find(v=>v.id===c.voxelId);cells.push({x:(v.cell[0]+.5)*m.gridM,y:(v.cell[1]+.5)*m.gridM,z:(v.cell[2]+.5)*m.gridM,mass:c.massKg+c.fuelItems*.6+c.fuel/400*.6+Object.entries(c.fluids).reduce((s,[id,n])=>s+this._itemMass(id)*n,0),size:m.gridM});}
-  cells.push({x:0,y:0,z:0,mass:Object.entries(m.cargo).reduce((s,[id,n])=>s+this._itemMass(id)*n,0),size:m.gridM});
+  for(const c of m.components){const v=m.voxels.find(v=>v.id===c.voxelId);cells.push({x:(v.cell[0]+.5)*m.gridM,y:(v.cell[1]+.5)*m.gridM,z:(v.cell[2]+.5)*m.gridM,mass:this._componentLoad(c),size:m.gridM});}
+  cells.push({x:0,y:0,z:0,mass:this._loadMass(m.cargo),size:m.gridM});
   return {...massProperties(cells),entityType:'machine',voxels:m.voxels.length,components:m.components.length,powerEUPerSecond:m.lastPower};
  }
  _condition(m,c){const v=m.voxels.find(v=>v.id===c.voxelId);return c.active&&v?clamp(v.hp/v.maxHp,0,1):0;}
@@ -375,9 +375,19 @@ export class MachineSystem {
  }
  physicsMasses(id){
   const m=this.machines.get(id);if(!m)return null;const voxelMasses=Object.fromEntries(m.voxels.map(v=>[v.id,v.massKg]));
-  for(const c of m.components)voxelMasses[c.voxelId]+=c.massKg+c.fuelItems*.6+c.fuel/400*.6+Object.entries(c.fluids).reduce((s,[id,n])=>s+this._itemMass(id)*n,0);
-  return {voxelMasses,cargoMassKg:Object.entries(m.cargo).reduce((s,[id,n])=>s+this._itemMass(id)*n,0)};
+  for(const c of m.components)voxelMasses[c.voxelId]+=this._componentLoad(c);
+  return {voxelMasses,cargoMassKg:this._loadMass(m.cargo)};
  }
+ /** physicsMasses without allocating (the physics bridge checks it every step): each voxel's mass in voxel order,
+  * the cargo last, into `out`; `index` maps a voxel id to its position. */
+ writePhysicsMasses(m,index,out){
+  const n=m.voxels.length;for(let i=0;i<n;i++)out[i]=m.voxels[i].massKg;
+  for(const c of m.components){const i=index.get(c.voxelId);if(i!==undefined)out[i]+=this._componentLoad(c);}
+  out[n]=this._loadMass(m.cargo);return out;
+ }
+ /** A mounted component with its fuel and fluids, kg. */
+ _componentLoad(c){return c.massKg+c.fuelItems*.6+c.fuel/400*.6+this._loadMass(c.fluids);}
+ _loadMass(items){let sum=0;for(const id in items)sum+=this._itemMass(id)*items[id];return sum;}
  acceptPhysicsState(id,state){
   const m=this.machines.get(id);if(!m||!state||!pointOK(state.position||{})||!pointOK(state.velocity||{})||!pointOK(state.angularVelocity||{})||!['x','y','z','w'].every(k=>finite(state.rotation?.[k])))return no('invalid_physics_state');
   const length=Math.hypot(...['x','y','z','w'].map(k=>state.rotation[k]));if(length<1e-9)return no('invalid_rotation');
@@ -385,9 +395,11 @@ export class MachineSystem {
   for(const k of ['x','y','z','w'])m.rotation[k]=state.rotation[k]/length;
   m.yaw=Math.atan2(2*(m.rotation.w*m.rotation.y+m.rotation.x*m.rotation.z),1-2*(m.rotation.y*m.rotation.y+m.rotation.x*m.rotation.x));return ok();
  }
- preparePhysicsStep(dt,{activeIds=null}={}){
+ /** Force packets of the machines with a physics body: `active` is anything with has(id) (the bridge's body map),
+  * or `activeIds` an id list. */
+ preparePhysicsStep(dt,{activeIds=null,active=activeIds?new Set(activeIds):null}={}){
   if(!finite(dt)||dt<=0||dt>.1)throw Error('Physics step must be in (0,0.1]');
-  const active=activeIds?new Set(activeIds):null,packets=[];
+  const packets=[];
   for(const m of this.machines.values())if(m.voxels.length&&(!active||active.has(m.id)))packets.push(this._physicsForces(m,dt));
   this.clock+=dt;return packets;
  }
