@@ -29,6 +29,9 @@ const colliderHandle = (value) => typeof value === 'number' ? value : value?.han
 
 export class AssetCollisionWorld {
   constructor(R, world) {
+    // Bumped whenever a body is added or removed; step() records the value it saw,
+    // so callers can tell whether scene queries need a broad-phase refresh.
+    this.revision = 0; this.steppedRevision = 0;
     if (!R?.ColliderDesc || !R?.RigidBodyDesc || !world?.createRigidBody) {
       throw new TypeError('Initialized Rapier module and a caller-owned World are required');
     }
@@ -125,7 +128,7 @@ export class AssetCollisionWorld {
         colliders.push(collider);
         this.colliderOwners.set(collider.handle, Object.freeze({ ownerId, partId, bodyHandle: body.handle }));
       }
-      this.entries.push(entry);
+      this.entries.push(entry); this.revision++;
       return entry;
     } catch (error) {
       for (const collider of colliders) this.colliderOwners.delete(collider.handle);
@@ -140,6 +143,7 @@ export class AssetCollisionWorld {
     scalar(dt, 'dt', { positive: true });
     this.world.timestep = dt;
     this.world.step(this.eventQueue, this.hooks);
+    this.steppedRevision = this.revision;
   }
 
   /** Removes every articulated body belonging to the entity, not other owners. */
@@ -152,7 +156,7 @@ export class AssetCollisionWorld {
       for (const collider of entry.colliders) this.colliderOwners.delete(collider.handle);
       if (this.world.getRigidBody(entry.body.handle)) this.world.removeRigidBody(entry.body);
       this.entries.splice(i, 1);
-      removed++;
+      removed++; this.revision++;
     }
     return removed;
   }

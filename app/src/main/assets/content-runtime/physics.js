@@ -1,6 +1,7 @@
 import R from '../vendor/rapier/rapier.js';
 import * as T from '../vendor/three.module.js';
 import { AssetCollisionWorld } from './voxel/physics.js';
+import { SECTION_CELLS } from './atlas.js';
 import { MachinePhysicsBridge } from './machine-physics.js';
 import { ObjectPhysicsBridge } from './object-physics.js';
 import { FixturePhysicsBridge } from './fixture-physics.js';
@@ -13,6 +14,20 @@ const xyz = (v) => Array.isArray(v) ? { x: v[0], y: v[1], z: v[2] } : { x: v.x, 
 const array = (v) => [v.x, v.y, v.z];
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
 const identity = { x: 0, y: 0, z: 0, w: 1 };
+// Quaternion helpers without allocation in per-step loops (out is a 3-array).
+const rotate = (q, x, y, z, out) => {
+  const ix = q.w * x + q.y * z - q.z * y, iy = q.w * y + q.z * x - q.x * z, iz = q.w * z + q.x * y - q.y * x, iw = -q.x * x - q.y * y - q.z * z;
+  out[0] = ix * q.w + iw * -q.x + iy * -q.z - iz * -q.y; out[1] = iy * q.w + iw * -q.y + iz * -q.x - ix * -q.z; out[2] = iz * q.w + iw * -q.z + ix * -q.y - iy * -q.x;
+};
+// World half extents of a box with half sizes x, y, z rotated by q.
+const rotatedExtents = (q, x, y, z, out) => {
+  const xx = q.x * q.x, yy = q.y * q.y, zz = q.z * q.z, xy = q.x * q.y, xz = q.x * q.z, yz = q.y * q.z, wx = q.w * q.x, wy = q.w * q.y, wz = q.w * q.z;
+  out[0] = Math.abs(1 - 2 * (yy + zz)) * x + Math.abs(2 * (xy - wz)) * y + Math.abs(2 * (xz + wy)) * z;
+  out[1] = Math.abs(2 * (xy + wz)) * x + Math.abs(1 - 2 * (xx + zz)) * y + Math.abs(2 * (yz - wx)) * z;
+  out[2] = Math.abs(2 * (xz - wy)) * x + Math.abs(2 * (yz + wx)) * y + Math.abs(1 - 2 * (xx + yy)) * z;
+};
+const multiply = (a, b) => ({ x: a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y, y: a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x,
+  z: a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w, w: a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z });
 const visible = (node) => { for (let n = node; n; n = n.parent) if (n.visible === false) return false; return true; };
 const solid = (box, material, role) => box.collision !== false && material?.collision !== false
   && material?.id !== 'visual_water' && role !== 'static_fluid_visual';
@@ -30,7 +45,7 @@ export class RuntimePhysics {
     this.runtime = runtime; this.scene = scene;
     this.radius = options.radius ?? 12; this.terrainRadius = options.terrainRadius ?? 7;
     this.terrainBelow = options.terrainBelow ?? 3; this.terrainAbove = options.terrainAbove ?? 4;
-    this.parts = new Map(); this.structures = new Map(); this.bossEffects = new Map(); this.fixtures = new Map(); this.terrainKey = null; this.modelBoxCache = new WeakMap(); this.fixtureBoxRefs = new Map();
+    this.parts = new Map(); this.structures = new Map(); this.bossEffects = new Map(); this.fixtures = new Map(); this.terrainSections = new Map(); this.terrainRanges = []; this.terrainPrevious = []; this.terrainRangeCount = 0; this.terrainRevision = null; this.terrainVersion = 0; this.terrainScratch = new Uint8Array(SECTION_CELLS ** 3); this.terrainScratchVector = [0, 0, 0]; this.entryBounds = new WeakMap(); this.partShapes = new WeakMap(); this.modelBoxCache = new WeakMap(); this.fixtureBoxRefs = new Map();
     this.disposed = false; this.initialized = false; this.lastPlayer = null;
     this.ready = initialize().then(() => {
       if (this.disposed) return;
@@ -50,68 +65,93 @@ export class RuntimePhysics {
     if (!this.initialized) throw new Error('Await RuntimePhysics.ready before use');
   }
 
+  /** Terrain colliders are cached per atlas section (SECTION_CELLS, 4 m). The
+   * wanted set is the player's box plus a margin around every moving cuboid. A
+   * section is built when it enters that set and rebuilt only when the atlas
+   * reports a solid-cell change inside it, so a resting or jittering object, or
+   * mining elsewhere, costs no collider work. Atlases without section revisions
+   * fall back to their global revision. Returns true when colliders changed. */
   terrainAt(player, force = false) {
     const p = xyz(player), atlas = this.runtime.atlas;
     if (!atlas?.isSolidCell) return false;
-    // Two-metre cache cells plus margin avoid rebuilding for every input tick.
-    const cx = Math.floor(p.x / 2) * 2, cy = Math.floor(p.y), cz = Math.floor(p.z / 2) * 2;
-    const dynamicKey = [...(this.machinePhysics?.bodies ?? []), ...(this.objectPhysics?.bodies ?? []), ...(this.fixturePhysics?.bodies ?? [])].map(([id, c]) => {
-      const p = c.entry.body.translation(), q = c.entry.body.rotation(), v = c.entry.body.linvel();
-      return [id, ...[p.x, p.y, p.z].map(Math.floor), ...[q.x, q.y, q.z, q.w].map((n) => Math.round(n * 12)),
-        ...[v.x, v.y, v.z].map((n) => Math.round(n / 5)), c.signature];
-    });
-    const key = `${cx},${cy},${cz}:${atlas.revision ?? 0}:${JSON.stringify(dynamicKey)}`;
-    if (!force && key === this.terrainKey) return false;
-    this.adapter.removeOwner('@terrain');
-    const bounds = {
-      min: [cx - this.terrainRadius - 2, cy - this.terrainBelow, cz - this.terrainRadius - 2],
-      max: [cx + this.terrainRadius + 2, cy + this.terrainAbove, cz + this.terrainRadius + 2],
-    };
-    const min = bounds.min.map((v) => Math.floor(v * 2)), max = bounds.max.map((v) => Math.ceil(v * 2));
-    const boxes = [];
-    // Exact union of 0.5m cells: merge only contiguous x runs in one y/z row.
-    // Holes, caves, mining edits and fluid non-collision cells remain empty.
-    for (let y = min[1]; y < max[1]; y++) for (let z = min[2]; z < max[2]; z++) {
-      let start = null;
-      for (let x = min[0]; x <= max[0]; x++) {
-        const occupied = x < max[0] && atlas.isSolidCell(x, y, z);
-        if (occupied && start === null) start = x;
-        if (!occupied && start !== null) {
-          boxes.push({ center: [(start + x) * .25, y * .5 + .25, z * .5 + .25], size: [(x - start) * .5, .5, .5] }); start = null;
-        }
-      }
-    }
-    // Sparse neighbourhoods around actual moving cuboids keep distant aircraft,
+    const r = this.terrainRadius + 1, ranges = this.terrainRanges;
+    let n = this._sectionRange(ranges, 0, p.x - r, p.y - this.terrainBelow, p.z - r, p.x + r, p.y + this.terrainAbove, p.z + r);
+    // Sparse neighbourhoods around actual moving bodies keep distant aircraft,
     // separated fragments and long assemblies in contact with local terrain.
-    // Do not fill the potentially huge empty AABB between player and vehicles.
-    const extra = new Set(), rows = new Map();
-    for (const { entry } of [...(this.machinePhysics?.bodies.values() ?? []), ...(this.objectPhysics?.bodies.values() ?? []), ...(this.fixturePhysics?.bodies.values() ?? [])]) {
-      const v = entry.body.linvel(), margin = 1.5 + Math.min(5, Math.hypot(v.x, v.y, v.z) * .1);
+    // Each body's own world AABB is used, never the empty space between bodies.
+    const e = this.terrainScratchVector;
+    for (const bridge of [this.machinePhysics, this.objectPhysics, this.fixturePhysics]) for (const { entry } of bridge?.bodies.values() ?? []) {
+      const bounds = this.bodyBounds(entry); if (!bounds) continue;
+      const t = entry.body.translation(), q = entry.body.rotation(), v = entry.body.linvel(), margin = 1.5 + Math.min(5, Math.hypot(v.x, v.y, v.z) * .1);
+      rotate(q, bounds.center[0], bounds.center[1], bounds.center[2], e); const cx = t.x + e[0], cy = t.y + e[1], cz = t.z + e[2];
+      rotatedExtents(q, bounds.half[0], bounds.half[1], bounds.half[2], e);
+      n = this._sectionRange(ranges, n, cx - e[0] - margin, cy - e[1] - margin, cz - e[2] - margin, cx + e[0] + margin, cy + e[1] + margin, cz + e[2] + margin);
+    }
+    const revision = atlas.revision ?? 0;
+    let same = !force && revision === this.terrainRevision && n === this.terrainRangeCount;
+    for (let i = 0; same && i < n; i++) same = ranges[i] === this.terrainPrevious[i];
+    if (same) return false;
+    this.terrainRevision = revision; this.terrainRangeCount = n;
+    for (let i = 0; i < n; i++) this.terrainPrevious[i] = ranges[i];
+    const wanted = new Map();
+    for (let i = 0; i < n; i += 6) for (let sy = ranges[i + 1]; sy <= ranges[i + 4]; sy++) for (let sz = ranges[i + 2]; sz <= ranges[i + 5]; sz++)
+      for (let sx = ranges[i]; sx <= ranges[i + 3]; sx++) { const key = `${sx},${sy},${sz}`; if (!wanted.has(key)) wanted.set(key, [sx, sy, sz]); }
+    let changed = false;
+    for (const [key, section] of this.terrainSections) if (!wanted.has(key)) { this.removeEntry(section.entry); this.terrainSections.delete(key); changed = true; }
+    for (const [key, [sx, sy, sz]] of wanted) {
+      const sectionRevision = atlas.terrainSectionRevision ? atlas.terrainSectionRevision(sx, sy, sz) : revision, old = this.terrainSections.get(key);
+      if (!force && old && old.revision === sectionRevision) continue;
+      if (old) this.removeEntry(old.entry);
+      const boxes = this._terrainSectionBoxes(atlas, sx, sy, sz);
+      this.terrainSections.set(key, { revision: sectionRevision, entry: boxes.length ? this.adapter.addBody({ ownerId: '@terrain', partId: key, type: 'fixed', boxes }) : null });
+      changed = true;
+    }
+    if (changed) this.terrainVersion++;
+    return changed;
+  }
+  /** Body-space bounds of an entry's cuboid colliders, measured once from their
+   * poses (colliders never move within their body). */
+  bodyBounds(entry) {
+    if (this.entryBounds.has(entry)) return this.entryBounds.get(entry);
+    let bounds = null;
+    if (entry.colliders.length) {
+      const t = entry.body.translation(), q0 = entry.body.rotation(), inverse = { x: -q0.x, y: -q0.y, z: -q0.z, w: q0.w }, e = [0, 0, 0], p = [0, 0, 0];
+      const min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity];
       for (const collider of entry.colliders) {
-        const c = collider.translation(), q0 = collider.rotation(), q = new T.Quaternion(q0.x, q0.y, q0.z, q0.w);
-        const h = collider.shape.halfExtents, basis = [new T.Vector3(h.x, 0, 0), new T.Vector3(0, h.y, 0), new T.Vector3(0, 0, h.z)].map((a) => a.applyQuaternion(q));
-        const ext = ['x', 'y', 'z'].map((k) => basis.reduce((sum, a) => sum + Math.abs(a[k]), 0));
-        const low = ['x', 'y', 'z'].map((k, i) => Math.floor((c[k] - ext[i] - margin) * 2));
-        const high = ['x', 'y', 'z'].map((k, i) => Math.ceil((c[k] + ext[i] + margin) * 2));
-        for (let y = low[1]; y < high[1]; y++) for (let z = low[2]; z < high[2]; z++) for (let x = low[0]; x < high[0]; x++) {
-          if (x >= min[0] && x < max[0] && y >= min[1] && y < max[1] && z >= min[2] && z < max[2]) continue;
-          const cell = `${x},${y},${z}`; if (extra.has(cell)) continue; extra.add(cell);
-          if (!atlas.isSolidCell(x, y, z)) continue;
-          const row = `${y},${z}`; if (!rows.has(row)) rows.set(row, []); rows.get(row).push(x);
-        }
+        const c = collider.translation(), cq = collider.rotation(), h = collider.shape.halfExtents;
+        rotate(inverse, c.x - t.x, c.y - t.y, c.z - t.z, p);
+        rotatedExtents(multiply(inverse, cq), h.x, h.y, h.z, e);
+        for (let i = 0; i < 3; i++) { min[i] = Math.min(min[i], p[i] - e[i]); max[i] = Math.max(max[i], p[i] + e[i]); }
       }
+      bounds = { center: min.map((v, i) => (v + max[i]) / 2), half: min.map((v, i) => (max[i] - v) / 2) };
     }
-    for (const [row, xs] of rows) {
-      const [y, z] = row.split(',').map(Number); xs.sort((a, b) => a - b);
-      let start = xs[0], end = start + 1;
-      for (let i = 1; i <= xs.length; i++) {
-        if (xs[i] === end) { end++; continue; }
-        boxes.push({ center: [(start + end) * .25, y * .5 + .25, z * .5 + .25], size: [(end - start) * .5, .5, .5] });
-        start = xs[i]; end = start + 1;
-      }
+    this.entryBounds.set(entry, bounds); return bounds;
+  }
+  /** Writes the inclusive section index range of a metre AABB at ranges[n..n+5]. */
+  _sectionRange(ranges, n, x0, y0, z0, x1, y1, z1) {
+    const m = SECTION_CELLS * .5;
+    ranges[n] = Math.floor(x0 / m); ranges[n + 1] = Math.floor(y0 / m); ranges[n + 2] = Math.floor(z0 / m);
+    ranges[n + 3] = Math.floor(x1 / m); ranges[n + 4] = Math.floor(y1 / m); ranges[n + 5] = Math.floor(z1 / m);
+    return n + 6;
+  }
+  /** Exact union of the section's solid 0.5 m cells as greedy cuboids: runs grow
+   * along x, then z, then y. Holes, caves, mining edits and fluid (non-collision)
+   * cells stay empty; a fully solid section becomes one box. */
+  _terrainSectionBoxes(atlas, sx, sy, sz) {
+    const S = SECTION_CELLS, solid = this.terrainScratch, x0 = sx * S, y0 = sy * S, z0 = sz * S, boxes = [];
+    let any = 0;
+    for (let y = 0, i = 0; y < S; y++) for (let z = 0; z < S; z++) for (let x = 0; x < S; x++, i++) any |= solid[i] = atlas.isSolidCell(x0 + x, y0 + y, z0 + z) ? 1 : 0;
+    if (!any) return boxes;
+    for (let y = 0; y < S; y++) for (let z = 0; z < S; z++) for (let x = 0; x < S; x++) {
+      const i = x + z * S + y * S * S; if (!solid[i]) continue;
+      let w = 1, d = 1, h = 1;
+      while (x + w < S && solid[i + w]) w++;
+      depth: while (z + d < S) { for (let k = 0; k < w; k++) if (!solid[i + k + d * S]) break depth; d++; }
+      height: while (y + h < S) { for (let c = 0; c < d; c++) for (let k = 0; k < w; k++) if (!solid[i + k + c * S + h * S * S]) break height; h++; }
+      for (let a = 0; a < h; a++) for (let c = 0; c < d; c++) for (let k = 0; k < w; k++) solid[i + k + c * S + a * S * S] = 0;
+      boxes.push({ center: [(x0 + x + w / 2) * .5, (y0 + y + h / 2) * .5, (z0 + z + d / 2) * .5], size: [w * .5, h * .5, d * .5] });
     }
-    if (boxes.length) this.adapter.addBody({ ownerId: '@terrain', type: 'fixed', boxes });
-    this.terrainKey = key; return true;
+    return boxes;
   }
 
   syncStructures(models, player) {
@@ -228,24 +268,40 @@ export class RuntimePhysics {
   }
 
   desiredParts(models, player) {
-    const plans = new Map();
+    const plans = new Map(), origin = xyz(player), reach = this.radius + 8;
     for (const [id, model] of models) {
       if (['structure', 'machine', 'object', 'fixture', 'resource'].includes(model.desc?.kind)) continue;
-      const root = model.group; root.updateMatrixWorld(true);
-      const rootPosition = new T.Vector3(); root.getWorldPosition(rootPosition);
-      if (distance(rootPosition, xyz(player)) > this.radius + 8) continue;
+      // Distance first: only actors in range pay for a hierarchy matrix update.
+      const root = model.group, rootPosition = new T.Vector3();
+      if (!root.parent || root.parent.isScene) rootPosition.copy(root.position);
+      else { root.updateMatrixWorld(true); root.getWorldPosition(rootPosition); }
+      if (distance(rootPosition, origin) > reach) continue;
+      root.updateMatrixWorld(true);
       for (const part of model.asset.parts) {
         const node = model.parts.get(part.id); if (!node || !visible(node)) continue;
         const p = new T.Vector3(), q = new T.Quaternion(), s = new T.Vector3(); node.matrixWorld.decompose(p, q, s);
-        const boxes = part.boxes.filter((b) => solid(b, model.asset.materials.find((m) => m.id === b.material), part.role))
-          .map((b) => ({ center: b.center.map((v, i) => v * [s.x, s.y, s.z][i]), size: b.size.map((v, i) => v * [s.x, s.y, s.z][i]) }));
-        if (!boxes.length) continue;
+        const shape = this.partShape(model, part, s); if (!shape.boxes.length) continue;
         const key = `${id}::${part.id}`;
-        plans.set(key, { id: key, ownerId: id, partId: part.id, model, node, position: xyz(p), rotation: { x: q.x, y: q.y, z: q.z, w: q.w }, boxes,
-          geometryKey: JSON.stringify(boxes) });
+        plans.set(key, { id: key, ownerId: id, partId: part.id, model, node, position: xyz(p), rotation: { x: q.x, y: q.y, z: q.z, w: q.w }, boxes: shape.boxes,
+          geometryKey: shape.key });
       }
     }
     return plans;
+  }
+  /** Solid boxes of a part at a world scale, cached per part and scale. The scale
+   * is rounded: matrix decomposition jitters in the last bits (0.09375 becomes
+   * 0.09374999999999999), which otherwise rebuilt every animated limb each frame. */
+  partShape(model, part, scale) {
+    const sx = Math.round(scale.x * 1e4) / 1e4, sy = Math.round(scale.y * 1e4) / 1e4, sz = Math.round(scale.z * 1e4) / 1e4, scaleKey = `${sx},${sy},${sz}`;
+    let byScale = this.partShapes.get(part.boxes);
+    if (!byScale) this.partShapes.set(part.boxes, byScale = new Map());
+    let shape = byScale.get(scaleKey);
+    if (!shape) {
+      const factor = [sx, sy, sz], boxes = part.boxes.filter((b) => solid(b, model.asset.materials.find((m) => m.id === b.material), part.role))
+        .map((b) => ({ center: b.center.map((v, i) => v * factor[i]), size: b.size.map((v, i) => v * factor[i]) }));
+      byScale.set(scaleKey, shape = { boxes, key: `${part.id}:${scaleKey}:${JSON.stringify(boxes)}` });
+    }
+    return shape;
   }
 
   removeEntry(entry){
@@ -253,6 +309,7 @@ export class RuntimePhysics {
     for(const c of entry.colliders)this.adapter.colliderOwners.delete(c.handle);
     this.world.removeRigidBody(entry.body);
     const index=this.adapter.entries.indexOf(entry);if(index>=0)this.adapter.entries.splice(index,1);
+    this.adapter.revision++;
   }
 
   removePart(key) {
@@ -320,8 +377,11 @@ export class RuntimePhysics {
         entry.body.recomputeMassPropertiesFromColliders(); entry.mass = mass;
       }
     }
-    // Refresh broad-phase after new terrain/parts before issuing actual queries.
-    this.adapter.step(1e-6);
+    // Queries read the broad-phase of the last world step: refresh it only when a
+    // body was added or removed or the player capsule moved since then.
+    const capsule = this.characterCollider.translation(), stepped = this.steppedCapsule;
+    if (this.adapter.revision !== this.adapter.steppedRevision || !stepped || Math.abs(stepped.height - playerHeight) > 1e-6
+      || Math.abs(stepped.x - capsule.x) + Math.abs(stepped.y - capsule.y) + Math.abs(stepped.z - capsule.z) > 1e-6) this.worldStep(1e-6);
     const ownerCorrection = new Map();
     for (const [key, plan] of plans) {
       const cached = this.parts.get(key), entry = cached.entry;
@@ -365,12 +425,18 @@ export class RuntimePhysics {
     return { parts: this.parts.size, colliders: this.world.colliders.len(), structures: this.structures.size };
   }
 
+  /** One Rapier step, remembering the player capsule the broad-phase now holds. */
+  worldStep(dt) {
+    this.adapter.step(dt);
+    const capsule = this.characterCollider.translation();
+    this.steppedCapsule = { x: capsule.x, y: capsule.y, z: capsule.z, height: this.characterCollider.shape.halfHeight * 2 + .54 };
+  }
   step(dt) {
     this.assertReady(); if (!Number.isFinite(dt) || dt <= 0 || dt > .25) throw new RangeError('Invalid physics dt');
     let remaining = dt;
     while (remaining > 1e-9) {
       const step = Math.min(1 / 60, remaining);
-      this.machinePhysics.prepare(step); this.objectPhysics.sync(); this.objectPhysics.prepare(step); if (this.runtime.placements?.physicsBodies) this.fixturePhysics.sync(); this.terrainAt(this.runtime.player); this.adapter.step(step); this.machinePhysics.capture(); this.objectPhysics.capture(); this.fixturePhysics.capture(); remaining -= step;
+      this.machinePhysics.prepare(step); this.objectPhysics.sync(); this.objectPhysics.prepare(step); if (this.runtime.placements?.physicsBodies) this.fixturePhysics.sync(); this.terrainAt(this.runtime.player); this.worldStep(step); this.machinePhysics.capture(); this.objectPhysics.capture(); this.fixturePhysics.capture(); remaining -= step;
     }
   }
   /** Exact placement overlap against every external solid cuboid/actor. A tiny
@@ -429,7 +495,7 @@ export class RuntimePhysics {
     const steps = Math.max(1, Math.ceil(Math.hypot(delta.x, delta.y, delta.z)));
     const current = { ...start }; let grounded = false;
     for (let i = 0; i < steps; i++) {
-      if (this.terrainAt(current)) this.adapter.step(1e-6);
+      if (this.terrainAt(current)) this.worldStep(1e-6);
       this.characterCollider.setTranslation({ x: current.x, y: current.y + height / 2, z: current.z });
       this.character.computeColliderMovement(this.characterCollider, { x: delta.x / steps, y: delta.y / steps, z: delta.z / steps },
         R.QueryFilterFlags.EXCLUDE_SENSORS, undefined, (c) => c.handle !== this.characterCollider.handle && this.adapter.ownershipForCollider(c)?.ownerId !== 'player' && !(this.runtime.drivingMachineId != null && this.adapter.ownershipForCollider(c)?.ownerId === this.runtime.drivingMachineId));
@@ -530,6 +596,6 @@ export class RuntimePhysics {
   dispose() {
     if (this.disposed) return;
     if (this.initialized) { this.machinePhysics.dispose(); this.objectPhysics.dispose(); this.fixturePhysics.dispose(); this.world.removeCharacterController(this.character); this.world.removeCollider(this.characterCollider, false); this.adapter.dispose(); this.world.free(); }
-    this.parts.clear(); this.structures.clear(); this.bossEffects.clear(); this.fixtures.clear(); this.disposed = true;
+    this.parts.clear(); this.structures.clear(); this.bossEffects.clear(); this.fixtures.clear(); this.terrainSections.clear(); this.disposed = true;
   }
 }

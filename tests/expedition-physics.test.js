@@ -185,11 +185,11 @@ test('unbounded atlas streaming handles negative distant coordinates and mining 
   const p = await RuntimePhysics.create(rt, null, { terrainRadius: 1 });
   try {
     p.synchronize(new Map(), rt.player); p.step(1 / 60);
-    const oldKey = p.terrainKey;
+    const oldVersion = p.terrainVersion;
     const grounded = { ...rt.player, y: -2 }; p.movePlayer(rt.player, grounded); assert(grounded.y > -.03);
     atlas.empty = true; atlas.revision++;
     p.synchronize(new Map(), rt.player); p.step(1 / 60);
-    assert.notEqual(p.terrainKey, oldKey);
+    assert.notEqual(p.terrainVersion, oldVersion);
     const falling = { ...rt.player, y: -2 }; p.movePlayer(rt.player, falling); assert(falling.y < -1.9);
     assert(!p.adapter.entries.some((e) => e.ownerId === '@terrain'));
   } finally { p.dispose(); }

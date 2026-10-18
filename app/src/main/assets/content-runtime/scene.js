@@ -23,40 +23,51 @@ function colorFor(id) {
  if(/wood|root/.test(id))return 0x79553c;
  return 0x777e79;
 }
+// Reused padded volume: the chunk plus one face-adjacent cell on each side.
+let PADDED=new Uint16Array(0),MASK=new Int32Array(0);
+const paletteIndex=new WeakMap(),paletteColor=new WeakMap();
+/** Greedy-meshed exposed faces of one chunk. Neighbour cells are read once into a
+ * padded volume so the sweep is pure index arithmetic with no per-cell allocation. */
 export function chunkGeometry(atlas,chunk) {
- const dims=[chunk.size,chunk.size,chunk.size], size=chunk.size, origin=[chunk.cx*16,chunk.cy*16,chunk.cz*16];
- const p=[],n=[],c=[],mask=new Int32Array(size*size),color=new T.Color();
- const at=v=>{
-   if(v.every(a=>a>=0&&a<size))return chunk.blocks[v[0]+v[2]*size+v[1]*size*size]||0;
-   const id=atlas.getCell(chunk.cx*size+v[0],chunk.cy*size+v[1],chunk.cz*size+v[2]);
-   return id?chunk.palette.indexOf(id):0;
- };
+ const size=chunk.size,W=size+2,W2=W*W,origin=[chunk.cx*16,chunk.cy*16,chunk.cz*16],palette=chunk.palette,blocks=chunk.blocks;
+ if(PADDED.length<W*W2)PADDED=new Uint16Array(W*W2);if(MASK.length<size*size)MASK=new Int32Array(size*size);
+ const vol=PADDED,mask=MASK;vol.fill(0,0,W*W2);
+ let index=paletteIndex.get(palette);if(!index){index=new Map();palette.forEach((id,i)=>{if(!index.has(id))index.set(id,i);});paletteIndex.set(palette,index);}
+ let colors=paletteColor.get(palette);if(!colors){colors=new Map();paletteColor.set(palette,colors);}
+ for(let y=0;y<size;y++)for(let z=0;z<size;z++){const from=z*size+y*size*size,to=1+(z+1)*W+(y+1)*W2;for(let x=0;x<size;x++)vol[to+x]=blocks[from+x];}
+ const gx=chunk.cx*size,gy=chunk.cy*size,gz=chunk.cz*size,outside=(x,y,z)=>{const id=atlas.getCell(gx+x,gy+y,gz+z);vol[(x+1)+(z+1)*W+(y+1)*W2]=id?index.get(id)??0:0;};
+ for(let a=0;a<size;a++)for(let b=0;b<size;b++){outside(-1,a,b);outside(size,a,b);outside(a,-1,b);outside(a,size,b);outside(a,b,-1);outside(a,b,size);}
+ const stride=[1,W2,W],p=[],n=[],c=[],x=[0,0,0],corner=[0,0,0];
  for(let d=0;d<3;d++){
-  const u=(d+1)%3,v=(d+2)%3,x=[0,0,0],q=[0,0,0];q[d]=1;
-  for(x[d]=-1;x[d]<dims[d];){
+  const u=(d+1)%3,v=(d+2)%3,sd=stride[d],su=stride[u],sv=stride[v];
+  for(let xd=-1;xd<size;xd++){
    let idx=0;
-   for(x[v]=0;x[v]<dims[v];x[v]++)for(x[u]=0;x[u]<dims[u];x[u]++){
-    const a=at(x),b=at(x.map((a,i)=>a+q[i]));
-    mask[idx++]=a&&!b&&x[d]>=0?a:!a&&b&&x[d]<dims[d]-1?-b:0;
-   }
-   x[d]++;idx=0;
-   for(let j=0;j<dims[v];j++)for(let i=0;i<dims[u];){
+   for(let j=0;j<size;j++){let i0=(xd+1)*sd+(j+1)*sv+su;for(let i=0;i<size;i++,i0+=su){
+    const a=vol[i0],b=vol[i0+sd];
+    mask[idx++]=a&&!b&&xd>=0?a:!a&&b&&xd<size-1?-b:0;
+   }}
+   x[d]=xd+1;idx=0;
+   for(let j=0;j<size;j++)for(let i=0;i<size;){
     const m=mask[idx];if(!m){i++;idx++;continue;}
-    let w=1,h=1;while(i+w<dims[u]&&mask[idx+w]===m)w++;
-    scan:while(j+h<dims[v]){for(let k=0;k<w;k++)if(mask[idx+k+h*dims[u]]!==m)break scan;h++;}
-    x[u]=i;x[v]=j;const du=[0,0,0],dv=[0,0,0];du[u]=w;dv[v]=h;
-    const corners=[x.slice(),x.map((a,k)=>a+du[k]),x.map((a,k)=>a+du[k]+dv[k]),x.map((a,k)=>a+dv[k])];
-    const order=m>0?[0,1,2,0,2,3]:[0,3,2,0,2,1], normal=[0,0,0];normal[d]=m>0?1:-1;
-    color.setHex(colorFor(chunk.palette[Math.abs(m)]));
-    const shade=d===1?(m>0?1:.53):d===0?.82:.7;
-    for(const k of order){p.push(...corners[k].map((a,l)=>a*.5+origin[l]));n.push(...normal);c.push(color.r*shade,color.g*shade,color.b*shade);}
-    for(let y=0;y<h;y++)for(let z=0;z<w;z++)mask[idx+z+y*dims[u]]=0;
+    let w=1,h=1;while(i+w<size&&mask[idx+w]===m)w++;
+    scan:while(j+h<size){for(let k=0;k<w;k++)if(mask[idx+k+h*size]!==m)break scan;h++;}
+    x[u]=i;x[v]=j;
+    const block=Math.abs(m);let rgb=colors.get(block);if(!rgb){const color=new T.Color().setHex(colorFor(palette[block]));colors.set(block,rgb=[color.r,color.g,color.b]);}
+    const shade=d===1?(m>0?1:.53):d===0?.82:.7,r=rgb[0]*shade,g=rgb[1]*shade,bl=rgb[2]*shade,nd=m>0?1:-1;
+    // Corners 0..3 are x, x+du, x+du+dv, x+dv; winding follows the face sign.
+    for(const k of m>0?ORDER_POSITIVE:ORDER_NEGATIVE){
+     corner[0]=x[0];corner[1]=x[1];corner[2]=x[2];if(k===1||k===2)corner[u]+=w;if(k===2||k===3)corner[v]+=h;
+     p.push(corner[0]*.5+origin[0],corner[1]*.5+origin[1],corner[2]*.5+origin[2]);
+     n.push(d===0?nd:0,d===1?nd:0,d===2?nd:0);c.push(r,g,bl);
+    }
+    for(let y=0;y<h;y++)for(let z=0;z<w;z++)mask[idx+z+y*size]=0;
     i+=w;idx+=w;
    }
   }
  }
  const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(p,3));g.setAttribute('normal',new T.Float32BufferAttribute(n,3));g.setAttribute('color',new T.Float32BufferAttribute(c,3));g.computeBoundingSphere();return g;
 }
+const ORDER_POSITIVE=[0,1,2,0,2,3],ORDER_NEGATIVE=[0,3,2,0,2,1];
 function releaseModel(model){for(const mesh of model.dynamicGeometry??[]){mesh.geometry.dispose();mesh.material.dispose();}model.group.removeFromParent();}
 export class ExpeditionScene {
  constructor(canvas,atlas){
@@ -93,16 +104,27 @@ export class ExpeditionScene {
   this.scene.fog.far=this.quality==='low'?150:this.quality==='high'?260:220;this.scene.fog.near=this.scene.fog.far*.39;
   this.camera.far=this.scene.fog.far+100;this.camera.updateProjectionMatrix();this.resize();
  }
- syncTerrain(){
+ /** Meshes loaded chunks within a time budget. Chunks whose mesh is stale (an edit
+  * the player is watching) go before newly loaded ones, nearest first; at least
+  * one chunk is meshed per call so edits always appear. */
+ syncTerrain(player=null,{budgetMs=3}={}){
   for(const[key,m]of this.chunks)if(!this.atlas.activeChunks.has(key)){this.scene.remove(m);m.geometry.dispose();this.chunks.delete(key);}
-  let budget=1;
+  let pending=null;
   for(const[key,chunk]of this.atlas.activeChunks){
    const old=this.chunks.get(key);if(old&&old.userData.revision===(chunk.revision??0)&&old.userData.chunk===chunk)continue;
-   if(!budget--)break;
+   const dx=player?chunk.cx*16+8-player.x:0,dy=player?chunk.cy*16+8-(player.y??0):0,dz=player?chunk.cz*16+8-player.z:0;
+   (pending??=[]).push({key,chunk,old,order:(old?0:1e9)+dx*dx+dy*dy+dz*dz});
+  }
+  if(!pending)return 0;
+  pending.sort((a,b)=>a.order-b.order);
+  const deadline=performance.now()+budgetMs;let built=0;
+  for(const {key,chunk,old}of pending){
+   if(built&&performance.now()>=deadline)break;
    if(old){this.scene.remove(old);old.geometry.dispose();}
    const mesh=new T.Mesh(chunkGeometry(this.atlas,chunk),this.terrainMaterial);mesh.userData={kind:'terrain',chunk,revision:chunk.revision??0};
-   this.scene.add(mesh);this.chunks.set(key,mesh);
+   this.scene.add(mesh);this.chunks.set(key,mesh);built++;
   }
+  return pending.length-built;
  }
  async makeModel(desc){
   const library=desc.asset?new Map([[desc.asset.id,desc.asset]]):await loadAssetLibrary(desc.assetId),asset=desc.asset??library.get(desc.assetId),group=new T.Group();

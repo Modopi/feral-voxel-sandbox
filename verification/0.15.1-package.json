@@ -1,0 +1,19 @@
+{
+  "version": "0.15.1",
+  "versionCode": 1501,
+  "minNativeCode": 303,
+  "files": 124,
+  "nativeFileLimit": 128,
+  "mjsFiles": [],
+  "newFiles": [
+    "content-runtime/frame-profiler.js"
+  ],
+  "archiveBytes": 2844046,
+  "expandedBytes": 11641549,
+  "archiveSha256": "7346f69b92ae57bad06bcac4bc633269ab647de39b7b2d4bc69effc1f3688fe2",
+  "packageSha256": "8edc56ed41e97f3081c3329e6040b48d8708a9ad8c9dd0149f0786a529b5afb6",
+  "apkSha256": "a142c84502aef3e7c61b9d36cbeb082d542afbdb1dacabbf633a18b261f65289",
+  "apkAssetsIdenticalToUpdate": true,
+  "withinLimits": true,
+  "note": "Local build with the shared test signing key; CI rebuilds and publishes after merge."
+}
