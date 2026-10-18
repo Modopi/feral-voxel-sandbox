@@ -1,6 +1,6 @@
 # 장거리 왕복·영속 상태 검증
 
-2026-10-17. [자동 검사](../../tests/expedition-streaming.test.js)는 실제 `ExpeditionRuntime`, `WorldAtlas`, 저장 서비스와 생태 서비스를 사용한다. 장거리 왕복 결과와 당시 코드 해시는 [report.json](./report.json)에 있다. 생태 순회 인덱스의 이전/이후 동등성·시간 비교는 [ecology-index.json](./ecology-index.json)에 별도로 기록했다.
+2026-10-17. [자동 검사](../../tests/expedition-streaming.test.js)는 실제 `ExpeditionRuntime`, `WorldAtlas`, 저장 서비스와 생태 서비스를 사용한다. 장거리 왕복 결과와 당시 코드 해시는 [report.json](report.json)에 있다. 생태 순회 인덱스의 이전/이후 동등성·시간 비교는 [ecology-index.json](ecology-index.json)에 별도로 기록했다.
 
 ## 사전에 정한 범위와 기준
 
@@ -38,7 +38,7 @@
 
 후속 생태 최적화는 공간 인덱스와 due queue를 사용해 활성 근처 개체 및 갱신 시점이 된 비활성 지역·개체만 선택한다. 80개 지역에서 활성 120초(480개체)와 비활성 7,200초(987개체)를 이전 구현과 비교했을 때 최종 저장 상태가 두 경우 모두 `deepEqual`이었다. 공유 Linux Node 환경의 시간은 활성 169.5ms→107.3ms, 비활성 3,112.0ms→702.3ms였다. 관련 creature/streaming 검사 33개가 통과했다. 이 수치는 모델 실행 비교이며 실기기 성능을 뜻하지 않는다.
 
-공간·갱신 인덱스는 반복적인 전체 순회를 줄였지만 영속 생태 지역과 모든 소유자를 메모리에 계속 보관한다. 무한히 새 지역을 방문할 때 메모리 사용이 일정하다는 보장은 없다. 변경·이력을 지우지 않는 지역별 저장과 메모리 교체는 추후 확장성 작업이다. `report.json`은 이 인덱스 최적화 이전의 장거리 왕복 측정이며, 해당 기존 보고서의 `creatures.js` 해시는 [ecology-index.json](./ecology-index.json)의 `beforeSha256`과 일치한다.
+공간·갱신 인덱스는 반복적인 전체 순회를 줄였지만 영속 생태 지역과 모든 소유자를 메모리에 계속 보관한다. 무한히 새 지역을 방문할 때 메모리 사용이 일정하다는 보장은 없다. 변경·이력을 지우지 않는 지역별 저장과 메모리 교체는 추후 확장성 작업이다. `report.json`은 이 인덱스 최적화 이전의 장거리 왕복 측정이며, 해당 기존 보고서의 `creatures.js` 해시는 [ecology-index.json](ecology-index.json)의 `beforeSha256`과 일치한다.
 
 표시 범위 안에 있는 사용자 제작 사물/기계와 던전 생명체 전체에 하나의 공통 모델 개수 상한이 있는 것은 아니다. 위 검사로 모든 종류의 모델 수가 48개로 제한된다고 주장할 수 없다.
 

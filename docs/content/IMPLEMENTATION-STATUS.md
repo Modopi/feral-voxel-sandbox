@@ -2,7 +2,7 @@
 
 상태: **전체 범위 구현 진행 중**. 설계·시각 파일의 완성과 게임에서 작동하는 구현을 구분한다. 이 문서는 기존 0.10.x 게임의 기능 목록을 신규 콘텐츠 통합 완료로 계산하지 않는다.
 
-기준 계약: [RUNTIME-CONTRACT.md](RUNTIME-CONTRACT.md). 정적 설계 감사: [INTEGRATION.md](INTEGRATION.md). 기존 게임 현황: [PROJECT-STATUS.md](../PROJECT-STATUS.md).
+기준 계약: [RUNTIME-CONTRACT.md](RUNTIME-CONTRACT.md). 정적 설계 감사: [INTEGRATION.md](INTEGRATION.md). 게임 전체 현황: [STATUS.md](../STATUS.md).
 
 ## 상태 판정
 
@@ -45,7 +45,7 @@
 
 ## 0.12.0 화면 연결
 
-이미 구현된 기능 중 화면에서 쓰거나 볼 수 없던 28가지를 [화면 연결 감사](../UI-REACHABILITY.md)에 정리하고 연결했다. 연구 멈추기·전환, 제작 대기열의 막힌 이유·먼저 진행·취소(재료 반환)·묶음 제작, 도구 내구도, 보스·생명체·던전·공동체 이벤트 알림, 위험 구역 경고, 실패 사유 250종의 한국어 안내를 포함한다. 모델 회귀는 `tests/ui-reachability.test.js`, 실제 터치 경로는 `tools/verify-ui-reachability.mjs`와 [보고서](../../verification/0.12.0-ui/report.json)에 있다. 준비된 자원·위치를 쓴 화면 검사는 정상 성장 완주의 증거로 세지 않는다.
+이미 구현된 기능 중 화면에서 쓰거나 볼 수 없던 28가지를 [화면 연결 감사](../archive/UI-REACHABILITY.md)에 정리하고 연결했다. 연구 멈추기·전환, 제작 대기열의 막힌 이유·먼저 진행·취소(재료 반환)·묶음 제작, 도구 내구도, 보스·생명체·던전·공동체 이벤트 알림, 위험 구역 경고, 실패 사유 250종의 한국어 안내를 포함한다. 모델 회귀는 `tests/ui-reachability.test.js`, 실제 터치 경로는 `tools/verify-ui-reachability.mjs`와 [보고서](../../verification/0.12.0-ui/report.json)에 있다. 준비된 자원·위치를 쓴 화면 검사는 정상 성장 완주의 증거로 세지 않는다.
 
 ## 0.11.0 패키지 검증 스냅샷
 

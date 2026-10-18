@@ -1,4 +1,4 @@
-// One game screen for every map (docs/UNIFIED-GAME.md): routing, shared shell modules,
+// One game screen for every map (docs/ARCHITECTURE.md): routing, shared shell modules,
 // the shared bag over count-based items, and the one notification line.
 import test, { mock } from 'node:test';
 import assert from 'node:assert/strict';
