@@ -34,7 +34,7 @@
 ## 다음 버전 배포 순서
 
 1. 코드 변경 후 `version.json`의 버전과 versionCode 증가. `node tools/version.mjs` 실행.
-2. CHANGELOG 맨 위에 해당 버전의 변경 사항 추가. 저장 형식 변경은 읽기 호환·변환과 복구 시험 추가.
+2. CHANGELOG 맨 위에 해당 버전의 변경 사항 추가. 저장 형식 변경은 읽기 호환·변환과 복구 시험 추가. 구조·규칙이 바뀌면 같은 PR에서 `docs/ARCHITECTURE.md`·`docs/GAME-RULES.md`·`docs/ROADMAP.md`를, 게시 후에는 `docs/STATUS.md`와 아래 릴리스 기록을 고친다. 게임 파일을 바꾸지 않는 문서 전용 변경은 버전을 올리지 않으며, 배포 워크플로는 같은 버전·같은 패키지를 "이미 게시됨"으로 건너뛴다.
 3. `node --test tests/*.test.js` 실행. UI·플레이 변경에는 관련 `tests/*-check.cjs` 실행. 하나의 게임 화면 검증(`tools/verify-ui-reachability.mjs`, 콘텐츠 탐험·섬·개척 원정)은 앱과 같은 MIME·CSP로 응답하는 `tools/android-asset-server.mjs`를 기본으로 쓴다. 일반 개발 서버는 `.mjs` 같은 파일을 JavaScript로 응답해 Android에서만 생기는 로딩 실패를 숨긴다.
 4. `bash build-apk.sh`와 `python3 tools/build-update.py`로 로컬 결과 확인.
 5. 검증된 변경을 main에 반영. **FERAL versioned release** Actions가 테스트·APK 빌드·서명 패키지 생성을 수행하고 GitHub Release에 결과를 올림.
@@ -61,15 +61,17 @@
 
 게임 1401 / 앱·최소 앱 303 / 저장 스키마 2. Java·권한·키 변경이 없는 게임 전용 릴리스다. 사용자 결정에 따라 공격 방식을 손으로 고르지 않고, 든 도구·장착한 무기가 타격 모양을 정한다. 맨손·도구는 시선이 닿은 곳을 파내는 점타격(외피 공작), 검은 맞은 면을 가로지르는 선·면 절단, 창은 공격 방향과 나란한 30~60 cm 관통선(외피와 선이 지나는 뼈), 둔기는 외피를 열지 않고 한 칸(0.5 m) 안쪽의 뼈만 친다. 저장 형식은 바뀌지 않으며 이전 저장의 수동 공격 방식 값은 무시한다. 상태 페이지의 방식 바꾸기 버튼을 없애고 능력치에 지금의 타격 방식을 표시한다. 검증은 `verification/0.14.1.md`. 업데이트 파일은 123개(앱 상한 128개)다.
 
+2026-10-18 05:19 UTC [PR #23](https://github.com/Modopi/feral-voxel-sandbox/pull/23) 병합 커밋 `3a7f871`에서 [배포 Actions](https://github.com/Modopi/feral-voxel-sandbox/actions/runs/39100161914)가 성공해 05:27 UTC에 [v0.14.1 Release](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.14.1)와 기존 공식 `updates/catalog.json`, `updates/stable.feral`, 불변 `updates/versions/0.14.1.feral`로 게시됐다. stable과 버전 패키지는 같은 파일(SHA256 `24ace31f…e990`)이며 로컬 빌드와 바이트 단위로 같고, 내부 아카이브 SHA256 `25648ce6…f24d`가 카탈로그와 일치한다. 0.14.0 이하의 카탈로그 항목과 패키지 파일은 바뀌지 않았다. Android 실기기 확인은 아직 하지 않았다.
+
 ### 0.14.0 — 개척 원정 감각과 기본 섬 이식 (통합 2단계)
 
-게임 1400 / 앱·최소 앱 303 / 저장 스키마 2. Java·권한·키 변경이 없는 게임 전용 릴리스다. 통합 런타임이 개척 원정의 감각(즉시 채집·개척 원정 채굴 공식·분리된 덩어리 깎기·생명체 외피와 골격)과 화면(공용 상태·지도 페이지, 1인칭 손)을 따르고, 기본 섬이 같은 런타임에서 돈다. 콘텐츠 탐험 저장의 지형 상처는 남은 HP 대신 캔 비율로 저장하며 이전 저장은 읽을 때 바꾼다. 생명체 상처(`wounds`)는 선택 필드로 추가했다. 기존 섬 저장(`feral.world.v1`, `feral.slot.<id>`)은 처음 열 때 콘텐츠 런타임 형식(`<키>.a/.b`)으로 한 번 변환하고, 원본 키는 그대로 둔다. 이전 게임 버전을 직접 선택하면 앱의 빌드별 저장 분리에 따라 그 빌드에서 마지막으로 쓰던 저장(업데이트 직전 상태)이 복원되고, 한 번도 실행하지 않은 빌드는 새 저장으로 시작한다. 0.14.0에서 진행한 내용은 0.14.0의 새 형식에만 남는다. 변환 규칙과 대응표는 `docs/UNIFIED-GAME.md`의 저장 변환 규칙, 검증은 `verification/0.14.0.md`. 업데이트 파일은 123개(앱 상한 128개)다.
+게임 1400 / 앱·최소 앱 303 / 저장 스키마 2. Java·권한·키 변경이 없는 게임 전용 릴리스다. 통합 런타임이 개척 원정의 감각(즉시 채집·개척 원정 채굴 공식·분리된 덩어리 깎기·생명체 외피와 골격)과 화면(공용 상태·지도 페이지, 1인칭 손)을 따르고, 기본 섬이 같은 런타임에서 돈다. 콘텐츠 탐험 저장의 지형 상처는 남은 HP 대신 캔 비율로 저장하며 이전 저장은 읽을 때 바꾼다. 생명체 상처(`wounds`)는 선택 필드로 추가했다. 기존 섬 저장(`feral.world.v1`, `feral.slot.<id>`)은 처음 열 때 콘텐츠 런타임 형식(`<키>.a/.b`)으로 한 번 변환하고, 원본 키는 그대로 둔다. 이전 게임 버전을 직접 선택하면 앱의 빌드별 저장 분리에 따라 그 빌드에서 마지막으로 쓰던 저장(업데이트 직전 상태)이 복원되고, 한 번도 실행하지 않은 빌드는 새 저장으로 시작한다. 0.14.0에서 진행한 내용은 0.14.0의 새 형식에만 남는다. 변환 규칙과 대응표는 `docs/archive/UNIFIED-GAME.md`의 저장 변환 규칙, 검증은 `verification/0.14.0.md`. 업데이트 파일은 123개(앱 상한 128개)다.
 
 2026-10-18 04:54 UTC [PR #22](https://github.com/Modopi/feral-voxel-sandbox/pull/22) 병합 커밋 `1c5b759`에서 [배포 Actions](https://github.com/Modopi/feral-voxel-sandbox/actions/runs/39098717171)가 성공해 04:58 UTC에 [v0.14.0 Release](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.14.0)와 기존 공식 `updates/catalog.json`, `updates/stable.feral`, 불변 `updates/versions/0.14.0.feral`로 게시됐다. stable과 버전 패키지는 같은 파일(SHA256 `f7ee4d77…e8b3`)이며 로컬 빌드와 일치하고, 내부 아카이브 SHA256 `85db75d6…3faa`가 카탈로그와 일치한다. 0.13.0 이하의 카탈로그 항목과 패키지 파일은 바뀌지 않았다. Android 실기기에서의 섬 저장 변환 확인은 아직 하지 않았다.
 
 ### 0.13.0 — 하나의 게임 화면 (통합 1단계)
 
-게임 1300 / 앱·최소 앱 303 / 저장 스키마 2. Java·권한·키 변경이 없는 게임 전용 릴리스다. 모든 월드(기계 시험장 제외)가 `index.html` 한 화면과 공용 `shell.js`를 쓰고, 콘텐츠 탐험은 기존 HUD·핫바·36칸 가방·장부 창·메뉴·설정·UI 편집기로 옮겼다. 콘텐츠 탐험 저장에는 가방 칸 배치(`itemSlots`)를 선택 필드로 추가하며 이전 저장도 그대로 읽는다. 예전 `expedition.html` 주소와 월드 목록은 `index.html`로 연결한다. 기준과 남은 단계는 `docs/UNIFIED-GAME.md`, 검증은 `verification/0.13.0.md`.
+게임 1300 / 앱·최소 앱 303 / 저장 스키마 2. Java·권한·키 변경이 없는 게임 전용 릴리스다. 모든 월드(기계 시험장 제외)가 `index.html` 한 화면과 공용 `shell.js`를 쓰고, 콘텐츠 탐험은 기존 HUD·핫바·36칸 가방·장부 창·메뉴·설정·UI 편집기로 옮겼다. 콘텐츠 탐험 저장에는 가방 칸 배치(`itemSlots`)를 선택 필드로 추가하며 이전 저장도 그대로 읽는다. 예전 `expedition.html` 주소와 월드 목록은 `index.html`로 연결한다. 기준과 남은 단계는 `docs/archive/UNIFIED-GAME.md`, 검증은 `verification/0.13.0.md`.
 
 2026-10-18 02:35 UTC [PR #21](https://github.com/Modopi/feral-voxel-sandbox/pull/21) 병합 커밋 `984c586`에서 [배포 Actions](https://github.com/Modopi/feral-voxel-sandbox/actions/runs/39090651659)가 성공해 02:44 UTC에 [v0.13.0 Release](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.13.0)와 기존 공식 `updates/catalog.json`, `updates/stable.feral`, 불변 `updates/versions/0.13.0.feral`로 게시됐다. stable과 버전 패키지는 같은 파일(SHA256 `11aba7f2…1546`)이며 로컬 빌드와 일치하고, 내부 아카이브 SHA256 `3869ee54…fcf8`이 카탈로그와 일치한다. 0.12.1 이하의 카탈로그 항목과 패키지 파일은 바뀌지 않았다.
 
@@ -83,7 +85,7 @@
 
 게임 1200 / 앱·최소 앱 303 / 저장 스키마 2. Java·권한·키 변경이 없는 게임 전용 릴리스다. 이미 구현된 기능을 화면·터치 입력·알림에 연결했다. 콘텐츠 탐험 저장에는 연구 일시정지와 제작 취소가 기존 필드만으로 기록된다. 던전 구조 부품 복구 횟수(`restorations`)는 선택 필드로 추가하며 이전 저장도 그대로 읽는다. 기본 섬의 미니맵·사건 알림 설정은 기존 `feral.settings`의 선택 필드다.
 
-2026-10-17 18:51 UTC [PR #18](https://github.com/Modopi/feral-voxel-sandbox/pull/18) 병합 커밋 `dd7b800`에서 [배포 Actions](https://github.com/Modopi/feral-voxel-sandbox/actions/runs/39059274447)가 성공해 [v0.12.0 Release](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.12.0)와 기존 공식 `updates/catalog.json`, `updates/stable.feral`, 불변 `updates/versions/0.12.0.feral`로 게시됐다. stable과 버전 패키지는 같은 파일(SHA256 `8c9a94e3…5981`)이고 내부 아카이브 SHA256 `f7e55691…3e34`가 카탈로그와 일치한다. 0.11.0 이하의 카탈로그 항목과 패키지 파일은 바뀌지 않았다. 변경 목록은 `docs/UI-REACHABILITY.md`, 검증은 `verification/0.12.0.md`. Android 실기기 성능·생명주기 검증은 아직 미완료다.
+2026-10-17 18:51 UTC [PR #18](https://github.com/Modopi/feral-voxel-sandbox/pull/18) 병합 커밋 `dd7b800`에서 [배포 Actions](https://github.com/Modopi/feral-voxel-sandbox/actions/runs/39059274447)가 성공해 [v0.12.0 Release](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.12.0)와 기존 공식 `updates/catalog.json`, `updates/stable.feral`, 불변 `updates/versions/0.12.0.feral`로 게시됐다. stable과 버전 패키지는 같은 파일(SHA256 `8c9a94e3…5981`)이고 내부 아카이브 SHA256 `f7e55691…3e34`가 카탈로그와 일치한다. 0.11.0 이하의 카탈로그 항목과 패키지 파일은 바뀌지 않았다. 변경 목록은 `docs/archive/UI-REACHABILITY.md`, 검증은 `verification/0.12.0.md`. Android 실기기 성능·생명주기 검증은 아직 미완료다.
 
 ### 0.11.0 — 콘텐츠 탐험 통합
 
@@ -143,13 +145,13 @@
 
 ## 게임 0.5.2 — 월드 공간 UI (미배포)
 
-게임 502 / 앱 302 / 최소 앱 302 / 저장 스키마 2. 월드 대상 정보창, 생존 HUD와 고정 게임 창 변경이다. Java 변경은 없으며 기존 공개 앱 0.3.2에서 게임 업데이트로 실행할 수 있다. 로컬 테스트 APK는 `build/Feral-0.5.2-game-native-0.3.2.apk`로 복사해 기존 공개 APK와 구분한다. 패키지는 `build/release/Feral-0.5.2-update.feral`. 기존 v0.5.1 자산을 교체하지 않는다. 구조는 `docs/WORLD-SPACE-UI.md`, 검증은 `verification/0.5.2.md` 참조.
+게임 502 / 앱 302 / 최소 앱 302 / 저장 스키마 2. 월드 대상 정보창, 생존 HUD와 고정 게임 창 변경이다. Java 변경은 없으며 기존 공개 앱 0.3.2에서 게임 업데이트로 실행할 수 있다. 로컬 테스트 APK는 `build/Feral-0.5.2-game-native-0.3.2.apk`로 복사해 기존 공개 APK와 구분한다. 패키지는 `build/release/Feral-0.5.2-update.feral`. 기존 v0.5.1 자산을 교체하지 않는다. 구조는 `docs/archive/WORLD-SPACE-UI.md`, 검증은 `verification/0.5.2.md` 참조.
 
 ## 게임 0.5.3 — 게임 창·HUD 편집·반 칸 기본값 (미배포)
 
 게임 503 / 앱 302 / 최소 앱 302 / 저장 스키마 2. 타이틀·일시정지·인벤토리·원정·월드 목록·기계 창을 공통 게임 테마로 정리하고 HUD 배치 편집을 추가했다. `feral.ui.layout.v1`에 화면 방향·왼손 설정별 배치를 저장하며 기존 네이티브의 feral.* 백업·빌드별 저장 격리에 포함된다. 구 월드의 1m 기본 편집값은 한 번 반 칸(0.5m)으로 이전한다. 이후 명시적으로 선택한 크기는 `editGridVersion: 1`과 함께 보존한다.
 
-Java 변경 없음. 기존 공개 앱 0.3.2에서 게임 업데이트 가능. 테스트 APK는 `build/Feral-0.5.3-game-native-0.3.2.apk`, 게임 패키지는 `build/release/Feral-0.5.3-update.feral`. 기존 공개 v0.5.1 자산은 교체하지 않는다. 조작은 `docs/UI-EDITOR.md`, 검증은 `verification/0.5.3.md` 참조.
+Java 변경 없음. 기존 공개 앱 0.3.2에서 게임 업데이트 가능. 테스트 APK는 `build/Feral-0.5.3-game-native-0.3.2.apk`, 게임 패키지는 `build/release/Feral-0.5.3-update.feral`. 기존 공개 v0.5.1 자산은 교체하지 않는다. 조작은 `docs/archive/UI-EDITOR.md`, 검증은 `verification/0.5.3.md` 참조.
 
 
 ## 게임 0.6.0 — 구조 손상과 월드 조립
@@ -182,7 +184,7 @@ Rapier의 WASM이 포함된 ES 모듈과 Apache-2.0 라이선스를 패키지에
 
 게임 0.8.0 / 800, 앱 0.3.3 / 303, 최소 앱 303, 저장 스키마 2. 복셀 손상 영속화, 주민·유적 조준 사용, 채집·의뢰·생태·제작과 자원 재생 경로를 확장한다. 초기 지급품 없는 모든 제작법의 모델 실행과 실제 터치 상호작용을 검증한다.
 
-앱 0.3.3에서 게임 업데이트로 적용한다. 출력은 `build/Feral-0.3.3-android.apk`와 `build/release/Feral-0.8.0-update.feral`. 기존 저장에도 채집 지점과 중계기 기록을 추가하고 이전 유적 진행을 유지한다. 상세 규칙은 `docs/PERSISTENT-WORLD-AND-LOOPS.md`, 검증은 `verification/0.8.0.md`.
+앱 0.3.3에서 게임 업데이트로 적용한다. 출력은 `build/Feral-0.3.3-android.apk`와 `build/release/Feral-0.8.0-update.feral`. 기존 저장에도 채집 지점과 중계기 기록을 추가하고 이전 유적 진행을 유지한다. 상세 규칙은 `docs/archive/PERSISTENT-WORLD-AND-LOOPS.md`, 검증은 `verification/0.8.0.md`.
 
 
 ## 0.9.0 — 첫 신호·시각 표현 개편
@@ -191,11 +193,11 @@ Rapier의 WASM이 포함된 ES 모듈과 Apache-2.0 라이선스를 패키지에
 
 출력은 `build/Feral-0.3.3-android.apk`와 `build/release/Feral-0.9.0-update.feral`. 기존 배포 파일은 교체하지 않는다. 이전 저장에 여정·야영지 기본값을 추가하며 기존 지역의 지형 생성 버전을 유지한다. 새로 방문하는 지역에만 새 유적 구조를 생성한다. 첫 신호 완료 여부와 원정·작물·강화 효과는 게임 저장에 포함되며 메뉴/오프라인 시간으로 성장하지 않는다.
 
-설계·참고 자료와 베타 후보의 범위는 `docs/FIRST-SIGNAL.md`, 자동 검증과 실제 기기 검증의 구분은 `verification/0.9.0.md` 참조.
+설계·참고 자료와 베타 후보의 범위는 `docs/archive/FIRST-SIGNAL.md`, 자동 검증과 실제 기기 검증의 구분은 `verification/0.9.0.md` 참조.
 
 ## 0.9.1 — 캐릭터 아트
 
-게임 0.9.1 / 901, 앱·최소 앱 0.3.3 / 303, saveSchema 2. 정밀 복셀 인물, 관절 동작, 3D 캐릭터 미리보기, 종별 동물 실루엣과 손상에 연동한 표면을 포함한다. 앱 0.3.3에서 게임 업데이트로 적용하며 신규 설치는 v0.9.1 Release의 Feral-0.3.3-android.apk를 사용한다. 상세 설계는 `docs/VOXEL-CHARACTERS.md`, 재현 검증은 `verification/0.9.1.md`.
+게임 0.9.1 / 901, 앱·최소 앱 0.3.3 / 303, saveSchema 2. 정밀 복셀 인물, 관절 동작, 3D 캐릭터 미리보기, 종별 동물 실루엣과 손상에 연동한 표면을 포함한다. 앱 0.3.3에서 게임 업데이트로 적용하며 신규 설치는 v0.9.1 Release의 Feral-0.3.3-android.apk를 사용한다. 상세 설계는 `docs/archive/VOXEL-CHARACTERS.md`, 재현 검증은 `verification/0.9.1.md`.
 
 
 ## 0.10.0 — 구조·동적 복셀 샌드박스
@@ -204,7 +206,7 @@ Rapier의 WASM이 포함된 ES 모듈과 Apache-2.0 라이선스를 패키지에
 
 기존 앱은 게임 업데이트로 적용한다. 신규 설치는 v0.10.0 Release의 `Feral-0.3.3-android.apk`, 게임 번들은 `Feral-0.10.0-update.feral`이다. Java·권한·검증 키는 변경하지 않는다. 기존 지역의 지형 생성 버전을 유지하고 새 지역부터 작업장을 생성한다. 월드의 선택 필드 `loose`와 신체의 선택 필드 `structure`/`trainingBody`를 이전하며 기존 손상은 유지한다. 일반 주민과 플레이어 전신을 관절 물리로 전환한 릴리스는 아니다.
 
-설계·조작: `docs/STRUCTURAL-SANDBOX.md`. 검증: `verification/0.10.0.md`.
+설계·조작: `docs/archive/STRUCTURAL-SANDBOX.md`. 검증: `verification/0.10.0.md`.
 
 
 ## 0.10.1 — 콘텐츠 설계·복셀 제작 도구 기준 릴리스

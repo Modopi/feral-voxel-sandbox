@@ -1,6 +1,6 @@
 # 탐험 자동 저장 워커 검증
 
-2026-10-17, 실제 고티어 자원 소비 경로에서 보존한 고정 스냅샷으로 검사했다. 원본은 `complete`, `reached`, `progression`, `atlas`를 포함하며, 검사에 필요한 유한 플레이어 좌표와 HP만 추가했다. 압축된 재현 입력은 [high-tier-route.json.gz](./high-tier-route.json.gz), 입력 해시·코드 해시·전체 결과는 [profile.json](./profile.json)에 있다.
+2026-10-17, 실제 고티어 자원 소비 경로에서 보존한 고정 스냅샷으로 검사했다. 원본은 `complete`, `reached`, `progression`, `atlas`를 포함하며, 검사에 필요한 유한 플레이어 좌표와 HP만 추가했다. 압축된 재현 입력은 [high-tier-route.json.gz](high-tier-route.json.gz), 입력 해시·코드 해시·전체 결과는 [profile.json](profile.json)에 있다.
 
 ## 구현 계약
 

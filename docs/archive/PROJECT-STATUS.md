@@ -1,8 +1,10 @@
 # FERAL 진행 현황 — 게임 0.14.1
 
+> **보관 문서.** 작성 당시 버전의 설명이며 현재 구조·규칙의 기준이 아니다. 현재 기준은 [소프트웨어 구조](../ARCHITECTURE.md), [현황](../STATUS.md), [게임 규칙](../GAME-RULES.md)이다. 옛 엔진의 기능을 통합 세션으로 옮길 때 동작을 참고하는 용도로만 쓴다.
+
 > 작성일: 2026-10-18 · 기준: 게임 0.14.1(직전 공개 버전 0.14.0) / Android 앱 0.3.3
 >
-> 구현·검증·배포 기록을 모은 현황 문서다. 장기 방향은 [게임 비전](GAME-VISION.md), 전체 완료 기준은 [구현 Goal](IMPLEMENTATION-GOAL.md), 요구사항별 근거는 [구현 추적표](content/IMPLEMENTATION-STATUS.md), 버전별 변경은 [CHANGELOG](../CHANGELOG.md)를 참조한다.
+> 구현·검증·배포 기록을 모은 현황 문서다. 장기 방향은 [게임 비전](../GAME-VISION.md), 전체 완료 기준은 [구현 Goal](../IMPLEMENTATION-GOAL.md), 요구사항별 근거는 [구현 추적표](../content/IMPLEMENTATION-STATUS.md), 버전별 변경은 [CHANGELOG](../../CHANGELOG.md)를 참조한다.
 
 ## 1. 현재 어디까지 왔는가
 
@@ -19,7 +21,7 @@
 
 **0.12.1은 Android 앱에서 콘텐츠 탐험이 로딩 화면에 멈추던 문제를 고친 핫픽스다.** 앱은 `.mjs` 모듈을 JavaScript로 응답하지 않아 0.11.0~0.12.0의 콘텐츠 탐험은 Android에서 시작되지 않았다. 데스크톱 개발 서버로만 브라우저 검사를 해서 놓쳤던 문제이며, 이제 화면 검증은 앱과 같은 MIME·CSP 규칙의 서버로 실행한다. 로딩 화면에는 단계별 진행도가 나온다.
 
-**[구현 Goal](IMPLEMENTATION-GOAL.md) 전체는 아직 진행 중이다.** 0.11.0~0.12.1은 중간 배포다. 기능 코드와 모델 검사는 대부분 갖췄지만, 새 월드에서 정상 입력만으로 보스까지 이어지는 화면 완주, 장거리 무한 월드의 메모리 상한, Android 실기기 성능·생명주기 검증이 남아 있다. 배포 채널 이름 `stable`은 이 품질 평가와 별개다.
+**[구현 Goal](../IMPLEMENTATION-GOAL.md) 전체는 아직 진행 중이다.** 0.11.0~0.12.1은 중간 배포다. 기능 코드와 모델 검사는 대부분 갖췄지만, 새 월드에서 정상 입력만으로 보스까지 이어지는 화면 완주, 장거리 무한 월드의 메모리 상한, Android 실기기 성능·생명주기 검증이 남아 있다. 배포 채널 이름 `stable`은 이 품질 평가와 별개다.
 
 ## 2. 월드 유형과 진입
 
@@ -28,7 +30,7 @@
 | 기본 섬 (통합 런타임) | 내 월드 → 기본 탐험 맵 | 원본과 같은 160×160m 섬, 평화 규칙, 샌드박스 도구·블록 쌓기, 설계 생명체 생태, 연구·제작 | [통합](UNIFIED-GAME.md#p2-완료-기준) |
 | 기계 시험장 | 내 월드 → 기계 베타 맵 | 7×3×7 격자 조립·주행 시험 | [기계 구조](MACHINE-ARCHITECTURE.md) |
 | 개척 원정 | 내 월드 → 새 월드 → 개척 원정 | 첫 신호 캠페인, 지역 전환, 기계·비행, 운반·물리 샌드박스 | [첫 신호](FIRST-SIGNAL.md), [구조 샌드박스](STRUCTURAL-SANDBOX.md) |
-| **콘텐츠 탐험** | 내 월드 → 새 월드 → FERAL 탐험 | 무한 청크, 설계 생명체·던전·보스, 연구·제작·설비·기계·에너지 | [콘텐츠 위키](content/README.md), [추적표](content/IMPLEMENTATION-STATUS.md) |
+| **콘텐츠 탐험** | 내 월드 → 새 월드 → FERAL 탐험 | 무한 청크, 설계 생명체·던전·보스, 연구·제작·설비·기계·에너지 | [콘텐츠 위키](../content/README.md), [추적표](../content/IMPLEMENTATION-STATUS.md) |
 
 기존 월드와 저장은 그대로 유지한다. 기계 시험장을 뺀 모든 월드는 같은 `index.html` 화면에서 시작한다. 기본 섬 저장은 0.14.0에서 처음 열 때 원본을 남긴 채 통합 런타임 형식으로 변환된다. 개척 원정 저장은 다음 단계(0.15.x)에서 변환한다.
 
@@ -46,11 +48,11 @@
 | 6. 생활·공동체·회수 | 공동체 거래·기여, 신앙 가입·의뢰·제단 시련, 사망 시 전체 소지품 현장 보존과 10m 요정 회수 | 신앙 가입·납품·시련·재보상 방지 | 사망 회수의 실제 화면 조작 완주 |
 | 7. 시각·조작·연동 | 119개 모델 런타임 연결, 무기 외형·재질 표면, 터치 조작, 두 세대 압축 저장·worker 자동 저장 | 3개 화면 크기 터치·제작 스크롤·메뉴·저장 재접속 | Android 실기기 표시·성능·생명주기 |
 
-정확한 근거와 실행 기록은 [구현 추적표](content/IMPLEMENTATION-STATUS.md)와 [0.11.0 검증 기록](../verification/0.11.0.md)에 있다.
+정확한 근거와 실행 기록은 [구현 추적표](../content/IMPLEMENTATION-STATUS.md)와 [0.11.0 검증 기록](../../verification/0.11.0.md)에 있다.
 
 ### 전투·사망 규칙의 변경
 
-0.11.0부터 외피 공격도 전체 HP를 줄이고 HP 소진으로 사망한다. 골격·기관 파손은 HP와 별도로 해당 행동을 제한한다. 관통·충격 전달로 내부 부위를 노릴 수 있으며 기존 개척 원정의 무기에도 적용한다. 규칙은 [전투 HP 규칙](content/COMBAT-HP-RULES.md)에 있다.
+0.11.0부터 외피 공격도 전체 HP를 줄이고 HP 소진으로 사망한다. 골격·기관 파손은 HP와 별도로 해당 행동을 제한한다. 관통·충격 전달로 내부 부위를 노릴 수 있으며 기존 개척 원정의 무기에도 적용한다. 규칙은 [전투 HP 규칙](../content/COMBAT-HP-RULES.md)에 있다.
 
 ## 4. 기존 월드 유형 구현 현황 (0.10.x)
 
@@ -110,18 +112,18 @@ flowchart LR
 
 | 책임 | 주요 코드 | 역할 |
 | --- | --- | --- |
-| 하나의 게임 화면 | [index.html](../app/src/main/assets/index.html), [game.js](../app/src/main/assets/game.js), [shell.js](../app/src/main/assets/shell.js), [inventory-ui.js](../app/src/main/assets/inventory-ui.js), [hud-editor.js](../app/src/main/assets/hud-editor.js) | 월드별 시작, 조작·알림·설정·메뉴·로딩·현장 HUD·장부 창, 36칸 가방, UI 배치 편집 (모든 맵 공통) |
-| 맵 설정 | [content-runtime/maps.js](../app/src/main/assets/content-runtime/maps.js) | 맵별 지형 생성기(섬은 원본 생성기 재사용)·규칙·시작 소지품·장소, 기존 아이템·블록·종 대응표와 섬 저장 변환 |
-| 콘텐츠 탐험·기본 섬 진행 | [content-runtime/game.js](../app/src/main/assets/content-runtime/game.js), [item-slots.js](../app/src/main/assets/content-runtime/item-slots.js), [runtime.js](../app/src/main/assets/content-runtime/runtime.js), [scene.js](../app/src/main/assets/content-runtime/scene.js) | 공용 화면 위의 프레임 루프·장부 페이지, 설계 아이템의 가방 칸, 시스템 조립, 장면 생성 |
-| 월드·생명체·던전·보스 | [atlas.js](../app/src/main/assets/content-runtime/atlas.js), [creatures.js](../app/src/main/assets/content-runtime/creatures.js), [dungeons.js](../app/src/main/assets/content-runtime/dungeons.js), [dungeon-devices.js](../app/src/main/assets/content-runtime/dungeon-devices.js), [bosses.js](../app/src/main/assets/content-runtime/bosses.js) | 청크 생성, 생태, 던전 배치·장치, 보스 페이즈·기술 |
-| 성장·장비·기계·에너지 | [progression.js](../app/src/main/assets/content-runtime/progression.js), [armaments.js](../app/src/main/assets/content-runtime/armaments.js), [machines.js](../app/src/main/assets/content-runtime/machines.js), [fixture-energy.js](../app/src/main/assets/content-runtime/fixture-energy.js), [placements.js](../app/src/main/assets/content-runtime/placements.js) | 연구·제작·사망 회수, 무기, 기계 SDK, 설비 전력망, 설치 |
-| 신앙·공동체·재질 반응 | [faith.js](../app/src/main/assets/content-runtime/faith.js), [community.js](../app/src/main/assets/content-runtime/community.js), [material-effects.js](../app/src/main/assets/content-runtime/material-effects.js) | 의뢰·시련 원장, 공동체 거래, 에너지→피해·물성 |
-| 콘텐츠 저장 | [save.js](../app/src/main/assets/content-runtime/save.js), [autosave.js](../app/src/main/assets/content-runtime/autosave.js), [save-worker.js](../app/src/main/assets/content-runtime/save-worker.js) | 두 세대 압축 저장, 작업 스레드 자동 저장 |
-| 생성 콘텐츠 | `content-runtime/*.generated.js`, [build-runtime-content.mjs](../tools/build-runtime-content.mjs) | `design/content/` 원본 6문서와 119개 모델의 불변 패키징 |
-| 지역·캠페인 (개척 원정) | [frontier/model.js](../app/src/main/assets/frontier/model.js), [campaign.js](../app/src/main/assets/frontier/campaign.js), [frontier/view.js](../app/src/main/assets/frontier/view.js) | 지역 상태, 진행 조건, 화면 연결 |
-| 소지품·신체·물체 | [inventory.js](../app/src/main/assets/inventory.js), [structural-body.js](../app/src/main/assets/structural-body.js), [loose-voxels.js](../app/src/main/assets/loose-voxels.js), [impact.js](../app/src/main/assets/impact.js) | 아이템·제작, 외피/골격, 독립 물체, 충격 피해 |
-| 복셀 제작 도구 | [design/assets/author.html](../design/assets/author.html), [generators/](../design/assets/generators) | 모든 신규 복셀 에셋의 필수 제작 경로. [규칙](VOXEL-ASSET-RULES.md) |
-| 버전·배포 | [version.json](../version.json), [배포 워크플로](../.github/workflows/release.yml), [제작 하네스](../.github/workflows/voxel-assets.yml) | 앱/게임 버전 분리, 검사·빌드·공개 게시 |
+| 하나의 게임 화면 | [index.html](../../app/src/main/assets/index.html), [game.js](../../app/src/main/assets/game.js), [shell.js](../../app/src/main/assets/shell.js), [inventory-ui.js](../../app/src/main/assets/inventory-ui.js), [hud-editor.js](../../app/src/main/assets/hud-editor.js) | 월드별 시작, 조작·알림·설정·메뉴·로딩·현장 HUD·장부 창, 36칸 가방, UI 배치 편집 (모든 맵 공통) |
+| 맵 설정 | [content-runtime/maps.js](../../app/src/main/assets/content-runtime/maps.js) | 맵별 지형 생성기(섬은 원본 생성기 재사용)·규칙·시작 소지품·장소, 기존 아이템·블록·종 대응표와 섬 저장 변환 |
+| 콘텐츠 탐험·기본 섬 진행 | [content-runtime/game.js](../../app/src/main/assets/content-runtime/game.js), [item-slots.js](../../app/src/main/assets/content-runtime/item-slots.js), [runtime.js](../../app/src/main/assets/content-runtime/runtime.js), [scene.js](../../app/src/main/assets/content-runtime/scene.js) | 공용 화면 위의 프레임 루프·장부 페이지, 설계 아이템의 가방 칸, 시스템 조립, 장면 생성 |
+| 월드·생명체·던전·보스 | [atlas.js](../../app/src/main/assets/content-runtime/atlas.js), [creatures.js](../../app/src/main/assets/content-runtime/creatures.js), [dungeons.js](../../app/src/main/assets/content-runtime/dungeons.js), [dungeon-devices.js](../../app/src/main/assets/content-runtime/dungeon-devices.js), [bosses.js](../../app/src/main/assets/content-runtime/bosses.js) | 청크 생성, 생태, 던전 배치·장치, 보스 페이즈·기술 |
+| 성장·장비·기계·에너지 | [progression.js](../../app/src/main/assets/content-runtime/progression.js), [armaments.js](../../app/src/main/assets/content-runtime/armaments.js), [machines.js](../../app/src/main/assets/content-runtime/machines.js), [fixture-energy.js](../../app/src/main/assets/content-runtime/fixture-energy.js), [placements.js](../../app/src/main/assets/content-runtime/placements.js) | 연구·제작·사망 회수, 무기, 기계 SDK, 설비 전력망, 설치 |
+| 신앙·공동체·재질 반응 | [faith.js](../../app/src/main/assets/content-runtime/faith.js), [community.js](../../app/src/main/assets/content-runtime/community.js), [material-effects.js](../../app/src/main/assets/content-runtime/material-effects.js) | 의뢰·시련 원장, 공동체 거래, 에너지→피해·물성 |
+| 콘텐츠 저장 | [save.js](../../app/src/main/assets/content-runtime/save.js), [autosave.js](../../app/src/main/assets/content-runtime/autosave.js), [save-worker.js](../../app/src/main/assets/content-runtime/save-worker.js) | 두 세대 압축 저장, 작업 스레드 자동 저장 |
+| 생성 콘텐츠 | `content-runtime/*.generated.js`, [build-runtime-content.mjs](../../tools/build-runtime-content.mjs) | `design/content/` 원본 6문서와 119개 모델의 불변 패키징 |
+| 지역·캠페인 (개척 원정) | [frontier/model.js](../../app/src/main/assets/frontier/model.js), [campaign.js](../../app/src/main/assets/frontier/campaign.js), [frontier/view.js](../../app/src/main/assets/frontier/view.js) | 지역 상태, 진행 조건, 화면 연결 |
+| 소지품·신체·물체 | [inventory.js](../../app/src/main/assets/inventory.js), [structural-body.js](../../app/src/main/assets/structural-body.js), [loose-voxels.js](../../app/src/main/assets/loose-voxels.js), [impact.js](../../app/src/main/assets/impact.js) | 아이템·제작, 외피/골격, 독립 물체, 충격 피해 |
+| 복셀 제작 도구 | [design/assets/author.html](../../design/assets/author.html), [generators/](../../design/assets/generators) | 모든 신규 복셀 에셋의 필수 제작 경로. [규칙](../VOXEL-ASSET-RULES.md) |
+| 버전·배포 | [version.json](../../version.json), [배포 워크플로](../../.github/workflows/release.yml), [제작 하네스](../../.github/workflows/voxel-assets.yml) | 앱/게임 버전 분리, 검사·빌드·공개 게시 |
 
 상태·규칙·표현을 나누는 방향으로 모듈을 확장했다. 0.13.0부터 화면 계층은 모든 맵이 공유한다. 0.14.0부터 기본 섬도 콘텐츠 런타임에서 돈다. 개척 원정(`main.js`·`inventory.js`·`entities.js`·`world.js` 시뮬레이션)과 기계 시험장은 아직 분리되어 있으며 [통합 단계](UNIFIED-GAME.md#4-단계)에서 하나로 합친다.
 
@@ -129,15 +131,15 @@ flowchart LR
 
 ### 0.14.1에서 확인된 결과
 
-로컬 전체 회귀 **527개 통과, 실패 0**(타격 모양 단위 시험 1개 추가). 앱 규칙 서버의 브라우저 검증 17개 경로가 실제 터치로 통과했고, 새 섬에서 같은 사슴에 검·창·둔기를 장착해 쳤다. 검은 면을 가로지르는 얕은 선 상처(0.0625×0.0625×0.3125 m), 창은 공격 방향으로 긴 상처(0.375 m)와 뼈 타격, 둔기는 상처 없이 뼈 타격을 남겼다. 상태 페이지에는 방식 바꾸기 버튼이 없고 맨손의 타격 방식이 점타격으로 표시된다. 개척 원정 코드는 바꾸지 않아 기존 화면 검사 19개는 0.14.0 결과를 그대로 쓴다. 근거는 [0.14.1 검증 기록](../verification/0.14.1.md).
+로컬 전체 회귀 **527개 통과, 실패 0**(타격 모양 단위 시험 1개 추가). 앱 규칙 서버의 브라우저 검증 17개 경로가 실제 터치로 통과했고, 새 섬에서 같은 사슴에 검·창·둔기를 장착해 쳤다. 검은 면을 가로지르는 얕은 선 상처(0.0625×0.0625×0.3125 m), 창은 공격 방향으로 긴 상처(0.375 m)와 뼈 타격, 둔기는 상처 없이 뼈 타격을 남겼다. 상태 페이지에는 방식 바꾸기 버튼이 없고 맨손의 타격 방식이 점타격으로 표시된다. 개척 원정 코드는 바꾸지 않아 기존 화면 검사 19개는 0.14.0 결과를 그대로 쓴다. 근거는 [0.14.1 검증 기록](../../verification/0.14.1.md).
 
 ### 0.14.0에서 확인된 결과
 
-로컬 전체 회귀 **526개 통과, 실패 0**(신규 섬 맵 6개·개척 원정 감각 8개 포함). 채굴 공식은 개척 원정 숫자와 같고, 통합 런타임의 섬 지형은 원본 섬 생성기와 같은 칸을 만든다. 앱 규칙 서버의 브라우저 검증 17개 경로(콘텐츠 탐험 9·개척 원정 1·기본 섬 6·로딩 실패 1)가 실제 터치로 통과했다. 새 섬에서 잔디 2번 파기, 상호작용 한 번에 즉시 채집, 사슴 옆구리 외피 상처 뒤 갈비뼈 타격(몸통 뼈 17 → 5), 저장 후 상처 유지를 확인했다. 기존 화면 검사 19개 중 12개 통과, 5개는 0.13.0 기록과 같은 값으로 실패하는 오래된 검사, 기존 섬 엔진 전용 2개는 기록으로 남겼다. APK와 업데이트 패키지(123개 파일)는 바이트 단위로 같다. interface-editor는 묶음 실행에서 한 번 실패한 뒤 단독 재실행에서 통과했다. 근거는 [0.14.0 검증 기록](../verification/0.14.0.md).
+로컬 전체 회귀 **526개 통과, 실패 0**(신규 섬 맵 6개·개척 원정 감각 8개 포함). 채굴 공식은 개척 원정 숫자와 같고, 통합 런타임의 섬 지형은 원본 섬 생성기와 같은 칸을 만든다. 앱 규칙 서버의 브라우저 검증 17개 경로(콘텐츠 탐험 9·개척 원정 1·기본 섬 6·로딩 실패 1)가 실제 터치로 통과했다. 새 섬에서 잔디 2번 파기, 상호작용 한 번에 즉시 채집, 사슴 옆구리 외피 상처 뒤 갈비뼈 타격(몸통 뼈 17 → 5), 저장 후 상처 유지를 확인했다. 기존 화면 검사 19개 중 12개 통과, 5개는 0.13.0 기록과 같은 값으로 실패하는 오래된 검사, 기존 섬 엔진 전용 2개는 기록으로 남겼다. APK와 업데이트 패키지(123개 파일)는 바이트 단위로 같다. interface-editor는 묶음 실행에서 한 번 실패한 뒤 단독 재실행에서 통과했다. 근거는 [0.14.0 검증 기록](../../verification/0.14.0.md).
 
 ### 0.13.0에서 확인된 결과
 
-로컬 전체 회귀 **512개 통과, 실패 0**. 앱 규칙 서버의 브라우저 검증 14개 경로(콘텐츠 탐험 9·개척 원정 1·기본 섬 3·로딩 실패 1)가 공용 화면에서 통과했다. 기존 화면 검사 19개 중 14개가 통과했고, 나머지 5개는 수정 전 0.12.1에서도 같은 값으로 실패하는 오래된 검사다. APK와 업데이트 패키지(122개 파일)는 바이트 단위로 같다. 근거는 [0.13.0 검증 기록](../verification/0.13.0.md).
+로컬 전체 회귀 **512개 통과, 실패 0**. 앱 규칙 서버의 브라우저 검증 14개 경로(콘텐츠 탐험 9·개척 원정 1·기본 섬 3·로딩 실패 1)가 공용 화면에서 통과했다. 기존 화면 검사 19개 중 14개가 통과했고, 나머지 5개는 수정 전 0.12.1에서도 같은 값으로 실패하는 오래된 검사다. APK와 업데이트 패키지(122개 파일)는 바이트 단위로 같다. 근거는 [0.13.0 검증 기록](../../verification/0.13.0.md).
 
 ### 0.11.0에서 확인된 결과
 
@@ -145,13 +147,13 @@ flowchart LR
 | --- | --- |
 | 단위·회귀 검사 | 로컬 **495개 통과, 실패 0**. 이후 안착 접촉 수정은 물리·조립·배치 46개와 접촉 회귀 1개로 확인하고, 병합 커밋에서 GitHub CI가 전체를 다시 실행해 통과 |
 | 복셀 에셋 | 119개 SDK 모델, Khronos glTF Validator 오류·경고 0, 131개 렌더 해시 일치. 제작 하네스 Actions 성공 |
-| 정상 입력 경로 | 보존된 초기 저장에서 채집 → 돌 곡괭이 → 목재 가공 → 메뉴 저장 → 재접속. [보고서](../verification/screenshots/expedition-browser-report.json) |
-| 전 구간 비용 | 빈 상태에서 39연구·27설비·31재료·10단계 장구와 저장 복원. [보고서](../verification/expedition-progression/0.11.0-report.json) |
-| 준비된 상태의 화면 검사 | 무기 제작·장착·보스 피해·마모, 신앙 의뢰·시련, 뿌리 저택 장치, 기계 충전·발사·차폐. [추가 화면 검사](../verification/expedition-additions/README.md) |
-| 터치 | 390×844·844×390·360×640에서 레이아웃·제작 스크롤·시점·조이스틱·메뉴·저장 재접속. [보고서](../verification/expedition-touch/report.json) |
+| 정상 입력 경로 | 보존된 초기 저장에서 채집 → 돌 곡괭이 → 목재 가공 → 메뉴 저장 → 재접속. [보고서](../../verification/screenshots/expedition-browser-report.json) |
+| 전 구간 비용 | 빈 상태에서 39연구·27설비·31재료·10단계 장구와 저장 복원. [보고서](../../verification/expedition-progression/0.11.0-report.json) |
+| 준비된 상태의 화면 검사 | 무기 제작·장착·보스 피해·마모, 신앙 의뢰·시련, 뿌리 저택 장치, 기계 충전·발사·차폐. [추가 화면 검사](../../verification/expedition-additions/README.md) |
+| 터치 | 390×844·844×390·360×640에서 레이아웃·제작 스크롤·시점·조이스틱·메뉴·저장 재접속. [보고서](../../verification/expedition-touch/report.json) |
 | 저장 | 7,392,216글자 상태를 동기·worker 각 3회 저장해 완전 동일 복원, 두 세대 합계 1,191,002글자 |
 | 빌드 | APK 빌드, 118개 게임 자산과 서명 업데이트 파일 바이트 일치, ZIP 2,781,642바이트·해제 11,469,147바이트 |
-| 공개 게시 | [배포 Actions #21](https://github.com/Modopi/feral-voxel-sandbox/actions/runs/39052235767) 성공. Release·stable·불변 패키지 SHA256 일치, 카탈로그 기존 15개 항목 불변. [게시 결과](../verification/0.11.0.md#공개-게시-결과) |
+| 공개 게시 | [배포 Actions #21](https://github.com/Modopi/feral-voxel-sandbox/actions/runs/39052235767) 성공. Release·stable·불변 패키지 SHA256 일치, 카탈로그 기존 15개 항목 불변. [게시 결과](../../verification/0.11.0.md#공개-게시-결과) |
 
 브라우저 결과는 Chromium/SwiftShader 측정이며 실제 Android의 프레임·메모리·발열 측정이 아니다. 휴대폰 앱에서 0.11.0을 적용·재시작한 결과도 아직 확인하지 않았다.
 
@@ -166,7 +168,7 @@ flowchart LR
 | 게임 릴리스 기준 커밋 | `1c5b759392fe17a6555590db31ecd81f8dbe98a2` ([PR #22](https://github.com/Modopi/feral-voxel-sandbox/pull/22)) |
 | 공개 릴리스 | [v0.14.0](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.14.0) · 2026-10-18 04:58 UTC 게시. 0.14.1은 병합 후 [릴리스 목록](https://github.com/Modopi/feral-voxel-sandbox/releases)에 게시 |
 
-앱 0.3.3 사용자는 **메뉴 → 업데이트 → 지금 확인 → 저장 후 적용**, 버전을 고정한 사용자는 **게임 버전 → 0.14.1**을 선택한다. 처음 설치하거나 앱 0.3.2 이하라면 릴리스의 `Feral-0.3.3-android.apk`를 기존 앱 위에 설치한다. 수동 버전 전환은 빌드별 저장을 분리하며 처음 선택한 빌드는 새 저장으로 시작한다. 상세한 적용·복구 범위는 [배포 안내](RELEASING.md)를 따른다.
+앱 0.3.3 사용자는 **메뉴 → 업데이트 → 지금 확인 → 저장 후 적용**, 버전을 고정한 사용자는 **게임 버전 → 0.14.1**을 선택한다. 처음 설치하거나 앱 0.3.2 이하라면 릴리스의 `Feral-0.3.3-android.apk`를 기존 앱 위에 설치한다. 수동 버전 전환은 빌드별 저장을 분리하며 처음 선택한 빌드는 새 저장으로 시작한다. 상세한 적용·복구 범위는 [배포 안내](../RELEASING.md)를 따른다.
 
 ## 8. 주요 개발 이력
 
@@ -191,7 +193,7 @@ flowchart LR
 
 ## 9. 남은 과제와 다음 우선순위
 
-**아래는 [구현 Goal](IMPLEMENTATION-GOAL.md)의 완료 조건에서 도출한 제안이며, 구현 완료 내역이나 확정 일정이 아니다.**
+**아래는 [구현 Goal](../IMPLEMENTATION-GOAL.md)의 완료 조건에서 도출한 제안이며, 구현 완료 내역이나 확정 일정이 아니다.**
 
 | 우선순위 | 과제 | 완료를 판단할 증거 |
 | --- | --- | --- |
@@ -204,4 +206,4 @@ flowchart LR
 | 2 | 실물 설비 배선·기계 주행 완주, 에너지→재질 반응의 전투 연결 | 실제 배치·포트 연결·충전·주행과 채널별 피해·물성 변화 확인 |
 | 3 | 일반 주민·플레이어의 구조 손상, NPC 자율 활동 확대 | 이동·전투·치료·사망·저장 규칙 정의와 기존 규칙과의 일관성 검사 |
 
-현재 1m 유체는 반 칸 틈을 정밀하게 흐르지 않으며, 연성체·전신 관절 래그돌은 구현하지 않았다. 공기역학·충격·부력은 게임용 근사 모델이다. APK의 공유 시험 서명 키는 정식 운영 키와 구분하며 교체·이전 정책은 별도로 정해야 한다. 자세한 제약은 [배포 안내](RELEASING.md)에 있다.
+현재 1m 유체는 반 칸 틈을 정밀하게 흐르지 않으며, 연성체·전신 관절 래그돌은 구현하지 않았다. 공기역학·충격·부력은 게임용 근사 모델이다. APK의 공유 시험 서명 키는 정식 운영 키와 구분하며 교체·이전 정책은 별도로 정해야 한다. 자세한 제약은 [배포 안내](../RELEASING.md)에 있다.

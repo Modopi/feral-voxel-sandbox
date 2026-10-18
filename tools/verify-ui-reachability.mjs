@@ -1,4 +1,4 @@
-// Browser check for the one game screen (docs/UNIFIED-GAME.md): every map runs on index.html with the
+// Browser check for the one game screen (docs/ARCHITECTURE.md): every map runs on index.html with the
 // same HUD, hotbar, bag, ledger window, menu, settings and controls; features are used through real taps.
 // By default assets are served with the Android app's MIME/CSP rules (tools/android-asset-server.mjs).
 // Setup steps that grant items or teleport are recorded as prepared state, not as normal progression evidence.
