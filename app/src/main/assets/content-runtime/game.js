@@ -594,7 +594,7 @@ function bind(){
  const rules=runtime.rules;
  document.querySelector('[data-tab="life"]').hidden=!rules.sandbox;
  // The world panel describes the terrain and the world's own settings.
- document.querySelector('[data-panel="world"] > p').textContent=[runtime.generator.description,rules.survival?'':'체력·식량이 줄지 않는 평화 규칙입니다.',rules.sandbox?'개발·생태 탭의 샌드박스 도구를 쓸 수 있습니다.':''].filter(Boolean).join(' ');
+ document.querySelector('[data-panel="world"] > p').textContent=[runtime.generator.description,rules.survival?(rules.dropOnDeath?'쓰러지면 그 자리에 소지품이 남습니다.':'쓰러져도 소지품을 지닌 채 깨어납니다.'):'체력·식량이 줄지 않는 평화 규칙입니다.',rules.sandbox?'개발·생태 탭의 샌드박스 도구를 쓸 수 있습니다.':''].filter(Boolean).join(' ');
  $('vitals').hidden=!rules.survival;
  if(rules.sandbox){
   for(const b of document.querySelectorAll('[data-sandbox-tool]'))b.onclick=()=>selectSandboxTool(+b.dataset.sandboxTool);

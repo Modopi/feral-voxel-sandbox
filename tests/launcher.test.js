@@ -37,8 +37,8 @@ function nativeSwitch(current, snapshots, fromCode, toCode) {
 
 test('worlds made before 0.15 get their preset settings; the list stays readable by older builds', () => {
   const db = store({ [CATALOG]: JSON.stringify([{ id: 'default', name: '기본 탐험 맵', type: 'island', seed: 63026 }, { id: 'w1', name: '탐험', type: 'expedition', seed: 7 }]) });
-  assert.deepEqual(findWorld(db, 'default').config, { configVersion: 1, preset: 'island', seed: 63026, terrain: { generator: 'island' }, rules: { survival: false, sandbox: true, starterKit: true } });
-  assert.deepEqual(findWorld(db, 'w1').config.rules, { survival: true, sandbox: false, startStructures: true });
+  assert.deepEqual(findWorld(db, 'default').config, { configVersion: 1, preset: 'island', seed: 63026, terrain: { generator: 'island' }, rules: { survival: false, sandbox: true, starterKit: true, dropOnDeath: true } });
+  assert.deepEqual(findWorld(db, 'w1').config.rules, { survival: true, sandbox: false, startStructures: true, dropOnDeath: true });
   updateWorld(db, 'w1', { rules: { survival: false } });
   const row = JSON.parse(db.getItem(CATALOG)).find(w => w.id === 'w1');
   assert.deepEqual([row.id, row.name, row.type, row.seed], ['w1', '탐험', 'expedition', 7], 'the fields older builds read are unchanged');
@@ -50,8 +50,8 @@ test('a world is made with its own settings; only what its session reads is acce
   const db = store();
   const w = createWorld(db, ' 평화 섬 ', 'island', 123, { survival: true, starterKit: false });
   assert.equal(w.name, '평화 섬');
-  assert.deepEqual(findWorld(db, w.id).config.rules, { survival: true, sandbox: true, starterKit: false });
-  assert.deepEqual(createWorld(db, '탐험', 'expedition', 1, { sandbox: true }).config.rules, { survival: true, sandbox: true, startStructures: true }, 'content exploration reads sandbox since 0.15.2');
+  assert.deepEqual(findWorld(db, w.id).config.rules, { survival: true, sandbox: true, starterKit: false, dropOnDeath: true });
+  assert.deepEqual(createWorld(db, '탐험', 'expedition', 1, { sandbox: true }).config.rules, { survival: true, sandbox: true, startStructures: true, dropOnDeath: true }, 'content exploration reads sandbox since 0.15.2');
   assert.throws(() => createWorld(db, '탐험', 'expedition', 1, { starterKit: true }), /쓸 수 없는 설정/, 'a setting its preset does not offer');
   assert.throws(() => createWorld(db, '개척', 'frontier', 1, { survival: false }), /쓸 수 없는 설정/, 'old engines take no settings');
   assert.throws(() => createWorld(db, '이상', 'island', 1, { survival: 'yes' }), /올바르지 않습니다/);
@@ -62,9 +62,9 @@ test('settings that shaped the world are fixed after creation; the name and play
   const db = store();
   const w = createWorld(db, '탐험', 'expedition', 5, { startStructures: false });
   assert.throws(() => updateWorld(db, w.id, { rules: { startStructures: true } }), /만든 뒤에는 바꿀 수 없는 설정/);
-  const edited = updateWorld(db, w.id, { name: '평화 탐험', rules: { survival: false } });
+  const edited = updateWorld(db, w.id, { name: '평화 탐험', rules: { survival: false, dropOnDeath: false } });
   assert.equal(edited.name, '평화 탐험');
-  assert.deepEqual(findWorld(db, w.id).config.rules, { survival: false, sandbox: false, startStructures: false });
+  assert.deepEqual(findWorld(db, w.id).config.rules, { survival: false, sandbox: false, startStructures: false, dropOnDeath: false });
   for (const [key, rule] of Object.entries(RULES)) assert(['always', 'create'].includes(rule.when), key);
 });
 
@@ -136,7 +136,7 @@ test('the runtime starts from the world config: terrain generator and rules, nev
   const islandConfig = worldConfig({ id: 'i', name: '섬', type: 'island', seed: 63026 });
   const runtime = await ExpeditionRuntime.create(63026, null, { config: { ...islandConfig, rules: { ...islandConfig.rules, survival: true, starterKit: false } } });
   assert.equal(runtime.generator.id, 'island');
-  assert.deepEqual(runtime.rules, { survival: true, sandbox: true, startStructures: false, starterKit: false }, 'a rule the preset does not offer is off');
+  assert.deepEqual(runtime.rules, { survival: true, sandbox: true, startStructures: false, starterKit: false, dropOnDeath: true }, 'a rule the preset does not offer is off');
   assert.equal(runtime.progression.count('stone_pick'), 0, 'no starting kit when the world says so');
   const expeditionConfig = worldConfig({ id: 'e', name: '탐험', type: 'expedition', seed: 63026 });
   const restored = new ExpeditionRuntime(63026, runtime.serialize(), new Map(), { config: { ...expeditionConfig, rules: { survival: false } } });
@@ -145,7 +145,7 @@ test('the runtime starts from the world config: terrain generator and rules, nev
   assert.equal(JSON.stringify(runtime.serialize()).includes('"rules"'), false, 'settings are not copied into the save');
   const old = { ...runtime.serialize(), map: 'island' }; delete old.terrain;
   assert.equal(new ExpeditionRuntime(63026, old, new Map(), { config: expeditionConfig }).generator.id, 'island', 'a save from before 0.15.2 names its map');
-  assert.deepEqual(new ExpeditionRuntime(63026, null, new Map()).rules, { survival: true, sandbox: false, startStructures: true, starterKit: false }, 'without a config the full rule set plays');
+  assert.deepEqual(new ExpeditionRuntime(63026, null, new Map()).rules, { survival: true, sandbox: false, startStructures: true, starterKit: false, dropOnDeath: true }, 'without a config the full rule set plays');
 });
 
 test('saves follow the player when a build is picked in the app version list (it starts with empty storage)', async () => {

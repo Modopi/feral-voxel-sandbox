@@ -305,18 +305,19 @@ try{
  assert.deepEqual(listed,['기본 탐험 맵','개척 원정','기계 베타 맵'],'the default worlds are listed');
  await ltap('#newWorld');await lp.selectOption('#preset','expedition');
  const createRules=await lp.evaluate(()=>[...document.querySelectorAll('#worldRules input')].map(i=>[i.dataset.rule,i.checked,i.disabled]));
- assert.deepEqual(createRules,[['survival',true,false],['sandbox',false,false],['startStructures',true,false]],'an expedition world offers what its session reads');
+ assert.deepEqual(createRules,[['survival',true,false],['sandbox',false,false],['startStructures',true,false],['dropOnDeath',true,false]],'an expedition world offers what its session reads');
  await ltap('#worldName');await lp.fill('#worldName','평화 탐험');await ltap('#rule-survival');await ltap('#rule-sandbox');
  await lp.screenshot({path:new URL('launcher-create.png',out).pathname});
  await ltap('#worldSubmit');
  const made=await lp.evaluate(()=>JSON.parse(localStorage.getItem('feral.worlds.v1')).find(w=>w.name==='평화 탐험'));
- assert.equal(made.type,'expedition');assert.deepEqual(made.config.rules,{survival:false,sandbox:true,startStructures:true});assert.equal(made.config.configVersion,1);
+ assert.equal(made.type,'expedition');assert.deepEqual(made.config.rules,{survival:false,sandbox:true,startStructures:true,dropOnDeath:true});assert.equal(made.config.configVersion,1);
  check(report.launcher,'a new world is made in the launcher with its own settings',{stored:made.config});
  await ltap(`article[data-world="${made.id}"] button:nth-of-type(2)`);
  const editRules=await lp.evaluate(()=>[...document.querySelectorAll('#worldRules input')].map(i=>[i.dataset.rule,i.checked,i.disabled]));
- assert.deepEqual(editRules,[['survival',false,false],['sandbox',true,false],['startStructures',true,true]],'settings that shaped the world are fixed after creation');
- await lp.fill('#worldName','평화 탐험 1');await ltap('#worldSubmit');
- assert.equal(await lp.evaluate(id=>JSON.parse(localStorage.getItem('feral.worlds.v1')).find(w=>w.id===id).name,made.id),'평화 탐험 1');
+ assert.deepEqual(editRules,[['survival',false,false],['sandbox',true,false],['startStructures',true,true],['dropOnDeath',true,false]],'settings that shaped the world are fixed after creation');
+ await lp.fill('#worldName','평화 탐험 1');await ltap('#rule-dropOnDeath');await ltap('#worldSubmit');
+ const edited=await lp.evaluate(id=>JSON.parse(localStorage.getItem('feral.worlds.v1')).find(w=>w.id===id),made.id);
+ assert.equal(edited.name,'평화 탐험 1');assert.equal(edited.config.rules.dropOnDeath,false,'the death rule can change after creation');
  check(report.launcher,'world settings are edited in the launcher; creation-only settings stay fixed',{editRules});
  await ltap('#worldsView .launcherBack');await ltap('#openSettings');await ltap('#showEvents');
  const stored=await lp.evaluate(()=>JSON.parse(localStorage.getItem('feral.settings')));assert.equal(stored.showEvents,true);
@@ -327,7 +328,7 @@ try{
  await ltap('#openWorlds');await ltap(`article[data-world="${made.id}"] button:nth-of-type(1)`);
  await lp.waitForURL(/play\.html\?world=/);await lp.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:120000});
  const session=await lp.evaluate(()=>({rules:FERAL.runtime.rules,vitalsHidden:document.getElementById('vitals').hidden,showEvents:document.getElementById('showEvents').checked,eventsClass:document.body.classList.contains('showEvents')}));
- assert.equal(session.rules.survival,false,'the session follows the world settings from the launcher');assert(session.vitalsHidden);
+ assert.equal(session.rules.survival,false,'the session follows the world settings from the launcher');assert.equal(session.rules.dropOnDeath,false);assert(session.vitalsHidden);
  assert(session.showEvents&&session.eventsClass,'the session reads the global settings made in the launcher');
  // Content exploration with the sandbox setting (S1): the same life tab and tools, placing the local ecology, not the island's.
  await ltap('#menuBtn');await ltap('[data-tab=life]');
