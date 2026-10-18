@@ -98,6 +98,8 @@ export function regionAt(x,z){
   const rx=Math.floor(x/REGION_STRIDE),rz=Math.floor(z/REGION_STRIDE),ox=rx*REGION_STRIDE,oz=rz*REGION_STRIDE;
   return x-ox<ISLAND_SIZE&&z-oz<ISLAND_SIZE?{rx,rz,ox,oz}:null;
 }
+/** Whether (x, z) metres is on a region island, without allocating (per-step checks). */
+export const onRegion = (x,z) => x-Math.floor(x/REGION_STRIDE)*REGION_STRIDE<ISLAND_SIZE&&z-Math.floor(z/REGION_STRIDE)*REGION_STRIDE<ISLAND_SIZE;
 /** The camp of the region nearest (x, z), in world metres. */
 export function nearestRegionCamp(x,z){
   const rx=Math.round((x-REGION_CAMP.x)/REGION_STRIDE),rz=Math.round((z-REGION_CAMP.z)/REGION_STRIDE);
@@ -120,9 +122,11 @@ export class FrontierAtlas extends IslandAtlas {
     return world;
   }
   _islandAt(x,z){
-    const r=regionAt(x,z);if(!r)return null;
-    const m=this._regionMemo;if(m&&m.rx===r.rx&&m.rz===r.rz)return m;
-    const world=this.regionWorld(r.rx,r.rz);return this._regionMemo={world,ox:r.ox,oz:r.oz,tier:world.tier,rx:r.rx,rz:r.rz};
+    // Called for every generated cell: no allocation unless the region changes.
+    const rx=Math.floor(x/REGION_STRIDE),rz=Math.floor(z/REGION_STRIDE);
+    if(x-rx*REGION_STRIDE>=ISLAND_SIZE||z-rz*REGION_STRIDE>=ISLAND_SIZE)return null;
+    const m=this._regionMemo;if(m&&m.rx===rx&&m.rz===rz)return m;
+    const world=this.regionWorld(rx,rz);return this._regionMemo={world,ox:rx*REGION_STRIDE,oz:rz*REGION_STRIDE,tier:world.tier,rx,rz};
   }
   _landings(x,z,radius){
     const out=[],reach=radius+REGION_STRIDE;
@@ -151,7 +155,7 @@ export const GENERATORS = Object.freeze({
   // The first signal's regions as islands of one world (S2). Starts at region 0,0's expedition camp.
   frontier:Object.freeze({id:'frontier',atlas:FrontierAtlas,spawn:{...REGION_CAMP,yaw:-.5},spawnName:'원정 야영지',
    description:'바다로 나뉜 지역 섬들을 오가며 마을과 협력하고 세 신호를 복원하는 원정입니다.',
-   region:(x,z)=>!!regionAt(x,z),landmarks:[],minimap:{size:160,origin:null},ecology:'grove',legacySave:null,
+   region:onRegion,landmarks:[],minimap:{size:160,origin:null},ecology:'grove',legacySave:null,
    // A fallen player wakes at the camp of the region they fell in, not back at the first region.
    respawn:nearestRegionCamp,respawnName:'지역 야영지'}),
 });

@@ -12,11 +12,6 @@ import {
   surveySites,
 } from "../app/src/main/assets/frontier/campaign.js";
 import {
-  prepareAttack,
-  attackZones,
-  attackHits,
-} from "../app/src/main/assets/frontier/encounters.js";
-import {
   Inventory,
   RECIPES,
   ITEMS,
@@ -29,6 +24,9 @@ import {
   resourceSites,
   relaySites,
   CONTRACTS,
+  prepareAttack,
+  attackZones,
+  attackHits,
 } from "../app/src/main/assets/frontier/content.js";
 import { auditAcquisition } from "../app/src/main/assets/acquisition.js";
 

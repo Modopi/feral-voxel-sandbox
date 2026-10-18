@@ -1,0 +1,22 @@
+{
+  "version": "0.15.4",
+  "versionCode": 1504,
+  "minNativeCode": 303,
+  "files": 124,
+  "nativeFileLimit": 128,
+  "mjsFiles": [],
+  "newFiles": [
+    "content-runtime/first-signal.js"
+  ],
+  "removedFiles": [
+    "frontier/encounters.js"
+  ],
+  "archiveBytes": 2855108,
+  "expandedBytes": 11672070,
+  "archiveSha256": "5c29f550f539fbd2fb49b62a0d55f65ea6f8a3534732e35f7c07dfed01523d60",
+  "packageSha256": "b41c8d4841d430e3a50f1e6bb54d0fa9c3069115e1488442b0bd03c730e2e933",
+  "apkSha256": "baa6d66806117fdb58e892b4175430d529c99c9ac4b15a64fdcbe2d221219f2b",
+  "apkAssetsIdenticalToUpdate": true,
+  "withinLimits": true,
+  "note": "Local build with the shared test signing key; CI rebuilds and publishes after merge."
+}

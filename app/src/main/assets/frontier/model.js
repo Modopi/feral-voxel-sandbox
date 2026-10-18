@@ -9,7 +9,6 @@ import {
   campaignAction,
   validateCampaign,
 } from "./campaign.js";
-import { prepareAttack, attackHits } from "./encounters.js";
 import {
   GATHERABLES,
   CONTRACTS,
@@ -17,6 +16,9 @@ import {
   relaySites,
   ruinDefinition,
   ensureContent,
+  prepareAttack,
+  attackHits,
+  FACTIONS,
 } from "./content.js";
 import { activeGear, spendGear } from "../equipment.js";
 // Frontier rules. No DOM, renderer or storage access: every action is explicit.
@@ -30,7 +32,7 @@ import {
   restore,
   serialize,
 } from "../machine/model.js";
-export const FACTIONS = ["이끼 연맹", "구리 조합", "현무암 부족"];
+export { FACTIONS };
 // Region placement lives with the region terrain so the unified runtime reads the same regions.
 import { regionInfo, regionKey } from "./terrain.js";
 export { regionInfo, regionKey };
