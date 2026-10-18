@@ -65,6 +65,8 @@
 
 게임 1502 / 앱·최소 앱 303 / 저장 스키마 2. Java·권한·키·게임 규칙 변경이 없는 게임 전용 릴리스다. 통합 런타임이 맵 이름 대신 월드 설정(지형 생성기 이름과 규칙)으로 시작하고, 세션 코드의 맵 이름 비교를 없앴다(`tests/launcher.test.js`가 확인). 콘텐츠 탐험 월드의 프리셋에 샌드박스 설정(기본 끔)이 더해졌다. 새 저장은 지형 생성기 이름(`terrain`)을 남기고 이전 저장의 `map`도 읽는다. 0.15.1 이하 빌드는 월드 목록의 프리셋으로 지형을 고르므로 새 저장을 그대로 연다. 검증은 [검증 기록](../verification/0.15.2.md).
 
+2026-10-18 08:51 UTC [PR #29](https://github.com/Modopi/feral-voxel-sandbox/pull/29) 병합 커밋 `a2a573d`에서 [배포 Actions](https://github.com/Modopi/feral-voxel-sandbox/actions/runs/39113058052)가 성공해 08:52 UTC에 [v0.15.2 Release](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.15.2)와 기존 공식 `updates/catalog.json`, `updates/stable.feral`, 불변 `updates/versions/0.15.2.feral`로 게시됐다. stable과 버전 패키지는 같은 파일(SHA256 `9eb54f1e…68d182`)이며 로컬 빌드와 바이트 단위로 같고, 내부 아카이브 SHA256 `290e0461…`가 카탈로그와 일치한다. 카탈로그는 24개 항목이며 0.15.1(`7346f69b…`) 항목은 그대로다. Release의 APK(`e9fdd3b1…d202`)는 CI가 다시 빌드한 것이다. Android 실기기 확인은 아직 하지 않았다.
+
 ### 0.15.1 — 성능 구조: 바뀐 곳만 다시 만들기
 
 게임 1501 / 앱·최소 앱 303 / 저장 스키마 2. Java·권한·키·규칙·저장 형식 변경이 없는 게임 전용 릴리스다. 사용자가 신고한 "나무 한 그루를 캐다 플레이할 수 없을 만큼 느려짐"을 구조로 고쳤다(`docs/ARCHITECTURE.md` 7장). 지형 세계가 바뀐 4m 구역을 기록해 지형 충돌체·물 메시가 그 구역만 다시 만들고, 고정 단계는 프레임당 최대 3번, 배경 작업은 남은 시간 안에서만, 생물 AI는 5개 조로 나눠 처리한다. 0.15.0과 같은 측정 도구(`tools/profile-runtime.mjs`)로 비교한 수치는 `verification/0.15.1-perf.json`과 [검증 기록](../verification/0.15.1.md)에 있다. 업데이트 파일은 124개로 앱 상한 128개까지 여유가 4개뿐이라, 다음에 파일을 더하는 버전은 은퇴 파일을 함께 정리해야 한다.
