@@ -65,6 +65,8 @@
 
 게임 1504 / 앱·최소 앱 303 / 저장 스키마 2. Java·권한·키·플레이 규칙 변경이 없는 게임 전용 릴리스다. 통합 런타임에 월드 설정 `modules`로 켜는 모듈 구조와 첫 신호 캠페인 모듈(`first-signal`)을 더했다. 개척 원정 프리셋은 아직 옛 엔진이라 사용자가 플레이하는 월드는 그대로다. 런타임 저장에 `modules` 항목이 생기며 이전 빌드는 이 항목을 읽지 않는다. 옛 개척 원정의 `frontier/encounters.js`를 `content.js`에 합쳐 업데이트 파일은 124개 그대로다. 검증은 [검증 기록](../verification/0.15.4.md).
 
+2026-10-18 10:10 UTC [PR #33](https://github.com/Modopi/feral-voxel-sandbox/pull/33) 병합 커밋 `d889a5d`에서 [배포 Actions](https://github.com/Modopi/feral-voxel-sandbox/actions/runs/39118188420)가 성공해 10:11 UTC에 [v0.15.4 Release](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.15.4)와 기존 공식 `updates/catalog.json`, `updates/stable.feral`, 불변 `updates/versions/0.15.4.feral`로 게시됐다. stable과 버전 패키지는 같은 파일(SHA256 `b41c8d48…e2e933`)이며 로컬 빌드와 바이트 단위로 같고, 내부 아카이브 SHA256 `5c29f550…`가 카탈로그와 일치한다. 카탈로그는 26개 항목이며 0.15.3(`c39b9054…`) 항목은 그대로다. Release의 APK(`e6625a60…140e`)는 CI가 다시 빌드한 것이다. Android 실기기 확인은 아직 하지 않았다.
+
 ### 0.15.3 — 개척 지역 지형과 사망 규칙 설정 (통합 S2a)
 
 게임 1503 / 앱·최소 앱 303 / 저장 스키마 2. Java·권한·키 변경이 없는 게임 전용 릴리스다. 월드 설정 "사망 시 소지품 남김"(콘텐츠 탐험·기본 섬 기본 켬, 지금과 같음)을 더했다. 이 항목이 없는 0.15.2 이하 월드는 기본값으로 읽고, 이전 빌드는 이 항목을 읽지 않아 설정 형식은 1 그대로다. 통합 런타임에 개척 원정 지역 섬들의 지형 생성기(`frontier`)를 등록했으나 개척 원정 프리셋은 아직 옛 엔진이다. 검증은 [검증 기록](../verification/0.15.3.md).
