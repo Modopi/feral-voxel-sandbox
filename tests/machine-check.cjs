@@ -23,13 +23,15 @@ const assert = require("node:assert/strict");
       errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
     const base = "file://" + process.cwd() + "/app/src/main/assets/";
-    await page.goto(base + "worlds.html");
+    // The launcher (0.15.0) lists and makes worlds; the machine field opens through the game session entry.
+    await page.goto(base + "index.html");
+    await page.click("#openWorlds");
     await page.waitForSelector("article");
     assert.equal(await page.locator("article").count(), 3);
     await page.click("#newWorld");
-    await page.fill("#name", "차량 시험 A");
-    await page.selectOption("#type", "machine");
-    await page.click("#create button:not([type=button])");
+    await page.selectOption("#preset", "machine");
+    await page.fill("#worldName", "차량 시험 A");
+    await page.click("#worldSubmit");
     assert.equal(await page.locator("article").count(), 4);
     await page.screenshot({ path: "build/legacy-worlds-0.3.0.png" });
     await page
@@ -87,6 +89,7 @@ const assert = require("node:assert/strict");
       9,
     );
     await page.click("header a");
+    await page.click("#openWorlds");
     await page
       .locator("article")
       .filter({ hasText: "기계 베타 맵" })
@@ -102,11 +105,12 @@ const assert = require("node:assert/strict");
     await page.screenshot({ path: "build/legacy-machine-portrait-0.3.0.png" });
     await page.setViewportSize({ width: 900, height: 412 });
     await page.click("header a");
+    await page.click("#openWorlds");
     await page.click("#newWorld");
-    await page.fill("#name", "독립 섬");
-    await page.selectOption("#type", "island");
-    await page.fill("#seed", "123");
-    await page.click("#create button:not([type=button])");
+    await page.selectOption("#preset", "island");
+    await page.fill("#worldName", "독립 섬");
+    await page.fill("#worldSeed", "123");
+    await page.click("#worldSubmit");
     await page.evaluate(() =>
       localStorage.setItem("feral.world.v1", "legacy sentinel"),
     );
@@ -124,6 +128,7 @@ const assert = require("node:assert/strict");
     assert.equal(await page.evaluate(() => FERAL.runtime.map.id), "island");
     await page.click("#menuBtn");
     await page.click("#worldListBtn");
+    await page.click("#openWorlds");
     await page.waitForSelector("article");
     assert.equal(
       await page.evaluate(() => localStorage.getItem("feral.world.v1")),
@@ -132,10 +137,10 @@ const assert = require("node:assert/strict");
     await page
       .locator("article")
       .last()
-      .getByText("이름 변경", { exact: true })
+      .getByText("설정", { exact: true })
       .click();
-    await page.fill("#renameName", "이름 바꾼 섬");
-    await page.locator("#renameForm button").first().click();
+    await page.fill("#worldName", "이름 바꾼 섬");
+    await page.click("#worldSubmit");
     assert.equal(
       await page.locator("article").last().locator("b").textContent(),
       "이름 바꾼 섬",

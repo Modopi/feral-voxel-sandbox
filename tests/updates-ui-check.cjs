@@ -61,7 +61,7 @@ const assert = require("node:assert/strict");
     };
   }, version);
   await page.goto(
-    "file://" + process.cwd() + "/app/src/main/assets/index.html",
+    "file://" + process.cwd() + "/app/src/main/assets/play.html?world=default",
   );
   await page.waitForFunction(() => window.FERAL?.ready, { timeout: 60000 });
   await page.waitForFunction(() => window.__calls.healthy.length > 0, {
@@ -154,7 +154,7 @@ const assert = require("node:assert/strict");
   };
   const preview = await context.newPage();
   await preview.goto(
-    "file://" + process.cwd() + "/app/src/main/assets/index.html",
+    "file://" + process.cwd() + "/app/src/main/assets/play.html?world=default",
   );
   await preview.waitForFunction(() => window.FERAL?.ready, { timeout: 60000 });
   assert.equal(await preview.locator("#checkUpdates").isDisabled(), true);

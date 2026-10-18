@@ -46,7 +46,7 @@ import {
 import { GEAR, activeGear, spendGear, miningWork } from "./equipment.js";
 let nextStrike = 0,
   sandboxSelected = false;
-import { currentWorld, saveKey } from "./world-slots.js";
+import { currentWorld, saveKey, syncVault } from "./world-slots.js";
 const activeWorld = currentWorld(
   localStorage,
   ["island", "frontier"],
@@ -941,7 +941,8 @@ function travel(dx, dz) {
     return false;
   }
   running = false; // Prevent beforeunload from overwriting the committed destination.
-  location.reload();
+  // The vault copy finishes before the page reloads into the destination region.
+  syncVault().finally(() => location.reload());
   return true;
 }
 function save(quiet = false) {
@@ -964,6 +965,7 @@ function save(quiet = false) {
     };
     const str = JSON.stringify(s);
     localStorage.setItem(storageKey, str);
+    syncVault();
     $("saveState").textContent =
       "SAVED " +
       new Date().toLocaleTimeString("ko-KR", {
@@ -1490,7 +1492,7 @@ function refreshAPI() {
   };
 }
 $("startBtn").onclick = () => {
-  if (localStorage.getItem(storageKey)) location.href = "worlds.html";
+  if (localStorage.getItem(storageKey)) location.href = "index.html";
   else start(false);
 };
 $("continueBtn").onclick = () => start(true);

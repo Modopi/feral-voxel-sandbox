@@ -84,7 +84,7 @@ const csp = fs
         null,
         { timeout: 60000 },
       );
-    await page.goto(base + "/index.html?world=frontier");
+    await page.goto(base + "/play.html?world=frontier");
     await ready();
     await page.waitForFunction(() => __calls.healthy.length > 0, null, {
       timeout: 30000,

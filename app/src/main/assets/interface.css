@@ -151,3 +151,38 @@ body.piloting #hud #toast {left:auto;right:20px;top:auto;bottom:76px;max-width:1
 #pauseScreen #recipeList,#pauseScreen .inventoryBody,#pauseScreen .menuContents,#pauseScreen .tabs,#frontierPanel nav,#frontierContent,#hudInspector,.worldMenu #worlds,.worldMenu dialog {scrollbar-width:thin;scrollbar-color:var(--ui-hi) var(--ui-inset);}
 #pauseScreen:not(.inventoryMode) .tabs,#frontierPanel .gameWindow>nav {min-height:0;touch-action:pan-y;overscroll-behavior:contain;}
 .worldMenu dialog {max-height:calc(100dvh - 24px);overflow-y:auto;touch-action:pan-y;overscroll-behavior:contain;}
+
+/* Loading screen of the game session: hidden title buttons stay hidden even where a rule sets display. */
+#titleScreen [hidden] {display:none!important;}
+
+/* Launcher (index.html): landing, world list, global settings and updates outside the game. */
+.launcher .hidden,.launcher [hidden] {display:none!important;}
+.launcherLanding {width:min(360px,100%);text-align:center;color:var(--ui-ink);}
+.launcherLanding .eyebrow {color:#ded6af;letter-spacing:4px;font-size:11px;}
+.launcherLanding h1 {font-size:88px;letter-spacing:6px;line-height:1;margin:10px 0;color:#efdfb3;text-shadow:4px 4px #26372b,7px 7px #080e0b;font-weight:900;}
+.launcherLanding h1 span {color:#9fd8bf;}
+.launcherLanding h2 {font-size:13px;color:#d8ddc8;margin:14px 0 25px;letter-spacing:1px;font-weight:normal;}
+.launcherActions {display:grid;gap:9px;}
+.launcher .launcherActions button {width:100%;min-height:46px;padding:12px;font-size:15px;font-weight:bold;background:#425749;color:#f3e9c9;border-color:#b5bb98 #202b21 #202b21 #b5bb98;}
+.launcher .launcherActions button small {display:block;font-size:11px;font-weight:normal;color:var(--ui-gold);margin-top:3px;overflow-wrap:anywhere;}
+.launcher #continueWorld {background:#5a6b3f;}
+.launcherLanding #launcherStatus {min-height:16px;font-size:11px;color:var(--ui-gold);margin:12px 0 0;}
+.launcher .launcherLanding footer {display:flex;justify-content:center;gap:12px;margin-top:14px;padding:0;border:0;background:none;font-size:10px;color:#bac7ac;}
+.launcherBody {padding:14px 20px;overflow:auto;overscroll-behavior:contain;touch-action:pan-y;}
+.launcherBody p {font-size:12px;line-height:1.6;color:var(--ui-muted);}
+.launcher .setting {display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:13px;padding:11px 0;border-bottom:1px solid var(--ui-hi);}
+.launcher .setting select {width:auto;margin:0;background:var(--ui-inset);color:var(--ui-ink);}
+.launcher .setting input {width:auto;margin:0;accent-color:var(--ui-gold);}
+.launcher .setting input[type=range] {width:min(220px,50%);}
+.launcher .metricGrid {display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+.launcher .metricGrid>div {background:var(--ui-inset);padding:9px;border:1px solid var(--ui-hi);}
+.launcher .metricGrid span {display:block;font-size:10px;color:var(--ui-muted);}.launcher .metricGrid b {font-size:14px;}
+.launcher .buttonRow {display:flex;flex-wrap:wrap;gap:8px;margin:10px 0;}
+.launcher .updateHelp {font-size:11px;}
+.launcher fieldset {border:1px solid var(--ui-hi);padding:4px 12px 8px;margin:0;}
+.launcher legend {font-size:12px;color:var(--ui-gold);padding:0 4px;}
+.launcher .ruleSetting {flex-wrap:wrap;}.launcher .ruleSetting small {flex-basis:100%;font-size:11px;color:var(--ui-muted);}
+.launcher .presetDescription {margin:-4px 0 0;font-size:12px;color:var(--ui-muted);}
+.launcher .dialogError {color:#f0b48c;}
+.launcher input:disabled,.launcher select:disabled,.launcher button:disabled {opacity:.55;cursor:default;}
+@media (max-height:520px) {.launcherLanding h1 {font-size:56px;margin:4px 0;}.launcherLanding h2 {margin:6px 0 12px;}.launcher .launcherActions button {min-height:36px;padding:7px;font-size:13px;}}

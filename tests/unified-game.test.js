@@ -1,4 +1,4 @@
-// One game screen for every map (docs/ARCHITECTURE.md): routing, shared shell modules,
+// One game session screen for every map (docs/ARCHITECTURE.md §6): routing, shared shell modules,
 // the shared bag over count-based items, and the one notification line.
 import test, { mock } from 'node:test';
 import assert from 'node:assert/strict';
@@ -12,17 +12,14 @@ import { createNotifier } from '../app/src/main/assets/shell.js';
 const ASSETS = new URL('../app/src/main/assets/', import.meta.url);
 const read = path => fs.readFileSync(new URL(path, ASSETS), 'utf8');
 
-test('every world type except the machine field opens the one game screen', () => {
-  for (const type of ['island', 'frontier', 'expedition'])
-    assert.match(worldURL({ id: 'w1', type }), /^index\.html\?world=w1$/, type);
-  assert.match(worldURL({ id: 'beta', type: 'machine' }), /^machine\.html/, 'the machine field moves in the map-preset step');
+test('every world opens the one game session page; the launcher is a separate page', () => {
+  for (const type of ['island', 'frontier', 'expedition', 'machine'])
+    assert.match(worldURL({ id: 'w1', type }), /^play\.html\?world=w1$/, type);
   assert.deepEqual(DEFAULTS.map(w => w.type), ['island', 'frontier', 'machine']);
-  const entry = read('game.js');
-  assert.match(entry, /\["expedition", "island"\]\.includes\(world\.type\) \? "\.\/content-runtime\/game\.js" : "\.\/main\.js"/, 'the island and the expedition run on the one runtime; the frontier moves next');
-  assert.match(read('index.html'), /<script type="module" src="game\.js"><\/script>/);
-  const old = read('expedition.html');
-  assert.doesNotMatch(old, /stylesheet|type="module"/, 'the old expedition page only forwards to index.html');
-  assert.match(old, /location\.replace\("index\.html" \+ location\.search\)/);
+  assert.match(read('play.html'), /<script type="module" src="game\.js"><\/script>/);
+  assert.match(read('index.html'), /<script type="module" src="launcher\.js"><\/script>/);
+  // The router (game.js) is the only place that still picks an old engine; the machine field keeps its page until S3.
+  assert.match(read('game.js'), /engine === "machine"\) location\.replace\(`machine\.html/);
 });
 
 test('maps share the shell module instead of keeping their own screen code', () => {
@@ -55,8 +52,8 @@ test('the update package stays under the native file limit', () => {
 test('every element the expedition screen reads exists on the shared page or is built by a shared module', () => {
   const expedition = read('content-runtime/game.js');
   const ids = new Set([...expedition.matchAll(/\$\('([A-Za-z][\w-]*)'\)/g)].map(m => m[1]));
-  const provided = [read('index.html'), read('shell.js'), read('inventory-ui.js')].join('\n');
-  const missing = [...ids].filter(id => !new RegExp(`id="${id}"`).test(provided));
+  const provided = [read('play.html'), read('shell.js'), read('inventory-ui.js'), read('settings.js'), read('updates.js')].join('\n');
+  const missing = [...ids].filter(id => !new RegExp(`id(=|: )"${id}"`).test(provided));
   assert(ids.size > 30, `checked ${ids.size} ids`);
   assert.deepEqual(missing, []);
 });

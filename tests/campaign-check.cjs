@@ -28,7 +28,7 @@ fs.mkdirSync(out, { recursive: true });
       if (m.type() === "error") errors.push(m.text());
     });
     const base = process.env.FERAL_BASE_URL || "http://127.0.0.1:8080";
-    await page.goto(base + "/index.html?world=frontier");
+    await page.goto(base + "/play.html?world=frontier");
     await page.waitForFunction(
       () => window.FERAL?.ready && FERAL.stats().running,
       null,

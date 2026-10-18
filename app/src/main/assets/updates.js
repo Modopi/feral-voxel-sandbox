@@ -1,8 +1,29 @@
 import { VERSION } from "./version.js";
 
+// The update panel the launcher and the in-game menu share (docs/ARCHITECTURE.md §4).
+const PANEL = `<div class="metricGrid">
+  <div><span>게임 코드</span><b id="gameVersion">—</b></div>
+  <div><span>Android 앱</span><b id="nativeVersion">—</b></div>
+  <div><span>배포 채널</span><b>stable</b></div>
+</div>
+<h3 id="updateConnection">공개 GitHub 업데이트</h3>
+<p id="updateMessage" role="status" aria-live="polite">업데이트 상태를 준비합니다.</p>
+<label class="setting">실행할 때 자동 확인·다운로드 <input id="automaticUpdates" type="checkbox" checked /></label>
+<div class="buttonRow">
+  <button id="chooseGameVersion" class="secondary">게임 버전 선택</button><button id="connectUpdates" class="secondary">업데이트 안내</button>
+  <button id="checkUpdates" class="secondary">지금 확인</button>
+  <button id="retryFailedUpdate" class="secondary hidden">실패한 버전 다시 실행</button>
+  <button id="applyUpdate" class="primary hidden">저장 후 적용</button>
+</div>
+<p class="updateHelp">새 버전은 다음 실행에 적용합니다. 연결되지 않아도 현재 버전으로 플레이할 수 있습니다.
+  실패·중단된 버전은 게임 버전 목록에서 [재시도]를 골라 다시 검증 후 실행할 수 있습니다.</p>
+<p class="updateHelp">최근 확인: <span id="updateLastCheck">아직 확인하지 않음</span></p>`;
+
 // 공개 업데이트는 로그인 없이 사용. 구 네이티브 상태 응답도 읽을 수 있도록 유지.
-export function initUpdates({ beforeApply }) {
+// panel: where to build the panel when the page does not have one yet.
+export function initUpdates({ beforeApply, panel = document.querySelector('[data-panel="updates"]') }) {
   const $ = (id) => document.getElementById(id);
+  if (!$("gameVersion") && panel) panel.innerHTML = PANEL;
   const bridge = window.AndroidApp;
   const available = typeof bridge?.updateStatus === "function";
   let failed = false,
@@ -63,7 +84,7 @@ export function initUpdates({ beforeApply }) {
         "hidden",
         !(s.pendingCode !== 0 && s.pendingCode !== s.runtimeCode),
       );
-      $("updateBadge").textContent =
+      if ($("updateBadge")) $("updateBadge").textContent =
         s.pendingCode !== 0 && s.pendingCode !== s.runtimeCode
           ? "준비됨"
           : `v${VERSION.version}`;
@@ -75,6 +96,7 @@ export function initUpdates({ beforeApply }) {
         "업데이트 상태를 읽지 못했습니다. 탐험은 계속할 수 있습니다.";
     }
   }
+  $("chooseGameVersion").onclick = () => bridge?.chooseVersions?.();
   $("connectUpdates").onclick = () => bridge?.configureUpdates?.();
   $("retryFailedUpdate").onclick = () => bridge?.retryFailedUpdate?.();
   $("checkUpdates").onclick = () => bridge?.checkUpdates?.();

@@ -19,7 +19,7 @@ const { chromium } = require("playwright"),
     await p.addInitScript(() => (window.AndroidApp = {}));
     await p.goto(
       (process.env.FERAL_BASE_URL || "http://127.0.0.1:8080") +
-        "/index.html?world=frontier",
+        "/play.html?world=frontier",
     );
     await p.waitForFunction(
       () => window.FERAL?.ready && FERAL.stats().running,

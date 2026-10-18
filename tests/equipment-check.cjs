@@ -22,7 +22,7 @@ const fs = require("node:fs");
     });
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
-    await page.goto("http://127.0.0.1:8080/index.html?world=frontier");
+    await page.goto("http://127.0.0.1:8080/play.html?world=frontier");
     await page.waitForFunction(
       () => window.FERAL?.ready && FERAL.stats().running,
     );

@@ -1,9 +1,11 @@
-// The game screen every map shares (docs/UNIFIED-GAME.md): notifications, controls, movement buttons,
+// The game screen every map shares (docs/ARCHITECTURE.md §6): notifications, controls, movement buttons,
 // settings, pause menu, field HUD and the ledger window. Moved from the island/frontier game so all
 // maps use the same code; one module keeps the update package under the native file limit.
 import { uiIcon } from "./ui-art.js";
 import { mountCharacterPortrait } from "./character-portrait.js";
 import { STANCES } from "./physics.js";
+import { SETTINGS_KEY, readSettings, mountSettings, loadSettingsForm, persistSettings } from "./settings.js";
+export { SETTINGS_KEY, readSettings };
 const $ = (id) => document.getElementById(id);
 
 // ---- Notifications ----
@@ -268,41 +270,13 @@ export function changeSprint(controller, player, latched, notify) {
 export const SANDBOX_TOOLS = { 0: ["관찰 렌즈", "생명·지형 정보 읽기"], 4: ["물 붓기", "조준한 곳에 물 추가"], 5: ["불 붙이기", "조준한 칸에 불 붙이기"], 6: ["산 붓기", "조준한 곳에 산 추가"], 8: ["개체 생성", "조준한 곳에 동물 1마리"] };
 
 // ---- Settings ----
-export const SETTINGS_KEY = "feral.settings";
-export function readSettings(storage = localStorage) {
-  try {
-    return JSON.parse(storage.getItem(SETTINGS_KEY) || "null");
-  } catch {
-    return null;
-  }
-}
-function persist() {
-  localStorage.setItem(
-    SETTINGS_KEY,
-    JSON.stringify({
-      layoutVersion: 2,
-      quality: $("quality").value,
-      sensitivity: $("sensitivity").value,
-      fov: $("fov").value,
-      sound: $("sound").checked,
-      leftHand: $("leftHand").checked,
-      showRadar: $("showRadar").checked,
-      showEvents: $("showEvents").checked,
-    }),
-  );
-}
+// The fields and the stored record live in settings.js so the launcher shows the same form.
+const persist = () => persistSettings();
 // view needs qualitySet(q) and a perspective camera. Returns live values the map reads each frame.
 export function initSettings({ view, onRadar = () => {}, onLeftHand = () => {} }) {
   const state = { sensitivity: 0.8, sound: true };
-  const settings = readSettings();
-  if (settings) {
-    $("quality").value = settings.quality || "balanced";
-    $("sensitivity").value = settings.sensitivity || 80;
-    $("fov").value = settings.layoutVersion === 2 ? settings.fov || 82 : 82;
-    $("sound").checked = settings.sound !== false;
-    $("leftHand").checked = !!settings.leftHand;
-    $("showRadar").checked = !!settings.showRadar;
-    $("showEvents").checked = !!settings.showEvents;
+  mountSettings($("settingsFields"));
+  if (loadSettingsForm()) {
     document.body.classList.toggle("showRadar", $("showRadar").checked);
     document.body.classList.toggle("showEvents", $("showEvents").checked);
     state.sensitivity = $("sensitivity").value / 100;

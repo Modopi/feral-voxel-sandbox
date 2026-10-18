@@ -1,4 +1,4 @@
-import { currentWorld, saveKey } from "../world-slots.js";
+import { currentWorld, saveKey, syncVault } from "../world-slots.js";
 import { readLayout } from "../hud-layout.js";
 document.documentElement.dataset.uiTheme = readLayout(localStorage).theme;
 const activeWorld = currentWorld(localStorage, "machine", location.search);
@@ -90,6 +90,7 @@ function clearInput() {
 function save() {
   try {
     localStorage.setItem(storage, serialize(state));
+    syncVault();
     $("status").textContent = "시험장 저장 완료";
     return true;
   } catch {
@@ -329,4 +330,4 @@ window.FERAL_MACHINE = {
 };
 requestAnimationFrame(frame);
 
-window.FeralNative={save, pause:()=>{if(driving)mode();clearInput();},back:()=>{if(save())location.href='worlds.html';}};
+window.FeralNative={save, pause:()=>{if(driving)mode();clearInput();},back:()=>{if(save())location.href='index.html';}};
