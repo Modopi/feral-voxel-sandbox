@@ -5,6 +5,8 @@ import {resolveSurfaceDamage} from './material-effects.js';
 const GRID = .5, CELL_LITERS = 125, MAX_COMPONENT_CELLS = 2048;
 const DIRS = [[0, 1, 0], [1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1], [0, -1, 0]];
 const copy = x => structuredClone(x), key = c => c.join(',');
+// Cells hold two coordinate arrays and plain values; a split copies hundreds of them, so no structuredClone each.
+const copyCell = c => ({ ...c, cell: [...c.cell], sourceCell: [...c.sourceCell] });
 const validCell = c => Array.isArray(c) && c.length === 3 && c.every(Number.isSafeInteger);
 const vec = v => Array.isArray(v) ? { x: v[0], y: v[1], z: v[2] } : v;
 const validVector = v => v && ['x', 'y', 'z'].every(k => Number.isFinite(v[k]) && Math.abs(v[k]) <= 1e12);
@@ -130,13 +132,16 @@ export class WorldObjects {
       materials, parts: [{ id: 'root', parent: null, translation: [0, 0, 0], role: 'detached_world_material', boxes: [] }], anchors: [], instances: [],
       notes: ['Material transferred from atlas cells; no machine function inferred.', 'Each cell retains 125 litres and its canonical mass. Motion belongs to the physics bridge.'] });
     object.boxes = []; object.massKg = 0; object.volumeLiters = 0;
+    const shapes = [];
     for (const c of object.cells) {
       const block = this.blocks.get(c.blockId), center = c.cell.map(v => (v + .5) * GRID), size = [GRID, GRID, GRID];
-      builder.addBox('root', { center, size, material: c.blockId });
+      shapes.push({ center, size, material: c.blockId });
       object.boxes.push({ center, size, massKg: block.massPerCellKg, blockId: c.blockId, collision: block.collision !== false,
         friction: block.friction, partId: `cell:${key(c.cell)}`, volumeLiters: CELL_LITERS });
       object.massKg += block.massPerCellKg; object.volumeLiters += CELL_LITERS;
     }
+    // All cells are placed in one checked step: a split tree rebuilds in O(n log n), not one overlap scan per cell.
+    builder.addBoxes('root', shapes);
     object.mass = object.massKg; object.asset = builder.toJSON();
   }
   get(id) { return this.objects.get(id) ?? null; }
@@ -154,25 +159,51 @@ export class WorldObjects {
     const local=[v.x+w*tx+y*tz-z*ty,v.y+w*ty+z*tx-x*tz,v.z+w*tz+x*ty-y*tx].map(n=>Math.floor(n/GRID));
     return o.cells.find(c=>key(c.cell)===key(local))??null;
   }
-  damageAt(id,point,amount,{energyType='mechanical',progression=null,yieldOf=null}={}){
+  /** A terrain cell broken by an impact is knocked loose as a one-cell object, so its material stays in the world. */
+  knockLoose(cell) {
+    if (!validCell(cell)) return null;
+    const blockId = this.atlas.getCell(...cell), block = this.blocks.get(blockId);
+    if (!block || block.collision === false || block.cellSizeM !== GRID || !(block.massPerCellKg > 0)) return null;
+    const object = { id: `object:${this.nextId}`, entityType: 'object', kind: 'object', originCell: [...cell], name: '부서진 조각',
+      position: { x: cell[0] * GRID, y: cell[1] * GRID, z: cell[2] * GRID }, rotation: identity(), velocity: zero(), angularVelocity: zero(), revision: 1,
+      cells: [{ cell: [0, 0, 0], sourceCell: [...cell], blockId }] };
+    this._build(object);
+    this.atlas.setCell(...cell, null); if (this.atlas.getCell(...cell) != null) return null;
+    this.nextId++; this.objects.set(object.id, object); return object;
+  }
+  /** The object's cell nearest a world point (contact points lie on cell faces). */
+  nearestCell(id, point) {
+    const o = this.get(id); if (!o || !validVector(point)) return null;
+    const q = o.rotation, v = { x: point.x - o.position.x, y: point.y - o.position.y, z: point.z - o.position.z };
+    const x = -q.x, y = -q.y, z = -q.z, w = q.w, tx = 2 * (y * v.z - z * v.y), ty = 2 * (z * v.x - x * v.z), tz = 2 * (x * v.y - y * v.x);
+    const local = [v.x + w * tx + y * tz - z * ty, v.y + w * ty + z * tx - x * tz, v.z + w * tz + x * ty - y * tx];
+    let best = null, distance = Infinity;
+    for (const c of o.cells) { const d = Math.hypot(...c.cell.map((n, i) => (n + .5) * GRID - local[i])); if (d < distance) { distance = d; best = c; } }
+    return best;
+  }
+  damageAt(id,point,amount,{energyType='mechanical',progression=null,yieldOf=null,knockLoose=false}={}){
     const o=this.get(id);if(!o||!validVector(point)||!Number.isFinite(amount)||amount<=0)return {ok:false,reason:'invalid_object_hit'};
     if(o.fragment)return {ok:false,reason:'생물 부위의 전리품은 사용 버튼으로 회수하세요.'};
-    const cell=this.cellAt(id,point);if(!cell)return {ok:false,reason:'target_missing'};
+    const cell=knockLoose?this.nearestCell(id,point):this.cellAt(id,point);if(!cell)return {ok:false,reason:'target_missing'};
     const block=this.blocks.get(cell.blockId),response=resolveSurfaceDamage(block,amount,energyType);if(!response.ok)return response;
     const hp=Math.max(0,(cell.hp??block.durabilityHpPerCell)-response.amount);
     if(hp>0){cell.hp=hp;o.revision++;return {ok:true,hp};}
+    // A single loose cell cannot be knocked off itself: rubble absorbs further impacts.
+    if(knockLoose&&o.cells.length===1){delete cell.hp;o.revision++;return {ok:true,hp:block.durabilityHpPerCell,rubble:true};}
     // The largest piece keeps the id and a wrench pin (frontier); the others fall free.
     const remaining=o.cells.filter(c=>c!==cell),groups=components(remaining.map(c=>({x:c.cell[0],y:c.cell[1],z:c.cell[2],source:c}))).sort((a,b)=>b.length-a.length),pieces=[];
     // Build all children before changing the registry. Original source coordinates
     // and local frames remain unchanged, including a rotated parent's orientation.
     let serial=this.nextId;const oldCentre=this._centre(o),spin=o.angularVelocity;
     for(let i=0;i<groups.length;i++){
-      const part={...o,id:i?`object:${serial++}`:o.id,cells:groups[i].map(c=>copy(c.source)),revision:o.revision+1,anchored:i===0&&!!o.anchored};this._build(part);
+      const part={...o,id:i?`object:${serial++}`:o.id,cells:groups[i].map(c=>copyCell(c.source)),revision:o.revision+1,anchored:i===0&&!!o.anchored};this._build(part);
       const centre=this._centre(part),d={x:centre.x-oldCentre.x,y:centre.y-oldCentre.y,z:centre.z-oldCentre.z};
       part.velocity={x:o.velocity.x+spin.y*d.z-spin.z*d.y,y:o.velocity.y+spin.z*d.x-spin.x*d.z,z:o.velocity.z+spin.x*d.y-spin.y*d.x};pieces.push(part);
     }
+    // An impact knocks the broken cell off as its own piece instead of turning it into items (frontier rubble).
+    if(knockLoose){const {hp,...loose}=cell,part={...o,id:`object:${serial++}`,cells:[copyCell(loose)],revision:o.revision+1,anchored:false};this._build(part);part.velocity=copy(o.velocity);pieces.push(part);}
     // A cell attached from the bag returns that item, not raw resources.
-    const mined=cell.placedItem?{id:cell.placedItem,count:1}:yieldOf?yieldOf(block):block.rawResourceId&&block.harvestYieldPerCell>0?{id:block.rawResourceId,count:block.harvestYieldPerCell}:null,items=mined?{[mined.id]:mined.count}:{};
+    const mined=knockLoose?null:cell.placedItem?{id:cell.placedItem,count:1}:yieldOf?yieldOf(block):block.rawResourceId&&block.harvestYieldPerCell>0?{id:block.rawResourceId,count:block.harvestYieldPerCell}:null,items=mined?{[mined.id]:mined.count}:{};
     const claimId=`object-harvest:${id}:${key(cell.sourceCell)}${cell.placedItem?`:placed:${cell.placedSerial}`:''}`;
     if(progression&&Object.keys(items).length){const receipt=progression.grant(items,{claimId});if(!receipt.ok)return receipt;}
     this.objects.delete(id);for(const part of pieces)this.objects.set(part.id,part);this.nextId=serial;

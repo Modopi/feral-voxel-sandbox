@@ -68,6 +68,7 @@ export class ObjectPhysicsBridge {
         this.physics.adapter.colliderOwners.set(collider.handle, Object.freeze({ ownerId: object.id, partId: box.partId ?? `cell:${i}`, bodyHandle: entry.body.handle }));
       }
       if (!fixed) {
+        this.physics.watchImpacts?.(entry.colliders, mass);
         entry.body.recomputeMassPropertiesFromColliders();
         entry.body.setLinvel(object.velocity ?? { x: 0, y: 0, z: 0 }, true);
         entry.body.setAngvel(object.angularVelocity ?? { x: 0, y: 0, z: 0 }, true);

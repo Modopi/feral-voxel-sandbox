@@ -1,4 +1,4 @@
-import {subtractBox,boxesOverlap,overlappingPairs} from './solid.js';
+import {subtractBox,overlapsAny,overlapsAdding,overlappingPairs} from './solid.js';
 export const COLLISION_CONTRACT=Object.freeze({enabled:true,ownerScope:'entity_instance',selfCollision:false,externalCollision:true,shape:'part_cuboid_compound',jointOverlapAllowed:true});
 const createdAssets=new WeakSet();
 export function assertCreatedByTool(asset){if(!createdAssets.has(asset))throw Error('에셋은 FERAL 제작 도구로 생성해야 합니다.');}
@@ -9,9 +9,15 @@ function targetPart(asset,id){const p=asset.parts.find(p=>p.id===id);if(!p)throw
 /** Shared creation primitive. No invalid intermediate asset is ever committed. */
 export function placeBox(asset,partId,box,{mode='reject'}={}){
  if(!['reject','replace','fill'].includes(mode))throw Error('추가 방식은 reject, replace, fill 중 하나여야 합니다.');validateRegion(asset,box);if(!asset.materials.some(m=>m.id===box.material))throw Error('없는 재질입니다: '+box.material);const p=targetPart(asset,partId);const incoming=structuredClone(box);
- if(mode==='reject'){if(p.boxes.some(b=>boxesOverlap(b,incoming)))throw Error('같은 부위의 기존 복셀과 겹칩니다. 위치를 바꾸거나 명시적으로 교체를 선택하세요.');p.boxes.push(incoming);}
+ if(mode==='reject'){if(overlapsAny(p.boxes,incoming))throw Error('같은 부위의 기존 복셀과 겹칩니다. 위치를 바꾸거나 명시적으로 교체를 선택하세요.');p.boxes.push(incoming);}
  else if(mode==='replace'){const next=p.boxes.flatMap(b=>subtractBox(b,incoming));next.push(incoming);p.boxes=next;}
  else{let next=[incoming];for(const b of p.boxes){next=next.flatMap(f=>subtractBox(f,b));if(!next.length)break;}p.boxes.push(...next);}
+ return incoming;
+}
+/** Many boxes in reject mode at once: checked together by sweep and prune, committed together or not at all. */
+export function placeBoxes(asset,partId,boxes){
+ if(!Array.isArray(boxes))throw Error('복셀 목록이 필요합니다.');for(const box of boxes){validateRegion(asset,box);if(!asset.materials.some(m=>m.id===box.material))throw Error('없는 재질입니다: '+box.material);}
+ const p=targetPart(asset,partId),incoming=structuredClone(boxes);if(overlapsAdding(p.boxes,incoming))throw Error('같은 부위의 기존 복셀과 겹칩니다. 위치를 바꾸거나 명시적으로 교체를 선택하세요.');for(const box of incoming)p.boxes.push(box);
  return incoming;
 }
 export function removeRegion(asset,partId,region){validateRegion(asset,region);const p=targetPart(asset,partId);p.boxes=p.boxes.flatMap(b=>subtractBox(b,region));}
@@ -23,6 +29,7 @@ export function assertAuthoringInvariant(a){
 export class VoxelAssetBuilder{
  constructor(asset){this.asset=structuredClone(asset);initializeAuthoring(this.asset);for(const m of this.asset.materials)m.collision=m.collision??!['water','acid_water','visual_water'].includes(m.id);assertAuthoringInvariant(this.asset);}
  addBox(partId,box,options){return placeBox(this.asset,partId,box,options);}
+ addBoxes(partId,boxes){return placeBoxes(this.asset,partId,boxes);}
  removeBox(partId,region){removeRegion(this.asset,partId,region);}
  addPart({id,parent='root',translation=[0,0,0],role='visual'}){if(typeof id!=='string'||!id||this.asset.parts.some(p=>p.id===id))throw Error('새 부위에는 중복되지 않는 이름이 필요합니다.');targetPart(this.asset,parent);if(!vector(translation)||translation.some(v=>Math.abs(v/this.asset.visualGridM-Math.round(v/this.asset.visualGridM))>1e-6))throw Error('부위 피벗을 격자에 맞추세요.');const p={id,parent,translation:[...translation],role,boxes:[]};this.asset.parts.push(p);return p;}
  toJSON(){assertAuthoringInvariant(this.asset);const copy=structuredClone(this.asset);createdAssets.add(copy);return copy;}

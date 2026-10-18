@@ -27,7 +27,7 @@ export class MachinePhysicsBridge {
         // A wrench-anchored machine is a fixed body until it is released (frontier).
         const fixed = !!m.anchored, entry = this.physics.adapter.addBody({ ownerId: m.id, partId: 'assembly', type: fixed ? 'fixed' : 'dynamic', boxes,
           position: arr(m.position), rotation: rotation(m), mass: fixed ? 0 : Math.max(.001, this.system.evaluate(m.id).mass), friction: .6 });
-        if (!fixed) { entry.body.setLinvel(m.velocity, true); entry.body.setAngvel(m.angularVelocity ?? { x: 0, y: 0, z: 0 }, true); entry.body.setLinearDamping(0); entry.body.setAngularDamping(.04); }
+        if (!fixed) { this.physics.watchImpacts?.(entry.colliders, Math.max(.001, this.system.evaluate(m.id).mass)); entry.body.setLinvel(m.velocity, true); entry.body.setAngvel(m.angularVelocity ?? { x: 0, y: 0, z: 0 }, true); entry.body.setLinearDamping(0); entry.body.setAngularDamping(.04); }
         const voxelIds = m.voxels.map((v) => v.id);
         entry.colliders.forEach((c, i) => this.physics.adapter.colliderOwners.set(c.handle,
           Object.freeze({ ownerId: m.id, partId: voxelIds[i], bodyHandle: entry.body.handle })));
