@@ -7,6 +7,8 @@ import { ObjectPhysicsBridge } from './object-physics.js';
 import { FixturePhysicsBridge } from './fixture-physics.js';
 import { traceCombatModel, segmentInterval } from './combat-trace.js';
 import { creatureBodyPart, creatureBones } from './creature-animation.js';
+import { impactEnergy } from '../impact.js';
+const IDENTITY = Object.freeze({ x: 0, y: 0, z: 0, w: 1 });
 
 let initialization;
 const initialize = () => initialization ??= R.init();
@@ -47,6 +49,7 @@ export class RuntimePhysics {
     this.terrainBelow = options.terrainBelow ?? 3; this.terrainAbove = options.terrainAbove ?? 4;
     this.parts = new Map(); this.structures = new Map(); this.bossEffects = new Map(); this.fixtures = new Map(); this.terrainSections = new Map(); this.terrainRanges = []; this.terrainPrevious = []; this.terrainRangeCount = 0; this.terrainRevision = null; this.terrainVersion = 0; this.terrainScratch = new Uint8Array(SECTION_CELLS ** 3); this.terrainScratchVector = [0, 0, 0]; this.entryBounds = new WeakMap(); this.partShapes = new WeakMap(); this.modelBoxCache = new WeakMap(); this.fixtureBoxRefs = new Map();
     this.disposed = false; this.initialized = false; this.lastPlayer = null;
+    this.impactClock = 0; this.impactCooldown = new Map(); this.impactLast = null;
     this.ready = initialize().then(() => {
       if (this.disposed) return;
       this.world = new R.World({ x: 0, y: -9.81, z: 0 });
@@ -436,7 +439,36 @@ export class RuntimePhysics {
     let remaining = dt;
     while (remaining > 1e-9) {
       const step = Math.min(1 / 60, remaining);
-      this.machinePhysics.prepare(step); this.objectPhysics.sync(); this.objectPhysics.prepare(step); if (this.runtime.placements?.physicsBodies) this.fixturePhysics.sync(); this.terrainAt(this.runtime.player); this.worldStep(step); this.machinePhysics.capture(); this.objectPhysics.capture(); this.fixturePhysics.capture(); remaining -= step;
+      this.machinePhysics.prepare(step); this.objectPhysics.sync(); this.objectPhysics.prepare(step); if (this.runtime.placements?.physicsBodies) this.fixturePhysics.sync(); this.terrainAt(this.runtime.player); this.worldStep(step); this.machinePhysics.capture(); this.objectPhysics.capture(); this.fixturePhysics.capture(); this.playerImpacts(step); remaining -= step;
+    }
+  }
+  /** Bodies that strike the player hurt like the frontier's (impact.js, safe speed 4 m/s): the captured
+   * poses give a cheap closing-speed and distance check, and only then the exact collider test, at most
+   * once per body every 0.45 s. The held object and the driven machine never strike their user. */
+  playerImpacts(dt) {
+    const p = this.runtime.player, last = this.impactLast ??= { x: p.x, y: p.y, z: p.z };
+    const vx = (p.x - last.x) / dt, vy = (p.y - last.y) / dt, vz = (p.z - last.z) / dt;
+    last.x = p.x; last.y = p.y; last.z = p.z; this.impactClock += dt;
+    if (vx * vx + vy * vy + vz * vz > 2500 || p.hp <= 0) return; // a teleport or respawn, not motion
+    this.strikesFrom(this.objectPhysics.bodies, this.runtime.objects, this.objectPhysics.held?.id, p, vx, vy, vz);
+    this.strikesFrom(this.machinePhysics.bodies, this.machinePhysics.system?.machines, this.runtime.drivingMachineId, p, vx, vy, vz);
+    if (this.impactCooldown.size) for (const [id, until] of this.impactCooldown) if (until <= this.impactClock) this.impactCooldown.delete(id);
+  }
+  strikesFrom(bodies, states, skipId, p, vx, vy, vz) {
+    for (const [id, cache] of bodies) {
+      const s = states?.get?.(id);
+      if (id === skipId || !s?.position || !s.velocity) continue;
+      const rx = s.velocity.x - vx, ry = s.velocity.y - vy, rz = s.velocity.z - vz;
+      if (rx * rx + ry * ry + rz * rz <= 16 || (this.impactCooldown.get(id) ?? 0) > this.impactClock) continue;
+      const b = this.bodyBounds(cache.entry); if (!b) continue;
+      const height = p.bodyHeight ?? 1.8, dx = p.x - s.position.x, dy = p.y + height / 2 - s.position.y, dz = p.z - s.position.z, d = Math.hypot(dx, dy, dz);
+      if (d > Math.hypot(b.center[0], b.center[1], b.center[2]) + Math.hypot(b.half[0], b.half[1], b.half[2]) + height / 2 + .3) continue;
+      const closing = d > 1e-6 ? (rx * dx + ry * dy + rz * dz) / d : 0;
+      if (closing <= 4) continue;
+      const shape = new R.Capsule(Math.max(0, height / 2 - .27), .27), center = { x: p.x, y: p.y + height / 2, z: p.z };
+      if (!cache.entry.colliders.some((c) => !c.isSensor() && c.intersectsShape(shape, center, IDENTITY))) continue;
+      this.impactCooldown.set(id, this.impactClock + .45);
+      this.runtime.strikePlayer?.(impactEnergy(cache.entry.body.mass(), 80, closing, 4), id);
     }
   }
   /** Exact placement overlap against every external solid cuboid/actor. A tiny
