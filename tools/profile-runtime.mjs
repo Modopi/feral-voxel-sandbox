@@ -119,6 +119,23 @@ const scenarios={
   await s.page.waitForTimeout(1500);
   await measure(s,'loose tree nearby',6000,{prepared});
   await measure(s,'loose tree, walking',6000,{prepared,action:walk(s)});
+  // Three felled trees (the 0.18.0 report): two more trees cut the same way, then one of them chopped with the real
+  // attack button (the aim is held on a cell of that piece, then of its largest piece nearby).
+  const three=await s.page.evaluate(found=>{const r=FERAL.runtime,p=r.player,felled=[];
+   for(const [x,y,z]of found.slice(1)){if(felled.length>=2||[...r.objects.objects.values()].filter(o=>o.cells.length>100).length>=3)break;const cut=[];
+    for(let dx=-3;dx<=3;dx++)for(let dz=-3;dz<=3;dz++)if(r.atlas.getCell(x+dx,y,z+dz)==='log'){r.atlas.setCell(x+dx,y,z+dz,null);cut.push([x+dx,y,z+dz]);}
+    const result=cut.length?r.objects.detachAround(cut[0]):{objects:[]};if(result.objects.length)felled.push(`${result.detachedCells} cells at ${x},${y},${z}`);else for(const c of cut)r.atlas.setCell(...c,'log');}
+   const pieces=[...r.objects.objects.values()].filter(o=>o.cells.length>100);return `${pieces.length} felled trees (${pieces.map(o=>o.cells.length).join(', ')} cells); this step cut ${felled.join('; ')||'none'}`;},found);
+  console.log(`prepared: ${three}`);
+  await s.page.waitForTimeout(1500);
+  await measure(s,'three felled trees',6000,{prepared:three});
+  await s.page.evaluate(()=>{const v=FERAL.view,r=FERAL.runtime;v.__aim??=v.aim.bind(v);let target=[...r.objects.objects.values()].sort((a,b)=>b.cells.length-a.cells.length)[0]?.id;
+   v.aim=opts=>{let o=r.objects.get(target);if(!o||o.cells.length<2){const p=r.player;o=[...r.objects.objects.values()].filter(x=>!x.fragment&&x.cells.length>1&&Math.hypot(x.position.x-p.x,x.position.z-p.z)<8).sort((a,b)=>b.cells.length-a.cells.length)[0];target=o?.id;}if(!o)return v.__aim(opts);
+    const c=o.cells[0],q=o.rotation,rot=(x,y,z)=>{const t={x:2*(q.y*z-q.z*y),y:2*(q.z*x-q.x*z),z:2*(q.x*y-q.y*x)};return {x:x+q.w*t.x+q.y*t.z-q.z*t.y,y:y+q.w*t.y+q.z*t.x-q.x*t.z,z:z+q.w*t.z+q.x*t.y-q.y*t.x};};
+    const lc=rot((c.cell[0]+.5)*.5,(c.cell[1]+.5)*.5,(c.cell[2]+.5)*.5),n=rot(0,1,0),centre={x:o.position.x+lc.x,y:o.position.y+lc.y,z:o.position.z+lc.z};
+    Object.assign(r.player,{x:centre.x+1.2,z:centre.z,vx:0,vz:0});return {kind:'object',id:o.id,point:{x:centre.x+n.x*.25,y:centre.y+n.y*.25,z:centre.z+n.z*.25},normal:n,distance:1.3};};});
+  await measure(s,'chopping a felled tree',8000,{prepared:'aim held on a cell of the largest felled tree (then its largest piece nearby), player beside it, attack held 7.8 s',action:()=>holdAttack(s,7800)});
+  await releaseAim(s);
   report.errors=[...(report.errors??[]),...s.errors];await s.context.close();
  },
  async expedition(){

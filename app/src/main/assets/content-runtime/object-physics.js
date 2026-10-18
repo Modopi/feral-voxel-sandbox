@@ -1,10 +1,42 @@
 import { gripLimits } from '../impact.js';
+const CELL = .5;
+/** Collider shapes of a piece: its 0.5 m cells merged into the fewest exact cuboids per block (same mass per cell,
+ * friction and solidity), the way terrain sections merge (no box covers an empty cell). A felled tree is tens of
+ * colliders instead of hundreds, so the solver and the contact filter see tens of pairs. Other boxes (creature
+ * fragments) are kept as they are. */
+export function matterShapes(boxes) {
+  const shapes = [], groups = new Map();
+  for (const b of boxes) {
+    const c = b.center, z = b.size;
+    if (z[0] !== CELL || z[1] !== CELL || z[2] !== CELL || ![0, 1, 2].every((k) => Number.isInteger(c[k] / CELL - .5))) { shapes.push({ ...b, partId: b.partId ?? `matter:${shapes.length}` }); continue; }
+    const key = `${b.blockId}|${b.massKg}|${b.friction}|${b.collision !== false}`;
+    let g = groups.get(key); if (!g) groups.set(key, g = { box: b, cells: [] });
+    g.cells.push(Math.round(c[0] / CELL - .5), Math.round(c[1] / CELL - .5), Math.round(c[2] / CELL - .5));
+  }
+  for (const { box, cells } of groups.values()) {
+    const lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity];
+    for (let i = 0; i < cells.length; i += 3) for (let k = 0; k < 3; k++) { lo[k] = Math.min(lo[k], cells[i + k]); hi[k] = Math.max(hi[k], cells[i + k]); }
+    const X = hi[0] - lo[0] + 1, Y = hi[1] - lo[1] + 1, Z = hi[2] - lo[2] + 1, solid = new Uint8Array(X * Y * Z);
+    for (let i = 0; i < cells.length; i += 3) solid[(cells[i] - lo[0]) + (cells[i + 2] - lo[2]) * X + (cells[i + 1] - lo[1]) * X * Z] = 1;
+    for (let y = 0; y < Y; y++) for (let z = 0; z < Z; z++) for (let x = 0; x < X; x++) {
+      const i = x + z * X + y * X * Z; if (!solid[i]) continue;
+      let w = 1, d = 1, h = 1;
+      while (x + w < X && solid[i + w]) w++;
+      depth: while (z + d < Z) { for (let k = 0; k < w; k++) if (!solid[i + k + d * X]) break depth; d++; }
+      height: while (y + h < Y) { for (let c = 0; c < d; c++) for (let k = 0; k < w; k++) if (!solid[i + k + c * X + h * X * Z]) break height; h++; }
+      for (let a = 0; a < h; a++) for (let c = 0; c < d; c++) for (let k = 0; k < w; k++) solid[i + k + c * X + a * X * Z] = 0;
+      shapes.push({ center: [(lo[0] + x + w / 2) * CELL, (lo[1] + y + h / 2) * CELL, (lo[2] + z + d / 2) * CELL], size: [w * CELL, h * CELL, d * CELL],
+        massKg: box.massKg * w * h * d, friction: box.friction, collision: box.collision, blockId: box.blockId, partId: `matter:${shapes.length}` });
+    }
+  }
+  return shapes;
+}
 /** Detached world matter: dynamic compound cuboids with authored per-cell mass.
  * No machine functions, extra component mass, inventory grants or energy ledgers.
  * Holding, throwing and carry weight follow the frontier hand grip (impact.js gripLimits); the carrying
  * grapple is the frontier's powered grip. A wrench-pinned object is a fixed body that cannot be moved. */
 export class ObjectPhysicsBridge {
-  constructor(physics) { this.physics = physics; this.bodies = new Map(); this.held=null; }
+  constructor(physics) { this.physics = physics; this.bodies = new Map(); this.held=null; this.pass = 0; }
   grab(id,point,{powered=false}={}){
     const p=this.physics.runtime.player,o=this.physics.runtime.objects.get(id),cache=this.bodies.get(id);
     if(!o||!cache||!point||!['x','y','z'].every(k=>Number.isFinite(point[k]))||Math.hypot(point.x-p.x,point.y-p.y,point.z-p.z)>(powered?6.5:4))return {ok:false,reason:'물체에 가까이 다가가세요.'};
@@ -50,22 +82,24 @@ export class ObjectPhysicsBridge {
     body.setAngvel({x:w.x*.94,y:w.y*.94,z:w.z*.94},true);
   }
   sync() {
-    const system = this.physics.runtime.objects, player = this.physics.runtime.player, alive = new Set();
-    for (const object of system?.physicsBodies?.() ?? []) {
-      if (!object.boxes.length || Math.hypot(object.position.x - player.x, object.position.z - player.z) > 64) continue;
-      alive.add(object.id);
-      const signature = JSON.stringify(object.boxes) + (object.anchored ? '|pinned' : ''); let cache = this.bodies.get(object.id);
-      if (cache?.signature === signature) continue;
+    const player = this.physics.runtime.player, pass = ++this.pass;
+    for (const object of this.physics.runtime.objects?.physicsBodies?.() ?? []) {
+      const dx = object.position.x - player.x, dz = object.position.z - player.z;
+      if (!object.boxes?.length || dx * dx + dz * dz > 64 * 64) continue;
+      let cache = this.bodies.get(object.id);
+      // The colliders change only with the object's cells (WorldObjects._build makes a new boxes array) or its pin:
+      // nothing is compared or rebuilt while a piece only moves or a cell only loses health.
+      if (cache && cache.boxes === object.boxes && cache.anchored === !!object.anchored) { cache.seen = pass; continue; }
       if (cache) this.physics.adapter.removeOwner(object.id);
       const mass = object.boxes.reduce((sum, b) => sum + b.massKg, 0);
       if (!Number.isFinite(mass) || mass <= 0) throw new TypeError('Object requires finite authored cell mass');
-      const fixed = !!object.anchored, entry = this.physics.adapter.addBody({ ownerId: object.id, partId: 'matter', type: fixed ? 'fixed' : 'dynamic', boxes: object.boxes,
+      const fixed = !!object.anchored, shapes = matterShapes(object.boxes), entry = this.physics.adapter.addBody({ ownerId: object.id, partId: 'matter', type: fixed ? 'fixed' : 'dynamic', boxes: shapes,
         position: [object.position.x, object.position.y, object.position.z], rotation: object.rotation, mass: fixed ? 0 : mass });
       for (let i = 0; i < entry.colliders.length; i++) {
-        const collider = entry.colliders[i], box = object.boxes[i];
+        const collider = entry.colliders[i], box = shapes[i];
         if (!Number.isFinite(box.massKg) || box.massKg <= 0) throw new TypeError('Invalid object cell mass');
         if (!fixed) collider.setMass(box.massKg); if (box.collision === false) collider.setSensor(true);
-        this.physics.adapter.colliderOwners.set(collider.handle, Object.freeze({ ownerId: object.id, partId: box.partId ?? `cell:${i}`, bodyHandle: entry.body.handle }));
+        this.physics.adapter.colliderOwners.set(collider.handle, Object.freeze({ ownerId: object.id, partId: box.partId, bodyHandle: entry.body.handle }));
       }
       if (!fixed) {
         this.physics.watchImpacts?.(entry.colliders, mass);
@@ -73,14 +107,16 @@ export class ObjectPhysicsBridge {
         entry.body.setLinvel(object.velocity ?? { x: 0, y: 0, z: 0 }, true);
         entry.body.setAngvel(object.angularVelocity ?? { x: 0, y: 0, z: 0 }, true);
       }
-      this.bodies.set(object.id, { signature, entry });
+      this.bodies.set(object.id, { boxes: object.boxes, anchored: fixed, entry, seen: pass });
     }
-    for (const id of this.bodies.keys()) if (!alive.has(id)) { this.physics.adapter.removeOwner(id); this.bodies.delete(id); }
+    // Pieces out of reach or gone this pass lose their bodies (deleting during Map iteration is safe).
+    for (const [id, cache] of this.bodies) if (cache.seen !== pass) { this.physics.adapter.removeOwner(id); this.bodies.delete(id); }
   }
+  /** Poses back to the registry each step; a sleeping body has not moved since. */
   capture() {
-    for (const [id, { entry }] of this.bodies) this.physics.runtime.objects?.setPhysicsPose(id, {
-      position: { ...entry.body.translation() }, rotation: { ...entry.body.rotation() },
-      velocity: { ...entry.body.linvel() }, angularVelocity: { ...entry.body.angvel() },
+    const objects = this.physics.runtime.objects;
+    for (const [id, { entry }] of this.bodies) if (!entry.body.isSleeping()) objects?.setPhysicsPose(id, {
+      position: entry.body.translation(), rotation: entry.body.rotation(), velocity: entry.body.linvel(), angularVelocity: entry.body.angvel(),
     });
   }
   dispose() { this.capture(); for (const id of this.bodies.keys()) this.physics.adapter.removeOwner(id); this.bodies.clear(); }

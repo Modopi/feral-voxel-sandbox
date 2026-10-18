@@ -1,6 +1,6 @@
 {
-  "version": "0.18.0",
-  "versionCode": 1800,
+  "version": "0.18.1",
+  "versionCode": 1810,
   "minNativeCode": 303,
   "saveSchema": 4,
   "channel": "stable",
