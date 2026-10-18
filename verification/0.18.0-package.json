@@ -1,0 +1,22 @@
+{
+  "version": "0.18.0",
+  "versionCode": 1800,
+  "minNativeCode": 303,
+  "saveSchema": 4,
+  "files": 104,
+  "nativeFileLimit": 128,
+  "mjsFiles": [],
+  "newFiles": [
+    "content-runtime/terrain-worker.js"
+  ],
+  "removedFiles": [],
+  "archiveBytes": 2787762,
+  "expandedBytes": 11457276,
+  "archiveSha256": "7e7dc0633262343eb563b07c2a64116383e4c297bcdad2a9726e3b8a99de7221",
+  "packageSha256": "c1fcf5358fb634683d9a4e5c4bae94f12e58ea890417a87c63c44c743c1182c5",
+  "apkSha256": "c097637bfa9f0badc4299b9cb058f0fcec92fd0562f8ce2bc129538145e114f8",
+  "apkAssetsIdenticalToUpdate": true,
+  "mainJsStub": true,
+  "withinLimits": true,
+  "note": "Local build with the shared test signing key; CI rebuilds and publishes after merge. content-runtime/terrain-worker.js is a module worker started by the session (same-origin, allowed by the app CSP script-src self)."
+}
