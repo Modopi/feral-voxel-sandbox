@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import { ExpeditionRuntime } from '../app/src/main/assets/content-runtime/runtime.js';
 import { RuntimePhysics } from '../app/src/main/assets/content-runtime/physics.js';
 import { impactEnergy, impactHealth } from '../app/src/main/assets/impact.js';
+import * as T from '../app/src/main/assets/vendor/three.module.js';
 
 const config = (survival = true) => ({ configVersion: 1, preset: 'expedition', seed: 7, terrain: { generator: 'infinite' }, rules: { survival } });
 function fall(runtime, speed) {
@@ -65,4 +66,35 @@ test('struck damage follows the survival setting and worn armour, with a message
   const peaceful = new ExpeditionRuntime(7, null, new Map(), { config: config(false) });
   assert.equal(peaceful.strikePlayer(energy, 'object:1'), 0);
   assert.equal(peaceful.player.hp, 100);
+});
+
+test('a thrown object that hits a creature part strikes that creature once by the two masses', async () => {
+  const strikes = [], object = { id: 'object:2', position: { x: 0, y: .9, z: 0 }, rotation: { x: 0, y: 0, z: 0, w: 1 }, velocity: { x: 0, y: 0, z: 0 }, angularVelocity: { x: 0, y: 0, z: 0 },
+    boxes: [{ center: [0, 0, 0], size: [.5, .5, .5], massKg: 20 }] };
+  const rt = { atlas: { revision: 0, isSolidCell: (_x, y) => y < 0, heightAt: () => 0 }, player: { x: -8, y: .02, z: 0, hp: 100 }, nearbyStructures: [],
+    creatures: { get: (id) => id === 'creature:deer' ? { id, massKg: 85 } : null }, strikeCreature: (...args) => strikes.push(args) };
+  rt.objects = { physicsBodies: () => [object], setPhysicsPose: (_id, pose) => Object.assign(object, pose), get: (id) => id === object.id ? object : null };
+  const group = new T.Group(), body = new T.Group(); group.position.set(2.5, 0, 0); group.add(body);
+  const deer = { group, parts: new Map([['torso', body]]), asset: { parts: [{ id: 'torso', parent: null, translation: [0, 0, 0], role: 'body', boxes: [{ center: [0, .9, 0], size: [1, 1.2, 1], material: 'fur' }] }], materials: [{ id: 'fur', collision: true }] },
+    desc: { id: 'creature:deer', kind: 'creature', position: { x: 2.5, y: 0, z: 0 } } };
+  const p = await RuntimePhysics.create(rt, null, { terrainRadius: 1 });
+  try {
+    p.synchronize(new Map([['creature:deer', deer]]), rt.player);
+    const b = p.objectPhysics.bodies.get(object.id).entry.body;
+    b.setTranslation({ x: 0, y: .9, z: 0 }, true); b.setLinvel({ x: 12, y: 0, z: 0 }, true);
+    for (let i = 0; i < 20; i++) p.step(1 / 60);
+    assert.equal(strikes.length, 1, `strikes ${strikes.length}`);
+    const [id, partId, energy, point, source] = strikes[0];
+    assert.deepEqual([id, partId, source], ['creature:deer', 'torso', object.id]);
+    assert.ok(energy > 0 && energy <= impactEnergy(20, 85, 12, 4) + 1e-6 && Number.isFinite(point.x));
+  } finally { p.dispose(); }
+});
+
+test('a struck creature takes the frontier collision damage on its struck part', () => {
+  const runtime = new ExpeditionRuntime(7, null, new Map(), { config: config() });
+  const deer = runtime.creatures.spawn('moss_deer', { x: runtime.player.x + 3, y: runtime.player.y, z: runtime.player.z }, { id: 'creature:test' });
+  const before = runtime.creatures.get(deer.id).hp, result = runtime.strikeCreature(deer.id, 'torso', 3000, { x: 0, y: 0, z: 0 }, 'object:1');
+  assert.ok(result.ok, JSON.stringify(result));
+  assert.ok(runtime.creatures.get(deer.id).hp < before, 'the deer is hurt');
+  assert.equal(runtime.strikeCreature(deer.id, 'torso', 0, { x: 0, y: 0, z: 0 }, 'object:1'), null);
 });

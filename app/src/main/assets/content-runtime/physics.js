@@ -439,12 +439,13 @@ export class RuntimePhysics {
     let remaining = dt;
     while (remaining > 1e-9) {
       const step = Math.min(1 / 60, remaining);
-      this.machinePhysics.prepare(step); this.objectPhysics.sync(); this.objectPhysics.prepare(step); if (this.runtime.placements?.physicsBodies) this.fixturePhysics.sync(); this.terrainAt(this.runtime.player); this.worldStep(step); this.machinePhysics.capture(); this.objectPhysics.capture(); this.fixturePhysics.capture(); this.playerImpacts(step); remaining -= step;
+      this.machinePhysics.prepare(step); this.objectPhysics.sync(); this.objectPhysics.prepare(step); if (this.runtime.placements?.physicsBodies) this.fixturePhysics.sync(); this.terrainAt(this.runtime.player); this.worldStep(step); this.playerImpacts(step); this.creatureImpacts(); this.machinePhysics.capture(); this.objectPhysics.capture(); this.fixturePhysics.capture(); remaining -= step;
     }
   }
-  /** Bodies that strike the player hurt like the frontier's (impact.js, safe speed 4 m/s): the captured
-   * poses give a cheap closing-speed and distance check, and only then the exact collider test, at most
-   * once per body every 0.45 s. The held object and the driven machine never strike their user. */
+  /** Bodies that strike the player hurt like the frontier's (impact.js, safe speed 4 m/s). Runs after the
+   * world step and before capture, so the last captured poses still hold the pre-impact velocity: they give
+   * a cheap closing-speed and distance check, and only then the exact collider test, at most once per body
+   * every 0.45 s. The held object and the driven machine never strike their user. */
   playerImpacts(dt) {
     const p = this.runtime.player, last = this.impactLast ??= { x: p.x, y: p.y, z: p.z };
     const vx = (p.x - last.x) / dt, vy = (p.y - last.y) / dt, vz = (p.z - last.z) / dt;
@@ -453,6 +454,24 @@ export class RuntimePhysics {
     this.strikesFrom(this.objectPhysics.bodies, this.runtime.objects, this.objectPhysics.held?.id, p, vx, vy, vz);
     this.strikesFrom(this.machinePhysics.bodies, this.machinePhysics.system?.machines, this.runtime.drivingMachineId, p, vx, vy, vz);
     if (this.impactCooldown.size) for (const [id, until] of this.impactCooldown) if (until <= this.impactClock) this.impactCooldown.delete(id);
+  }
+  /** A loose object moving faster than 4 m/s that touches a creature's part strikes it with the impact
+   * energy of the two masses (runtime.strikeCreature), once per object and creature every 0.45 s. */
+  creatureImpacts() {
+    const creatures = this.runtime.creatures; if (!creatures?.get) return;
+    for (const [id, cache] of this.objectPhysics.bodies) {
+      const s = this.runtime.objects?.get?.(id), v = s?.velocity;
+      if (!v || v.x * v.x + v.y * v.y + v.z * v.z <= 16) continue;
+      for (const collider of cache.entry.colliders) this.world.contactPairsWith(collider, (other) => {
+        const owner = this.adapter.ownershipForCollider(other), creature = owner && creatures.get(owner.ownerId);
+        if (!creature) return;
+        const key = `${id}>${owner.ownerId}`; if ((this.impactCooldown.get(key) ?? 0) > this.impactClock) return;
+        const c = other.translation(), dx = c.x - s.position.x, dy = c.y - s.position.y, dz = c.z - s.position.z, d = Math.hypot(dx, dy, dz) || 1;
+        const closing = (v.x * dx + v.y * dy + v.z * dz) / d; if (closing <= 4) return;
+        this.impactCooldown.set(key, this.impactClock + .45);
+        this.runtime.strikeCreature?.(owner.ownerId, owner.partId, impactEnergy(cache.entry.body.mass(), creature.massKg ?? 60, closing, 4), { x: c.x, y: c.y, z: c.z }, id);
+      });
+    }
   }
   strikesFrom(bodies, states, skipId, p, vx, vy, vz) {
     for (const [id, cache] of bodies) {

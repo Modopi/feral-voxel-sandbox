@@ -225,6 +225,12 @@ export class ExpeditionRuntime {
  }
  /** Impact damage (impact.js): health from collision energy, reduced by worn armour like any hit. */
  impactDamage(energy,source){const amount=impactHealth(energy);if(!(amount>0)||!this.rules.survival)return 0;this.hurt(amount*(1-this.progression.evaluateLoadout().damageReduction),source);return amount;}
+ /** A moving object struck a creature (physics.js creatureImpacts): the frontier's collision damage,
+  * min(80, energy / 100), lands like a blunt blow on the struck part's bone. */
+ strikeCreature(id,partId,energy,point,sourceId){
+  const amount=Math.min(80,energy/100);if(!(amount>0))return null;
+  return this.creatures.damage(id,amount,'body',{structuralHits:[{partId,amount}],sourceId,attackMode:'impact',energyType:'mechanical',point});
+ }
  /** A loose object or machine struck the player (physics.js playerImpacts). */
  strikePlayer(energy,sourceId){const n=this.impactDamage(energy,'impact');if(n)this.message(`물체 충돌 −${Math.ceil(n)}`);return n;}
  hurt(amount,source){if(!Number.isFinite(amount)||amount<=0||!this.rules.survival)return;this.player.hp=Math.max(0,this.player.hp-amount);this.player.lastDamageAt=this.time;this.player.resting=false;this.events.push({type:'player_hit',amount,source});if(this.events.length>64)this.events.shift();}
