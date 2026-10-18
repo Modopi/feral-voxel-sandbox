@@ -1,58 +1,5 @@
 import { mountCharacterPortrait } from "./character-portrait.js";
-import { sourceHints } from "./acquisition.js";
-import { ITEMS, RECIPES } from "./inventory.js";
-import { GEAR } from "./equipment.js";
-import { itemArt } from "./item-art.js";
-// Item names, art, wear and recipes for the legacy island/frontier inventory.
-// Other maps pass their own catalog with the same shape, so every map shares this bag.
-export function legacyCatalog(ctx) {
-  const inv = () => ctx.inventory;
-  return {
-    name: (id) => ITEMS[id].name,
-    art: (id) => itemArt(id),
-    durability: (id) =>
-      GEAR[id]?.durability
-        ? { value: inv().wear[id] || 0, max: GEAR[id].durability }
-        : null,
-    attackMode: (id) => GEAR[id]?.attackMode ?? null,
-    sources: (id) => sourceHints(id, !!ctx.frontier),
-    repair: (id) =>
-      GEAR[id]?.durability
-        ? {
-            disabled: inv().wear[id] >= GEAR[id].durability,
-            run: () =>
-              inv().repair(id) ? "수리 완료" : "재료 부족 · 제작 재료 절반 필요",
-          }
-        : null,
-    armored: () => inv().unlocks.has("armor"),
-    recipes: () =>
-      RECIPES.filter((r) => !r.frontier || ctx.frontier).map((r) => {
-        const output = Object.keys(r.give || {})[0] || r.id,
-          missing = Object.entries(r.cost)
-            .filter(([id, n]) => inv().count(id) < n)
-            .map(([id, n]) => `${ITEMS[id].name} ${n - inv().count(id)}`);
-        return {
-          id: r.id,
-          name: r.name,
-          output,
-          amount: r.give?.[output] || 1,
-          names: [r.name, ...Object.keys(r.give || {}).map((id) => ITEMS[id].name)],
-          cost: Object.entries(r.cost),
-          gear: !!GEAR[r.id] || Object.keys(r.give || {}).some((id) => GEAR[id]),
-          craftable: inv().canCraft(r),
-          description: r.description,
-          blocked:
-            r.requires && !inv().unlocks.has(r.requires)
-              ? `${RECIPES.find((p) => p.unlock === r.requires)?.name || r.requires} 먼저 연구`
-              : missing.length
-                ? `부족: ${missing.join(" · ")}`
-                : r.unlock && (inv().unlocks.has(r.unlock) || inv().count(r.id))
-                  ? "이미 보유·연구 완료"
-                  : "결과 아이템을 놓을 빈 칸이 필요합니다",
-        };
-      }),
-  };
-}
+// The shared bag and hotbar. A world passes its catalog (names, art, wear, recipes) with the slots it uses.
 // The 9-slot HUD hotbar, drawn from the same slots and catalog as the bag.
 export function drawHotbar(bar, inv, catalog, select) {
   bar.replaceChildren();
@@ -84,7 +31,7 @@ export function drawHotbar(bar, inv, catalog, select) {
 export class InventoryUI {
   constructor(ctx) {
     this.c = ctx;
-    this.catalog = ctx.catalog ?? legacyCatalog(ctx);
+    this.catalog = ctx.catalog;
     this.source = null;
     this.split = false;
     this.recipe = "planks";

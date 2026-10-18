@@ -16,27 +16,26 @@ export const RULES = {
 };
 
 // Presets are default world settings. `rules` holds only what that world's game session actually reads,
-// so the launcher never shows a switch the game ignores. `engine` is read by the session router alone,
-// until the frontier and the machine field move onto the one runtime (docs/ROADMAP.md).
+// so the launcher never shows a switch the game ignores. Every preset plays on the one runtime (0.17.0).
 export const PRESETS = {
   expedition: {
-    name: "FERAL 탐험", summary: "연구 · 던전 · 자유 제작", engine: "runtime", terrain: "infinite",
+    name: "FERAL 탐험", summary: "연구 · 던전 · 자유 제작", terrain: "infinite",
     description: "끝없이 이어지는 세계입니다. 출발지에서 멀어질수록 위험해집니다.",
     rules: { survival: true, sandbox: false, startStructures: true, dropOnDeath: true },
   },
   island: {
-    name: "기본 탐험 맵", summary: "복셀 섬 · 생태 관찰", engine: "runtime", terrain: "island",
+    name: "기본 탐험 맵", summary: "복셀 섬 · 생태 관찰", terrain: "island",
     description: "160 × 160 m의 섬입니다. 다섯 장소를 탐험하고 생태의 변화를 관찰합니다.",
     rules: { survival: false, sandbox: true, starterKit: true, dropOnDeath: true },
   },
   frontier: {
-    name: "첫 신호", summary: "야영지 성장 · 신호망 복원 · 자유 원정", engine: "runtime", terrain: "frontier", modules: ["first-signal"],
+    name: "첫 신호", summary: "야영지 성장 · 신호망 복원 · 자유 원정", terrain: "frontier", modules: ["first-signal"],
     description: "바다로 나뉜 지역 섬을 오가며 마을과 협력하고 세 신호를 복원하는 원정입니다. 지역 사이는 식량 1개로 이동하거나 기계로 날아 건넙니다.",
     rules: { survival: true, dropOnDeath: false },
   },
   machine: {
-    name: "기계 시험장", summary: "BETA · 기계 조립 시험", engine: "machine", terrain: "machine-field",
-    description: "격자에 차체·모터·바퀴를 조립해 달려 보는 시험장입니다. 아직 통합 전이라 바꿀 수 있는 설정이 없습니다.",
+    name: "기계 시험장", summary: "기계 조립 · 주행 · 충돌 시험", terrain: "machine-field", modules: ["machine-field"],
+    description: "벽으로 둘러싼 평지에서 기계를 조립해 달리고, 기둥과 벽에 부딪혀 손상을 보고 수리하는 시험장입니다. 예제 기계와 시작 장비가 주어집니다.",
     rules: {},
   },
 };
@@ -174,11 +173,9 @@ export function deleteWorld(store, id) {
   // 목록 갱신 성공 뒤 해당 월드 데이터만 제거
   store.setItem(CATALOG, JSON.stringify(rows.filter((w) => w.id !== id)));
   store.removeItem(saveKey(w));
-  // Worlds on the one runtime keep two save generations next to the original key.
-  if (PRESETS[w.type]?.engine === "runtime") {
-    store.removeItem(saveKey(w) + ".a");
-    store.removeItem(saveKey(w) + ".b");
-  }
+  // Every world keeps two save generations next to the original key (an older engine's save stays there).
+  store.removeItem(saveKey(w) + ".a");
+  store.removeItem(saveKey(w) + ".b");
 }
 
 // ---- Save vault (docs/ARCHITECTURE.md §4): saves follow the player across game versions ----

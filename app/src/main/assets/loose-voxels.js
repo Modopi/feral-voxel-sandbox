@@ -1,5 +1,4 @@
-import { FACES, cellKey, components } from "./structure.js";
-import { rotate } from "./machine/assembly-state.js";
+import { FACES, cellKey, components, rotate } from "./structure.js";
 import { rayBox } from "./structural-body.js";
 
 // Half-metre cells keep their material, damage and identity when terrain becomes a body.

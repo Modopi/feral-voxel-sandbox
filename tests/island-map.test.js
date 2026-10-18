@@ -7,8 +7,7 @@ import { ExpeditionRuntime } from '../app/src/main/assets/content-runtime/runtim
 import { GENERATORS, LEGACY_BLOCKS, LEGACY_ITEMS, LEGACY_SPECIES, STARTER_KIT, applyLegacyIsland, generatorFor, savedGenerator, ecologyAt, ecologySpecies } from '../app/src/main/assets/content-runtime/maps.js';
 import { worldConfig } from '../app/src/main/assets/world-slots.js';
 import { World, B } from '../app/src/main/assets/world.js';
-import { Inventory, ITEMS } from '../app/src/main/assets/inventory.js';
-import { Ecology } from '../app/src/main/assets/entities.js';
+import fs from 'node:fs';
 
 const SEED = 63026;
 // The island world's own settings, as the launcher makes them.
@@ -24,7 +23,6 @@ test('legacy blocks, items and species point at real design entries', () => {
   }
   for (const value of Object.values(B)) if (value) assert(LEGACY_BLOCKS[value], `block ${value} has a design block`);
   for (const [legacy, rule] of Object.entries(LEGACY_ITEMS)) {
-    assert(ITEMS[legacy], `${legacy} is an original item`);
     assert(items.has(rule.item), `${legacy} → ${rule.item}`);
     assert(rule.ratio > 0);
   }
@@ -86,16 +84,11 @@ test('island rules are peaceful and survive save and load', async () => {
 });
 
 test('an original island save converts without touching the original', async () => {
-  const world = new World(SEED); world.generate();
-  world.set(77, 13, 84, B.STONE);
-  world.set(78, 12, 84, 0);
-  world.setCell(150, 30, 160, B.PLANK);
-  world.pour(80, 12, 80, 2, 0);
-  world.miningDamage.set(world.damageKey(154, 26, 168), [B.STONE, .5]);
-  const inventory = new Inventory();
-  inventory.add('berry', 3); inventory.add('crystal', 2); inventory.add('arrow', 5);
-  const eco = new Ecology(world); eco.populate(12);
-  const old = { version: 2, inventory: inventory.save(), world: world.save(), eco: eco.save(), player: { x: 90.5, y: 14, z: 70.5, yaw: 1, pitch: -0.2, flying: true }, playTime: 321, discovered: ['초록 능선', '굽이치는 강'] };
+  // Saved by the original island game (its bag and ecology code is gone since 0.17.0): placed stone, a dug cell,
+  // a plank half-cell, poured water, a half-mined cell, berries, crystals, arrows and 12 animals. Its plant and
+  // nutrient fields were left out of the fixture; the conversion reads neither.
+  const old = JSON.parse(fs.readFileSync(new URL('./fixtures/island-save-v2.json', import.meta.url), 'utf8'));
+  const world = new World(SEED); world.generate(); world.load(old.world);
   const original = JSON.stringify(old);
   const runtime = await ExpeditionRuntime.create(SEED, null, { config: island({ starterKit: false }) });
   assert.deepEqual(runtime.progression.inventory, {}, 'a converted save brings its own items instead of the new-world kit');

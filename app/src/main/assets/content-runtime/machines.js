@@ -1,8 +1,7 @@
 import { VoxelAssetBuilder } from './voxel/authoring.js';
 import { components as connectedGroups, massProperties } from '../structure.js';
-import { TYPES as LEGACY_PARTS } from '../machine/model.js';
 import { MATERIAL_EFFECT_RULES } from './material-effects.js';
-import { panelForce } from '../machine/aerodynamics.js';
+import { panelForce } from './aerodynamics.js';
 import { FIXTURE_LINK_RULES } from './fixture-energy.js';
 
 const ENERGY = ['mechanical', 'electrical', 'thermal', 'chemical', 'magic', 'divine'];
@@ -86,7 +85,7 @@ export class MachineSystem {
   const m=this.machines.get(id),v=m?.voxels.find(v=>v.id===voxelId),c=this._entry(componentId);
   if(!v||c?.kind!=='component'||!this.progression.research.has(c.research))return no('component_or_research_required');
   if(m.components.some(x=>x.voxelId===voxelId))return no('mount_occupied');
-  if(legacyType!=null&&(!(MACHINE_VARIANTS[componentId]||[]).includes(legacyType)||!LEGACY_PARTS[legacyType]))return no('unsupported_variant');
+  if(legacyType!=null&&!(MACHINE_VARIANTS[componentId]||[]).includes(legacyType))return no('unsupported_variant');
   const component={id:`mounted:${this.nextId}`,voxelId,componentId,legacyType,energy:zero(),fuel:0,fuelItems:0,fluids:{},massKg:this._coreMass(componentId),active:true};
   if(componentId==='arc_thrower'){component.nextFireAt=0;component.shotsFired=0;component.fireLedger=[];component.fireCache=[];}
   const paid=this.progression.spend({[componentId]:1},{claimId:`mount:${m.id}:${component.id}`});if(!paid.ok)return paid;
@@ -325,6 +324,16 @@ export class MachineSystem {
    item.force.y=push;item.point.x=x;item.point.y=y;item.point.z=z;
   }
   w.share=w.ground/w.total;return w;
+ }
+ /** Wheels of a machine and how many are on the ground (the driving readout). */
+ wheelsOnGround(id){
+  const m=this.machines.get(id);if(!m)return null;const p=this._wheelPoint??={x:0,y:0,z:0};let count=0,ground=0;
+  for(const c of m.components){
+   if(c.legacyType!=='wheel'||!c.active)continue;const v=voxelOf(m,c.voxelId);if(!v||v.hp<=0)continue;count++;
+   rotateInto(p,(v.cell[0]+.5)*m.gridM,v.cell[1]*m.gridM,(v.cell[2]+.5)*m.gridM,m.rotation);
+   if(this._groundGap(m.position.x+p.x,m.position.y+p.y,m.position.z+p.z,WHEEL_DRIVE.reachM)<WHEEL_DRIVE.clearanceM)ground++;
+  }
+  return {count,ground};
  }
  /** Moves a machine to a place at rest, upright and facing `yaw` (the machine field's return to the start). */
  place(id,{position:where,yaw=0}={}){

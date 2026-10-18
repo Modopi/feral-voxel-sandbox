@@ -2,7 +2,7 @@ export const LAYOUT_KEY = "feral.ui.layout.v1";
 export const HUD_ELEMENTS = {
   stick: "이동 스틱", actBtn: "공격 · 채굴", useBtn: "사용 · 설치", jumpBtn: "점프",
   sprintBtn: "달리기", crouchBtn: "웅크리기", crawlBtn: "기어가기", descendBtn: "비행 하강", brakeBtn: "제동", movementState: "이동 자세",
-  flightReadout: "비행 계기", flyBtn: "비행", rangeBtn: "편집 크기", hotbar: "아이템 핫바", vitals: "체력 · 포만",
+  flightReadout: "기계 계기", flyBtn: "비행", rangeBtn: "편집 크기", hotbar: "아이템 핫바", vitals: "체력 · 포만",
   inventoryBtn: "가방 버튼", menuBtn: "메뉴 버튼", journalBtn: "지도 버튼", statusBtn: "상태 버튼",
   journeyHUD: "여정 · 현재 목표",
   interactBtn: "상호작용", toolLabel: "아이템 이름", waypoint: "목적지", toast: "알림", radar: "미니맵",

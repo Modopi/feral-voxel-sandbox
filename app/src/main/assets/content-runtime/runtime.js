@@ -16,6 +16,7 @@ import {reasonText} from './reasons.js';
 import {generatorFor,savedGenerator,worldRules,STARTER_KIT,BUILD_BLOCKS,miningProfile,minedItem,TOOL_GEAR,BARE_GEAR,impactToughness} from './maps.js';
 import {miningWorkFor,MINING_PERIOD_S} from '../equipment.js';
 import {FirstSignal} from './first-signal.js';
+import {MachineField} from './machine-field.js';
 import {impactEnergy,impactHealth} from '../impact.js';
 import {hitShapeFor,hitShapeForMode,shapeCut,IMPACT_REACH_M} from './creature-animation.js';
 const clone = value => JSON.parse(JSON.stringify(value));
@@ -26,7 +27,7 @@ const SPECIES = new Map(CONTENT.creatures.entries.map(e=>[e.id,e]));
 const BLOCKS = new Map(CONTENT.blocks.entries.map(e=>[e.id,e]));
 const BOSS_ACTIONS = {repair:'수리',rest:'휴식',recharge:'재충전'};
 // Systems a world turns on by name (config.modules, docs/ARCHITECTURE.md §6).
-export const MODULES = Object.freeze({'first-signal':FirstSignal});
+export const MODULES = Object.freeze({'first-signal':FirstSignal,'machine-field':MachineField});
 export class ExpeditionRuntime {
  /** onProgress(step,done,total) reports loading steps; pause lets the screen repaint before synchronous construction. */
  static async create(seed,state=null,{onProgress=()=>{},pause=null,config=null,atlas=null}={}){

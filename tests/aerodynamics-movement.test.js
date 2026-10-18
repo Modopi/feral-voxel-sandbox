@@ -5,14 +5,13 @@ import {
   coefficients,
   bodyDrag,
   exposedFaces,
-} from "../app/src/main/assets/machine/aerodynamics.js";
+} from "../app/src/main/assets/content-runtime/aerodynamics.js";
 import {
   CharacterController,
   FIXED_DT,
   bodyHeight,
   overlaps,
 } from "../app/src/main/assets/physics.js";
-import { Inventory } from "../app/src/main/assets/inventory.js";
 const dot = (a, b) => a.x * b.x + a.y * b.y + a.z * b.z;
 test("wing lift scales with airspeed squared, loses lift after stall, and passive force never supplies energy", () => {
   const v = { x: 0, y: 0, z: -20 },
@@ -55,18 +54,6 @@ test("elevator, fin and opposite wing deflections create pitch, yaw and roll for
     panelForce("wing", v, 1, { turn: 1 }, 4).lift <
       panelForce("wing", v, 1, { turn: 1 }, -4).lift,
   );
-});
-test("aircraft parts use research and shared inventory, including atomic kit crafting", () => {
-  const i = new Inventory(false);
-  i.grant("iron", 100);
-  assert.equal(i.craft("wing_part"), false);
-  assert.equal(i.count("iron"), 100);
-  i.unlocks.add("aviation");
-  assert.equal(i.craft("aircraft_parts"), true);
-  assert.equal(i.count("wing_part"), 24);
-  assert.equal(i.count("iron"), 11);
-  assert.equal(i.craft("aircraft_parts"), false);
-  assert.equal(i.count("wing_part"), 24);
 });
 function actor() {
   return {
