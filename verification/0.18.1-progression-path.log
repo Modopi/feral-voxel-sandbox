@@ -1,0 +1,49 @@
+TAP version 13
+# Subtest: whole-route energy balance allows only scale-sized floating point residue
+ok 1 - whole-route energy balance allows only scale-sized floating point residue
+  ---
+  duration_ms: 2.029162
+  type: 'test'
+  ...
+# Subtest: harvest candidate cursor preserves find order and retries regrowing nodes
+ok 2 - harvest candidate cursor preserves find order and retries regrowing nodes
+  ---
+  duration_ms: 0.507707
+  type: 'test'
+  ...
+# Subtest: all ten tiers and four research fields are reached from actual terrain with consumed resources
+ok 3 - all ten tiers and four research fields are reached from actual terrain with consumed resources
+  ---
+  duration_ms: 467623.428732
+  type: 'test'
+  ...
+# researched material:mana_stainless_alloy at 15748 simulated seconds
+# researched material:consecrated_adamantium at 29358 simulated seconds
+# researched material:arcane_crystal_alloy at 57910 simulated seconds
+# researched material:composite_mana_superalloy at 114152 simulated seconds
+# researched material:meister_composite at 232190 simulated seconds
+# researched material:mana_wood at 235650 simulated seconds
+# researched material:consecrated_mana_wood at 239520 simulated seconds
+# researched material:world_tree_wood at 246540 simulated seconds
+# researched material:fulfilled_world_tree_wood at 260090 simulated seconds
+# researched material:world_heartwood at 288420 simulated seconds
+# researched material:raw_arcane_crystal at 291850 simulated seconds
+# researched material:refined_arcane_crystal at 295530 simulated seconds
+# researched material:holy_iron at 302390 simulated seconds
+# researched material:blessed_holy_iron at 319930 simulated seconds
+# researched material:saints_endurance at 369370 simulated seconds
+# researched material:inertial_alloy at 373130 simulated seconds
+# researched material:alpha_particle at 380820 simulated seconds
+# researched material:neutrino_condensate at 396014 simulated seconds
+# researched material:superstring_aggregate at 430186 simulated seconds
+# researched material:cosmic_megastructure at 514194 simulated seconds
+# {"simulatedSeconds":965266.0448470634,"researched":39,"stations":27,"materials":31,"activities":6,"toolReplacements":83,"harvestActions":{"source_raw_timber":47428,"source_loose_stone":322,"source_plant_fiber":68,"source_clay":13,"source_iron_ore":6619,"source_water":1885,"source_sand":572,"source_herb":1,"source_nickel_ore":2707,"source_titanium_ore":745,"source_acid_sap":746,"source_berry":24,"source_sap":259,"source_seed":56},"recipes":78,"energyConsumed":{"mechanical":239469.99999482435,"electrical":363200.00000063435,"thermal":1469760.0001128388,"chemical":4959.999999991983,"magic":443000.0000037222,"divine":63069.99999990855},"progressionSaveBytes":6938924,"atlasSaveBytes":213318,"resumedFrom":null}
+1..3
+# tests 3
+# suites 0
+# pass 3
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 467900.393224
