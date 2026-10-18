@@ -144,13 +144,18 @@ export class WorldObjects {
     const q=object.rotation,t={x:2*(q.y*local.z-q.z*local.y),y:2*(q.z*local.x-q.x*local.z),z:2*(q.x*local.y-q.y*local.x)};
     return {x:local.x+q.w*t.x+q.y*t.z-q.z*t.y,y:local.y+q.w*t.y+q.z*t.x-q.x*t.z,z:local.z+q.w*t.z+q.x*t.y-q.y*t.x};
   }
-  damageAt(id,point,amount,{energyType='mechanical',progression=null}={}){
-    const o=this.get(id);if(!o||!validVector(point)||!Number.isFinite(amount)||amount<=0)return {ok:false,reason:'invalid_object_hit'};
-    if(o.fragment)return {ok:false,reason:'생물 부위의 전리품은 사용 버튼으로 회수하세요.'};
+  /** The object's cell under a world point, or null. */
+  cellAt(id,point){
+    const o=this.get(id);if(!o||!validVector(point))return null;
     const q=o.rotation,v={x:point.x-o.position.x,y:point.y-o.position.y,z:point.z-o.position.z};
     const x=-q.x,y=-q.y,z=-q.z,w=q.w,tx=2*(y*v.z-z*v.y),ty=2*(z*v.x-x*v.z),tz=2*(x*v.y-y*v.x);
     const local=[v.x+w*tx+y*tz-z*ty,v.y+w*ty+z*tx-x*tz,v.z+w*tz+x*ty-y*tx].map(n=>Math.floor(n/GRID));
-    const cell=o.cells.find(c=>key(c.cell)===key(local));if(!cell)return {ok:false,reason:'target_missing'};
+    return o.cells.find(c=>key(c.cell)===key(local))??null;
+  }
+  damageAt(id,point,amount,{energyType='mechanical',progression=null,yieldOf=null}={}){
+    const o=this.get(id);if(!o||!validVector(point)||!Number.isFinite(amount)||amount<=0)return {ok:false,reason:'invalid_object_hit'};
+    if(o.fragment)return {ok:false,reason:'생물 부위의 전리품은 사용 버튼으로 회수하세요.'};
+    const cell=this.cellAt(id,point);if(!cell)return {ok:false,reason:'target_missing'};
     const block=this.blocks.get(cell.blockId),response=resolveSurfaceDamage(block,amount,energyType);if(!response.ok)return response;
     const hp=Math.max(0,(cell.hp??block.durabilityHpPerCell)-response.amount);
     if(hp>0){cell.hp=hp;o.revision++;return {ok:true,hp};}
@@ -163,7 +168,7 @@ export class WorldObjects {
       const centre=this._centre(part),d={x:centre.x-oldCentre.x,y:centre.y-oldCentre.y,z:centre.z-oldCentre.z};
       part.velocity={x:o.velocity.x+spin.y*d.z-spin.z*d.y,y:o.velocity.y+spin.z*d.x-spin.x*d.z,z:o.velocity.z+spin.x*d.y-spin.y*d.x};pieces.push(part);
     }
-    const items=block.rawResourceId&&block.harvestYieldPerCell>0?{[block.rawResourceId]:block.harvestYieldPerCell}:{};
+    const mined=yieldOf?yieldOf(block):block.rawResourceId&&block.harvestYieldPerCell>0?{id:block.rawResourceId,count:block.harvestYieldPerCell}:null,items=mined?{[mined.id]:mined.count}:{};
     const claimId=`object-harvest:${id}:${key(cell.sourceCell)}`;
     if(progression&&Object.keys(items).length){const receipt=progression.grant(items,{claimId});if(!receipt.ok)return receipt;}
     this.objects.delete(id);for(const part of pieces)this.objects.set(part.id,part);this.nextId=serial;

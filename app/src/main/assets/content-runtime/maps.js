@@ -3,6 +3,7 @@
 // original island generator (world.js) and maps its blocks to design blocks.
 import {WorldAtlas} from './atlas.js';
 import {World, SIZE as ISLAND_SIZE, SEA as ISLAND_SEA} from '../world.js';
+import {GEAR, MINING_HARDNESS} from '../equipment.js';
 
 // Original island block numbers → design blocks (design blocks.json lists the same legacy numbers).
 // Lava has no design block; the crater keeps its basalt shape.
@@ -11,13 +12,40 @@ export const LEGACY_BLOCKS = Object.freeze({1:'grass',2:'dirt',3:'stone',4:'sand
 // per cell; consumables keep their count. Everything else is listed, never silently converted.
 export const LEGACY_ITEMS = Object.freeze({
   berry:{item:'berry',ratio:1},herb:{item:'herb',ratio:1},meat:{item:'meat',ratio:1},food:{item:'food',ratio:1},stew:{item:'food',ratio:1},seed:{item:'seed',ratio:1},
-  stone:{item:'loose_stone',ratio:1},wood:{item:'raw_timber',ratio:1},sand:{item:'sand',ratio:1},crystal:{item:'iron_ore',ratio:1},fiber:{item:'plant_fiber',ratio:1},
+  stone:{item:'loose_stone',ratio:1},wood:{item:'raw_timber',ratio:1},sand:{item:'sand',ratio:1},dirt:{item:'soil',ratio:1},crystal:{item:'iron_ore',ratio:1},fiber:{item:'plant_fiber',ratio:1},
   // The island's starting pick: the design has no wooden pick, and a new island starts with the stone pick.
   stonepick:{item:'stone_pick',ratio:1},pick:{item:'stone_pick',ratio:1},
 });
 // Sandbox maps build with what they mine: a raw resource becomes the block it comes from, one unit per
 // 0.5 m cell (the design's harvest yield), like the original island's block pieces.
-export const BUILD_BLOCKS = Object.freeze({loose_stone:'stone',raw_timber:'log',sand:'sand',clay:'clay',iron_ore:'iron_ore',wood:'plank',stone:'stone'});
+export const BUILD_BLOCKS = Object.freeze({loose_stone:'stone',raw_timber:'log',sand:'sand',clay:'clay',iron_ore:'iron_ore',wood:'plank',stone:'stone',soil:'dirt'});
+// Mining follows the frontier rule (equipment.js miningWorkFor) on every map. Design blocks are soil,
+// wood, rock or ore; blocks the original island also had keep the frontier hardness, harder design-only
+// blocks scale with their durability against the reference block of their kind.
+const MINING_REFERENCE = {soil:'dirt',wood:'log',rock:'stone',ore:'iron_ore'};
+const ROCK_MATERIALS = new Set(['stone','scrap_iron']);
+export function miningKind(block){
+  if(!block)return null;
+  if(/_ore$|^sulfur_deposit$/.test(block.id))return 'ore';
+  if(['wood','mana_wood'].includes(block.materialId))return 'wood';
+  if(ROCK_MATERIALS.has(block.materialId)||['clay_brick','glass'].includes(block.id))return 'rock';
+  return 'soil';
+}
+export function miningProfile(block,blocks){
+  const kind=miningKind(block);if(!kind)return null;
+  const reference=blocks.get(MINING_REFERENCE[kind]),scale=block.legacyBlockId!=null||!reference?1:Math.max(1,block.durabilityHpPerCell/reference.durabilityHpPerCell);
+  return {kind,affinity:kind==='ore'?'rock':kind,hardness:MINING_HARDNESS[kind]*scale};
+}
+// A mined cell gives its block's raw resource; blocks without one give what the frontier gave for them.
+export const MINED_ITEMS = Object.freeze({grass:'soil',dirt:'soil',ash:'soil',leaves:'plant_fiber',plank:'wood',moss:'plant_fiber',algae:'plant_fiber',
+  ash_lichen:'plant_fiber',salt_grass:'plant_fiber',mana_fern:'plant_fiber',luminous_moss:'plant_fiber',mineral_lichen:'plant_fiber',iron_scrap_block:'scrap_iron'});
+export function minedItem(block){
+  if(!block)return null;
+  return block.rawResourceId&&block.harvestYieldPerCell>0?{id:block.rawResourceId,count:block.harvestYieldPerCell}:MINED_ITEMS[block.id]?{id:MINED_ITEMS[block.id],count:1}:null;
+}
+// Design tools on the frontier tool table. Without a tool the hands mine like the frontier's starting pick.
+export const TOOL_GEAR = Object.freeze({stone_pick:GEAR.stonepick,hand_knife:Object.freeze({name:'돌 절삭도구',power:2,affinity:'wood'})});
+export const BARE_GEAR = GEAR.pick;
 export const LEGACY_SPECIES = Object.freeze({0:'moss_deer',1:'copper_fox',2:'azure_beetle'});
 const insideIsland = (x,z) => x>=0&&z>=0&&x<ISLAND_SIZE&&z<ISLAND_SIZE;
 const ISLAND_SPAWN = {x:77.5,z:84.5,yaw:-.5};
@@ -70,7 +98,7 @@ export function mapFor(type){return MAPS[type]??MAPS.expedition;}
 export function applyLegacyIsland(runtime,old){
   const unmapped=[],items={},note=(name,detail)=>unmapped.push({name,detail});
   const world=old?.world;
-  if(world?.edits?.length||world?.subcells?.length){
+  if(world?.edits?.length||world?.subcells?.length||world?.miningDamage?.length){
     // The original loader applies the save to the original generator; only cells that differ are copied.
     const base=new World(Number(world.seed??runtime.seed));base.generate();
     const loaded=new World(Number(world.seed??runtime.seed));loaded.generate();loaded.load(world);
@@ -83,8 +111,12 @@ export function applyLegacyIsland(runtime,old){
      if(runtime.atlas.setCell(hx,hy,hz,id))cells++;
     }}
     runtime.conversionCells=cells;
+    // Half-mined cells keep their wound: the frontier rule and the 0.5 m cells are the same on both sides.
+    let wounds=0;
+    for(const [key,[b,ratio]]of loaded.miningDamage){const [x,y,z]=loaded.decode(key>>3),j=key&7,cell=[x*2+(j&1),y*2+((j>>1)&1),z*2+((j>>2)&1)],blockId=LEGACY_BLOCKS[b];
+     if(blockId&&runtime.atlas.getCell(...cell)===blockId){runtime.terrainDamage[cell.join(',')]={blockId,damage:ratio};wounds++;}}
+    runtime.conversionWounds=wounds;
   }
-  if(world?.miningDamage?.length)note('채굴 손상도',`${world.miningDamage.length}칸의 부분 손상은 초기화됩니다.`);
   if(world?.fluids?.length)note('부은 물·산',"섬의 바다와 강은 그대로이며, 직접 부은 물과 산의 분포는 초기화됩니다.");
   if(world?.burning?.length)note('불',`${world.burning.length}칸의 불은 꺼집니다.`);
   if(world?.loose?.bodies?.length)note('떨어진 물체',`${world.loose.bodies.length}개는 옮기지 못했습니다.`);

@@ -34,12 +34,13 @@ test('empty inventory bootstraps wood, stone and kiln using actual harvest, samp
   assert.equal(p.availableResearch().some(r => r.id === 'material:scrap_iron'), false);
   assert.equal(p.recipeStatus('make_steel').reason, 'research_required');
 });
-test('harvest requires time, tool, source environment, depletion and persistent unique claim', () => {
+test('harvest is immediate and still requires tool, source environment, depletion and persistent unique claim', () => {
   const p = new Progression(CONTENT);
-  assert.equal(p.harvest('source_water', { environmentId: 'grove', nodeId: 'w', elapsed: 4, claimId: 'w1' }).reason, 'tool_required');
-  assert.equal(p.harvest('source_titanium_ore', { environmentId: 'grove', nodeId: 't', elapsed: 12, claimId: 't1' }).ok, false);
-  const context = { environmentId: 'grove', nodeId: 'b', elapsed: 4, claimId: 'h1' };
-  assert.equal(p.harvest('source_berry', { ...context, elapsed: 1 }).reason, 'harvest_time_required');
+  assert(p.list('source').every(s => s.seconds === 0), 'gathering has no channel time (frontier)');
+  assert.equal(p.harvest('source_water', { environmentId: 'grove', nodeId: 'w', claimId: 'w1' }).reason, 'tool_required');
+  assert.equal(p.harvest('source_titanium_ore', { environmentId: 'grove', nodeId: 't', claimId: 't1' }).ok, false);
+  const context = { environmentId: 'grove', nodeId: 'b', claimId: 'h1' };
+  assert.equal(p.harvest('source_berry', { ...context, elapsed: -1 }).reason, 'harvest_time_required');
   assert.equal(p.harvest('source_berry', context).ok, true); assert.equal(p.count('berry'), 2);
   assert.equal(p.harvest('source_berry', context).duplicate, true);
   const q = new Progression(CONTENT, p.serialize());

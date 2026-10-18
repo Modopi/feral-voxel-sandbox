@@ -151,7 +151,7 @@ try{
  await page.screenshot({path:new URL('reward-marker.png',out).pathname});
  await tap('#interactBtn');await page.waitForTimeout(300);assert.match(await page.locator('#toast').textContent(),/물자 보관함 회수 · /);
  await page.waitForTimeout(800);assert.equal(await page.evaluate(()=>FERAL.stats().rewardMarkers),markers-1,'claimed marker removed');
- await tap('#journalBtn');assert.match(await page.locator('#frontierContent').textContent(),/물자 보관함 회수함/);await tap('#frontierClose');
+ await tap('#journalBtn');assert.equal(await page.locator('#frontierTitle').textContent(),'탐험 지도','the map button opens the frontier-style map page');assert(await page.locator('#destinations button').count()>0,'destinations listed');await tap('[data-frontier-tab=journey]');assert.match(await page.locator('#frontierContent').textContent(),/물자 보관함 회수함/);await tap('#frontierClose');
  const supply=await page.evaluate(id=>{const r=FERAL.runtime,d=r.dungeons.devices,p=d._anchorPosition(id,null);Object.assign(r.player,{x:p[0],y:p[1]+.05,z:p[2]+.6});d._state(id).supplies.electrical={ownerId:'removed-battery',type:'electrical',lengthM:2,anchorId:null,items:{}};return true;},site.id);
  await page.waitForTimeout(300);await tap('#statusBtn');await tap('[data-frontier-tab=devices]');await page.waitForTimeout(300);
  assert.match(await page.locator('#frontierContent').textContent(),/장치 세부/);
@@ -185,7 +185,7 @@ try{
  assert.match(await ip.locator('#toast').textContent(),/기존 섬 저장을 옮겼습니다|새 장소 발견/);
  assert.deepEqual(await present(ip,[...SHARED_HUD,...FIELD_HUD]),[],'island shows the shared HUD');
  const itap=async selector=>{await ip.locator(selector).first().scrollIntoViewIfNeeded();const box=await ip.locator(selector).first().boundingBox();assert(box,selector);await ip.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);};
- await itap('#journalBtn');const journey=await ip.locator('#frontierContent').textContent();assert.match(journey,/기존 섬 저장을 옮겼습니다/);assert.match(journey,/옮기지 못한 항목 · 아이템/);assert.match(journey,/잿빛 분화구/);
+ await itap('#journalBtn');assert.equal(await ip.locator('#frontierTitle').textContent(),'탐험 지도');await itap('[data-frontier-tab=journey]');const journey=await ip.locator('#frontierContent').textContent();assert.match(journey,/기존 섬 저장을 옮겼습니다/);assert.match(journey,/옮기지 못한 항목 · 아이템/);assert.match(journey,/잿빛 분화구/);
  await ip.screenshot({path:new URL('island-journey.png',out).pathname});await itap('#frontierClose');
  check(report.island,'original island save converts onto the shared runtime and lists what could not move',{prepared:'0.13.0-format island save with a plank platform',converted});
  const aimDown=()=>ip.evaluate(()=>{FERAL.runtime.player.pitch=-1;});
@@ -230,17 +230,37 @@ try{
  assert.equal(dig.kind,'terrain');assert(dig.block,'aimed at a solid cell');
  let taps=0;for(;taps<40&&await np.evaluate(c=>FERAL.runtime.atlas.getCell(...c),dig.cell);taps++){await ntap('#actBtn');await np.waitForTimeout(250);}
  assert.equal(await np.evaluate(c=>FERAL.runtime.atlas.getCell(...c),dig.cell),null,`dug ${dig.block} with ${taps} taps`);
+ assert(taps<=3,`the frontier mining rule: ${dig.block} goes in ${taps} strikes`);
+ // Gathering is immediate: standing at a starter branch, one tap of the interact button gives the timber.
+ const branch=await np.evaluate(()=>{const r=FERAL.runtime,n=r.nodes.find(n=>n.id.startsWith('starter:fallen_branch'));Object.assign(r.player,{x:n.x+.6,z:n.z,y:r.atlas.heightAt(n.x+.6,n.z)+.05,vy:0});return {id:n.id,timber:r.progression.count('raw_timber')};});
+ await np.waitForTimeout(400);assert.match(await np.locator('#interactBtn').textContent(),/채집/);await ntap('#interactBtn');await np.waitForTimeout(150);
+ const gathered=await np.evaluate(()=>FERAL.runtime.progression.count('raw_timber'));assert(gathered>branch.timber,`timber ${branch.timber} -> ${gathered} at once`);
+ // Layered body: a calm deer side-on; real attack taps chip its flank and then hit the ribs under it.
+ const deer=await np.evaluate(()=>{const r=FERAL.runtime,p=r.player,x=p.x,z=p.z-1.6,e=r.creatures.spawn('moss_deer',{x,z},{regionId:`${Math.floor(x/64)},${Math.floor(z/64)}`,environmentId:'grove'});
+  const pin=()=>{if(!e.dead){e.state='idle';e.targetPoint=null;e.targetId=null;e.nextDecisionAt=1e9;e.nextWanderAt=1e9;e.angerUntil=0;e.attack=null;e.pose.moving=false;e.x=x;e.z=z;e.yaw=Math.PI/2;e.hp=e.maxHp;}if(window.__pinDeer)requestAnimationFrame(pin);};window.__pinDeer=true;pin();
+  window.__deerFrom={x:p.x,z:p.z};return {id:e.id,core:e.parts.core.hp};});
+ await np.waitForTimeout(1500);
+ const swings=[];
+ for(let i=0;i<5;i++){
+  await np.evaluate(id=>{const r=FERAL.runtime,p=r.player,v=FERAL.view,n=v.models.get(id).parts.get('thorax');Object.assign(p,{x:window.__deerFrom.x,z:window.__deerFrom.z,vx:0,vz:0});n.updateMatrixWorld(true);const t=n.getWorldPosition(v.camera.position.clone()),c=v.camera.position;p.yaw=Math.atan2(-(t.x-c.x),-(t.z-c.z));p.pitch=Math.atan2(t.y+.02-c.y,Math.hypot(t.x-c.x,t.z-c.z));},deer.id);
+  await np.waitForTimeout(250);const before=await np.evaluate(id=>FERAL.runtime.creatures.get(id).woundRevision,deer.id);
+  await ntap('#actBtn');await np.waitForTimeout(1100);
+  swings.push(await np.evaluate(([id,before])=>{const e=FERAL.runtime.creatures.get(id);return {wound:e.woundRevision>before,core:Math.round(e.parts.core.hp)};},[deer.id,before]));
+ }
+ const flank=await np.evaluate(id=>{window.__pinDeer=false;const e=FERAL.runtime.creatures.get(id);return {wounds:Object.values(e.wounds).reduce((n,l)=>n+l.length,0),core:e.parts.core.hp};},deer.id);
+ assert(flank.wounds>0,'shell bites are recorded');assert(flank.core<deer.core,`ribs under the bite take the structural hit (${deer.core} -> ${flank.core})`);
+ await np.screenshot({path:new URL('island-creature-wound.png',out).pathname});
  await ntap('#menuBtn');await ntap('[data-tab=life]');const herdBefore=await np.evaluate(()=>FERAL.runtime.creatures.entities.length);
  await ntap('#herdBtn');const herdAfter=await np.evaluate(()=>FERAL.runtime.creatures.entities.length);assert(herdAfter>=herdBefore+20,`herd ${herdBefore} -> ${herdAfter}`);
  await ntap('#resumeBtn');await np.waitForTimeout(300);
  await ntap('#menuBtn');await np.waitForTimeout(200);
  const saved=await np.evaluate(()=>({x:FERAL.runtime.player.x,z:FERAL.runtime.player.z,items:FERAL.runtime.progression.inventory,places:[...FERAL.runtime.discoveredLandmarks]}));
  await np.reload();await np.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:120000});
- const reopened=await np.evaluate(c=>({map:FERAL.runtime.map.id,cell:FERAL.runtime.atlas.getCell(...c),x:FERAL.runtime.player.x,z:FERAL.runtime.player.z,items:FERAL.runtime.progression.inventory,places:[...FERAL.runtime.discoveredLandmarks]}),dig.cell);
+ const reopened=await np.evaluate(([c,deerId])=>({wounds:Object.values(FERAL.runtime.creatures.get(deerId)?.wounds??{}).reduce((n,l)=>n+l.length,0),map:FERAL.runtime.map.id,cell:FERAL.runtime.atlas.getCell(...c),x:FERAL.runtime.player.x,z:FERAL.runtime.player.z,items:FERAL.runtime.progression.inventory,places:[...FERAL.runtime.discoveredLandmarks]}),[dig.cell,deer.id]);
  assert.equal(reopened.map,'island');assert.equal(reopened.cell,null,'the dug cell stays dug');assert.deepEqual(reopened.items,saved.items);assert.deepEqual(reopened.places,saved.places);
- assert(Math.hypot(reopened.x-saved.x,reopened.z-saved.z)<.05,'position restored');
+ assert(Math.hypot(reopened.x-saved.x,reopened.z-saved.z)<.05,'position restored');assert.equal(reopened.wounds,flank.wounds,'creature wounds survive save and reopen');
  await np.screenshot({path:new URL('island-new.png',out).pathname});
- check(report.island,'new island: starting kit, stick walk, digging, herd button, save and reopen',{walkedM:walked,dug:dig.block,taps,herd:[herdBefore,herdAfter],places:reopened.places});
+ check(report.island,'new island: starting kit, stick walk, frontier digging, instant gathering, shell bites and bone hits, herd button, save and reopen',{walkedM:walked,dug:dig.block,taps,gathered:[branch.timber,gathered],swings,flank,herd:[herdBefore,herdAfter],places:reopened.places,woundsAfterReopen:reopened.wounds});
  await fresh.close();
 
  // A module that cannot load must end in a visible failure with retry on the shared loading screen.

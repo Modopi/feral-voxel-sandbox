@@ -2,6 +2,7 @@
 // settings, pause menu, field HUD and the ledger window. Moved from the island/frontier game so all
 // maps use the same code; one module keeps the update package under the native file limit.
 import { uiIcon } from "./ui-art.js";
+import { mountCharacterPortrait } from "./character-portrait.js";
 import { STANCES } from "./physics.js";
 const $ = (id) => document.getElementById(id);
 
@@ -451,6 +452,45 @@ export function waypointText(player, target) {
   const arrow =
     Math.abs(angle) < 0.5 ? "↑" : Math.abs(angle) > 2.5 ? "↓" : angle > 0 ? "→" : "←";
   return `${arrow} ${target.name} · ${Math.round(Math.hypot(dx, dz))} m`;
+}
+
+// ---- Character sheet (the frontier's status page, shared by every map) ----
+const escapeHTML = (text) =>
+  String(text).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+/** Portrait, equipped slots, meters, combat stats, effects, quick actions, milestones and the log.
+ * `button(label, onClick, id)` makes the ledger's buttons; each action is {label, short, id, art|icon, count, disabled, onClick}. */
+export function renderCharacterSheet(root, sheet, button) {
+  const { name = "개척자", level = 1, state = "", figureLabel = "개척자 · 끌어 회전", armored = false, slots = [], meters = [], stats = [], effects = "", actions = [], milestones = [], log = [], logTitle = "원정 기록", portrait = {} } = sheet;
+  root.innerHTML = `<div class="characterSheet"><div class="characterFigure"><div class="characterStage ${armored ? "armored" : ""}"><span>${escapeHTML(figureLabel)}</span></div><div class="equippedSlots">${slots.map((s) => `<div class="${s.className ?? ""}" title="${escapeHTML(s.title ?? s.label)}">${s.art}<small>${escapeHTML(s.label)}</small></div>`).join("")}</div></div>
+      <div class="characterStats"><div class="characterName"><h3>${escapeHTML(name)} <small>LV.</small> ${level}</h3><span>${escapeHTML(state)}</span></div>
+      ${meters.map((m) => `<div class="statMeter ${m.kind}"><label>${escapeHTML(m.label)} <b>${escapeHTML(m.text)}</b></label><progress max="${m.max}" value="${m.value}"></progress></div>`).join("\n      ")}
+      <dl class="combatStats">${stats.map(([term, value]) => `<div><dt>${escapeHTML(term)}</dt><dd>${escapeHTML(value)}</dd></div>`).join("")}</dl>
+      <p class="activeEffects">${effects || "음식·강장제의 효과가 여기에 표시됩니다."}</p>
+      <div id="supplies" class="supplySlots"></div></div></div>
+      <div class="milestoneStrip">${milestones.map(([icon, count, label]) => `<span>${icon} <b>${count}</b> ${escapeHTML(label)}</span>`).join("")}</div>
+      <details class="expeditionLog"><summary>${escapeHTML(logTitle)} <span>${log.length}</span></summary><ol>${log.map((t) => `<li>${escapeHTML(t)}</li>`).join("") || "<li>첫 원정을 시작했습니다.</li>"}</ol></details>`;
+  mountCharacterPortrait(root.querySelector(".characterStage"), { armored, ...portrait });
+  const supplies = root.querySelector("#supplies");
+  for (const a of actions) {
+    const b = button(a.label, a.onClick, a.id);
+    b.setAttribute("aria-label", a.label);
+    b.innerHTML = a.art
+      ? `${a.art}<b class="supplyCount">${a.count ?? ""}</b><small>${escapeHTML(a.short)}</small>`
+      : `<b aria-hidden="true">${a.icon}</b><small>${escapeHTML(a.short)}</small>`;
+    b.disabled = !!a.disabled;
+    supplies.append(b);
+  }
+  return root.querySelector(".characterSheet");
+}
+
+// ---- Map page (the frontier's map: a map on the left, destinations on the right) ----
+/** `map` is HTML or an element; each destination is {name, distance, id, onSelect}. */
+export function renderMapPage(root, { title, subtitle = "", map = "", footer = "", destinations = [] }, button) {
+  root.innerHTML = `<div class="mapLayout"><div class="regionMap"><h3>${escapeHTML(title)}</h3><small>${escapeHTML(subtitle)}</small><div class="mapBody"></div><p>${footer}</p></div><div class="destinationList"><h3>목적지 표시</h3><div id="destinations"></div><p>목적지를 선택하면 탐험 화면에 방향과 거리를 표시합니다.</p></div></div>`;
+  const body = root.querySelector(".mapBody");
+  if (typeof map === "string") body.innerHTML = map;
+  else if (map) body.append(map);
+  for (const d of destinations) root.querySelector("#destinations").append(button(`${d.name} · ${Math.round(d.distance)} m`, d.onSelect, d.id));
 }
 
 // ---- Ledger window ----

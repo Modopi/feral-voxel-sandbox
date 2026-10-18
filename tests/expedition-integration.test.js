@@ -223,27 +223,30 @@ function headlessScene(descriptors) {
   return scene;
 }
 
-test('runtime mining spends the full harvest time, removes the cell once and preserves depletion after reload', async () => {
+test('runtime mining follows the frontier rule, removes the cell once and keeps wounds and holes after reload', async () => {
   let runtime = await ExpeditionRuntime.create(SEED);
   const block = CONTENT.blocks.entries.find(b => b.rawResourceId === 'raw_timber');
   assert(block);
   const cell = [0, 16, 0];runtime.atlas.setCell(...cell, block.id);
   const hit = { kind:'terrain', point:{x:.25,y:8.5,z:.25}, normal:{x:0,y:1,z:0}, distance:1 };
   Object.assign(runtime.player,{x:0,y:8,z:0});
-  const node=runtime.terrainResource(hit), source=runtime.progression.catalog.get(node.sourceId);
-  runtime.interactionAction={anchorId:'old-gimmick'};
-  assert.equal(runtime.beginHarvest(node).ok,true);
-  assert.equal(runtime.interactionAction,null,'harvesting and operating an arena device cannot advance together');
   const before=runtime.progression.count('raw_timber');
-  for(let t=0;t<source.seconds-.1;t+=.1)runtime.tick(.1);
-  if(runtime.harvestAction)runtime.tick(.2);
-  assert.equal(runtime.harvestAction,null);
-  assert.equal(runtime.atlas.getCell(...cell),null);
-  assert.equal(runtime.progression.count('raw_timber'),before+source.outputs.raw_timber);
+  assert.equal(runtime.strike(hit).mined,true,'attacking terrain mines it');
+  assert.equal(runtime.strike(hit).reason,'공격 준비 중','one strike per 0.18 s');
+  runtime.tick(.2);
+  assert.equal(runtime.strike(hit).ok,true);
+  assert.equal(runtime.atlas.getCell(...cell),block.id,'wood takes three bare-handed strikes');
   const store=new ExpeditionSave(storage(),'mining');store.write(runtime.serialize());
   runtime=await ExpeditionRuntime.create(SEED,store.load());
+  assert(Math.abs(runtime.terrainDamage[cell.join(',')].damage-2/3)<1e-9,'the wound survives reload');
+  runtime.tick(.2);const last=runtime.strike(hit);
+  assert.equal(last.removed,1);
   assert.equal(runtime.atlas.getCell(...cell),null);
-  assert.equal(runtime.terrainResource(hit),null);
+  assert.equal(runtime.progression.count('raw_timber'),before+block.harvestYieldPerCell);
+  store.write(runtime.serialize());
+  runtime=await ExpeditionRuntime.create(SEED,store.load());
+  assert.equal(runtime.atlas.getCell(...cell),null);
+  assert.equal(runtime.terrainDamage[cell.join(',')],undefined);
 });
 
 test('machine rendered quaternion and gameplay hit identify the same rotated paid voxel without rebuilding on motion', async () => {

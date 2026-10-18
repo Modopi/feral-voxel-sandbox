@@ -85,6 +85,7 @@ test('an original island save converts without touching the original', async () 
   world.set(78, 12, 84, 0);
   world.setCell(150, 30, 160, B.PLANK);
   world.pour(80, 12, 80, 2, 0);
+  world.miningDamage.set(world.damageKey(154, 26, 168), [B.STONE, .5]);
   const inventory = new Inventory();
   inventory.add('berry', 3); inventory.add('crystal', 2); inventory.add('arrow', 5);
   const eco = new Ecology(world); eco.populate(12);
@@ -99,6 +100,7 @@ test('an original island save converts without touching the original', async () 
     assert.equal(runtime.atlas.getCell(hx, hy, hz), value ? LEGACY_BLOCKS[value] : null, `${hx},${hy},${hz}`);
   }
   assert(runtime.conversionCells >= 9, `${runtime.conversionCells} edited cells copied`);
+  assert.deepEqual(runtime.terrainDamage['154,26,168'], { blockId: 'stone', damage: .5 }, 'a half-mined cell keeps its wound');
   assert.equal(runtime.progression.count('berry'), 3);
   assert.equal(runtime.progression.count('iron_ore'), 2);
   assert.equal(runtime.progression.count('loose_stone'), 4, 'original stone pieces carry over');

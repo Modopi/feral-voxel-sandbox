@@ -5,7 +5,7 @@
   "shared": [
     {
       "name": "module load failure shows retry instead of endless loading",
-      "text": "게임 파일을 불러오지 못했습니다: Failed to fetch dynamically imported module: http://127.0.0.1:35003/assets/content-runtime/game.js · 멈춘 단계: 게임 파일을 불러오는 중 · 2%",
+      "text": "게임 파일을 불러오지 못했습니다: Failed to fetch dynamically imported module: http://127.0.0.1:39391/assets/content-runtime/game.js · 멈춘 단계: 게임 파일을 불러오는 중 · 2%",
       "retry": true,
       "runtimeFailed": 1
     }
@@ -24,35 +24,35 @@
       "bootTimings": [
         {
           "stage": "게임 파일을 불러오는 중",
-          "ms": 186
+          "ms": 258
         },
         {
           "stage": "저장을 확인하는 중",
-          "ms": 4
+          "ms": 53
         },
         {
           "stage": "건축물 모델을 불러오는 중",
-          "ms": 208
+          "ms": 70
         },
         {
           "stage": "세계와 생태계를 구성하는 중",
-          "ms": 71
+          "ms": 57
         },
         {
           "stage": "설치한 설비를 불러오는 중",
-          "ms": 4
+          "ms": 3
         },
         {
           "stage": "장면을 준비하는 중",
-          "ms": 67
+          "ms": 68
         },
         {
           "stage": "물리 엔진을 준비하는 중",
-          "ms": 136
+          "ms": 114
         },
         {
           "stage": "탐험을 시작하는 중",
-          "ms": 6
+          "ms": 3
         }
       ]
     },
@@ -183,8 +183,8 @@
           ]
         }
       ],
-      "walkM": 3.412495557561221,
-      "sprintM": 4.956169746819069
+      "walkM": 3.5187003429574757,
+      "sprintM": 5.118100874396852
     },
     {
       "name": "machine descend/brake and leaving through the shared interact button",
@@ -203,7 +203,7 @@
     {
       "name": "research pause and resume in the ledger window",
       "prepared": "samples granted",
-      "pausedWork": 1.6999999999999988
+      "pausedWork": 1.7166666666666655
     },
     {
       "name": "crafting and the craft queue in the shared bag",
@@ -253,7 +253,6 @@
           "부은 물·산",
           "동물 개체",
           "아이템",
-          "아이템",
           "아이템"
         ],
         "original": 323255,
@@ -267,7 +266,7 @@
     {
       "name": "sandbox water tool via menu and use button",
       "waterBefore": 0,
-      "waterAfter": 0.5000000000000003
+      "waterAfter": 0.4999999999999998
     },
     {
       "name": "building a block from the hotbar with mined stone",
@@ -280,17 +279,48 @@
       "landmark": "굽이치는 강"
     },
     {
-      "name": "new island: starting kit, stick walk, digging, herd button, save and reopen",
-      "walkedM": 4.106025231044153,
+      "name": "new island: starting kit, stick walk, frontier digging, instant gathering, shell bites and bone hits, herd button, save and reopen",
+      "walkedM": 4.266025228069006,
       "dug": "grass",
-      "taps": 16,
+      "taps": 2,
+      "gathered": [
+        4,
+        5
+      ],
+      "swings": [
+        {
+          "wound": true,
+          "core": 17
+        },
+        {
+          "wound": false,
+          "core": 13
+        },
+        {
+          "wound": false,
+          "core": 9
+        },
+        {
+          "wound": true,
+          "core": 9
+        },
+        {
+          "wound": false,
+          "core": 5
+        }
+      ],
+      "flank": {
+        "wounds": 2,
+        "core": 5
+      },
       "herd": [
-        30,
-        54
+        31,
+        55
       ],
       "places": [
         "초록 능선"
-      ]
+      ],
+      "woundsAfterReopen": 2
     }
   ],
   "frontier": [

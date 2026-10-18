@@ -61,14 +61,11 @@ after(async()=>{
 test('far signed-coordinate roundtrip retains mining, damage, fixtures, deaths and object owners', async()=>{
   const start=performance.now();let runtime=await ExpeditionRuntime.create(31415);
   const initial=counts(runtime);
-  // Exercise the real timed terrain harvest path with a deterministic cell fixture.
+  // Exercise the real mining path (frontier rule) with a deterministic cell fixture.
   runtime.atlas.setCell(0,80,0,'log');Object.assign(runtime.player,{x:0,y:40,z:0});
   const hit={kind:'terrain',point:{x:.25,y:40.5,z:.25},normal:{x:0,y:1,z:0},distance:1};
-  const node=runtime.terrainResource(hit);assert(node);
-  assert(runtime.beginHarvest(node).ok);
-  const source=runtime.progression.catalog.get(node.sourceId);
-  for(let elapsed=0;elapsed<source.seconds+.25;elapsed+=.25)runtime.tick(.25);
-  assert.equal(runtime.atlas.getCell(0,80,0),null);assert.equal(runtime.harvestAction,null);
+  for(let i=0;i<8&&runtime.atlas.getCell(0,80,0);i++){runtime.tick(.2);assert(runtime.mine(hit).ok);}
+  assert.equal(runtime.atlas.getCell(0,80,0),null);assert.equal(runtime.progression.count('raw_timber'),1);
   runtime.atlas.setCell(-65,80,-65,'stone');
   const instance=runtime.nearbyStructures.find(s=>s.templateId==='root_manor');assert(instance);
   const box=runtime.dungeons.renderBoxes(instance.id).find(b=>b.collision&&b.size.every(v=>v>=.5));

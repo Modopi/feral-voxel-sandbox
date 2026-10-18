@@ -13,12 +13,15 @@ import {WorldObjects} from './objects.js';
 import {FaithSystem} from './faith.js';
 import {Armaments} from './armaments.js';
 import {reasonText} from './reasons.js';
-import {mapFor,BUILD_BLOCKS} from './maps.js';
+import {mapFor,BUILD_BLOCKS,miningProfile,minedItem,TOOL_GEAR,BARE_GEAR} from './maps.js';
+import {miningWorkFor,MINING_PERIOD_S} from '../equipment.js';
+import {woundCut,woundBox} from './creature-animation.js';
 const clone = value => JSON.parse(JSON.stringify(value));
 export const distance = (a,b) => Math.hypot(a.x-b.x,(a.y||0)-(b.y||0),a.z-b.z);
 const asPoint = v => Array.isArray(v) ? {x:v[0],y:v[1],z:v[2]} : v;
 const firstSentence = text => String(text||'').split(/(?<=[.。])\s/)[0].trim();
 const SPECIES = new Map(CONTENT.creatures.entries.map(e=>[e.id,e]));
+const BLOCKS = new Map(CONTENT.blocks.entries.map(e=>[e.id,e]));
 const BOSS_ACTIONS = {repair:'수리',rest:'휴식',recharge:'재충전'};
 export class ExpeditionRuntime {
  /** onProgress(step,done,total) reports loading steps; pause lets the screen repaint before synchronous construction. */
@@ -45,7 +48,7 @@ export class ExpeditionRuntime {
   this.player=state?.player?clone(state.player):{x:spawn.x,y:this.atlas.heightAt(spawn.x,spawn.z)+.05,z:spawn.z,yaw:spawn.yaw,pitch:0,hp:100,maxHp:100,calories:this.calorieRule.capacity,maxCalories:this.calorieRule.capacity,vy:0,grounded:false,stance:'stand',lastDamageAt:-100,resting:false};
   this.deaths=clone(state?.deaths||[]);this.seenRegions=new Set(state?.seenRegions||[]);
   this.discoveredLandmarks=new Set(state?.discoveredLandmarks||[]);this.conversion=state?.conversion?clone(state.conversion):null;
-  this.messages=[];this.warnings=[];this.events=[];this.playerPush=null;this.harvestAction=null;this.lastStrike=0;this.populationClock=Infinity;
+  this.messages=[];this.warnings=[];this.events=[];this.playerPush=null;this.lastStrike=0;this.lastMine=-Infinity;this.populationClock=Infinity;
   this.terrain={unbounded:true,getCell:(x,y,z)=>this.isSolid(x*.5+.25,y*.5+.25,z*.5+.25)?1:0,
    isSolidCell:(x,y,z)=>this.isSolid(x*.5+.25,y*.5+.25,z*.5+.25),heightAt:(x,z,y)=>this.surfaceHeight(x,z,y),
    groundHeight:(x,z,y)=>this.surfaceHeight(x,z,y),fluidAt:(x,y,z)=>this.dungeons.fluidAt({x,y,z})??this.atlas.fluidAt(x,y,z),
@@ -60,7 +63,8 @@ export class ExpeditionRuntime {
   this.atlas.isAnchoredCell=(x,y,z)=>{const p={x:x*.5+.25,y:y*.5+.25,z:z*.5+.25};return !!this.dungeons.solidAt(p)||!!this.placements.solidAt(p);};
   this.community=new CommunitySystem(this,state?.community||{});
   this.faith=new FaithSystem(this,state?.faith||{});
-  this.terrainDamage=clone(state?.terrainDamage||{});
+  // Terrain wounds are the mined fraction of a cell (frontier rule); saves before 0.14 stored remaining HP.
+  this.terrainDamage=Object.fromEntries(Object.entries(clone(state?.terrainDamage||{})).map(([key,d])=>[key,d.hp==null?d:{blockId:d.blockId,damage:Math.min(.99,Math.max(0,1-d.hp/(BLOCKS.get(d.blockId)?.durabilityHpPerCell||1)))}]));
   this.equipmentExposureProfiles=new Map();
   this.nodes=[];this.nearbyStructures=[];
   // A converted original save brings its own items instead of the new-world kit.
@@ -196,15 +200,6 @@ export class ExpeditionRuntime {
     if(this.physics)this.physics.movePlayer(before,p);else if(this.isSolid(p.x,p.y+.5,p.z))Object.assign(p,{x:before.x,y:before.y,z:before.z});
    }
   }
-  if(this.harvestAction){
-   if(distance(p,this.harvestAction.position)>5){this.harvestAction=null;this.message('너무 멀어 채집을 멈췄습니다.');}
-   else{this.harvestAction.elapsed+=dt;const source=this.progression.catalog.get(this.harvestAction.sourceId);
-    if(this.harvestAction.elapsed>=source.seconds){const a=this.harvestAction;
-     const intact=!a.cell||this.atlas.getCell(...a.cell)===a.blockId;
-     const result=intact?this.progression.harvest(a.sourceId,{environmentId:a.environmentId,nodeId:a.nodeId,nodeType:a.nodeType,elapsed:a.elapsed,claimId:a.claimId}):{ok:false,reason:'채집할 자원이 이미 사라졌습니다.'};
-     if(result.ok&&a.cell){this.atlas.setCell(...a.cell,null);delete this.terrainDamage[a.cell.join(',')];this.objects?.detachAround(a.cell);}
-     this.harvestAction=null;this.message(result.ok?`${source.name} 완료`:result.reason);}}
-  }
   if(this.interactionAction){const a=this.interactionAction;
    if(distance(p,a.position)>3){this.interactionAction=null;this.message('장치에서 멀어져 조작을 멈췄습니다.');}
    else if((a.elapsed+=dt)>=a.seconds){this.interactionAction=null;const result=this.bosses.interactGimmick(a.bossId,a.gimmickId,{actorPosition:p,progressS:a.elapsed});if(!result)this.message('장치를 조작하지 못했습니다.');}
@@ -223,7 +218,7 @@ export class ExpeditionRuntime {
   this.progression.inventory={};this.progression.overflow={};this.progression.equipped=null;
   const spawn=this.map.spawn;
   Object.assign(p,{x:spawn.x,y:this.atlas.heightAt(spawn.x,spawn.z)+.05,z:spawn.z,hp:100,maxHp:100,calories:600,vy:0,lastDamageAt:this.time});
-  this.harvestAction=null;this.interactionAction=null;this.drivingMachineId=null;this.player.resting=false;this.message('출발지에서 깨어났습니다. 사망 장소 10m 안에 가면 요정이 소지품을 돌려줍니다.');
+  this.interactionAction=null;this.drivingMachineId=null;this.player.resting=false;this.message('출발지에서 깨어났습니다. 사망 장소 10m 안에 가면 요정이 소지품을 돌려줍니다.');
  }
  recoverDeath(death){
   const items={},virtual={...this.progression.inventory};
@@ -268,7 +263,8 @@ export class ExpeditionRuntime {
   if(id!=='food')return {ok:false,reason:'먹을 수 있는 음식이 아닙니다.'};
   const result=this.progression.spend({[id]:1},{claimId:this.id('eat')});if(result.ok)this.player.calories=Math.min(this.player.maxCalories,this.player.calories+this.calorieRule.foodCalories);return result;
  }
- beginHarvest(node){
+ /** Gathering is immediate, like the frontier's: no channel time. */
+ harvest(node){
   const position=node.position??{x:node.x,y:node.y??this.atlas.heightAt(node.x,node.z),z:node.z};
   if(distance(this.player,position)>5)return {ok:false,reason:'가까이 다가가세요.'};
   const sourceId=node.sourceId??node.progressionSourceId;
@@ -276,36 +272,83 @@ export class ExpeditionRuntime {
   const source=this.progression.catalog.get(sourceId);
   if(source.requiredTool&&!this.progression.count(source.requiredTool))return {ok:false,reason:'tool_required'};
   if(!isResourceAvailable(this,{...node,...position,sourceId}))return {ok:false,reason:'source_depleted'};
-  if(this.harvestAction?.nodeId===node.id)return {ok:true};
-  this.interactionAction=null;this.harvestAction={sourceId,nodeId:node.id,nodeType:node.nodeId,environmentId:this.atlas.sample(position.x,position.z).environmentId,position,elapsed:0,claimId:this.id('harvest'),cell:node.cell,blockId:node.blockId};return {ok:true};
+  const result=this.progression.harvest(sourceId,{environmentId:this.atlas.sample(position.x,position.z).environmentId,nodeId:node.id,nodeType:node.nodeId,elapsed:source.seconds,claimId:this.id('harvest')});
+  return result.ok?{...result,sourceId}:result;
  }
  beginGimmick(anchor){
   const boss=this.bosses.get(anchor?.bossInstanceId),g=boss?.gimmicks[anchor.gimmickId];
   if(!boss||boss.defeated||!g||g.broken||g.uses<=0||distance(this.player,anchor.position)>3)return {ok:false,reason:'지금은 이 장치를 조작할 수 없습니다.'};
   if(this.interactionAction?.anchorId===anchor.id)return {ok:true};
   const seconds=this.bosses.definitionFor(boss).arena.gimmickInteractionS;
-  this.harvestAction=null;this.interactionAction={anchorId:anchor.id,bossId:boss.id,gimmickId:anchor.gimmickId,position:clone(anchor.position),elapsed:0,seconds};return {ok:true};
+  this.interactionAction={anchorId:anchor.id,bossId:boss.id,gimmickId:anchor.gimmickId,position:clone(anchor.position),elapsed:0,seconds};return {ok:true};
  }
- terrainResource(hit){
-  if(hit?.kind!=='terrain'||hit.distance>5||!hit.normal)return null;
-  const cell=['x','y','z'].map(k=>Math.floor((hit.point[k]-hit.normal[k]*.001)*2));
-  const blockId=this.atlas.getCell(...cell),block=CONTENT.blocks.entries.find(e=>e.id===blockId);
-  if(!block?.rawResourceId)return null;
-  const source=this.progression.list('source').find(e=>e.outputs[block.rawResourceId]);if(!source)return null;
-  return {id:`terrain:${cell.join(',')}`,sourceId:source.id,blockId,cell,x:cell[0]*.5+.25,y:cell[1]*.5+.25,z:cell[2]*.5+.25};
- }
- strike(hit){
+ /** Attack: terrain and loose world pieces are mined (frontier rule), resources gathered, everything else hit. */
+ strike(hit,{toolId=null,size=.5}={}){
+  if(hit&&!this.gimmickTarget(hit,4)){
+   if(hit.kind==='terrain')return this.mine(hit,{toolId,size});
+   if(hit.kind==='object'&&!this.objects.get(hit.id)?.fragment)return this.mineObject(hit,{toolId});
+  }
   const weapon=this.armaments.loadout(),loadout=weapon??this.progression.evaluateLoadout();if(this.time-this.lastStrike<loadout.attackPeriod)return {ok:false,reason:'공격 준비 중'};
   const gimmick=this.gimmickTarget(hit,weapon?.range??4);
   if(!gimmick){
    if(!hit||hit.distance>(weapon?.range??4))return {ok:false,reason:'대상이 멉니다.'};
-   if(hit.kind==='resource'){const node=this.nodes.find(n=>n.id===hit.id);return node?this.beginHarvest(node):{ok:false};}
-   if(hit.kind==='terrain'){const resource=this.terrainResource(hit);if(resource)return this.beginHarvest(resource);}
+   if(hit.kind==='resource'){const node=this.nodes.find(n=>n.id===hit.id);return node?this.harvest(node):{ok:false};}
   }
   if(weapon){const worn=this.armaments.recordAttack({distanceM:gimmick?gimmick.distance:hit.distance,at:this.time});if(!worn.ok)return worn;}
   if(gimmick){this.lastStrike=this.time;const ok=this.bosses.interactGimmick(gimmick.bossInstanceId,gimmick.gimmickId,{action:'damage',amount:loadout.hitDamage,actorPosition:this.player});return ok?{ok:true,gimmick:true,remainingHp:this.bosses.get(gimmick.bossInstanceId)?.gimmicks[gimmick.gimmickId]?.hp??0}:{ok:false,reason:'gimmick'};}
   this.lastStrike=this.time;this.lastAttackMode=weapon?.attackMode??this.player.attackStyle??'strike';
   return this.damageHit(hit,{amount:loadout.hitDamage,energyType:'mechanical',energyEU:loadout.hitDamage*1.5,attackMode:this.lastAttackMode});
+ }
+ /** The frontier tool table entry for a held design tool; a broken or missing tool mines bare-handed. */
+ miningGear(toolId){
+  const gear=TOOL_GEAR[toolId],max=this.progression.catalog.get(toolId)?.durabilityActions;
+  if(!gear||this.progression.count(toolId)<1||(max&&(this.progression.toolWear[toolId]??max)<=0&&this.progression.count(toolId)<2))return BARE_GEAR;
+  return gear;
+ }
+ wearTool(toolId){
+  const max=this.progression.catalog.get(toolId)?.durabilityActions;if(!TOOL_GEAR[toolId]||!max||this.progression.count(toolId)<1)return;
+  if(this.progression.toolWear[toolId]===0&&this.progression.count(toolId)>=2){this.progression.spend({[toolId]:1},{claimId:this.id('tool-worn')});this.progression.toolWear[toolId]=max;}
+  this.progression.toolWear[toolId]=Math.max(0,(this.progression.toolWear[toolId]??max)-1);
+ }
+ /** Frontier mining: every 0.18 s a strike removes 0.2 / work of each cell in the 0.5 m or 1 m region. */
+ mine(hit,{toolId=null,size=.5}={}){
+  if(!hit?.normal||!hit.point)return {ok:false,reason:'6.5 m 이내의 표면을 조준하세요.'};
+  if(hit.distance>6.5)return {ok:false,reason:'6.5m 안에서 채굴하세요.'};
+  if(this.time-this.lastMine<MINING_PERIOD_S)return {ok:false,reason:'공격 준비 중'};
+  const n=size>=1?2:1,cell=['x','y','z'].map(k=>Math.floor((hit.point[k]-hit.normal[k]*.001)*2)),start=n===1?cell:cell.map(v=>Math.floor(v/2)*2);
+  const gear=this.miningGear(toolId),edit=n*.5,removed=[];let struck=0,progress=0;
+  for(let dy=0;dy<n;dy++)for(let dz=0;dz<n;dz++)for(let dx=0;dx<n;dx++){
+   const c=[start[0]+dx,start[1]+dy,start[2]+dz],blockId=this.atlas.getCell(...c),profile=miningProfile(BLOCKS.get(blockId),BLOCKS);if(!profile)continue;
+   const key=c.join(','),old=this.terrainDamage[key],damage=(old?.blockId===blockId?old.damage??0:0)+.2/miningWorkFor(profile.hardness,profile.affinity,edit,gear);struck++;
+   if(damage>=1-1e-9){this.atlas.setCell(...c,null);delete this.terrainDamage[key];removed.push({cell:c,blockId});}
+   else{this.terrainDamage[key]={blockId,damage};progress=Math.max(progress,damage);}
+  }
+  if(!struck)return {ok:false,reason:'채굴할 수 있는 지형을 조준하세요.'};
+  this.lastMine=this.time;
+  const items=this.minedItems(removed.map(r=>r.blockId));
+  if(Object.keys(items).length){const r=this.progression.grant(items,{claimId:this.id('mine')});if(!r.ok)return r;}
+  for(const r of removed)this.objects.detachAround(r.cell);
+  if(removed.length&&toolId)this.wearTool(toolId);
+  return {ok:true,mined:true,struck,removed:removed.length,items,progress,size:edit};
+ }
+ /** Items for mined cells; the frontier's bonus seed for clearing four grass cells at once. */
+ minedItems(blockIds){
+  const items={};for(const id of blockIds){const y=minedItem(BLOCKS.get(id));if(y)items[y.id]=(items[y.id]??0)+y.count;}
+  if(blockIds.filter(id=>id==='grass').length>=4)items.seed=(items.seed??0)+1;
+  return items;
+ }
+ /** Cutting a detached piece uses the same rule at 0.5 m; the rest of the piece stays a physical object. */
+ mineObject(hit,{toolId=null}={}){
+  if(!hit?.point||hit.distance>6.5)return {ok:false,reason:'6.5m 안에서 깎으세요.'};
+  if(this.time-this.lastMine<MINING_PERIOD_S)return {ok:false,reason:'공격 준비 중'};
+  const point={};for(const k of ['x','y','z'])point[k]=hit.point[k]-(hit.normal?.[k]||0)*.001;
+  const cell=this.objects.cellAt(hit.id,point);if(!cell)return {ok:false,reason:'target_missing'};
+  const block=BLOCKS.get(cell.blockId),profile=miningProfile(block,BLOCKS);if(!profile)return {ok:false,reason:'target_missing'};
+  this.lastMine=this.time;
+  const fraction=.2/miningWorkFor(profile.hardness,profile.affinity,.5,this.miningGear(toolId));
+  const result=this.objects.damageAt(hit.id,point,fraction*block.durabilityHpPerCell,{progression:this.progression,yieldOf:minedItem});
+  if(result.ok&&result.removed&&toolId)this.wearTool(toolId);
+  return result.ok?{...result,mined:true,progress:result.removed?1:1-result.hp/block.durabilityHpPerCell}:result;
  }
  machineVoxelAt(hit){
   const m=this.machines.machines.get(hit.id);if(!m||!hit.point)return null;
@@ -338,7 +381,19 @@ export class ExpeditionRuntime {
    if(trace.blocked||trace.effectiveAmount<=0)return {ok:false,reason:'대상이 다른 물체에 가려졌습니다.'};
    amount=trace.effectiveAmount;packet={...packet,amount,attackMode,structuralHits:trace.hits};
   }
-  if(hit.kind==='creature')return this.creatures.damage(hit.id,amount,packet.structuralHits?'body':hit.partId,{...packet,sourceId:packet.sourceId??'player',attackMode,energyType});
+  if(hit.kind==='creature'){
+   // Frontier layered body: a shell hit cuts the shell where it lands and wears the shell plating; bone
+   // exposed by earlier wounds takes the structural hit. Piercing and impact keep their traced depth.
+   const bone=hit.layer==='bone';let structuralHits=packet.structuralHits;
+   if(bone)structuralHits=[{partId:hit.partId,amount}];
+   else if(attackMode==='strike'||!structuralHits)structuralHits=[{partId:'shell',amount}];
+   if(!bone&&hit.point&&hit.partId&&hit.rayOrigin){
+    // The cut starts at the struck surface and bites along the swing, in the part's own frame.
+    const local=this.physics?.partLocalPoint?.(hit.id,hit.partId,hit.point),origin=this.physics?.partLocalPoint?.(hit.id,hit.partId,hit.rayOrigin);
+    if(local&&origin)this.creatures.wound(hit.id,hit.partId,woundBox(local,local.map((v,i)=>v-origin[i]),woundCut(amount,attackMode)));
+   }
+   return this.creatures.damage(hit.id,amount,'body',{...packet,structuralHits,sourceId:packet.sourceId??'player',attackMode,energyType});
+  }
   if(hit.kind==='boss')return this.bosses.hit(hit.id,{...packet,attackMode,partId:hit.partId,attackerPosition:packet.attackerPosition??this.player});
   if(hit.kind==='object'){
    const point={};for(const k of ['x','y','z'])point[k]=hit.point[k]-(hit.normal?.[k]||0)*.001;
@@ -363,9 +418,9 @@ export class ExpeditionRuntime {
    const block=CONTENT.blocks.entries.find(e=>e.id===this.atlas.getCell(...cell));if(!block||block.collision===false)return {ok:false};
    if(energyType==='thermal')return {ok:true,thermalEU:this.atlas.applyThermalEnergy(...cell,packet.energyEU)};
    const response=resolveSurfaceDamage(block,amount,energyType);if(!response.ok)return response;
-   const old=this.terrainDamage[key],hp=Math.max(0,(old?.blockId===block.id?old.hp:block.durabilityHpPerCell)-response.amount);
-   if(hp===0){this.atlas.setCell(...cell,null);delete this.terrainDamage[key];this.objects.detachAround(cell);}
-   else this.terrainDamage[key]={blockId:block.id,hp};return {ok:true,hp};
+   const old=this.terrainDamage[key],damage=(old?.blockId===block.id?old.damage??0:0)+response.amount/block.durabilityHpPerCell;
+   if(damage>=1-1e-9){this.atlas.setCell(...cell,null);delete this.terrainDamage[key];this.objects.detachAround(cell);return {ok:true,hp:0};}
+   this.terrainDamage[key]={blockId:block.id,damage};return {ok:true,hp:block.durabilityHpPerCell*(1-damage)};
   }
   return {ok:false,reason:'공격할 수 있는 대상을 겨누세요.'};
  }

@@ -98,7 +98,8 @@ export class EquipmentView {
     const bob=Math.sin(this.clock*8)*Math.min(.018,this.speed*.003),breath=Math.sin(this.clock*1.7)*.004;
     for(const model of this.models){const right=model.hand==='right',tool=model.slot==='tool_hand',cup=model.asset.id==='bark_cup',sign=right?1:-1;
       const move=right?attack.position:[0,0,0],turn=right?attack.rotation:[0,0,0],work=right?chop:0;
-      const base=right?(model.asset.id==='stone_pick'?[.22,-.48,-.9]:[.34,-.48,-.8]):[-.46,-.4,-.9];
+      // Held in the frontier's right hand, low and to the side so the crosshair stays clear.
+      const base=right?[.42,-.4,-.68]:[-.46,-.4,-.9];model.group.scale.setScalar(right&&tool?.72:1);
       model.group.position.set(base[0]+move[0],base[1]+bob+breath+(resting?-.2:0)+move[1]+work*.025,base[2]+move[2]+(resting?.1:0));
       model.group.rotation.set((right?(cup?-.12:-.65):-.08)+turn[0]+work*(cup?.12:.55),(right?-.16:.32)+turn[1],sign*(right?-.18:.08)+turn[2]+(resting?sign*.18:0));
       if(tool&&cup)model.group.position.y+=.08;
@@ -107,7 +108,8 @@ export class EquipmentView {
   }
   sync(runtime,dt=0){
     if(this.disposed)return;if(!Number.isFinite(dt)||dt<0)throw Error('Invalid equipment view time');dt=Math.min(dt,.1);this.clock+=dt;this.lastRuntime=runtime;
-    const strike=runtime.lastStrike;if(this.lastStrike===null)this.lastStrike=strike;else if(Number.isFinite(strike)&&strike!==this.lastStrike){this.strikeAge=0;this.strikeStyle=runtime.lastAttackMode??runtime.player?.attackStyle??'strike';this.lastStrike=strike;}this.strikeAge+=dt;
+    // Weapon hits and mining strikes both swing the held tool.
+    const strike=Math.max(runtime.lastStrike??-Infinity,runtime.lastMine??-Infinity);if(this.lastStrike===null)this.lastStrike=strike;else if(Number.isFinite(strike)&&strike!==this.lastStrike){this.strikeAge=0;this.strikeStyle=runtime.lastAttackMode??runtime.player?.attackStyle??'strike';this.lastStrike=strike;}this.strikeAge+=dt;
     const p=runtime.player;if(p&&this.lastPosition&&dt>0){const speed=Math.hypot(p.x-this.lastPosition.x,p.z-this.lastPosition.z)/dt;this.speed+=(Math.min(8,speed)-this.speed)*Math.min(1,dt*12);}if(p)this.lastPosition={x:p.x,z:p.z};
     this._request(selectHeldEquipment(runtime));this._pose(runtime,dt);return this.ready;
   }

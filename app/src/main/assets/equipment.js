@@ -144,6 +144,16 @@ export function spendGear(inv, slot) {
   }
   return true;
 }
+// One mining rule for every map: a strike removes 0.2 / work of a cell, where work grows with the
+// material's hardness and the edit size and shrinks with a matching tool's power.
+export const MINING_HARDNESS = { soil: 0.55, wood: 1.2, rock: 1.6, ore: 2.4 };
+export const MINING_PERIOD_S = 0.18;
+export function miningWorkFor(hardness, affinity, size, gear) {
+  return (
+    (hardness * Math.max(0.5, size ** 3)) /
+    (gear.affinity === affinity ? gear.power : 1)
+  );
+}
 export function miningWork(block, size, gear) {
   const kind = [B.WOOD, B.PLANK].includes(block)
     ? "wood"
@@ -153,13 +163,8 @@ export function miningWork(block, size, gear) {
   const hardness =
     kind === "rock"
       ? block === B.ORE
-        ? 2.4
-        : 1.6
-      : kind === "wood"
-        ? 1.2
-        : 0.55;
-  return (
-    (hardness * Math.max(0.5, size ** 3)) /
-    (gear.affinity === kind ? gear.power : 1)
-  );
+        ? MINING_HARDNESS.ore
+        : MINING_HARDNESS.rock
+      : MINING_HARDNESS[kind];
+  return miningWorkFor(hardness, kind, size, gear);
 }
