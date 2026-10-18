@@ -149,3 +149,48 @@ test('a shell hit bites the shell and wears its plating; exposed bone takes the 
   const restored = new ExpeditionRuntime(SEED, state, new Map());
   assert.deepEqual(restored.creatures.get(e.id).wounds, e.wounds, 'wounds survive save and load');
 });
+
+test('what is held decides how a blow lands: tools bite a point, swords slash, spears drive a line, blunt weapons reach bone', async () => {
+  const { hitShapeFor, shapeCut } = await import('../app/src/main/assets/content-runtime/creature-animation.js');
+  assert.deepEqual([undefined, 'slash', 'pierce', 'blunt'].map(hitShapeFor), ['point', 'slash', 'pierce', 'impact']);
+  const side = [1, 0, 0], at = [-.15625, 0, 0];
+  const point = shapeCut('point', 4, at, side), slash = shapeCut('slash', 12, at, side), pierce = shapeCut('pierce', 12, at, side);
+  assert.deepEqual(point.slice(3), [.0625, .125, .125], 'a point bite: shallow and square');
+  assert(slash[3] <= .125 && slash[5] >= .25 && slash[4] <= .0625, 'a slash: shallow, long across the face, level with the ground, thin');
+  assert(shapeCut('slash', 30, at, side)[4] > slash[4], 'a heavy slash widens into a plane');
+  assert(pierce[3] >= .3 && pierce[4] === .0625 && pierce[5] === .0625, 'a spear: a thin line along the blow');
+  assert.equal(shapeCut('impact', 12, at, side), null, 'a blunt blow opens no hole');
+
+  const runtime = await field();
+  const p = runtime.player, e = runtime.creatures.spawn('moss_deer', { x: p.x, z: p.z - 1.5 }, { regionId: 'test', environmentId: 'grove' });
+  const bonesOnLine = [];
+  let reaches = false;
+  runtime.physics = { partLocalPoint: (id, partId, q) => [q.x - e.x, q.y - e.y, q.z - e.z], traceBones: () => bonesOnLine, cutReachesBone: () => reaches };
+  const hit = { kind: 'creature', id: e.id, partId: 'thorax', point: { x: e.x - .15, y: e.y + .7, z: e.z }, rayOrigin: { x: e.x - 1.5, y: e.y + .7, z: e.z }, distance: 1.35 };
+  const snapshot = () => ({ shell: e.parts.shell.hp, core: e.parts.core.hp, leg: e.parts.limb_0.hp, cuts: e.wounds.thorax?.length ?? 0 });
+  const blow = (shape, extra = {}) => { const before = snapshot(); runtime.damageHit({ ...hit, ...extra }, { amount: 6, energyType: 'mechanical', attackMode: shape === 'pierce' ? 'pierce' : shape === 'impact' ? 'impact' : 'strike', hitShape: shape }); const after = snapshot(); return Object.fromEntries(Object.keys(after).map(k => [k, after[k] - before[k]])); };
+  bonesOnLine.push({ partId: 'left_foreleg', enterM: .2 });
+  const impact = blow('impact');
+  assert.equal(impact.cuts, 0, 'blunt: the shell stays closed');
+  assert.equal(impact.shell, 0, 'blunt: the shell plating is untouched');
+  assert(impact.leg < 0, 'blunt: the bone one cell in takes the blow');
+  bonesOnLine.splice(0, 1, { partId: 'thorax', enterM: .05 }, { partId: 'left_foreleg', enterM: .3 });
+  const spear = blow('pierce');
+  assert.equal(spear.cuts, 1, 'spear: a line is cut');
+  assert(spear.shell < 0 && spear.core < 0, 'spear: shell plus every bone on the line');
+  const tool = blow('point');
+  assert(tool.shell <= 0 && tool.core === 0 && tool.leg === 0 && tool.cuts === 1, 'tool: the shell only, until bone is exposed');
+  reaches = true;
+  const sword = blow('slash');
+  assert(sword.cuts === 1 && sword.core < 0, 'sword: a cut that meets bone reaches it');
+
+  // The equipped weapon's kind is what strike() uses; there is no manual style left on the player.
+  runtime.armaments.loadout = () => ({ weaponKind: 'blunt', attackMode: 'impact', hitDamage: 6, attackPeriod: 1, range: 4 });
+  runtime.armaments.recordAttack = () => ({ ok: true });
+  runtime.lastStrike = -99;
+  const cuts = e.wounds.thorax.length;
+  assert.equal(runtime.strike(hit).ok, true);
+  assert.equal(e.wounds.thorax.length, cuts, 'an equipped blunt weapon strikes without cutting');
+  assert.equal(runtime.lastAttackMode, 'impact');
+  assert.equal('attackStyle' in runtime.player, false);
+});

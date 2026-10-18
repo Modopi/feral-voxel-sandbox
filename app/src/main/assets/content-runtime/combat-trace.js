@@ -16,7 +16,8 @@ function resistance(material) {
   if (/wood|bark|root|timber/.test(id)) return 60;
   return 24;
 }
-function interval(a, b, center, size) {
+/** Entry and exit fractions of segment a→b through an axis-aligned box, or null. */
+export function segmentInterval(a, b, center, size) {
   let enter = 0, exit = 1;
   for (const [i, k] of ['x', 'y', 'z'].entries()) {
     const d = b[k] - a[k], lo = center[i] - size[i] / 2, hi = center[i] + size[i] / 2;
@@ -48,7 +49,7 @@ export function traceCombatModel(record, { from, to, ownerId, mode = 'strike', e
     for (const box of part.boxes) {
       const material = record.asset.materials.find(m => m.id === box.material);
       if (box.collision === false || material?.collision === false || part.role === 'static_fluid_visual') continue;
-      const range = interval(a, b, box.center, box.size); if (!range) continue;
+      const range = segmentInterval(a, b, box.center, box.size); if (!range) continue;
       ranges.push({ enter: range[0] * length, exit: range[1] * length, visualPartId: part.id,
         partId: record.desc?.kind === 'boss' ? bossLogicalPart(record.asset, part.id) : part.id,
         resistance: resistance(material), materialId: material?.id, volume: box.size.reduce((v,n)=>v*n,1) });

@@ -4,7 +4,8 @@ import { AssetCollisionWorld } from './voxel/physics.js';
 import { MachinePhysicsBridge } from './machine-physics.js';
 import { ObjectPhysicsBridge } from './object-physics.js';
 import { FixturePhysicsBridge } from './fixture-physics.js';
-import { traceCombatModel } from './combat-trace.js';
+import { traceCombatModel, segmentInterval } from './combat-trace.js';
+import { creatureBodyPart, creatureBones } from './creature-animation.js';
 
 let initialization;
 const initialize = () => initialization ??= R.init();
@@ -449,6 +450,43 @@ export class RuntimePhysics {
     node.updateMatrixWorld(true);
     const v = new T.Vector3(point.x, point.y, point.z).applyMatrix4(node.matrixWorld.clone().invert());
     return [v.x, v.y, v.z];
+  }
+
+  /** Unbroken bone pieces of one visible creature part, in part-local metres (cached per asset part). */
+  _bones(record, entity, part) {
+    const logical = creatureBodyPart(entity, part.id);
+    if (!logical || entity.parts?.[logical]?.broken) return [];
+    this.boneCache ??= new Map();
+    const key = `${record.asset.id}:${part.id}`;
+    if (!this.boneCache.has(key)) this.boneCache.set(key, creatureBones(part, logical));
+    return this.boneCache.get(key);
+  }
+  _visibleParts(record) {
+    record.group.updateMatrixWorld(true);
+    return record.asset.parts.map(part => ({ part, node: record.parts.get(part.id) })).filter(({ node }) => {
+      if (!node) return false;
+      for (let n = node; n; n = n.parent) if (!n.visible) return false;
+      return true;
+    });
+  }
+  /** Creature parts whose bones a world segment crosses, nearest first ({partId, enterM}). */
+  traceBones(ownerId, from, to) {
+    const record = (this.sceneModels ?? this.scene?.models)?.get(ownerId), entity = this.runtime.creatures?.get(ownerId);
+    if (!record || !entity || !from || !to) return [];
+    const a = new T.Vector3(from.x, from.y, from.z), b = new T.Vector3(to.x, to.y, to.z), length = a.distanceTo(b), hits = [];
+    for (const { part, node } of this._visibleParts(record)) {
+      const inv = node.matrixWorld.clone().invert(), la = a.clone().applyMatrix4(inv), lb = b.clone().applyMatrix4(inv);
+      let best = null;
+      for (const box of this._bones(record, entity, part)) { const r = segmentInterval(la, lb, box.center, box.size); if (r && (best === null || r[0] < best)) best = r[0]; }
+      if (best !== null) hits.push({ partId: part.id, enterM: best * length });
+    }
+    return hits.sort((x, y) => x.enterM - y.enterM);
+  }
+  /** True when a part-local cut box [x,y,z,sx,sy,sz] overlaps that part's unbroken bone. */
+  cutReachesBone(ownerId, partId, cut) {
+    const record = (this.sceneModels ?? this.scene?.models)?.get(ownerId), entity = this.runtime.creatures?.get(ownerId), part = record?.asset.parts.find(p => p.id === partId);
+    if (!record || !entity || !part || !cut) return false;
+    return this._bones(record, entity, part).some(b => [0, 1, 2].every(i => Math.abs(b.center[i] - cut[i]) < (b.size[i] + cut[3 + i]) / 2));
   }
 
   /** True only when the actual collider segment is clear. Ignore attacker and

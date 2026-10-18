@@ -250,6 +250,29 @@ try{
  const flank=await np.evaluate(id=>{window.__pinDeer=false;const e=FERAL.runtime.creatures.get(id);return {wounds:Object.values(e.wounds).reduce((n,l)=>n+l.length,0),core:e.parts.core.hp};},deer.id);
  assert(flank.wounds>0,'shell bites are recorded');assert(flank.core<deer.core,`ribs under the bite take the structural hit (${deer.core} -> ${flank.core})`);
  await np.screenshot({path:new URL('island-creature-wound.png',out).pathname});
+ // What is held decides the blow: a prepared weapon of each kind stands in for a crafted one; real attack taps.
+ const kinds={};
+ for(const kind of ['slash','pierce','blunt']){
+  const id=await np.evaluate(kind=>{const r=FERAL.runtime,p=r.player,x=window.__deerFrom.x+3,z=window.__deerFrom.z-1.6,e=r.creatures.spawn('moss_deer',{x,z},{regionId:`${Math.floor(x/64)},${Math.floor(z/64)}`,environmentId:'grove'});
+   window.__kindDeer={id:e.id,x,z};window.__pinKind=true;const pin=()=>{if(!e.dead){e.state='idle';e.targetPoint=null;e.targetId=null;e.nextDecisionAt=1e9;e.nextWanderAt=1e9;e.angerUntil=0;e.attack=null;e.pose.moving=false;e.x=x;e.z=z;e.yaw=Math.PI/2;e.hp=e.maxHp;}if(window.__pinKind&&window.__kindDeer.id===e.id)requestAnimationFrame(pin);};pin();
+   r.armaments.loadout=()=>({id:'prepared',name:kind,weaponKind:kind,attackMode:kind==='pierce'?'pierce':kind==='blunt'?'impact':'strike',hitDamage:12,attackPeriod:1,range:4.4});r.armaments.recordAttack=()=>({ok:true});return e.id;},kind);
+  await np.waitForTimeout(1500);
+  // Move first and let the camera follow before aiming from it.
+  await np.evaluate(()=>{Object.assign(FERAL.runtime.player,{x:window.__kindDeer.x,z:window.__kindDeer.z+1.6,vx:0,vz:0});});await np.waitForTimeout(400);
+  await np.evaluate(id=>{const r=FERAL.runtime,p=r.player,v=FERAL.view,n=v.models.get(id).parts.get('thorax');n.updateMatrixWorld(true);const t=n.getWorldPosition(v.camera.position.clone()),c=v.camera.position;p.yaw=Math.atan2(-(t.x-c.x),-(t.z-c.z));p.pitch=Math.atan2(t.y+.02-c.y,Math.hypot(t.x-c.x,t.z-c.z));},id);
+  await np.waitForTimeout(300);const before=await np.evaluate(id=>({core:FERAL.runtime.creatures.get(id).parts.core.hp,help:document.getElementById('toolHelp').textContent}),id);
+  await ntap('#actBtn');await np.waitForTimeout(1100);
+  kinds[kind]=await np.evaluate(([id,before])=>{const e=FERAL.runtime.creatures.get(id),cuts=Object.values(e.wounds).flat();window.__pinKind=false;return {help:before.help,cuts:cuts.map(c=>c.slice(3)),boneHit:e.parts.core.hp<before.core};},[id,before]);
+ }
+ await np.evaluate(()=>{delete FERAL.runtime.armaments.loadout;delete FERAL.runtime.armaments.recordAttack;});
+ assert.match(kinds.slash.help,/베기/);assert.match(kinds.pierce.help,/관통/);assert.match(kinds.blunt.help,/충격/);
+ assert(kinds.slash.cuts.length===1&&Math.max(...kinds.slash.cuts[0])>=.25&&Math.min(...kinds.slash.cuts[0])<=.0625,`a sword cuts a long thin line: ${JSON.stringify(kinds)}`);
+ assert(kinds.pierce.cuts.length===1&&Math.max(...kinds.pierce.cuts[0])>=.3,'a spear cuts a deep line');
+ assert(kinds.pierce.boneHit,'the spear line reaches bone');
+ assert(kinds.blunt.cuts.length===0&&kinds.blunt.boneHit,'a blunt blow leaves the shell closed and lands on bone');
+ await ntap('#statusBtn');await np.waitForTimeout(300);
+ const sheet=await np.evaluate(()=>({manual:!!document.getElementById('attackStyle'),text:document.querySelector('.combatStats')?.textContent??''}));
+ assert(!sheet.manual,'no manual attack style button');assert.match(sheet.text,/타격 방식.*점타격/);await ntap('#frontierClose');
  await ntap('#menuBtn');await ntap('[data-tab=life]');const herdBefore=await np.evaluate(()=>FERAL.runtime.creatures.entities.length);
  await ntap('#herdBtn');const herdAfter=await np.evaluate(()=>FERAL.runtime.creatures.entities.length);assert(herdAfter>=herdBefore+20,`herd ${herdBefore} -> ${herdAfter}`);
  await ntap('#resumeBtn');await np.waitForTimeout(300);
@@ -260,7 +283,7 @@ try{
  assert.equal(reopened.map,'island');assert.equal(reopened.cell,null,'the dug cell stays dug');assert.deepEqual(reopened.items,saved.items);assert.deepEqual(reopened.places,saved.places);
  assert(Math.hypot(reopened.x-saved.x,reopened.z-saved.z)<.05,'position restored');assert.equal(reopened.wounds,flank.wounds,'creature wounds survive save and reopen');
  await np.screenshot({path:new URL('island-new.png',out).pathname});
- check(report.island,'new island: starting kit, stick walk, frontier digging, instant gathering, shell bites and bone hits, herd button, save and reopen',{walkedM:walked,dug:dig.block,taps,gathered:[branch.timber,gathered],swings,flank,herd:[herdBefore,herdAfter],places:reopened.places,woundsAfterReopen:reopened.wounds});
+ check(report.island,'new island: starting kit, stick walk, frontier digging, instant gathering, shell bites and bone hits, automatic hit by tool and weapon kind, herd button, save and reopen',{walkedM:walked,dug:dig.block,taps,gathered:[branch.timber,gathered],swings,flank,weaponKinds:kinds,herd:[herdBefore,herdAfter],places:reopened.places,woundsAfterReopen:reopened.wounds});
  await fresh.close();
 
  // A module that cannot load must end in a visible failure with retry on the shared loading screen.
