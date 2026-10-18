@@ -65,6 +65,8 @@
 
 게임 1505 / 앱·최소 앱 303 / 저장 스키마 2. Java·권한·키·저장 형식 변경이 없는 게임 전용 릴리스다. 개척 원정의 충격 규칙을 통합 런타임에 옮겨, 생존이 켜진 월드에서 낙하(8 m/s 초과)와 4 m/s보다 빠르게 닿은 지형 물체·기계에 피해를 받고, 던진 물체가 생명체에 피해를 준다. 생존을 끈 월드는 그대로다. 검증은 [검증 기록](../verification/0.15.5.md).
 
+2026-10-18 10:27 UTC [PR #35](https://github.com/Modopi/feral-voxel-sandbox/pull/35) 병합 커밋 `32c8ca4`에서 [배포 Actions](https://github.com/Modopi/feral-voxel-sandbox/actions/runs/39119303278)가 성공해 10:28 UTC에 [v0.15.5 Release](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.15.5)와 기존 공식 `updates/catalog.json`, `updates/stable.feral`, 불변 `updates/versions/0.15.5.feral`로 게시됐다. stable과 버전 패키지는 같은 파일(SHA256 `10801486…3a643a`)이며 로컬 빌드와 바이트 단위로 같고, 내부 아카이브 SHA256 `134a4081…`가 카탈로그와 일치한다. 카탈로그는 27개 항목이며 0.15.4(`5c29f550…`) 항목은 그대로다. Release의 APK(`fb8a833c…db31`)는 CI가 다시 빌드한 것이다. Android 실기기 확인은 아직 하지 않았다.
+
 ### 0.15.4 — 첫 신호 캠페인을 통합 런타임 모듈로 (통합 S2b)
 
 게임 1504 / 앱·최소 앱 303 / 저장 스키마 2. Java·권한·키·플레이 규칙 변경이 없는 게임 전용 릴리스다. 통합 런타임에 월드 설정 `modules`로 켜는 모듈 구조와 첫 신호 캠페인 모듈(`first-signal`)을 더했다. 개척 원정 프리셋은 아직 옛 엔진이라 사용자가 플레이하는 월드는 그대로다. 런타임 저장에 `modules` 항목이 생기며 이전 빌드는 이 항목을 읽지 않는다. 옛 개척 원정의 `frontier/encounters.js`를 `content.js`에 합쳐 업데이트 파일은 124개 그대로다. 검증은 [검증 기록](../verification/0.15.4.md).
