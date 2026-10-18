@@ -2,13 +2,6 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { World, B } from "../app/src/main/assets/world.js";
 import { miningWork, GEAR } from "../app/src/main/assets/equipment.js";
-import { Frontier } from "../app/src/main/assets/frontier/model.js";
-import {
-  GATHERABLES,
-  resourceSites,
-  relaySites,
-  CONTRACTS,
-} from "../app/src/main/assets/frontier/content.js";
 import { Inventory } from "../app/src/main/assets/inventory.js";
 import { Ecology } from "../app/src/main/assets/entities.js";
 const hit = (hx, hy = 24, hz = 24) => ({ hx, hy, hz });
@@ -85,84 +78,6 @@ test("mixed-material mining and protected cells use their own hardness without d
   assert.equal(w.getCell(25, 24, 24), B.LAVA);
   assert.equal(w.miningDamage.size, 0);
   assert.equal(strike(w, hit(24, 0), 0.5).struck, 0);
-});
-test("gathering has finite/re-growing sources, atomic full-bag failure and deterministic locations", () => {
-  const s = new Frontier(42),
-    i = stocked(),
-    sites = resourceSites(s.info);
-  assert.deepEqual(sites, resourceSites(s.info));
-  const berry = sites.find((n) => n.kind === "berry"),
-    scrap = sites.find((n) => n.kind === "scrap");
-  assert.match(s.gather(berry.id, { x: 0, z: 0 }, i), /접근/);
-  s.gather(berry.id, berry, i);
-  assert.equal(i.count("berry"), 3);
-  s.gather(berry.id, berry, i);
-  assert.equal(i.count("berry"), 3);
-  s.time += GATHERABLES.berry.regrow;
-  s.gather(berry.id, berry, i);
-  assert.equal(i.count("berry"), 6);
-  s.gather(scrap.id, scrap, i);
-  s.time += 9999;
-  s.gather(scrap.id, scrap, i);
-  assert.equal(i.count("scrap"), 3);
-  const full = stocked({ stone: 36 * 64 }),
-    herb = sites.find((n) => n.kind === "herb");
-  assert.match(s.gather(herb.id, herb, full), /가방/);
-  assert.equal(s.region.resources[herb.id], undefined);
-  const r = Frontier.load(s.save());
-  assert.equal(r.region.resources[scrap.id], -1);
-  assert.ok(r.region.resources[berry.id] > 0);
-});
-test("ruin relays, bonus cache, observations and contracts are persistent one-time progression", () => {
-  const s = new Frontier(42),
-    i = stocked({ berry: 6, herb: 4, bio: 2, scrap: 6 }),
-    v = s.region.villages[0];
-  for (const q of CONTRACTS) {
-    assert.match(s.deliver(v.id, q.id, v, i), /완료/);
-    const saved = i.save();
-    s.deliver(v.id, q.id, v, i);
-    assert.deepEqual(i.save(), saved);
-  }
-  assert.equal(s.reputation[v.faction], 24);
-  assert.equal(s.study(0, i), true);
-  const notes = i.count("knowledge");
-  assert.equal(s.study(0, i), false);
-  assert.equal(i.count("knowledge"), notes);
-  const sites = relaySites(s.info);
-  assert.match(s.activateRelay(0, { x: 0, z: 0 }), /4m/);
-  s.activateRelay(0, sites[0]);
-  const xp = s.xp;
-  s.activateRelay(0, sites[0]);
-  assert.equal(s.xp, xp);
-  const r = Frontier.load(s.save());
-  assert.equal(r.region.relays.length, 1);
-  assert.equal(r.region.contracts.length, 3);
-  assert.deepEqual(r.region.studies, [0]);
-  for (const site of sites.slice(1)) r.activateRelay(site.index, site);
-  const full = stocked({ stone: 36 * 64 });
-  assert.match(r.claimRuin(r.info.dungeon, full), /가방/);
-  assert.equal(r.region.cacheClaimed, false);
-  assert.match(r.claimRuin(r.info.dungeon, i), /유적 핵 1/);
-  const after = i.save();
-  r.claimRuin(r.info.dungeon, i);
-  assert.deepEqual(i.save(), after);
-  assert.equal(i.count("relic"), 1);
-});
-test("legacy ruin progress migrates and malformed new content is rejected", () => {
-  const s = new Frontier(42),
-    old = s.save();
-  old.regions["0,0"].dungeon = 2.5;
-  for (const key of ["relays", "contracts", "studies", "resources"])
-    delete old.regions["0,0"][key];
-  const r = Frontier.load(old);
-  assert.deepEqual(r.region.relays, [0, 1]);
-  assert.equal(r.region.dungeon, 2.5);
-  const last = relaySites(r.info)[2];
-  r.activateRelay(2, last);
-  assert.equal(r.region.dungeon, 3);
-  const bad = r.save();
-  bad.regions["0,0"].relays = [0, 0];
-  assert.throws(() => Frontier.load(bad));
 });
 test("new gathering materials close crafting loop and relic tool uses real durability", () => {
   const i = stocked({

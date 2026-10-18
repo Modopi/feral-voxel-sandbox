@@ -5,7 +5,7 @@
 // phases between versions, not absolute FPS with a phone.
 // Scenarios use real input (held keys, the real attack button) except the loose-object setup,
 // which removes one trunk cell the way a felled tree does and is recorded as prepared state.
-//   node tools/profile-runtime.mjs [island,expedition]
+//   node tools/profile-runtime.mjs [island,expedition,frontier]
 //   FERAL_CHROME=chrome path, FERAL_ASSETS=served assets URL (e.g. an older build), FERAL_PERF_OUT=report path
 import fs from 'node:fs/promises';
 import {createRequire} from 'node:module';
@@ -109,6 +109,19 @@ const scenarios={
   const s=await open('profile-expedition','expedition');await s.page.waitForTimeout(4000);
   await measure(s,'idle',5000);
   await measure(s,'walk',6000,{action:walk(s)});
+  report.errors=[...(report.errors??[]),...s.errors];await s.context.close();
+ },
+ // The first signal on the runtime (0.16.0+): the camp with the campaign things in view, and the guardian's nest
+ // where it winds up and its telegraph is drawn. Builds before 0.16.0 run this preset on the old engine (skipped).
+ async frontier(){
+  const s=await open('profile-frontier','frontier');
+  if(!(await s.page.evaluate(()=>!!FERAL.runtime?.modules?.['first-signal']))){await s.context.close();return;}
+  await s.page.waitForTimeout(4000);
+  await measure(s,'camp',5000);
+  await measure(s,'camp, walking',6000,{action:walk(s)});
+  const prepared=await s.page.evaluate(()=>{const rt=FERAL.runtime,m=rt.modules['first-signal'],b=m.activeBoss,w=m.world(b);rt.hurt=()=>{};Object.assign(rt.player,{x:w.x+7,z:w.z,y:rt.atlas.heightAt(w.x+7,w.z)+.1,yaw:Math.PI/2});return 'player 7 m from the guardian (damage to the player switched off so the scene keeps running)';});
+  await s.page.waitForTimeout(2500);
+  await measure(s,'guardian fight',6000,{prepared});
   report.errors=[...(report.errors??[]),...s.errors];await s.context.close();
  },
 };

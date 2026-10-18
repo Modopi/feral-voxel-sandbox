@@ -4,17 +4,18 @@
 // Survival is the runtime's (user decision): damage goes through runtime.hurt, recovery fills the runtime's
 // HP and calories, and there is no experience, level or food buff. Frontier items map onto catalog items.
 import {regionInfo, regionKey} from '../frontier/terrain.js';
-import {CAMP, newJourney, ensureOutpost, campaignAction, validateCampaign} from '../frontier/campaign.js';
-import {FACTIONS, GATHERABLES, CONTRACTS, resourceSites, relaySites, ruinDefinition, ensureContent, prepareAttack, attackHits} from '../frontier/content.js';
+import {CAMP, BIOMES, PROJECTS, CROPS, newJourney, ensureOutpost, campaignAction, validateCampaign, channels, surveySites} from '../frontier/campaign.js';
+import {FACTIONS, GATHERABLES, CONTRACTS, resourceSites, relaySites, ruinDefinition, ensureContent, prepareAttack, attackHits, attackZones} from '../frontier/content.js';
+import {relayAsset, ruinCoreAsset, guardianAsset, villageSignAsset, villagerAsset, campCrateAsset, mastAsset, lampAsset, beamAsset, facilityAsset, FACILITY_OFFSETS, cropAsset, resourceAsset, surveyMarkerAsset} from './signal-assets.js';
 import {hash, clamp} from '../world.js';
-import {regionAt, onRegion, REGION_STRIDE} from './maps.js';
+import {regionAt, onRegion, REGION_STRIDE, FRONTIER_ITEMS as ITEM_MAP, RECORD_WORK} from './maps.js';
 
-// Frontier item → catalog item. Research records (`knowledge`) are research work the runtime's research
-// spends (RECORD_WORK seconds each); ruin cores (`relic`) are the campaign's own record, not a bag item.
-// Medicine becomes field food because HP recovers from calories under the runtime rules.
-export const ITEM_MAP = Object.freeze({wood:'raw_timber',plank:'wood',stone:'loose_stone',dirt:'soil',sand:'sand',fiber:'plant_fiber',berry:'berry',herb:'herb',seed:'seed',
- food:'food',medicine:'food',meat:'meat',iron:'scrap_iron',scrap:'iron_ore',crystal:'mana_crystal_ore',resin:'sap',bio:'hide'});
-export const RECORD_WORK = 5;
+// Frontier items map onto catalog items (maps.js FRONTIER_ITEMS, shared with the save converter): research
+// records (`knowledge`) are RECORD_WORK seconds of research work, ruin cores (`relic`) the campaign's own record.
+export {ITEM_MAP, RECORD_WORK};
+// What the frontier gave a new expedition (food 8, medicine 2, fiber 6, wood 8, stone 8, crystal 2), in catalog items.
+export const START_SUPPLIES = Object.freeze({food:8,medicine:2,fiber:6,wood:8,stone:8,crystal:2});
+const CROP_ASSETS = [0, 1, 2].map(cropAsset);
 const EPS = 1e-9, near = (p, q, r = 12) => Math.hypot(p.x - q.x, p.z - q.z) <= r, clone = v => JSON.parse(JSON.stringify(v));
 
 /** The frontier inventory contract (transaction/take/grant/count) over the runtime's progression. */
@@ -52,6 +53,10 @@ export class FirstSignal {
   this.x=0;this.z=0;this.time=0;this.socialClock=0;this.reputation=[0,0,0];this.diplomacy=[0,0,0];this.allies=[];this.regions={};this.cores=0;
   this.log=['첫 신호 · 주변에서 보급품을 채집하고 여정에서 다음 목표를 확인하세요.'];this.journey=newJourney();
   this.hostileClock=0;this.supportClock=0;this.fieldClock=0;this._local={x:0,z:0,flying:false};this._infoKey=null;this._info=null;
+  // revision counts every change a world thing shows; the descriptor list is rebuilt only when it moves.
+  this.revision=0;this._descriptors=[];this._descRevision=-1;this._guardian=null;this._crops=[];
+  // A new expedition receives the frontier's starting supplies on its first step; a loaded or converted one already has its own.
+  this.supplied=!!state;
   if(state)this._load(state);
   const r=regionAt(runtime.player.x,runtime.player.z);if(r&&!state){this.x=r.rx;this.z=r.rz;}
   this.ensureRegion();
@@ -94,11 +99,12 @@ export class FirstSignal {
 
  tick(dt){
   if(!Number.isFinite(dt)||dt<=0)return;
+  if(!this.supplied){this.supplied=true;this.inventory.transaction({},START_SUPPLIES,true);}
   dt=Math.min(dt,.25);this.time+=dt;this.socialClock+=dt;
   // Travel by any means (the travel button, a machine across the strait) arrives in the region below.
   // No allocation on this per-step path (docs/ARCHITECTURE.md §7) except when something happens.
   const p=this.runtime.player,on=onRegion(p.x,p.z);
-  if(on){const rx=Math.floor(p.x/REGION_STRIDE),rz=Math.floor(p.z/REGION_STRIDE);if(rx!==this.x||rz!==this.z){this.x=rx;this.z=rz;this.ensureRegion();this.note(`${this.info.name} 도착`);}}
+  if(on){const rx=Math.floor(p.x/REGION_STRIDE),rz=Math.floor(p.z/REGION_STRIDE);if(rx!==this.x||rz!==this.z){this.x=rx;this.z=rz;this.ensureRegion();this.revision++;this.note(`${this.info.name} 도착`);}}
   while(this.socialClock>=30){this.socialClock-=30;this.socialStep();}
   if(!on)return;
   const local=this.localPlayer(this._local),region=this.region,info=this.info;this.discover(local);
@@ -164,14 +170,15 @@ export class FirstSignal {
    if(!o.projects.includes('workshop'))return '공동 정비소가 필요합니다.';
    const g=this.runtime.progression,tools=Object.keys(g.toolWear).filter(id=>g.count(id)>0&&g.toolWear[id]<(g.catalog.get(id)?.durabilityActions||0)),weapons=this.runtime.armaments.weapons.filter(w=>w.durability<w.maxDurability);
    if(!tools.length&&!weapons.length)return '정비할 손상 장비가 없습니다.';
-   if(!this.inventory.transaction({iron:1,wood:1},{},true))return '정비에는 합금(잡철) 1·원목(미가공 목재) 1이 필요합니다.';
+   if(!this.inventory.transaction({iron:1,wood:1},{},true))return '정비에는 잡철 1·미가공 목재 1이 필요합니다.';
    for(const id of tools)g.toolWear[id]=Math.min(g.catalog.get(id).durabilityActions,g.toolWear[id]+60);
    for(const w of weapons)w.durability=Math.min(w.maxDurability,w.durability+60);
    return '모든 소지 장비 내구도 +60';
   }
-  return campaignAction(this,action,arg,p,this.inventory);
+  const result=campaignAction(this,action,arg,p,this.inventory);this.revision++;return result;
  }
  village(id,action){
+  this.revision++;
   const v=this.region.villages.find(v=>v.id===id),p=this.localPlayer(),inv=this.inventory;
   if(!v||!near(v,p))return '마을 12m 이내로 접근하세요.';
   const f=v.faction,hostile=this.reputation[f]<=-20;
@@ -221,7 +228,7 @@ export class FirstSignal {
   const key=`${v.id}/${quest.id}`;
   if(this.region.contracts.includes(key))return '이미 완료한 의뢰입니다.';
   if(!this.inventory.transaction(quest.cost,quest.reward,true))return '의뢰 재료를 확인하세요.';
-  this.region.contracts.push(key);this.reputation[v.faction]=Math.min(100,this.reputation[v.faction]+8);
+  this.region.contracts.push(key);this.revision++;this.reputation[v.faction]=Math.min(100,this.reputation[v.faction]+8);
   this.note(`${v.name} · ${quest.name} 완료 · 평판 +8`);return `${quest.name} 완료 · 보상 수령 · 평판 +8`;
  }
  gather(id){
@@ -231,14 +238,14 @@ export class FirstSignal {
   if(until===-1)return '모두 회수한 자원입니다.';
   if(until>this.time)return `다시 자라기까지 ${Math.ceil(until-this.time)}초`;
   this.inventory.transaction({},def.reward,true);
-  this.region.resources[id]=def.regrow?this.time+def.regrow:-1;
+  this.region.resources[id]=def.regrow?this.time+def.regrow:-1;this.revision++;
   return `${def.name} 채집`;
  }
  activateRelay(index){
   const site=relaySites(this.info)[index],r=this.region;
   if(!site||!near(site,this.localPlayer(),4))return '중계기 4m 안에서 사용하세요.';
   if(r.relays.includes(index))return '이미 해제한 중계기입니다.';
-  r.relays.push(index);r.dungeon=Math.max(r.dungeon,r.relays.length);this.note(`${site.name} 해제 · ${r.relays.length}/3`);
+  r.relays.push(index);r.dungeon=Math.max(r.dungeon,r.relays.length);this.revision++;this.note(`${site.name} 해제 · ${r.relays.length}/3`);
   return r.relays.length===3?'방어장 해제 · 가운데 회전하는 핵을 사용해 보상을 회수하세요.':`중계기 ${r.relays.length}/3 해제 · 다른 중계기를 찾으세요.`;
  }
  claimRuin(){
@@ -247,7 +254,7 @@ export class FirstSignal {
   if(r.cacheClaimed)return '이미 회수한 유적입니다.';
   if(r.dungeon<3)return `중계기 ${r.relays.length}/3 해제 · 주변의 세 중계기를 조준하고 사용하세요.`;
   const reward={knowledge:6,crystal:4,iron:3,relic:1};for(const [id,n] of Object.entries(ruin.bonus))reward[id]=(reward[id]||0)+n;
-  this.inventory.transaction({},reward,true);r.cacheClaimed=true;this.note(ruin.lore);this.note('유적 회수 · 유적 핵 +1');
+  this.inventory.transaction({},reward,true);r.cacheClaimed=true;this.revision++;this.note(ruin.lore);this.note('유적 회수 · 유적 핵 +1');
   return '유적 회수 · 연구 작업·결정·합금·유적 핵 1과 보관소 물자';
  }
  /** A hit on the guardian (or a sortie's echo) of this region. */
@@ -256,7 +263,7 @@ export class FirstSignal {
   if(b.defeated||!Number.isFinite(amount)||amount<=0)return false;
   b.hp=Math.max(0,b.hp-amount);
   if(!b.hp){
-   b.defeated=true;b.warning=0;this.hp+=30;
+   b.defeated=true;b.warning=0;this.hp+=30;this.revision++;
    if(this.region.outpost.sortie?.kind==='hunt'){this.region.outpost.sortie.done=true;this.note('수호자 잔향 격파 · 야영지에서 원정 보상을 받으세요.');return true;}
    const t=this.info.tier;this.inventory.transaction({},{relic:t,knowledge:6*t,iron:5*t},true);this.note(`수호자 격파 · 유적 핵 +${t} · 연구와 합금 획득`);
   }
@@ -277,11 +284,61 @@ export class FirstSignal {
   if(this.runtime.drivingMachineId){this.runtime.machines.control(this.runtime.drivingMachineId,{throttle:0,steer:0,pitch:0,brake:true});this.runtime.drivingMachineId=null;}
   this.x+=dx;this.z+=dz;const camp=this.world(CAMP);
   Object.assign(p,{x:camp.x,y:this.runtime.atlas.heightAt(camp.x,camp.z)+.05,z:camp.z,vy:0});
-  this.ensureRegion();this.note(`${this.info.name} 도착`);
+  this.ensureRegion();this.revision++;this.note(`${this.info.name} 도착`);
   return `${this.info.name} 도착`;
  }
 
- serialize(){return clone({schema:1,x:this.x,z:this.z,time:this.time,socialClock:this.socialClock,reputation:this.reputation,diplomacy:this.diplomacy,allies:this.allies,regions:this.regions,log:this.log,journey:this.journey,cores:this.cores});}
+ /** A blow on something this module put in the world (runtime.strike, kind 'module'): only the guardian takes it. */
+ strike(hit,amount){
+  if(hit?.id!=='first-signal/guardian')return {ok:false,reason:'상호작용 버튼으로 사용하세요.'};
+  if(this.activeBoss.defeated)return {ok:false,reason:'이미 쓰러진 수호자입니다.'};
+  this.hitGuardian(amount);return {ok:true,damage:amount};
+ }
+ /** The guardian's attack zones while it winds up (frontier attackZones), in world metres; empty otherwise. */
+ guardianZones(){
+  const b=this.activeBoss;if(b.defeated||!(b.warning>0))return null;
+  // One wind-up keeps its zones (aim and pattern are fixed until the blow), so they are made once per attack.
+  if(this._zones?.phase!==b.phase||this._zones.key!==this.key||this._zones.boss!==b){
+   const ox=this.x*REGION_STRIDE,oz=this.z*REGION_STRIDE,zones=attackZones(b);
+   for(const zone of zones){zone.x+=ox;zone.z+=oz;}
+   this._zones={phase:b.phase,key:this.key,boss:b,pattern:b.pattern,zones};
+  }
+  this._zones.warning=b.warning;return this._zones;
+ }
+ /** World things of the current region for the shared scene (runtime.descriptors): kind 'module', ids '<module>/<thing>'.
+  * The list is rebuilt only when `revision` or the region changes; the guardian and crops update in place. */
+ descriptors(){
+  if(this._descRevision!==this.revision||this._descKey!==this.key)this._buildDescriptors();
+  const g=this._guardian;
+  if(g){const b=this.activeBoss,p=this.runtime.player;g.position.x=b.x+this.x*REGION_STRIDE;g.position.z=b.z+this.z*REGION_STRIDE;g.position.y=this.runtime.atlas.heightAt(g.position.x,g.position.z);g.yaw=Math.atan2(p.x-g.position.x,p.z-g.position.z);}
+  const plots=this.region.outpost.plots;
+  for(const c of this._crops){const plot=plots[c.index];if(!plot)continue;const left=(plot.ready-this.time)/CROPS[plot.crop].seconds;c.asset=CROP_ASSETS[left<=0?2:left<.5?1:0];}
+  return this._descriptors;
+ }
+ _buildDescriptors(){
+  const info=this.info,region=this.region,o=region.outpost,rows=[],at=this.runtime.atlas;
+  const add=(thing,asset,local,extra={})=>{const x=local.x+this.x*REGION_STRIDE,z=local.z+this.z*REGION_STRIDE,row={id:`first-signal/${thing}`,assetId:asset.id,asset,kind:'module',position:{x,y:at.heightAt(x,z),z},yaw:extra.yaw??0,interactable:true,...extra};rows.push(row);return row;};
+  add('camp',campCrateAsset(),CAMP);
+  const mast={x:CAMP.x,z:CAMP.z-3},lit=channels(this);
+  add('mast',mastAsset(),mast);
+  BIOMES.forEach((_,i)=>{const row=add(`lamp:${i}`,lampAsset(i,lit.includes(i)),{x:mast.x+(i-1)*.85,z:mast.z});row.position.y+=4.4;});
+  if(this.journey.completedAt!==null){const row=add('beam',beamAsset(),mast);row.position.y+=4.5;}
+  for(const id of o.projects){const [dx,dz]=FACILITY_OFFSETS[id];add(`facility:${id}`,facilityAsset(id),{x:CAMP.x+dx,z:CAMP.z+dz});}
+  this._crops=[];
+  if(o.projects.includes('garden'))o.plots.forEach((plot,index)=>{if(!plot)return;const [dx,dz]=FACILITY_OFFSETS.garden,row=add(`crop:${index}`,CROP_ASSETS[0],{x:CAMP.x+dx,z:CAMP.z+dz+index*1.5},{index});row.position.y+=.2;this._crops.push(row);});
+  if(o.sortie?.kind==='survey')for(const site of surveySites(info))add(`survey:${site.index}`,surveyMarkerAsset(o.sortie.visited.includes(site.index)),site,{index:site.index});
+  relaySites(info).forEach((site,index)=>add(`relay:${index}`,relayAsset(region.relays.includes(index)),site,{index}));
+  if(!region.cacheClaimed)add('ruin',ruinCoreAsset(region.dungeon>=3),info.dungeon);
+  for(const site of resourceSites(info)){const until=region.resources[site.id];if(until===-1||until>this.time)continue;add(`resource:${site.id}`,resourceAsset(site.kind),site,{site:site.id});}
+  for(const v of region.villages){
+   add(`village:${v.id}`,villageSignAsset(v.faction),v,{village:v.id});
+   for(let role=0;role<3;role++){const a=role*2.1+v.x*.13;add(`villager:${v.id}:${role}`,villagerAsset(v.faction,role),{x:v.x+Math.cos(a)*2.4,z:v.z+Math.sin(a)*2.4},{village:v.id,role,yaw:Math.atan2(Math.cos(a),Math.sin(a))});} // facing out to visitors
+  }
+  this._guardian=this.activeBoss.defeated?null:add('guardian',guardianAsset(info.biome),this.activeBoss);
+  this._descriptors=rows;this._descRevision=this.revision;this._descKey=this.key;
+ }
+
+ serialize(){return clone({schema:1,x:this.x,z:this.z,time:this.time,socialClock:this.socialClock,reputation:this.reputation,diplomacy:this.diplomacy,allies:this.allies,regions:this.regions,log:this.log,journey:this.journey,cores:this.cores,supplied:this.supplied});}
  _load(data){
   const finite=(n,min=0)=>Number.isFinite(n)&&n>=min;
   if(!data||data.schema!==1||!Number.isInteger(data.x)||!Number.isInteger(data.z)||Math.abs(data.x)>10000||Math.abs(data.z)>10000)throw Error('첫 신호 저장 형식을 읽을 수 없습니다.');
@@ -297,8 +354,14 @@ export class FirstSignal {
   }
   const clean=clone(data);
   for(const key of ['x','z','time','socialClock','reputation','diplomacy','allies','regions','log','cores'])this[key]=clean[key];
-  this.journey=clean.journey||newJourney();
-  for(const r of Object.values(this.regions)){ensureContent(r);ensureOutpost(r);r.terrainVersion??=3;r.dungeon=Math.max(r.dungeon,r.relays.length);}
+  this.journey=clean.journey||newJourney();this.supplied=clean.supplied!==false;
+  for(const r of Object.values(this.regions)){
+   ensureContent(r);ensureOutpost(r);r.terrainVersion??=3;
+   // After migration each relay, observation and contract counts once (the frontier loader's rule).
+   if(new Set(r.relays).size!==r.relays.length||r.relays.some(n=>![0,1,2].includes(n))||r.studies.some(n=>![0,1,2].includes(n))||new Set(r.studies).size!==r.studies.length
+    ||r.contracts.some(n=>typeof n!=='string')||new Set(r.contracts).size!==r.contracts.length)throw Error('탐사 콘텐츠 기록이 손상되었습니다.');
+   r.dungeon=Math.max(r.dungeon,r.relays.length);
+  }
   validateCampaign(this);
  }
 }

@@ -49,9 +49,7 @@
 #titleScreen .eyebrow {color:#ded6af;letter-spacing:4px;font-size:11px;}
 #titleScreen h1 {font-size:88px;letter-spacing:6px;line-height:1;margin:10px 0;color:#efdfb3;text-shadow:4px 4px #26372b,7px 7px #080e0b;font-weight:900;}
 #titleScreen h1 .period {display:none;}#titleScreen h2 {font-size:13px;color:#d8ddc8;margin:14px 0 25px;letter-spacing:1px;}
-#titleScreen .startActions {display:grid;gap:9px;margin:0;}
-#titleScreen .startActions button,#titleScreen .worldSelectButton {width:100%;min-height:46px;padding:12px;display:block;border:2px solid;border-color:#b5bb98 #202b21 #202b21 #b5bb98;border-radius:0;background:#425749;color:#f3e9c9;box-shadow:inset 0 -3px #0003;font-size:15px;text-decoration:none;font-weight:bold;}
-#titleScreen .startActions button b {display:none;}#titleScreen .worldSelectButton {margin-top:9px;background:#293f34;}
+#titleScreen .worldSelectButton {width:100%;min-height:46px;padding:12px;margin-top:9px;display:block;border:2px solid;border-color:#b5bb98 #202b21 #202b21 #b5bb98;border-radius:0;background:#293f34;color:#f3e9c9;box-shadow:inset 0 -3px #0003;font-size:15px;text-decoration:none;font-weight:bold;}
 #titleScreen #loadStatus {font-size:10px;color:#cad2b6;margin-top:14px;}
 #titleScreen .titleFooter {position:absolute;bottom:14px;left:20px;right:20px;display:flex;justify-content:space-between;border:0;padding:0;color:#bac7ac;font-size:9px;}
 /* The editor captures all input while its real HUD preview is noninteractive. */
@@ -96,7 +94,7 @@ body.layoutEditing #toast {opacity:1;transform:none;min-width:110px;min-height:3
 .machineShell header,.machineShell section {background:var(--ui-face);color:var(--ui-ink);border:2px solid;border-color:var(--ui-hi) var(--ui-lo) var(--ui-lo) var(--ui-hi);border-radius:0;}
 .machineShell #metrics div {background:var(--ui-inset);border-radius:0;}.machineShell #metrics strong {color:var(--ui-ink);}.machineShell p,.machineShell small,.machineShell #metrics div {color:var(--ui-muted);}.machineShell #grid button {border-color:var(--ui-lo) var(--ui-hi) var(--ui-hi) var(--ui-lo);border-radius:0;}
 @media(orientation:landscape) and (max-height:540px) {
-  #titleScreen h1 {font-size:64px;margin:5px 0;}#titleScreen h2 {margin:8px 0 15px;}#titleScreen .titleCopy {width:300px;}#titleScreen .startActions button,#titleScreen .worldSelectButton {min-height:38px;padding:8px;font-size:13px;}#titleScreen #loadStatus {margin-top:8px;}
+  #titleScreen h1 {font-size:64px;margin:5px 0;}#titleScreen h2 {margin:8px 0 15px;}#titleScreen .titleCopy {width:300px;}#titleScreen .worldSelectButton {min-height:38px;padding:8px;font-size:13px;}#titleScreen #loadStatus {margin-top:8px;}
   #pauseScreen.inventoryMode .panelTop {margin:0;padding:3px 10px;}#pauseScreen:not(.inventoryMode) .menuContents {padding:9px 14px;}#pauseScreen #resumeWorld {min-height:40px;}#pauseScreen .editHudEntry {margin:7px 0;min-height:38px;}
   .worldMenu {padding:10px;}.worldMenu main {height:calc(100dvh - 20px);}.worldMenu header {padding:9px 16px;}.worldMenu h1 {font-size:20px;}.worldMenu article {padding:8px;}.worldMenu footer {padding:8px 16px;}
 }

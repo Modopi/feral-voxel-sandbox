@@ -1,0 +1,30 @@
+// scratch: exercise the frontier world on the runtime
+import {createRequire} from 'node:module';
+import {startAndroidAssetServer} from './android-asset-server.mjs';
+const {chromium}=createRequire(import.meta.url)('playwright');
+const out=process.argv[2];
+const server=await startAndroidAssetServer(),assets=`http://127.0.0.1:${server.address().port}/assets`;
+const browser=await chromium.launch({executablePath:'/opt/pw-browsers/chromium',headless:true,args:['--no-sandbox','--enable-webgl','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-dev-shm-usage']});
+const ctx=await browser.newContext({viewport:{width:844,height:390},isMobile:true,hasTouch:true});
+const page=await ctx.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push('console: '+m.text());});
+await page.addInitScript(()=>{window.AndroidApp={};});
+await page.goto(`${assets}/play.html?world=frontier`);
+await page.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:180000});
+const r=await page.evaluate(()=>{const rt=FERAL.runtime,m=rt.modules['first-signal'];return {map:FERAL.map,modules:Object.keys(rt.modules),views:FERAL.moduleViews.length,food:rt.progression.count('food'),biome:document.getElementById('biome').textContent,journey:document.getElementById('journeyHUD')?.textContent,waypoint:document.getElementById('waypoint').textContent,descriptors:rt.descriptors().filter(d=>d.kind==='module').length};});
+console.log(JSON.stringify(r));
+await page.waitForTimeout(3000);
+await page.screenshot({path:`${out}/field.png`});
+const look=async(name,thing,dx,dz)=>{await page.evaluate(([thing,dx,dz])=>{const rt=FERAL.runtime,d=rt.descriptors().find(x=>x.id===thing);const x=d.position.x+dx,z=d.position.z+dz;Object.assign(rt.player,{x,z,y:rt.atlas.heightAt(x,z)+.1,yaw:Math.atan2(-(d.position.x-x),-(d.position.z-z)),pitch:.05});},[thing,dx,dz]);await page.waitForTimeout(2500);await page.screenshot({path:`${out}/${name}.png`});};
+await look('camp','first-signal/mast',7,9);
+await look('village','first-signal/village:0,0:0',6,6);
+await look('relays','first-signal/ruin',9,9);
+await look('resources','first-signal/resource:berry:0',3,4);
+const samples=[];
+await page.evaluate(()=>{const rt=FERAL.runtime,m=rt.modules['first-signal'];rt.player.hp=100;});
+await look('guardian','first-signal/guardian',9,0);
+for(let i=0;i<30;i++){samples.push(await page.evaluate(()=>{const m=FERAL.runtime.modules['first-signal'],b=m.activeBoss;FERAL.runtime.player.hp=100;return [Number(b.warning.toFixed(2)),b.pattern,FERAL.moduleViews[0].telegraphs.hazards.size];}));if(samples.at(-1)[0]>0.2&&samples.at(-1)[2]>0){await page.screenshot({path:`${out}/telegraph.png`});break;}await page.waitForTimeout(150);}
+console.log('samples',JSON.stringify(samples.slice(-4)));
+const hit=await page.evaluate(()=>{const rt=FERAL.runtime,m=rt.modules['first-signal'],d=rt.descriptors().find(x=>x.id==='first-signal/guardian');rt.lastStrike=-10;const before=m.activeBoss.hp;const r=rt.strike({kind:'module',id:d.id,distance:3,point:d.position});return {r,before,after:m.activeBoss.hp};});
+console.log('strike',JSON.stringify(hit));
+console.log('errors',JSON.stringify(errors.slice(0,8)));
+await browser.close();server.close();

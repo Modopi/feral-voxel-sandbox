@@ -1,10 +1,4 @@
-/* Frontier overlays use the same field-equipment vocabulary as inventory. */
-body.frontier #hotbar .slot:nth-child(5),
-body.frontier #hotbar .slot:nth-child(6),
-body.frontier #hotbar .slot:nth-child(7),
-body.frontier #hotbar .slot:nth-child(9) {
-  display: none;
-}
+/* Field overlays use the same field-equipment vocabulary as inventory. */
 body.field #hud .telemetry {
   max-width: 50%;
 }
@@ -219,13 +213,6 @@ body.field #events {
 .villageRow {
   padding: 12px 0 24px;
   border-bottom: 1px solid #526057;
-}
-.raidConfirm {
-  border: 1px solid #b78464;
-  padding: 16px;
-}
-.raidConfirm button {
-  margin-right: 10px;
 }
 #frontierMachineGrid {
   display: grid;

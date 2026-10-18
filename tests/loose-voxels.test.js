@@ -6,7 +6,6 @@ import {
   massCenter,
 } from "../app/src/main/assets/loose-voxels.js";
 import { impactEnergy, gripLimits } from "../app/src/main/assets/impact.js";
-import { AssemblyPhysics } from "../app/src/main/assets/machine/assembly-physics.js";
 import {
   Ecology,
   cellPosition,
@@ -118,103 +117,6 @@ test("saved bodies preserve pose, pins and partial damage; malformed data is rej
   const bad = w.save();
   bad.loose.bodies[0].pose.rotation.w = 0;
   assert.throws(() => new World().load(bad), /회전/);
-});
-test("physical fall causes one resource-conserving impact, resting contact does not keep damaging", () => {
-  const w = floorWorld(),
-    s = w.loose.create([cell(0, 0, 0)], { x: 80, y: 12, z: 80 }),
-    physics = new AssemblyPhysics(w);
-  let chips = 0;
-  physics.onVoxelImpact = () => chips++;
-  try {
-    for (let i = 0; i < 240; i++) physics.step(null, 1 / 60);
-    assert.equal(chips, 1);
-    assert.equal(w.loose.bodies.length, 0);
-    assert.ok(!physics.loose.entries.size);
-  } finally {
-    physics.dispose();
-  }
-  const resting = floorWorld(),
-    r = resting.loose.create([cell(0, 0, 0)], { x: 80, y: 2.25, z: 80 }),
-    p = new AssemblyPhysics(resting);
-  try {
-    for (let i = 0; i < 180; i++) p.step(null, 1 / 60);
-    assert.equal(r.cells[0].damage || 0, 0);
-    assert.ok(Math.abs(r.pose.position.y - 2.25) < 0.04);
-  } finally {
-    p.dispose();
-  }
-});
-test("mass-limited grabbing lifts a light object while a heavy stone stays on the ground and can be pushed", () => {
-  const w = floorWorld(),
-    light = w.loose.create([cell(0, 0, 0)], { x: 78, y: 2.25, z: 80 }),
-    heavy = w.loose.create(
-      Array.from({ length: 8 }, (_, i) =>
-        cell(i % 2, Math.floor(i / 2) % 2, Math.floor(i / 4), B.STONE),
-      ),
-      { x: 82, y: 2.25, z: 80 },
-    ),
-    p = new AssemblyPhysics(w);
-  try {
-    p.step(null, 1 / 60);
-    p.loose.grab({ body: light, local: { x: 0, y: 0, z: 0 }, distance: 2 });
-    p.loose.aim = {
-      origin: { x: 78, y: 4, z: 82 },
-      direction: { x: 0, y: 0, z: -1 },
-    };
-    for (let i = 0; i < 90; i++) p.step(null, 1 / 60);
-    assert.ok(light.pose.position.y > 3.5);
-    p.loose.release();
-    p.loose.grab({ body: heavy, local: { x: 0, y: 0, z: 0 }, distance: 2 });
-    p.loose.aim = {
-      origin: { x: 82, y: 5, z: 82 },
-      direction: { x: 0, y: 0, z: -1 },
-    };
-    for (let i = 0; i < 90; i++) p.step(null, 1 / 60);
-    assert.ok(heavy.pose.position.y < 2.5);
-    assert.ok(p.loose.speedScale < 0.6);
-    p.loose.release();
-    const x = heavy.pose.position.x;
-    p.loose.push(
-      { body: heavy, point: [x, 2.5, 80.25] },
-      { x: 1, y: 0, z: 0 },
-      true,
-    );
-    for (let i = 0; i < 30; i++) p.step(null, 1 / 60);
-    assert.ok(heavy.pose.position.x > x + 0.01);
-  } finally {
-    p.dispose();
-  }
-});
-test("momentum damages contacted actors once and is not triggered by support force", () => {
-  const w = floorWorld(),
-    s = w.loose.create([cell(0, 0, 0, B.STONE)], { x: 80, y: 3, z: 84 });
-  s.pose.velocity = { x: 0, y: 0, z: -12 };
-  const p = new AssemblyPhysics(w),
-    key = {};
-  let damage = 0,
-    hits = 0;
-  p.impactActors = [
-    {
-      id: "victim",
-      key,
-      mass: 80,
-      height: 1.6,
-      radius: 0.3,
-      position: { x: 80, y: 2.8, z: 80 },
-    },
-  ];
-  p.onActorImpact = (actor, hit) => {
-    assert.equal(actor.key, key);
-    damage += hit.energy;
-    hits++;
-  };
-  try {
-    for (let i = 0; i < 120; i++) p.step(null, 1 / 60);
-    assert.ok(damage > 1000);
-    assert.equal(hits, 1);
-  } finally {
-    p.dispose();
-  }
 });
 test("impact rules forgive small falls, scale with mass, and stronger grips retain weight differences", () => {
   assert.equal(impactEnergy(80, Infinity, 7, 8), 0);

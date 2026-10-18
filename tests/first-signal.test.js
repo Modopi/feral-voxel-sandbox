@@ -6,9 +6,8 @@ import { CONTENT } from '../app/src/main/assets/content-runtime/catalog.generate
 import { ExpeditionRuntime } from '../app/src/main/assets/content-runtime/runtime.js';
 import { ITEM_MAP, RECORD_WORK } from '../app/src/main/assets/content-runtime/first-signal.js';
 import { REGION_STRIDE } from '../app/src/main/assets/content-runtime/maps.js';
-import { CAMP, PROJECTS, SIGNAL_ROUTES, CROPS, SORTIES, channels, milestones, surveySites } from '../app/src/main/assets/frontier/campaign.js';
+import { CAMP, PROJECTS, SIGNAL_ROUTES, CROPS, SORTIES, channels, milestones, surveySites, newJourney } from '../app/src/main/assets/frontier/campaign.js';
 import { GATHERABLES, CONTRACTS, RUINS, resourceSites, relaySites, attackHits } from '../app/src/main/assets/frontier/content.js';
-import { Frontier } from '../app/src/main/assets/frontier/model.js';
 
 const SEED = 42;
 const config = (rules = {}) => ({ configVersion: 1, preset: 'frontier', seed: SEED, terrain: { generator: 'frontier' }, rules: { survival: true, dropOnDeath: false, ...rules }, modules: ['first-signal'] });
@@ -17,7 +16,7 @@ const reopen = (runtime) => new ExpeditionRuntime(SEED, JSON.parse(JSON.stringif
 
 test('every campaign item maps onto a catalog item with an outdoor source or a recipe', () => {
   const used = new Set();
-  for (const def of [...PROJECTS, ...Object.values(SIGNAL_ROUTES), ...Object.values(CROPS), ...Object.values(SORTIES), ...CONTRACTS, ...Object.values(GATHERABLES), ...milestones(new Frontier())])
+  for (const def of [...PROJECTS, ...Object.values(SIGNAL_ROUTES), ...Object.values(CROPS), ...Object.values(SORTIES), ...CONTRACTS, ...Object.values(GATHERABLES), ...milestones({ regions: {}, journey: newJourney() })])
     for (const id of [...Object.keys(def.cost || {}), ...Object.keys(def.reward || {})]) used.add(id);
   for (const ruin of RUINS) for (const id of Object.keys(ruin.bonus)) used.add(id);
   for (const id of ['food', 'iron', 'wood', 'crystal', 'stone', 'sand', 'plank', 'knowledge']) used.add(id); // village trade, quarry, aid, peace

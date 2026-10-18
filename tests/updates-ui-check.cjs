@@ -70,8 +70,6 @@ const assert = require("node:assert/strict");
   assert.deepEqual(await page.evaluate(() => window.__calls.healthy), [
     version.versionCode,
   ]);
-  // The default world (the basic island, on the shared runtime from 0.14.0) starts without a title button.
-  if (await page.locator("#startBtn").isVisible()) await page.click("#startBtn");
   await page.click("#menuBtn");
   await page.click('[data-tab="updates"]');
   assert.equal(

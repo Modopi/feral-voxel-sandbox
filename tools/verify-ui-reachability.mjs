@@ -161,16 +161,48 @@ try{
  check(report.expedition,'reward marker, interact label, claim, journey record and device supply disconnect',{prepared:'teleport to dungeon; dead supply link injected',template:site.template,focusCard:card.focus,supplyInjected:supply});
  await context.close();
 
- // Frontier: the same field HUD and ledger window, now from the shared modules.
+ // First signal (frontier preset) on the runtime since 0.16.0: the shared HUD and ledger, the first-signal
+ // module's journey pages, villages, region travel and world things. An original frontier save converts once.
  const frontier=await browser.newContext({viewport:{width:844,height:390},isMobile:true,hasTouch:true,deviceScaleFactor:1});
- const fpage=await open(frontier,'play.html?world=frontier');await fpage.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:120000});
+ const fpage=await frontier.newPage();fpage.on('pageerror',e=>report.errors.push(`frontier: ${e.message}`));
+ const frontierSave=await fs.readFile(new URL('../tests/fixtures/frontier-save-v2.json',import.meta.url),'utf8');
+ await fpage.addInitScript(([worlds,save])=>{window.AndroidApp={};if(!localStorage.getItem('feral.worlds.v1'))localStorage.setItem('feral.worlds.v1',JSON.stringify(worlds));if(!localStorage.getItem('feral.slot.frontier'))localStorage.setItem('feral.slot.frontier',save);},[WORLDS,frontierSave]);
+ await fpage.goto(`${assets}/play.html?world=frontier`);await fpage.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:180000});
  assert.deepEqual(await present(fpage,[...SHARED_HUD,...FIELD_HUD]),[],'frontier shows the shared HUD');
- const ftap=async selector=>{const box=await fpage.locator(selector).first().boundingBox();assert(box,selector);await fpage.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);};
- await ftap('#journalBtn');assert.equal(await fpage.locator('#frontierTitle').textContent(),'원정 지도');
- await ftap('[data-frontier-tab=journal]');assert.equal(await fpage.locator('#frontierTitle').textContent(),'캐릭터 상태');await ftap('#frontierClose');
+ const fconv=await fpage.evaluate(()=>{const rt=FERAL.runtime,m=rt.modules['first-signal'];return {generator:rt.generator.id,modules:Object.keys(rt.modules),views:FERAL.moduleViews.length,block:rt.atlas.getCell(140,60,140),cores:m.cores,reputation:m.reputation,original:localStorage.getItem('feral.slot.frontier')?.length,generation:!!(localStorage.getItem('feral.slot.frontier.a')||localStorage.getItem('feral.slot.frontier.b')),unmapped:rt.conversion?.unmapped.map(u=>u.name),things:rt.descriptors().filter(d=>d.kind==='module').length};});
+ assert.deepEqual([fconv.generator,fconv.modules,fconv.views,fconv.block,fconv.cores],['frontier',['first-signal'],1,'dirt',2],'converted frontier world on the runtime');
+ assert.deepEqual(fconv.reputation,[30,-5,0]);assert.equal(fconv.original,frontierSave.length,'original frontier save untouched');assert(fconv.generation,'converted world saved in the shared format');
+ assert(fconv.unmapped.includes('경험치·레벨')&&fconv.unmapped.includes('아이템'),'what could not move is listed');assert(fconv.things>=30,'campaign things in the scene');
+ check(report.frontier,'original frontier save converts onto the runtime with its campaign, region terrain and items',{prepared:'old-engine frontier save fixture (tests/fixtures/frontier-save-v2.json)',converted:fconv});
+ const ftap=async selector=>{await fpage.locator(selector).first().scrollIntoViewIfNeeded();const box=await fpage.locator(selector).first().boundingBox();assert(box,selector);await fpage.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);};
+ await ftap('#journeyHUD');assert.equal(await fpage.locator('#frontierTitle').textContent(),'여정과 발견');
+ assert.deepEqual(await fpage.$$eval('[data-campaign-page]',b=>b.map(x=>x.textContent)),['목표','야영지','신호망','원정']);
+ assert.match(await fpage.locator('#frontierContent').textContent(),/기존 개척 원정 저장을 옮겼습니다/);
+ await ftap('[data-campaign-page=camp]');assert.match(await fpage.locator('#frontierContent').textContent(),/재생 텃밭/);
+ await fpage.screenshot({path:new URL('frontier-journey.png',out).pathname});
+ await ftap('[data-frontier-tab=map]');assert.equal(await fpage.locator('[data-route]').count(),4,'region travel to the four neighbours');
+ await fpage.screenshot({path:new URL('frontier-map.png',out).pathname});
+ await ftap('[data-frontier-tab=status]');assert.equal(await fpage.locator('#frontierTitle').textContent(),'캐릭터 상태');await ftap('#frontierClose');
+ check(report.frontier,'journey pages, conversion report, travel grid and status in the shared ledger');
+ // Walk up to a village: the interact button talks, the village page trades.
+ await fpage.evaluate(()=>{const rt=FERAL.runtime,m=rt.modules['first-signal'],v=m.region.villages[0],w=m.world(v),x=w.x+3,z=w.z+2;Object.assign(rt.player,{x,z,y:rt.atlas.heightAt(x,z)+.1});});
+ await fpage.waitForTimeout(500);
+ const talked=await fpage.evaluate(()=>{const m=FERAL.runtime.modules['first-signal'],v=m.region.villages[0];return FERAL.moduleViews[0].interact({kind:'module',id:`first-signal/village:${v.id}`,distance:2,point:FERAL.runtime.player});});
+ assert(talked);await fpage.waitForTimeout(300);assert.equal(await fpage.locator('#frontierTitle').textContent(),'공동체');
+ assert.equal(await fpage.locator('.villageRow').count(),2);const crystal=await fpage.evaluate(()=>FERAL.runtime.progression.count('mana_crystal_ore'));
+ await fpage.evaluate(()=>FERAL.runtime.progression.grant({raw_timber:4},{claimId:'ui-check:trade'}));await fpage.evaluate(()=>FERAL.ledger.render());
+ await ftap('.villageRow [data-action=trade]');await fpage.waitForTimeout(300);
+ assert.equal(await fpage.evaluate(()=>FERAL.runtime.progression.count('mana_crystal_ore')),crystal+2,'trade: timber 4 → crystal 2');
+ await fpage.screenshot({path:new URL('frontier-village.png',out).pathname});await ftap('#frontierClose');
+ check(report.frontier,'village conversation and trade through the shared ledger',{prepared:'player placed beside the first village; 4 timber granted'});
+ // Travel by the map: one food to the next region's camp, no reload.
+ const travel=await fpage.evaluate(()=>{const rt=FERAL.runtime,m=rt.modules['first-signal'],c=m.world({x:77.5,z:84.5});Object.assign(rt.player,{x:c.x,z:c.z,y:rt.atlas.heightAt(c.x,c.z)+.1});const food=rt.progression.count('food');const msg=m.travel(1,0);return {msg,key:m.key,spent:food-rt.progression.count('food'),stillReady:FERAL.stats().running};});
+ assert.match(travel.msg,/도착/);assert.deepEqual([travel.key,travel.spent,travel.stillReady],['1,0',1,true]);
+ await fpage.waitForTimeout(2500);await fpage.screenshot({path:new URL('frontier-region.png',out).pathname});
+ check(report.frontier,'region travel by food without a reload',{travel});
  await ftap('#inventoryBtn');assert.equal(await fpage.locator('#inventoryGrid .itemSlot').count(),27);
  await fpage.screenshot({path:new URL('frontier-bag.png',out).pathname});await frontier.close();
- check(report.frontier,'frontier field HUD, ledger window and bag from shared modules');
+ check(report.frontier,'frontier bag from the shared inventory screen');
 
  // Basic island: the same runtime and screen as the expedition (island map preset with sandbox rules).
  // An original island save is converted once; the original key stays untouched.

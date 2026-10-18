@@ -460,7 +460,7 @@ export class RuntimePhysics {
   watchImpacts(colliders, massKg) {
     for (const c of colliders) { c.setActiveEvents(R.ActiveEvents.CONTACT_FORCE_EVENTS); c.setContactForceEventThreshold(massKg * 9.81 * 5); }
   }
-  /** Fast bodies break and hurt what they hit (frontier impact-physics). Each reported contact is judged by the
+  /** Fast bodies break and hurt what they hit (the frontier engine's impact rule). Each reported contact is judged by the
    * pre-impact closing speed of the contact point along its normal (safe 4 m/s, wheels 8), at most every 0.3 s per pair
    * (0.45 s with a creature): terrain cells, loose
    * objects and machine voxels on both sides wear by the collision energy, and a creature part takes a blow. */

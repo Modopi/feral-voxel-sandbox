@@ -37,7 +37,7 @@ function nativeSwitch(current, snapshots, fromCode, toCode) {
 
 test('worlds made before 0.15 get their preset settings; the list stays readable by older builds', () => {
   const db = store({ [CATALOG]: JSON.stringify([{ id: 'default', name: '기본 탐험 맵', type: 'island', seed: 63026 }, { id: 'w1', name: '탐험', type: 'expedition', seed: 7 }]) });
-  assert.deepEqual(findWorld(db, 'default').config, { configVersion: 1, preset: 'island', seed: 63026, terrain: { generator: 'island' }, rules: { survival: false, sandbox: true, starterKit: true, dropOnDeath: true } });
+  assert.deepEqual(findWorld(db, 'default').config, { configVersion: 1, preset: 'island', seed: 63026, terrain: { generator: 'island' }, rules: { survival: false, sandbox: true, starterKit: true, dropOnDeath: true }, modules: [] });
   assert.deepEqual(findWorld(db, 'w1').config.rules, { survival: true, sandbox: false, startStructures: true, dropOnDeath: true });
   updateWorld(db, 'w1', { rules: { survival: false } });
   const row = JSON.parse(db.getItem(CATALOG)).find(w => w.id === 'w1');
@@ -53,9 +53,12 @@ test('a world is made with its own settings; only what its session reads is acce
   assert.deepEqual(findWorld(db, w.id).config.rules, { survival: true, sandbox: true, starterKit: false, dropOnDeath: true });
   assert.deepEqual(createWorld(db, '탐험', 'expedition', 1, { sandbox: true }).config.rules, { survival: true, sandbox: true, startStructures: true, dropOnDeath: true }, 'content exploration reads sandbox since 0.15.2');
   assert.throws(() => createWorld(db, '탐험', 'expedition', 1, { starterKit: true }), /쓸 수 없는 설정/, 'a setting its preset does not offer');
-  assert.throws(() => createWorld(db, '개척', 'frontier', 1, { survival: false }), /쓸 수 없는 설정/, 'old engines take no settings');
+  // The first signal runs on the runtime since 0.16.0: survival and the death rule (off by default), and its module.
+  const frontier = createWorld(db, '개척', 'frontier', 1, { survival: false });
+  assert.deepEqual([frontier.config.rules, findWorld(db, frontier.id).config.modules], [{ survival: false, dropOnDeath: false }, ['first-signal']]);
+  assert.throws(() => createWorld(db, '개척', 'frontier', 1, { sandbox: true }), /쓸 수 없는 설정/, 'the frontier offers no sandbox');
   assert.throws(() => createWorld(db, '이상', 'island', 1, { survival: 'yes' }), /올바르지 않습니다/);
-  assert.equal(listWorlds(db).length, DEFAULTS.length + 2, 'failed creations add nothing');
+  assert.equal(listWorlds(db).length, DEFAULTS.length + 3, 'failed creations add nothing');
 });
 
 test('settings that shaped the world are fixed after creation; the name and play rules can change', () => {
@@ -85,6 +88,11 @@ test('sessions only record when a world was last played; saves and deletion keep
   deleteWorld(db, w.id);
   assert.equal(db.getItem(saveKey(w) + '.a'), null);
   assert.equal(db.getItem('feral.world.v1'), 'old');
+  // Every runtime world (the frontier since 0.16.0) drops its save generations with it.
+  const f = createWorld(db, '원정', 'frontier');
+  for (const suffix of ['', '.a', '.b']) db.setItem(saveKey(f) + suffix, 'save');
+  deleteWorld(db, f.id);
+  assert.deepEqual(['', '.a', '.b'].map(suffix => db.getItem(saveKey(f) + suffix)), [null, null, null]);
 });
 
 test('the launcher and the game session are separate pages; only the session router picks an engine', () => {
@@ -98,9 +106,9 @@ test('the launcher and the game session are separate pages; only the session rou
   for (const gone of ['worlds.html', 'world-menu.js', 'expedition.html']) assert.equal(fs.existsSync(new URL(gone, ASSETS)), false, gone);
   assert.match(router, /PRESETS\[world\.type\]\.engine/);
   assert.match(router, /import\("\.\/content-runtime\/game\.js"\)\.then\(\(m\) => m\.start\(world\)\)/);
-  assert.deepEqual(Object.fromEntries(Object.entries(PRESETS).map(([k, p]) => [k, p.engine])), { expedition: 'runtime', island: 'runtime', frontier: 'frontier', machine: 'machine' });
+  assert.deepEqual(Object.fromEntries(Object.entries(PRESETS).map(([k, p]) => [k, p.engine])), { expedition: 'runtime', island: 'runtime', frontier: 'runtime', machine: 'machine' });
   const engineChoice = /\.engine\b/;
-  for (const file of ['launcher.js', 'content-runtime/game.js', 'content-runtime/runtime.js', 'shell.js', 'main.js'])
+  for (const file of ['launcher.js', 'content-runtime/game.js', 'content-runtime/runtime.js', 'shell.js'])
     assert.doesNotMatch(read(file), engineChoice, `${file} must not pick an engine`);
 });
 
@@ -232,8 +240,6 @@ test('copying unchanged data writes nothing; a build that never saved leaves the
 test('every engine copies its saves into the vault; the launcher restores before anything reads', () => {
   assert.match(read('content-runtime/game.js'), /autosave\.writeNow\(snapshot\(\)\);syncVault\(\)/);
   assert.match(read('content-runtime/game.js'), /onSaved:\(\)=>\{syncVault\(\);/);
-  assert.match(read('main.js'), /localStorage\.setItem\(storageKey, str\);\n    syncVault\(\);/);
-  assert.match(read('main.js'), /syncVault\(\)\.finally\(\(\) => location\.reload\(\)\)/, 'region travel copies before reloading');
   assert.match(read('machine/view.js'), /localStorage\.setItem\(storage, serialize\(state\)\);\n    syncVault\(\);/);
   const launcher = read('launcher.js');
   assert.match(launcher, /const restoring = restoreFromVault\(\)/);

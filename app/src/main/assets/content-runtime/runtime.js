@@ -29,21 +29,22 @@ const BOSS_ACTIONS = {repair:'수리',rest:'휴식',recharge:'재충전'};
 export const MODULES = Object.freeze({'first-signal':FirstSignal});
 export class ExpeditionRuntime {
  /** onProgress(step,done,total) reports loading steps; pause lets the screen repaint before synchronous construction. */
- static async create(seed,state=null,{onProgress=()=>{},pause=null,config=null}={}){
+ static async create(seed,state=null,{onProgress=()=>{},pause=null,config=null,atlas=null}={}){
   const assets=new Map(),total=CONTENT.structures.entries.length;let done=0;
   await Promise.all(CONTENT.structures.entries.map(async e=>{assets.set(e.id,await loadAsset(e.id));onProgress('assets',++done,total);}));
   onProgress('world',0,1);if(pause)await pause();
-  const runtime=new ExpeditionRuntime(seed,state,assets,{config});
+  const runtime=new ExpeditionRuntime(seed,state,assets,{config,atlas});
   onProgress('placements',0,1);if(pause)await pause();
   await runtime.placements.ready;runtime.placements.syncAccess(runtime.player);return runtime;
  }
- constructor(seed,state,assets,{config=null}={}){
+ /** atlas: extra atlas options for a new world (a converted save's region terrain versions). */
+ constructor(seed,state,assets,{config=null,atlas=null}={}){
   this.calorieRule=CONTENT.progression.entries.find(e=>e.id==='calorie_baseline');
   // The world config (kept by the launcher) names the terrain generator and the rules; every system
   // below is shared. A save keeps the generator it was made with.
   this.generator=generatorFor(savedGenerator(state)??config?.terrain?.generator);this.rules=worldRules(config);
   this.seed=seed;this.time=state?.time||0;this.nextId=state?.nextId||1;
-  this.atlas=new this.generator.atlas(CONTENT,{seed,state:state?.atlas,maxActiveChunks:96});
+  this.atlas=new this.generator.atlas(CONTENT,{...(state?null:atlas),seed,state:state?.atlas,maxActiveChunks:96});
   this.progression=new Progression(CONTENT,state?.progression||{});
   this.armaments=new Armaments(this.progression,state?.armaments||{});
   // Five staggered AI groups: about 3 game ticks apart instead of every creature on one tick.
@@ -82,6 +83,10 @@ export class ExpeditionRuntime {
   this.refreshWorld();
  }
  id(prefix){return `${prefix}:${this.seed}:${this.nextId++}`;}
+ /** Replaces a module's state (a converted save); the world settings must already name the module. */
+ loadModule(name,state){if(!this.modules[name])throw Error(`이 월드에 없는 모듈입니다: ${name}`);this.modules[name]=new MODULES[name](this,state);this.moduleList=Object.values(this.modules);return this.modules[name];}
+ /** The module that owns a world thing whose id is '<module>/<thing>'. */
+ moduleFor(id){const slash=typeof id==='string'?id.indexOf('/'):-1;return slash>0?this.modules[id.slice(0,slash)]??null:null;}
  message(text){this.messages.push(String(text));if(this.messages.length>30)this.messages.shift();}
  warn(text,seconds=1.5){this.warnings.push({text:String(text),until:this.time+Math.max(.8,seconds)});if(this.warnings.length>8)this.warnings.shift();}
  activeWarning(){this.warnings=this.warnings.filter(w=>w.until>this.time);return this.warnings.at(-1)??null;}
@@ -401,6 +406,8 @@ export class ExpeditionRuntime {
   if(weapon){const worn=this.armaments.recordAttack({distanceM:gimmick?gimmick.distance:hit.distance,at:this.time});if(!worn.ok)return worn;}
   if(gimmick){this.lastStrike=this.time;const ok=this.bosses.interactGimmick(gimmick.bossInstanceId,gimmick.gimmickId,{action:'damage',amount:loadout.hitDamage,actorPosition:this.player});return ok?{ok:true,gimmick:true,remainingHp:this.bosses.get(gimmick.bossInstanceId)?.gimmicks[gimmick.gimmickId]?.hp??0}:{ok:false,reason:'gimmick'};}
   this.lastStrike=this.time;this.lastAttackMode=weapon?.attackMode??'strike';
+  // Things a module puts in the world (kind 'module', id '<module>/<thing>') take the blow themselves.
+  if(hit.kind==='module')return this.moduleFor(hit.id)?.strike?.(hit,loadout.hitDamage)??{ok:false,reason:'target_missing'};
   return this.damageHit(hit,{amount:loadout.hitDamage,energyType:'mechanical',energyEU:loadout.hitDamage*1.5,attackMode:this.lastAttackMode,hitShape:hitShapeFor(weapon?.weaponKind)});
  }
  /** The frontier tool table entry for a held design tool; a broken or missing tool mines bare-handed. */
@@ -549,6 +556,7 @@ export class ExpeditionRuntime {
   for(const e of this.creatures.visibleEntities(p))rows.push({id:e.id,assetId:e.assetId??e.speciesId,kind:'creature',position:e,yaw:e.yaw,pose:e.pose,missingParts:e.pose?.missingParts,moving:['walk','hunt','flee','forage'].includes(e.state),entity:e});
   for(const e of this.bosses.entities.values())if((!e.defeated||Number.isFinite(e.defeatedAt)&&this.bosses.time-e.defeatedAt<1.6)&&distance(p,e.position)<220)rows.push({id:e.id,assetId:e.bossId,kind:'boss',position:e.position,yaw:Math.atan2(e.facing.x,e.facing.z),entity:e,bossSystem:this.bosses});
   for(const e of this.nearbyStructures){const origin=e.origin??e.position;if(!origin)continue;rows.push({id:e.id,assetId:e.templateId,kind:'structure',position:Array.isArray(origin)?{x:origin[0],y:origin[1],z:origin[2]}:origin,revision:e.revision,getBoxes:()=>this.dungeons.renderBoxes(e.id)});}
+  for(const module of this.moduleList)if(module.descriptors)rows.push(...module.descriptors());
   rows.push(...getResourceDescriptors(this),...this.machines.sceneModels().filter(e=>distance(p,e.position)<160),...this.objects.sceneModels().filter(e=>distance(p,e.position)<160),...this.placements.descriptors().filter(e=>distance(p,e.position)<160));
   return rows;
  }

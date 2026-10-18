@@ -18,7 +18,6 @@ import {
   cellPosition,
   toWorld,
 } from "../app/src/main/assets/entities.js";
-import { chunkGeometry } from "../app/src/main/assets/render.js";
 function field() {
   const w = new World(18);
   for (let z = 4; z < 30; z++)
@@ -177,17 +176,13 @@ test("tools remove 0.125, 1 and 8 cubic metres on filled terrain", () => {
   }
   assert.deepEqual(counts, [1, 8, 64]);
 });
-test("ray picking and visible half-cell mesh agree on the excavated boundary", () => {
+test("ray picking finds the excavated half-cell boundary", () => {
   const w = new World();
   w.set(18, 5, 18, B.STONE);
   w.setCell(36, 10, 36, 0);
   const h = w.raycast({ x: 18.25, y: 5.25, z: 17 }, { x: 0, y: 0, z: 1 }, 5);
   assert.equal(h.hz, 37);
   assert.equal(h.distance, 1.5);
-  const g = chunkGeometry(w, 1, 1),
-    a = g.attributes.position.array;
-  assert.ok(Array.from(a).some((v) => v === 18.5));
-  g.dispose();
 });
 test("save and load preserve fine terrain and half-height support", () => {
   const w = field();

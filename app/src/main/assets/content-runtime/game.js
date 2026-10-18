@@ -21,6 +21,7 @@ import {AnchorMarkers} from './anchor-markers.js';
 import {ItemSlots,designCatalog} from './item-slots.js';
 import {generatorFor,ecologyAt,ecologySpecies,BUILD_BLOCKS} from './maps.js';
 import {hitShapeFor} from './creature-animation.js';
+import {FirstSignalView} from './first-signal-view.js';
 import {VERSION} from '../version.js';
 import {FrameProfiler,fixedSteps,backgroundBudgetMs} from './frame-profiler.js';
 import {reasonText} from './reasons.js';
@@ -29,6 +30,11 @@ import {HudEditor} from '../hud-editor.js';
 import {installHUDArt,uiIcon} from '../ui-art.js';
 import {createInput,createNotifier,showDiscovery,initSettings,bindMenuTabs,selectTab,showPauseScreen,bindBackground,installErrorScreen,mountFieldHUD,mountJourney,setJourney,setVitals,waypointText,GameWindow,renderCharacterSheet,renderMapPage,showMovementState,changeStance,changeSprint,SANDBOX_TOOLS} from '../shell.js';
 const $=id=>document.getElementById(id);
+// Screens of the modules a world names (config.modules): game.js calls their hooks, never a map's name.
+const MODULE_VIEWS=Object.freeze({'first-signal':FirstSignalView});
+let moduleViews=[];
+/** The first answer a module view gives to a hook, or null. */
+function moduleHook(hook,...args){for(const v of moduleViews){const r=v[hook]?.(...args);if(r)return r;}return null;}
 const loading=window.FeralLoading??{set(){},step(){},finish(){},fail(){},timings:[]};
 // Importing this module starts nothing (the launcher loads it to check the files); start(world) does.
 let notify=Object.assign(()=>{},{busy:()=>false}),input;
@@ -184,6 +190,7 @@ function interact(){
  if(!ready||paused)return;const hit=view.aim();
  if(physical.objectPhysics.held){physical.objectPhysics.release();notify('물체를 놓았습니다.');return;}
  if(runtime.drivingMachineId){leaveMachine();return;}
+ if(moduleHook('interact',hit))return;
  if(hit?.kind==='machine'){machinePanel.selected=hit.id;ledger.open('machine');return;}
  if(hit?.kind==='fixture'&&hit.distance<5){ledger.open('energy');return;}
  if(hit?.kind==='object'&&hit.distance<4){const owner=runtime.objects.get(hit.id)?.fragment?.lootOwnerId,corpse=owner?runtime.creatures.corpses.get(`corpse:${owner}`):null;if(corpse&&!corpse.claimed){report(runtime.creatures.claimDrops(owner,runtime.progression),'전리품을 회수했습니다.');return;}report(physical.objectPhysics.grab(hit.id,hit.point),'물체를 잡았습니다. 상호작용은 놓기, 공격은 던지기입니다.');return;}
@@ -205,6 +212,7 @@ function gather(node){const r=runtime.harvest(node);if(r.ok){notify(`${name(r.so
 // What the interact button would do right now; empty when nothing is in reach.
 function interactLabel(hit){
  if(runtime.drivingMachineId)return '내리기';if(physical?.objectPhysics.held)return '놓기';
+ const fromModule=moduleHook('interactLabel',hit);if(fromModule)return fromModule;
  if(hit?.kind==='machine')return '기계 패널';if(hit?.kind==='fixture'&&hit.distance<5)return '설비 패널';
  if(hit?.kind==='object'&&hit.distance<4)return '잡기';if(hit?.kind==='resource')return '채집';
  if(hit?.kind==='creature'&&hit.distance<4){const e=runtime.creatures.get(hit.id);if(e?.dead)return '전리품';if(e?.civilization)return '대화';}
@@ -274,13 +282,15 @@ function renderMap(list){
   ...runtime.generator.landmarks.map(l=>spot(`${l.name}${runtime.discoveredLandmarks.has(l.name)?'':' · 미발견'}`,l.x,l.z)),
   ...runtime.nearbyStructures.map(d=>spot(CONTENT.structures.entries.find(s=>s.id===d.templateId)?.name??'장소',d.origin[0],d.origin[2],d.origin[1])),
   ...runtime.deaths.filter(d=>!d.recovered).map(d=>spot('요정이 지키는 소지품',d.position.x,d.position.z,d.position.y))];
- renderMapPage(list,{title:world.name,subtitle:`${e?.name??''} · ${runtime.region.tier}티어 · 발견 ${discovered.size+runtime.discoveredLandmarks.size}곳`,map:canvas,
+ const fromModule=moduleHook('mapInfo');
+ renderMapPage(list,{title:fromModule?.title??world.name,subtitle:fromModule?.subtitle??`${e?.name??''} · ${runtime.region.tier}티어 · 발견 ${discovered.size+runtime.discoveredLandmarks.size}곳`,map:canvas,
   footer:`현재 위치 ${Math.round(p.x)} / ${Math.round(p.z)}${destination?` · 목적지 ${destination.name}`:''}`,
-  destinations:places.map(d=>({name:d.name,distance:distance(p,d),onSelect:()=>{destination=d;pause(false);}}))},(label,fn,id)=>ledger.button(label,fn,id));
+  destinations:[...(fromModule?.destinations??[]),...places].map(d=>({name:d.name,distance:distance(p,d),onSelect:()=>{destination=d;pause(false);}}))},(label,fn,id)=>ledger.button(label,fn,id));
+ for(const v of moduleViews)v.renderTravel?.(list);
 }
 function renderConversion(append){
  const c=runtime.conversion;if(!c)return;
- const items=Object.entries(c.items??{}).map(([id,n])=>`${name(id)} ${Number(n.toFixed(2))}`).join(' · ')||'없음';
+ const items=[...Object.entries(c.items??{}).map(([id,n])=>`${name(id)} ${Number(n.toFixed(2))}`),...(c.extras??[])].join(' · ')||'없음';
  append(`${runtime.generator.legacySave?.name??'이전 저장'}을 옮겼습니다`,`원래 저장(${c.from})은 그대로 남아 있습니다. 위치·지형 편집·발견 장소와 다음 아이템을 옮겼습니다: ${items}`);
  for(const u of c.unmapped??[])append(`옮기지 못한 항목 · ${u.name}`,u.detail);
 }
@@ -291,9 +301,9 @@ function row(title,detail,label,callback,disabled=false,extra=[]){const el=docum
  if(buttons.length>1){const group=document.createElement('div');group.className='actions';group.append(...buttons);el.append(group);}else if(buttons.length)el.append(buttons[0]);return el;}
 function bar(card,percent){const track=document.createElement('div'),fill=document.createElement('span');track.className='progress-bar';fill.style.width=`${Math.max(0,Math.min(100,percent)).toFixed(1)}%`;track.append(fill);card.querySelector('.copy').append(track);}
 function renderLedger(tab,list){
- if(!ready)return;const p=runtime.progression,scrollTop=list.scrollTop;list.replaceChildren();
+ if(!ready)return;const p=runtime.progression,scrollTop=list.scrollTop;list.replaceChildren();list.classList.remove('journeyContent');
  const append=(title,detail,label,action,disabled,extra)=>list.append(row(title,detail,label,action,disabled,extra));
- if(tab==='journey')renderJourney(list,append);
+ if(tab==='journey'){if(moduleHook('renderJourney',list))renderConversion(append);else renderJourney(list,append);}
  else if(tab==='map')renderMap(list);
  else if(tab==='status')renderStatus(list,append);
  else if(tab==='research'){
@@ -328,6 +338,7 @@ function renderLedger(tab,list){
   }
  }else if(tab==='machine')machinePanel.render(list);
  else if(tab==='community'){
+  moduleHook('renderCommunity',list);
   if(communityTarget&&runtime.community){for(const option of runtime.community.optionsFor(communityTarget))append(option.label,option.detail,option.label,()=>report(runtime.community.interact(option.id,{targetId:communityTarget,requestId:runtime.id('community')})),option.disabled);}
   if(!list.childNodes.length)list.append(row('공동체와 만나기','문명 생명체나 공동체 시설에 다가가서 상호작용하세요.'));
  }else if(tab==='devices')renderDevices(list,append);
@@ -384,7 +395,7 @@ function renderStatus(list,append){
    {label:'가방 · 제작',short:'가방',id:'frontierBag',icon:uiIcon('bag'),onClick:()=>{ledger.close();openBag();}},
    {label:'탐험 저장',short:'저장',id:'frontierSave',icon:uiIcon('journey'),onClick:()=>save()?'저장했습니다.':'저장 실패 · 공간을 확인하세요.'},
   ],
-  milestones:[['▧',g.research.size,'연구'],['◆',bosses,'수호자'],['⚑',places,'발견'],['◈',runtime.deaths.filter(d=>!d.recovered).length,'회수 대기']],
+  milestones:moduleViews.some(v=>v.milestones)?[['▧',g.research.size,'연구'],...moduleViews.flatMap(v=>v.milestones?.()??[])].slice(0,4):[['▧',g.research.size,'연구'],['◆',bosses,'수호자'],['⚑',places,'발견'],['◈',runtime.deaths.filter(d=>!d.recovered).length,'회수 대기']],
   log:fieldLog,logTitle:'탐험 기록',
   portrait:{held,stance:p.stance},
  },(label,fn,id)=>ledger.button(label,fn,id));
@@ -473,6 +484,7 @@ function anchorCard(){
 }
 function focusCard(hit,node){
  const flash=hitFlash&&performance.now()<hitFlash.until?hitFlash.text:'';
+ const fromModule=moduleHook('focusCard',hit);if(fromModule){if(flash)fromModule.hint=flash;return fromModule;}
  if(hit?.kind==='creature'||hit?.kind==='boss'){
   const e=hit.kind==='boss'?runtime.bosses.get(hit.id):runtime.creatures.get(hit.id);
   if(e){const boss=hit.kind==='boss',def=boss?runtime.bosses.definitionFor(e):null,pos=boss?e.position:e;
@@ -497,14 +509,16 @@ function contextCard(){
 }
 function hud(){
  const p=runtime.player,g=runtime.progression,e=CONTENT.environments.entries.find(e=>e.id===runtime.region.environmentId);
- const place=landmarks();$('biome').textContent=place?place.name:`${e?.name??''} · ${runtime.region.tier}티어`;
+ const place=landmarks();$('biome').textContent=place?place.name:moduleHook('place')??`${e?.name??''} · ${runtime.region.tier}티어`;
  $('population').textContent=`생명체 ${runtime.creatures.visibleEntities(p).length}`;
  $('coords').textContent=`${Math.round(p.x)} / ${Math.round(p.z)}`;
  const job=g.researchJob,current=job&&g.catalog.get(job.id),progress=current?g.researchProgress[current.id]?.work??0:0;
  setVitals({hp:p.hp,maxHp:p.maxHp,food:p.calories/p.maxCalories*100,level:g.research.size,xp:progress,xpMax:current?.work??1,
   healthText:`체력 ${Math.ceil(p.hp)} / ${p.maxHp} · 연구 ${g.research.size}`,foodText:`식량 ${Math.ceil(p.calories/p.maxCalories*100)}% · ${p.resting?'휴식 중':runtime.drivingMachineId?'조종 중':'도보'}`,hurt:runtime.time-p.lastDamageAt<1});
- const [goal]=objective();setJourney(journey,goal,current?`연구 중 · ${current.name} ${(progress/current.work*100).toFixed(0)}%`:`연구 ${g.research.size}/${g.list('research').length} · 눌러서 여정 보기`);
- const target=destination??nearestUnexplored();$('waypoint').textContent=target?waypointText(p,target):'';
+ const [goal]=objective(),moduleGoal=moduleHook('objective');
+ if(moduleGoal)setJourney(journey,moduleGoal.title,moduleGoal.detail,moduleGoal.done);
+ else setJourney(journey,goal,current?`연구 중 · ${current.name} ${(progress/current.work*100).toFixed(0)}%`:`연구 ${g.research.size}/${g.list('research').length} · 눌러서 여정 보기`);
+ const target=destination??moduleHook('waypoint')??nearestUnexplored();$('waypoint').textContent=target?waypointText(p,target):'';
  const driving=!!runtime.drivingMachineId,hit=view.aim(),node=nearestNode(),interaction=interactLabel(hit);
  // Always on screen, like the frontier; the label names what is in reach.
  $('interactBtn').firstChild.textContent=(interaction||'상호작용')+' ';$('interactBtn').hidden=false;
@@ -577,7 +591,7 @@ function frame(now){
  const backgroundMs=performance.now()-background;t=perf.mark();
  view.syncModels(runtime.descriptors(),runtime.time,dt);fragments.sync(view.models);perf.add('view.models',t);t=perf.mark();
  physical?.synchronize(view.models,runtime.player);perf.add('physics.sync',t);t=perf.mark();
- bossView.sync(runtime.bosses);environmentView.sync(runtime.player,runtime.time);equipmentView.sync(runtime,dt);feedbackView.sync(runtime,dt);anchorMarkers.sync(runtime,dt);perf.add('view.effects',t);t=perf.mark();
+ bossView.sync(runtime.bosses);for(const v of moduleViews)v.frame?.();environmentView.sync(runtime.player,runtime.time);equipmentView.sync(runtime,dt);feedbackView.sync(runtime,dt);anchorMarkers.sync(runtime,dt);perf.add('view.effects',t);t=perf.mark();
  view.draw(runtime.player,controller.eye);perf.add('view.draw',t);t=perf.mark();
  hudClock+=dt;tabClock+=dt;
  if(hudClock>.2){hudClock=0;hud();}
@@ -661,9 +675,9 @@ async function boot(selected){
  // A save the earlier engine made for this terrain (the original island) is carried over once.
  if(!saved&&legacy){try{const old=JSON.parse(localStorage.getItem(saveKey(world))??'null');if(legacy.matches(old))legacySave=old;}catch(e){console.warn(`${legacy.name}을 읽지 못했습니다`,e);}}
  await stage('건축물 모델을 불러오는 중',10);
- runtime=await ExpeditionRuntime.create(world.seed,saved,{config:legacySave?{...config,rules:{...config.rules,starterKit:false}}:config,pause:paint,onProgress:(step,done,total)=>step==='assets'?loading.step(`건축물 모델을 불러오는 중 ${done}/${total}`,10+40*done/total):loading.set(...LOAD_STEPS[step])});
+ runtime=await ExpeditionRuntime.create(world.seed,saved,{config:legacySave?{...config,rules:{...config.rules,starterKit:false}}:config,atlas:legacySave?legacy.atlasOptions?.(legacySave):null,pause:paint,onProgress:(step,done,total)=>step==='assets'?loading.step(`건축물 모델을 불러오는 중 ${done}/${total}`,10+40*done/total):loading.set(...LOAD_STEPS[step])});
  // The earlier save (same key, without the .a/.b generations) brings its own items instead of the starting kit; the original stays.
- if(legacySave){await stage(`${legacy.name}을 옮기는 중`,70);converted=legacy.apply(runtime,legacySave);}
+ if(legacySave){await stage(`${legacy.name}을 옮기는 중`,70);converted=legacy.apply(runtime,legacySave,saveKey(world));}
  await stage('장면을 준비하는 중',72);
  view=new ExpeditionScene($('world'),runtime.atlas);controller=new CharacterController(runtime.terrain,runtime.player);
  settings=initSettings({view,onLeftHand:()=>hudEditor?.apply()});view.camera.fov=+$('fov').value;view.camera.updateProjectionMatrix();if(!view.loadRadiusChunks)view.qualitySet($('quality').value);
@@ -677,6 +691,8 @@ async function boot(selected){
  mountFieldHUD({journalLabel:'탐험 지도',onJournal:()=>ledger.open('map'),onStatus:()=>ledger.open('status'),onInteract:interact});
  journey=mountJourney(()=>ledger.open('journey'));
  ledger=new GameWindow({tabs:TABS,titles:TITLES,label:'탐험 장부',canOpen:()=>ready,onOpen:()=>pause(true,{quiet:true}),onClose:()=>pause(false),render:renderLedger});
+ const moduleHost={runtime,view,ledger,notify:text=>notify(text),pause:value=>pause(value),name,setDestination:target=>{destination=target;},refresh:refreshPanels};
+ moduleViews=Object.entries(runtime.modules).filter(([moduleName])=>MODULE_VIEWS[moduleName]).map(([moduleName,module])=>new MODULE_VIEWS[moduleName](module,moduleHost));
  installHUDArt();
  hudEditor=new HudEditor({open:()=>{pause(true);ledger.close();$('pauseScreen').classList.add('hidden');},close:()=>{stopInput();pause(true);selectTab('settings',updatePanels);}});
  $('editHudBtn').onclick=()=>hudEditor.open();$('editHudShortcut').onclick=()=>hudEditor.open();
@@ -691,7 +707,7 @@ async function boot(selected){
  if(converted){save();notify(`${runtime.generator.legacySave?.name??'이전 저장'}을 옮겼습니다${converted.unmapped.length?` · 옮기지 못한 항목 ${converted.unmapped.length}개는 지도 버튼의 여정에서 확인하세요.`:'.'}`);}
  loading.finish();$('titleScreen').classList.add('hidden');$('hud').classList.remove('hidden');hudEditor.apply();
  installErrorScreen();
- window.FERAL={ready:true,map:'expedition',perf,environment:environmentView,bootTimings:loading.timings,runtime,view,controller,physics:physical,slots,bag,ledger,save,pause,interact,openBag,selectHotbar,stats:()=>({running:ready&&!paused,paused,rewardMarkers:anchorMarkers.markers.size,warning:$('warning').textContent,toast:$('toast').textContent,version:VERSION.version,versionCode:VERSION.versionCode,player:{...runtime.player},regions:runtime.seenRegions.size,models:view.models.size,chunks:runtime.atlas.activeChunks.size,held:slots.held})};
+ window.FERAL={ready:true,map:'expedition',moduleViews,perf,environment:environmentView,bootTimings:loading.timings,runtime,view,controller,physics:physical,slots,bag,ledger,save,pause,interact,openBag,selectHotbar,stats:()=>({running:ready&&!paused,paused,rewardMarkers:anchorMarkers.markers.size,warning:$('warning').textContent,toast:$('toast').textContent,version:VERSION.version,versionCode:VERSION.versionCode,player:{...runtime.player},regions:runtime.seenRegions.size,models:view.models.size,chunks:runtime.atlas.activeChunks.size,held:slots.held})};
  window.FeralNative={save,pause:()=>{save();if(!paused)pause(true,{quiet:true});},back:()=>{if(hudEditor.editing)hudEditor.cancel();else if(ledger.isOpen)pause(false);else pause();}};
  requestAnimationFrame(frame);
 }

@@ -1,6 +1,6 @@
 // Game session entry (docs/ARCHITECTURE.md §6): play.html?world=<id> starts one world from the launcher's list.
-// This router is the only place that still picks an old engine, until the frontier and the machine field
-// move onto the one runtime (docs/ROADMAP.md S2, S3).
+// This router is the only place that still picks an old engine: the machine field, until it moves onto the
+// one runtime (docs/ROADMAP.md S3).
 import { findWorld, touchWorld, syncVault, PRESETS } from "./world-slots.js";
 
 const loading = window.FeralLoading;
@@ -21,12 +21,10 @@ if (!world) {
     console.warn("마지막 플레이 시각을 기록하지 못했습니다", e);
   }
   const engine = PRESETS[world.type].engine;
+  // Every world but the machine field plays on the one runtime (since 0.16.0 the frontier too).
   if (engine === "machine") location.replace(`machine.html?world=${encodeURIComponent(world.id)}`);
   else
-    (engine === "runtime"
-      ? import("./content-runtime/game.js").then((m) => m.start(world))
-      : import("./main.js")
-    ).catch((e) => {
+    import("./content-runtime/game.js").then((m) => m.start(world)).catch((e) => {
       console.error(e);
       loading.fail(`게임 파일을 불러오지 못했습니다: ${e.message}`);
     });

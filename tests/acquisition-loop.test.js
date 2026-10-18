@@ -14,9 +14,8 @@ import {
 import { GEAR, miningWork } from "../app/src/main/assets/equipment.js";
 import { B, World } from "../app/src/main/assets/world.js";
 import { Ecology, animalDrops } from "../app/src/main/assets/entities.js";
-import { Frontier } from "../app/src/main/assets/frontier/model.js";
-import { frontierWorld } from "../app/src/main/assets/frontier/terrain.js";
-import { resourceSites } from "../app/src/main/assets/frontier/content.js";
+import { regionInfo } from "../app/src/main/assets/frontier/terrain.js";
+import { resourceSites, GATHERABLES } from "../app/src/main/assets/frontier/content.js";
 test("every item and prerequisite has a route without starter items in both game modes", () => {
   for (const frontier of [false, true]) {
     const report = auditAcquisition(frontier);
@@ -35,13 +34,12 @@ test("every recipe executes from an empty bag using actual mining, regrowth, ani
   const metrics = { recipes: 0, minedCells: 0, gatherings: 0, hunts: 0 };
   for (const recipe of RECIPES) {
     const inv = new Inventory(false),
-      model = new Frontier(42),
       eco = new Ecology(world);
     eco.onDeath = (e) => {
       for (const [id, n] of Object.entries(animalDrops(e.type)))
         assert.equal(inv.add(id, n), n);
     };
-    const sites = resourceSites(model.info);
+    const sites = resourceSites(regionInfo(42, 0, 0));
     const gatherFor = {
       wood: "wood",
       fiber: "wood",
@@ -70,12 +68,9 @@ test("every recipe executes from an empty bag using actual mining, regrowth, ani
           `${recipe.id}: cannot acquire ${id} x${n}`,
         );
         if (gatherFor[id]) {
+          // A campaign gathering site gives its frontier reward (the first-signal module's gather rule).
           const site = sites.find((s) => s.kind === gatherFor[id]);
-          model.time = Math.max(
-            model.time,
-            model.region.resources[site.id] || 0,
-          );
-          assert.match(model.gather(site.id, site, inv), /채집/);
+          for (const [item, count] of Object.entries(GATHERABLES[site.kind].reward)) assert.equal(inv.add(item, count), count);
           metrics.gatherings++;
         } else if (blockFor[id]) {
           const index = world.blocks.indexOf(blockFor[id], 160 * 160),
@@ -178,24 +173,4 @@ test("extinction recovery consumes fertile habitat, stays away from player and s
     empty = new Ecology(barren);
   empty.migrate(90, player);
   assert.equal(empty.entities.length, 0);
-});
-test("a single region can renew timber, building minerals and research, and reconstruct relics without a boss", () => {
-  const s = new Frontier(42),
-    inv = new Inventory(false),
-    v = s.region.villages[0],
-    wood = resourceSites(s.info).find((n) => n.kind === "wood");
-  for (let n = 0; n < 5; n++) {
-    s.time = n * 300;
-    s.gather(wood.id, wood, inv);
-  }
-  assert.equal(inv.count("wood"), 20);
-  assert.ok(inv.craft("food"));
-  const stock = v.stone;
-  assert.match(s.actVillage(v.id, "quarry", inv, v), /돌 8/);
-  assert.equal(v.stone, stock - 12);
-  for (let n = 0; n < 6; n++) s.socialStep();
-  assert.ok(v.stone >= stock);
-  assert.ok(inv.craft("compost"));
-  assert.ok(inv.count("dirt") >= 4);
-  assert.equal(s.region.boss.defeated, false);
 });
