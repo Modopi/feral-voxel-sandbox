@@ -65,6 +65,8 @@
 
 게임 1507 / 앱·최소 앱 303 / 저장 스키마 2. Java·권한·키 변경이 없는 게임 전용 릴리스다. 제작 데이터에 도구 2개(조립 렌치·운반 집게)와 그 모델을 더하고, 물체·기계 고정, 강한 잡기, 물체에 블록 붙이기를 통합 런타임에 옮겼다. 고정 여부와 붙인 칸은 저장에 남고, 이전 빌드는 고정 여부를 읽지 않는다. 검증은 [검증 기록](../verification/0.15.7.md).
 
+2026-10-18 11:19 UTC [PR #39](https://github.com/Modopi/feral-voxel-sandbox/pull/39) 병합 커밋 `13f63c9`에서 [배포 Actions](https://github.com/Modopi/feral-voxel-sandbox/actions/runs/39122753329)가 성공해 11:20 UTC에 [v0.15.7 Release](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.15.7)와 기존 공식 `updates/catalog.json`, `updates/stable.feral`, 불변 `updates/versions/0.15.7.feral`로 게시됐다. stable과 버전 패키지는 같은 파일(SHA256 `0c901133…b38c97`)이며 로컬 빌드와 바이트 단위로 같고, 내부 아카이브 SHA256 `b6c2e916…`가 카탈로그와 일치한다. 카탈로그는 29개 항목이며 0.15.6(`62ad704d…`) 항목은 그대로다. 같은 커밋의 에셋 재생성·10티어 경로 검사도 성공했다. Release의 APK(`5135fb32…59d8`)는 CI가 다시 빌드한 것이다. Android 실기기 확인은 아직 하지 않았다.
+
 ### 0.15.6 — 로터 비행과 개척 원정식 물체 잡기 (통합 S2c2)
 
 게임 1506 / 앱·최소 앱 303 / 저장 스키마 2. Java·권한·키·저장 형식 변경이 없는 게임 전용 릴리스다. 로터가 조종 중 상승·고도 유지·하강·전진을 하도록 바꿔 기계가 날 수 있게 했고, 기계에서 내릴 때 옆 땅에 내린다. 물체 잡기·던지기·운반 무게는 개척 원정 규칙이다(잡는 힘 최대 3500 N, 던지기 min(5, 1100÷질량) m/s). 검증은 [검증 기록](../verification/0.15.6.md).
