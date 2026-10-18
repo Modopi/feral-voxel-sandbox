@@ -156,8 +156,7 @@ function driveMachine(id){
  runtime.drivingMachineId=id;runtime.machines.control(id,{throttle:0,steer:0,brake:false});pause(false);notify('이동 입력으로 조종합니다. 점프는 상승, 하강·제동 버튼(Shift·Ctrl)으로 조절하고 상호작용으로 내립니다.');return {ok:true};
 }
 function leaveMachine(){
- const m=runtime.machines.machines.get(runtime.drivingMachineId);if(m)runtime.machines.control(m.id,{throttle:0,steer:0,pitch:0,brake:true});
- runtime.drivingMachineId=null;runtime.player.vy=0;notify('조종을 마쳤습니다.');
+ runtime.leaveMachine();notify('조종을 마쳤습니다.');
 }
 function save(){
  if(!ready)return false;
@@ -542,7 +541,7 @@ function nearestUnexplored(){
 // ---- Loop ----
 function step(){
  const keys=input.keys,axes=input.axes(),p=runtime.player;
- const control=paused?{}:{forward:axes.forward,side:axes.side,jump:keys.has('Space'),sprint:keys.has('ShiftLeft')||keys.has('ShiftRight')||sprintLatched,speedScale:runtime.bosses.targetEffects(p).speedMultiplier};
+ const control=paused?{}:{forward:axes.forward,side:axes.side,jump:keys.has('Space'),sprint:keys.has('ShiftLeft')||keys.has('ShiftRight')||sprintLatched,speedScale:runtime.bosses.targetEffects(p).speedMultiplier*(physical?.objectPhysics.speedScale??1)};
  const before={...p};if(control.forward||control.side||actionHeld)p.resting=false;
  const driving=runtime.machines.machines.get(runtime.drivingMachineId);
  if(driving)runtime.machines.control(driving.id,{throttle:control.forward||0,steer:-(control.side||0),pitch:Number(!!control.jump)-Number(keys.has('ShiftLeft')||keys.has('KeyQ')||held.descend),brake:keys.has('ControlLeft')||held.brake});

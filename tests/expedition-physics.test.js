@@ -480,17 +480,21 @@ test('real WorldObjects detachment feeds exact original mass into Rapier and sav
   } finally { p.dispose(); }
 });
 
-test('grabbing applies bounded physical impulses and throwing adds at most the specified work to a moving object',async()=>{
+test('grabbing applies the frontier grip (at most 3500 N), carrying slows the player by mass, and a throw adds min(5, 1100/m) m/s',async()=>{
  const {WorldObjects}=await import('../app/src/main/assets/content-runtime/objects.js');
  const cells=new Map([['0,2,0','log']]);
  const atlas={...flat(),getCell:(x,y,z)=>cells.get(`${x},${y},${z}`)??null,setCell:(x,y,z,id)=>id==null?cells.delete(`${x},${y},${z}`):cells.set(`${x},${y},${z}`,id),revision:0};
  const rt=runtime(atlas);Object.assign(rt.player,{hp:100,yaw:0,pitch:0});rt.objects=new WorldObjects(content,atlas);const o=rt.objects.detachAround([0,1,0]).objects[0];
  const p=await RuntimePhysics.create(rt,null,{terrainRadius:1});try{
   p.synchronize(new Map(),rt.player);const bridge=p.objectPhysics,body=bridge.bodies.get(o.id).entry.body;
+  assert.equal(bridge.speedScale,1,'empty hands do not slow');
   assert.equal(bridge.grab(o.id,{x:.25,y:1.25,z:.25}).ok,true);const mass=body.mass(),before=body.linvel();bridge.prepare(1/60);const after=body.linvel();
-  assert(Math.hypot(after.x-before.x,after.y-before.y,after.z-before.z)*mass<=1800/60+.001);
-  body.setLinvel({x:0,y:0,z:-10},true);const initial=.5*mass*100;assert.equal(bridge.throwHeld().ok,true);const velocity=body.linvel(),final=.5*mass*(velocity.x**2+velocity.y**2+velocity.z**2);
-  assert(final-initial<=300.01);assert(final>initial);assert.equal(bridge.held,null);assert.equal(bridge.throwHeld().ok,false);
+  assert(Math.hypot(after.x-before.x,after.y-before.y,after.z-before.z)*mass<=Math.min(45*mass,3500)/60+.001);
+  assert.ok(Math.abs(bridge.speedScale-Math.max(.45,1/(1+mass/1600)))<1e-9,'carrying slows by the held mass');
+  assert.ok(bridge.held.distance>=1.5&&bridge.held.distance<=2.5);
+  body.setLinvel({x:0,y:0,z:-10},true);const thrown=bridge.throwHeld();assert.equal(thrown.ok,true);const velocity=body.linvel();
+  assert.ok(Math.abs(thrown.speed-Math.min(5,1100/mass))<1e-9);assert.ok(Math.abs(velocity.z-(-10-thrown.speed))<1e-3,`throw adds ${thrown.speed} m/s along the view`);
+  assert.equal(bridge.held,null);assert.equal(bridge.speedScale,1);assert.equal(bridge.throwHeld().ok,false);
   assert.equal(bridge.grab(o.id,{x:100,y:0,z:0}).ok,false);
  }finally{p.dispose();}
 });

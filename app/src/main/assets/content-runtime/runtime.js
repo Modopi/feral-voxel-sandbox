@@ -223,6 +223,22 @@ export class ExpeditionRuntime {
   }
   if(p.hp<=0)this.die();
  }
+ /** Stops driving and steps off beside the machine (frontier dismount): the first side, at the machine's
+  * half-width + 0.8 m, whose ground is at most 2 m above the machine and has room to stand; else 2.5 m above
+  * it. The player keeps the machine's vertical speed (±30 m/s). */
+ leaveMachine(){
+  const m=this.machines.machines.get(this.drivingMachineId),p=this.player;this.drivingMachineId=null;
+  if(!m?.voxels.length){p.vy=0;return null;}
+  this.machines.control(m.id,{throttle:0,steer:0,pitch:0,brake:true});
+  const c=this.machines.evaluate(m.id).center,cos=Math.cos(m.yaw),sin=Math.sin(m.yaw),flat=(x,z)=>({x:m.position.x+x*cos+z*sin,z:m.position.z-x*sin+z*cos});
+  let radius=0;for(const v of m.voxels)radius=Math.max(radius,Math.hypot((v.cell[0]+.5)*m.gridM-c[0],(v.cell[2]+.5)*m.gridM-c[2]));radius+=m.gridM/2+.8;
+  const y=m.position.y+c[1],vy=Math.max(-30,Math.min(30,m.velocity.y));
+  for(const [dx,dz] of [[radius,0],[-radius,0],[0,radius],[0,-radius]]){
+   const at=flat(c[0]+dx,c[2]+dz),ground=this.atlas.heightAt(at.x,at.z);
+   if(ground<=y+2&&!this.isSolid(at.x,Math.max(ground,y)+.5,at.z)&&!this.isSolid(at.x,Math.max(ground,y)+1.4,at.z)){Object.assign(p,{x:at.x,y:Math.max(ground,y),z:at.z,vy,grounded:ground>=y});return {x:p.x,y:p.y,z:p.z};}
+  }
+  const top=flat(c[0],c[2]);Object.assign(p,{x:top.x,y:y+2.5,z:top.z,vy:0});return {x:p.x,y:p.y,z:p.z};
+ }
  /** Impact damage (impact.js): health from collision energy, reduced by worn armour like any hit. */
  impactDamage(energy,source){const amount=impactHealth(energy);if(!(amount>0)||!this.rules.survival)return 0;this.hurt(amount*(1-this.progression.evaluateLoadout().damageReduction),source);return amount;}
  /** A moving object struck a creature (physics.js creatureImpacts): the frontier's collision damage,
