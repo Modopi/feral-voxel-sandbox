@@ -7,17 +7,6 @@ import {
   EYE_HEIGHT,
   overlaps,
 } from "../app/src/main/assets/physics.js";
-import {
-  Inventory,
-  Pickups,
-  resourceForBlock,
-} from "../app/src/main/assets/inventory.js";
-import {
-  Ecology,
-  SPECIES,
-  cellPosition,
-  toWorld,
-} from "../app/src/main/assets/entities.js";
 function field() {
   const w = new World(18);
   for (let z = 4; z < 30; z++)
@@ -193,91 +182,4 @@ test("save and load preserve fine terrain and half-height support", () => {
   assert.deepEqual([...copy.subcells], [...w.subcells]);
   assert.equal(copy.surface(12.25, 12.25), 3.5);
   assert.equal(copy.surface(12.75, 12.25), 4);
-});
-test("crafting is atomic: missing resources never disappear and outputs are exact", () => {
-  const inv = new Inventory(false);
-  inv.add("wood", 1);
-  assert.equal(inv.craft("planks"), false);
-  assert.equal(inv.count("wood"), 1);
-  inv.add("wood", 1);
-  assert.equal(inv.craft("planks"), true);
-  assert.equal(inv.count("wood"), 0);
-  assert.equal(inv.count("plank"), 4);
-  assert.equal(inv.craft("hammer"), false);
-  assert.equal(inv.count("plank"), 4);
-});
-test("resource collection enables crafted tools and an unlock cannot be charged twice", () => {
-  const inv = new Inventory(false);
-  for (const [id, n] of Object.entries({ stone: 12, plank: 4, bio: 6 }))
-    inv.add(id, n);
-  assert.equal(inv.craft("resin"), true);
-  assert.equal(inv.craft("hammer"), true);
-  assert.equal(inv.unlocks.has("hammer"), true);
-  assert.equal(inv.craft("hammer"), false);
-  assert.equal(inv.count("stone"), 0);
-});
-test("mined drops remain until approached, then collect only once", () => {
-  const w = field(),
-    inv = new Inventory(false),
-    loot = new Pickups(),
-    p = actor(20, 4, 20);
-  loot.spawn(resourceForBlock(B.WOOD), 8, 12.5, 4.2, 12.5, {
-    vx: 0,
-    vy: 0,
-    vz: 0,
-  });
-  for (let i = 0; i < 120; i++) loot.update(FIXED_DT, w, p, inv);
-  assert.equal(inv.count("wood"), 0);
-  assert.equal(loot.items.length, 1);
-  assert.ok(Math.abs(loot.items[0].y - 4.075) < 1e-7);
-  p.x = 12.5;
-  p.z = 12.5;
-  loot.update(FIXED_DT, w, p, inv);
-  assert.equal(inv.count("wood"), 8);
-  assert.equal(loot.items.length, 0);
-  loot.update(FIXED_DT, w, p, inv);
-  assert.equal(inv.count("wood"), 8);
-});
-test("voxel damage routes collectable fragments; death yields a separate reward once", () => {
-  const w = field(),
-    eco = new Ecology(w),
-    loot = new Pickups(),
-    inv = new Inventory(false),
-    e = eco.spawn(0, 12.5, 12.5);
-  e.yaw = 0;
-  let deaths = 0;
-  eco.onVoxel = (d) => loot.spawn("bio", 1, d.x, d.y, d.z, d);
-  eco.onDeath = (m) => {
-    deaths++;
-    loot.spawn("essence", 1, m.x, m.y + 0.4, m.z);
-  };
-  const p = SPECIES[0].parts[2];
-  eco.damageHit(
-    { entity: e, part: 2, point: toWorld(e, p, 2, cellPosition(p, 0), 0) },
-    0,
-    0.3,
-  );
-  assert.ok(loot.items.some((d) => d.kind === "bio"));
-  eco.kill(e);
-  eco.kill(e);
-  assert.equal(deaths, 1);
-  loot.update(FIXED_DT, w, actor(12.5, 4, 12.5), inv);
-  assert.ok(inv.count("bio") >= 1);
-  assert.equal(inv.count("essence"), 1);
-});
-test("inventory, crafted unlocks and uncollected drops survive serialization", () => {
-  const inv = new Inventory(false);
-  for (const [id, n] of Object.entries({ stone: 12, plank: 4, resin: 2 }))
-    inv.add(id, n);
-  inv.craft("hammer");
-  inv.add("wood", 7);
-  const loot = new Pickups();
-  loot.spawn("bio", 5, 20, 5, 20);
-  const i2 = new Inventory(false),
-    l2 = new Pickups();
-  i2.load(JSON.parse(JSON.stringify(inv.save())));
-  l2.load(JSON.parse(JSON.stringify(loot.save())));
-  assert.equal(i2.count("wood"), 7);
-  assert.equal(i2.unlocks.has("hammer"), true);
-  assert.equal(l2.items[0].count, 5);
 });

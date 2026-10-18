@@ -15,7 +15,7 @@ const make = (state = null, options = {}) => new ExpeditionRuntime(63026, state,
 const fixture = () => JSON.parse(fs.readFileSync(new URL('./fixtures/frontier-save-v2.json', import.meta.url), 'utf8'));
 
 test('the frontier preset plays on the runtime with the first-signal module, survival on and belongings kept on death', () => {
-  assert.equal(PRESETS.frontier.engine, 'runtime');
+  assert.equal(PRESETS.frontier.terrain, 'frontier');
   assert.deepEqual([config.terrain.generator, config.modules, config.rules], ['frontier', ['first-signal'], { survival: true, dropOnDeath: false }]);
   const runtime = make();
   assert.deepEqual(Object.keys(runtime.modules), ['first-signal']);

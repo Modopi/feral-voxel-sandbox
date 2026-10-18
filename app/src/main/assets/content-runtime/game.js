@@ -22,6 +22,7 @@ import {ItemSlots,designCatalog} from './item-slots.js';
 import {generatorFor,ecologyAt,ecologySpecies,BUILD_BLOCKS} from './maps.js';
 import {hitShapeFor} from './creature-animation.js';
 import {FirstSignalView} from './first-signal-view.js';
+import {MachineFieldView} from './machine-field-view.js';
 import {VERSION} from '../version.js';
 import {FrameProfiler,fixedSteps,backgroundBudgetMs} from './frame-profiler.js';
 import {reasonText} from './reasons.js';
@@ -31,7 +32,7 @@ import {installHUDArt,uiIcon} from '../ui-art.js';
 import {createInput,createNotifier,showDiscovery,initSettings,bindMenuTabs,selectTab,showPauseScreen,bindBackground,installErrorScreen,mountFieldHUD,mountJourney,setJourney,setVitals,waypointText,GameWindow,renderCharacterSheet,renderMapPage,showMovementState,changeStance,changeSprint,SANDBOX_TOOLS} from '../shell.js';
 const $=id=>document.getElementById(id);
 // Screens of the modules a world names (config.modules): game.js calls their hooks, never a map's name.
-const MODULE_VIEWS=Object.freeze({'first-signal':FirstSignalView});
+const MODULE_VIEWS=Object.freeze({'first-signal':FirstSignalView,'machine-field':MachineFieldView});
 let moduleViews=[];
 /** The first answer a module view gives to a hook, or null. */
 function moduleHook(hook,...args){for(const v of moduleViews){const r=v[hook]?.(...args);if(r)return r;}return null;}
@@ -530,8 +531,18 @@ function hud(){
  const firstJob=g.jobs[0];if(firstJob?.id!==jobWatch.id||firstJob.progress!==jobWatch.progress)jobWatch={id:firstJob?.id??null,progress:firstJob?.progress??0,since:performance.now()};
  for(const message of runtime.messages.splice(0)){notify(message,{queue:true});fieldLog.unshift(message);fieldLog.length=Math.min(fieldLog.length,40);}
  discover();
+ machineReadout();
  const h=8+runtime.time/60;$('worldTime').textContent=`DAY ${String(1+Math.floor(h/24)).padStart(2,'0')} · ${String(Math.floor(h)%24).padStart(2,'0')}:${String(Math.floor((h%1)*60)).padStart(2,'0')}`;
  updateToolLabel();
+}
+// The shared readout while driving a machine: speed, height over the ground, power, mass, wheels on the ground, damage.
+function machineReadout(){
+ const out=$('flightReadout'),m=runtime.machines.machines.get(runtime.drivingMachineId);
+ // The readout takes the journey line's place while driving.
+ out.hidden=!m;journey.hidden=!!m;if(!m)return;
+ const stats=runtime.machines.evaluate(m.id),wheels=runtime.machines.wheelsOnGround(m.id),damaged=m.voxels.filter(v=>v.hp<v.maxHp).length;
+ const height=Math.max(0,m.position.y-runtime.surfaceHeight(m.position.x,m.position.z,m.position.y));
+ out.textContent=`속도 ${(Math.hypot(m.velocity.x,m.velocity.z)*3.6).toFixed(0)} km/h · 높이 ${height.toFixed(1)} m\n출력 ${stats.powerEUPerSecond.toFixed(1)} EU/s · 질량 ${stats.mass.toFixed(0)} kg\n${wheels.count?`바퀴 접지 ${wheels.ground}/${wheels.count} · `:''}손상 복셀 ${damaged}/${m.voxels.length}`;
 }
 // Attack and use labels follow the held item and what the player is doing.
 function buttonLabels(){
@@ -683,7 +694,7 @@ async function boot(selected){
  settings=initSettings({view,onLeftHand:()=>hudEditor?.apply()});view.camera.fov=+$('fov').value;view.camera.updateProjectionMatrix();if(!view.loadRadiusChunks)view.qualitySet($('quality').value);
  autosave=new Autosave(saveStore,{onSaved:()=>{syncVault();$('saveState').textContent='SAVED '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});},onError:error=>{$('saveState').textContent='SAVE FAILED';console.warn(error);notify('자동 저장하지 못했습니다. 이전 정상 저장은 보존됩니다.');}});
  bossView=new BossView(view);equipmentView=new EquipmentView(view);feedbackView=new FeedbackView(view);anchorMarkers=new AnchorMarkers(view);
- environmentView=new EnvironmentView(view,runtime.atlas);machinePanel=new MachinePanel(runtime,{report,drive:driveMachine});fixtureEnergyPanel=new FixtureEnergyPanel(runtime,{report,onManual:value=>{manual=value;if(value)actionHeld=false;}});
+ environmentView=new EnvironmentView(view,runtime.atlas);machinePanel=new MachinePanel(runtime,{report,drive:driveMachine,extra:(parent,machine)=>moduleHook('machineCards',parent,machine)});fixtureEnergyPanel=new FixtureEnergyPanel(runtime,{report,onManual:value=>{manual=value;if(value)actionHeld=false;}});
  slots=new ItemSlots(runtime.progression,saved?.itemSlots);
  if(saved?.editGrid){miningSize=saved.editGrid.miningSize===1?1:.5;buildSize=saved.editGrid.buildSize===1?1:.5;}
  catalog=designCatalog(runtime,{name,actions:itemActions,queue:renderQueue});
@@ -707,7 +718,7 @@ async function boot(selected){
  if(converted){save();notify(`${runtime.generator.legacySave?.name??'이전 저장'}을 옮겼습니다${converted.unmapped.length?` · 옮기지 못한 항목 ${converted.unmapped.length}개는 지도 버튼의 여정에서 확인하세요.`:'.'}`);}
  loading.finish();$('titleScreen').classList.add('hidden');$('hud').classList.remove('hidden');hudEditor.apply();
  installErrorScreen();
- window.FERAL={ready:true,map:'expedition',moduleViews,perf,environment:environmentView,bootTimings:loading.timings,runtime,view,controller,physics:physical,slots,bag,ledger,save,pause,interact,openBag,selectHotbar,stats:()=>({running:ready&&!paused,paused,rewardMarkers:anchorMarkers.markers.size,warning:$('warning').textContent,toast:$('toast').textContent,version:VERSION.version,versionCode:VERSION.versionCode,player:{...runtime.player},regions:runtime.seenRegions.size,models:view.models.size,chunks:runtime.atlas.activeChunks.size,held:slots.held})};
+ window.FERAL={ready:true,map:'expedition',moduleViews,machinePanel,perf,environment:environmentView,bootTimings:loading.timings,runtime,view,controller,physics:physical,slots,bag,ledger,save,pause,interact,openBag,selectHotbar,stats:()=>({running:ready&&!paused,paused,rewardMarkers:anchorMarkers.markers.size,warning:$('warning').textContent,toast:$('toast').textContent,version:VERSION.version,versionCode:VERSION.versionCode,player:{...runtime.player},regions:runtime.seenRegions.size,models:view.models.size,chunks:runtime.atlas.activeChunks.size,held:slots.held})};
  window.FeralNative={save,pause:()=>{save();if(!paused)pause(true,{quiet:true});},back:()=>{if(hudEditor.editing)hudEditor.cancel();else if(ledger.isOpen)pause(false);else pause();}};
  requestAnimationFrame(frame);
 }

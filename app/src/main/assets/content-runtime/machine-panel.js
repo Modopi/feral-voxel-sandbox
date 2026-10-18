@@ -1,4 +1,4 @@
-import {MACHINE_VARIANTS} from './machines.js';
+import {MACHINE_VARIANTS,materialColor} from './machines.js';
 import {MATERIAL_EFFECT_RULES} from './material-effects.js';
 
 const ENERGY_NAMES={mechanical:'역학',electrical:'전기',thermal:'열',chemical:'화학',magic:'마법',divine:'신성'};
@@ -8,7 +8,7 @@ const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z);
 
 /** Ordinary inventory-backed assembly controls. Every mutation uses MachineSystem. */
 export class MachinePanel {
- constructor(runtime,{report,drive}={}){this.runtime=runtime;this.report=report;this.drive=drive;this.selected=null;this.draft={name:'나의 구조물',grid:'.1',material:'wood',x:0,y:0,z:0,voxel:'',component:'',variant:'',from:'',to:'',energy:'mechanical',cargo:'',amount:1,fluid:'water',source:'',pump:'',destination:''};}
+ constructor(runtime,{report,drive,extra}={}){this.runtime=runtime;this.report=report;this.drive=drive;this.extra=extra;this.selected=null;this.draft={tool:'add',layer:0,name:'나의 구조물',grid:'.1',material:'wood',x:0,y:0,z:0,voxel:'',component:'',variant:'',from:'',to:'',energy:'mechanical',cargo:'',amount:1,fluid:'water',source:'',pump:'',destination:''};}
  name(id){return this.runtime.progression.catalog.get(id)?.name??id;}
  field(parent,key,label,options=null,type='text'){
   const wrapper=el('label',null,'machine-field');wrapper.append(el('span',label));
@@ -21,6 +21,41 @@ export class MachinePanel {
  }
  action(parent,label,callback,disabled=false){const b=el('button',label);b.disabled=disabled;b.onclick=()=>{try{const result=callback();if(result&&typeof result.then==='function')result.then(r=>this.report(r)).catch(e=>this.report({ok:false,reason:e.message}));else if(result)this.report(result);}catch(e){this.report({ok:false,reason:e.message});}};parent.append(b);return b;}
  card(parent,title,detail){const node=el('article',null,'machine-card');node.append(el('b',title));if(detail)node.append(el('p',detail));parent.append(node);return node;}
+ /** One layer of the machine as a grid, front (+Z) up (the old machine field's assembly grid): tap an empty cell
+  * to attach a voxel of the chosen material, a voxel to salvage, repair or select it for a component. */
+ grid(parent,m){
+  const rt=this.runtime,s=rt.machines,p=rt.progression,d=this.draft,lo=[0,0,0],hi=[0,0,0];
+  m.voxels.forEach((v,i)=>{for(let k=0;k<3;k++){lo[k]=i?Math.min(lo[k],v.cell[k]):v.cell[k];hi[k]=i?Math.max(hi[k],v.cell[k]):v.cell[k];}});
+  const card=this.card(parent,'격자 조립','층을 고르고 칸을 누릅니다. 위가 앞쪽(+Z)입니다. 빈 칸에 붙이려면 이웃한 복셀이 있어야 합니다.');
+  const layers=[];for(let y=Math.max(-128,lo[1]-1);y<=Math.min(128,hi[1]+1);y++)layers.push([y,`${y}층`]);
+  if(!layers.some(([y])=>y===Number(d.layer)))d.layer=lo[1];
+  this.field(card,'tool','도구',[['add','배치'],['remove','회수'],['repair','수리'],['select','선택']]);
+  this.field(card,'layer','층',layers);
+  const materials=p.list('material').filter(e=>p.count(e.id)>0).map(e=>[e.id,`${e.name} · ${p.count(e.id).toFixed(2)}L`]);
+  this.field(card,'material','재료',materials);
+  // At most 15 × 15 cells around the machine's middle, so a long machine still fits.
+  const span=k=>{const a=Math.max(lo[k]-1,Math.round((lo[k]+hi[k])/2)-7);return [a,Math.min(hi[k]+1,a+14)];};
+  const [x0,x1]=span(0),[z0,z1]=span(2),y=Number(d.layer),at=new Map();
+  for(const v of m.voxels)if(v.cell[1]===y)at.set(`${v.cell[0]},${v.cell[2]}`,v);
+  const mount=new Map(m.components.map(c=>[c.voxelId,c])),grid=el('div',null,'machine-grid');if(grid.style)grid.style.gridTemplateColumns=`repeat(${x1-x0+1},1fr)`;
+  // +X is the machine's left when it faces +Z, so left is drawn on the left: columns run from high x to low x.
+  for(let z=z1;z>=z0;z--)for(let x=x1;x>=x0;x--){
+   const v=at.get(`${x},${z}`),c=v&&mount.get(v.id),b=el('button',v?(c?(VARIANT_NAMES[c.legacyType]??this.name(c.componentId)).slice(0,1):'■'):'·');
+   b.dataset.cell=`${x},${y},${z}`;
+   if(v){if(b.style)b.style.background=materialColor(v.materialId);b.title=`${this.name(v.materialId)} · HP ${v.hp.toFixed(0)}/${v.maxHp.toFixed(0)}${c?` · ${this.name(c.componentId)}`:''}`;if(v.hp<v.maxHp)b.classList?.add('damaged');if(d.voxel===v.id)b.classList?.add('selected');}
+   b.onclick=()=>{
+    let result;
+    if(d.tool==='add')result=v?{ok:false,reason:'occupied'}:s.attachVoxel(m.id,{cell:[x,y,z],materialId:d.material});
+    else if(!v)result={ok:false,reason:'unknown_voxel'};
+    else if(d.tool==='remove')result=s.removeVoxel(m.id,v.id);
+    else if(d.tool==='repair')result=s.repair(m.id,v.id);
+    else{d.voxel=v.id;result={ok:true};}
+    this.report(result);
+   };
+   grid.append(b);
+  }
+  card.append(grid);
+ }
  render(parent){
   const rt=this.runtime,s=rt.machines,p=rt.progression,d=this.draft;
   const machines=[...s.machines.values()].filter(m=>dist(m.position,rt.player)<80);
@@ -33,12 +68,16 @@ export class MachinePanel {
    const x=rt.player.x-Math.sin(rt.player.yaw)*2.5,z=rt.player.z-Math.cos(rt.player.yaw)*2.5;
    const result=s.create({name:d.name,gridM:Number(d.grid),position:{x,y:rt.surfaceHeight(x,z),z}});if(result.ok)this.selected=result.machineId;return result;
   });
-  const m=s.machines.get(this.selected);if(!m)return;
+  const m=s.machines.get(this.selected);
+  // A world's own machine actions (the machine field's examples and return to the start pad).
+  this.extra?.(parent,m??null);
+  if(!m)return;
   const stats=s.evaluate(m.id),near=dist(m.position,rt.player)<=5;
   const info=this.card(parent,m.name,`${m.voxels.length}복셀 · ${stats.mass.toFixed(2)}kg · 출력 ${stats.powerEUPerSecond.toFixed(1)} EU/s${near?'':' · 수정하려면 5m 안으로 다가가세요.'}`);
   this.action(info,'조종하기',()=>this.drive(m.id),!near||!m.components.some(c=>c.componentId==='controller'));
   this.action(info,'동력 정지',()=>s.control(m.id,{throttle:0,steer:0,pitch:0,brake:true}),!near);
   if(!near)return;
+  this.grid(parent,m);
   const shape=this.card(parent,'복셀 조립',`좌표는 구조물 내부의 칸 위치입니다. 기존 복셀의 면에 연결하며, 같은 칸은 겹쳐 놓을 수 없습니다. 한 칸 ${Number((m.gridM**3*1000).toFixed(3))}L.`);
   const materials=p.list('material').filter(e=>p.count(e.id)>0).map(e=>[e.id,`${e.name} · ${p.count(e.id).toFixed(2)}L`]);
   this.field(shape,'material','재료',materials);for(const axis of ['x','y','z'])this.field(shape,axis,axis.toUpperCase(),null,'number');

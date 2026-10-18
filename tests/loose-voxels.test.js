@@ -6,12 +6,6 @@ import {
   massCenter,
 } from "../app/src/main/assets/loose-voxels.js";
 import { impactEnergy, gripLimits } from "../app/src/main/assets/impact.js";
-import {
-  Ecology,
-  cellPosition,
-  toWorld,
-  SPECIES,
-} from "../app/src/main/assets/entities.js";
 const settleQueue = (w) => {
   let n = 0;
   while (w.loose.pending.size || w.loose.job) {
@@ -126,17 +120,4 @@ test("impact rules forgive small falls, scale with mass, and stronger grips reta
   assert.ok(impactEnergy(1000, Infinity, 10) > impactEnergy(100, Infinity, 10));
   assert.ok(gripLimits(75).throwSpeed > gripLimits(2400).throwSpeed);
   assert.ok(gripLimits(2400, true).force > gripLimits(2400).force);
-});
-test("animal impact is absorbed by the outer layer before damaging the internal skeleton", () => {
-  const w = floorWorld(),
-    eco = new Ecology(w),
-    e = eco.spawn(0, 80, 80),
-    part = SPECIES[0].parts[2],
-    pos = toWorld(e, part, 2, cellPosition(part, 0), 0);
-  const point = { x: pos[0], y: pos[1], z: pos[2] };
-  eco.impact(e, point, 300, 0);
-  assert.equal(eco.legs(e), 4);
-  assert.equal(Object.keys(e.structure.hp).length, 0);
-  eco.impact(e, point, 4500, 0);
-  assert.ok(eco.legs(e) < 4);
 });

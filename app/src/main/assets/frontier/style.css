@@ -214,21 +214,6 @@ body.field #events {
   padding: 12px 0 24px;
   border-bottom: 1px solid #526057;
 }
-#frontierMachineGrid {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 4px;
-  max-width: 440px;
-  margin-top: 16px;
-}
-#frontierMachineGrid button {
-  padding: 4px;
-  min-height: 44px;
-}
-#frontierMachineGrid .broken {
-  color: #ea9c8a;
-  background: #3c2521;
-}
 @media (orientation: landscape) and (max-height: 540px) {
   #frontierActions {
     right: 135px;

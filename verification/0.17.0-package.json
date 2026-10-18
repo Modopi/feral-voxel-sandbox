@@ -1,0 +1,37 @@
+{
+  "version": "0.17.0",
+  "versionCode": 1700,
+  "minNativeCode": 303,
+  "saveSchema": 4,
+  "files": 103,
+  "nativeFileLimit": 128,
+  "mjsFiles": [],
+  "newFiles": [
+    "content-runtime/machine-field.js",
+    "content-runtime/machine-field-view.js",
+    "content-runtime/aerodynamics.js"
+  ],
+  "removedFiles": [
+    "machine.html",
+    "machine/view.js",
+    "machine/model.js",
+    "machine/assembly-state.js",
+    "machine/style.css",
+    "machine/aerodynamics.js",
+    "inventory.js",
+    "acquisition.js",
+    "entities.js",
+    "anatomy.js",
+    "animal-art.js",
+    "animal-skeleton.js"
+  ],
+  "archiveBytes": 2780944,
+  "expandedBytes": 11440549,
+  "archiveSha256": "412755b6f5b1af1edbc66da5d0ade9412dcf2c13c6b5d138966e7987218e452e",
+  "packageSha256": "7efd2a84a329cf9f6fe4575eaf41519101f559ecf075d63ece989a4e3efa7230",
+  "apkSha256": "d5be20e21330390ab378895cfa8abeace8f248e8cbd78e461e58a34be0c9c6d5",
+  "apkAssetsIdenticalToUpdate": true,
+  "mainJsStub": true,
+  "withinLimits": true,
+  "note": "Local build with the shared test signing key; CI rebuilds and publishes after merge. machine/aerodynamics.js moved to content-runtime/aerodynamics.js. main.js stays as a stub because the app's update check requires it."
+}

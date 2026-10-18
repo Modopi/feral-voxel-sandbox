@@ -149,6 +149,7 @@
 #frontierPanel .machine-card button {margin:5px 6px 5px 0;}
 #frontierPanel .machine-field {display:inline-flex;flex-direction:column;gap:4px;max-width:100%;margin:5px 10px 8px 0;}
 #frontierPanel .machine-field span {font-size:12px;color:var(--ui-muted);}
+#frontierPanel .machine-grid {display:grid;gap:2px;max-width:360px;margin:8px 0;}#frontierPanel .machine-grid button {margin:0;padding:0;min-height:22px;aspect-ratio:1;font-size:11px;}#frontierPanel .machine-grid button.damaged {outline:2px solid #e08a6a;outline-offset:-2px;}#frontierPanel .machine-grid button.selected {box-shadow:inset 0 0 0 2px #fff;}
 #frontierPanel .machine-field input,#frontierPanel .machine-field select,#frontierPanel .ledgerSearch input,#frontierPanel .row select {font:inherit;color:var(--ui-ink);background:var(--ui-inset);border:1px solid #7c978699;padding:6px;max-width:100%;}
 #frontierPanel .machine-field input[type=number] {width:90px;}
 #frontierPanel .ledgerSearch {display:block;margin:0 0 6px;}#frontierPanel .ledgerSearch input {width:100%;}

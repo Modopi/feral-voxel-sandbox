@@ -1,5 +1,5 @@
 // Launcher and game session (docs/ARCHITECTURE.md §2–6): world settings live in the world list, the launcher
-// makes and edits them, a session reads them, and only the session router picks an old engine.
+// makes and edits them, and a session reads them. Every world plays on the one runtime (0.17.0).
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -95,7 +95,7 @@ test('sessions only record when a world was last played; saves and deletion keep
   assert.deepEqual(['', '.a', '.b'].map(suffix => db.getItem(saveKey(f) + suffix)), [null, null, null]);
 });
 
-test('the launcher and the game session are separate pages; only the session router picks an engine', () => {
+test('the launcher and the game session are separate pages; every world starts the one runtime', () => {
   for (const w of [...DEFAULTS, { id: 'w 1', type: 'expedition' }]) assert.equal(worldURL(w), `play.html?world=${encodeURIComponent(w.id)}`);
   const launcher = read('index.html'), session = read('play.html'), router = read('game.js');
   assert.match(launcher, /<script type="module" src="launcher\.js"><\/script>/);
@@ -104,12 +104,12 @@ test('the launcher and the game session are separate pages; only the session rou
   assert.match(session, /<script type="module" src="game\.js"><\/script>/);
   assert.match(session, /id="settingsFields"/, 'the in-game menu builds the same settings form as the launcher');
   for (const gone of ['worlds.html', 'world-menu.js', 'expedition.html']) assert.equal(fs.existsSync(new URL(gone, ASSETS)), false, gone);
-  assert.match(router, /PRESETS\[world\.type\]\.engine/);
   assert.match(router, /import\("\.\/content-runtime\/game\.js"\)\.then\(\(m\) => m\.start\(world\)\)/);
-  assert.deepEqual(Object.fromEntries(Object.entries(PRESETS).map(([k, p]) => [k, p.engine])), { expedition: 'runtime', island: 'runtime', frontier: 'runtime', machine: 'machine' });
-  const engineChoice = /\.engine\b/;
-  for (const file of ['launcher.js', 'content-runtime/game.js', 'content-runtime/runtime.js', 'shell.js'])
-    assert.doesNotMatch(read(file), engineChoice, `${file} must not pick an engine`);
+  // No engine is chosen anywhere: presets name no engine and the old machine field page is gone (S3).
+  for (const p of Object.values(PRESETS)) assert.equal('engine' in p, false, p.name);
+  for (const gone of ['machine.html', 'machine/view.js', 'machine/model.js']) assert.equal(fs.existsSync(new URL(gone, ASSETS)), false, gone);
+  for (const file of ['game.js', 'launcher.js', 'content-runtime/game.js', 'content-runtime/runtime.js', 'shell.js'])
+    assert.doesNotMatch(read(file), /\.engine\b|machine\.html/, `${file} must not pick an engine`);
 });
 
 test('session code never compares map or preset names; only the session router picks by preset', () => {
@@ -125,7 +125,6 @@ test('session code never compares map or preset names; only the session router p
     const lines = read(file).split('\n'), hit = lines.findIndex(line => compare.test(line));
     assert.equal(hit, -1, `${file}:${hit + 1} compares a map name: ${lines[hit]?.trim().slice(0, 120)}`);
   }
-  assert.match(read('game.js'), /PRESETS\[world\.type\]\.engine/, 'the session router still picks the old engines by preset until S3');
 });
 
 test('the runtime entry starts nothing when imported; the launcher can load it to check the files', async () => {
@@ -237,10 +236,9 @@ test('copying unchanged data writes nothing; a build that never saved leaves the
   assert.equal(full.getItem('feral.slot.w1.a'), 'old', 'a failed restore puts the previous storage back');
 });
 
-test('every engine copies its saves into the vault; the launcher restores before anything reads', () => {
+test('the runtime copies its saves into the vault; the launcher restores before anything reads', () => {
   assert.match(read('content-runtime/game.js'), /autosave\.writeNow\(snapshot\(\)\);syncVault\(\)/);
   assert.match(read('content-runtime/game.js'), /onSaved:\(\)=>\{syncVault\(\);/);
-  assert.match(read('machine/view.js'), /localStorage\.setItem\(storage, serialize\(state\)\);\n    syncVault\(\);/);
   const launcher = read('launcher.js');
   assert.match(launcher, /const restoring = restoreFromVault\(\)/);
   assert.match(launcher, /restoring\.finally\(\(\) => \(location\.href = worldURL\(w\)\)\)/, 'a world opens only after the restore');

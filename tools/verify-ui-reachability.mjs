@@ -7,9 +7,6 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {startAndroidAssetServer} from './android-asset-server.mjs';
-import {World,B} from '../app/src/main/assets/world.js';
-import {Inventory} from '../app/src/main/assets/inventory.js';
-import {Ecology} from '../app/src/main/assets/entities.js';
 const {chromium}=createRequire(import.meta.url)('playwright');
 const VERSION=JSON.parse(await fs.readFile(new URL('../version.json',import.meta.url),'utf8')),version=VERSION.version;
 const out=new URL(process.env.FERAL_UI_OUT||`../verification/${version}-ui/`,import.meta.url);
@@ -17,7 +14,7 @@ const server=process.env.FERAL_ASSETS?null:await startAndroidAssetServer();
 const assets=process.env.FERAL_ASSETS||`http://127.0.0.1:${server.address().port}/assets`;
 await fs.mkdir(out,{recursive:true});
 const browser=await chromium.launch({executablePath:process.env.FERAL_CHROME||'/usr/bin/chromium',headless:true,args:['--no-sandbox','--enable-webgl','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-dev-shm-usage']});
-const report={version,assets:server?'Android app MIME/CSP rules':assets,scope:'Chromium SwiftShader with touch input. Prepared items/positions are listed per check; this is not Android hardware or normal-progression evidence.',shared:[],launcher:[],expedition:[],island:[],frontier:[],errors:[]};
+const report={version,assets:server?'Android app MIME/CSP rules':assets,scope:'Chromium SwiftShader with touch input. Prepared items/positions are listed per check; this is not Android hardware or normal-progression evidence.',shared:[],launcher:[],expedition:[],island:[],frontier:[],machine:[],errors:[]};
 const check=(list,name,detail={})=>{list.push({name,...detail});console.log('ok',name);};
 const WORLDS=[{id:'default',name:'기본 탐험 맵',type:'island',seed:63026},{id:'frontier',name:'개척 원정',type:'frontier',seed:63026},{id:'beta',name:'기계 베타 맵',type:'machine',seed:63026},{id:'ui-check',name:'UI 검사',type:'expedition',seed:63026},{id:'island-new',name:'새 섬',type:'island',seed:63026}];
 // The HUD every map shows; the field HUD (vitals, map/status/interact, journey) is shared by the frontier and the expedition.
@@ -28,12 +25,17 @@ async function open(context,url){
  await page.addInitScript(worlds=>{window.AndroidApp=window.AndroidApp??{};if(!localStorage.getItem('feral.worlds.v1'))localStorage.setItem('feral.worlds.v1',JSON.stringify(worlds));},WORLDS);
  await page.goto(`${assets}/${url}`);return page;
 }
-// An original island save (0.13.0 and earlier format) with a built platform, items and animals.
-function legacyIslandSave(){
- const world=new World(63026);world.generate();for(let x=74;x<=80;x++)world.set(x,13,88,B.PLANK);
- const inventory=new Inventory();inventory.add('berry',3);inventory.add('arrow',2);const eco=new Ecology(world);eco.populate(20);
- return JSON.stringify({version:2,inventory:inventory.save(),world:world.save(),eco:eco.save(),player:{x:77.5,y:13,z:84.5,yaw:3.14,pitch:-.1},playTime:77,discovered:['초록 능선']});
-}
+// An original island save (0.13.0 and earlier format) made by the original island game: placed stone, a plank
+// half-cell, poured water, berries, crystals, arrows and 12 animals (tests/fixtures/island-save-v2.json).
+const legacyIslandSave=()=>fs.readFile(new URL('../tests/fixtures/island-save-v2.json',import.meta.url),'utf8');
+// Tap the first match with a touch. The shared ledger re-renders after each report, so a button found a moment
+// earlier can be replaced before the tap: then find it again (at most three more times).
+const retryTap=page=>async selector=>{
+ for(let i=0;;i++){
+  try{const target=page.locator(selector).first();await target.scrollIntoViewIfNeeded();const box=await target.boundingBox();assert(box,selector);await page.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);return;}
+  catch(e){if(i>=3||!/not attached|detached/.test(e.message))throw e;await page.waitForTimeout(200);}
+ }
+};
 const present=(page,ids)=>page.evaluate(ids=>ids.filter(id=>!document.getElementById(id)),ids);
 try{
  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:1});
@@ -174,7 +176,7 @@ try{
  assert.deepEqual(fconv.reputation,[30,-5,0]);assert.equal(fconv.original,frontierSave.length,'original frontier save untouched');assert(fconv.generation,'converted world saved in the shared format');
  assert(fconv.unmapped.includes('경험치·레벨')&&fconv.unmapped.includes('아이템'),'what could not move is listed');assert(fconv.things>=30,'campaign things in the scene');
  check(report.frontier,'original frontier save converts onto the runtime with its campaign, region terrain and items',{prepared:'old-engine frontier save fixture (tests/fixtures/frontier-save-v2.json)',converted:fconv});
- const ftap=async selector=>{await fpage.locator(selector).first().scrollIntoViewIfNeeded();const box=await fpage.locator(selector).first().boundingBox();assert(box,selector);await fpage.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);};
+ const ftap=retryTap(fpage);
  await ftap('#journeyHUD');assert.equal(await fpage.locator('#frontierTitle').textContent(),'여정과 발견');
  assert.deepEqual(await fpage.$$eval('[data-campaign-page]',b=>b.map(x=>x.textContent)),['목표','야영지','신호망','원정']);
  assert.match(await fpage.locator('#frontierContent').textContent(),/기존 개척 원정 저장을 옮겼습니다/);
@@ -190,9 +192,11 @@ try{
  const talked=await fpage.evaluate(()=>{const m=FERAL.runtime.modules['first-signal'],v=m.region.villages[0];return FERAL.moduleViews[0].interact({kind:'module',id:`first-signal/village:${v.id}`,distance:2,point:FERAL.runtime.player});});
  assert(talked);await fpage.waitForTimeout(300);assert.equal(await fpage.locator('#frontierTitle').textContent(),'공동체');
  assert.equal(await fpage.locator('.villageRow').count(),2);const crystal=await fpage.evaluate(()=>FERAL.runtime.progression.count('mana_crystal_ore'));
- await fpage.evaluate(()=>FERAL.runtime.progression.grant({raw_timber:4},{claimId:'ui-check:trade'}));await fpage.evaluate(()=>FERAL.ledger.render());
- await ftap('.villageRow [data-action=trade]');await fpage.waitForTimeout(300);
- assert.equal(await fpage.evaluate(()=>FERAL.runtime.progression.count('mana_crystal_ore')),crystal+2,'trade: timber 4 → crystal 2');
+ // Put the player back beside the village (physics may have moved them since) before trading.
+ await fpage.evaluate(()=>{const rt=FERAL.runtime,m=rt.modules['first-signal'],v=m.region.villages[0],w=m.world(v),x=w.x+3,z=w.z+2;Object.assign(rt.player,{x,z,vx:0,vz:0,y:rt.atlas.heightAt(x,z)+.1});rt.progression.grant({raw_timber:4},{claimId:'ui-check:trade'});FERAL.ledger.render();});
+ await fpage.waitForTimeout(300);await ftap('.villageRow [data-action=trade]');
+ await fpage.waitForFunction(c=>FERAL.runtime.progression.count('mana_crystal_ore')>=c+2,crystal,{timeout:3000}).catch(()=>{});
+ assert.equal(await fpage.evaluate(()=>FERAL.runtime.progression.count('mana_crystal_ore')),crystal+2,`trade: timber 4 → crystal 2 (${await fpage.locator('#toast').textContent()})`);
  await fpage.screenshot({path:new URL('frontier-village.png',out).pathname});await ftap('#frontierClose');
  check(report.frontier,'village conversation and trade through the shared ledger',{prepared:'player placed beside the first village; 4 timber granted'});
  // Travel by the map: one food to the next region's camp, no reload.
@@ -204,15 +208,55 @@ try{
  await fpage.screenshot({path:new URL('frontier-bag.png',out).pathname});await frontier.close();
  check(report.frontier,'frontier bag from the shared inventory screen');
 
+ // Machine field on the runtime (S3): the old field page's save converts once; machines are built on the shared
+ // panel's grid, the field's examples come from its card, a machine is driven with the shared readout and returned.
+ const machine=await browser.newContext({viewport:{width:844,height:390},isMobile:true,hasTouch:true,deviceScaleFactor:1});
+ const mpage=await machine.newPage();mpage.on('pageerror',e=>report.errors.push(`machine: ${e.message}`));
+ const machineSave=await fs.readFile(new URL('../tests/fixtures/machine-save-v1.json',import.meta.url),'utf8');
+ await mpage.addInitScript(([worlds,save])=>{window.AndroidApp={};if(!localStorage.getItem('feral.worlds.v1'))localStorage.setItem('feral.worlds.v1',JSON.stringify(worlds));if(!localStorage.getItem('feral.machine.v1'))localStorage.setItem('feral.machine.v1',save);},[WORLDS,machineSave]);
+ await mpage.goto(`${assets}/play.html?world=beta`);await mpage.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:180000});
+ assert.deepEqual(await present(mpage,[...SHARED_HUD,'interactBtn','journeyHUD']),[],'the machine field shows the shared HUD');
+ const mconv=await mpage.evaluate(()=>{const rt=FERAL.runtime,ms=[...rt.machines.machines.values()];return {generator:rt.generator.id,modules:Object.keys(rt.modules),machines:ms.map(m=>[m.name,m.voxels.length,m.components.length]),wood:rt.progression.count('wood'),original:localStorage.getItem('feral.machine.v1')?.length,generation:!!(localStorage.getItem('feral.machine.v1.a')||localStorage.getItem('feral.machine.v1.b')),unmapped:rt.conversion?.unmapped.map(u=>u.name),wall:rt.atlas.getCell(46,8,0),scrap:rt.atlas.getCell(-12,8,18)};});
+ assert.deepEqual([mconv.generator,mconv.modules,mconv.machines,mconv.wood],['machine-field',['machine-field'],[['옮겨 온 기계',5,4]],640],'converted machine and the field kit');
+ assert.equal(mconv.original,machineSave.length,'original machine save untouched');assert(mconv.generation,'converted world saved in the shared format');
+ assert.deepEqual(mconv.unmapped,['부서진 부품','떨어져 나간 부품','시험장 재료']);assert.deepEqual([mconv.wall,mconv.scrap],['stone','iron_scrap_block']);
+ check(report.machine,'old machine field save converts onto the runtime: the part group on the core, health shares, the field kit; what could not move is listed',{prepared:'old field page save fixture (tests/fixtures/machine-save-v1.json)',converted:mconv});
+ const mtap=retryTap(mpage);
+ const tapText=text=>mtap(`#frontierContent button:text-is("${text}")`);
+ await mpage.evaluate(()=>FERAL.ledger.open('machine'));await mpage.waitForTimeout(300);
+ await tapText('경량 예제 불러오기');await mpage.waitForTimeout(300);
+ const example=await mpage.evaluate(()=>[...FERAL.runtime.machines.machines.values()].filter(m=>m.fieldExample).map(m=>[m.name,m.voxels.length]));
+ assert.deepEqual(example,[['경량 예제',8]],'the field card brings in the example on the start pad');
+ // Select the example (nearest) and attach a voxel through the grid: layer 1, an empty cell beside the engine.
+ const exampleId=await mpage.evaluate(()=>{const m=[...FERAL.runtime.machines.machines.values()].find(m=>m.fieldExample);return m.id;});
+ await mpage.evaluate(id=>{FERAL.machinePanel.selected=id;FERAL.ledger.render();},exampleId);await mpage.waitForTimeout(200);
+ assert(await mpage.locator('.machine-grid button').count()>=25,'the assembly grid shows the layer');
+ await mpage.selectOption('[data-machine-field=layer]','1');await mpage.waitForTimeout(200);await mtap('.machine-grid button[data-cell="1,1,0"]');await mpage.waitForTimeout(300);
+ const grown=await mpage.evaluate(id=>({voxels:FERAL.runtime.machines.machines.get(id).voxels.length,wood:FERAL.runtime.progression.count('wood')}),exampleId);
+ assert.deepEqual(grown,{voxels:9,wood:640-125},'a grid tap attaches a 50 cm wood voxel from the bag');
+ await mpage.screenshot({path:new URL('machine-panel.png',out).pathname});
+ check(report.machine,'the field card brings in an example; the shared machine panel grid attaches a voxel from the bag',{example,grown});
+ await tapText('조종하기');await mpage.waitForTimeout(500);
+ assert.equal(await mpage.evaluate(()=>FERAL.runtime.drivingMachineId),exampleId);
+ await mpage.keyboard.down('KeyW');await mpage.waitForTimeout(2500);await mpage.keyboard.up('KeyW');
+ const drive=await mpage.evaluate(id=>{const m=FERAL.runtime.machines.machines.get(id);return {moved:Math.hypot(m.position.x-.25,m.position.z-5.25),readout:document.getElementById('flightReadout').hidden?null:document.getElementById('flightReadout').textContent};},exampleId);
+ assert(drive.moved>1,`driven ${drive.moved} m`);assert.match(drive.readout??'',/속도 \d+ km\/h[\s\S]*바퀴 접지 \d\/4/);
+ await mpage.screenshot({path:new URL('machine-drive.png',out).pathname});
+ await mtap('#interactBtn');await mpage.waitForTimeout(300);assert.equal(await mpage.evaluate(()=>FERAL.runtime.drivingMachineId),null,'leave through the shared interact button');
+ await mpage.evaluate(()=>FERAL.ledger.open('machine'));await mpage.waitForTimeout(300);await tapText('선택한 기계를 출발 패드로');await mpage.waitForTimeout(500);
+ const returned=await mpage.evaluate(id=>{const m=FERAL.runtime.machines.machines.get(id);return Math.hypot(m.position.x-.25,m.position.z-5.25);},exampleId);
+ assert(returned<.5,`back at the start pad (${returned} m)`);await machine.close();
+ check(report.machine,'drive the example with the shared readout, leave, and return it to the start pad',{drive,returned});
+
  // Basic island: the same runtime and screen as the expedition (island map preset with sandbox rules).
  // An original island save is converted once; the original key stays untouched.
  const island=await browser.newContext({viewport:{width:900,height:412},isMobile:true,hasTouch:true,deviceScaleFactor:1});
  const ip=await island.newPage();ip.on('pageerror',e=>report.errors.push(e.message));
- const legacy=legacyIslandSave();
+ const legacy=await legacyIslandSave();
  await ip.addInitScript(legacy=>{window.AndroidApp={};if(!localStorage.getItem('feral.world.v1'))localStorage.setItem('feral.world.v1',legacy);},legacy);
  await ip.goto(`${assets}/play.html?world=default`);await ip.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:120000});
- const converted=await ip.evaluate(()=>({map:FERAL.runtime.generator.id,platform:FERAL.runtime.atlas.getCell(150,26,176),berry:FERAL.runtime.progression.count('berry'),unmapped:FERAL.runtime.conversion?.unmapped.map(u=>u.name),original:localStorage.getItem('feral.world.v1')?.length,generation:!!(localStorage.getItem('feral.world.v1.a')||localStorage.getItem('feral.world.v1.b')),vitalsHidden:document.getElementById('vitals').hidden}));
- assert.equal(converted.map,'island');assert.equal(converted.platform,'plank','built platform carried over');assert.equal(converted.berry,3);
+ const converted=await ip.evaluate(()=>({map:FERAL.runtime.generator.id,platform:FERAL.runtime.atlas.getCell(150,30,160),berry:FERAL.runtime.progression.count('berry'),unmapped:FERAL.runtime.conversion?.unmapped.map(u=>u.name),original:localStorage.getItem('feral.world.v1')?.length,generation:!!(localStorage.getItem('feral.world.v1.a')||localStorage.getItem('feral.world.v1.b')),vitalsHidden:document.getElementById('vitals').hidden}));
+ assert.equal(converted.map,'island');assert.equal(converted.platform,'plank','a placed plank carried over');assert.equal(converted.berry,3);
  assert.equal(converted.original,legacy.length,'original island save untouched');assert(converted.generation,'converted world saved in the shared format');
  assert(converted.unmapped.includes('아이템')&&converted.unmapped.includes('동물 개체'),'unmapped items listed');assert(converted.vitalsHidden,'peaceful island hides health and food');
  assert.match(await ip.locator('#toast').textContent(),/기존 섬 저장을 옮겼습니다|새 장소 발견/);
@@ -220,7 +264,7 @@ try{
  const itap=async selector=>{await ip.locator(selector).first().scrollIntoViewIfNeeded();const box=await ip.locator(selector).first().boundingBox();assert(box,selector);await ip.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);};
  await itap('#journalBtn');assert.equal(await ip.locator('#frontierTitle').textContent(),'탐험 지도');await itap('[data-frontier-tab=journey]');const journey=await ip.locator('#frontierContent').textContent();assert.match(journey,/기존 섬 저장을 옮겼습니다/);assert.match(journey,/옮기지 못한 항목 · 아이템/);assert.match(journey,/잿빛 분화구/);
  await ip.screenshot({path:new URL('island-journey.png',out).pathname});await itap('#frontierClose');
- check(report.island,'original island save converts onto the shared runtime and lists what could not move',{prepared:'0.13.0-format island save with a plank platform',converted});
+ check(report.island,'original island save converts onto the shared runtime and lists what could not move',{prepared:'original island save fixture (tests/fixtures/island-save-v2.json)',converted});
  const aimDown=()=>ip.evaluate(()=>{FERAL.runtime.player.pitch=-1;});
  const emptySlot=await ip.evaluate(()=>{const i=FERAL.slots.slots.slice(0,9).findIndex(s=>!s);FERAL.selectHotbar(i);return i;});assert(emptySlot>=0);
  await ip.waitForTimeout(300);await aimDown();await ip.waitForTimeout(400);assert.equal(await ip.locator('#useBtn small').textContent(),'관찰');await itap('#useBtn');await ip.waitForTimeout(250);
@@ -393,7 +437,7 @@ try{
  const resumed=await lp.evaluate(()=>({survival:FERAL.runtime.rules.survival,time:FERAL.runtime.time}));assert.equal(resumed.survival,false);assert(resumed.time>0,'the world resumes from its save, not a new world');
  await ltap('#menuBtn');await ltap('[data-tab=world]');await ltap('#worldListBtn');await lp.waitForURL(/index\.html$/);await lp.waitForFunction(()=>window.FeralLauncher?.ready,null,{timeout:30000});
  check(report.launcher,'a version switch that empties the app storage keeps the worlds: the launcher restores them from the save vault and the world resumes',{prepared:'all feral.* keys cleared as app 0.3.3 does for a build picked in its version list',keys:afterSwitch.keys.length,restored:afterSwitch.restored,resumed});
- await ltap('#openWorlds');await ltap('article[data-world="beta"] button:nth-of-type(1)');await lp.waitForURL(/machine\.html\?world=beta/);
+ await ltap('#openWorlds');await ltap('article[data-world="beta"] button:nth-of-type(1)');await lp.waitForURL(/play\.html\?world=beta/);
  await lp.goto(`${assets}/index.html`);await ltap('#openWorlds');await ltap(`article[data-world="${made.id}"] button:nth-of-type(3)`);
  await lp.evaluate(()=>FeralNative.back());assert.equal(await lp.locator('#confirm').evaluate(d=>d.open),false,'the Android back button closes a dialog');
  await ltap(`article[data-world="${made.id}"] button:nth-of-type(3)`);await ltap('#deleteYes');
@@ -420,4 +464,4 @@ try{
  check(report.shared,'module load failure shows retry instead of endless loading',failure);
  assert.deepEqual(report.errors,[]);
 }catch(e){report.failure=e.stack;process.exitCode=1;}finally{await fs.writeFile(new URL('report.json',out),JSON.stringify(report,null,2));await browser.close();server?.close();}
-console.log(JSON.stringify({launcher:report.launcher.length,shared:report.shared.length,expedition:report.expedition.length,frontier:report.frontier.length,island:report.island.length,errors:report.errors,failure:report.failure?.split('\n')[0]}));
+console.log(JSON.stringify({launcher:report.launcher.length,shared:report.shared.length,expedition:report.expedition.length,frontier:report.frontier.length,machine:report.machine.length,island:report.island.length,errors:report.errors,failure:report.failure?.split('\n')[0]}));

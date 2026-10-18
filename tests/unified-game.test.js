@@ -18,12 +18,13 @@ test('every world opens the one game session page; the launcher is a separate pa
   assert.deepEqual(DEFAULTS.map(w => w.type), ['island', 'frontier', 'machine']);
   assert.match(read('play.html'), /<script type="module" src="game\.js"><\/script>/);
   assert.match(read('index.html'), /<script type="module" src="launcher\.js"><\/script>/);
-  // The router (game.js) is the only place that still picks an old engine; the machine field keeps its page until S3.
-  assert.match(read('game.js'), /engine === "machine"\) location\.replace\(`machine\.html/);
+  // The router (game.js) starts the one runtime for every world (0.17.0: the machine field's own page is gone).
+  assert.match(read('game.js'), /import\("\.\/content-runtime\/game\.js"\)/);
+  assert.doesNotMatch(read('game.js'), /machine\.html|\.engine\b/);
 });
 
 test('maps share the shell module instead of keeping their own screen code', () => {
-  // Every world but the machine field plays on content-runtime/game.js (the frontier engine was removed in 0.16.0).
+  // Every world plays on content-runtime/game.js (the frontier engine went in 0.16.0, the machine field page in 0.17.0).
   const expedition = read('content-runtime/game.js'), shell = read('shell.js');
   for (const name of ['createInput', 'createNotifier', 'initSettings', 'bindMenuTabs', 'showPauseScreen', 'bindBackground', 'showMovementState', 'changeStance', 'changeSprint', 'GameWindow', 'mountFieldHUD', 'setVitals'])
     assert.match(shell, new RegExp(`export (?:function|class) ${name}\\b`), `shell exports ${name}`);

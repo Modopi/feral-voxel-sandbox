@@ -1,8 +1,7 @@
 import { VoxelAssetBuilder } from './voxel/authoring.js';
 import { components as connectedGroups, massProperties } from '../structure.js';
-import { TYPES as LEGACY_PARTS } from '../machine/model.js';
 import { MATERIAL_EFFECT_RULES } from './material-effects.js';
-import { panelForce } from '../machine/aerodynamics.js';
+import { panelForce } from './aerodynamics.js';
 import { FIXTURE_LINK_RULES } from './fixture-energy.js';
 
 const ENERGY = ['mechanical', 'electrical', 'thermal', 'chemical', 'magic', 'divine'];
@@ -29,6 +28,19 @@ export const MACHINE_MOTION = Object.freeze({ joulesPerEU: 100, maxAcceleration:
 // Rotor flight (S2c2): lift per useful mechanical EU/s at a rotor, climb rate at full up/down input, the share of
 // lift that pushes forward, air damping while rotors carry the craft, and how long a control command keeps them running.
 export const ROTOR_FLIGHT = Object.freeze({ liftNPerEU: 50, climbMS: 3, forwardShare: .3, airDrag: .35, engagedS: .25 });
+// Wheel drive (S3, docs/GAME-RULES.md §6). Suspension holds each wheel's voxel `clearanceM` above the ground,
+// sinking `sagM` under the machine's weight, with `damping` of critical, so the voxels never scrape the ground;
+// the ground is looked for `reachM` below a wheel. A wheel whose suspension carries weight is on the ground.
+// Traction per useful mechanical EU/s reaching the wheels on the ground (at most gripG of the weight), damping
+// while they roll and once all are off the ground, sideways grip, the turn rate steering asks for from 3 m/s,
+// how fast the wheels bring the turn to it and the turn a side with weaker wheels pulls into (the machine field's rule).
+export const WHEEL_DRIVE = Object.freeze({ clearanceM: .06, sagM: .03, damping: .8, reachM: .5, forceNPerEU: 340, rollingDrag: .3, airDrag: .05, gripG: .9, lateralGrip: 6, steerRate: 1, steerResponse: 6, sidePull: .22 });
+const voxelOf = (m, id) => { for (const v of m.voxels) if (v.id === id) return v; return null; };
+// The bottom centre of a voxel turned by the machine's rotation, written into `out` (no allocation per step).
+function rotateInto(out, x, y, z, q) {
+ const tx=2*(q.y*z-q.z*y),ty=2*(q.z*x-q.x*z),tz=2*(q.x*y-q.y*x);
+ out.x=x+q.w*tx+q.y*tz-q.z*ty;out.y=y+q.w*ty+q.z*tx-q.x*tz;out.z=z+q.w*tz+q.x*ty-q.y*tx;return out;
+}
 export const materialColor = id => ({wood:'#96724D',stone:'#8A9088',scrap_iron:'#7B7770',steel:'#849A9B',titanium:'#B2C1C8',nickel:'#A8A58C'}[id] || (id.includes('wood')?'#657F63':id.includes('holy')?'#D5C98E':id.includes('mana')?'#718CA9':'#8B8E9F'));
 const color = materialColor;
 
@@ -73,7 +85,7 @@ export class MachineSystem {
   const m=this.machines.get(id),v=m?.voxels.find(v=>v.id===voxelId),c=this._entry(componentId);
   if(!v||c?.kind!=='component'||!this.progression.research.has(c.research))return no('component_or_research_required');
   if(m.components.some(x=>x.voxelId===voxelId))return no('mount_occupied');
-  if(legacyType!=null&&(!(MACHINE_VARIANTS[componentId]||[]).includes(legacyType)||!LEGACY_PARTS[legacyType]))return no('unsupported_variant');
+  if(legacyType!=null&&!(MACHINE_VARIANTS[componentId]||[]).includes(legacyType))return no('unsupported_variant');
   const component={id:`mounted:${this.nextId}`,voxelId,componentId,legacyType,energy:zero(),fuel:0,fuelItems:0,fluids:{},massKg:this._coreMass(componentId),active:true};
   if(componentId==='arc_thrower'){component.nextFireAt=0;component.shotsFired=0;component.fireLedger=[];component.fireCache=[];}
   const paid=this.progression.spend({[componentId]:1},{claimId:`mount:${m.id}:${component.id}`});if(!paid.ok)return paid;
@@ -244,7 +256,7 @@ export class MachineSystem {
  }
  _condition(m,c){const v=m.voxels.find(v=>v.id===c.voxelId);return c.active&&v?clamp(v.hp/v.maxHp,0,1):0;}
  _network(m,dt){
-  const packets=new Map(),limits=new Map(),spent=new Map(),rotors=[],engaged=this.clock-(this.commandClocks.get(m.id)??-Infinity)<=ROTOR_FLIGHT.engagedS;let motive=0,lift=0;
+  const packets=new Map(),limits=new Map(),spent=new Map(),rotors=[],engaged=this.clock-(this.commandClocks.get(m.id)??-Infinity)<=ROTOR_FLIGHT.engagedS;let motive=0,wheelMotive=0,lift=0;
   for(const c of m.components){const d=this._entry(c.componentId),health=this._condition(m,c),q=zero();packets.set(c.id,q);limits.set(c.id,d.nominalPower*health*dt);spent.set(c.id,0);
    // arc_thrower reserve is a paid projectile budget, not an idle network
    // output. It drains only through one recorded shot, while links may charge it.
@@ -272,17 +284,95 @@ export class MachineSystem {
    if(!moved)break;
   }
   for(const c of m.components){const d=this._entry(c.componentId),q=packets.get(c.id),health=this._condition(m,c);
-   if(['wheel','propeller','rotor'].includes(c.legacyType)&&health>0){const rotor=c.legacyType==='rotor',n=Math.min(q.mechanical,d.nominalPower*health*dt)*(rotor?Number(engaged):Math.abs(m.command.throttle));q.mechanical-=n;const useful=n*d.efficiency;m.metrics.consumed+=useful;m.metrics.loss+=n-useful;if(rotor){lift+=useful/dt;if(useful>0)rotors.push({component:c,power:useful/dt});}else motive+=useful/dt;}
+   if(['wheel','propeller','rotor'].includes(c.legacyType)&&health>0){const rotor=c.legacyType==='rotor',n=Math.min(q.mechanical,d.nominalPower*health*dt)*(rotor?Number(engaged):Math.abs(m.command.throttle));q.mechanical-=n;const useful=n*d.efficiency;m.metrics.consumed+=useful;m.metrics.loss+=n-useful;if(rotor){lift+=useful/dt;if(useful>0)rotors.push({component:c,power:useful/dt});}else if(c.legacyType==='wheel')wheelMotive+=useful/dt;else motive+=useful/dt;}
    if(c.componentId==='pump'&&health>0){const route=m.fluidLinks.find(l=>l.pump===c.id),source=m.components.find(x=>x.id===route?.source),target=m.components.find(x=>x.id===route?.target);if(source&&target){const fluid=Object.keys(source.fluids).find(k=>source.fluids[k]>0),targetDef=this._entry(target.componentId);if(fluid&&!Object.entries(target.fluids).some(([f,n])=>f!==fluid&&n>0)){const room=targetDef.capacityLiters-Object.values(target.fluids).reduce((a,b)=>a+b,0);const moved=Math.max(0,Math.min(source.fluids[fluid],room,d.flowLitersPerSecond*health*dt,q.mechanical/d.nominalPower));source.fluids[fluid]-=moved;target.fluids[fluid]=(target.fluids[fluid]||0)+moved;const consumed=moved*d.nominalPower;q.mechanical-=consumed;m.metrics.consumed+=consumed;}}}
    const propertyWork=this.materialEffects?.acceptMachineEnergy(m.id,c.id,q,dt)||{};for(const[t,n]of Object.entries(propertyWork)){q[t]-=n;m.metrics.consumed+=n;}
    for(const t of ENERGY){if(d.stores.includes(t)){const n=Math.min(q[t],Math.max(0,d.capacity-c.energy[t]));c.energy[t]+=n;q[t]-=n;}m.metrics.loss+=q[t];}
    delete c.sentEU;
   }
-  m.lastPower=motive+lift;return {motive,lift,rotors};
+  m.lastPower=motive+wheelMotive+lift;return {motive,wheelMotive,lift,rotors};
  }
  _ground(x,z){return this.terrain?.heightAt?.(x,z)??this.terrain?.surface?.(x,z)??0;}
  _solid(x,y,z){if(this.terrain?.isSolidCell)return this.terrain.isSolidCell(Math.floor(x*2),Math.floor(y*2),Math.floor(z*2));return y<this._ground(x,z)-1e-6;}
  setPhysicsDriver(driver=null){this.physicsDriver=driver;return ok();}
+ /** How far below `bottom` (metres) the top of the ground is at (x, z), looking `reach` down from just above it. */
+ _groundGap(x,bottom,z,reach){
+  for(let hy=Math.floor((bottom+.24)*2),end=Math.floor((bottom-reach)*2);hy>=end;hy--)if(this._solid(x,hy*.5+.25,z))return bottom-(hy+1)*.5;
+  return Infinity;
+ }
+ /** Wheels on the ground: healthy wheel count and health, the health on the ground, its share, the grounded health
+  * left (+X, the left of a machine facing +Z) and right of the centre of mass, and with physics the suspension force
+  * of each grounded wheel at its voxel's bottom (`n` of `items`). One scratch result, no allocation per step. */
+ _wheelContact(m,stats,mass){
+  const w=this._wheel??={count:0,total:0,ground:0,share:0,left:0,right:0,n:0,items:[],com:{x:0,y:0,z:0}},p=this._wheelPoint??={x:0,y:0,z:0},g=m.gridM,D=WHEEL_DRIVE;
+  w.count=0;w.total=0;w.ground=0;w.left=0;w.right=0;w.n=0;
+  for(const c of m.components)if(c.legacyType==='wheel'&&c.active){const v=voxelOf(m,c.voxelId);if(v&&v.hp>0){w.count++;w.total+=clamp(v.hp/v.maxHp,0,1);}}
+  if(!w.count){w.share=0;return w;}
+  const com=rotateInto(w.com,stats.center[0],stats.center[1],stats.center[2],m.rotation);com.x+=m.position.x;com.y+=m.position.y;com.z+=m.position.z;
+  const k=mass*9.81/(D.sagM*w.count),damp=2*D.damping*Math.sqrt(k*mass/w.count),most=4*mass*9.81/w.count,spin=m.angularVelocity;
+  for(const c of m.components){
+   if(c.legacyType!=='wheel'||!c.active)continue;const v=voxelOf(m,c.voxelId);if(!v||v.hp<=0)continue;
+   rotateInto(p,(v.cell[0]+.5)*g,v.cell[1]*g,(v.cell[2]+.5)*g,m.rotation);const x=m.position.x+p.x,y=m.position.y+p.y,z=m.position.z+p.z;
+   const gap=this._groundGap(x,y,z,D.reachM);if(!(gap<D.clearanceM))continue;
+   const health=clamp(v.hp/v.maxHp,0,1),side=(v.cell[0]+.5)*g-stats.center[0];w.ground+=health;
+   // A wheel within half a voxel of the centre line counts on both sides (a centre wheel steers and does not pull).
+   if(side>-g/2)w.left+=health;if(side<g/2)w.right+=health;
+   if(!this.physicsDriver)continue;
+   // The spring pushes the wheel's bottom up towards clearanceM, damped by the speed of that point.
+   const rise=m.velocity.y+spin.z*(x-com.x)-spin.x*(z-com.z),push=clamp(k*(D.clearanceM-gap)-damp*rise,0,most);
+   const item=w.items[w.n]??(w.items[w.n]={force:{x:0,y:0,z:0},point:{x:0,y:0,z:0}});w.n++;
+   item.force.y=push;item.point.x=x;item.point.y=y;item.point.z=z;
+  }
+  w.share=w.ground/w.total;return w;
+ }
+ /** Wheels of a machine and how many are on the ground (the driving readout). */
+ wheelsOnGround(id){
+  const m=this.machines.get(id);if(!m)return null;const p=this._wheelPoint??={x:0,y:0,z:0};let count=0,ground=0;
+  for(const c of m.components){
+   if(c.legacyType!=='wheel'||!c.active)continue;const v=voxelOf(m,c.voxelId);if(!v||v.hp<=0)continue;count++;
+   rotateInto(p,(v.cell[0]+.5)*m.gridM,v.cell[1]*m.gridM,(v.cell[2]+.5)*m.gridM,m.rotation);
+   if(this._groundGap(m.position.x+p.x,m.position.y+p.y,m.position.z+p.z,WHEEL_DRIVE.reachM)<WHEEL_DRIVE.clearanceM)ground++;
+  }
+  return {count,ground};
+ }
+ /** Moves a machine to a place at rest, upright and facing `yaw` (the machine field's return to the start). */
+ place(id,{position:where,yaw=0}={}){
+  const m=this.machines.get(id),p=position(where);if(!m||!pointOK(p)||!finite(yaw))return no('invalid_place');
+  Object.assign(m.position,p);m.yaw=yaw;m.rotation=quaternion(yaw);m.velocity={x:0,y:0,z:0};m.angularVelocity={x:0,y:0,z:0};
+  m.placed=(m.placed??0)+1;return ok();
+ }
+ /** Takes a machine out of the world without salvage (the machine field clearing its own examples). */
+ removeMachine(id){if(!this.machines.delete(id))return no('unknown_machine');this.commandClocks.delete(id);return ok();}
+ /** Brings an already built machine into the world: a converted save or the machine field's examples. Its voxels,
+  * mounts and links are checked like built ones, but nothing is taken from the bag and no research is needed.
+  * voxels: [{cell, materialId, hp (share of full health, default 1)}]; components: [{cell, componentId,
+  * legacyType, fuelItems}]; links: [{from, to, type}] by component index. */
+ importDesign({name='조립 구조물',gridM=.5,position:where=[0,0,0],yaw=0,voxels=[],components=[],links=[],tags={}}={}){
+  const p=position(where);
+  if(!pointOK(p)||!finite(yaw)||![.03125,.1,.5].includes(gridM)||typeof name!=='string'||name.length>100||!Array.isArray(voxels)||!voxels.length||voxels.length>2048)return no('invalid_design');
+  const cells=new Map();
+  for(const v of voxels){
+   if(!Array.isArray(v?.cell)||v.cell.length!==3||!v.cell.every(n=>Number.isInteger(n)&&Math.abs(n)<=128)||cells.has(cellKey(v.cell)))return no('invalid_design_voxel');
+   const share=v.hp??1;if(!finite(share)||share<=0||share>1)return no('invalid_design_voxel');cells.set(cellKey(v.cell),v);
+  }
+  if(connectedGroups(voxels.map(v=>({x:v.cell[0],y:v.cell[1],z:v.cell[2]}))).length!==1)return no('attachment_required');
+  const liters=Math.round(gridM**3*1000*1e9)/1e9,built=[];
+  for(const v of voxels){const evaluation=this.progression.evaluateMaterial(v.materialId,{volumeLiters:liters});if(!evaluation.ok)return evaluation;built.push({cell:[...v.cell],materialId:v.materialId,volumeLiters:liters,massKg:evaluation.massKg,hp:evaluation.maxHp*(v.hp??1),maxHp:evaluation.maxHp});}
+  const mounted=new Set();
+  for(const c of components){
+   const d=this._entry(c?.componentId),key=Array.isArray(c?.cell)?cellKey(c.cell):'';
+   if(d?.kind!=='component'||!cells.has(key)||mounted.has(key)||(c.legacyType!=null&&!(MACHINE_VARIANTS[c.componentId]||[]).includes(c.legacyType))||!Number.isInteger(c.fuelItems??0)||(c.fuelItems??0)<0||(c.fuelItems??0)>64)return no('invalid_design_component');
+   mounted.add(key);
+  }
+  for(const l of links){const a=this._entry(components[l?.from]?.componentId),b=this._entry(components[l?.to]?.componentId);if(!a||!b||l.from===l.to||!a.outputEnergies.includes(l.type)||!b.inputEnergies.includes(l.type))return no('invalid_design_link');}
+  const id=this._id('machine'),m={id,name,entityType:'machine',gridM,position:p,velocity:{x:0,y:0,z:0},yaw,pitch:0,rotation:quaternion(yaw),angularVelocity:{x:0,y:0,z:0},damageClaims:[],voxels:[],components:[],links:[],fluidLinks:[],cargo:{},command:{throttle:0,steer:0,pitch:0,brake:false,push:0},revision:0,metrics:{generated:0,consumed:0,loss:0},lastPower:0,...tags};
+  const byCell=new Map();for(const v of built){const voxel={id:`voxel:${this.nextId++}`,...v};m.voxels.push(voxel);byCell.set(cellKey(v.cell),voxel);}
+  for(const c of components){const component={id:`mounted:${this.nextId++}`,voxelId:byCell.get(cellKey(c.cell)).id,componentId:c.componentId,legacyType:c.legacyType??null,energy:zero(),fuel:0,fuelItems:c.fuelItems??0,fluids:{},massKg:this._coreMass(c.componentId),active:true};
+   if(c.componentId==='arc_thrower'){component.nextFireAt=0;component.shotsFired=0;component.fireLedger=[];component.fireCache=[];}m.components.push(component);}
+  for(const l of links)m.links.push({id:this._id('link'),from:m.components[l.from].id,to:m.components[l.to].id,type:l.type});
+  this._validate(m);this._rebuild(m);this.machines.set(id,m);
+  return ok({machineId:id,componentIds:m.components.map(c=>c.id)});
+ }
  physicsMasses(id){
   const m=this.machines.get(id);if(!m)return null;const voxelMasses=Object.fromEntries(m.voxels.map(v=>[v.id,v.massKg]));
   for(const c of m.components)voxelMasses[c.voxelId]+=c.massKg+c.fuelItems*.6+c.fuel/400*.6+Object.entries(c.fluids).reduce((s,[id,n])=>s+this._itemMass(id)*n,0);
@@ -304,13 +394,14 @@ export class MachineSystem {
  _physicsForces(m,dt){
   const output=this._network(m,dt),stats=this.evaluate(m.id),mass=Math.max(.01,stats.mass),cmd=m.command,q=m.rotation;
   const forward=rotate({x:0,y:0,z:1},q),up=rotate({x:0,y:1,z:0},q),speed=m.velocity.x*forward.x+m.velocity.y*forward.y+m.velocity.z*forward.z;
-  const wheels=m.components.filter(c=>c.legacyType==='wheel'&&this._condition(m,c)>0).length;
+  const wheel=this._wheelContact(m,stats,mass),right=rotateInto(this._right??={x:0,y:0,z:0},1,0,0,q);
   const controller=m.components.some(c=>c.componentId==='controller'&&this._condition(m,c)>0);
   // EU remains a channel-specific game unit. Only mechanical work is calibrated to SI.
-  const thrust=clamp(output.motive*MACHINE_MOTION.joulesPerEU/Math.max(1,Math.abs(speed)),-mass*MACHINE_MOTION.maxAcceleration,mass*MACHINE_MOTION.maxAcceleration)*Math.sign(cmd.throttle);
+  const thrust=clamp(output.motive*MACHINE_MOTION.joulesPerEU/Math.max(1,Math.abs(speed)),-mass*MACHINE_MOTION.maxAcceleration,mass*MACHINE_MOTION.maxAcceleration)*Math.sign(cmd.throttle)
+   +Math.min(output.wheelMotive*WHEEL_DRIVE.forceNPerEU,WHEEL_DRIVE.gripG*9.81*mass)*wheel.share*Math.sign(cmd.throttle);
   let pushForce=0;const manualEU=Math.abs(cmd.push)*.5*dt;
   if(manualEU>0&&this.progression.energyAvailable('mechanical')+1e-8>=manualEU){const paid=this.progression.consumeEnergy('mechanical',manualEU,{claimId:this._id('manual-work')});if(paid.ok){pushForce=Math.sign(cmd.push)*manualEU/dt*MACHINE_MOTION.joulesPerEU/Math.max(1,Math.abs(speed));m.metrics.generated+=manualEU;m.metrics.consumed+=manualEU;}}
-  const flying=output.rotors.length>0,drag=cmd.brake?8:wheels?.35:flying?ROTOR_FLIGHT.airDrag:1.2,force={x:forward.x*(thrust+pushForce)-m.velocity.x*drag*mass,y:forward.y*(thrust+pushForce),z:forward.z*(thrust+pushForce)-m.velocity.z*drag*mass},torque={x:0,y:0,z:0};
+  const flying=output.rotors.length>0,drag=cmd.brake?8:wheel.count?(wheel.share>0?WHEEL_DRIVE.rollingDrag:WHEEL_DRIVE.airDrag):flying?ROTOR_FLIGHT.airDrag:1.2,force={x:forward.x*(thrust+pushForce)-m.velocity.x*drag*mass,y:forward.y*(thrust+pushForce),z:forward.z*(thrust+pushForce)-m.velocity.z*drag*mass},torque={x:0,y:0,z:0};
   let forces=null;
   if(flying){
    // Rotor flight: each powered rotor can lift liftNPerEU per useful EU/s. Together they hold the climb rate the
@@ -335,9 +426,18 @@ export class MachineSystem {
    const f=panelForce(c.legacyType,{x:local.x,y:local.y,z:-local.z},this._condition(m,c),{pitch:controller?cmd.pitch:0,turn:controller?cmd.steer:0},r.x),ratio=m.gridM*m.gridM/.25,world=rotate({x:f.force.x*ratio,y:f.force.y*ratio,z:-f.force.z*ratio},q);
    for(const k of ['x','y','z'])force[k]+=world[k];torque.x+=r.y*world.z-r.z*world.y;torque.y+=r.z*world.x-r.x*world.z;torque.z+=r.x*world.y-r.y*world.x;
   }
-  // Steering redirects powered traction; it cannot spin a stationary unpowered craft.
-  if(controller&&wheels&&output.motive>0)torque.y+=cmd.steer*Math.min(Math.abs(thrust)*m.gridM,Math.abs(speed)*mass)*Math.sign(speed);
-  // With rotors the physics bridge applies point forces: the rest of the force at the centre of mass.
+  if(wheel.share>0){
+   // Grounded wheels hold the machine against sliding sideways and turn it at the rate steering asks for while
+   // it rolls (a stopped machine does not turn); a side with weaker wheels pulls the turn towards it.
+   const slip=m.velocity.x*right.x+m.velocity.y*right.y+m.velocity.z*right.z,grip=clamp(-slip*WHEEL_DRIVE.lateralGrip,-WHEEL_DRIVE.gripG*9.81,WHEEL_DRIVE.gripG*9.81)*mass*wheel.share;
+   force.x+=right.x*grip;force.y+=right.y*grip;force.z+=right.z*grip;
+   const steering=controller?Math.min(1,wheel.left,wheel.right):0,pull=clamp(wheel.left-wheel.right,-1,1)*WHEEL_DRIVE.sidePull;
+   const rate=(cmd.steer*steering-pull)*clamp(speed/3,-1,1)*WHEEL_DRIVE.steerRate;
+   torque.y+=(rate-m.angularVelocity.y)*stats.inertia[1]*WHEEL_DRIVE.steerResponse*wheel.share;
+  }
+  // Each grounded wheel's suspension pushes at its wheel (with physics only; without it the machine rests on the ground).
+  if(wheel.n){forces??=[{force:null,point:wheel.com}];for(let i=0;i<wheel.n;i++){forces.push(wheel.items[i]);force.y+=wheel.items[i].force.y;}}
+  // With rotors or suspension the physics bridge applies point forces: the rest of the force at the centre of mass.
   if(forces){const rest={...force};for(let i=1;i<forces.length;i++)for(const k of ['x','y','z'])rest[k]-=forces[i].force[k];forces[0].force=rest;return {id:m.id,force,forces,torque,mass};}
   return {id:m.id,force,torque,mass};
  }

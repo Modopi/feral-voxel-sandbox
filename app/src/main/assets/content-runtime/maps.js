@@ -8,6 +8,7 @@ import {World, SIZE as ISLAND_SIZE, SEA as ISLAND_SEA} from '../world.js';
 import {frontierWorld, regionInfo, regionKey} from '../frontier/terrain.js';
 import {GEAR, MINING_HARDNESS} from '../equipment.js';
 import {IMPACT_TOUGHNESS} from '../impact.js';
+import {applyLegacyMachineField} from './machine-field.js';
 
 // Original island block numbers → design blocks (design blocks.json lists the same legacy numbers).
 // Lava has no design block; the crater keeps its basalt shape.
@@ -156,6 +157,34 @@ export class FrontierAtlas extends IslandAtlas {
   serialize(){const state=super.serialize();if(this.regionTerrain.size)state.regionTerrain=[...this.regionTerrain].sort(([a],[b])=>a.localeCompare(b));return state;}
 }
 
+// The machine field (S3): the old field's 46 m test ground, centred on the origin, as terrain. A flat floor
+// FIELD_FLOOR m up, a 2 m wall around it, three pillars where the field's obstacles stood and the scrap heap
+// where its ore vein was (mined scrap is a machine building material). Outside the wall the floor goes on.
+export const FIELD_FLOOR = 4, FIELD_WALL = 23;
+export const FIELD_PILLARS = Object.freeze([{x:0,z:-10,r:2},{x:10,z:5,r:2.5},{x:-10,z:-5,r:1.8}]);
+export const FIELD_SCRAP = Object.freeze({x:-6,z:9,r:1.5});
+const FLOOR_CELL = FIELD_FLOOR*2;
+export class MachineFieldAtlas extends WorldAtlas {
+  get generatorId(){return 'machine-field-v1';}
+  _rawSample(){
+    return {environmentId:'grove',baseEnvironmentId:'grove',tier:1,baseTier:1,height:FIELD_FLOOR,waterLevel:null,waterType:null,safeBypass:true,
+     hostileSpawnsAllowed:false,highTierPatchId:null,nearbyPatch:null,ecologyCellId:'eco:field',reservedBy:null};
+  }
+  _baseCell(hx,hy,hz){
+    if(hy<FLOOR_CELL)return hy===FLOOR_CELL-1?'grass':hy>=FLOOR_CELL-3?'dirt':'stone';
+    const x=(hx+.5)*.5,z=(hz+.5)*.5,ax=Math.abs(x),az=Math.abs(z),up=hy-FLOOR_CELL;
+    if(up<4&&Math.max(ax,az)>=FIELD_WALL&&Math.max(ax,az)<FIELD_WALL+1)return 'stone';
+    if(up<6)for(const p of FIELD_PILLARS)if(Math.hypot(x-p.x,z-p.z)<=p.r)return 'basalt';
+    const scrap=Math.hypot(x-FIELD_SCRAP.x,z-FIELD_SCRAP.z);
+    if(up===0&&scrap<=FIELD_SCRAP.r||up===1&&scrap<=FIELD_SCRAP.r/2)return 'iron_scrap_block';
+    return null;
+  }
+  _chunkCell(hx,hy,hz){return this._baseCell(hx,hy,hz);}
+  _vegetationAt(){return null;}
+  findBuildingSites(){return [];}
+  harvestNodesAround(){return [];}
+}
+
 export const GENERATORS = Object.freeze({
   infinite:Object.freeze({id:'infinite',atlas:WorldAtlas,spawn:{x:0,z:0,yaw:Math.PI},spawnName:'출발지',
    description:'끝없이 이어지는 세계입니다. 출발지에서 멀어질수록 위험해집니다. 던전·공동체·유적을 찾고, 채집한 표본으로 연구해 제작과 설비를 넓혀 가세요.',
@@ -175,6 +204,11 @@ export const GENERATORS = Object.freeze({
     atlasOptions:old=>({regionTerrain:legacyRegionTerrain(old)}),apply:(runtime,old,from)=>applyLegacyFrontier(runtime,old,from)}),
    // A fallen player wakes at the camp of the region they fell in, not back at the first region.
    respawn:nearestRegionCamp,respawnName:'지역 야영지'}),
+  // The machine field: no wildlife, and the player starts behind the start pad looking down the field.
+  'machine-field':Object.freeze({id:'machine-field',atlas:MachineFieldAtlas,spawn:{x:0,z:9.5,yaw:0},spawnName:'시험장 입구',
+   description:'벽으로 둘러싼 46 m 평지 시험장입니다. 기계를 조립해 달리고, 기둥과 벽에 부딪혀 손상을 보고, 고철 더미에서 재료를 캐 수리합니다.',
+   region:()=>false,landmarks:[{x:0,z:5,name:'출발 패드'},{x:FIELD_SCRAP.x,z:FIELD_SCRAP.z,name:'고철 더미'}],minimap:{size:64,origin:{x:-32,z:-32}},ecology:null,
+   legacySave:Object.freeze({name:'기존 기계 시험장 저장',matches:old=>old?.schema===1&&Array.isArray(old.blueprint),apply:(runtime,old,from)=>applyLegacyMachineField(runtime,old,from)})}),
 });
 // Saves before 0.15.2 recorded the map preset instead of the generator.
 const SAVED_MAP_GENERATOR = Object.freeze({expedition:'infinite',island:'island'});
