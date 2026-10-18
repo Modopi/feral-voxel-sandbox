@@ -7,6 +7,7 @@ import {WorldAtlas} from './atlas.js';
 import {World, SIZE as ISLAND_SIZE, SEA as ISLAND_SEA} from '../world.js';
 import {frontierWorld, regionInfo, regionKey} from '../frontier/terrain.js';
 import {GEAR, MINING_HARDNESS} from '../equipment.js';
+import {IMPACT_TOUGHNESS} from '../impact.js';
 
 // Original island block numbers → design blocks (design blocks.json lists the same legacy numbers).
 // Lava has no design block; the crater keeps its basalt shape.
@@ -38,6 +39,13 @@ export function miningProfile(block,blocks){
   const kind=miningKind(block);if(!kind)return null;
   const reference=blocks.get(MINING_REFERENCE[kind]),scale=block.legacyBlockId!=null||!reference?1:Math.max(1,block.durabilityHpPerCell/reference.durabilityHpPerCell);
   return {kind,affinity:kind==='ore'?'rock':kind,hardness:MINING_HARDNESS[kind]*scale};
+}
+// Impact toughness (frontier impact.js, joules that break a cell): original blocks keep the frontier value;
+// design-only blocks scale the reference of their kind by durability.
+const IMPACT_REFERENCE = Object.freeze({soil:[1800,28],stone:[11000,100],wood:[2800,70],vegetation:[300,8],ore:[14000,130],metal:[18000,130],glass:[1000,35]});
+export function impactToughness(block){
+  const legacy=block.legacyBlockId!=null?IMPACT_TOUGHNESS[block.legacyBlockId]:null;if(Number.isFinite(legacy))return legacy;
+  const [joules,durability]=IMPACT_REFERENCE[block.kind]??IMPACT_REFERENCE.stone;return joules*block.durabilityHpPerCell/durability;
 }
 // A mined cell gives its block's raw resource; blocks without one give what the frontier gave for them.
 export const MINED_ITEMS = Object.freeze({grass:'soil',dirt:'soil',ash:'soil',leaves:'plant_fiber',plank:'wood',moss:'plant_fiber',algae:'plant_fiber',

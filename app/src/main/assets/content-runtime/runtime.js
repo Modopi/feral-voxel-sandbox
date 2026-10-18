@@ -13,7 +13,7 @@ import {WorldObjects} from './objects.js';
 import {FaithSystem} from './faith.js';
 import {Armaments} from './armaments.js';
 import {reasonText} from './reasons.js';
-import {generatorFor,savedGenerator,worldRules,STARTER_KIT,BUILD_BLOCKS,miningProfile,minedItem,TOOL_GEAR,BARE_GEAR} from './maps.js';
+import {generatorFor,savedGenerator,worldRules,STARTER_KIT,BUILD_BLOCKS,miningProfile,minedItem,TOOL_GEAR,BARE_GEAR,impactToughness} from './maps.js';
 import {miningWorkFor,MINING_PERIOD_S} from '../equipment.js';
 import {FirstSignal} from './first-signal.js';
 import {impactEnergy,impactHealth} from '../impact.js';
@@ -54,7 +54,7 @@ export class ExpeditionRuntime {
   this.player=state?.player?clone(state.player):{x:spawn.x,y:this.atlas.heightAt(spawn.x,spawn.z)+.05,z:spawn.z,yaw:spawn.yaw,pitch:0,hp:100,maxHp:100,calories:this.calorieRule.capacity,maxCalories:this.calorieRule.capacity,vy:0,grounded:false,stance:'stand',lastDamageAt:-100,resting:false};
   this.deaths=clone(state?.deaths||[]);this.seenRegions=new Set(state?.seenRegions||[]);
   this.discoveredLandmarks=new Set(state?.discoveredLandmarks||[]);this.conversion=state?.conversion?clone(state.conversion):null;
-  this.messages=[];this.warnings=[];this.events=[];this.fallSpeed=0;this.playerPush=null;this.lastStrike=0;this.lastMine=-Infinity;this.populationClock=Infinity;
+  this.messages=[];this.warnings=[];this.events=[];this.fallSpeed=0;this.impactCells=new Map();this.playerPush=null;this.lastStrike=0;this.lastMine=-Infinity;this.populationClock=Infinity;
   this.terrain={unbounded:true,getCell:(x,y,z)=>this.isSolid(x*.5+.25,y*.5+.25,z*.5+.25)?1:0,
    isSolidCell:(x,y,z)=>this.isSolid(x*.5+.25,y*.5+.25,z*.5+.25),heightAt:(x,z,y)=>this.surfaceHeight(x,z,y),
    groundHeight:(x,z,y)=>this.surfaceHeight(x,z,y),fluidAt:(x,y,z)=>this.dungeons.fluidAt({x,y,z})??this.atlas.fluidAt(x,y,z),
@@ -246,6 +246,36 @@ export class ExpeditionRuntime {
  strikeCreature(id,partId,energy,point,sourceId){
   const amount=Math.min(80,energy/100);if(!(amount>0))return null;
   return this.creatures.damage(id,amount,'body',{structuralHits:[{partId,amount}],sourceId,attackMode:'impact',energyType:'mechanical',point});
+ }
+ /** A fast body struck terrain (frontier impact rule): the struck cell takes energy × 0.35 ÷ its impact toughness
+  * of its strength, at most every 0.35 s per cell; a broken cell is knocked loose as a one-cell object and
+  * whatever it held up detaches. */
+ impactTerrain(point,normal,energy){
+  if(!(energy>0))return null;
+  for(const sign of [-1,1]){
+   const cell=[Math.floor((point.x+normal.x*.04*sign)*2),Math.floor((point.y+normal.y*.04*sign)*2),Math.floor((point.z+normal.z*.04*sign)*2)];
+   const blockId=this.atlas.getCell(...cell),block=BLOCKS.get(blockId);if(!block||block.collision===false)continue;
+   if(this.dungeons.solidAt?.({x:cell[0]*.5+.25,y:cell[1]*.5+.25,z:cell[2]*.5+.25}))return null; // building fabric is not terrain
+   const key=cell.join(',');if((this.impactCells.get(key)??-Infinity)>this.time)return null;
+   if(this.impactCells.size>256)for(const [k,until]of this.impactCells)if(until<=this.time)this.impactCells.delete(k);
+   this.impactCells.set(key,this.time+.35);
+   const old=this.terrainDamage[key],damage=(old?.blockId===blockId?old.damage??0:0)+energy*.35/impactToughness(block);
+   if(damage<1-1e-9){this.terrainDamage[key]={blockId,damage};return {cell,damage};}
+   // What the cell held up falls later through the deferred detach queue, outside the physics step.
+   delete this.terrainDamage[key];const loose=this.objects.knockLoose(cell);if(loose)this.pendingDetach.add(key);return {cell,broken:true,objectId:loose?.id??null};
+  }
+  return null;
+ }
+ /** A fast collision wears the struck cell of a loose object by energy × 0.65 ÷ toughness; a broken cell comes off as its own piece. */
+ impactObject(id,point,energy){
+  const o=this.objects.get(id);if(!o||o.fragment||!(energy>0))return null;
+  const cell=this.objects.nearestCell(id,point),block=cell&&BLOCKS.get(cell.blockId);if(!block)return null;
+  return this.objects.damageAt(id,point,energy*.65/impactToughness(block)*block.durabilityHpPerCell,{knockLoose:true});
+ }
+ /** A fast collision damages the machine voxel that touched: min(60, energy ÷ 180) (frontier). */
+ impactMachine(id,voxelId,energy){
+  const amount=Math.min(60,energy/180);if(!(amount>0)||!this.machines.machines.get(id)?.voxels.some(v=>v.id===voxelId))return null;
+  return this.machines.applyDamageEvent(id,this.id('impact'),{[voxelId]:amount},{energyType:'mechanical'});
  }
  /** A loose object or machine struck the player (physics.js playerImpacts). */
  strikePlayer(energy,sourceId){const n=this.impactDamage(energy,'impact');if(n)this.message(`물체 충돌 −${Math.ceil(n)}`);return n;}

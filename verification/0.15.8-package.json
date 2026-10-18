@@ -1,0 +1,17 @@
+{
+  "version": "0.15.8",
+  "versionCode": 1508,
+  "minNativeCode": 303,
+  "files": 124,
+  "nativeFileLimit": 128,
+  "mjsFiles": [],
+  "newFiles": [],
+  "archiveBytes": 2866148,
+  "expandedBytes": 11712689,
+  "archiveSha256": "c2794c13f7a172d992258b668594896ef7a6060bdfe87393b6b6c5c3adf3cff6",
+  "packageSha256": "f993b64020d2875fe11c632bef619c0f2329f9314590c219df26c3b5f69c4d09",
+  "apkSha256": "7eabbca27503c404532eed5433ff9a7888d8e641f1d55e5fd221c0e0bc1eeab2",
+  "apkAssetsIdenticalToUpdate": true,
+  "withinLimits": true,
+  "note": "Local build with the shared test signing key; CI rebuilds and publishes after merge."
+}

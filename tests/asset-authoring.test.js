@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { VoxelAssetBuilder, initializeAuthoring, assertAuthoringInvariant, assertCreatedByTool } from '../tools/asset-pipeline/authoring.mjs';
 import { flattenAsset } from '../tools/asset-pipeline/model.mjs';
-import { overlappingPairs } from '../tools/asset-pipeline/solid.mjs';
+import { overlappingPairs, overlapsAny, overlapsAdding } from '../tools/asset-pipeline/solid.mjs';
+import { readFileSync } from 'node:fs';
 
 const cube = (center = [0, 0, 0], size = [2, 2, 2], material = 'wood') => ({ center, size, material });
 function source() {
@@ -127,4 +128,37 @@ test('SDK copies input and exported data to prevent accidental alias mutations',
   exported.parts[0].boxes[0].center[0] = 100;
   assert.deepEqual(boxes(builder)[0].center, [0, 0, 0]);
   assert.deepEqual(builder.toJSON().parts[0].translation, [0, 0, 0]);
+});
+
+test('bulk add places many boxes in one checked step and rejects any overlap atomically', () => {
+  const builder = new VoxelAssetBuilder(source());
+  builder.addBox('root', cube([10, 0, 0]));
+  const row = Array.from({ length: 6 }, (_, i) => cube([i * 2, 0, 4]));
+  builder.addBoxes('root', row);
+  assert.equal(volume(boxes(builder)), 7 * 8);
+  const before = builder.toJSON();
+  assert.throws(() => builder.addBoxes('root', [cube([0, 0, 8]), cube([1, 0, 8])]), /겹/, 'incoming boxes overlapping each other');
+  assert.throws(() => builder.addBoxes('root', [cube([0, 0, 8]), cube([10.5, 0, 0])]), /겹/, 'an incoming box overlapping an existing one');
+  assert.throws(() => builder.addBoxes('root', [cube([0, 0, 8]), cube([0, 0, 12], [2, 2, 2], 'missing')]), /재질/);
+  assert.deepEqual(builder.toJSON(), before, 'nothing of a refused batch is kept');
+});
+
+test('sweep overlap checks give the same answers as testing every pair', () => {
+  // Grid-aligned boxes of mixed sizes, many touching only by faces, some overlapping.
+  let seed = 7; const random = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const brute = (list) => { let n = 0; for (let i = 0; i < list.length; i++) for (let j = 0; j < i; j++) if (list[i].center.every((c, k) => Math.abs(c - list[j].center[k]) < (list[i].size[k] + list[j].size[k]) / 2 - 1e-8)) n++; return n; };
+  for (let round = 0; round < 40; round++) {
+    const list = Array.from({ length: 60 }, () => { const size = [1, 2, 3].map(() => .5 * (1 + Math.floor(random() * 3))); return { center: size.map((s) => Math.floor(random() * 12) * .5 + s / 2), size, material: 'wood' }; });
+    assert.equal(overlappingPairs(list), brute(list));
+    const [existing, incoming] = [list.slice(0, 40), list.slice(40, 42)];
+    const expected = brute([...existing, ...incoming]) - brute(existing) > 0;
+    assert.equal(overlapsAdding(existing, incoming), expected);
+    assert.equal(overlapsAny(existing, incoming[0]), brute([...existing, incoming[0]]) - brute(existing) > 0);
+  }
+});
+
+test('the runtime voxel SDK is the same code as the asset pipeline SDK', () => {
+  const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
+  assert.equal(read('../app/src/main/assets/content-runtime/voxel/solid.js'), read('../tools/asset-pipeline/solid.mjs'));
+  assert.equal(read('../app/src/main/assets/content-runtime/voxel/authoring.js').replace("'./solid.js'", "'./solid.mjs'"), read('../tools/asset-pipeline/authoring.mjs'));
 });

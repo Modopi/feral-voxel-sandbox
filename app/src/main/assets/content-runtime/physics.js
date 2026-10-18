@@ -439,7 +439,7 @@ export class RuntimePhysics {
     let remaining = dt;
     while (remaining > 1e-9) {
       const step = Math.min(1 / 60, remaining);
-      this.machinePhysics.prepare(step); this.objectPhysics.sync(); this.objectPhysics.prepare(step); if (this.runtime.placements?.physicsBodies) this.fixturePhysics.sync(); this.terrainAt(this.runtime.player); this.worldStep(step); this.playerImpacts(step); this.creatureImpacts(); this.machinePhysics.capture(); this.objectPhysics.capture(); this.fixturePhysics.capture(); remaining -= step;
+      this.machinePhysics.prepare(step); this.objectPhysics.sync(); this.objectPhysics.prepare(step); if (this.runtime.placements?.physicsBodies) this.fixturePhysics.sync(); this.terrainAt(this.runtime.player); this.worldStep(step); this.playerImpacts(step); this.matterImpacts(); this.machinePhysics.capture(); this.objectPhysics.capture(); this.fixturePhysics.capture(); remaining -= step;
     }
   }
   /** Bodies that strike the player hurt like the frontier's (impact.js, safe speed 4 m/s). Runs after the
@@ -455,23 +455,68 @@ export class RuntimePhysics {
     this.strikesFrom(this.machinePhysics.bodies, this.machinePhysics.system?.machines, this.runtime.drivingMachineId, p, vx, vy, vz);
     if (this.impactCooldown.size) for (const [id, until] of this.impactCooldown) if (until <= this.impactClock) this.impactCooldown.delete(id);
   }
-  /** A loose object moving faster than 4 m/s that touches a creature's part strikes it with the impact
-   * energy of the two masses (runtime.strikeCreature), once per object and creature every 0.45 s. */
-  creatureImpacts() {
-    const creatures = this.runtime.creatures; if (!creatures?.get) return;
-    for (const [id, cache] of this.objectPhysics.bodies) {
-      const s = this.runtime.objects?.get?.(id), v = s?.velocity;
-      if (!v || v.x * v.x + v.y * v.y + v.z * v.z <= 16) continue;
-      for (const collider of cache.entry.colliders) this.world.contactPairsWith(collider, (other) => {
-        const owner = this.adapter.ownershipForCollider(other), creature = owner && creatures.get(owner.ownerId);
-        if (!creature) return;
-        const key = `${id}>${owner.ownerId}`; if ((this.impactCooldown.get(key) ?? 0) > this.impactClock) return;
-        const c = other.translation(), dx = c.x - s.position.x, dy = c.y - s.position.y, dz = c.z - s.position.z, d = Math.hypot(dx, dy, dz) || 1;
-        const closing = (v.x * dx + v.y * dy + v.z * dz) / d; if (closing <= 4) return;
-        this.impactCooldown.set(key, this.impactClock + .45);
-        this.runtime.strikeCreature?.(owner.ownerId, owner.partId, impactEnergy(cache.entry.body.mass(), creature.massKg ?? 60, closing, 4), { x: c.x, y: c.y, z: c.z }, id);
-      });
+  /** Object and machine colliders report contact forces above five times their body's weight: resting never
+   * does, an impact does. Only those reports are judged (matterImpacts), never every collider of a body. */
+  watchImpacts(colliders, massKg) {
+    for (const c of colliders) { c.setActiveEvents(R.ActiveEvents.CONTACT_FORCE_EVENTS); c.setContactForceEventThreshold(massKg * 9.81 * 5); }
+  }
+  /** Fast bodies break and hurt what they hit (frontier impact-physics). Each reported contact is judged by the
+   * pre-impact closing speed of the contact point along its normal (safe 4 m/s, wheels 8), at most every 0.3 s per pair
+   * (0.45 s with a creature): terrain cells, loose
+   * objects and machine voxels on both sides wear by the collision energy, and a creature part takes a blow. */
+  matterImpacts() {
+    const queue = this.adapter.eventQueue; if (!queue?.drainContactForceEvents) return;
+    queue.drainContactForceEvents((event) => {
+      const a = this.world.getCollider(event.collider1()), b = this.world.getCollider(event.collider2());
+      if (a && b) this.impactPair(a, b);
+    });
+  }
+  /** What a collider belongs to for impacts: a moving object or machine, terrain, or a creature. */
+  impactSide(collider) {
+    const owner = this.adapter.ownershipForCollider(collider); if (!owner) return null;
+    const rt = this.runtime, id = owner.ownerId;
+    if (id === '@terrain') return { kind: 'terrain', id, mass: Infinity };
+    const object = this.objectPhysics.bodies.get(id) && rt.objects?.get?.(id);
+    if (object) { const body = this.objectPhysics.bodies.get(id).entry.body; return { kind: 'object', id, partId: owner.partId, mass: body.isDynamic() ? body.mass() : Infinity, velocity: object.velocity, spin: object.angularVelocity, center: body.worldCom() }; }
+    const machine = this.machinePhysics.bodies.get(id) && this.machinePhysics.system?.machines.get(id);
+    if (machine) {
+      const body = this.machinePhysics.bodies.get(id).entry.body, wheel = machine.components.some((c) => c.voxelId === owner.partId && c.legacyType === 'wheel');
+      return { kind: 'machine', id, partId: owner.partId, mass: body.isDynamic() ? body.mass() : Infinity, velocity: machine.velocity, spin: machine.angularVelocity, center: body.worldCom(), wheel };
     }
+    const creature = rt.creatures?.get?.(id);
+    if (creature) return { kind: 'creature', id, partId: owner.partId, mass: creature.massKg ?? 60 };
+    return null;
+  }
+  /** Pre-step velocity of a side at the contact point, spin included (v + ω × r from the centre of mass). */
+  impactVelocity(side, point) {
+    const v = side.velocity, w = side.spin, c = side.center;
+    if (!v) return { x: 0, y: 0, z: 0 };
+    if (!w || !c) return v;
+    const r = { x: point.x - c.x, y: point.y - c.y, z: point.z - c.z };
+    return { x: v.x + w.y * r.z - w.z * r.y, y: v.y + w.z * r.x - w.x * r.z, z: v.z + w.x * r.y - w.y * r.x };
+  }
+  impactPair(a, b) {
+    const sa = this.impactSide(a), sb = this.impactSide(b);
+    if (!sa || !sb || sa.id === sb.id || (sa.kind !== 'object' && sa.kind !== 'machine' && sb.kind !== 'object' && sb.kind !== 'machine')) return;
+    const key = sa.id < sb.id ? `${sa.id}|${sb.id}` : `${sb.id}|${sa.id}`;
+    if ((this.impactCooldown.get(key) ?? 0) > this.impactClock) return;
+    this.world.contactPair(a, b, (manifold, flipped) => {
+      if (!manifold.numSolverContacts() || (this.impactCooldown.get(key) ?? 0) > this.impactClock) return;
+      const p = manifold.solverContactPoint(0), m = manifold.normal(), sign = flipped ? -1 : 1, n = { x: m.x * sign, y: m.y * sign, z: m.z * sign };
+      const point = { x: p.x, y: p.y, z: p.z }, va = this.impactVelocity(sa, point), vb = this.impactVelocity(sb, point);
+      // Wheels are built to roll over bumps: their safe speed is 8 m/s (frontier).
+      const closing = (va.x - vb.x) * n.x + (va.y - vb.y) * n.y + (va.z - vb.z) * n.z, energy = impactEnergy(sa.mass, sb.mass, closing, sa.wheel || sb.wheel ? 8 : 4);
+      if (!(energy > 0)) return;
+      // A creature is struck at most every 0.45 s by the same body (frontier actor cooldown), matter every 0.3 s.
+      this.impactCooldown.set(key, this.impactClock + (sa.kind === 'creature' || sb.kind === 'creature' ? .45 : .3));
+      const rt = this.runtime;
+      for (const [side, other, toward] of [[sa, sb, n], [sb, sa, { x: -n.x, y: -n.y, z: -n.z }]]) {
+        if (side.kind === 'object') rt.impactObject?.(side.id, point, energy);
+        else if (side.kind === 'machine') rt.impactMachine?.(side.id, side.partId, energy);
+        else if (side.kind === 'terrain') rt.impactTerrain?.(point, { x: -toward.x, y: -toward.y, z: -toward.z }, energy);
+        else if (side.kind === 'creature') rt.strikeCreature?.(side.id, side.partId, energy, point, other.id);
+      }
+    });
   }
   strikesFrom(bodies, states, skipId, p, vx, vy, vz) {
     for (const [id, cache] of bodies) {
