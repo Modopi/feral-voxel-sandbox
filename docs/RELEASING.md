@@ -65,6 +65,8 @@
 
 게임 1800 / 앱·최소 앱 303 / 저장 스키마 4(그대로). Java·권한·키 변경이 없는 게임 전용 릴리스다. 지형 생성이 웹 워커 `content-runtime/terrain-worker.js`로 옮겨 가 첫 채움(원하는 청크 96개를 만들고 메시까지 그림)이 콘텐츠 탐험 36~48초에서 약 4초, 섬 약 18초에서 4~5초, 개척 원정 15~23초에서 3.5~4초가 됐다(SwiftShader). 생물 AI는 거리별로 갱신한다(사용자 결정). 워커는 같은 출처의 모듈 워커라 앱 0.3.3의 CSP(`script-src 'self'`)에서 그대로 돈다. 업데이트 파일은 104개다.
 
+2026-10-18 15:36 UTC [PR #47](https://github.com/Modopi/feral-voxel-sandbox/pull/47) 병합 커밋 `6138341`에서 [배포 Actions](https://github.com/Modopi/feral-voxel-sandbox/actions/runs/39141252963)가 성공해 15:37 UTC에 [v0.18.0 Release](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.18.0)와 기존 공식 `updates/catalog.json`, `updates/stable.feral`, 불변 `updates/versions/0.18.0.feral`로 게시됐다. stable과 버전 패키지는 같은 파일(SHA256 `c1fcf535…c1182c5`)이며 로컬 빌드와 바이트 단위로 같고, 내부 아카이브 SHA256 `7e7dc063…`가 카탈로그와 일치한다. 카탈로그는 33개 항목이며 0.17.0(`412755b6…`) 항목은 그대로다. Release의 APK(`38d1866b…e5be4a5c`)는 CI가 다시 빌드한 것이다. Android 실기기 확인은 아직 하지 않았다.
+
 ### 0.17.0 — 기계 시험장을 통합 런타임으로, 엔진 통합 완료 (통합 S3)
 
 게임 1700 / 앱·최소 앱 303 / 저장 스키마 4. Java·권한·키 변경이 없는 게임 전용 릴리스다. 기계 시험장 프리셋이 통합 런타임에서 돌아 게임 세션의 엔진이 하나가 됐다(세션 라우터의 엔진 분기 제거). 바퀴 기계가 서스펜션·견인·조향 힘으로 실제로 달린다. 기존 기계 시험장 저장(`feral.machine.v1`)은 처음 열 때 한 번 옮긴다(원본 키는 그대로). 기계 시험장 월드의 저장이 통합 런타임 형식(`.a`/`.b`)이 되어 이전 빌드가 그 진행을 읽지 못하므로 저장 스키마를 4로 올렸다. 옛 기계 시험장 페이지와 옛 가방·생태 코드를 지워 업데이트 파일이 112개에서 103개가 됐다. 검증은 [검증 기록](../verification/0.17.0.md).
