@@ -15,6 +15,7 @@ import {Armaments} from './armaments.js';
 import {reasonText} from './reasons.js';
 import {generatorFor,savedGenerator,worldRules,STARTER_KIT,BUILD_BLOCKS,miningProfile,minedItem,TOOL_GEAR,BARE_GEAR} from './maps.js';
 import {miningWorkFor,MINING_PERIOD_S} from '../equipment.js';
+import {FirstSignal} from './first-signal.js';
 import {hitShapeFor,hitShapeForMode,shapeCut,IMPACT_REACH_M} from './creature-animation.js';
 const clone = value => JSON.parse(JSON.stringify(value));
 export const distance = (a,b) => Math.hypot(a.x-b.x,(a.y||0)-(b.y||0),a.z-b.z);
@@ -23,6 +24,8 @@ const firstSentence = text => String(text||'').split(/(?<=[.。])\s/)[0].trim();
 const SPECIES = new Map(CONTENT.creatures.entries.map(e=>[e.id,e]));
 const BLOCKS = new Map(CONTENT.blocks.entries.map(e=>[e.id,e]));
 const BOSS_ACTIONS = {repair:'수리',rest:'휴식',recharge:'재충전'};
+// Systems a world turns on by name (config.modules, docs/ARCHITECTURE.md §6).
+export const MODULES = Object.freeze({'first-signal':FirstSignal});
 export class ExpeditionRuntime {
  /** onProgress(step,done,total) reports loading steps; pause lets the screen repaint before synchronous construction. */
  static async create(seed,state=null,{onProgress=()=>{},pause=null,config=null}={}){
@@ -70,6 +73,11 @@ export class ExpeditionRuntime {
   this.equipmentExposureProfiles=new Map();
   this.nodes=[];this.nearbyStructures=[];
   if(!state&&this.rules.starterKit)this.progression.grant(STARTER_KIT,{claimId:`map-start:${this.generator.id}`});
+  // Modules the world settings name run with the shared systems; a saved module the settings no longer
+  // name keeps its state untouched in the save.
+  this.moduleStates=clone(state?.modules||{});this.modules={};
+  for(const name of config?.modules??[]){if(!MODULES[name])throw Error(`알 수 없는 모듈입니다: ${name}`);this.modules[name]=new MODULES[name](this,this.moduleStates[name]??null);}
+  this.moduleList=Object.values(this.modules);
   this.refreshWorld();
  }
  id(prefix){return `${prefix}:${this.seed}:${this.nextId++}`;}
@@ -185,6 +193,7 @@ export class ExpeditionRuntime {
   for(const event of bossEvents??[])this.bossEvent(event);
   this.faith.tick(dt);
   this.armaments.tick(dt);
+  for(const module of this.moduleList)module.tick(dt);
   if(this.playerPush){
    // Catalog counterplay: the wind pushes back at most 1 m (4 m/s for 0.25 s), never through solid cells.
    const step=Math.min(dt,this.playerPush.remaining),before={...p};p.x+=this.playerPush.x*4*step;p.z+=this.playerPush.z*4*step;this.playerPush.remaining-=step;
@@ -454,5 +463,5 @@ export class ExpeditionRuntime {
   rows.push(...getResourceDescriptors(this),...this.machines.sceneModels().filter(e=>distance(p,e.position)<160),...this.objects.sceneModels().filter(e=>distance(p,e.position)<160),...this.placements.descriptors().filter(e=>distance(p,e.position)<160));
   return rows;
  }
- serialize(){return {schema:1,terrain:this.generator.id,seed:this.seed,time:this.time,nextId:this.nextId,player:clone(this.player),atlas:this.atlas.serialize(),progression:this.progression.serialize(),armaments:this.armaments.serialize(),creatures:this.creatures.serialize(),dungeons:this.dungeons.serialize(),bosses:this.bosses.serialize(),machines:this.machines.serialize(),materialEffects:this.materialEffects.serialize(),objects:this.objects.serialize(),pendingDetach:[...this.pendingDetach],placements:this.placements.serialize(),community:this.community.serialize(),faith:this.faith.serialize(),terrainDamage:clone(this.terrainDamage),deaths:clone(this.deaths),seenRegions:[...this.seenRegions],discoveredLandmarks:[...this.discoveredLandmarks],conversion:this.conversion?clone(this.conversion):null};}
+ serialize(){return {schema:1,terrain:this.generator.id,seed:this.seed,time:this.time,nextId:this.nextId,player:clone(this.player),atlas:this.atlas.serialize(),progression:this.progression.serialize(),armaments:this.armaments.serialize(),creatures:this.creatures.serialize(),dungeons:this.dungeons.serialize(),bosses:this.bosses.serialize(),machines:this.machines.serialize(),materialEffects:this.materialEffects.serialize(),objects:this.objects.serialize(),pendingDetach:[...this.pendingDetach],placements:this.placements.serialize(),community:this.community.serialize(),faith:this.faith.serialize(),terrainDamage:clone(this.terrainDamage),deaths:clone(this.deaths),seenRegions:[...this.seenRegions],discoveredLandmarks:[...this.discoveredLandmarks],conversion:this.conversion?clone(this.conversion):null,modules:{...this.moduleStates,...Object.fromEntries(Object.entries(this.modules).map(([name,m])=>[name,m.serialize()]))}};}
 }

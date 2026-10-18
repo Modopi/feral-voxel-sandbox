@@ -3,13 +3,14 @@ import { CharacterRig } from "../character-view.js";
 import { uiIcon } from "../ui-art.js";
 import { CampaignView } from "./campaign-view.js";
 import { BIOMES, CROPS, biomeIndex } from "./campaign.js";
-import { PATTERNS, attackZones } from "./encounters.js";
 import {
   GATHERABLES,
   CONTRACTS,
   resourceSites,
   relaySites,
   ruinDefinition,
+  PATTERNS,
+  attackZones,
 } from "./content.js";
 import { ITEMS } from "../inventory.js";
 import { activeGear, gearId, GEAR } from "../equipment.js";
