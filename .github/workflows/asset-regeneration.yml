@@ -1,0 +1,41 @@
+name: FERAL asset regeneration
+
+# Regenerates all voxel assets from their generators and checks catalog, silhouettes and GLB export.
+# It only says something when asset sources change, so it runs on those paths alone.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'design/assets/**'
+      - 'design/content/**'
+      - 'tools/asset-pipeline/**'
+      - 'tests/long/visual-assets.test.js'
+      - '.github/workflows/asset-regeneration.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'design/assets/**'
+      - 'design/content/**'
+      - 'tools/asset-pipeline/**'
+      - 'tests/long/visual-assets.test.js'
+      - '.github/workflows/asset-regeneration.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: asset-regeneration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  asset-regeneration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Regenerate assets and check catalog, silhouettes and GLB export
+        run: node --test tests/long/visual-assets.test.js

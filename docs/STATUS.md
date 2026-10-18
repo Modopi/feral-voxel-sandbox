@@ -1,6 +1,6 @@
 # FERAL 현황
 
-> 기준: 2026-10-18 · 게임 **0.15.0 / 1500**(직전 공개 0.14.1) · Android 앱 **0.3.3 / 303** · 저장 스키마 2
+> 기준: 2026-10-18 · 게임 **0.15.0 / 1500**(공개) · Android 앱 **0.3.3 / 303** · 저장 스키마 2
 >
 > 구조는 [소프트웨어 구조](ARCHITECTURE.md), 앞으로의 단계는 [로드맵](ROADMAP.md), 플레이 규칙은 [게임 규칙](GAME-RULES.md)을 본다. 버전별 변경은 [CHANGELOG](../CHANGELOG.md).
 
@@ -9,7 +9,7 @@
 | 항목 | 값 |
 | --- | --- |
 | 공개 저장소 | [Modopi/feral-voxel-sandbox](https://github.com/Modopi/feral-voxel-sandbox) |
-| 최신 공개 게임 | [v0.14.1](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.14.1) · 2026-10-18 05:27 UTC · 병합 커밋 `3a7f871` ([PR #23](https://github.com/Modopi/feral-voxel-sandbox/pull/23)). 0.15.0은 병합 후 [릴리스 목록](https://github.com/Modopi/feral-voxel-sandbox/releases)에 게시 |
+| 최신 공개 게임 | [v0.15.0](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.15.0) · 2026-10-18 07:03 UTC · 병합 커밋 `50da8fc` ([PR #25](https://github.com/Modopi/feral-voxel-sandbox/pull/25)) |
 | 앱이 읽는 경로 | `updates` 브랜치의 [버전 목록](https://raw.githubusercontent.com/Modopi/feral-voxel-sandbox/updates/catalog.json)과 [최신 패키지](https://raw.githubusercontent.com/Modopi/feral-voxel-sandbox/updates/stable.feral). 로그인·토큰 없음 |
 | 서명 | 공유 시험 키(정식 운영 키 아님) |
 
@@ -45,7 +45,7 @@
 ## 알려진 한계
 
 - Android 실기기 검증이 부족하다. 0.12.1 이후의 시작·업데이트·터치·성능은 데스크톱 브라우저(SwiftShader)와 앱 규칙 서버로만 확인했다.
-- 기존 화면 검사 19개 중 5개(survival-ui·frontier·world-ui·layered-body·aerodynamics-movement)는 0.12.1부터 같은 위치·값으로 실패하는 오래된 검사다. 기존 섬 엔진 전용 2개(browser·progression)는 기록으로 남겼다. [0.14.0 검증](../verification/0.14.0.md).
+- 검사는 필수 회귀(`npm test`, 약 20초)와 바꾼 영역만 도는 장기 검사(`tests/long/`)로 나눴다. 0.12.1부터 같은 위치·값으로 실패하던 예전 화면 검사 5개(survival-ui·frontier·world-ui·layered-body·aerodynamics-movement)와 기존 섬 엔진 전용 기록 2개(browser·progression)는 지웠다. 남은 예전 화면 검사 12개는 옛 엔진을 통합하며 없앤다.
 - 유체는 1 m 셀이라 반 칸 틈을 정밀하게 흐르지 않는다. 공기역학·충격·부력은 게임용 근사 모델이다.
 - 조준 대상 카드가 가까운 대상을 내려다볼 때 오른쪽 위 버튼과 겹칠 수 있다(0.13.0부터).
 

@@ -1,14 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {validateAsset,flattenAsset,boundsOf} from '../tools/asset-pipeline/model.mjs';
-import {exportGlb} from '../tools/asset-pipeline/glb.mjs';
-import {generate as creatures} from '../design/assets/generators/creatures.mjs';
-import {generate as bosses} from '../design/assets/generators/bosses.mjs';
-import {generate as structures} from '../design/assets/generators/structures.mjs';
-import {generate as environments} from '../design/assets/generators/environments.mjs';
-import {generate as equipment} from '../design/assets/generators/equipment.mjs';
-const content=Object.fromEntries(['creatures','bosses','structures','environments','blocks','progression'].map(n=>[n,JSON.parse(fs.readFileSync(new URL(`../design/content/${n}.json`,import.meta.url)))]));
+import {validateAsset,flattenAsset,boundsOf} from '../../tools/asset-pipeline/model.mjs';
+import {exportGlb} from '../../tools/asset-pipeline/glb.mjs';
+import {generate as creatures} from '../../design/assets/generators/creatures.mjs';
+import {generate as bosses} from '../../design/assets/generators/bosses.mjs';
+import {generate as structures} from '../../design/assets/generators/structures.mjs';
+import {generate as environments} from '../../design/assets/generators/environments.mjs';
+import {generate as equipment} from '../../design/assets/generators/equipment.mjs';
+const content=Object.fromEntries(['creatures','bosses','structures','environments','blocks','progression'].map(n=>[n,JSON.parse(fs.readFileSync(new URL(`../../design/content/${n}.json`,import.meta.url)))]));
 const all=[...creatures(content),...bosses(content),...structures(content),...environments(content),...equipment(content)],library=new Map(all.map(a=>[a.id,a]));
 function parse(bytes){assert.equal(bytes.readUInt32LE(0),0x46546c67);assert.equal(bytes.readUInt32LE(8),bytes.length);return JSON.parse(bytes.subarray(20,20+bytes.readUInt32LE(12)).toString());}
 test('visual catalog covers every content ID and enforces coordinates/materials/hierarchy',()=>{assert.equal(all.length,119);for(const a of all)assert.ok(validateAsset(a,library,content).boxes>0);for(const [name,category]of [['creatures','creature'],['bosses','boss'],['structures','structure'],['environments','environment']])for(const e of content[name].entries)assert.equal(library.get(e.id)?.category,category);});
