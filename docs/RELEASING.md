@@ -65,6 +65,8 @@
 
 게임 1810 / 앱·최소 앱 303 / 저장 스키마 4(그대로). Java·권한·키 변경이 없는 게임 전용 릴리스다. 0.18.0 신고(나무 세 그루를 베어 부수면 플레이 불가)에 대해 칸을 깬 뒤의 받침 탐색, 덩어리 충돌체, 덩어리 화면 갱신, 공용 SDK의 표면 계산을 칸이 바뀐 곳에만 비용이 들도록 고쳤다. 표면 계산 결과는 바이트 단위로 같다(모든 모델 GLB 재생성 확인). 업데이트 파일은 104개 그대로다.
 
+2026-10-18 16:42 UTC [PR #49](https://github.com/Modopi/feral-voxel-sandbox/pull/49) 병합 커밋 `9ead705`에서 [배포 Actions](https://github.com/Modopi/feral-voxel-sandbox/actions/runs/39146228328)가 성공해 16:43 UTC에 [v0.18.1 Release](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.18.1)와 기존 공식 `updates/catalog.json`, `updates/stable.feral`, 불변 `updates/versions/0.18.1.feral`로 게시됐다. stable과 버전 패키지는 같은 파일(SHA256 `62dca024…56cf6b9db`)이며 로컬 빌드와 바이트 단위로 같고, 내부 아카이브 SHA256 `f6a7b58a…`가 카탈로그와 일치한다. 카탈로그는 34개 항목이며 0.18.0(`7e7dc063…`) 항목은 그대로다. Release의 APK(`ec261759…9a569c5c02`)는 CI가 다시 빌드한 것이다. Android 실기기 확인은 아직 하지 않았다.
+
 ### 0.18.0 — 성능 다음 단계: 지형 워커와 생물 AI 거리별 갱신 (P2a)
 
 게임 1800 / 앱·최소 앱 303 / 저장 스키마 4(그대로). Java·권한·키 변경이 없는 게임 전용 릴리스다. 지형 생성이 웹 워커 `content-runtime/terrain-worker.js`로 옮겨 가 첫 채움(원하는 청크 96개를 만들고 메시까지 그림)이 콘텐츠 탐험 36~48초에서 약 4초, 섬 약 18초에서 4~5초, 개척 원정 15~23초에서 3.5~4초가 됐다(SwiftShader). 생물 AI는 거리별로 갱신한다(사용자 결정). 워커는 같은 출처의 모듈 워커라 앱 0.3.3의 CSP(`script-src 'self'`)에서 그대로 돈다. 업데이트 파일은 104개다.

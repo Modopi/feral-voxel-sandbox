@@ -1,6 +1,6 @@
 # FERAL 현황
 
-> 기준: 2026-10-18 · 게임 **0.18.0 / 1800**(공개) · Android 앱 **0.3.3 / 303** · 저장 스키마 4
+> 기준: 2026-10-18 · 게임 **0.18.1 / 1810**(공개) · Android 앱 **0.3.3 / 303** · 저장 스키마 4
 >
 > 구조는 [소프트웨어 구조](ARCHITECTURE.md), 앞으로의 단계는 [로드맵](ROADMAP.md), 플레이 규칙은 [게임 규칙](GAME-RULES.md)을 본다. 버전별 변경은 [CHANGELOG](../CHANGELOG.md).
 
@@ -9,7 +9,7 @@
 | 항목 | 값 |
 | --- | --- |
 | 공개 저장소 | [Modopi/feral-voxel-sandbox](https://github.com/Modopi/feral-voxel-sandbox) |
-| 최신 공개 게임 | [v0.18.0](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.18.0) · 2026-10-18 15:37 UTC · 병합 커밋 `6138341` ([PR #47](https://github.com/Modopi/feral-voxel-sandbox/pull/47)) · 지형 워커와 생물 AI 거리별 갱신(성능 P2a) |
+| 최신 공개 게임 | [v0.18.1](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.18.1) · 2026-10-18 16:43 UTC · 병합 커밋 `9ead705` ([PR #49](https://github.com/Modopi/feral-voxel-sandbox/pull/49)) · 쓰러진 나무를 깎을 때의 렉 수정(P2a 보충) |
 | 앱이 읽는 경로 | `updates` 브랜치의 [버전 목록](https://raw.githubusercontent.com/Modopi/feral-voxel-sandbox/updates/catalog.json)과 [최신 패키지](https://raw.githubusercontent.com/Modopi/feral-voxel-sandbox/updates/stable.feral). 로그인·토큰 없음 |
 | 서명 | 공유 시험 키(정식 운영 키 아님) |
 
