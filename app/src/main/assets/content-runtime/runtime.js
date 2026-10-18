@@ -15,7 +15,7 @@ import {Armaments} from './armaments.js';
 import {reasonText} from './reasons.js';
 import {mapFor,BUILD_BLOCKS,miningProfile,minedItem,TOOL_GEAR,BARE_GEAR} from './maps.js';
 import {miningWorkFor,MINING_PERIOD_S} from '../equipment.js';
-import {woundCut,woundBox} from './creature-animation.js';
+import {hitShapeFor,hitShapeForMode,shapeCut,IMPACT_REACH_M} from './creature-animation.js';
 const clone = value => JSON.parse(JSON.stringify(value));
 export const distance = (a,b) => Math.hypot(a.x-b.x,(a.y||0)-(b.y||0),a.z-b.z);
 const asPoint = v => Array.isArray(v) ? {x:v[0],y:v[1],z:v[2]} : v;
@@ -296,8 +296,8 @@ export class ExpeditionRuntime {
   }
   if(weapon){const worn=this.armaments.recordAttack({distanceM:gimmick?gimmick.distance:hit.distance,at:this.time});if(!worn.ok)return worn;}
   if(gimmick){this.lastStrike=this.time;const ok=this.bosses.interactGimmick(gimmick.bossInstanceId,gimmick.gimmickId,{action:'damage',amount:loadout.hitDamage,actorPosition:this.player});return ok?{ok:true,gimmick:true,remainingHp:this.bosses.get(gimmick.bossInstanceId)?.gimmicks[gimmick.gimmickId]?.hp??0}:{ok:false,reason:'gimmick'};}
-  this.lastStrike=this.time;this.lastAttackMode=weapon?.attackMode??this.player.attackStyle??'strike';
-  return this.damageHit(hit,{amount:loadout.hitDamage,energyType:'mechanical',energyEU:loadout.hitDamage*1.5,attackMode:this.lastAttackMode});
+  this.lastStrike=this.time;this.lastAttackMode=weapon?.attackMode??'strike';
+  return this.damageHit(hit,{amount:loadout.hitDamage,energyType:'mechanical',energyEU:loadout.hitDamage*1.5,attackMode:this.lastAttackMode,hitShape:hitShapeFor(weapon?.weaponKind)});
  }
  /** The frontier tool table entry for a held design tool; a broken or missing tool mines bare-handed. */
  miningGear(toolId){
@@ -371,7 +371,7 @@ export class ExpeditionRuntime {
  }
  damageHit(hit,packet){
   let {amount,energyType}=packet;
-  const attackMode=packet.attackMode??this.player.attackStyle??'strike';
+  const attackMode=packet.attackMode??'strike';
   if(['creature','boss'].includes(hit.kind)&&this.physics?.traceCombat&&hit.point){
    const from=hit.rayOrigin??{x:this.player.x,y:this.player.y+(this.player.bodyHeight??1.5)*.9,z:this.player.z};
    const length=distance(from,hit.point),depth=attackMode==='pierce'?1.201:attackMode==='impact'?.601:.002;
@@ -382,15 +382,23 @@ export class ExpeditionRuntime {
    amount=trace.effectiveAmount;packet={...packet,amount,attackMode,structuralHits:trace.hits};
   }
   if(hit.kind==='creature'){
-   // Frontier layered body: a shell hit cuts the shell where it lands and wears the shell plating; bone
-   // exposed by earlier wounds takes the structural hit. Piercing and impact keep their traced depth.
-   const bone=hit.layer==='bone';let structuralHits=packet.structuralHits;
-   if(bone)structuralHits=[{partId:hit.partId,amount}];
-   else if(attackMode==='strike'||!structuralHits)structuralHits=[{partId:'shell',amount}];
-   if(!bone&&hit.point&&hit.partId&&hit.rayOrigin){
-    // The cut starts at the struck surface and bites along the swing, in the part's own frame.
-    const local=this.physics?.partLocalPoint?.(hit.id,hit.partId,hit.point),origin=this.physics?.partLocalPoint?.(hit.id,hit.partId,hit.rayOrigin);
-    if(local&&origin)this.creatures.wound(hit.id,hit.partId,woundBox(local,local.map((v,i)=>v-origin[i]),woundCut(amount,attackMode)));
+   // Frontier layered body; what is held decides how the blow lands (hitShapeFor). A point bite or a slash
+   // wears the shell plating and reaches bone only where the cut meets it; a spear's line splits between the
+   // shell and every bone it passes; a blunt blow leaves the shell closed and lands on the bone one cell in.
+   // Bone already exposed by earlier wounds takes the blow directly.
+   const shape=packet.hitShape??hitShapeForMode(attackMode),o=hit.rayOrigin,d=o&&hit.point?['x','y','z'].map(k=>hit.point[k]-o[k]):null,l=d?Math.hypot(...d)||1:1;
+   const ahead=m=>({x:hit.point.x+d[0]/l*m,y:hit.point.y+d[1]/l*m,z:hit.point.z+d[2]/l*m});
+   let structuralHits=[{partId:'shell',amount}];
+   if(hit.layer==='bone')structuralHits=[{partId:hit.partId,amount}];
+   else if(shape==='impact')structuralHits=[{partId:(d&&this.physics?.traceBones?.(hit.id,hit.point,ahead(IMPACT_REACH_M))?.[0]?.partId)||hit.partId,amount}];
+   else{
+    const local=d&&hit.partId?this.physics?.partLocalPoint?.(hit.id,hit.partId,hit.point):null,origin=local?this.physics.partLocalPoint(hit.id,hit.partId,o):null;
+    const cut=local&&origin?shapeCut(shape,amount,local,local.map((v,i)=>v-origin[i])):null;
+    if(cut){
+     this.creatures.wound(hit.id,hit.partId,cut);
+     if(shape==='pierce'){const bones=this.physics.traceBones?.(hit.id,hit.point,ahead(Math.max(...cut.slice(3))))??[];if(bones.length)structuralHits=[{partId:'shell',amount:amount*.3},...bones.map(b=>({partId:b.partId,amount:amount*.7/bones.length}))];}
+     else if(this.physics.cutReachesBone?.(hit.id,hit.partId,cut))structuralHits=[{partId:'shell',amount:amount*.5},{partId:hit.partId,amount:amount*.5}];
+    }else if(shape==='pierce'&&hit.partId)structuralHits=[{partId:'shell',amount:amount*.3},{partId:hit.partId,amount:amount*.7}]; // no rendered frame: the line reaches the struck part's bone
    }
    return this.creatures.damage(hit.id,amount,'body',{...packet,structuralHits,sourceId:packet.sourceId??'player',attackMode,energyType});
   }

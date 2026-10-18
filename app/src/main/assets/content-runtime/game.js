@@ -20,6 +20,7 @@ import {CreatureFragments} from './creature-fragments.js';
 import {AnchorMarkers} from './anchor-markers.js';
 import {ItemSlots,designCatalog} from './item-slots.js';
 import {applyLegacyIsland} from './maps.js';
+import {hitShapeFor} from './creature-animation.js';
 import {VERSION} from '../version.js';
 import {reasonText} from './reasons.js';
 import {InventoryUI,drawHotbar} from '../inventory-ui.js';
@@ -36,7 +37,9 @@ const held={descend:false,brake:false},ledgerPointers=new Set(),discovered=new S
 let sandboxTool=null,converted=null,minimapClock=0,buildSize=.5,miningSize=.5;const fieldLog=[];
 const input=createInput({canControl:()=>ready&&!paused,isEditing:()=>hudEditor?.editing===true,rotateLook});
 const energyNames={mechanical:'역학',electrical:'전기',thermal:'열',chemical:'화학',magic:'마법',divine:'신성'};
-const attackStyles={strike:'일반 타격',pierce:'관통 찌르기',impact:'충격 전달'};
+// How a blow lands follows what is held (runtime hitShapeFor); there is no manual attack style.
+const HIT_SHAPES={point:'점타격 · 외피 파내기',slash:'베기 · 선·면 절단',pierce:'관통 · 공격 방향으로 깊숙이',impact:'충격 · 안쪽 뼈만'};
+const heldShape=()=>hitShapeFor(runtime.armaments.loadout()?.weaponKind);
 const HAZARDS={heat:'고온',acid_fluid:'산성 액체',water:'깊은 물',ecology_water:'저수조 물',crosswind:'강한 횡풍',mana_pressure:'마나 압력',moving_platform:'움직이는 운반대'};
 // The frontier's ledger tabs first (여정·상태·지도·마을·기계), then the runtime's own pages.
 const TABS=[
@@ -97,7 +100,7 @@ function renderHotbar(){if(slots)drawHotbar($('hotbar'),slots,catalog,selectHotb
 function updateToolLabel(){
  const id=slots.held,d=id&&runtime.progression.catalog.get(id),weapon=runtime.armaments.loadout(),wear=id&&catalog.durability(id);
  $('toolName').textContent=weapon?weapon.name:id?d.name:'빈 손';const gear=runtime.miningGear(id);
- $('toolHelp').textContent=weapon?`${attackStyles[weapon.attackMode]} · 내구 ${weapon.durability}/${weapon.maxDurability}`:wear?`도구 내구 ${wear.value}/${wear.max}`:id==='food'?'사용: 먹기':d?.kind==='station'||d?.kind==='component'?'사용: 앞에 설치':`채굴 ${miningSize>=1?'1 m':'0.5 m'} · ${gear.affinity==='rock'?'돌':gear.affinity==='wood'?'나무':'흙'}에 강함 ×${gear.power}`;
+ $('toolHelp').textContent=weapon?`${HIT_SHAPES[hitShapeFor(weapon.weaponKind)]} · 내구 ${weapon.durability}/${weapon.maxDurability}`:wear?`도구 내구 ${wear.value}/${wear.max}`:id==='food'?'사용: 먹기':d?.kind==='station'||d?.kind==='component'?'사용: 앞에 설치':`채굴 ${miningSize>=1?'1 m':'0.5 m'} · ${gear.affinity==='rock'?'돌':gear.affinity==='wood'?'나무':'흙'}에 강함 ×${gear.power}`;
  if(sandboxTool!==null){$('toolName').textContent=SANDBOX_TOOLS[sandboxTool][0];$('toolHelp').textContent=SANDBOX_TOOLS[sandboxTool][1];}
  const block=runtime.buildableBlock(id);
  if(block&&sandboxTool===null)$('toolHelp').textContent=`보유 ${Number(runtime.progression.count(id).toFixed(2))} · 설치 ${buildSize>=1?8:1}칸 · ${CONTENT.blocks.entries.find(b=>b.id===block)?.name??block}`;
@@ -114,11 +117,6 @@ function syncHands(id,weapon){
 }
 // The range button sizes block placement while a buildable item is held, otherwise the mining region (frontier).
 function cycleRange(){if(runtime.buildableBlock(slots.held))buildSize=buildSize>=1?.5:1;else miningSize=miningSize>=1?.5:1;updateToolLabel();buttonLabels();}
-function cycleAttackStyle(){
- if(runtime.armaments.loadout()){notify('장착한 무기의 공격 방식을 사용합니다.');return;}
- const modes=Object.keys(attackStyles),mode=modes[(modes.indexOf(runtime.player.attackStyle??'strike')+1)%modes.length];runtime.player.attackStyle=mode;
- notify(mode==='pierce'?'외피를 관통해 안쪽 부위를 노립니다.':mode==='impact'?'충격을 가까운 내부 부위로 전달합니다.':'접촉한 부위를 타격합니다.');updateToolLabel();
-}
 
 function attack(){
  if(!ready||paused)return;
@@ -307,7 +305,7 @@ function renderLedger(tab,list){
   }list.append(controls);
   const q=runtime.armaments.quote(weaponPattern,weaponMaterial);
   append(q.name??'무기 제작',q.inputs?`${quantities(q.inputs)} · ${name(q.station)} · ${q.seconds}초\n피해 ${q.hitDamage.toFixed(1)} · 사거리 ${q.range}m · ${q.attackPeriod}초 간격${q.ok?'':' · '+reasonText(q.reason)}`:reasonText(q.reason),'제작',()=>report(runtime.armaments.craft(weaponPattern,weaponMaterial),'무기를 제작하고 있습니다.'),!q.ok);
-  for(const w of runtime.armaments.weapons)append(w.name,`${name(w.materialId)} · 내구 ${w.durability}/${w.maxDurability} · 피해 ${w.hitDamage.toFixed(1)} · ${attackStyles[w.attackMode]}`,runtime.armaments.equippedId===w.id?'해제':'장착',()=>{report(runtime.armaments.equip(runtime.armaments.equippedId===w.id?null:w.id),'무기 장착을 변경했습니다.');updateToolLabel();});
+  for(const w of runtime.armaments.weapons)append(w.name,`${name(w.materialId)} · 내구 ${w.durability}/${w.maxDurability} · 피해 ${w.hitDamage.toFixed(1)} · ${HIT_SHAPES[hitShapeFor(w.weaponKind)]}`,runtime.armaments.equippedId===w.id?'해제':'장착',()=>{report(runtime.armaments.equip(runtime.armaments.equippedId===w.id?null:w.id),'무기 장착을 변경했습니다.');updateToolLabel();});
   for(const job of runtime.armaments.jobs??[])append('무기 제작 중',`${job.name??name(job.materialId)} · 작업대에서 제작을 진행합니다.`);
  }else if(tab==='energy'){
   append('열에너지 연료',`원목 1개를 태워 열을 모읍니다. 남은 연료 ${runtime.materialEffects.thermal.fuelEU.toFixed(0)} EU`,'원목 1개 넣기',()=>report(runtime.materialEffects.loadThermalFuel(1,{claimId:runtime.id('thermal-fuel')}),'연료를 넣었습니다.'),p.count('raw_timber')<1);
@@ -369,13 +367,12 @@ function renderStatus(list,append){
    {kind:'food',label:'식량',text:`${Math.ceil(p.calories)} / ${p.maxCalories} CP`,value:p.calories,max:p.maxCalories},
    current?{kind:'xp',label:`연구 · ${current.name}`,text:`${progress.toFixed(1)} / ${current.work}`,value:progress,max:current.work}:{kind:'xp',label:'연구',text:`${g.research.size} / ${g.list('research').length}`,value:g.research.size,max:g.list('research').length},
   ],
-  stats:[[weapon?.name??'맨손',`공격 ${(weapon?.hitDamage??loadout.hitDamage).toFixed(1)} · ${weapon?.attackPeriod??loadout.attackPeriod}초`],[armor?.name??'기본 의복',`피해 감소 ${reduction}%`],[`채굴 ${miningSize>=1?'1 m':'0.5 m'}`,`${gear.affinity==='rock'?'돌':gear.affinity==='wood'?'나무':'흙'} ×${gear.power}`]],
+  stats:[[weapon?.name??'맨손',`공격 ${(weapon?.hitDamage??loadout.hitDamage).toFixed(1)} · ${weapon?.attackPeriod??loadout.attackPeriod}초`],[armor?.name??'기본 의복',`피해 감소 ${reduction}%`],[`채굴 ${miningSize>=1?'1 m':'0.5 m'}`,`${gear.affinity==='rock'?'돌':gear.affinity==='wood'?'나무':'흙'} ×${gear.power}`],['타격 방식',HIT_SHAPES[heldShape()]]],
   effects:[p.resting?'휴식 중 · 체력 회복이 빨라집니다':'',p.attackEnergy?`${energyNames[p.attackEnergy]} 에너지 공격 선택 중`:'',runtime.map.rules.survival===false?'평화 규칙 · 체력과 식량이 줄지 않습니다':''].filter(Boolean).join('<br>'),
   actions:[
    {label:'보급 식량 먹기',short:'먹기',id:'eatFood',art:catalog.art('food'),count:Number(g.count('food').toFixed(1)),disabled:g.count('food')<1,onClick:()=>{const r=runtime.eat();renderLedger('status',list);return r.ok?'음식을 먹었습니다.':reasonText(r.reason);}},
    {label:'휴식',short:'휴식',id:'campRest',icon:uiIcon('village'),onClick:rest},
    {label:'가방 · 제작',short:'가방',id:'frontierBag',icon:uiIcon('bag'),onClick:()=>{ledger.close();openBag();}},
-   {label:'공격 방식 바꾸기',short:attackStyles[weapon?.attackMode??p.attackStyle??'strike'],id:'attackStyle',icon:uiIcon('attack'),disabled:!!weapon,onClick:()=>{cycleAttackStyle();renderLedger('status',list);}},
    {label:'탐험 저장',short:'저장',id:'frontierSave',icon:uiIcon('journey'),onClick:()=>save()?'저장했습니다.':'저장 실패 · 공간을 확인하세요.'},
   ],
   milestones:[['▧',g.research.size,'연구'],['◆',bosses,'수호자'],['⚑',places,'발견'],['◈',runtime.deaths.filter(d=>!d.recovered).length,'회수 대기']],
@@ -470,7 +467,7 @@ function focusCard(hit,node){
  if(hit?.kind==='creature'||hit?.kind==='boss'){
   const e=hit.kind==='boss'?runtime.bosses.get(hit.id):runtime.creatures.get(hit.id);
   if(e){const boss=hit.kind==='boss',def=boss?runtime.bosses.definitionFor(e):null,pos=boss?e.position:e;
-   return {title:boss?`${def.name} · ${e.encounterTier}티어`:name(e.speciesId),detail:boss?`${runtime.bosses.phase(e).name}${bossPartLabel(e,hit.partId)?' · '+bossPartLabel(e,hit.partId):''}`:`HP ${Math.ceil(e.hp)}/${e.maxHp}${e.dead?' · 쓰러짐':''}`,hint:flash||(e.dead?'상호작용: 전리품':`공격: ${attackStyles[runtime.armaments.loadout()?.attackMode??runtime.player.attackStyle??'strike']}`),value:Math.ceil(e.hp),max:e.maxHp,color:boss||e.attack?.targetId==='player'?'#efb484':'#b4ddbe',maxDistance:boss?28:10,follow:()=>e.dead&&!boss?{x:pos.x,y:pos.y+.8,z:pos.z}:{x:pos.x,y:(pos.y??0)+(boss?3.2:1.6),z:pos.z}};}
+   return {title:boss?`${def.name} · ${e.encounterTier}티어`:name(e.speciesId),detail:boss?`${runtime.bosses.phase(e).name}${bossPartLabel(e,hit.partId)?' · '+bossPartLabel(e,hit.partId):''}`:`HP ${Math.ceil(e.hp)}/${e.maxHp}${e.dead?' · 쓰러짐':''}`,hint:flash||(e.dead?'상호작용: 전리품':`공격: ${HIT_SHAPES[heldShape()]}`),value:Math.ceil(e.hp),max:e.maxHp,color:boss||e.attack?.targetId==='player'?'#efb484':'#b4ddbe',maxDistance:boss?28:10,follow:()=>e.dead&&!boss?{x:pos.x,y:pos.y+.8,z:pos.z}:{x:pos.x,y:(pos.y??0)+(boss?3.2:1.6),z:pos.z}};}
  }
  if(hit&&hit.distance<=6){
   if(hit.kind==='fixture'){const f=runtime.placements.records.get(hit.id);if(f)return {title:name(f.assetId),detail:`HP ${Math.ceil(f.hp)}/${f.maxHp}`,hint:flash||'상호작용: 설비 패널',value:f.hp,max:f.maxHp,position:hit.point,maxDistance:8};}

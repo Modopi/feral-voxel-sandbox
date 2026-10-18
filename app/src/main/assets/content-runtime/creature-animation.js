@@ -94,6 +94,28 @@ export function woundBox(local,direction,cut){
   return [...center.map(v=>Math.round(v/WOUND_GRID)*WOUND_GRID),...size];
 }
 
+/** How a blow lands follows what is held, never a manual choice: hands and tools bite a point of the shell
+ * (working it), swords cut a line or plane across it, spears drive a line along the blow through the shell
+ * into bone, blunt weapons reach the bone one cell in and leave the shell closed. */
+export function hitShapeFor(weaponKind){return weaponKind==='slash'?'slash':weaponKind==='pierce'?'pierce':weaponKind==='blunt'?'impact':'point';}
+export function hitShapeForMode(mode){return mode==='pierce'?'pierce':mode==='impact'?'impact':'point';}
+export const IMPACT_REACH_M=.5;
+/** The shell cut for a hit shape at a part-local point along a part-local swing direction; impact cuts nothing. */
+export function shapeCut(shape,amount,local,direction){
+  if(shape==='impact')return null;
+  if(shape==='point')return woundBox(local,direction,woundCut(amount));
+  const even=v=>Math.max(2*WOUND_GRID,Math.round(v/(2*WOUND_GRID))*2*WOUND_GRID);
+  const axis=[0,1,2].reduce((a,i)=>Math.abs(direction[i])>Math.abs(direction[a])?i:a,0),sign=Math.sign(direction[axis])||1,size=[2*WOUND_GRID,2*WOUND_GRID,2*WOUND_GRID];
+  if(shape==='pierce')size[axis]=even(clamp(.3+amount*.006,.3,.6));
+  else{
+   // A slash runs across the struck face, level with the ground where it can; heavy blows widen the line into a plane.
+   const across=axis===1?(Math.abs(direction[0])>Math.abs(direction[2])?2:0):axis===0?2:0,third=3-axis-across;
+   size[axis]=even(clamp(.0625+amount*.002,.0625,.125));size[across]=even(clamp(.25+amount*.006,.25,.4));size[third]=amount>=20?4*WOUND_GRID:2*WOUND_GRID;
+  }
+  const center=[...local];center[axis]+=sign*size[axis]/2;
+  return [...center.map(v=>Math.round(v/WOUND_GRID)*WOUND_GRID),...size];
+}
+
 function damageHidden(entity,id,mapping){
   if(entity.fragmentMass?.parts?.[id]?.objectId)return true;
   const missing=new Set(entity.pose?.missingParts??entity.missingParts??[]);

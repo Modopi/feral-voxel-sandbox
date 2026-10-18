@@ -1,0 +1,16 @@
+{
+  "version": "0.14.1",
+  "versionCode": 1401,
+  "minNativeCode": 303,
+  "files": 123,
+  "nativeFileLimit": 128,
+  "mjsFiles": [],
+  "newFiles": [],
+  "archiveBytes": 2827163,
+  "expandedBytes": 11594425,
+  "archiveSha256": "25648ce6ef584a221e7ab208535a914d277afd10cb4997e632b826d393e8f24d",
+  "packageSha256": "24ace31f871aafbdae3359b31cd27623a5252b81ce9a7a7d5e6daad1988ee990",
+  "apkAssetsIdenticalToUpdate": true,
+  "withinLimits": true,
+  "note": "Local build with the shared test signing key; CI rebuilds and publishes after merge."
+}
