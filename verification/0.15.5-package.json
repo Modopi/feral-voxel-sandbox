@@ -1,0 +1,17 @@
+{
+  "version": "0.15.5",
+  "versionCode": 1505,
+  "minNativeCode": 303,
+  "files": 124,
+  "nativeFileLimit": 128,
+  "mjsFiles": [],
+  "newFiles": [],
+  "archiveBytes": 2856861,
+  "expandedBytes": 11677532,
+  "archiveSha256": "134a408136598e7b5f6e908b824d8b30dec4b98841add060bced03a5bd1447aa",
+  "packageSha256": "10801486a4897b43bec647c7be5bad0f66d3da82131aadcc19771461633a643a",
+  "apkSha256": "e7d885c5aca3bc5081fbf546260266595aca20a54d4f3ea0d197831199b28dbc",
+  "apkAssetsIdenticalToUpdate": true,
+  "withinLimits": true,
+  "note": "Local build with the shared test signing key; CI rebuilds and publishes after merge."
+}
