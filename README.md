@@ -2,7 +2,7 @@
 
 Android에서 오프라인으로 탐험·채굴·제작·생태·전투를 하는 1인칭 복셀 샌드박스 RPG.
 
-- **이번 버전:** 게임 0.15.0 / 1500 · Android 앱 0.3.3 / 303. 직전 공개 버전은 [0.14.1](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.14.1)이며 0.15.0의 공개 여부는 [릴리스 목록](https://github.com/Modopi/feral-voxel-sandbox/releases)에서 확인한다.
+- **현재 공개 버전:** 게임 0.15.0 / 1500 · Android 앱 0.3.3 / 303 · [릴리스](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.15.0)
 - **지금 되는 것과 한계:** [현황](docs/STATUS.md)
 - **구조와 앞으로의 단계:** [소프트웨어 구조](docs/ARCHITECTURE.md) · [로드맵](docs/ROADMAP.md). 0.15.0부터 앱의 첫 화면은 게임 밖 런처이고, 월드 선택·월드 설정·환경 설정·업데이트를 여기서 한다. 다음 단계는 게임 세션 안의 엔진 통합이다.
 - **모든 문서와 신뢰 등급:** [문서 안내](docs/README.md)
@@ -19,7 +19,8 @@ Android에서 오프라인으로 탐험·채굴·제작·생태·전투를 하�
 필요한 것: Node.js, Python 3, Java 17 JDK, Android SDK Platform 35와 Build Tools 35.0.0. 브라우저 검증에는 Playwright와 Chromium.
 
 ```bash
-npm test                                   # 전체 회귀 (node --test tests/*.test.js)
+npm test                                   # 필수 회귀, 약 20초 (tests/*.test.js)
+npm run test:long                          # 장기 검사: 10티어 경로 약 7분, 에셋 재생성 (바꾼 영역만)
 node tools/verify-ui-reachability.mjs      # 앱과 같은 MIME·CSP 서버에서 실제 터치 경로 검증 (FERAL_CHROME=크롬 경로)
 export ANDROID_HOME=/absolute/path/to/Android/sdk
 bash build-apk.sh                          # build/Feral-<앱 버전>-android.apk

@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
-import { CONTENT } from '../app/src/main/assets/content-runtime/catalog.generated.js';
-import { WorldAtlas } from '../app/src/main/assets/content-runtime/atlas.js';
-import { DungeonSystem } from '../app/src/main/assets/content-runtime/dungeons.js';
-import { Progression, ENERGY_TYPES } from '../app/src/main/assets/content-runtime/progression.js';
+import { CONTENT } from '../../app/src/main/assets/content-runtime/catalog.generated.js';
+import { WorldAtlas } from '../../app/src/main/assets/content-runtime/atlas.js';
+import { DungeonSystem } from '../../app/src/main/assets/content-runtime/dungeons.js';
+import { Progression, ENERGY_TYPES } from '../../app/src/main/assets/content-runtime/progression.js';
 
 const definitions = new Map(CONTENT.progression.entries.map(e => [e.id, e]));
 const entries = kind => [...definitions.values()].filter(e => e.kind === kind);

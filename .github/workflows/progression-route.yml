@@ -1,0 +1,45 @@
+name: FERAL progression route proof
+
+# The full paid route (all ten tiers and four research fields from actual terrain, about seven minutes)
+# proves progression data, not everyday changes, so it runs only when its sources change.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'design/content/**'
+      - 'app/src/main/assets/content-runtime/progression.js'
+      - 'app/src/main/assets/content-runtime/atlas.js'
+      - 'app/src/main/assets/content-runtime/dungeons.js'
+      - 'app/src/main/assets/content-runtime/catalog.generated.js'
+      - 'tests/long/expedition-progression-path.test.js'
+      - '.github/workflows/progression-route.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'design/content/**'
+      - 'app/src/main/assets/content-runtime/progression.js'
+      - 'app/src/main/assets/content-runtime/atlas.js'
+      - 'app/src/main/assets/content-runtime/dungeons.js'
+      - 'app/src/main/assets/content-runtime/catalog.generated.js'
+      - 'tests/long/expedition-progression-path.test.js'
+      - '.github/workflows/progression-route.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: progression-route-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  progression-route:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reach every tier and research field with consumed resources
+        run: node --test tests/long/expedition-progression-path.test.js

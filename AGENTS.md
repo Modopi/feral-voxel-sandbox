@@ -12,7 +12,7 @@
 - 배포 정보의 기준은 `version.json`. 게임 변경을 배포할 때 SemVer와 단조 증가하는 `versionCode`를 함께 올리고 `node tools/version.mjs` 실행. 배포한 버전의 파일 교체 금지.
 - 게임 HTML/JS/CSS/자산 변경은 호환되는 `minNativeCode`를 유지할 수 있음. Java·권한·업데이트 검증 키 변경은 새 APK가 필요하며 `minNativeCode = nativeCode`로 지정(분리 전 버전은 versionCode 사용).
 - `CHANGELOG.md`와 `docs/RELEASING.md`의 릴리스 기록·설치 안내 갱신. 저장 스키마 번호는 앱 버전과 별도 관리.
-- `node --test tests/*.test.js`, 관련 브라우저 검증, `bash build-apk.sh` 통과 후 main 반영. main의 버전 증가를 GitHub Actions가 GitHub Release와 updates/stable 채널로 배포.
+- 검사 단계(사용자 결정 2026-10-18: 테스트 경량화): `npm test`(필수 회귀, 약 20초)와 `bash build-apk.sh`는 항상 통과해야 한다. 장기 검사(`tests/long/`)는 바꾼 영역에만 돌린다. 진행·제작 데이터·`progression.js`·지형·던전을 바꾸면 10티어 경로(`tests/long/expedition-progression-path.test.js`, 약 7분), 에셋 원본·생성기를 바꾸면 에셋 재생성(`tests/long/visual-assets.test.js`)을 돌린다. CI도 경로가 맞을 때만 이 둘을 돌린다. 화면·플레이를 바꾸면 `tools/verify-ui-reachability.mjs`, 개척 원정·기계 시험장 옛 엔진을 바꾸면 해당 `tests/*-check.cjs`를 돌린다. 같은 장기 검사를 반복하지 않는다. 통과 후 main 반영. main의 버전 증가를 GitHub Actions가 GitHub Release와 updates/stable 채널로 배포.
 - 사용자 결정: PR을 만든 뒤 필요한 테스트·빌드와 변경 사항을 확인하고, 실패한 필수 검사·미해결 리뷰 문제·병합 충돌이 없으면 추가 확인 없이 바로 병합한다. 병합 후 릴리스 워크플로와 공개 업데이트 게시 결과까지 확인한다. 문제가 발견되면 먼저 해결하며 필수 검사를 우회하지 않는다.
 - 앱·저장소·배포 파일에 개인 GitHub 토큰을 넣지 않음. 0.3.2부터 공개 업데이트는 인증 없이 조회·다운로드하고 기존 암호화 토큰 설정은 제거.
 - 초기 APK와 OTA는 기존 공유 시험 키를 사용. 이를 production 키라고 표현하지 않음. 키 교체는 별도 네이티브 마이그레이션 필요.

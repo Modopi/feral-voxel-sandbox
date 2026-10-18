@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.js",
+    "test:long": "node --test tests/long/*.test.js",
     "audit:design": "node tools/audit-content-design.mjs",
     "build:runtime": "node tools/build-runtime-content.mjs",
     "check:runtime": "node tools/build-runtime-content.mjs --check",

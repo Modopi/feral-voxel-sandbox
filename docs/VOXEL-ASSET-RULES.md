@@ -53,7 +53,7 @@
 
 1. `npm run build:assets`: 생성기를 제작 API로 실행한다. 도구를 거치지 않은 반환 객체, 중복 점유, 충돌 계약 위반은 후보정 없이 실패한다. 직접 편집 원본은 `authored/`에서 불러온다.
 2. `npm run check:assets`: GitHub와 같은 하네스로 제작 경로와 체크인된 JSON/GLB/manifest의 정확한 재현을 확인한다.
-3. `node --test tests/asset-authoring.test.js tests/asset-solid.test.js tests/asset-collision.test.js tests/visual-assets.test.js`: 부피/재질/피벗 보존, 내부 면, 소유권, 실제 물리 충돌을 확인한다.
+3. `node --test tests/asset-authoring.test.js tests/asset-solid.test.js tests/asset-collision.test.js tests/long/visual-assets.test.js`: 부피/재질/피벗 보존, 내부 면, 소유권, 실제 물리 충돌을 확인한다.
 4. `npm run render:assets`: 변경한 원본에서 이미지도 다시 만든다. 이전 이미지를 새 원본의 결과로 재사용하지 않는다.
 5. 신규 물리 로더·런타임 통합은 동일 owner 관절 통과, 다른 owner 충돌, 지형 지지, 빈 공간 통과를 실제 시뮬레이션으로 검증한다. 설정값만 검사해서 완료로 판정하지 않는다.
 

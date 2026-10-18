@@ -35,7 +35,11 @@
 
 1. 코드 변경 후 `version.json`의 버전과 versionCode 증가. `node tools/version.mjs` 실행.
 2. CHANGELOG 맨 위에 해당 버전의 변경 사항 추가. 저장 형식 변경은 읽기 호환·변환과 복구 시험 추가. 구조·규칙이 바뀌면 같은 PR에서 `docs/ARCHITECTURE.md`·`docs/GAME-RULES.md`·`docs/ROADMAP.md`를, 게시 후에는 `docs/STATUS.md`와 아래 릴리스 기록을 고친다. 게임 파일을 바꾸지 않는 문서 전용 변경은 버전을 올리지 않으며, 배포 워크플로는 같은 버전·같은 패키지를 "이미 게시됨"으로 건너뛴다.
-3. `node --test tests/*.test.js` 실행. UI·플레이 변경에는 관련 `tests/*-check.cjs` 실행. 런처·게임 세션 화면 검증(`tools/verify-ui-reachability.mjs`, 런처·콘텐츠 탐험·섬·개척 원정)은 앱과 같은 MIME·CSP로 응답하는 `tools/android-asset-server.mjs`를 기본으로 쓴다. 일반 개발 서버는 `.mjs` 같은 파일을 JavaScript로 응답해 Android에서만 생기는 로딩 실패를 숨긴다.
+3. 검사는 세 단계다(2026-10-18 경량화).
+   - 필수 회귀: `npm test`(`tests/*.test.js`, 약 20초). 모든 변경에 돌린다. PR 필수 검사 verify-authoring과 배포 워크플로도 이것만 돌린다.
+   - 장기 검사(`tests/long/`, `npm run test:long`): 바꾼 영역만 돌린다. 진행·제작 데이터·`progression.js`·지형·던전은 10티어 경로(약 7분, CI `progression-route.yml`), 에셋 원본·생성기는 에셋 재생성(CI `asset-regeneration.yml`). CI는 해당 경로가 바뀐 PR·main에서만 이 둘을 돌린다.
+   - 브라우저 검사: 화면·플레이를 바꾸면 런처·게임 세션 화면 검증, 개척 원정·기계 시험장 옛 엔진을 바꾸면 해당 `tests/*-check.cjs`(12개, S2·S3에서 통합 검증으로 옮기며 없앤다). 0.12.1부터 계속 실패하던 5개와 실행할 수 없던 기록용 2개는 지웠다.
+   런처·게임 세션 화면 검증(`tools/verify-ui-reachability.mjs`, 런처·콘텐츠 탐험·섬·개척 원정)은 앱과 같은 MIME·CSP로 응답하는 `tools/android-asset-server.mjs`를 기본으로 쓴다. 일반 개발 서버는 `.mjs` 같은 파일을 JavaScript로 응답해 Android에서만 생기는 로딩 실패를 숨긴다.
 4. `bash build-apk.sh`와 `python3 tools/build-update.py`로 로컬 결과 확인.
 5. 검증된 변경을 main에 반영. **FERAL versioned release** Actions가 테스트·APK 빌드·서명 패키지 생성을 수행하고 GitHub Release에 결과를 올림.
 6. Release 게시가 완료되면 별도 `updates` 브랜치의 `versions/<버전>.feral`과 `stable.feral` 갱신. 앱은 공개 raw.githubusercontent.com 주소에서 stable.feral을 인증 없이 읽음.
@@ -60,6 +64,8 @@
 ### 0.15.0 — 런처와 게임 세션 분리
 
 게임 1500 / 앱·최소 앱 303 / 저장 스키마 2. Java·권한·키 변경이 없는 게임 전용 릴리스다. 앱의 첫 화면이 게임 밖 런처(`index.html`)가 되고 게임 세션은 `play.html?world=<id>`로 시작한다. 월드 목록 항목에 월드 설정(`config`, `configVersion` 1)과 마지막 플레이 시각(`lastPlayedAt`)을 선택 필드로 더했다. `id·name·type·seed`는 그대로라 이전 게임 빌드도 같은 목록을 읽는다. 월드 저장 키와 형식은 바뀌지 않는다. 앱에 보내는 시작 성공 신호는 런처가 보낸다. 게임 세션 파일을 실행하지 않고 불러 본 뒤에 보내므로 세션 파일이 깨진 버전은 시작 실패로 되돌려진다. 버전이 바뀌어도 저장이 유지되도록 저장 보관함(IndexedDB `feral-vault`)을 더했다. 저장할 때마다 모든 `feral.*` 키의 최신 사본을 보관하고, 런처가 시작할 때 이 빌드의 저장이 비었거나 오래됐으면 사본 전체로 되살린다. 더 높은 `saveSchema`의 사본은 낮은 스키마 빌드가 가져오거나 덮지 않는다. 0.14.1 이하에서 버전 목록으로 0.15.0을 고르면 그때는 보관함이 비어 빈 저장으로 시작하므로, 이번 업데이트는 "지금 확인 → 저장 후 적용"으로 받는다. 구조는 `docs/ARCHITECTURE.md`, 검증은 `verification/0.15.0.md`. 업데이트 파일은 123개(앱 상한 128개)다.
+
+2026-10-18 06:57 UTC [PR #25](https://github.com/Modopi/feral-voxel-sandbox/pull/25) 병합 커밋 `50da8fc`에서 [배포 Actions](https://github.com/Modopi/feral-voxel-sandbox/actions/runs/39105861039)가 성공해 07:03 UTC에 [v0.15.0 Release](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.15.0)와 기존 공식 `updates/catalog.json`, `updates/stable.feral`, 불변 `updates/versions/0.15.0.feral`로 게시됐다. stable과 버전 패키지는 같은 파일(SHA256 `c45e5e4d…fad8`)이며 로컬 빌드와 바이트 단위로 같고, 내부 아카이브 SHA256 `808e09b9…9a14`가 카탈로그와 일치한다. 0.14.1 이하의 카탈로그 항목과 패키지 파일은 바뀌지 않았다. Android 실기기 확인은 아직 하지 않았다.
 
 ### 0.14.1 — 도구·무기별 자동 타격 방식
 

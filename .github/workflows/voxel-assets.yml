@@ -39,16 +39,16 @@ concurrency:
 jobs:
   verify-authoring:
     runs-on: ubuntu-latest
-    # Full paid progression traverses all four research fields; the measured
-    # uncached route alone exceeded 16 minutes before further asset checks.
-    timeout-minutes: 30
+    # npm test is the fast required tier (about half a minute). The long proofs in
+    # tests/long run only when their sources change (progression-route.yml, asset-regeneration.yml).
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
       # The harness uses Node built-ins and the repository's vendored engines.
-      - name: Run model, authoring and physics regressions
+      - name: Run the required regression tier
         run: npm test
       - name: Audit content contracts
         run: npm run audit:design
