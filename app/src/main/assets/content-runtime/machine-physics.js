@@ -19,15 +19,15 @@ export class MachinePhysicsBridge {
     for (const m of this.system.machines.values()) {
       if (!m.voxels.length || Math.hypot(m.position.x - player.x, m.position.z - player.z) > 64) continue;
       alive.add(m.id);
-      const signature = JSON.stringify([m.gridM, m.voxels.map((v) => [v.id, v.cell])]);
+      const signature = JSON.stringify([m.gridM, m.voxels.map((v) => [v.id, v.cell]), !!m.anchored]);
       let cache = this.bodies.get(m.id);
       if (cache?.signature !== signature) {
         if (cache) this.physics.adapter.removeOwner(m.id);
         const boxes = m.voxels.map((v) => ({ center: v.cell.map((n) => (n + .5) * m.gridM), size: [m.gridM, m.gridM, m.gridM] }));
-        const entry = this.physics.adapter.addBody({ ownerId: m.id, partId: 'assembly', type: 'dynamic', boxes,
-          position: arr(m.position), rotation: rotation(m), mass: Math.max(.001, this.system.evaluate(m.id).mass), friction: .6 });
-        entry.body.setLinvel(m.velocity, true); entry.body.setAngvel(m.angularVelocity ?? { x: 0, y: 0, z: 0 }, true);
-        entry.body.setLinearDamping(0); entry.body.setAngularDamping(.04);
+        // A wrench-anchored machine is a fixed body until it is released (frontier).
+        const fixed = !!m.anchored, entry = this.physics.adapter.addBody({ ownerId: m.id, partId: 'assembly', type: fixed ? 'fixed' : 'dynamic', boxes,
+          position: arr(m.position), rotation: rotation(m), mass: fixed ? 0 : Math.max(.001, this.system.evaluate(m.id).mass), friction: .6 });
+        if (!fixed) { entry.body.setLinvel(m.velocity, true); entry.body.setAngvel(m.angularVelocity ?? { x: 0, y: 0, z: 0 }, true); entry.body.setLinearDamping(0); entry.body.setAngularDamping(.04); }
         const voxelIds = m.voxels.map((v) => v.id);
         entry.colliders.forEach((c, i) => this.physics.adapter.colliderOwners.set(c.handle,
           Object.freeze({ ownerId: m.id, partId: voxelIds[i], bodyHandle: entry.body.handle })));
@@ -40,6 +40,7 @@ export class MachinePhysicsBridge {
     }
   }
   mass(m, cache) {
+    if (m.anchored) return; // fixed bodies carry no mass
     const distribution = this.system.physicsMasses(m.id), key = JSON.stringify(distribution);
     if (key === cache.massKey) return;
     cache.entry.colliders.forEach((c, i) => c.setMass(distribution.voxelMasses[cache.voxelIds[i]]));

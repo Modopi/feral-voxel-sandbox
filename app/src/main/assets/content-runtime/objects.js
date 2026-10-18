@@ -42,8 +42,10 @@ export class WorldObjects {
         if (!validCell(cell.cell) || !validCell(cell.sourceCell) || !this.blocks.has(cell.blockId) || key(cell.sourceCell) !== key(cell.cell.map((v, i) => v + object.originCell[i]))) throw Error('Invalid detached cell');
         if (sourceCells.has(key(cell.sourceCell))) throw Error('Duplicate detached source cell');
         if(cell.hp!=null&&(!Number.isFinite(cell.hp)||cell.hp<=0||cell.hp>this.blocks.get(cell.blockId).durabilityHpPerCell))throw Error('Invalid detached cell health');
+        if(cell.placedItem!=null&&(typeof cell.placedItem!=='string'||!Number.isSafeInteger(cell.placedSerial)))throw Error('Invalid attached cell');
         sourceCells.add(key(cell.sourceCell));
       }
+      if (object.anchored != null && typeof object.anchored !== 'boolean') throw Error('Invalid object pin');
       this._build(object); this.objects.set(object.id, object);
       const serial = Number(object.id.slice(7));
       if (Number.isSafeInteger(serial)) this.nextId = Math.max(this.nextId, serial + 1);
@@ -159,20 +161,50 @@ export class WorldObjects {
     const block=this.blocks.get(cell.blockId),response=resolveSurfaceDamage(block,amount,energyType);if(!response.ok)return response;
     const hp=Math.max(0,(cell.hp??block.durabilityHpPerCell)-response.amount);
     if(hp>0){cell.hp=hp;o.revision++;return {ok:true,hp};}
-    const remaining=o.cells.filter(c=>c!==cell),groups=components(remaining.map(c=>({x:c.cell[0],y:c.cell[1],z:c.cell[2],source:c}))),pieces=[];
+    // The largest piece keeps the id and a wrench pin (frontier); the others fall free.
+    const remaining=o.cells.filter(c=>c!==cell),groups=components(remaining.map(c=>({x:c.cell[0],y:c.cell[1],z:c.cell[2],source:c}))).sort((a,b)=>b.length-a.length),pieces=[];
     // Build all children before changing the registry. Original source coordinates
     // and local frames remain unchanged, including a rotated parent's orientation.
     let serial=this.nextId;const oldCentre=this._centre(o),spin=o.angularVelocity;
     for(let i=0;i<groups.length;i++){
-      const part={...o,id:i?`object:${serial++}`:o.id,cells:groups[i].map(c=>copy(c.source)),revision:o.revision+1};this._build(part);
+      const part={...o,id:i?`object:${serial++}`:o.id,cells:groups[i].map(c=>copy(c.source)),revision:o.revision+1,anchored:i===0&&!!o.anchored};this._build(part);
       const centre=this._centre(part),d={x:centre.x-oldCentre.x,y:centre.y-oldCentre.y,z:centre.z-oldCentre.z};
       part.velocity={x:o.velocity.x+spin.y*d.z-spin.z*d.y,y:o.velocity.y+spin.z*d.x-spin.x*d.z,z:o.velocity.z+spin.x*d.y-spin.y*d.x};pieces.push(part);
     }
-    const mined=yieldOf?yieldOf(block):block.rawResourceId&&block.harvestYieldPerCell>0?{id:block.rawResourceId,count:block.harvestYieldPerCell}:null,items=mined?{[mined.id]:mined.count}:{};
-    const claimId=`object-harvest:${id}:${key(cell.sourceCell)}`;
+    // A cell attached from the bag returns that item, not raw resources.
+    const mined=cell.placedItem?{id:cell.placedItem,count:1}:yieldOf?yieldOf(block):block.rawResourceId&&block.harvestYieldPerCell>0?{id:block.rawResourceId,count:block.harvestYieldPerCell}:null,items=mined?{[mined.id]:mined.count}:{};
+    const claimId=`object-harvest:${id}:${key(cell.sourceCell)}${cell.placedItem?`:placed:${cell.placedSerial}`:''}`;
     if(progression&&Object.keys(items).length){const receipt=progression.grant(items,{claimId});if(!receipt.ok)return receipt;}
     this.objects.delete(id);for(const part of pieces)this.objects.set(part.id,part);this.nextId=serial;
     return {ok:true,hp:0,removed:true,removedMassKg:block.massPerCellKg,objectIds:pieces.map(p=>p.id),items,claimId};
+  }
+  /** Wrench pin (frontier): a pinned object is held fixed where it is until unpinned. */
+  setAnchored(id, anchored) {
+    const o = this.get(id); if (!o || o.fragment) return { ok: false, reason: 'target_missing' };
+    o.anchored = !!anchored; if (o.anchored) { o.velocity = zero(); o.angularVelocity = zero(); }
+    o.revision++; return { ok: true, anchored: o.anchored };
+  }
+  /** Where a block held against an object would go: the cell beside the struck face, in object cells and as a
+   * world-space box, or a reason. Pure; attachCell commits it. */
+  attachTarget(id, point, normal) {
+    const o = this.get(id); if (!o || o.fragment || !validVector(point) || !validVector(normal)) return { ok: false, reason: 'target_missing' };
+    const q = o.rotation, inverse = { x: -q.x, y: -q.y, z: -q.z, w: q.w }, rotate = (v, r) => { const t = { x: 2 * (r.y * v.z - r.z * v.y), y: 2 * (r.z * v.x - r.x * v.z), z: 2 * (r.x * v.y - r.y * v.x) }; return { x: v.x + r.w * t.x + r.y * t.z - r.z * t.y, y: v.y + r.w * t.y + r.z * t.x - r.x * t.z, z: v.z + r.w * t.z + r.x * t.y - r.y * t.x }; };
+    const hit = this.cellAt(id, { x: point.x - normal.x * .01, y: point.y - normal.y * .01, z: point.z - normal.z * .01 }); if (!hit) return { ok: false, reason: 'target_missing' };
+    const n = rotate(normal, inverse), axis = ['x', 'y', 'z'].reduce((best, k) => Math.abs(n[k]) > Math.abs(n[best]) ? k : best, 'x'), step = ['x', 'y', 'z'].map(k => k === axis ? Math.sign(n[k]) : 0);
+    const cell = hit.cell.map((v, i) => v + step[i]);
+    if (o.cells.some(c => key(c.cell) === key(cell))) return { ok: false, reason: 'occupied' };
+    const local = rotate({ x: (cell[0] + .5) * GRID, y: (cell[1] + .5) * GRID, z: (cell[2] + .5) * GRID }, q);
+    return { ok: true, cell, center: { x: o.position.x + local.x, y: o.position.y + local.y, z: o.position.z + local.z }, rotation: copy(q), halfSize: GRID / 2 };
+  }
+  /** Attaches one cell of blockId (from the bag item itemId) at attachTarget's cell. */
+  attachCell(id, target, blockId, itemId) {
+    const o = this.get(id), block = this.blocks.get(blockId);
+    if (!o || o.fragment || !target?.ok || !validCell(target.cell) || !block || typeof itemId !== 'string') return { ok: false, reason: 'invalid_attach' };
+    if (o.cells.some(c => key(c.cell) === key(target.cell))) return { ok: false, reason: 'occupied' };
+    const placed = { cell: [...target.cell], sourceCell: target.cell.map((v, i) => v + o.originCell[i]), blockId, placedItem: itemId, placedSerial: o.revision + 1 };
+    o.cells.push(placed);
+    try { this._build(o); } catch (error) { o.cells.pop(); this._build(o); return { ok: false, reason: 'invalid_attach', detail: error.message }; }
+    o.revision++; return { ok: true, massKg: o.massKg };
   }
   setPhysicsPose(id, { position, rotation, velocity, angularVelocity } = {}) {
     const o = this.get(id); if (!o) return false;
@@ -182,7 +214,7 @@ export class WorldObjects {
     Object.assign(o, { position: copy(p), rotation: q, velocity: copy(v), angularVelocity: copy(w) }); return true;
   }
   physicsBodies() { return [...this.objects.values()].map(o => ({ id: o.id, ownerId: o.id, entityType: 'object', position: o.position, rotation: o.rotation,
-    velocity: o.velocity, angularVelocity: o.angularVelocity, massKg: o.massKg, boxes: o.boxes, revision: o.revision })); }
+    velocity: o.velocity, angularVelocity: o.angularVelocity, massKg: o.massKg, boxes: o.boxes, revision: o.revision, anchored: !!o.anchored })); }
   sceneModels() { return [...this.objects.values()].map(o => ({ id: o.id, ownerId: o.id, assetId: o.id, kind: 'object', entityType: 'object',
     asset: o.asset, model: o.asset, position: o.position, rotation: o.rotation, velocity: o.velocity, angularVelocity: o.angularVelocity,
     mass: o.massKg, massKg: o.massKg, revision: o.revision, fragment: o.fragment ? copy(o.fragment) : null })); }
@@ -234,6 +266,6 @@ export class WorldObjects {
   serialize() {
     return { schemaVersion: 1, nextId: this.nextId, objects: [...this.objects.values()].map(o => copy({ id: o.id, entityType: o.entityType, kind: o.kind,
       name: o.name, ...(o.fragment ? { fragment:o.fragment,asset:o.asset } : { originCell:o.originCell,cells:o.cells }), position: o.position, rotation: o.rotation, velocity: o.velocity, angularVelocity: o.angularVelocity,
-      revision: o.revision })) };
+      revision: o.revision, ...(o.anchored ? { anchored: true } : {}) })) };
   }
 }

@@ -230,6 +230,8 @@ export class MachineSystem {
   // Rotors run while someone keeps steering (each fixed step) and spin down engagedS after the last command.
   this.commandClocks.set(id,this.clock);return ok();
  }
+ /** Wrench anchor (frontier): an anchored machine is held fixed where it stands; driving it releases it. */
+ setAnchored(id,anchored){const m=this.machines.get(id);if(!m)return no('unknown_machine');m.anchored=!!anchored;if(m.anchored){m.velocity={x:0,y:0,z:0};m.angularVelocity={x:0,y:0,z:0};}return ok({anchored:m.anchored});}
  loadCargo(id,items){const m=this.machines.get(id);if(!m||!this.progression.hasItems(items))return no('invalid_cargo');const paid=this.progression.spend(items,{claimId:this._id('cargo-load')});if(!paid.ok)return paid;for(const[k,n]of Object.entries(items))m.cargo[k]=(m.cargo[k]||0)+n;return ok();}
  unloadCargo(id,items){const m=this.machines.get(id);if(!m||!items||!Object.entries(items).every(([k,n])=>finite(n)&&n>0&&(m.cargo[k]||0)>=n))return no('invalid_cargo');const paid=this.progression.grant(items,{claimId:this._id('cargo-unload')});if(!paid.ok)return paid;for(const[k,n]of Object.entries(items)){m.cargo[k]-=n;if(!m.cargo[k])delete m.cargo[k];}return ok();}
  voxelProfile(id,voxelId){const v=this.machines.get(id)?.voxels.find(v=>v.id===voxelId);return v?(this.materialEffects?.profile(v)||this.progression.evaluateMaterial(v.materialId,{volumeLiters:v.volumeLiters})):null;}
@@ -406,6 +408,7 @@ export class MachineSystem {
  serialize(){return {schemaVersion:1,nextId:this.nextId,clock:this.clock,machines:[...this.machines.values()].map(m=>{const s=clone(m);delete s.asset;return s;})};}
  _validate(m){
   m.rotation??=quaternion(m.yaw);m.angularVelocity??={x:0,y:0,z:0};m.damageClaims??=[];
+  if(m.anchored!=null&&typeof m.anchored!=='boolean')throw Error('Invalid machine anchor');
   if(!pointOK(m.angularVelocity)||!['x','y','z','w'].every(k=>finite(m.rotation[k]))||Math.abs(Math.hypot(...Object.values(m.rotation))-1)>1e-5||!Array.isArray(m.damageClaims)||m.damageClaims.some(id=>typeof id!=='string'||id.length>512))throw Error('Invalid machine physics state');
   if(typeof m.id!=='string'||m.entityType!=='machine'||![.03125,.1,.5].includes(m.gridM)||!pointOK(m.position)||!pointOK(m.velocity)||!finite(m.yaw)||!Array.isArray(m.voxels)||m.voxels.length>2048||!Array.isArray(m.components)||!Array.isArray(m.links))throw Error('Invalid machine state');
   const ids=new Set(),cells=new Set();for(const v of m.voxels){if(v.materialEffects&&(!Array.isArray(v.materialEffects)||new Set(v.materialEffects).size!==v.materialEffects.length||v.materialEffects.some(id=>!MATERIAL_EFFECT_RULES[id])))throw Error('Invalid material effects');if(ids.has(v.id)||cells.has(cellKey(v.cell))||!v.cell.every(Number.isInteger)||this._entry(v.materialId)?.kind!=='material'||!finite(v.hp)||v.hp<=0||!finite(v.maxHp)||v.maxHp<=0||v.hp>v.maxHp||!finite(v.massKg)||v.massKg<=0||!finite(v.volumeLiters)||Math.abs(v.volumeLiters-m.gridM**3*1000)>1e-6)throw Error('Invalid machine voxel');ids.add(v.id);cells.add(cellKey(v.cell));}

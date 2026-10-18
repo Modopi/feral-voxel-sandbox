@@ -282,6 +282,35 @@ export class ExpeditionRuntime {
  }
  /** Block a held item places on sandbox maps (the basic island), or null. */
  buildableBlock(itemId){return this.rules.sandbox?BUILD_BLOCKS[itemId]??null:null;}
+ /** Wrench use (frontier, 6.5 m): pins or frees the aimed loose object, or anchors or frees the aimed machine. */
+ useWrench(hit){
+  if(this.progression.count('wrench')<1)return {ok:false,reason:'조립 렌치가 필요합니다.'};
+  if(hit?.kind==='object'&&hit.distance<=6.5){
+   const o=this.objects.get(hit.id);if(!o||o.fragment)return {ok:false,reason:'렌치로 고정할 수 없는 물체입니다.'};
+   if(this.physics?.objectPhysics?.held?.id===hit.id)this.physics.objectPhysics.release();
+   const r=this.objects.setAnchored(hit.id,!o.anchored);return r.ok?{...r,message:r.anchored?'물체를 고정했습니다.':'물체 고정을 풀었습니다.'}:r;
+  }
+  if(hit?.kind==='machine'&&hit.distance<=6.5){
+   const m=this.machines.machines.get(hit.id);if(!m)return {ok:false,reason:'target_missing'};
+   if(this.drivingMachineId===hit.id)return {ok:false,reason:'내린 뒤 고정하세요.'};
+   const r=this.machines.setAnchored(hit.id,!m.anchored);return r.ok?{...r,message:r.anchored?'기계를 고정했습니다.':'기계 고정을 풀었습니다.'}:r;
+  }
+  return {ok:false,reason:'렌치로 고정할 물체나 기계를 겨누세요.'};
+ }
+ /** A block held against a loose object attaches one 0.5 m cell of it on the struck face (frontier), on any map.
+  * The cell must not overlap terrain or another body; mining it later returns the block item. */
+ attachToObject(hit,itemId){
+  const blockId=BUILD_BLOCKS[itemId];if(!blockId)return {ok:false,reason:'붙일 수 있는 블록이 아닙니다.'};
+  if(hit?.kind!=='object'||hit.distance>6.5||!hit.normal)return {ok:false,reason:'붙일 물체를 겨누세요.'};
+  if(this.progression.count(itemId)<1)return {ok:false,reason:'붙일 블록이 없습니다.'};
+  const target=this.objects.attachTarget(hit.id,hit.point,hit.normal);if(!target.ok)return target.reason==='occupied'?{ok:false,reason:'이미 칸이 있는 자리입니다.'}:target;
+  const c=target.center,size=target.halfSize*2,box={center:[c.x,c.y,c.z],size:[size,size,size],rotation:target.rotation};
+  if(this.isSolid(c.x,c.y,c.z)||this.physics?.externalOverlap?.(box,{ignoreOwnerId:hit.id}))return {ok:false,reason:'그 자리는 막혀 있습니다.'};
+  const paid=this.progression.spend({[itemId]:1},{claimId:this.id('attach')});if(!paid.ok)return paid;
+  const r=this.objects.attachCell(hit.id,target,blockId,itemId);
+  if(!r.ok){this.progression.grant({[itemId]:1},{claimId:this.id('attach-refund')});return r;}
+  return {...r,blockId};
+ }
  /** Place 0.5 m or 1 m of terrain on the aimed face, one unit of the item per 0.5 m cell. */
  placeBlocks(hit,itemId,size=.5){
   const blockId=this.buildableBlock(itemId);if(!blockId)return {ok:false,reason:'not_buildable'};

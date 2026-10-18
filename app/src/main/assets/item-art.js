@@ -208,6 +208,8 @@ export function itemArt(id) {
 // Design catalog items reuse the legacy sprite when the item is the same thing,
 // otherwise they get a sprite in the same style by kind.
 const DESIGN_ART = {
+  wrench: "wrench",
+  grapple: "grapple",
   berry: "berry",
   herb: "herb",
   meat: "meat",

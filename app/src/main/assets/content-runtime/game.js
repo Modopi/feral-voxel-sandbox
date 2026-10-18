@@ -19,7 +19,7 @@ import {FixtureEnergyPanel} from './fixture-energy-panel.js';
 import {CreatureFragments} from './creature-fragments.js';
 import {AnchorMarkers} from './anchor-markers.js';
 import {ItemSlots,designCatalog} from './item-slots.js';
-import {generatorFor,ecologyAt,ecologySpecies} from './maps.js';
+import {generatorFor,ecologyAt,ecologySpecies,BUILD_BLOCKS} from './maps.js';
 import {hitShapeFor} from './creature-animation.js';
 import {VERSION} from '../version.js';
 import {FrameProfiler,fixedSteps,backgroundBudgetMs} from './frame-profiler.js';
@@ -113,7 +113,7 @@ function updateToolLabel(){
 }
 // What the hands hold follows the hotbar, like the frontier: a tool shows its model, a block or material a
 // small cube, an empty hand only the hands; an equipped weapon or gear shows while no tool is selected.
-const HAND_TOOLS=new Set(['stone_pick','hand_knife','bark_cup']);
+const HAND_TOOLS=new Set(['stone_pick','hand_knife','bark_cup','wrench','grapple']);
 function syncHands(id,weapon){
  const g=runtime.progression,gear=g.equipped&&g.catalog.get(g.equipped)?.kind==='gear_baseline';
  runtime.heldToolId=HAND_TOOLS.has(id)?id:weapon||gear?null:'hand';
@@ -128,7 +128,7 @@ function attack(){
  if(runtime.drivingMachineId){const hit=view.aim({range:24,excludeOwnerId:runtime.drivingMachineId}),r=runtime.fireMachine(hit);if(r.ok&&!r.duplicate&&!r.blocked)view.flashTrace(r.packet.rayOrigin,hit.point);else if(!r.ok&&!notify.busy()&&!['cooldown','fire_cooldown'].includes(r.reason))notify(r.reason);return;}
  const type=runtime.player.attackEnergy,hit=view.aim({range:6.5});
  // Frontier: an empty hand pushes a detached piece, anything held cuts it.
- if(!type&&hit?.kind==='object'&&!slots.held&&!runtime.objects.get(hit.id)?.fragment){if(runtime.time-runtime.lastMine<MINING_PERIOD_S)return;runtime.lastMine=runtime.time;const r=physical.objectPhysics.push(hit.id,hit.point);if(r.ok)hitFlash={text:'밀기 · 질량에 따라 가속',until:performance.now()+700};return;}
+ if(!type&&hit?.kind==='object'&&(!slots.held||slots.held==='grapple')&&!runtime.objects.get(hit.id)?.fragment){if(runtime.time-runtime.lastMine<MINING_PERIOD_S)return;runtime.lastMine=runtime.time;const r=physical.objectPhysics.push(hit.id,hit.point,{powered:slots.held==='grapple'});if(r.ok)hitFlash={text:'밀기 · 질량에 따라 가속',until:performance.now()+700};else if(!notify.busy())notify(r.reason);return;}
  const result=type?runtime.energyStrike(hit,type,25,{magicAttribute:runtime.player.magicAttribute??null}):runtime.strike(hit,{toolId:slots.held,size:miningSize});
  if(result.mined){const got=quantities(result.items??{});hitFlash={text:got?`+ ${got}`:result.removed?'떨어져 나감':`균열 ${Math.round(result.progress*100)}%`,until:performance.now()+700};if(result.removed){renderHotbar();updateToolLabel();}return;}
  if(result.ok||result.accepted){const amount=result.hpLost??result.damage;if(result.gimmick)hitFlash={text:`장치 내구 ${Math.ceil(result.remainingHp)}`,until:performance.now()+900};else if(Number.isFinite(amount)&&amount>0)hitFlash={text:`피해 ${amount.toFixed(1)}`,until:performance.now()+700};}
@@ -147,12 +147,17 @@ function secondary(){
  // On sandbox maps an empty hand observes, like the original island; the interact button still interacts.
  if(!id&&runtime.rules.sandbox){observe(view.aim({range:8}));return;}
  if(id==='food'){report(runtime.eat(),'음식을 먹었습니다.');return;}
+ // Frontier tools: the wrench pins or frees what it aims at, the grapple grabs from farther and harder.
+ if(id==='wrench'){const r=runtime.useWrench(view.aim({range:6.5}));r.ok?notify(r.message):notify(r.reason);return;}
+ if(id==='grapple'){const hit=view.aim({range:6.5});if(hit?.kind==='object'&&!runtime.objects.get(hit.id)?.fragment){report(physical.objectPhysics.grab(hit.id,hit.point,{powered:true}),'집게로 잡았습니다. 공격으로 던지고 사용으로 놓습니다.');return;}}
+ if(BUILD_BLOCKS[id]){const hit=view.aim({range:6.5});if(hit?.kind==='object'&&!runtime.objects.get(hit.id)?.fragment){report(runtime.attachToObject(hit,id),'물체에 블록을 붙였습니다.');renderHotbar();return;}}
  if(runtime.buildableBlock(id)){const r=runtime.placeBlocks(view.aim({range:6.5}),id,buildSize);if(!r.ok)notify(r.reason);renderHotbar();return;}
  if(d?.kind==='station'||d?.kind==='component'){placeEquipment(id).catch(e=>notify(e.message));return;}
  interact();
 }
 function driveMachine(id){
  const m=runtime.machines.machines.get(id);if(!m||distance(runtime.player,m.position)>5||!m.components.some(c=>c.componentId==='controller'))return {ok:false,reason:'가까운 조종 장치가 필요합니다.'};
+ if(m.anchored)runtime.machines.setAnchored(id,false); // riding releases a wrench anchor (frontier)
  runtime.drivingMachineId=id;runtime.machines.control(id,{throttle:0,steer:0,brake:false});pause(false);notify('이동 입력으로 조종합니다. 점프는 상승, 하강·제동 버튼(Shift·Ctrl)으로 조절하고 상호작용으로 내립니다.');return {ok:true};
 }
 function leaveMachine(){
