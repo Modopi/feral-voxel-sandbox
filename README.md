@@ -22,6 +22,7 @@ Android에서 오프라인으로 탐험·채굴·제작·생태·전투를 하�
 npm test                                   # 필수 회귀, 약 20초 (tests/*.test.js)
 npm run test:long                          # 장기 검사: 10티어 경로 약 7분, 에셋 재생성 (바꾼 영역만)
 node tools/verify-ui-reachability.mjs      # 앱과 같은 MIME·CSP 서버에서 실제 터치 경로 검증 (FERAL_CHROME=크롬 경로)
+node tools/profile-runtime.mjs             # 장면별 프레임 비용(FERAL.perf). FERAL_ASSETS로 이전 빌드도 같은 기준으로 잰다
 export ANDROID_HOME=/absolute/path/to/Android/sdk
 bash build-apk.sh                          # build/Feral-<앱 버전>-android.apk
 python3 tools/build-update.py              # build/release/Feral-<게임 버전>-update.feral

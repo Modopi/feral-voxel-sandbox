@@ -3,6 +3,18 @@ export const ATLAS_VERSION = 1;
 export const CELL_SIZE = 0.5;
 export const CHUNK_CELLS = 32;
 export const CHUNK_METRES = 16;
+/** Invalidation unit (8 cells = 4 m). Terrain colliders and liquid meshes cache
+ * per section and rebuild only the sections the atlas reports as changed. */
+export const SECTION_CELLS = 8;
+const CHANGE_LOG_LIMIT = 4096;
+/** Active chunk map whose version changes on every insertion or removal, so the
+ * single-entry chunk lookup cache in getCell can never return an evicted chunk. */
+class ChunkMap extends Map{
+  constructor(){super();this.version=0;}
+  set(key,value){this.version++;return super.set(key,value);}
+  delete(key){this.version++;return super.delete(key);}
+  clear(){this.version++;return super.clear();}
+}
 const CAP_COLUMNS = 8192, CAP_REGIONS = 128;
 const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
 const smooth = t=>t*t*(3-2*t);
@@ -11,6 +23,7 @@ const columnKey = (x,z)=>`${x},${z}`;
 const floorDiv = (x,n)=>Math.floor(x/n);
 const safeInteger = n=>Number.isSafeInteger(n);
 const finitePosition = n=>Number.isFinite(n)&&Math.abs(n)<=Number.MAX_SAFE_INTEGER/4;
+const EMPTY_SET = Object.freeze(new Set());
 function memo(map,key,compute,limit){if(map.has(key))return map.get(key);const value=compute();map.set(key,value);if(map.size>limit)map.delete(map.keys().next().value);return value;}
 const SHA_K = new Uint32Array([0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2]);
 const rotate=(x,n)=>(x>>>n)|(x<<(32-n));
@@ -48,8 +61,12 @@ export class WorldAtlas {
     this.palette=[null,...this.blocks.keys()];this.blockNumbers=new Map(this.palette.map((id,i)=>[id,i]));
     if(!Number.isFinite(options.maxActiveChunks??96))throw new TypeError('Invalid chunk limit');
     this.maxActiveChunks=clamp(Math.floor(options.maxActiveChunks??96),1,256);
-    this.activeChunks=new Map();this.edits=new Map();this.columnEdits=new Map();this.chunkEdits=new Map();this.reservations=new Map();
+    this.activeChunks=new ChunkMap();this._chunkMemo={version:-1,cx:0,cy:0,cz:0,chunk:undefined};this.edits=new Map();this.columnEdits=new Map();this.chunkEdits=new Map();this.reservations=new Map();
     this._columns=new Map();this._ores=new Map();this._trees=new Map();this._patchGroups=new Map();this._samples=new Map();this._hashes=new Map();this._caves=new Map();this._noiseCorners=new Map();this._jobs=new Map();this.lastLoadWork={processedCells:0,completedChunks:0};
+    // Collision by palette number keeps isSolidCell free of id lookups on loaded chunks.
+    this._solid=Uint8Array.from(this.palette,id=>id!==null&&this.blocks.get(id)?.collision!==false?1:0);
+    // Section change log: per-section serials plus an ordered log consumers read with changesSince().
+    this._changeSerial=0;this._resetSerial=0;this._terrainSections=new Map();this._fluidSectionKeys=new Map();this._changeKeys=[];this._changeSerials=[];this._changeFloor=0;
     this.pendingChunkCount=0;this.revision=0;this.onCellDestroyed=options.onCellDestroyed??null;
     this.rules=content.environments.world;
     this.fluidCells=new Map();this._fluidChunkKeys=new Map();this._fluidActive=new Set();this._flowCursor=0;this.burning=new Map();this.fuelRemaining=new Map();this.thermalCells=new Map();this.cellDamage=new Map();
@@ -82,8 +99,40 @@ export class WorldAtlas {
     this.reservations.set(id,next);this._columns.clear();this._samples.clear();this._trees.clear();this._ores.clear();this._caves.clear();
     for(const [key,c] of this.activeChunks)if([r,previous].filter(Boolean).some(q=>c.cx*16<q.maxX&&(c.cx+1)*16>q.minX&&c.cz*16<q.maxZ&&(c.cz+1)*16>q.minZ))this.activeChunks.delete(key);
     for(const c of this.activeChunks.values())if([r,previous].filter(Boolean).some(q=>c.cx*16<q.maxX+.5&&(c.cx+1)*16>q.minX-.5&&c.cz*16<q.maxZ+.5&&(c.cz+1)*16>q.minZ-.5))c.revision=this.revision+1;
-    this._jobs.clear();this._loadPlan=null;this.revision++;return true;
+    this._jobs.clear();this._loadPlan=null;this.revision++;this._resetSections();return true;
   }
+  /** Base terrain changed over a region (reservation): every cached section is stale. */
+  _resetSections(){this._resetSerial=++this._changeSerial;this._changeKeys.length=0;this._changeSerials.length=0;this._changeFloor=this._resetSerial;}
+  _touchSection(sx,sy,sz,terrain){
+    const key=cellKey(sx,sy,sz),serial=++this._changeSerial;if(terrain)this._terrainSections.set(key,serial);
+    const last=this._changeKeys.length-1;
+    if(last>=0&&this._changeKeys[last]===key){this._changeSerials[last]=serial;return;}
+    this._changeKeys.push(key);this._changeSerials.push(serial);
+    if(this._changeKeys.length>CHANGE_LOG_LIMIT){const drop=this._changeKeys.length-CHANGE_LOG_LIMIT/2;this._changeFloor=this._changeSerials[drop-1];this._changeKeys.splice(0,drop);this._changeSerials.splice(0,drop);}
+  }
+  /** Marks the 4 m section of a changed cell. A cell on a section face also marks
+   * the neighbor, whose exposed faces and side flows read across that seam. */
+  _touchCell(hx,hy,hz,terrain){
+    if(this._restoring)return;
+    const sx=floorDiv(hx,SECTION_CELLS),sy=floorDiv(hy,SECTION_CELLS),sz=floorDiv(hz,SECTION_CELLS),lx=hx-sx*SECTION_CELLS,ly=hy-sy*SECTION_CELLS,lz=hz-sz*SECTION_CELLS,last=SECTION_CELLS-1;
+    this._touchSection(sx,sy,sz,terrain);
+    if(lx===0)this._touchSection(sx-1,sy,sz,terrain);else if(lx===last)this._touchSection(sx+1,sy,sz,terrain);
+    if(ly===0)this._touchSection(sx,sy-1,sz,terrain);else if(ly===last)this._touchSection(sx,sy+1,sz,terrain);
+    if(lz===0)this._touchSection(sx,sy,sz-1,terrain);else if(lz===last)this._touchSection(sx,sy,sz+1,terrain);
+  }
+  /** Serial of the last solid-cell change in a section (0 = never edited). */
+  terrainSectionRevision(sx,sy,sz){const v=this._terrainSections.get(cellKey(sx,sy,sz))??0;return v>this._resetSerial?v:this._resetSerial;}
+  /** Sections whose terrain or fluid changed after `cursor` (a previous result's
+   * cursor, or 0). sections is null when everything must be treated as changed. */
+  changesSince(cursor=0){
+    const serials=this._changeSerials,current=this._changeSerial;
+    if(cursor>=current)return{cursor:current,sections:new Set()};
+    if(cursor<this._changeFloor)return{cursor:current,sections:null};
+    let lo=0,hi=serials.length;while(lo<hi){const mid=(lo+hi)>>1;if(serials[mid]<=cursor)lo=mid+1;else hi=mid;}
+    return{cursor:current,sections:new Set(this._changeKeys.slice(lo))};
+  }
+  /** Saved fluid cells (including depleted tombstones) inside one section. */
+  fluidCellsInSection(sx,sy,sz){return this._fluidSectionKeys.get(cellKey(sx,sy,sz))??EMPTY_SET;}
   _baseTier(x,z){const r=Math.hypot(x,z);for(const band of this.rules.difficulty.radialBands){if(r>=band.minM&&(band.maxM===null||r<band.maxM)){if(band.tier)return band.tier;const roll=this._rand('tier',floorDiv(x,256),floorDiv(z,256));let cumulative=0;for(const [tier,w] of Object.entries(band.tierWeights)){cumulative+=w;if(roll<cumulative)return Number(tier);}}}return 5;}
   _anchorTier(cx,cz){for(const row of this.rules.difficulty.patchTiers){const n=Math.ceil((row.minimumRadiusM+256)/512);if((cx===n&&cz===0)||(cx===-n-1&&cz===0)||(cz===n&&cx===0)||(cz===-n-1&&cx===0))return row.tier;}return null;}
   _patchForRegion(cx,cz){const minimum=this.rules.difficulty.patchTiers[0].minimumRadiusM;if(Math.hypot(Math.max(Math.abs(cx*512),Math.abs((cx+1)*512)),Math.max(Math.abs(cz*512),Math.abs((cz+1)*512)))<minimum)return null;const gx=floorDiv(cx,8),gz=floorDiv(cz,8);const group=memo(this._patchGroups,columnKey(gx,gz),()=>{
@@ -209,8 +258,27 @@ export class WorldAtlas {
     return(dx-t*cave.dx)**2+(dz-t*cave.dz)**2+(y-cave.y)**2<cave.radius*cave.radius;
   }
   _baseCell(hx,hy,hz){const c=this._column(hx,hz);if(hy>c.topCell){if(hy>c.topCell+24)return null;return this._vegetationAt(hx,hy,hz,c);}if(hy===c.topCell)return c.surface;if(this._caveAt(hx,hy,hz,c))return null;if(hy>=c.topCell-c.soilCells)return c.subsoil;return this._oreMap(floorDiv(hx,128),floorDiv(hz,128)).get(cellKey(hx,hy,hz))??c.bedrock;}
-  getCell(hx,hy,hz){if(![hx,hy,hz].every(safeInteger))throw new RangeError('Cell coordinates must be safe integers');const key=cellKey(hx,hy,hz);if(this.edits.has(key))return this.edits.get(key);const cx=floorDiv(hx,32),cy=floorDiv(hy,32),cz=floorDiv(hz,32),chunk=this.activeChunks.get(cellKey(cx,cy,cz));if(chunk)return this.palette[chunk.blocks[(hx-cx*32)+(hz-cz*32)*32+(hy-cy*32)*1024]];return this._baseCell(hx,hy,hz);}
-  isSolidCell(hx,hy,hz){const id=this.getCell(hx,hy,hz);return id!==null&&this.blocks.get(id)?.collision!==false;}
+  /** Loaded chunk containing cell chunk coordinates, cached for spatially coherent queries. */
+  _chunkAt(cx,cy,cz){
+    const m=this._chunkMemo,chunks=this.activeChunks;
+    if(m.version===chunks.version&&m.cx===cx&&m.cy===cy&&m.cz===cz)return m.chunk;
+    m.chunk=chunks.get(cellKey(cx,cy,cz));m.cx=cx;m.cy=cy;m.cz=cz;m.version=chunks.version;return m.chunk;
+  }
+  // Loaded chunks already hold every edit (setCell writes through and generation
+  // replays chunkEdits), so only unloaded cells consult the edit map.
+  getCell(hx,hy,hz){
+    if(!Number.isSafeInteger(hx)||!Number.isSafeInteger(hy)||!Number.isSafeInteger(hz))throw new RangeError('Cell coordinates must be safe integers');
+    const cx=Math.floor(hx/32),cy=Math.floor(hy/32),cz=Math.floor(hz/32),chunk=this._chunkAt(cx,cy,cz);
+    if(chunk)return this.palette[chunk.blocks[(hx-cx*32)+(hz-cz*32)*32+(hy-cy*32)*1024]];
+    if(this.edits.size){const id=this.edits.get(cellKey(hx,hy,hz));if(id!==undefined)return id;}
+    return this._baseCell(hx,hy,hz);
+  }
+  isSolidCell(hx,hy,hz){
+    if(!Number.isSafeInteger(hx)||!Number.isSafeInteger(hy)||!Number.isSafeInteger(hz))throw new RangeError('Cell coordinates must be safe integers');
+    const cx=Math.floor(hx/32),cy=Math.floor(hy/32),cz=Math.floor(hz/32),chunk=this._chunkAt(cx,cy,cz);
+    if(chunk)return this._solid[chunk.blocks[(hx-cx*32)+(hz-cz*32)*32+(hy-cy*32)*1024]]===1;
+    const id=this.getCell(hx,hy,hz);return id!==null&&this.blocks.get(id)?.collision!==false;
+  }
   setCell(hx,hy,hz,id){
     if(![hx,hy,hz].every(safeInteger)||id!==null&&!this.blocks.has(id))throw new TypeError('Invalid edited voxel');
     const key=cellKey(hx,hy,hz);if(this.edits.has(key)&&this.edits.get(key)===id)return false;
@@ -223,6 +291,7 @@ export class WorldAtlas {
     // Exposed faces belong to both chunks at a seam. A neighbor can have no voxel
     // edits of its own and still need a mesh rebuild after this edit.
     for(const [dx,dy,dz]of [[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]]){const nx=floorDiv(hx+dx,32),ny=floorDiv(hy+dy,32),nz=floorDiv(hz+dz,32);if(nx===cx&&ny===cy&&nz===cz)continue;const neighbor=this.activeChunks.get(cellKey(nx,ny,nz));if(neighbor)neighbor.revision=this.revision;}
+    this._touchCell(hx,hy,hz,true);
     if(!this._restoring&&id===null)this._wakeFluidNeighbors(hx,hy,hz);return true;
   }
   heightAt(x,z){validatePosition(x,z);const hx=Math.floor(x*2),hz=Math.floor(z*2),c=this._column(hx,hz),edits=this.columnEdits.get(columnKey(hx,hz));if(!edits)return c.height;let y=c.topCell;for(const [hy,id]of edits)if(id!==null&&this.blocks.get(id)?.collision!==false)y=Math.max(y,hy);while(edits.has(y)&&(edits.get(y)===null||this.blocks.get(edits.get(y))?.collision===false))y--;return(y+1)*.5;}
@@ -237,6 +306,7 @@ export class WorldAtlas {
     const key=cellKey(hx,hy,hz),v=clamp(state.volumeM3,0,.125);
     const f={volumeM3:v,acidM3:clamp(state.acidM3,0,v),thermalEu:Math.max(0,state.thermalEu)};
     this.fluidCells.set(key,f);const ck=cellKey(floorDiv(hx,32),floorDiv(hy,32),floorDiv(hz,32));if(!this._fluidChunkKeys.has(ck))this._fluidChunkKeys.set(ck,new Set());this._fluidChunkKeys.get(ck).add(key); // Zero is a persistent depletion tombstone, never regenerate it.
+    const sk=cellKey(floorDiv(hx,SECTION_CELLS),floorDiv(hy,SECTION_CELLS),floorDiv(hz,SECTION_CELLS));if(!this._fluidSectionKeys.has(sk))this._fluidSectionKeys.set(sk,new Set());this._fluidSectionKeys.get(sk).add(key);this._touchCell(hx,hy,hz,false);
     if(v>1e-9&&this._simulationNear(hx,hz)&&this._fluidActive.size<2048)this._fluidActive.add(key);else if(v<=1e-9)this._fluidActive.delete(key);
     this.environmentRevision++;return f;
   }

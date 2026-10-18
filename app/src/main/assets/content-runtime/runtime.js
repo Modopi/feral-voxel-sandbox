@@ -42,7 +42,8 @@ export class ExpeditionRuntime {
   this.atlas=new this.map.atlas(CONTENT,{seed,state:state?.atlas,maxActiveChunks:96});
   this.progression=new Progression(CONTENT,state?.progression||{});
   this.armaments=new Armaments(this.progression,state?.armaments||{});
-  this.creatures=new CreatureSystem(CONTENT,{seed,state:state?.creatures,terrain:this.atlas});
+  // Five staggered AI groups: about 3 game ticks apart instead of every creature on one tick.
+  this.creatures=new CreatureSystem(CONTENT,{seed,state:state?.creatures,terrain:this.atlas,slices:5});
   this.bosses=new BossSystem(CONTENT,state?.bosses);
   this.dungeons=new DungeonSystem({catalog:CONTENT,seed,state:state?.dungeons,atlas:this.atlas,assets,starterStructures:this.map.rules.structures!==false});
   const spawn=this.map.spawn;

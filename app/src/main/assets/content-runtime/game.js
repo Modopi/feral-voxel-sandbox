@@ -22,6 +22,7 @@ import {ItemSlots,designCatalog} from './item-slots.js';
 import {applyLegacyIsland} from './maps.js';
 import {hitShapeFor} from './creature-animation.js';
 import {VERSION} from '../version.js';
+import {FrameProfiler,fixedSteps,backgroundBudgetMs} from './frame-profiler.js';
 import {reasonText} from './reasons.js';
 import {InventoryUI,drawHotbar} from '../inventory-ui.js';
 import {HudEditor} from '../hud-editor.js';
@@ -32,6 +33,7 @@ const loading=window.FeralLoading??{set(){},step(){},finish(){},fail(){},timings
 // Importing this module starts nothing (the launcher loads it to check the files); start(world) does.
 let notify=Object.assign(()=>{},{busy:()=>false}),input;
 let runtime,view,bossView,environmentView,equipmentView,feedbackView,machinePanel,fixtureEnergyPanel,fragments,anchorMarkers,controller,physical,saveStore,autosave,updates,slots,catalog,bag,ledger,journey,hudEditor,settings,world;
+const perf=new FrameProfiler();let frameWork=0;
 let ready=false,paused=false,last=0,accum=0,saveClock=0,hudClock=0,tabClock=0,fpsFrames=0,fpsTime=0,fps=0,sprintLatched=false,actionHeld=false,manual=false,manualDeviceId=null;
 let communityTarget=null,deviceTarget=null,deviceAngleRad=0,weaponPattern='weapon_slash',weaponMaterial='wood',hitFlash=null,jobWatch={id:null,progress:0,since:0},destination=null,researchQuery='',bagSignature='';
 const held={descend:false,brake:false},ledgerPointers=new Set(),discovered=new Set();
@@ -541,9 +543,9 @@ function step(){
  const before={...p};if(control.forward||control.side||actionHeld)p.resting=false;
  const driving=runtime.machines.machines.get(runtime.drivingMachineId);
  if(driving)runtime.machines.control(driving.id,{throttle:control.forward||0,steer:-(control.side||0),pitch:Number(!!control.jump)-Number(keys.has('ShiftLeft')||keys.has('KeyQ')||held.descend),brake:keys.has('ControlLeft')||held.brake});
- else{runtime.drivingMachineId=null;controller.step(FIXED_DT,control);physical?.movePlayer(before,p);}
- if(actionHeld&&!paused&&!manual)attack();
- runtime.tick(FIXED_DT,{manual,manualDeviceId,moving:!!(control.forward||control.side)});physical?.step(FIXED_DT);
+ else{runtime.drivingMachineId=null;let t=perf.mark();controller.step(FIXED_DT,control);physical?.movePlayer(before,p);perf.add('step.move',t);}
+ if(actionHeld&&!paused&&!manual){const t=perf.mark();attack();perf.add('step.attack',t);}
+ let t=perf.mark();runtime.tick(FIXED_DT,{manual,manualDeviceId,moving:!!(control.forward||control.side)});perf.add('step.world',t);t=perf.mark();physical?.step(FIXED_DT);perf.add('step.physics',t);
  if(driving&&runtime.drivingMachineId===driving.id&&runtime.machines.machines.has(driving.id)&&driving.voxels.length){
   const c=driving.components.find(c=>c.componentId==='controller'),voxel=driving.voxels.find(v=>v.id===c?.voxelId);
   const offset=voxel?new T.Vector3((voxel.cell[0]+.5)*driving.gridM,(voxel.cell[1]+1)*driving.gridM+.08,(voxel.cell[2]+.5)*driving.gridM):new T.Vector3(0,Math.max(...driving.voxels.map(v=>(v.cell[1]+1)*driving.gridM))+.08,0);
@@ -555,14 +557,21 @@ function frame(now){
  requestAnimationFrame(frame);
  const realDt=Math.max(.001,(now-(last||now))/1000||.016),dt=Math.min(.1,realDt);last=now;
  if(!ready||document.hidden)return;
+ const started=performance.now();let steps=0;
  fpsFrames++;fpsTime+=realDt;if(fpsTime>1){fps=fpsFrames/fpsTime;fpsFrames=fpsTime=0;$('fps').textContent=`${fps.toFixed(0)} FPS`;}
  if(!frozen()){
-  accum=Math.min(.5,accum+dt);while(accum>=FIXED_DT){step();accum-=FIXED_DT;}
+  const simulated=perf.mark();({steps,accumulator:accum}=fixedSteps(accum,dt,FIXED_DT));for(let i=0;i<steps;i++)step();perf.add('simulate',simulated);
   saveClock+=dt;if(saveClock>30){saveClock=0;autosave.schedule(snapshot());}
  }
- runtime.atlas.loadAround(runtime.player.x,runtime.player.z,{radiusChunks:view.loadRadiusChunks??3,verticalRadius:1,y:runtime.player.y,chunkBudget:1});
- view.syncTerrain();view.syncModels(runtime.descriptors(),runtime.time,dt);fragments.sync(view.models);physical?.synchronize(view.models,runtime.player);bossView.sync(runtime.bosses);environmentView.sync(runtime.player,runtime.time);equipmentView.sync(runtime,dt);feedbackView.sync(runtime,dt);anchorMarkers.sync(runtime,dt);
- view.draw(runtime.player,controller.eye);
+ // Background work gets what the previous frame left: re-meshing edited chunks first, then streaming.
+ const background=performance.now(),budget=backgroundBudgetMs(frameWork);let t=perf.mark();
+ view.syncTerrain(runtime.player,{budgetMs:budget/2});perf.add('terrain.mesh',t);t=perf.mark();
+ runtime.atlas.loadAround(runtime.player.x,runtime.player.z,{radiusChunks:view.loadRadiusChunks??3,verticalRadius:1,y:runtime.player.y,chunkBudget:1,workBudgetMs:Math.max(.5,budget-(performance.now()-background))});perf.add('terrain.stream',t);
+ const backgroundMs=performance.now()-background;t=perf.mark();
+ view.syncModels(runtime.descriptors(),runtime.time,dt);fragments.sync(view.models);perf.add('view.models',t);t=perf.mark();
+ physical?.synchronize(view.models,runtime.player);perf.add('physics.sync',t);t=perf.mark();
+ bossView.sync(runtime.bosses);environmentView.sync(runtime.player,runtime.time);equipmentView.sync(runtime,dt);feedbackView.sync(runtime,dt);anchorMarkers.sync(runtime,dt);perf.add('view.effects',t);t=perf.mark();
+ view.draw(runtime.player,controller.eye);perf.add('view.draw',t);t=perf.mark();
  hudClock+=dt;tabClock+=dt;
  if(hudClock>.2){hudClock=0;hud();}
  minimapClock+=dt;if(minimapClock>.5){minimapClock=0;drawMinimap();}
@@ -571,7 +580,8 @@ function frame(now){
   const signature=JSON.stringify([runtime.progression.inventory,runtime.progression.jobs.map(j=>[j.id,Math.round(j.progress)]),slots.revision]);
   if(signature!==bagSignature){bagSignature=signature;if(paused&&$('pauseScreen').classList.contains('inventoryMode')&&!document.activeElement?.matches('#recipeSearch'))bag.render();else renderHotbar();$('bagCount').textContent=slots.slots.filter(Boolean).length;}
  }
- updates.frame(true,now);
+ updates.frame(true,now);perf.add('ui',t);
+ const work=performance.now()-started;frameWork=work-backgroundMs;perf.frame(work,steps);
 }
 
 // ---- Screen wiring ----
@@ -678,7 +688,7 @@ async function boot(selected){
  if(converted){save();notify(`기존 섬 저장을 옮겼습니다${converted.unmapped.length?` · 옮기지 못한 항목 ${converted.unmapped.length}개는 지도 버튼의 여정에서 확인하세요.`:'.'}`);}
  loading.finish();$('titleScreen').classList.add('hidden');$('hud').classList.remove('hidden');hudEditor.apply();
  installErrorScreen();
- window.FERAL={ready:true,map:'expedition',bootTimings:loading.timings,runtime,view,controller,physics:physical,slots,bag,ledger,save,pause,interact,openBag,selectHotbar,stats:()=>({running:ready&&!paused,paused,rewardMarkers:anchorMarkers.markers.size,warning:$('warning').textContent,toast:$('toast').textContent,version:VERSION.version,versionCode:VERSION.versionCode,player:{...runtime.player},regions:runtime.seenRegions.size,models:view.models.size,chunks:runtime.atlas.activeChunks.size,held:slots.held})};
+ window.FERAL={ready:true,map:'expedition',perf,environment:environmentView,bootTimings:loading.timings,runtime,view,controller,physics:physical,slots,bag,ledger,save,pause,interact,openBag,selectHotbar,stats:()=>({running:ready&&!paused,paused,rewardMarkers:anchorMarkers.markers.size,warning:$('warning').textContent,toast:$('toast').textContent,version:VERSION.version,versionCode:VERSION.versionCode,player:{...runtime.player},regions:runtime.seenRegions.size,models:view.models.size,chunks:runtime.atlas.activeChunks.size,held:slots.held})};
  window.FeralNative={save,pause:()=>{save();if(!paused)pause(true,{quiet:true});},back:()=>{if(hudEditor.editing)hudEditor.cancel();else if(ledger.isOpen)pause(false);else pause();}};
  requestAnimationFrame(frame);
 }

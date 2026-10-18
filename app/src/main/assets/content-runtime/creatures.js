@@ -64,6 +64,10 @@ export class CreatureSystem {
     this.terrain = options.terrain ?? null;
     this.time = 0;
     this.remainder = 0;
+    // Staggered AI: with slices > 1 the active creatures are split into that many
+    // groups, one group per STEP/slices, so a STEP's work no longer lands on one
+    // frame. Each creature still updates every STEP with dt = STEP.
+    this.slices = Math.max(1, Math.floor(options.slices ?? 1));
     this.pendingOfflineSeconds = 0;
     this.serial = 0;
     this._entities = new Map();
@@ -320,10 +324,12 @@ export class CreatureSystem {
     if (dt > MAX_CATCHUP) throw new RangeError('Use advanceOffline for catch-up above two hours');
     this._context = context;
     this.remainder += dt;
-    while (this.remainder >= STEP - 1e-9) {
-      this.remainder = Math.max(0, this.remainder - STEP);
-      this.time += STEP;
-      this._step(STEP, context);
+    // Offline catch-up has no active group to spread and keeps whole steps.
+    const slices = context.offline || !context.player ? 1 : this.slices, slice = STEP / slices;
+    while (this.remainder >= slice - 1e-9) {
+      this.remainder = Math.max(0, this.remainder - slice);
+      this.time += slice;
+      this._step(STEP, context, slices > 1 ? Math.round(this.time / slice) % slices : -1);
     }
     const events = this._events;
     this._events = [];
@@ -361,10 +367,15 @@ export class CreatureSystem {
       .sort((a, b) => dist(a, player) - dist(b, player) || a.id.localeCompare(b.id)).slice(0, limit);
   }
 
-  _step(dt, context) {
+  /** One STEP of ecology. group >= 0 runs only that staggered group of active
+   * creatures (regions and breeding with group 0); -1 runs everything. */
+  _step(dt, context, group = -1) {
     this.work.steps++;
-    const active = new Set(context.offline?[]:context.player?this.visibleEntities(context.player).filter(e=>!e.dead).map(e=>e.id):this._liveIds);
-    const activeRegions = new Set([...active].map(id => this.get(id).regionId));
+    if (group <= 0 || !this._activeSet) {
+      const active = new Set(context.offline?[]:context.player?this.visibleEntities(context.player).filter(e=>!e.dead).map(e=>e.id):this._liveIds);
+      this._activeSet = { active, regions: new Set([...active].map(id => this.get(id).regionId)) };
+    }
+    const { active } = this._activeSet, activeRegions = group <= 0 ? this._activeSet.regions : new Set();
     const processed = new Set();
     const regionIds=new Set([...this._regionDue.take(this.time),...activeRegions]);regionIds.delete(null);
     for (const id of [...regionIds].sort((a,b)=>this._regionOrder.get(a)-this._regionOrder.get(b))) {
@@ -388,12 +399,14 @@ export class CreatureSystem {
         c.edibleCp -= amount; r.detritusCp += amount;
       }
     }
-    const ids=this._ordered(new Set([...this._entityDue.take(this.time),...active]));
+    const groupActive = group < 0 ? active : [...active].filter(id => this._entityIndex.get(id)?.order % this.slices === group);
+    const ids=this._ordered(new Set([...this._entityDue.take(this.time),...groupActive]));
     const byRegion = new Map();
     for(const id of ids){const regionId=this.get(id).regionId;if(!byRegion.has(regionId))byRegion.set(regionId,this._living(regionId));}
     for (const id of ids) {
       const e=this.get(id);
       if (e.dead) continue;
+      if (group >= 0 && active.has(id) && this._entityIndex.get(id)?.order % this.slices !== group) continue;
       const s = this.species.get(e.speciesId), elapsed = this.time - (e.lastUpdatedAt ?? this.time - dt);
       const nearby = byRegion.get(e.regionId) || [];
       if (!active.has(e.id)) {
@@ -516,10 +529,11 @@ export class CreatureSystem {
         e.targetId = null; e.targetPoint = e.home; e.state = 'return';
       } else { e.state = 'chase'; return; }
     }
-    if (canAttack && player && this._visible(e, player, context)) {
+    if (canAttack && player) {
       const close = dist(e, player) < s.stats.detectionM;
       const hostile = e.angerUntil > this.time || !s.civilization && s.entityType === 'inorganic' && dist(player, e.home) < 8;
-      if (close && hostile) { this._target(e, 'player'); return; }
+      // Line of sight is a physics shape cast: only asked once it can change the decision.
+      if (close && hostile && this._visible(e, player, context)) { this._target(e, 'player'); return; }
     }
     const day = context.isNight ?? ((8 + this.time / 60) % 24 >= 19 || (8 + this.time / 60) % 24 < 6);
     const active = s.behavior.activePeriod !== 'dusk_night' || day;
