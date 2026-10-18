@@ -5,6 +5,7 @@
 // the original island generator (world.js) and maps its blocks to design blocks.
 import {WorldAtlas} from './atlas.js';
 import {World, SIZE as ISLAND_SIZE, SEA as ISLAND_SEA} from '../world.js';
+import {frontierWorld, regionInfo, regionKey} from '../frontier/terrain.js';
 import {GEAR, MINING_HARDNESS} from '../equipment.js';
 
 // Original island block numbers → design blocks (design blocks.json lists the same legacy numbers).
@@ -52,35 +53,88 @@ export const LEGACY_SPECIES = Object.freeze({0:'moss_deer',1:'copper_fox',2:'azu
 const insideIsland = (x,z) => x>=0&&z>=0&&x<ISLAND_SIZE&&z<ISLAND_SIZE;
 const ISLAND_SPAWN = {x:77.5,z:84.5,yaw:-.5};
 
-/** The 160 × 160 m island with its rivers, crater and ruin, surrounded by sea. */
+/** The 160 × 160 m island with its rivers, crater and ruin, surrounded by sea. Islands built by the
+ * original island generator (world.js) are found through _islandAt, so one atlas can hold several. */
 export class IslandAtlas extends WorldAtlas {
   get generatorId(){return 'island-v1';}
   get island(){if(!this._island){const w=new World(Number(this.seed));w.generate();this._island=w;}return this._island;}
+  /** The island under (x, z) metres with its origin and tier, or null over open sea. */
+  _islandAt(x,z){return insideIsland(x,z)?(this._home??={world:this.island,ox:0,oz:0,tier:1}):null;}
+  /** Landing spots near (x, z) where starter branches and stones lie; `id` keeps saved node ids unique. */
+  _landings(){return [{id:'',salt:[],x:ISLAND_SPAWN.x,z:ISLAND_SPAWN.z}];}
   _rawSample(x,z){
-    const inside=insideIsland(x,z),height=inside?this.island.surface(x,z):4,water=height<ISLAND_SEA+1;
-    const environmentId=!inside?'coast':x>=132&&x<148&&z>=27&&z<42?'thermal':x>125&&z<90?'ridge':'grove';
-    return {environmentId,baseEnvironmentId:environmentId,tier:1,baseTier:1,height,waterLevel:water?ISLAND_SEA+1:null,waterType:water?'water':null,safeBypass:false,
-     hostileSpawnsAllowed:inside,highTierPatchId:null,nearbyPatch:null,ecologyCellId:`eco:${Math.floor(x/64)},${Math.floor(z/64)}`,reservedBy:null};
+    const at=this._islandAt(x,z),lx=at?x-at.ox:x,lz=at?z-at.oz:z,height=at?at.world.surface(lx,lz):4,water=height<ISLAND_SEA+1;
+    const environmentId=!at?'coast':lx>=132&&lx<148&&lz>=27&&lz<42?'thermal':lx>125&&lz<90?'ridge':'grove';
+    return {environmentId,baseEnvironmentId:environmentId,tier:at?.tier??1,baseTier:at?.tier??1,height,waterLevel:water?ISLAND_SEA+1:null,waterType:water?'water':null,safeBypass:false,
+     hostileSpawnsAllowed:!!at,highTierPatchId:null,nearbyPatch:null,ecologyCellId:`eco:${Math.floor(x/64)},${Math.floor(z/64)}`,reservedBy:null};
   }
   _baseCell(hx,hy,hz){
-    const x=hx*.5,z=hz*.5;
-    if(!insideIsland(x,z))return hy<=7?(hy<5?'stone':'sand'):null;
-    return LEGACY_BLOCKS[this.island.getCell(hx,hy,hz)]??null;
+    const at=this._islandAt(hx*.5,hz*.5);
+    if(!at)return hy<=7?(hy<5?'stone':'sand'):null;
+    return LEGACY_BLOCKS[at.world.getCell(hx-at.ox*2,hy,hz-at.oz*2)]??null;
   }
   _chunkCell(hx,hy,hz){return this._baseCell(hx,hy,hz);}
   _vegetationAt(){return null;}
   findBuildingSites(){return [];}
   harvestNodesAround(x,z,radius=64){
-    const nodes=super.harvestNodesAround(x,z,radius).filter(n=>!n.id.startsWith('starter:')&&insideIsland(n.x,n.z));
-    // Starter branches and stones sit around the island landing, like the expedition's around its spawn.
+    const nodes=super.harvestNodesAround(x,z,radius).filter(n=>!n.id.startsWith('starter:')&&this._islandAt(n.x,n.z));
+    // Starter branches and stones sit around each landing, like the expedition's around its spawn.
     const definitions=new Map(this.rules.harvestNodes.map(n=>[n.id,n]));
-    for(const [nodeId,count]of [['fallen_branch',8],['loose_stone',8],['fiber_patch',4],['berry_bush',6]])for(let i=0;i<count;i++){
-     const angle=this._rand('island-starter-angle',nodeId,i)*Math.PI*2,r=8+this._rand('island-starter-radius',nodeId,i)*16;
-     const px=Math.round((ISLAND_SPAWN.x+Math.cos(angle)*r)*2)/2,pz=Math.round((ISLAND_SPAWN.z+Math.sin(angle)*r)*2)/2,def=definitions.get(nodeId),s=this.sample(px,pz);
-     if(Math.hypot(px-x,pz-z)<=radius&&s.waterLevel===null)nodes.push({id:`starter:${nodeId}:${i}`,nodeId,sourceId:def.sourceId,resourceId:def.resourceId,x:px,y:this.heightAt(px,pz),z:pz,regrowS:def.regrowS});
+    for(const landing of this._landings(x,z,radius))for(const [nodeId,count]of [['fallen_branch',8],['loose_stone',8],['fiber_patch',4],['berry_bush',6]])for(let i=0;i<count;i++){
+     const angle=this._rand('island-starter-angle',nodeId,i,...landing.salt)*Math.PI*2,r=8+this._rand('island-starter-radius',nodeId,i,...landing.salt)*16;
+     const px=Math.round((landing.x+Math.cos(angle)*r)*2)/2,pz=Math.round((landing.z+Math.sin(angle)*r)*2)/2,def=definitions.get(nodeId),s=this.sample(px,pz);
+     if(Math.hypot(px-x,pz-z)<=radius&&s.waterLevel===null)nodes.push({id:`starter:${landing.id}${nodeId}:${i}`,nodeId,sourceId:def.sourceId,resourceId:def.resourceId,x:px,y:this.heightAt(px,pz),z:pz,regrowS:def.regrowS});
     }
     return nodes;
   }
+}
+
+// First-signal regions: each region is the frontier's 160 m region terrain (frontier/terrain.js, same
+// villages, nest, ruin, trails and workyard) on its own island, REGION_STRIDE apart across the sea, so the
+// regions share one world and one save and travel between them is a voyage instead of a reload.
+export const REGION_STRIDE = 320;
+const REGION_CAMP = {x:77.5,z:84.5};
+export function regionAt(x,z){
+  const rx=Math.floor(x/REGION_STRIDE),rz=Math.floor(z/REGION_STRIDE),ox=rx*REGION_STRIDE,oz=rz*REGION_STRIDE;
+  return x-ox<ISLAND_SIZE&&z-oz<ISLAND_SIZE?{rx,rz,ox,oz}:null;
+}
+/** The camp of the region nearest (x, z), in world metres. */
+export function nearestRegionCamp(x,z){
+  const rx=Math.round((x-REGION_CAMP.x)/REGION_STRIDE),rz=Math.round((z-REGION_CAMP.z)/REGION_STRIDE);
+  return {x:rx*REGION_STRIDE+REGION_CAMP.x,z:rz*REGION_STRIDE+REGION_CAMP.z};
+}
+export class FrontierAtlas extends IslandAtlas {
+  get generatorId(){return 'frontier-v1';}
+  constructor(content,options={}){
+    super(content,options);
+    // Regions generated by an older frontier keep their terrain version (converted saves); new ones are 3.
+    this.regionTerrain=new Map(options.state?.regionTerrain??[]);
+  }
+  regionWorld(rx,rz){
+    const key=regionKey(rx,rz);this._regions??=new Map();let world=this._regions.get(key);
+    if(!world){
+      const info=regionInfo(Number(this.seed),rx,rz);
+      world=frontierWorld(info.seed,{...info,terrainVersion:this.regionTerrain?.get(key)??3});world.tier=info.tier;
+      this._regions.set(key,world);if(this._regions.size>6)this._regions.delete(this._regions.keys().next().value);
+    }else{this._regions.delete(key);this._regions.set(key,world);}
+    return world;
+  }
+  _islandAt(x,z){
+    const r=regionAt(x,z);if(!r)return null;
+    const m=this._regionMemo;if(m&&m.rx===r.rx&&m.rz===r.rz)return m;
+    const world=this.regionWorld(r.rx,r.rz);return this._regionMemo={world,ox:r.ox,oz:r.oz,tier:world.tier,rx:r.rx,rz:r.rz};
+  }
+  _landings(x,z,radius){
+    const out=[],reach=radius+REGION_STRIDE;
+    for(let rx=Math.floor((x-reach)/REGION_STRIDE);rx<=Math.floor((x+reach)/REGION_STRIDE);rx++)for(let rz=Math.floor((z-reach)/REGION_STRIDE);rz<=Math.floor((z+reach)/REGION_STRIDE);rz++){
+      const cx=rx*REGION_STRIDE+REGION_CAMP.x,cz=rz*REGION_STRIDE+REGION_CAMP.z;
+      if(Math.hypot(cx-x,cz-z)<=radius+30)out.push({id:`${rx},${rz}:`,salt:[rx,rz],x:cx,z:cz});
+    }
+    return out;
+  }
+  /** Places of the region under (x, z), in world metres. */
+  regionLandmarks(x,z){const at=this._islandAt(x,z);return at?at.world.landmarks.map(l=>({...l,x:l.x+at.ox,z:l.z+at.oz})):[];}
+  serialize(){const state=super.serialize();if(this.regionTerrain.size)state.regionTerrain=[...this.regionTerrain].sort(([a],[b])=>a.localeCompare(b));return state;}
 }
 
 export const GENERATORS = Object.freeze({
@@ -94,6 +148,12 @@ export const GENERATORS = Object.freeze({
    // The whole island fits the minimap; its life is the original island's three species (grove).
    minimap:{size:160,origin:{x:0,z:0}},ecology:'grove',
    legacySave:Object.freeze({name:'기존 섬 저장',matches:old=>[1,2].includes(old?.version)&&!!old.world,apply:(runtime,old)=>applyLegacyIsland(runtime,old)})}),
+  // The first signal's regions as islands of one world (S2). Starts at region 0,0's expedition camp.
+  frontier:Object.freeze({id:'frontier',atlas:FrontierAtlas,spawn:{...REGION_CAMP,yaw:-.5},spawnName:'원정 야영지',
+   description:'바다로 나뉜 지역 섬들을 오가며 마을과 협력하고 세 신호를 복원하는 원정입니다.',
+   region:(x,z)=>!!regionAt(x,z),landmarks:[],minimap:{size:160,origin:null},ecology:'grove',legacySave:null,
+   // A fallen player wakes at the camp of the region they fell in, not back at the first region.
+   respawn:nearestRegionCamp,respawnName:'지역 야영지'}),
 });
 // Saves before 0.15.2 recorded the map preset instead of the generator.
 const SAVED_MAP_GENERATOR = Object.freeze({expedition:'infinite',island:'island'});
@@ -107,8 +167,8 @@ export function savedGenerator(state){return state?.terrain??SAVED_MAP_GENERATOR
 export const STARTER_KIT = Object.freeze({stone_pick:1,raw_timber:4,loose_stone:4,seed:4});
 // A world config lists every rule its preset offers; a rule it does not offer is off. Without a config
 // (tests and tools) the runtime plays the full rule set: survival and start structures on.
-const RULES_OFF = Object.freeze({survival:false,sandbox:false,startStructures:false,starterKit:false});
-const RULES_WITHOUT_CONFIG = Object.freeze({survival:true,sandbox:false,startStructures:true,starterKit:false});
+const RULES_OFF = Object.freeze({survival:false,sandbox:false,startStructures:false,starterKit:false,dropOnDeath:false});
+const RULES_WITHOUT_CONFIG = Object.freeze({survival:true,sandbox:false,startStructures:true,starterKit:false,dropOnDeath:true});
 export function worldRules(config){return config?{...RULES_OFF,...config.rules}:{...RULES_WITHOUT_CONFIG};}
 
 /** Carry an original island save into a fresh island runtime. The original save is not modified.

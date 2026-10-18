@@ -12,6 +12,7 @@ export const RULES = {
   sandbox: { label: "샌드박스", help: "관찰·물·불·산·개체 생성 도구, 캔 자원으로 블록 쌓기", when: "always" },
   startStructures: { label: "시작 건축물", help: "출발지 주변에 첫 건축물을 둡니다", when: "create" },
   starterKit: { label: "시작 소지품", help: "돌 곡괭이·목재·돌·씨앗을 받고 시작합니다", when: "create" },
+  dropOnDeath: { label: "사망 시 소지품 남김", help: "쓰러진 자리에 소지품을 남기고, 그곳에 다시 가면 요정이 돌려줍니다. 끄면 소지품을 지닌 채 깨어납니다.", when: "always" },
 };
 
 // Presets are default world settings. `rules` holds only what that world's game session actually reads,
@@ -21,12 +22,12 @@ export const PRESETS = {
   expedition: {
     name: "FERAL 탐험", summary: "연구 · 던전 · 자유 제작", engine: "runtime", terrain: "infinite",
     description: "끝없이 이어지는 세계입니다. 출발지에서 멀어질수록 위험해집니다.",
-    rules: { survival: true, sandbox: false, startStructures: true },
+    rules: { survival: true, sandbox: false, startStructures: true, dropOnDeath: true },
   },
   island: {
     name: "기본 탐험 맵", summary: "복셀 섬 · 생태 관찰", engine: "runtime", terrain: "island",
     description: "160 × 160 m의 섬입니다. 다섯 장소를 탐험하고 생태의 변화를 관찰합니다.",
-    rules: { survival: false, sandbox: true, starterKit: true },
+    rules: { survival: false, sandbox: true, starterKit: true, dropOnDeath: true },
   },
   frontier: {
     name: "첫 신호", summary: "야영지 성장 · 신호망 복원 · 자유 원정", engine: "frontier", terrain: "frontier",

@@ -212,14 +212,19 @@ export class ExpeditionRuntime {
  }
  hurt(amount,source){if(!Number.isFinite(amount)||amount<=0||!this.rules.survival)return;this.player.hp=Math.max(0,this.player.hp-amount);this.player.lastDamageAt=this.time;this.player.resting=false;this.events.push({type:'player_hit',amount,source});if(this.events.length>64)this.events.shift();}
  die(){
-  const p=this.player,inventory=this.progression.inventory,overflow=this.progression.overflow,items={...inventory};
+  const p=this.player,g=this.generator,drop=this.rules.dropOnDeath;
   if(this.drivingMachineId)this.machines.control(this.drivingMachineId,{throttle:0,steer:0,pitch:0,brake:true});
-  for(const[id,n]of Object.entries(overflow))items[id]=(items[id]||0)+n;
-  this.deaths.push({id:this.id('death'),position:{x:p.x,y:p.y,z:p.z},items,weapons:this.armaments.drainCarried(),recovered:false});
-  this.progression.inventory={};this.progression.overflow={};this.progression.equipped=null;
-  const spawn=this.generator.spawn;
+  // World setting "drop on death": belongings stay where the player fell until the fairy brings them back.
+  if(drop){
+   const items={...this.progression.inventory};
+   for(const[id,n]of Object.entries(this.progression.overflow))items[id]=(items[id]||0)+n;
+   this.deaths.push({id:this.id('death'),position:{x:p.x,y:p.y,z:p.z},items,weapons:this.armaments.drainCarried(),recovered:false});
+   this.progression.inventory={};this.progression.overflow={};this.progression.equipped=null;
+  }
+  const spawn=g.respawn?.(p.x,p.z)??g.spawn,name=g.respawn?g.respawnName:g.spawnName;
   Object.assign(p,{x:spawn.x,y:this.atlas.heightAt(spawn.x,spawn.z)+.05,z:spawn.z,hp:100,maxHp:100,calories:600,vy:0,lastDamageAt:this.time});
-  this.interactionAction=null;this.drivingMachineId=null;this.player.resting=false;this.message('출발지에서 깨어났습니다. 사망 장소 10m 안에 가면 요정이 소지품을 돌려줍니다.');
+  this.interactionAction=null;this.drivingMachineId=null;this.player.resting=false;
+  this.message(drop?`${name}에서 깨어났습니다. 사망 장소 10m 안에 가면 요정이 소지품을 돌려줍니다.`:`${name}에서 깨어났습니다. 소지품은 그대로입니다.`);
  }
  recoverDeath(death){
   const items={},virtual={...this.progression.inventory};

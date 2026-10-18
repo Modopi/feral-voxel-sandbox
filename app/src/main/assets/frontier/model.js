@@ -31,29 +31,9 @@ import {
   serialize,
 } from "../machine/model.js";
 export const FACTIONS = ["이끼 연맹", "구리 조합", "현무암 부족"];
-export const regionKey = (x, z) => `${x},${z}`;
-export function regionInfo(seed, x, z) {
-  const roll = (n) => hash(x + n * 19, z - n * 7, seed);
-  const tier = Math.min(3, 1 + Math.floor((Math.abs(x) + Math.abs(z)) / 2));
-  return {
-    key: regionKey(x, z),
-    x,
-    z,
-    seed: Math.floor(roll(1) * 2147483647),
-    tier,
-    biome: biomeIndex(x, z),
-    name: BIOMES[biomeIndex(x, z)].name + ` [${x}, ${z}]`,
-    villages: [0, 1].map((i) => ({
-      id: `${x},${z}:${i}`,
-      name: ["강변 야영지", "고원 정착지"][i],
-      x: (i ? 130 : 65) + Math.floor(roll(3 + i) * 6),
-      z: i ? 114 : 68,
-      faction: (Math.floor(roll(7) * 3) + i) % 3,
-    })),
-    boss: { x: 44 + Math.floor(roll(5) * 9), z: 126 },
-    dungeon: { x: 133, z: 45 + Math.floor(roll(6) * 7) },
-  };
-}
+// Region placement lives with the region terrain so the unified runtime reads the same regions.
+import { regionInfo, regionKey } from "./terrain.js";
+export { regionInfo, regionKey };
 const clone = (v) => JSON.parse(JSON.stringify(v));
 export class Frontier {
   constructor(seed = 63026) {
