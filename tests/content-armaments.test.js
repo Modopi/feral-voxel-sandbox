@@ -21,13 +21,13 @@ function woodCraftFixture() {
   return { p, beforeBaselines, armaments: new Armaments(p) };
 }
 
-test('weapon patterns are separate from the 53 existing equipment results and reference only catalog materials', () => {
+test('weapon patterns are separate from the 55 existing equipment results and reference only catalog materials', () => {
   const p = new Progression(CONTENT);
   const oldResults = p.entries.filter(e => ['tool', 'station', 'component', 'gear_baseline'].includes(e.kind) && e.id !== 'arc_thrower');
   const currentResults = p.entries.filter(e => ['tool', 'station', 'component', 'gear_baseline'].includes(e.kind));
   const patterns = p.entries.filter(e => e.kind === 'weapon_pattern');
-  assert.equal(oldResults.length, 53);
-  assert.equal(currentResults.length, 54);
+  assert.equal(oldResults.length, 55); // 53 + wrench and grapple (0.15.7)
+  assert.equal(currentResults.length, 56);
   assert.equal(patterns.length, 3);
   assert.deepEqual(patterns.map(e => e.id), [...ARMAMENT_PATTERNS]);
   assert.ok(patterns.every(e => !p.items.has(e.id)), 'a shape parameter must not create an inventory item');

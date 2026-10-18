@@ -1,0 +1,58 @@
+TAP version 13
+# Subtest: visual catalog covers every content ID and enforces coordinates/materials/hierarchy
+ok 1 - visual catalog covers every content ID and enforces coordinates/materials/hierarchy
+  ---
+  duration_ms: 547.640786
+  type: 'test'
+  ...
+# Subtest: creature and boss silhouettes fit design dimensions and stand on ground
+ok 2 - creature and boss silhouettes fit design dimensions and stand on ground
+  ---
+  duration_ms: 3.198549
+  type: 'test'
+  ...
+# Subtest: environment references canonical entrance after translation and remains deterministic
+ok 3 - environment references canonical entrance after translation and remains deterministic
+  ---
+  duration_ms: 20352.4391
+  type: 'test'
+  ...
+# Subtest: invalid references and cyclic hierarchy fail before export
+ok 4 - invalid references and cyclic hierarchy fail before export
+  ---
+  duration_ms: 13.318929
+  type: 'test'
+  ...
+# Subtest: GLB preserves part and attachment names without invalid empty child arrays
+ok 5 - GLB preserves part and attachment names without invalid empty child arrays
+  ---
+  duration_ms: 10.383646
+  type: 'test'
+  ...
+# Subtest: emission above one survives GLB export as standard strength extension
+ok 6 - emission above one survives GLB export as standard strength extension
+  ---
+  duration_ms: 6.421583
+  type: 'test'
+  ...
+# Subtest: GLB material colors use canonical decimal precision across JavaScript engines
+ok 7 - GLB material colors use canonical decimal precision across JavaScript engines
+  ---
+  duration_ms: 14.996076
+  type: 'test'
+  ...
+# Subtest: equipment catalog covers authored tools, stations, components, kits and weapon patterns
+ok 8 - equipment catalog covers authored tools, stations, components, kits and weapon patterns
+  ---
+  duration_ms: 0.608523
+  type: 'test'
+  ...
+1..8
+# tests 8
+# suites 0
+# pass 8
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 33993.747507

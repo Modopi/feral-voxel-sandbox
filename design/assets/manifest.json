@@ -8,7 +8,7 @@
     "boss": 8,
     "structure": 12,
     "environment": 8,
-    "equipment": 57
+    "equipment": 59
   },
   "entries": [
     {
@@ -2543,6 +2543,84 @@
           0.015625,
           0.3125,
           0
+        ]
+      }
+    },
+    {
+      "id": "wrench",
+      "name": "조립 렌치",
+      "category": "equipment",
+      "contentRef": {
+        "file": "design/content/progression.json",
+        "id": "wrench"
+      },
+      "model": "models/wrench.voxel.json",
+      "glb": "exports/wrench.glb",
+      "preview": "previews/wrench.png",
+      "sha256": "2dd2d34ba1dfa654bfd9132ea21b1147e230b4255b03fb8caf279058117d6612",
+      "glbSha256": "822d73c5881fc12b9f0bdd3250737945dcb637d787009cefa751643c17cad332",
+      "boxes": 5,
+      "parts": 2,
+      "anchors": 2,
+      "bounds": {
+        "min": [
+          -0.09375,
+          0,
+          -0.03125
+        ],
+        "max": [
+          0.125,
+          0.5,
+          0.0625
+        ],
+        "size": [
+          0.21875,
+          0.5,
+          0.09375
+        ],
+        "center": [
+          0.015625,
+          0.25,
+          0.015625
+        ]
+      }
+    },
+    {
+      "id": "grapple",
+      "name": "운반 집게",
+      "category": "equipment",
+      "contentRef": {
+        "file": "design/content/progression.json",
+        "id": "grapple"
+      },
+      "model": "models/grapple.voxel.json",
+      "glb": "exports/grapple.glb",
+      "preview": "previews/grapple.png",
+      "sha256": "fb5b8484e0757b076a9e01649978f12532005e59c3bf55a27f86f1207d9d572a",
+      "glbSha256": "110deb81ea437213a37d871238aecbbdb944f79f2f747536458c8f8bd00f9a69",
+      "boxes": 9,
+      "parts": 2,
+      "anchors": 2,
+      "bounds": {
+        "min": [
+          -0.09375,
+          0,
+          -0.03125
+        ],
+        "max": [
+          0.09375,
+          0.71875,
+          0.0625
+        ],
+        "size": [
+          0.1875,
+          0.71875,
+          0.09375
+        ],
+        "center": [
+          0,
+          0.359375,
+          0.015625
         ]
       }
     },

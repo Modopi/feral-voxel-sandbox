@@ -659,6 +659,77 @@
       }
     },
     {
+      "kind": "tool",
+      "id": "wrench",
+      "name": "조립 렌치",
+      "origin": {
+        "type": "craft",
+        "recipe": "make_wrench"
+      },
+      "variableDictionary": "P-TOOL"
+    },
+    {
+      "kind": "recipe",
+      "id": "make_wrench",
+      "name": "조립 렌치 만들기",
+      "inputs": {
+        "scrap_iron": 2,
+        "raw_timber": 1
+      },
+      "outputs": {
+        "wrench": 1
+      },
+      "station": "hand",
+      "research": null,
+      "seconds": 20,
+      "energy": {},
+      "origin": {
+        "type": "craft",
+        "discoveryRequired": false
+      },
+      "variableDictionary": "P-RECIPE",
+      "massBalance": {
+        "mode": "assembly_preserves_inputs",
+        "rule": "finished tool/station/component/gear records summed input material mass; research documents preserve paper mass; no automatic cell-mass substitution"
+      }
+    },
+    {
+      "kind": "tool",
+      "id": "grapple",
+      "name": "운반 집게",
+      "origin": {
+        "type": "craft",
+        "recipe": "make_grapple"
+      },
+      "variableDictionary": "P-TOOL"
+    },
+    {
+      "kind": "recipe",
+      "id": "make_grapple",
+      "name": "운반 집게 만들기",
+      "inputs": {
+        "raw_timber": 2,
+        "plant_fiber": 2,
+        "mana_crystal_ore": 1
+      },
+      "outputs": {
+        "grapple": 1
+      },
+      "station": "hand",
+      "research": null,
+      "seconds": 20,
+      "energy": {},
+      "origin": {
+        "type": "craft",
+        "discoveryRequired": false
+      },
+      "variableDictionary": "P-RECIPE",
+      "massBalance": {
+        "mode": "assembly_preserves_inputs",
+        "rule": "finished tool/station/component/gear records summed input material mass; research documents preserve paper mass; no automatic cell-mass substitution"
+      }
+    },
+    {
       "kind": "station",
       "id": "field_bench",
       "name": "야외 작업대",

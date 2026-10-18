@@ -23,7 +23,7 @@ test('browser catalog preserves all six canonical documents and freezes definiti
 
 test('lazy browser assets preserve every canonical model and manifest metadata', async () => {
   const manifest = JSON.parse(await fs.readFile(path.join(root, 'design/assets/manifest.json')));
-  assert.equal(manifest.entries.length, 119);
+  assert.equal(manifest.entries.length, 121); // 119 + wrench and grapple (0.15.7)
   const weaponPatterns = CONTENT.progression.entries.filter(entry => entry.kind === 'weapon_pattern');
   assert.equal(weaponPatterns.length, 3);
   for (const pattern of weaponPatterns) {
@@ -71,7 +71,7 @@ test('packaged authoring SDK can safely edit a copy without mutating cached sour
 test('runtime package is deterministic and committed files equal canonical compilation', async () => {
   const first = await compileRuntimeContent(), second = await compileRuntimeContent();
   assert.deepEqual(first, second);
-  assert.equal(first.assetCount, 119);
+  assert.equal(first.assetCount, 121);
   assert.equal(first.files.size, 11);
   for (const [filename, source] of first.files) {
     assert(!source.includes('node:'));

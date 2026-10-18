@@ -61,7 +61,25 @@ function knife(a,p){
   voxel(a,p,[0,.28125,0],[.15625,G,.125],'cloth');
   anchor(a,'grip',p,[0,.140625,0],'slot:tool_hand; 절삭도구 손잡이');anchor(a,'cutting_edge',p,[.0625,.46875,0],'절삭 접촉 위치; 무기 스킬을 추가하지 않음');
 }
-function tool(a,e){const p=makePart(a,'tool',[0,0,0],'root','tool');if(e.id==='bark_cup')cup(a,p);else if(e.id==='stone_pick')pick(a,p);else knife(a,p);a.equipmentSlots=[{slot:'tool_hand',partIds:[p],anchorId:e.id==='stone_pick'?'tool_grip':'grip'}];}
+// Frontier assembly wrench: an iron bar with a cloth grip and an open jaw.
+function wrench(a,p){
+  voxel(a,p,[0,.09375,0],[.09375,.1875,.09375],'cloth');
+  voxel(a,p,[0,.1875,0],[.0625,.375,.0625],'body');
+  voxel(a,p,[0,.40625,0],[.21875,.0625,.0625],'body');
+  for(const x of[-.078125,.078125])voxel(a,p,[x,.46875,0],[.0625,.0625,.0625],'edge');
+  anchor(a,'grip',p,[0,.09375,0],'slot:tool_hand; 렌치 손잡이');anchor(a,'jaw',p,[0,.46875,0],'고정·해제 접촉점; 기능은 런타임 규칙');
+}
+// Frontier carrying grapple: a wooden shaft, a resonant crystal and two claws.
+function grapple(a,p){
+  voxel(a,p,[0,.09375,0],[.09375,.125,.09375],'cloth');
+  voxel(a,p,[0,.25,0],[.0625,.5,.0625],'wood');
+  voxel(a,p,[0,.53125,0],[.1875,.0625,.0625],'body');
+  voxel(a,p,[0,.59375,0],[.0625,.0625,.0625],'mana');
+  for(const x of[-.078125,.078125])voxel(a,p,[x,.625,0],[.03125,.125,.03125],'body');
+  for(const x of[-.046875,.046875])voxel(a,p,[x,.703125,0],[.03125,.03125,.03125],'edge');
+  anchor(a,'grip',p,[0,.09375,0],'slot:tool_hand; 집게 손잡이');anchor(a,'claw',p,[0,.65625,0],'물체를 잡는 위치; 힘은 런타임 규칙');
+}
+function tool(a,e){const p=makePart(a,'tool',[0,0,0],'root','tool');if(e.id==='bark_cup')cup(a,p);else if(e.id==='stone_pick')pick(a,p);else if(e.id==='wrench')wrench(a,p);else if(e.id==='grapple')grapple(a,p);else knife(a,p);a.equipmentSlots=[{slot:'tool_hand',partIds:[p],anchorId:e.id==='stone_pick'?'tool_grip':'grip'}];}
 function tank(a,p,center=[0,.5,0],radius=.25,height=.75,m='body'){
   ring(a,p,center,radius,height,Math.max(G,radius-.0625),m);
   ring(a,p,[center[0],center[1]-height/2+G/2,center[2]],radius,G,0,m);
