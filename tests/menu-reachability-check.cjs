@@ -25,7 +25,7 @@ fs.mkdirSync(out, { recursive: true });
       errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
     const base = process.env.FERAL_BASE_URL || "http://127.0.0.1:8080";
-    await page.goto(base + "/index.html?world=frontier");
+    await page.goto(base + "/play.html?world=frontier");
     await page.waitForFunction(
       () => window.FERAL?.ready && FERAL.stats().running,
       null,
@@ -352,36 +352,39 @@ fs.mkdirSync(out, { recursive: true });
     await tap("#hudCancel");
     await tap("#resumeBtn");
     // Long world lists and dialogs in a shortened viewport (e.g. an open keyboard).
-    await page.goto(base + "/worlds.html");
+    // The launcher (0.15.0) lists worlds; its world settings dialog renames them.
+    await page.goto(base + "/index.html");
     await page.evaluate(async () => {
       const { createWorld } = await import("./world-slots.js");
       for (let i = 0; i < 8; i++)
         createWorld(localStorage, "스크롤 월드 " + i, "island", i + 1);
     });
     await page.reload();
+    await tap("#openWorlds");
     await page.setViewportSize({ width: 320, height: 480 });
     await reach("#worlds article:last-child button:nth-of-type(2)", "#worlds");
     await tap("#worlds article:last-child button:nth-of-type(2)");
-    await tap("#renameName");
+    await tap("#worldName");
     await page.keyboard.press("ControlOrMeta+A");
     await page.keyboard.insertText("마지막 월드 이름 변경");
-    await tap("#renameForm button:not([type=button])");
+    await reach("#worldSubmit", "#worldDialog");
+    await tap("#worldSubmit");
     assert.equal(
       await page.locator("#worlds article:last-child b").textContent(),
       "마지막 월드 이름 변경",
     );
     await page.setViewportSize({ width: 568, height: 260 });
     await tap("#newWorld");
-    await reach("#name", "#createDialog", -1);
-    await tap("#name");
+    await reach("#worldName", "#worldDialog", -1);
+    await tap("#worldName");
     await page.keyboard.insertText("스크롤 생성");
     const dialogSwipes = await reach(
-      "#create button:not([type=button])",
-      "#createDialog",
+      "#worldSubmit",
+      "#worldDialog",
     );
     await page.screenshot({ path: `${out}/create-dialog-short.png` });
-    await tap("#create button:not([type=button])");
-    assert.equal(await page.locator("#createDialog").isVisible(), false);
+    await tap("#worldSubmit");
+    assert.equal(await page.locator("#worldDialog").isVisible(), false);
     assert.equal(
       await page.locator("#worlds article:last-child b").textContent(),
       "스크롤 생성",

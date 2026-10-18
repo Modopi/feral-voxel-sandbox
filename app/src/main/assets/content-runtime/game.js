@@ -6,7 +6,7 @@ import {CONTENT} from './catalog.generated.js';
 import {ExpeditionSave} from './save.js';
 import {Autosave} from './autosave.js';
 import {CharacterController,FIXED_DT} from '../physics.js';
-import {currentWorld,saveKey} from '../world-slots.js';
+import {saveKey,syncVault} from '../world-slots.js';
 import {initUpdates} from '../updates.js';
 import {BossView} from './boss-view.js';
 import {isResourceAvailable} from './props.js';
@@ -29,13 +29,13 @@ import {installHUDArt,uiIcon} from '../ui-art.js';
 import {createInput,createNotifier,showDiscovery,initSettings,bindMenuTabs,selectTab,showPauseScreen,bindBackground,installErrorScreen,mountFieldHUD,mountJourney,setJourney,setVitals,waypointText,GameWindow,renderCharacterSheet,renderMapPage,showMovementState,changeStance,changeSprint,SANDBOX_TOOLS} from '../shell.js';
 const $=id=>document.getElementById(id);
 const loading=window.FeralLoading??{set(){},step(){},finish(){},fail(){},timings:[]};
-const notify=createNotifier($('toast'),{translate:reasonText});
+// Importing this module starts nothing (the launcher loads it to check the files); start(world) does.
+let notify=Object.assign(()=>{},{busy:()=>false}),input;
 let runtime,view,bossView,environmentView,equipmentView,feedbackView,machinePanel,fixtureEnergyPanel,fragments,anchorMarkers,controller,physical,saveStore,autosave,updates,slots,catalog,bag,ledger,journey,hudEditor,settings,world;
 let ready=false,paused=false,last=0,accum=0,saveClock=0,hudClock=0,tabClock=0,fpsFrames=0,fpsTime=0,fps=0,sprintLatched=false,actionHeld=false,manual=false,manualDeviceId=null;
 let communityTarget=null,deviceTarget=null,deviceAngleRad=0,weaponPattern='weapon_slash',weaponMaterial='wood',hitFlash=null,jobWatch={id:null,progress:0,since:0},destination=null,researchQuery='',bagSignature='';
 const held={descend:false,brake:false},ledgerPointers=new Set(),discovered=new Set();
 let sandboxTool=null,converted=null,minimapClock=0,buildSize=.5,miningSize=.5;const fieldLog=[];
-const input=createInput({canControl:()=>ready&&!paused,isEditing:()=>hudEditor?.editing===true,rotateLook});
 const energyNames={mechanical:'역학',electrical:'전기',thermal:'열',chemical:'화학',magic:'마법',divine:'신성'};
 // How a blow lands follows what is held (runtime hitShapeFor); there is no manual attack style.
 const HIT_SHAPES={point:'점타격 · 외피 파내기',slash:'베기 · 선·면 절단',pierce:'관통 · 공격 방향으로 깊숙이',impact:'충격 · 안쪽 뼈만'};
@@ -157,7 +157,7 @@ function leaveMachine(){
 }
 function save(){
  if(!ready)return false;
- try{autosave.writeNow(snapshot());$('saveState').textContent='SAVED '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});return true;}
+ try{autosave.writeNow(snapshot());syncVault();$('saveState').textContent='SAVED '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});return true;}
  catch(e){$('saveState').textContent='SAVE FAILED';notify('저장하지 못했습니다. 이전 정상 저장은 보존됩니다.');return false;}
 }
 function snapshot(){return {...runtime.serialize(),itemSlots:slots.serialize(),editGrid:{miningSize,buildSize}};}
@@ -632,21 +632,29 @@ function movementHud(){
 const paint=()=>new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));
 async function stage(text,percent){loading.set(text,percent);await paint();}
 const LOAD_STEPS={world:['세계와 생태계를 구성하는 중',55],placements:['설치한 설비를 불러오는 중',65]};
-async function boot(){
- $('startBtn').hidden=true;$('continueBtn').hidden=true;
+/** Runtime rules from the world settings the launcher keeps (docs/ARCHITECTURE.md §5). */
+function runtimeRules(config){
+ const r=config.rules,out={};
+ if('survival' in r)out.survival=r.survival;if('sandbox' in r)out.sandbox=r.sandbox;if('startStructures' in r)out.structures=r.startStructures;
+ return out;
+}
+async function boot(selected){
+ notify=createNotifier($('toast'),{translate:reasonText});
+ input=createInput({canControl:()=>ready&&!paused,isEditing:()=>hudEditor?.editing===true,rotateLook});
  await stage('저장을 확인하는 중',6);
- world=currentWorld(localStorage,['island','expedition'],location.search);saveStore=new ExpeditionSave(localStorage,saveKey(world));const saved=saveStore.load();
- const mapId=world.type==='island'?'island':'expedition';
+ world=selected;saveStore=new ExpeditionSave(localStorage,saveKey(world));const saved=saveStore.load();
+ const mapId=world.config.preset,config=world.config;
  let legacyIsland=null;
- if(!saved&&mapId==='island'){try{const old=JSON.parse(localStorage.getItem(saveKey(world))??'null');if([1,2].includes(old?.version)&&old.world)legacyIsland=old;}catch(e){console.warn('기존 섬 저장을 읽지 못했습니다',e);}}
+ // An original island save is the island generator's format; it is carried over once.
+ if(!saved&&config.terrain.generator==='island'){try{const old=JSON.parse(localStorage.getItem(saveKey(world))??'null');if([1,2].includes(old?.version)&&old.world)legacyIsland=old;}catch(e){console.warn('기존 섬 저장을 읽지 못했습니다',e);}}
  await stage('건축물 모델을 불러오는 중',10);
- runtime=await ExpeditionRuntime.create(world.seed,saved,{map:mapId,starter:!legacyIsland,pause:paint,onProgress:(step,done,total)=>step==='assets'?loading.step(`건축물 모델을 불러오는 중 ${done}/${total}`,10+40*done/total):loading.set(...LOAD_STEPS[step])});
+ runtime=await ExpeditionRuntime.create(world.seed,saved,{map:mapId,rules:runtimeRules(config),starter:!legacyIsland&&config.rules.starterKit!==false,pause:paint,onProgress:(step,done,total)=>step==='assets'?loading.step(`건축물 모델을 불러오는 중 ${done}/${total}`,10+40*done/total):loading.set(...LOAD_STEPS[step])});
  // An original island save (same key, without the .a/.b generations) is carried over once; the original stays.
  if(legacyIsland){await stage('기존 섬 저장을 옮기는 중',70);converted=applyLegacyIsland(runtime,legacyIsland);}
  await stage('장면을 준비하는 중',72);
  view=new ExpeditionScene($('world'),runtime.atlas);controller=new CharacterController(runtime.terrain,runtime.player);
  settings=initSettings({view,onLeftHand:()=>hudEditor?.apply()});view.camera.fov=+$('fov').value;view.camera.updateProjectionMatrix();if(!view.loadRadiusChunks)view.qualitySet($('quality').value);
- autosave=new Autosave(saveStore,{onSaved:()=>{$('saveState').textContent='SAVED '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});},onError:error=>{$('saveState').textContent='SAVE FAILED';console.warn(error);notify('자동 저장하지 못했습니다. 이전 정상 저장은 보존됩니다.');}});
+ autosave=new Autosave(saveStore,{onSaved:()=>{syncVault();$('saveState').textContent='SAVED '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});},onError:error=>{$('saveState').textContent='SAVE FAILED';console.warn(error);notify('자동 저장하지 못했습니다. 이전 정상 저장은 보존됩니다.');}});
  bossView=new BossView(view);equipmentView=new EquipmentView(view);feedbackView=new FeedbackView(view);anchorMarkers=new AnchorMarkers(view);
  environmentView=new EnvironmentView(view,runtime.atlas);machinePanel=new MachinePanel(runtime,{report,drive:driveMachine});fixtureEnergyPanel=new FixtureEnergyPanel(runtime,{report,onManual:value=>{manual=value;if(value)actionHeld=false;}});
  slots=new ItemSlots(runtime.progression,saved?.itemSlots);
@@ -674,4 +682,5 @@ async function boot(){
  window.FeralNative={save,pause:()=>{save();if(!paused)pause(true,{quiet:true});},back:()=>{if(hudEditor.editing)hudEditor.cancel();else if(ledger.isOpen)pause(false);else pause();}};
  requestAnimationFrame(frame);
 }
-boot().catch(e=>{console.error(e);loading.fail(`세계 준비를 완료하지 못했습니다: ${e.message}`);});
+/** Starts a game session for one world from the launcher's list (game.js routes here). */
+export function start(selected){return boot(selected).catch(e=>{console.error(e);loading.fail(`세계 준비를 완료하지 못했습니다: ${e.message}`);});}

@@ -1,4 +1,5 @@
-// Browser check for the one game screen (docs/ARCHITECTURE.md): every map runs on index.html with the
+// Browser check for the launcher and the game session (docs/ARCHITECTURE.md): the launcher (index.html) makes and
+// edits worlds outside the game; every world plays on play.html with the
 // same HUD, hotbar, bag, ledger window, menu, settings and controls; features are used through real taps.
 // By default assets are served with the Android app's MIME/CSP rules (tools/android-asset-server.mjs).
 // Setup steps that grant items or teleport are recorded as prepared state, not as normal progression evidence.
@@ -10,13 +11,13 @@ import {World,B} from '../app/src/main/assets/world.js';
 import {Inventory} from '../app/src/main/assets/inventory.js';
 import {Ecology} from '../app/src/main/assets/entities.js';
 const {chromium}=createRequire(import.meta.url)('playwright');
-const version=JSON.parse(await fs.readFile(new URL('../version.json',import.meta.url),'utf8')).version;
+const VERSION=JSON.parse(await fs.readFile(new URL('../version.json',import.meta.url),'utf8')),version=VERSION.version;
 const out=new URL(process.env.FERAL_UI_OUT||`../verification/${version}-ui/`,import.meta.url);
 const server=process.env.FERAL_ASSETS?null:await startAndroidAssetServer();
 const assets=process.env.FERAL_ASSETS||`http://127.0.0.1:${server.address().port}/assets`;
 await fs.mkdir(out,{recursive:true});
 const browser=await chromium.launch({executablePath:process.env.FERAL_CHROME||'/usr/bin/chromium',headless:true,args:['--no-sandbox','--enable-webgl','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-dev-shm-usage']});
-const report={version,assets:server?'Android app MIME/CSP rules':assets,scope:'Chromium SwiftShader with touch input. Prepared items/positions are listed per check; this is not Android hardware or normal-progression evidence.',shared:[],expedition:[],island:[],frontier:[],errors:[]};
+const report={version,assets:server?'Android app MIME/CSP rules':assets,scope:'Chromium SwiftShader with touch input. Prepared items/positions are listed per check; this is not Android hardware or normal-progression evidence.',shared:[],launcher:[],expedition:[],island:[],frontier:[],errors:[]};
 const check=(list,name,detail={})=>{list.push({name,...detail});console.log('ok',name);};
 const WORLDS=[{id:'default',name:'기본 탐험 맵',type:'island',seed:63026},{id:'frontier',name:'개척 원정',type:'frontier',seed:63026},{id:'beta',name:'기계 베타 맵',type:'machine',seed:63026},{id:'ui-check',name:'UI 검사',type:'expedition',seed:63026},{id:'island-new',name:'새 섬',type:'island',seed:63026}];
 // The HUD every map shows; the field HUD (vitals, map/status/interact, journey) is shared by the frontier and the expedition.
@@ -36,17 +37,17 @@ function legacyIslandSave(){
 const present=(page,ids)=>page.evaluate(ids=>ids.filter(id=>!document.getElementById(id)),ids);
 try{
  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:1});
- // The old expedition address forwards to the one screen.
- const page=await open(context,'expedition.html?world=ui-check');
+ // An old world address (index.html?world=…) forwards to the game session page.
+ const page=await open(context,'index.html?world=ui-check');
  const stages=[];for(const started=Date.now();Date.now()-started<120000;){const s=await page.evaluate(()=>({stage:document.getElementById('loadStatus')?.textContent.replace(/ · \d+초$/,''),ready:!!window.FERAL?.ready}));if(s.stage&&stages.at(-1)!==s.stage)stages.push(s.stage);if(s.ready)break;await page.waitForTimeout(50);}
  assert(await page.evaluate(()=>window.FERAL?.ready),'expedition ready within 120 s');
- assert.match(page.url(),/\/index\.html\?world=ui-check$/,'old address forwards to index.html');
+ assert.match(page.url(),/\/play\.html\?world=ui-check$/,'old address forwards to the game session page');
  const bootTimings=await page.evaluate(()=>FERAL.bootTimings);
  assert(bootTimings.some(t=>t.stage.startsWith('건축물 모델'))&&bootTimings.some(t=>t.stage.startsWith('물리 엔진')),'loading reports its stages');
  assert(await page.locator('#titleScreen').isHidden(),'shared title/loading screen hides when ready');
  assert.deepEqual(await present(page,[...SHARED_HUD,...FIELD_HUD]),[],'expedition shows the shared HUD');
  assert.equal(await page.locator('#hotbar .slot').count(),9);
- check(report.expedition,'expedition boots on index.html with the shared loading screen and HUD',{stages,bootTimings});
+ check(report.expedition,'expedition boots on the game session page with the shared loading screen and HUD',{stages,bootTimings});
  const cdp=await context.newCDPSession(page);
  const tap=async selector=>{for(let attempt=0;;attempt++){try{const target=page.locator(selector).first();await target.scrollIntoViewIfNeeded({timeout:3000});const b=await target.boundingBox();assert(b,selector);await page.touchscreen.tap(b.x+b.width/2,b.y+b.height/2);return;}catch(e){if(attempt>=4)throw e;await page.waitForTimeout(150);}}};
  const ledgerTap=text=>tap(`#frontierContent button:text-is("${text}")`);
@@ -162,7 +163,7 @@ try{
 
  // Frontier: the same field HUD and ledger window, now from the shared modules.
  const frontier=await browser.newContext({viewport:{width:844,height:390},isMobile:true,hasTouch:true,deviceScaleFactor:1});
- const fpage=await open(frontier,'index.html?world=frontier');await fpage.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:120000});
+ const fpage=await open(frontier,'play.html?world=frontier');await fpage.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:120000});
  assert.deepEqual(await present(fpage,[...SHARED_HUD,...FIELD_HUD]),[],'frontier shows the shared HUD');
  const ftap=async selector=>{const box=await fpage.locator(selector).first().boundingBox();assert(box,selector);await fpage.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);};
  await ftap('#journalBtn');assert.equal(await fpage.locator('#frontierTitle').textContent(),'원정 지도');
@@ -177,7 +178,7 @@ try{
  const ip=await island.newPage();ip.on('pageerror',e=>report.errors.push(e.message));
  const legacy=legacyIslandSave();
  await ip.addInitScript(legacy=>{window.AndroidApp={};if(!localStorage.getItem('feral.world.v1'))localStorage.setItem('feral.world.v1',legacy);},legacy);
- await ip.goto(`${assets}/index.html`);await ip.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:120000});
+ await ip.goto(`${assets}/play.html?world=default`);await ip.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:120000});
  const converted=await ip.evaluate(()=>({map:FERAL.runtime.map.id,platform:FERAL.runtime.atlas.getCell(150,26,176),berry:FERAL.runtime.progression.count('berry'),unmapped:FERAL.runtime.conversion?.unmapped.map(u=>u.name),original:localStorage.getItem('feral.world.v1')?.length,generation:!!(localStorage.getItem('feral.world.v1.a')||localStorage.getItem('feral.world.v1.b')),vitalsHidden:document.getElementById('vitals').hidden}));
  assert.equal(converted.map,'island');assert.equal(converted.platform,'plank','built platform carried over');assert.equal(converted.berry,3);
  assert.equal(converted.original,legacy.length,'original island save untouched');assert(converted.generation,'converted world saved in the shared format');
@@ -217,7 +218,7 @@ try{
  // A new island world: the island's starting kit, the shared stick, digging with the attack button,
  // the sandbox herd button, and save → reopen keeping the island map, the dug cell and the items.
  const fresh=await browser.newContext({viewport:{width:900,height:412},isMobile:true,hasTouch:true,deviceScaleFactor:1});
- const np=await open(fresh,'index.html?world=island-new');await np.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:120000});
+ const np=await open(fresh,'play.html?world=island-new');await np.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:120000});
  const ncdp=await fresh.newCDPSession(np);
  const ntap=async selector=>{const box=await np.locator(selector).first().boundingBox();assert(box,selector);await np.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);};
  const start=await np.evaluate(()=>({map:FERAL.runtime.map.id,items:FERAL.runtime.progression.inventory,starter:FERAL.runtime.map.starter,conversion:FERAL.runtime.conversion??null,x:FERAL.runtime.player.x,z:FERAL.runtime.player.z}));
@@ -286,14 +287,93 @@ try{
  check(report.island,'new island: starting kit, stick walk, frontier digging, instant gathering, shell bites and bone hits, automatic hit by tool and weapon kind, herd button, save and reopen',{walkedM:walked,dug:dig.block,taps,gathered:[branch.timber,gathered],swings,flank,weaponKinds:kinds,herd:[herdBefore,herdAfter],places:reopened.places,woundsAfterReopen:reopened.wounds});
  await fresh.close();
 
+ // Launcher: the first screen, outside the game. World settings are made and changed here; the engine never starts here.
+ const lc=await browser.newContext({viewport:{width:844,height:390},isMobile:true,hasTouch:true,deviceScaleFactor:1});
+ const lp=await lc.newPage();lp.on('pageerror',e=>report.errors.push(`launcher: ${e.message}`));
+ await lp.addInitScript(()=>{window.__healthy=[];window.__runtimeFailed=0;window.AndroidApp={runtimeHealthy(code){window.__healthy.push(code);},runtimeFailed(){window.__runtimeFailed++;}};});
+ const ltap=async selector=>{const l=lp.locator(selector).first();await l.scrollIntoViewIfNeeded();const box=await l.boundingBox();assert(box,selector);await lp.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);};
+ await lp.goto(`${assets}/index.html`);
+ await lp.waitForFunction(()=>window.FeralLauncher?.health.reported,null,{timeout:30000});
+ const lstart=await lp.evaluate(()=>({landing:!document.getElementById('landing').hidden,engine:!!window.FERAL,canvas:!!document.getElementById('world'),health:{...window.FeralLauncher.health},healthy:window.__healthy,continueShown:!document.getElementById('continueWorld').hidden,version:document.querySelector('[data-game-version]').textContent}));
+ assert(lstart.landing&&!lstart.engine&&!lstart.canvas,'the launcher shows its landing without the game engine');
+ assert.equal(lstart.health.sessionFiles,'ok','the game session files load (not run) before the app hears healthy');assert.deepEqual(lstart.healthy,[VERSION.versionCode]);
+ assert.equal(lstart.continueShown,false,'nothing to continue before any world was played');
+ await lp.screenshot({path:new URL('launcher-landing.png',out).pathname});
+ check(report.launcher,'app start opens the launcher landing; game files are checked, then the app is told the version started',lstart);
+ await ltap('#openWorlds');
+ const listed=await lp.evaluate(()=>[...document.querySelectorAll('#worlds article b')].map(b=>b.textContent));
+ assert.deepEqual(listed,['기본 탐험 맵','개척 원정','기계 베타 맵'],'the default worlds are listed');
+ await ltap('#newWorld');await lp.selectOption('#preset','expedition');
+ const createRules=await lp.evaluate(()=>[...document.querySelectorAll('#worldRules input')].map(i=>[i.dataset.rule,i.checked,i.disabled]));
+ assert.deepEqual(createRules,[['survival',true,false],['startStructures',true,false]],'an expedition world offers what its session reads');
+ await ltap('#worldName');await lp.fill('#worldName','평화 탐험');await ltap('#rule-survival');
+ await lp.screenshot({path:new URL('launcher-create.png',out).pathname});
+ await ltap('#worldSubmit');
+ const made=await lp.evaluate(()=>JSON.parse(localStorage.getItem('feral.worlds.v1')).find(w=>w.name==='평화 탐험'));
+ assert.equal(made.type,'expedition');assert.deepEqual(made.config.rules,{survival:false,startStructures:true});assert.equal(made.config.configVersion,1);
+ check(report.launcher,'a new world is made in the launcher with its own settings',{stored:made.config});
+ await ltap(`article[data-world="${made.id}"] button:nth-of-type(2)`);
+ const editRules=await lp.evaluate(()=>[...document.querySelectorAll('#worldRules input')].map(i=>[i.dataset.rule,i.checked,i.disabled]));
+ assert.deepEqual(editRules,[['survival',false,false],['startStructures',true,true]],'settings that shaped the world are fixed after creation');
+ await lp.fill('#worldName','평화 탐험 1');await ltap('#worldSubmit');
+ assert.equal(await lp.evaluate(id=>JSON.parse(localStorage.getItem('feral.worlds.v1')).find(w=>w.id===id).name,made.id),'평화 탐험 1');
+ check(report.launcher,'world settings are edited in the launcher; creation-only settings stay fixed',{editRules});
+ await ltap('#worldsView .launcherBack');await ltap('#openSettings');await ltap('#showEvents');
+ const stored=await lp.evaluate(()=>JSON.parse(localStorage.getItem('feral.settings')));assert.equal(stored.showEvents,true);
+ await lp.screenshot({path:new URL('launcher-settings.png',out).pathname});
+ await ltap('#settingsView .launcherBack');await ltap('#openUpdates');
+ assert.equal(await lp.locator('#gameVersion').textContent(),VERSION.version);await ltap('#updatesView .launcherBack');
+ check(report.launcher,'global settings and the update panel are in the launcher (the same parts as the in-game menu)',{settings:stored});
+ await ltap('#openWorlds');await ltap(`article[data-world="${made.id}"] button:nth-of-type(1)`);
+ await lp.waitForURL(/play\.html\?world=/);await lp.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:120000});
+ const session=await lp.evaluate(()=>({rules:FERAL.runtime.map.rules,vitalsHidden:document.getElementById('vitals').hidden,showEvents:document.getElementById('showEvents').checked,eventsClass:document.body.classList.contains('showEvents')}));
+ assert.equal(session.rules.survival,false,'the session follows the world settings from the launcher');assert(session.vitalsHidden);
+ assert(session.showEvents&&session.eventsClass,'the session reads the global settings made in the launcher');
+ await ltap('#menuBtn');await ltap('[data-tab=world]');await ltap('#worldListBtn');
+ await lp.waitForURL(/index\.html$/);await lp.waitForFunction(()=>window.FeralLauncher?.ready,null,{timeout:30000});
+ const back=await lp.evaluate(()=>({continueShown:!document.getElementById('continueWorld').hidden,name:document.getElementById('continueName').textContent}));
+ assert.deepEqual(back,{continueShown:true,name:'평화 탐험 1'},'leaving saves and returns to the launcher, which offers to continue');
+ await lp.screenshot({path:new URL('launcher-continue.png',out).pathname});
+ check(report.launcher,'play from the launcher, session uses the world and global settings, save and return, continue',{session,back});
+ // App 0.3.3 gives a build picked in its version list its own `feral.*` storage (empty if it never ran). The save vault brings the saves back.
+ await lp.waitForFunction(()=>window.FeralLauncher?.vault&&!window.FeralLauncher.vault.error,null,{timeout:30000});await lp.evaluate(()=>FeralLauncher.restoring);await lp.waitForTimeout(800);
+ const beforeSwitch=await lp.evaluate(id=>({keys:Object.keys(localStorage).filter(k=>k.startsWith('feral.')&&k!=='feral.vault.v1').sort(),save:localStorage.getItem(`feral.slot.${id}.a`)??localStorage.getItem(`feral.slot.${id}.b`)}),made.id);
+ assert(beforeSwitch.save,'the world has a save before the switch');
+ await lp.evaluate(()=>{for(const k of Object.keys(localStorage))if(k.startsWith('feral.'))localStorage.removeItem(k);});
+ await lp.reload();await lp.waitForFunction(()=>window.FeralLauncher?.ready,null,{timeout:30000});await lp.evaluate(()=>FeralLauncher.restoring);
+ const afterSwitch=await lp.evaluate(id=>({keys:Object.keys(localStorage).filter(k=>k.startsWith('feral.')&&k!=='feral.vault.v1').sort(),restored:FeralLauncher.vault.restored.length,status:document.getElementById('launcherStatus').textContent,continueName:document.getElementById('continueName').textContent,save:localStorage.getItem(`feral.slot.${id}.a`)??localStorage.getItem(`feral.slot.${id}.b`)}),made.id);
+ assert.deepEqual(afterSwitch.keys,beforeSwitch.keys,'every saved key is back');assert.equal(afterSwitch.save,beforeSwitch.save,'the world save is the same');
+ assert.match(afterSwitch.status,/이전 게임 버전의 저장 \d+개를 가져왔습니다/);assert.equal(afterSwitch.continueName,'평화 탐험 1');
+ await lp.screenshot({path:new URL('launcher-vault-restored.png',out).pathname});
+ await ltap('#continueWorld');await lp.waitForURL(/play\.html\?world=/);await lp.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:120000});
+ const resumed=await lp.evaluate(()=>({survival:FERAL.runtime.map.rules.survival,time:FERAL.runtime.time}));assert.equal(resumed.survival,false);assert(resumed.time>0,'the world resumes from its save, not a new world');
+ await ltap('#menuBtn');await ltap('[data-tab=world]');await ltap('#worldListBtn');await lp.waitForURL(/index\.html$/);await lp.waitForFunction(()=>window.FeralLauncher?.ready,null,{timeout:30000});
+ check(report.launcher,'a version switch that empties the app storage keeps the worlds: the launcher restores them from the save vault and the world resumes',{prepared:'all feral.* keys cleared as app 0.3.3 does for a build picked in its version list',keys:afterSwitch.keys.length,restored:afterSwitch.restored,resumed});
+ await ltap('#openWorlds');await ltap('article[data-world="beta"] button:nth-of-type(1)');await lp.waitForURL(/machine\.html\?world=beta/);
+ await lp.goto(`${assets}/index.html`);await ltap('#openWorlds');await ltap(`article[data-world="${made.id}"] button:nth-of-type(3)`);
+ await lp.evaluate(()=>FeralNative.back());assert.equal(await lp.locator('#confirm').evaluate(d=>d.open),false,'the Android back button closes a dialog');
+ await ltap(`article[data-world="${made.id}"] button:nth-of-type(3)`);await ltap('#deleteYes');
+ const gone=await lp.evaluate(id=>({listed:JSON.parse(localStorage.getItem('feral.worlds.v1')).some(w=>w.id===id),saves:Object.keys(localStorage).filter(k=>k.startsWith(`feral.slot.${id}`))}),made.id);
+ assert.deepEqual(gone,{listed:false,saves:[]});await lp.evaluate(()=>FeralNative.back());assert.equal(await lp.locator('#landing').isVisible(),true,'back returns to the landing');
+ check(report.launcher,'the machine field opens through the same session entry; delete with confirmation; Android back',{gone});
+ await lc.close();
+ // A version whose game session files cannot load is reported as failed from the launcher, so the app rolls it back.
+ const bc=await browser.newContext({viewport:{width:844,height:390},isMobile:true,hasTouch:true});const bp=await bc.newPage();
+ await bp.addInitScript(()=>{window.__healthy=[];window.__runtimeFailed=0;window.AndroidApp={runtimeHealthy(code){window.__healthy.push(code);},runtimeFailed(){window.__runtimeFailed++;}};});
+ await bp.route('**/content-runtime/runtime.js',route=>route.fulfill({status:404,body:''}));
+ await bp.goto(`${assets}/index.html`);await bp.waitForFunction(()=>window.FeralLauncher?.health.sessionFiles==='failed',null,{timeout:30000});await bp.waitForTimeout(3500);
+ const broken=await bp.evaluate(()=>({failed:window.__runtimeFailed,healthy:window.__healthy,text:document.getElementById('launcherStatus').textContent}));
+ assert.equal(broken.failed,1);assert.deepEqual(broken.healthy,[]);assert.match(broken.text,/되돌립니다/);await bc.close();
+ check(report.launcher,'broken game files: the launcher reports a failed start instead of healthy',broken);
+
  // A module that cannot load must end in a visible failure with retry on the shared loading screen.
  const failing=await browser.newContext({viewport:{width:900,height:412},isMobile:true,hasTouch:true});const fp=await failing.newPage();
  await fp.addInitScript(worlds=>{window.__runtimeFailed=0;window.AndroidApp={runtimeFailed(){window.__runtimeFailed++;}};localStorage.setItem('feral.worlds.v1',JSON.stringify(worlds));},WORLDS);
  await fp.route('**/content-runtime/voxel/solid.js',route=>route.fulfill({status:200,contentType:'application/octet-stream',body:'export {}'}));
- await fp.goto(`${assets}/index.html?world=ui-check`);await fp.waitForFunction(()=>window.FeralLoading?.failed,null,{timeout:30000});
- const failure=await fp.evaluate(()=>({text:document.getElementById('loadStatus').textContent,retry:!document.getElementById('loadingRetry').hidden,runtimeFailed:window.__runtimeFailed}));
- assert.match(failure.text,/불러오지 못했습니다/);assert(failure.retry);assert.equal(failure.runtimeFailed,1);await fp.screenshot({path:new URL('loading-failure.png',out).pathname});await failing.close();
+ await fp.goto(`${assets}/play.html?world=ui-check`);await fp.waitForFunction(()=>window.FeralLoading?.failed,null,{timeout:30000});
+ const failure=await fp.evaluate(()=>({text:document.getElementById('loadStatus').textContent,retry:!document.getElementById('loadingRetry').hidden,backToLauncher:getComputedStyle(document.getElementById('loadingBack')).display!=='none',runtimeFailed:window.__runtimeFailed}));
+ assert.match(failure.text,/불러오지 못했습니다/);assert(failure.retry);assert(failure.backToLauncher,'a failed session offers the way back to the launcher');assert.equal(failure.runtimeFailed,1);await fp.screenshot({path:new URL('loading-failure.png',out).pathname});await failing.close();
  check(report.shared,'module load failure shows retry instead of endless loading',failure);
  assert.deepEqual(report.errors,[]);
 }catch(e){report.failure=e.stack;process.exitCode=1;}finally{await fs.writeFile(new URL('report.json',out),JSON.stringify(report,null,2));await browser.close();server?.close();}
-console.log(JSON.stringify({shared:report.shared.length,expedition:report.expedition.length,frontier:report.frontier.length,island:report.island.length,errors:report.errors,failure:report.failure?.split('\n')[0]}));
+console.log(JSON.stringify({launcher:report.launcher.length,shared:report.shared.length,expedition:report.expedition.length,frontier:report.frontier.length,island:report.island.length,errors:report.errors,failure:report.failure?.split('\n')[0]}));

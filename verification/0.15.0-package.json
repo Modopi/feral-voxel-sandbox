@@ -1,0 +1,20 @@
+{
+  "version": "0.15.0",
+  "versionCode": 1500,
+  "minNativeCode": 303,
+  "files": 123,
+  "nativeFileLimit": 128,
+  "mjsFiles": [],
+  "newFiles": [
+    "launcher.js",
+    "play.html",
+    "settings.js"
+  ],
+  "archiveBytes": 2836384,
+  "expandedBytes": 11620135,
+  "archiveSha256": "808e09b986bfb074ea86e515f10bc752268bbc5cfd4a6e869cd9c1ad6baa9a14",
+  "packageSha256": "c45e5e4d0f18eebcea11ba0e8bfeb7fda63ce137604ba506fd89a968e4cffad8",
+  "apkAssetsIdenticalToUpdate": true,
+  "withinLimits": true,
+  "note": "Local build with the shared test signing key; CI rebuilds and publishes after merge."
+}

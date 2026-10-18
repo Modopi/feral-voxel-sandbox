@@ -26,7 +26,7 @@ const fs = require("node:fs");
       page.waitForFunction(() => window.FERAL?.ready && FERAL.stats().running);
     await page.goto(
       (process.env.FERAL_BASE_URL || "http://127.0.0.1:8080") +
-        "/index.html?world=frontier",
+        "/play.html?world=frontier",
     );
     await ready();
     assert.equal(await page.locator("#hotbar .slot:visible").count(), 9);

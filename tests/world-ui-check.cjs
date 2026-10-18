@@ -12,7 +12,7 @@ fs.mkdirSync(out, { recursive: true });
     const errors = [];
     page.on("pageerror", e => errors.push(e.message));
     await page.addInitScript(() => window.AndroidApp = {});
-    await page.goto((process.env.FERAL_BASE_URL || "http://127.0.0.1:8080") + "/index.html?world=frontier");
+    await page.goto((process.env.FERAL_BASE_URL || "http://127.0.0.1:8080") + "/play.html?world=frontier");
     await page.waitForFunction(() => window.FERAL?.ready && FERAL.stats().running, { timeout: 60000 });
     await page.evaluate(() => {
       const f = FERAL;

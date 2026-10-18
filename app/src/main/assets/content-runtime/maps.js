@@ -1,4 +1,4 @@
-// Map presets on the one runtime (docs/UNIFIED-GAME.md). A map only chooses terrain, rules, start and
+// Map presets on the one runtime (docs/ARCHITECTURE.md §5–6). A map only chooses terrain, rules, start and
 // places; creatures, items, research, crafting and saving are the runtime's. The basic island reuses the
 // original island generator (world.js) and maps its blocks to design blocks.
 import {WorldAtlas} from './atlas.js';

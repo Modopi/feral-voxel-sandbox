@@ -30,7 +30,7 @@ const fs = require("node:fs");
     });
     page.setDefaultTimeout(20000);
     const base = process.env.FERAL_BASE_URL || "http://127.0.0.1:8080";
-    await page.goto(base + "/index.html?world=frontier");
+    await page.goto(base + "/play.html?world=frontier");
     const ready = () =>
       page.waitForFunction(
         () => window.FERAL?.ready && window.FERAL.stats().running,
