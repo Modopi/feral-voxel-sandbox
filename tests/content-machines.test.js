@@ -54,7 +54,9 @@ test('external physics advances fuel exactly once and persists live corrected po
  const {s,p,m,engine}=fixture();s.refuel(m,engine,1);s.control(m,{throttle:1});const row=s.sceneModels()[0],revision=row.revision;
  s.setPhysicsDriver({});s.tick(1);assert.equal(s.clock,0);assert.equal(s.machines.get(m).components.find(c=>c.id===engine).fuelItems,1);
  assert.deepEqual(s.preparePhysicsStep(1/60,{activeIds:[]}),[]);
- const packet=s.preparePhysicsStep(1/60)[0];assert.ok(packet.force.z>0);assert.equal(packet.force.y,0);assert.equal(row.position.z,0);
+ const packet=s.preparePhysicsStep(1/60)[0];assert.ok(packet.force.z>0);assert.equal(row.position.z,0);
+ // The only vertical force is the grounded wheel's suspension, pushed at the bottom of its voxel (WHEEL_DRIVE).
+ assert.equal(packet.forces.length,2);assert.ok(packet.forces[1].force.y>0);assert.equal(packet.forces[1].point.y,0);assert.ok(Math.abs(packet.force.y-packet.forces[1].force.y)<1e-9);
  const state={position:{x:1,y:3,z:4},velocity:{x:0,y:-2,z:5},rotation:{x:0,y:0,z:0,w:1},angularVelocity:{x:0,y:2,z:0}};
  assert.equal(s.acceptPhysicsState(m,state).ok,true);assert.equal(row.position.z,4);assert.equal(s.sceneModels()[0].revision,revision);
  const restored=new MachineSystem(CONTENT,p,s.serialize());assert.deepEqual(restored.machines.get(m).rotation,state.rotation);assert.deepEqual(restored.machines.get(m).angularVelocity,state.angularVelocity);

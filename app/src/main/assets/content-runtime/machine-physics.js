@@ -19,19 +19,34 @@ export class MachinePhysicsBridge {
     for (const m of this.system.machines.values()) {
       if (!m.voxels.length || Math.hypot(m.position.x - player.x, m.position.z - player.z) > 64) continue;
       alive.add(m.id);
-      const signature = JSON.stringify([m.gridM, m.voxels.map((v) => [v.id, v.cell]), !!m.anchored]);
       let cache = this.bodies.get(m.id);
-      if (cache?.signature !== signature) {
-        if (cache) this.physics.adapter.removeOwner(m.id);
-        const boxes = m.voxels.map((v) => ({ center: v.cell.map((n) => (n + .5) * m.gridM), size: [m.gridM, m.gridM, m.gridM] }));
-        // A wrench-anchored machine is a fixed body until it is released (frontier).
-        const fixed = !!m.anchored, entry = this.physics.adapter.addBody({ ownerId: m.id, partId: 'assembly', type: fixed ? 'fixed' : 'dynamic', boxes,
-          position: arr(m.position), rotation: rotation(m), mass: fixed ? 0 : Math.max(.001, this.system.evaluate(m.id).mass), friction: .6 });
-        if (!fixed) { this.physics.watchImpacts?.(entry.colliders, Math.max(.001, this.system.evaluate(m.id).mass)); entry.body.setLinvel(m.velocity, true); entry.body.setAngvel(m.angularVelocity ?? { x: 0, y: 0, z: 0 }, true); entry.body.setLinearDamping(0); entry.body.setAngularDamping(.04); }
-        const voxelIds = m.voxels.map((v) => v.id);
-        entry.colliders.forEach((c, i) => this.physics.adapter.colliderOwners.set(c.handle,
-          Object.freeze({ ownerId: m.id, partId: voxelIds[i], bodyHandle: entry.body.handle })));
-        cache = { entry, signature, voxelIds }; this.bodies.set(m.id, cache);
+      // The colliders change only with the machine's voxels, wheels or anchor: look only when its revision moves.
+      if (cache?.revision !== m.revision || cache.anchored !== !!m.anchored) {
+        const wheels = m.components.filter((c) => c.legacyType === 'wheel').map((c) => c.voxelId);
+        const signature = JSON.stringify([m.gridM, m.voxels.map((v) => [v.id, v.cell]), !!m.anchored, wheels]);
+        if (cache?.signature !== signature) {
+          if (cache) this.physics.adapter.removeOwner(m.id);
+          // Wheel suspension carries a wheeled machine just above the ground (machines.js WHEEL_DRIVE), so its voxels
+          // do not scrape the ground; a wheel voxel that still touches it slides, since the wheel drive pushes and holds.
+          const rolling = new Set(wheels);
+          const boxes = m.voxels.map((v) => ({ center: v.cell.map((n) => (n + .5) * m.gridM), size: [m.gridM, m.gridM, m.gridM], friction: rolling.has(v.id) ? 0 : .6 }));
+          // A wrench-anchored machine is a fixed body until it is released (frontier).
+          const fixed = !!m.anchored, entry = this.physics.adapter.addBody({ ownerId: m.id, partId: 'assembly', type: fixed ? 'fixed' : 'dynamic', boxes,
+            position: arr(m.position), rotation: rotation(m), mass: fixed ? 0 : Math.max(.001, this.system.evaluate(m.id).mass), friction: .6 });
+          if (!fixed) { this.physics.watchImpacts?.(entry.colliders, Math.max(.001, this.system.evaluate(m.id).mass)); entry.body.setLinvel(m.velocity, true); entry.body.setAngvel(m.angularVelocity ?? { x: 0, y: 0, z: 0 }, true); entry.body.setLinearDamping(0); entry.body.setAngularDamping(.04); }
+          const voxelIds = m.voxels.map((v) => v.id);
+          entry.colliders.forEach((c, i) => {
+            this.physics.adapter.colliderOwners.set(c.handle, Object.freeze({ ownerId: m.id, partId: voxelIds[i], bodyHandle: entry.body.handle }));
+            if (rolling.has(voxelIds[i])) c.setFrictionCombineRule(this.R.CoefficientCombineRule.Min);
+          });
+          cache = { entry, signature, voxelIds, placed: m.placed ?? 0 }; this.bodies.set(m.id, cache);
+        }
+        cache.revision = m.revision; cache.anchored = !!m.anchored;
+      }
+      // A machine moved by MachineSystem.place (back to the start) is put there at rest.
+      if (cache.placed !== (m.placed ?? 0)) {
+        const body = cache.entry.body; body.setTranslation(m.position, true); body.setRotation(rotation(m), true);
+        body.setLinvel(m.velocity, true); body.setAngvel(m.angularVelocity, true); cache.placed = m.placed ?? 0;
       }
       this.mass(m, cache);
     }
