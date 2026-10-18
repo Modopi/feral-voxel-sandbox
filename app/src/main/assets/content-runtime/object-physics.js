@@ -1,36 +1,49 @@
+import { gripLimits } from '../impact.js';
 /** Detached world matter: dynamic compound cuboids with authored per-cell mass.
- * No machine functions, extra component mass, inventory grants or energy ledgers. */
+ * No machine functions, extra component mass, inventory grants or energy ledgers.
+ * Holding, throwing and carry weight follow the frontier hand grip (impact.js gripLimits). */
 export class ObjectPhysicsBridge {
   constructor(physics) { this.physics = physics; this.bodies = new Map(); this.held=null; }
   grab(id,point){
     const p=this.physics.runtime.player,o=this.physics.runtime.objects.get(id),cache=this.bodies.get(id);
     if(!o||!cache||!point||!['x','y','z'].every(k=>Number.isFinite(point[k]))||Math.hypot(point.x-p.x,point.y-p.y,point.z-p.z)>4)return {ok:false,reason:'물체에 가까이 다가가세요.'};
-    const body=cache.entry.body,q=body.rotation(),v={x:point.x-o.position.x,y:point.y-o.position.y,z:point.z-o.position.z};
-    this.held={id,local:this.rotate(v,{x:-q.x,y:-q.y,z:-q.z,w:q.w})};return {ok:true,massKg:o.massKg};
+    const body=cache.entry.body,q=body.rotation(),v={x:point.x-o.position.x,y:point.y-o.position.y,z:point.z-o.position.z},eye=this.eye(p);
+    // Held at the grab distance from the eye, 1.5–2.5 m; held matter slides (friction 0.35) until released.
+    this.held={id,local:this.rotate(v,{x:-q.x,y:-q.y,z:-q.z,w:q.w}),distance:Math.max(1.5,Math.min(2.5,Math.hypot(point.x-eye.x,point.y-eye.y,point.z-eye.z))),friction:cache.entry.colliders.map(c=>c.friction())};
+    for(const c of cache.entry.colliders)c.setFriction(.35);
+    return {ok:true,massKg:o.massKg};
   }
+  eye(p){return {x:p.x,y:p.y+(p.bodyHeight??1.5)*.9,z:p.z};}
+  /** Carrying slows the player by the held mass (frontier: at most to 45%). */
+  get speedScale(){const cache=this.bodies.get(this.held?.id);return cache?gripLimits(cache.entry.body.mass(),false).speedScale:1;}
   rotate(v,q){const t={x:2*(q.y*v.z-q.z*v.y),y:2*(q.z*v.x-q.x*v.z),z:2*(q.x*v.y-q.y*v.x)};return {x:v.x+q.w*t.x+q.y*t.z-q.z*t.y,y:v.y+q.w*t.y+q.z*t.x-q.x*t.z,z:v.z+q.w*t.z+q.x*t.y-q.y*t.x};}
-  release(){this.held=null;}
+  release(){const cache=this.bodies.get(this.held?.id);if(cache)cache.entry.colliders.forEach((c,i)=>c.setFriction(this.held.friction?.[i]??.7));this.held=null;}
   /** Frontier push: an empty-handed strike shoves a piece along the view, up to three times its mass or 650 N·s. */
   push(id,point){
     const cache=this.bodies.get(id),p=this.physics.runtime.player;if(!cache||!point)return {ok:false,reason:'target_missing'};
     const body=cache.entry.body,pitch=p.pitch??0,d={x:-Math.sin(p.yaw)*Math.cos(pitch),y:Math.sin(pitch),z:-Math.cos(p.yaw)*Math.cos(pitch)},impulse=Math.min(body.mass()*3,650);
     body.applyImpulseAtPoint({x:d.x*impulse,y:d.y*impulse,z:d.z*impulse},point,true);return {ok:true,pushed:true,impulse};
   }
+  /** Frontier throw: adds min(5, 1100 / mass) m/s along the view. */
   throwHeld(){
     const cache=this.bodies.get(this.held?.id),p=this.physics.runtime.player;if(!cache)return {ok:false,reason:'잡고 있는 물체가 없습니다.'};
-    const body=cache.entry.body,mass=body.mass(),pitch=p.pitch??0,direction={x:-Math.sin(p.yaw)*Math.cos(pitch),y:Math.sin(pitch),z:-Math.cos(p.yaw)*Math.cos(pitch)},velocity=body.linvel();
-    const along=direction.x*velocity.x+direction.y*velocity.y+direction.z*velocity.z,speed=Math.min(8,-along+Math.sqrt(along*along+600/mass));
-    body.applyImpulse({x:direction.x*mass*speed,y:direction.y*mass*speed,z:direction.z*mass*speed},true);this.release();return {ok:true};
+    const body=cache.entry.body,mass=body.mass(),pitch=p.pitch??0,direction={x:-Math.sin(p.yaw)*Math.cos(pitch),y:Math.sin(pitch),z:-Math.cos(p.yaw)*Math.cos(pitch)},speed=gripLimits(mass,false).throwSpeed;
+    this.release();body.applyImpulse({x:direction.x*mass*speed,y:direction.y*mass*speed,z:direction.z*mass*speed},true);return {ok:true,speed};
   }
+  /** Frontier hold spring: the grip point is pulled to the held distance along the view with 30 /s² per metre,
+   * 9 /s damping and gravity compensated, the acceleration capped at min(45, 3500 N / mass); spin bleeds 6%
+   * a step, and the grip lets go beyond 8 m. */
   prepare(dt){
     const held=this.held,cache=this.bodies.get(held?.id),p=this.physics.runtime.player;if(!held)return;
     if(!cache||p.hp<=0){this.release();return;}
     const body=cache.entry.body,offset=this.rotate(held.local,body.rotation()),origin=body.translation(),anchor={x:origin.x+offset.x,y:origin.y+offset.y,z:origin.z+offset.z};
-    const eye={x:p.x,y:p.y+(p.bodyHeight??1.5)*.9,z:p.z};if(Math.hypot(anchor.x-eye.x,anchor.y-eye.y,anchor.z-eye.z)>6){this.release();return;}
-    const target={x:eye.x-Math.sin(p.yaw)*Math.cos(p.pitch??0)*2,y:eye.y+Math.sin(p.pitch??0)*2,z:eye.z-Math.cos(p.yaw)*Math.cos(p.pitch??0)*2};
-    const velocity=body.linvel(),force={};for(const k of ['x','y','z'])force[k]=(target[k]-anchor[k])*650-velocity[k]*90;
-    const scale=Math.min(1,1800/Math.max(1,Math.hypot(force.x,force.y,force.z)));for(const k of ['x','y','z'])force[k]*=scale*dt;
-    body.applyImpulseAtPoint(force,anchor,true);
+    const eye=this.eye(p),pitch=p.pitch??0,target={x:eye.x-Math.sin(p.yaw)*Math.cos(pitch)*held.distance,y:eye.y+Math.sin(pitch)*held.distance,z:eye.z-Math.cos(p.yaw)*Math.cos(pitch)*held.distance};
+    if(Math.hypot(target.x-anchor.x,target.y-anchor.y,target.z-anchor.z)>8){this.release();return;}
+    const v=body.linvel(),w=body.angvel(),c=body.worldCom(),r={x:anchor.x-c.x,y:anchor.y-c.y,z:anchor.z-c.z},at={x:v.x+w.y*r.z-w.z*r.y,y:v.y+w.z*r.x-w.x*r.z,z:v.z+w.x*r.y-w.y*r.x};
+    const mass=body.mass(),a={x:(target.x-anchor.x)*30-at.x*9,y:(target.y-anchor.y)*30-at.y*9+9.81,z:(target.z-anchor.z)*30-at.z*9};
+    const scale=Math.min(1,Math.min(45,gripLimits(mass,false).force/mass)/Math.max(1,Math.hypot(a.x,a.y,a.z)))*mass*dt;
+    body.applyImpulseAtPoint({x:a.x*scale,y:a.y*scale,z:a.z*scale},anchor,true);
+    body.setAngvel({x:w.x*.94,y:w.y*.94,z:w.z*.94},true);
   }
   sync() {
     const system = this.physics.runtime.objects, player = this.physics.runtime.player, alive = new Set();

@@ -2,7 +2,7 @@ import { VoxelAssetBuilder } from './voxel/authoring.js';
 import { components as connectedGroups, massProperties } from '../structure.js';
 import { TYPES as LEGACY_PARTS } from '../machine/model.js';
 import { MATERIAL_EFFECT_RULES } from './material-effects.js';
-import { panelForce, AIR_DENSITY } from '../machine/aerodynamics.js';
+import { panelForce } from '../machine/aerodynamics.js';
 import { FIXTURE_LINK_RULES } from './fixture-energy.js';
 
 const ENERGY = ['mechanical', 'electrical', 'thermal', 'chemical', 'magic', 'divine'];
@@ -26,13 +26,16 @@ export const MACHINE_VARIANTS = Object.freeze({
 });
 // Provisional gameplay calibration, not a claim that the design EU already had an SI definition.
 export const MACHINE_MOTION = Object.freeze({ joulesPerEU: 100, maxAcceleration: 12, maxSpeed: 50, physicsStep: 1/60 });
+// Rotor flight (S2c2): lift per useful mechanical EU/s at a rotor, climb rate at full up/down input, the share of
+// lift that pushes forward, air damping while rotors carry the craft, and how long a control command keeps them running.
+export const ROTOR_FLIGHT = Object.freeze({ liftNPerEU: 50, climbMS: 3, forwardShare: .3, airDrag: .35, engagedS: .25 });
 export const materialColor = id => ({wood:'#96724D',stone:'#8A9088',scrap_iron:'#7B7770',steel:'#849A9B',titanium:'#B2C1C8',nickel:'#A8A58C'}[id] || (id.includes('wood')?'#657F63':id.includes('holy')?'#D5C98E':id.includes('mana')?'#718CA9':'#8B8E9F'));
 const color = materialColor;
 
 /** Pure, deterministic machine model. Rendering and Rapier integration consume sceneModels(). */
 export class MachineSystem {
  constructor(content, progression, state = {}, { terrain = null } = {}) {
-  this.content=content;this.progression=progression;this.physicsDriver=null;this.terrain=terrain;this.machines=new Map();this.fireLedgerIndex=new WeakMap();this.nextId=state.nextId??1;this.clock=state.clock??0;
+  this.content=content;this.progression=progression;this.physicsDriver=null;this.terrain=terrain;this.machines=new Map();this.fireLedgerIndex=new WeakMap();this.nextId=state.nextId??1;this.clock=state.clock??0;this.commandClocks=new Map();
   if(state.schemaVersion!=null&&state.schemaVersion!==1)throw Error('Unsupported machine save');
   if(!Number.isSafeInteger(this.nextId)||this.nextId<1||!finite(this.clock)||this.clock<0)throw Error('Invalid machine counters');
   for(const saved of state.machines||[]){const m=clone(saved);this._validate(m);if(this.machines.has(m.id))throw Error('Duplicate machine');this.machines.set(m.id,m);this._rebuild(m);}
@@ -223,7 +226,9 @@ export class MachineSystem {
  setActive(id,componentId,active){const m=this.machines.get(id),c=m?.components.find(c=>c.id===componentId);if(!c||typeof active!=='boolean')return no('invalid_component');c.active=active;return ok();}
  control(id,command={}){
   const m=this.machines.get(id);if(!m)return no('unknown_machine');for(const k of ['throttle','steer','pitch','push'])if(command[k]!=null&&!finite(command[k]))return no('invalid_control');
-  for(const k of ['throttle','steer','pitch','push'])m.command[k]=clamp(command[k]??m.command[k],-1,1);m.command.brake=command.brake??m.command.brake;return ok();
+  for(const k of ['throttle','steer','pitch','push'])m.command[k]=clamp(command[k]??m.command[k],-1,1);m.command.brake=command.brake??m.command.brake;
+  // Rotors run while someone keeps steering (each fixed step) and spin down engagedS after the last command.
+  this.commandClocks.set(id,this.clock);return ok();
  }
  loadCargo(id,items){const m=this.machines.get(id);if(!m||!this.progression.hasItems(items))return no('invalid_cargo');const paid=this.progression.spend(items,{claimId:this._id('cargo-load')});if(!paid.ok)return paid;for(const[k,n]of Object.entries(items))m.cargo[k]=(m.cargo[k]||0)+n;return ok();}
  unloadCargo(id,items){const m=this.machines.get(id);if(!m||!items||!Object.entries(items).every(([k,n])=>finite(n)&&n>0&&(m.cargo[k]||0)>=n))return no('invalid_cargo');const paid=this.progression.grant(items,{claimId:this._id('cargo-unload')});if(!paid.ok)return paid;for(const[k,n]of Object.entries(items)){m.cargo[k]-=n;if(!m.cargo[k])delete m.cargo[k];}return ok();}
@@ -237,7 +242,7 @@ export class MachineSystem {
  }
  _condition(m,c){const v=m.voxels.find(v=>v.id===c.voxelId);return c.active&&v?clamp(v.hp/v.maxHp,0,1):0;}
  _network(m,dt){
-  const packets=new Map(),limits=new Map(),spent=new Map();let motive=0,lift=0;
+  const packets=new Map(),limits=new Map(),spent=new Map(),rotors=[],engaged=this.clock-(this.commandClocks.get(m.id)??-Infinity)<=ROTOR_FLIGHT.engagedS;let motive=0,lift=0;
   for(const c of m.components){const d=this._entry(c.componentId),health=this._condition(m,c),q=zero();packets.set(c.id,q);limits.set(c.id,d.nominalPower*health*dt);spent.set(c.id,0);
    // arc_thrower reserve is a paid projectile budget, not an idle network
    // output. It drains only through one recorded shot, while links may charge it.
@@ -265,13 +270,13 @@ export class MachineSystem {
    if(!moved)break;
   }
   for(const c of m.components){const d=this._entry(c.componentId),q=packets.get(c.id),health=this._condition(m,c);
-   if(['wheel','propeller','rotor'].includes(c.legacyType)&&health>0){const n=Math.min(q.mechanical,d.nominalPower*health*dt)*Math.abs(m.command.throttle);q.mechanical-=n;const useful=n*d.efficiency;m.metrics.consumed+=useful;m.metrics.loss+=n-useful;if(c.legacyType==='rotor')lift+=useful/dt;else motive+=useful/dt;}
+   if(['wheel','propeller','rotor'].includes(c.legacyType)&&health>0){const rotor=c.legacyType==='rotor',n=Math.min(q.mechanical,d.nominalPower*health*dt)*(rotor?Number(engaged):Math.abs(m.command.throttle));q.mechanical-=n;const useful=n*d.efficiency;m.metrics.consumed+=useful;m.metrics.loss+=n-useful;if(rotor){lift+=useful/dt;if(useful>0)rotors.push({component:c,power:useful/dt});}else motive+=useful/dt;}
    if(c.componentId==='pump'&&health>0){const route=m.fluidLinks.find(l=>l.pump===c.id),source=m.components.find(x=>x.id===route?.source),target=m.components.find(x=>x.id===route?.target);if(source&&target){const fluid=Object.keys(source.fluids).find(k=>source.fluids[k]>0),targetDef=this._entry(target.componentId);if(fluid&&!Object.entries(target.fluids).some(([f,n])=>f!==fluid&&n>0)){const room=targetDef.capacityLiters-Object.values(target.fluids).reduce((a,b)=>a+b,0);const moved=Math.max(0,Math.min(source.fluids[fluid],room,d.flowLitersPerSecond*health*dt,q.mechanical/d.nominalPower));source.fluids[fluid]-=moved;target.fluids[fluid]=(target.fluids[fluid]||0)+moved;const consumed=moved*d.nominalPower;q.mechanical-=consumed;m.metrics.consumed+=consumed;}}}
    const propertyWork=this.materialEffects?.acceptMachineEnergy(m.id,c.id,q,dt)||{};for(const[t,n]of Object.entries(propertyWork)){q[t]-=n;m.metrics.consumed+=n;}
    for(const t of ENERGY){if(d.stores.includes(t)){const n=Math.min(q[t],Math.max(0,d.capacity-c.energy[t]));c.energy[t]+=n;q[t]-=n;}m.metrics.loss+=q[t];}
    delete c.sentEU;
   }
-  m.lastPower=motive+lift;return {motive,lift};
+  m.lastPower=motive+lift;return {motive,lift,rotors};
  }
  _ground(x,z){return this.terrain?.heightAt?.(x,z)??this.terrain?.surface?.(x,z)??0;}
  _solid(x,y,z){if(this.terrain?.isSolidCell)return this.terrain.isSolidCell(Math.floor(x*2),Math.floor(y*2),Math.floor(z*2));return y<this._ground(x,z)-1e-6;}
@@ -303,8 +308,25 @@ export class MachineSystem {
   const thrust=clamp(output.motive*MACHINE_MOTION.joulesPerEU/Math.max(1,Math.abs(speed)),-mass*MACHINE_MOTION.maxAcceleration,mass*MACHINE_MOTION.maxAcceleration)*Math.sign(cmd.throttle);
   let pushForce=0;const manualEU=Math.abs(cmd.push)*.5*dt;
   if(manualEU>0&&this.progression.energyAvailable('mechanical')+1e-8>=manualEU){const paid=this.progression.consumeEnergy('mechanical',manualEU,{claimId:this._id('manual-work')});if(paid.ok){pushForce=Math.sign(cmd.push)*manualEU/dt*MACHINE_MOTION.joulesPerEU/Math.max(1,Math.abs(speed));m.metrics.generated+=manualEU;m.metrics.consumed+=manualEU;}}
-  const drag=cmd.brake?8:wheels?.35:1.2,force={x:forward.x*(thrust+pushForce)-m.velocity.x*drag*mass,y:forward.y*(thrust+pushForce),z:forward.z*(thrust+pushForce)-m.velocity.z*drag*mass},torque={x:0,y:0,z:0};
-  if(output.lift>0){const area=Math.max(.01,m.components.filter(c=>c.legacyType==='rotor').length*m.gridM*m.gridM),lift=Math.cbrt(2*AIR_DENSITY*area*(output.lift*MACHINE_MOTION.joulesPerEU)**2)*.7;for(const k of ['x','y','z'])force[k]+=up[k]*lift;}
+  const flying=output.rotors.length>0,drag=cmd.brake?8:wheels?.35:flying?ROTOR_FLIGHT.airDrag:1.2,force={x:forward.x*(thrust+pushForce)-m.velocity.x*drag*mass,y:forward.y*(thrust+pushForce),z:forward.z*(thrust+pushForce)-m.velocity.z*drag*mass},torque={x:0,y:0,z:0};
+  let forces=null;
+  if(flying){
+   // Rotor flight: each powered rotor can lift liftNPerEU per useful EU/s. Together they hold the climb rate the
+   // pitch input asks for (up, hold, down). Each rotor pushes at its offset from the centre of all built rotors,
+   // placed on the centre of mass: balanced rotors add no torque however the deck's weight sits, and a stopped
+   // rotor tips the craft. A share of the lift pushes along the heading, steering yaws, and the rotors keep it level.
+   const capacity=output.rotors.reduce((n,r)=>n+r.power,0)*ROTOR_FLIGHT.liftNPerEU,center=rotate({x:stats.center[0],y:stats.center[1],z:stats.center[2]},q);
+   const lift=clamp(mass*(9.81+4*(ROTOR_FLIGHT.climbMS*cmd.pitch-m.velocity.y))/Math.max(.5,up.y),0,capacity),heading=Math.hypot(forward.x,forward.z)||1;
+   const push=cmd.throttle*capacity*ROTOR_FLIGHT.forwardShare;force.x+=forward.x/heading*push;force.z+=forward.z/heading*push;
+   const cellOf=c=>m.voxels.find(v=>v.id===c.voxelId)?.cell,built=m.components.filter(c=>c.legacyType==='rotor').map(cellOf).filter(Boolean),hub=[0,1,2].map(i=>built.reduce((n,cell)=>n+cell[i],0)/built.length);
+   forces=[{force:null,point:{x:m.position.x+center.x,y:m.position.y+center.y,z:m.position.z+center.z}}];
+   for(const r of output.rotors){
+    const cell=cellOf(r.component),at=rotate({x:(cell[0]-hub[0])*m.gridM,y:(cell[1]-hub[1])*m.gridM,z:(cell[2]-hub[2])*m.gridM},q),share=lift*r.power*ROTOR_FLIGHT.liftNPerEU/capacity;
+    const f={x:up.x*share,y:up.y*share,z:up.z*share};forces.push({force:f,point:{x:forces[0].point.x+at.x,y:forces[0].point.y+at.y,z:forces[0].point.z+at.z}});for(const k of ['x','y','z'])force[k]+=f[k];
+   }
+   torque.y+=cmd.steer*mass*1.5;
+   torque.x+=(-up.z*8-m.angularVelocity.x*4)*stats.inertia[0];torque.z+=(up.x*8-m.angularVelocity.z*4)*stats.inertia[2];
+  }
   const local=rotate(m.velocity,{x:-q.x,y:-q.y,z:-q.z,w:q.w});
   for(const c of m.components)if(['wing','elevator','rudder'].includes(c.legacyType)&&this._condition(m,c)>0){
    const v=m.voxels.find(v=>v.id===c.voxelId),r=rotate({x:(v.cell[0]+.5)*m.gridM-stats.center[0],y:(v.cell[1]+.5)*m.gridM-stats.center[1],z:(v.cell[2]+.5)*m.gridM-stats.center[2]},q);
@@ -313,6 +335,8 @@ export class MachineSystem {
   }
   // Steering redirects powered traction; it cannot spin a stationary unpowered craft.
   if(controller&&wheels&&output.motive>0)torque.y+=cmd.steer*Math.min(Math.abs(thrust)*m.gridM,Math.abs(speed)*mass)*Math.sign(speed);
+  // With rotors the physics bridge applies point forces: the rest of the force at the centre of mass.
+  if(forces){const rest={...force};for(let i=1;i<forces.length;i++)for(const k of ['x','y','z'])rest[k]-=forces[i].force[k];forces[0].force=rest;return {id:m.id,force,forces,torque,mass};}
   return {id:m.id,force,torque,mass};
  }
  _step(m,dt){
