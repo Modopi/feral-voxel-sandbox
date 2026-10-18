@@ -547,6 +547,20 @@
       "glbSha256": "6f904553110b29493ac7e5bcab421e897131a1ca4277c4ab7064ed07be1291f5"
     },
     {
+      "id": "wrench",
+      "mode": "full",
+      "boxes": 5,
+      "modelSha256": "2dd2d34ba1dfa654bfd9132ea21b1147e230b4255b03fb8caf279058117d6612",
+      "glbSha256": "822d73c5881fc12b9f0bdd3250737945dcb637d787009cefa751643c17cad332"
+    },
+    {
+      "id": "grapple",
+      "mode": "full",
+      "boxes": 9,
+      "modelSha256": "fb5b8484e0757b076a9e01649978f12532005e59c3bf55a27f86f1207d9d572a",
+      "glbSha256": "110deb81ea437213a37d871238aecbbdb944f79f2f747536458c8f8bd00f9a69"
+    },
+    {
       "id": "field_bench",
       "mode": "full",
       "boxes": 18,
@@ -924,6 +938,5 @@
       "modelSha256": "93af2d0bdb5fb432c64b06127da864b44dec03da99518022ee029fc758f85c16",
       "glbSha256": "0f159c881d9c25a653e4ffd621bb50e2d53932c841d19ae4716f6fe3c3d40044"
     }
-  ],
-  "provenance": "115 assets covered; four corrected arcane engineering station renders replace earlier records. Every source/GLB hash matches the current manifest."
+  ]
 }
