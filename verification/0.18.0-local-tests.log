@@ -1,0 +1,3161 @@
+
+> feral-voxel-sandbox@0.18.0 test
+> node --test tests/*.test.js
+
+TAP version 13
+# Subtest: wing lift scales with airspeed squared, loses lift after stall, and passive force never supplies energy
+ok 1 - wing lift scales with airspeed squared, loses lift after stall, and passive force never supplies energy
+  ---
+  duration_ms: 1.69736
+  type: 'test'
+  ...
+# Subtest: internal hull faces do not multiply drag, and reversed airflow reverses drag
+ok 2 - internal hull faces do not multiply drag, and reversed airflow reverses drag
+  ---
+  duration_ms: 0.438975
+  type: 'test'
+  ...
+# Subtest: elevator, fin and opposite wing deflections create pitch, yaw and roll forces in the commanded direction
+ok 3 - elevator, fin and opposite wing deflections create pitch, yaw and roll forces in the commanded direction
+  ---
+  duration_ms: 0.242817
+  type: 'test'
+  ...
+# Subtest: only crawling fits a half-metre tunnel; standing remains blocked until outside, including camera height
+ok 4 - only crawling fits a half-metre tunnel; standing remains blocked until outside, including camera height
+  ---
+  duration_ms: 6.109012
+  type: 'test'
+  ...
+# Subtest: crouching fits a metre tunnel; sprint is disabled in low stances and crawling cannot jump
+ok 5 - crouching fits a metre tunnel; sprint is disabled in low stances and crawling cannot jump
+  ---
+  duration_ms: 2.391024
+  type: 'test'
+  ...
+# Subtest: standing clearance asks the obstruction hook (moving bodies), and the capsule fits the chosen stance
+ok 6 - standing clearance asks the obstruction hook (moving bodies), and the capsule fits the chosen stance
+  ---
+  duration_ms: 0.332599
+  type: 'test'
+  ...
+# Subtest: MainActivity asset rules are parsed from the shipped native source
+ok 7 - MainActivity asset rules are parsed from the shipped native source
+  ---
+  duration_ms: 1.060953
+  type: 'test'
+  ...
+# Subtest: every script and stylesheet the game loads is served with a usable MIME on Android
+ok 8 - every script and stylesheet the game loads is served with a usable MIME on Android
+  ---
+  duration_ms: 56.016019
+  type: 'test'
+  ...
+# Subtest: content expedition does not depend on network fetches the app CSP blocks
+ok 9 - content expedition does not depend on network fetches the app CSP blocks
+  ---
+  duration_ms: 4.470024
+  type: 'test'
+  ...
+# Subtest: SDK rejects overlapping add atomically instead of repairing the existing model
+ok 10 - SDK rejects overlapping add atomically instead of repairing the existing model
+  ---
+  duration_ms: 3.572319
+  type: 'test'
+  ...
+# Subtest: invalid SDK mutations leave model state unchanged
+ok 11 - invalid SDK mutations leave model state unchanged
+  ---
+  duration_ms: 1.138395
+  type: 'test'
+  ...
+# Subtest: explicit replace transfers only intersecting volume to the new material
+ok 12 - explicit replace transfers only intersecting volume to the new material
+  ---
+  duration_ms: 0.506899
+  type: 'test'
+  ...
+# Subtest: explicit fill preserves occupied material and inserts only empty volume
+ok 13 - explicit fill preserves occupied material and inserts only empty volume
+  ---
+  duration_ms: 0.495764
+  type: 'test'
+  ...
+# Subtest: removal creates a real cavity with conserved remaining volume and local pivot
+ok 14 - removal creates a real cavity with conserved remaining volume and local pivot
+  ---
+  duration_ms: 2.163393
+  type: 'test'
+  ...
+# Subtest: articulated children may overlap other parts while same-part additions stay exclusive
+ok 15 - articulated children may overlap other parts while same-part additions stay exclusive
+  ---
+  duration_ms: 0.352991
+  type: 'test'
+  ...
+# Subtest: corrupt imported occupancy is rejected and never normalized as a side effect
+ok 16 - corrupt imported occupancy is rejected and never normalized as a side effect
+  ---
+  duration_ms: 0.26998
+  type: 'test'
+  ...
+# Subtest: tool provenance is runtime-created identity, not a copied metadata label
+ok 17 - tool provenance is runtime-created identity, not a copied metadata label
+  ---
+  duration_ms: 0.174141
+  type: 'test'
+  ...
+# Subtest: SDK copies input and exported data to prevent accidental alias mutations
+ok 18 - SDK copies input and exported data to prevent accidental alias mutations
+  ---
+  duration_ms: 0.506454
+  type: 'test'
+  ...
+# Subtest: bulk add places many boxes in one checked step and rejects any overlap atomically
+ok 19 - bulk add places many boxes in one checked step and rejects any overlap atomically
+  ---
+  duration_ms: 0.900293
+  type: 'test'
+  ...
+# Subtest: sweep overlap checks give the same answers as testing every pair
+ok 20 - sweep overlap checks give the same answers as testing every pair
+  ---
+  duration_ms: 41.019979
+  type: 'test'
+  ...
+# Subtest: the runtime voxel SDK is the same code as the asset pipeline SDK
+ok 21 - the runtime voxel SDK is the same code as the asset pipeline SDK
+  ---
+  duration_ms: 0.596115
+  type: 'test'
+  ...
+# Subtest: actual Rapier: distinct owners collide and exchange impulses
+ok 22 - actual Rapier: distinct owners collide and exchange impulses
+  ---
+  duration_ms: 115.558922
+  type: 'test'
+  ...
+# Subtest: actual Rapier: articulated child bodies of one owner pass through each other
+ok 23 - actual Rapier: articulated child bodies of one owner pass through each other
+  ---
+  duration_ms: 24.48511
+  type: 'test'
+  ...
+# Subtest: actual Rapier: same-owner colliders on one rigid body do not self-resolve
+ok 24 - actual Rapier: same-owner colliders on one rigid body do not self-resolve
+  ---
+  duration_ms: 11.505019
+  type: 'test'
+  ...
+# Subtest: actual Rapier: registered terrain and external terrain support dynamic assets
+ok 25 - actual Rapier: registered terrain and external terrain support dynamic assets
+  ---
+  duration_ms: 39.158627
+  type: 'test'
+  ...
+# Subtest: actual Rapier: local cuboid holes remain empty instead of using a combined AABB
+ok 26 - actual Rapier: local cuboid holes remain empty instead of using a combined AABB
+  ---
+  duration_ms: 8.608773
+  type: 'test'
+  ...
+# Subtest: actual Rapier: more than sixteen independent owners have no collision-mask aliases
+ok 27 - actual Rapier: more than sixteen independent owners have no collision-mask aliases
+  ---
+  duration_ms: 62.375776
+  type: 'test'
+  ...
+# Subtest: actual Rapier: kinematic external bodies push dynamics while same-owner parts are ignored
+ok 28 - actual Rapier: kinematic external bodies push dynamics while same-owner parts are ignored
+  ---
+  duration_ms: 17.965085
+  type: 'test'
+  ...
+# Subtest: ownership cleanup is selective and handle reuse does not inherit removed ownership
+ok 29 - ownership cleanup is selective and handle reuse does not inherit removed ownership
+  ---
+  duration_ms: 1.182929
+  type: 'test'
+  ...
+# Subtest: invalid mass, shape, pose and friction are rejected without leaving physics bodies
+ok 30 - invalid mass, shape, pose and friction are rejected without leaving physics bodies
+  ---
+  duration_ms: 0.709662
+  type: 'test'
+  ...
+# Subtest: overlap removal preserves union volume and gives later material ownership
+ok 31 - overlap removal preserves union volume and gives later material ownership
+  ---
+  duration_ms: 2.258507
+  type: 'test'
+  ...
+# Subtest: duplicate boxes collapse and partial opaque contacts lose only hidden faces
+ok 32 - duplicate boxes collapse and partial opaque contacts lose only hidden faces
+  ---
+  duration_ms: 1.835331
+  type: 'test'
+  ...
+# Subtest: independent joint parts retain overlapping geometry and pivots
+ok 33 - independent joint parts retain overlapping geometry and pivots
+  ---
+  duration_ms: 0.434643
+  type: 'test'
+  ...
+# Subtest: same species instances receive distinct collision ownership paths
+ok 34 - same species instances receive distinct collision ownership paths
+  ---
+  duration_ms: 0.406325
+  type: 'test'
+  ...
+# Subtest: adjacent cells of one translucent liquid have no internal seam
+ok 35 - adjacent cells of one translucent liquid have no internal seam
+  ---
+  duration_ms: 0.230278
+  type: 'test'
+  ...
+# Subtest: branch preparation preserves native version and creates unique game builds
+ok 36 - branch preparation preserves native version and creates unique game builds
+  ---
+  duration_ms: 42.639145
+  type: 'test'
+  ...
+# Subtest: telegraphs and collisions share all five shapes including safe ring centres and charge flanks
+ok 37 - telegraphs and collisions share all five shapes including safe ring centres and charge flanks
+  ---
+  duration_ms: 1.13612
+  type: 'test'
+  ...
+# Subtest: jointed locomotion and crouch/crawl keep a supporting boot on the ground; reset clears gestures
+ok 38 - jointed locomotion and crouch/crawl keep a supporting boot on the ground; reset clears gestures
+  ---
+  duration_ms: 40.865884
+  type: 'test'
+  ...
+# Subtest: all roles have connected elbow/knee/ankle rigs and share immutable geometry without sharing poses
+ok 39 - all roles have connected elbow/knee/ankle rigs and share immutable geometry without sharing poses
+  ---
+  duration_ms: 41.452763
+  type: 'test'
+  ...
+# Subtest: strike HP budget reaches surface; pierce and impulse reach actual internal part with no duplicate energy
+ok 40 - strike HP budget reaches surface; pierce and impulse reach actual internal part with no duplicate energy
+  ---
+  duration_ms: 13.047217
+  type: 'test'
+  ...
+# Subtest: resistant front shell stops internal damage; thickness, finite depth and exact rotation matter
+ok 41 - resistant front shell stops internal damage; thickness, finite depth and exact rotation matter
+  ---
+  duration_ms: 1.244494
+  type: 'test'
+  ...
+# Subtest: real Rapier external cuboid blocks all modes before owner while exact gaps remain open
+ok 42 - real Rapier external cuboid blocks all modes before owner while exact gaps remain open
+  ---
+  duration_ms: 237.994019
+  type: 'test'
+  ...
+# Subtest: weapon patterns are separate from the 55 existing equipment results and reference only catalog materials
+ok 43 - weapon patterns are separate from the 55 existing equipment results and reference only catalog materials
+  ---
+  duration_ms: 3.836095
+  type: 'test'
+  ...
+# Subtest: quote enforces the selected material recipe research and actual station, then crafts with real costs and time
+ok 44 - quote enforces the selected material recipe research and actual station, then crafts with real costs and time
+  ---
+  duration_ms: 4.307373
+  type: 'test'
+  ...
+# Subtest: equipping, cooldown, durability, serialization, death drain and recovery preserve the exact weapon record
+ok 45 - equipping, cooldown, durability, serialization, death drain and recovery preserve the exact weapon record
+  ---
+  duration_ms: 7.04189
+  type: 'test'
+  ...
+# Subtest: rack holds eight carried weapons plus one equipped item and retains overflow for retry
+ok 46 - rack holds eight carried weapons plus one equipped item and retains overflow for retry
+  ---
+  duration_ms: 1.45909
+  type: 'test'
+  ...
+# Subtest: atlas named random stream exactly matches SHA256 first 53 bits including negative/large coordinates
+ok 47 - atlas named random stream exactly matches SHA256 first 53 bits including negative/large coordinates
+  ---
+  duration_ms: 2.100829
+  type: 'test'
+  ...
+# Subtest: initial spawn is dry grove tier one and starter resources are accessible without inventory grants
+ok 48 - initial spawn is dry grove tier one and starter resources are accessible without inventory grants
+  ---
+  duration_ms: 48.93383
+  type: 'test'
+  ...
+# Subtest: negative chunk coordinates and exact boundaries map edits to unique cells and packed indices
+ok 49 - negative chunk coordinates and exact boundaries map edits to unique cells and packed indices
+  ---
+  duration_ms: 154.765677
+  type: 'test'
+  ...
+# Subtest: edited terrain, deep cells and high construction survive unloading and JSON reload
+ok 50 - edited terrain, deep cells and high construction survive unloading and JSON reload
+  ---
+  duration_ms: 71.839091
+  type: 'test'
+  ...
+# Subtest: visit ordering and bounded active residency do not change generated cells or regions
+ok 51 - visit ordering and bounded active residency do not change generated cells or regions
+  ---
+  duration_ms: 199.956923
+  type: 'test'
+  ...
+# Subtest: four directional high-tier anchors are isolated by connected dry baseline corridors
+ok 52 - four directional high-tier anchors are isolated by connected dry baseline corridors
+  ---
+  duration_ms: 66.904327
+  type: 'test'
+  ...
+# Subtest: moving a reservation invalidates old and new chunks and persists its new position
+ok 53 - moving a reservation invalidates old and new chunks and persists its new position
+  ---
+  duration_ms: 46.650298
+  type: 'test'
+  ...
+# Subtest: capsule caves actually carve rock, preserve roof and respect structure reservations
+ok 54 - capsule caves actually carve rock, preserve roof and respect structure reservations
+  ---
+  duration_ms: 2.875421
+  type: 'test'
+  ...
+# Subtest: building candidates identify original templates and preserve deterministic ruin variants
+ok 55 - building candidates identify original templates and preserve deterministic ruin variants
+  ---
+  duration_ms: 38.617746
+  type: 'test'
+  ...
+# Subtest: invalid cells, unknown saves and non-finite loading budgets fail explicitly
+ok 56 - invalid cells, unknown saves and non-finite loading budgets fail explicitly
+  ---
+  duration_ms: 0.692389
+  type: 'test'
+  ...
+# Subtest: harvest candidates agree with the actual environment at their rounded position
+ok 57 - harvest candidates agree with the actual environment at their rounded position
+  ---
+  duration_ms: 71.371174
+  type: 'test'
+  ...
+# Subtest: incremental chunks remain private until complete and match pre-optimization bytes
+ok 58 - incremental chunks remain private until complete and match pre-optimization bytes
+  ---
+  duration_ms: 24.113346
+  type: 'test'
+  ...
+# Subtest: edits during incremental generation are reflected at atomic chunk publication
+ok 59 - edits during incremental generation are reflected at atomic chunk publication
+  ---
+  duration_ms: 25.186464
+  type: 'test'
+  ...
+# Subtest: finite flowing liquid conserves volume, reagent and thermal energy across negative chunk boundaries
+ok 60 - finite flowing liquid conserves volume, reagent and thermal energy across negative chunk boundaries
+  ---
+  duration_ms: 15.947559
+  type: 'test'
+  ...
+# Subtest: withdrawing natural water persists depletion and building cannot erase a live liquid cell
+ok 61 - withdrawing natural water persists depletion and building cannot erase a live liquid cell
+  ---
+  duration_ms: 1.347298
+  type: 'test'
+  ...
+# Subtest: partial burning survives reload, spreads through heat and never refills fuel after extinguishing
+ok 62 - partial burning survives reload, spreads through heat and never refills fuel after extinguishing
+  ---
+  duration_ms: 5.101812
+  type: 'test'
+  ...
+# Subtest: acid damage is bounded by available reagent and thermal energy actually damages vulnerable material
+ok 63 - acid damage is bounded by available reagent and thermal energy actually damages vulnerable material
+  ---
+  duration_ms: 25.500198
+  type: 'test'
+  ...
+# Subtest: environment simulation is fixed-step, read-only queries do not advance it, and long catchup is bounded
+ok 64 - environment simulation is fixed-step, read-only queries do not advance it, and long catchup is bounded
+  ---
+  duration_ms: 3.332512
+  type: 'test'
+  ...
+# Subtest: environment snapshots are independent and resume the same fluid and fire evolution
+ok 65 - environment snapshots are independent and resume the same fluid and fire evolution
+  ---
+  duration_ms: 49.326105
+  type: 'test'
+  ...
+# Subtest: editing a chunk boundary refreshes both exposed meshes without editing the neighbor voxels
+ok 66 - editing a chunk boundary refreshes both exposed meshes without editing the neighbor voxels
+  ---
+  duration_ms: 90.751494
+  type: 'test'
+  ...
+# Subtest: 96 chunk residency selects all 49 nearby surface layers before remote underground or sky layers
+ok 67 - 96 chunk residency selects all 49 nearby surface layers before remote underground or sky layers
+  ---
+  duration_ms: 3.098749
+  type: 'test'
+  ...
+# Subtest: default loading cell budget can use the remaining time instead of stopping at 2048 cells
+ok 68 - default loading cell budget can use the remaining time instead of stopping at 2048 cells
+  ---
+  duration_ms: 50.80349
+  type: 'test'
+  ...
+# Subtest: environment destruction emits one support notification; ordinary edits and restoration do not
+ok 69 - environment destruction emits one support notification; ordinary edits and restoration do not
+  ---
+  duration_ms: 112.690435
+  type: 'test'
+  ...
+# Subtest: all eight actual boss rigs keep pivots/hierarchy while 24 phase poses and all 32 cast poses differ
+ok 70 - all eight actual boss rigs keep pivots/hierarchy while 24 phase poses and all 32 cast poses differ
+  ---
+  duration_ms: 81.051161
+  type: 'test'
+  ...
+# Subtest: actual locomotion, broken organs and frozen grounded death poses never mutate gameplay or lose nested wings/rings
+ok 71 - actual locomotion, broken organs and frozen grounded death poses never mutate gameplay or lose nested wings/rings
+  ---
+  duration_ms: 32.229763
+  type: 'test'
+  ...
+# Subtest: logical boss damage regions use real part ancestry and authored weakpoint anchors
+ok 72 - logical boss damage regions use real part ancestry and authored weakpoint anchors
+  ---
+  duration_ms: 10.146091
+  type: 'test'
+  ...
+# Subtest: four explicit boss variants animate through their derived definitions on the preserved base rigs
+ok 73 - four explicit boss variants animate through their derived definitions on the preserved base rigs
+  ---
+  duration_ms: 20.343073
+  type: 'test'
+  ...
+# Subtest: Rapier reads the same animated parent/joint matrices and omitted real parts as rendering
+ok 74 - Rapier reads the same animated parent/joint matrices and omitted real parts as rendering
+  ---
+  duration_ms: 294.542467
+  type: 'test'
+  ...
+# Subtest: death clock survives save/reload and resumed animation uses elapsed time instead of replaying the fall
+ok 75 - death clock survives save/reload and resumed animation uses elapsed time instead of replaying the fall
+  ---
+  duration_ms: 9.407102
+  type: 'test'
+  ...
+# Subtest: inside sphere warning retains exact height/floor boundaries while limiting full-screen tint
+ok 76 - inside sphere warning retains exact height/floor boundaries while limiting full-screen tint
+  ---
+  duration_ms: 16.509153
+  type: 'test'
+  ...
+# Subtest: sphere countdown represents windup plus actual projectile travel and stays continuous at launch
+ok 77 - sphere countdown represents windup plus actual projectile travel and stays continuous at launch
+  ---
+  duration_ms: 7.613148
+  type: 'test'
+  ...
+# Subtest: BossView renders all explicit T9/T10 variant cast volumes from the base asset identity
+ok 78 - BossView renders all explicit T9/T10 variant cast volumes from the base asset identity
+  ---
+  duration_ms: 12.428681
+  type: 'test'
+  ...
+# Subtest: all eight bosses use real HP transitions through all 24 authored phases
+ok 79 - all eight bosses use real HP transitions through all 24 authored phases
+  ---
+  duration_ms: 15.24874
+  type: 'test'
+  ...
+# Subtest: four reviewed variants preserve the eight prototypes and use explicit tier-bound definitions
+ok 80 - four reviewed variants preserve the eight prototypes and use explicit tier-bound definitions
+  ---
+  duration_ms: 13.067972
+  type: 'test'
+  ...
+# Subtest: variant saves retain encounter identity and pending reposition; defeat keeps the original reward key
+ok 81 - variant saves retain encounter identity and pending reposition; defeat keeps the original reward key
+  ---
+  duration_ms: 11.065119
+  type: 'test'
+  ...
+# Subtest: variant movement uses saved phase triggers, stops at consumed gimmicks or blocked sweeps
+ok 82 - variant movement uses saved phase triggers, stops at consumed gimmicks or blocked sweeps
+  ---
+  duration_ms: 11.844387
+  type: 'test'
+  ...
+# Subtest: all 32 authored skills actually cast, spend channel EU, share telegraph/hit shape and enter recovery
+ok 83 - all 32 authored skills actually cast, spend channel EU, share telegraph/hit shape and enter recovery
+  ---
+  duration_ms: 77.650635
+  type: 'test'
+  ...
+# Subtest: same-owner multiple target parts receive at most one hit per cast and fixed aim can be evaded
+ok 84 - same-owner multiple target parts receive at most one hit per cast and fixed aim can be evaded
+  ---
+  duration_ms: 13.658784
+  type: 'test'
+  ...
+# Subtest: 3D height/OBB/SAT use actual volumes, preserving flight and machine holes
+ok 85 - 3D height/OBB/SAT use actual volumes, preserving flight and machine holes
+  ---
+  duration_ms: 0.841245
+  type: 'test'
+  ...
+# Subtest: terrain blocks targeting, active attacks and moving projectiles
+ok 86 - terrain blocks targeting, active attacks and moving projectiles
+  ---
+  duration_ms: 9.087263
+  type: 'test'
+  ...
+# Subtest: exterior shell hits reduce total HP and exposed core break changes skills without forcing death
+ok 87 - exterior shell hits reduce total HP and exposed core break changes skills without forcing death
+  ---
+  duration_ms: 26.879813
+  type: 'test'
+  ...
+# Subtest: authored phase mechanics include water/draining, growth cover, heat exposure, shields and orbit
+ok 88 - authored phase mechanics include water/draining, growth cover, heat exposure, shields and orbit
+  ---
+  duration_ms: 30.807111
+  type: 'test'
+  ...
+# Subtest: terrain solid lookups reuse a spatial effect index and invalidate it on boss state changes
+ok 89 - terrain solid lookups reuse a spatial effect index and invalidate it on boss state changes
+  ---
+  duration_ms: 5.909338
+  type: 'test'
+  ...
+# Subtest: organic combat recovery consumes calories; inorganic repair consumes supplies and interrupts on hit
+ok 90 - organic combat recovery consumes calories; inorganic repair consumes supplies and interrupts on hit
+  ---
+  duration_ms: 1.920341
+  type: 'test'
+  ...
+# Subtest: glider alternates actual altitude and grounded windows with phase-specific limits
+ok 91 - glider alternates actual altitude and grounded windows with phase-specific limits
+  ---
+  duration_ms: 9.774561
+  type: 'test'
+  ...
+# Subtest: casting save/reload replays full warning without spending twice or repeating owner damage; inactive chunks freeze
+ok 92 - casting save/reload replays full warning without spending twice or repeating owner damage; inactive chunks freeze
+  ---
+  duration_ms: 2.509876
+  type: 'test'
+  ...
+# Subtest: defeat creates a durable entitlement and rewards require idempotent successful transfer
+ok 93 - defeat creates a durable entitlement and rewards require idempotent successful transfer
+  ---
+  duration_ms: 1.845132
+  type: 'test'
+  ...
+# Subtest: disengagement does not refill energy, restore parts, regenerate robots or respawn defeated bosses
+ok 94 - disengagement does not refill energy, restore parts, regenerate robots or respawn defeated bosses
+  ---
+  duration_ms: 2.096144
+  type: 'test'
+  ...
+# Subtest: gimmick forced landing takes priority over an existing schedule cursor
+ok 95 - gimmick forced landing takes priority over an existing schedule cursor
+  ---
+  duration_ms: 1.080683
+  type: 'test'
+  ...
+# Subtest: area damage splits a finite EU budget across distinct owners and saves remaining budget
+ok 96 - area damage splits a finite EU budget across distinct owners and saves remaining budget
+  ---
+  duration_ms: 2.208908
+  type: 'test'
+  ...
+# Subtest: Three boss view renders all 32 actual 3D skill volumes without changing simulation state
+ok 97 - Three boss view renders all 32 actual 3D skill volumes without changing simulation state
+  ---
+  duration_ms: 116.478147
+  type: 'test'
+  ...
+# Subtest: boss view tracks actual projectile, phase water and breakable growth-wall bounds
+ok 98 - boss view tracks actual projectile, phase water and breakable growth-wall bounds
+  ---
+  duration_ms: 3.681228
+  type: 'test'
+  ...
+# Subtest: weakpoint overlays follow authored part matrices and exposure without mutating asset materials
+ok 99 - weakpoint overlays follow authored part matrices and exposure without mutating asset materials
+  ---
+  duration_ms: 1.750642
+  type: 'test'
+  ...
+# Subtest: multi-part allocations consume one total HP budget and reject duplicated structural damage
+ok 100 - multi-part allocations consume one total HP budget and reject duplicated structural damage
+  ---
+  duration_ms: 0.956903
+  type: 'test'
+  ...
+# Subtest: authored communal residents initialize once, preserve corpses, and never invent quest/trial rewards
+ok 101 - authored communal residents initialize once, preserve corpses, and never invent quest/trial rewards
+  ---
+  duration_ms: 11.93514
+  type: 'test'
+  ...
+# Subtest: trade checks civilization, actual distance, visibility, hostility and finite inventory
+ok 102 - trade checks civilization, actual distance, visibility, hostility and finite inventory
+  ---
+  duration_ms: 7.105158
+  type: 'test'
+  ...
+# Subtest: feeding charges actual food once and rest only invokes calorie-based player healing state
+ok 103 - feeding charges actual food once and rest only invokes calorie-based player healing state
+  ---
+  duration_ms: 1.720298
+  type: 'test'
+  ...
+# Subtest: three paid timed contributions reward only through progression and survive each save boundary
+ok 104 - three paid timed contributions reward only through progression and survive each save boundary
+  ---
+  duration_ms: 10.967215
+  type: 'test'
+  ...
+# Subtest: only live civilized communities accept activities and queued cancellations grant no contribution
+ok 105 - only live civilized communities accept activities and queued cancellations grant no contribution
+  ---
+  duration_ms: 2.929696
+  type: 'test'
+  ...
+# Subtest: repair consumes finite material after elapsed work, pauses out of range and restores without replay
+ok 106 - repair consumes finite material after elapsed work, pauses out of range and restores without replay
+  ---
+  duration_ms: 5.491085
+  type: 'test'
+  ...
+# Subtest: invalid actions and invalid time cannot mutate balances
+ok 107 - invalid actions and invalid time cannot mutate balances
+  ---
+  duration_ms: 1.323656
+  type: 'test'
+  ...
+# Subtest: activity request survives independently newer progression save without paying or rewarding twice
+ok 108 - activity request survives independently newer progression save without paying or rewarding twice
+  ---
+  duration_ms: 2.786632
+  type: 'test'
+  ...
+# Subtest: explicit request IDs cannot be reused for different actions
+ok 109 - explicit request IDs cannot be reused for different actions
+  ---
+  duration_ms: 1.680097
+  type: 'test'
+  ...
+# Subtest: all 34 authored SDK species allocate exactly existing mass with one owner for joint union volume
+ok 110 - all 34 authored SDK species allocate exactly existing mass with one owner for joint union volume
+  ---
+  duration_ms: 114.777615
+  type: 'test'
+  ...
+# Subtest: actual animated leg transfers source boxes, posed world transform and exact budget to a new inert owner
+ok 111 - actual animated leg transfers source boxes, posed world transform and exact budget to a new inert owner
+  ---
+  duration_ms: 20.847594
+  type: 'test'
+  ...
+# Subtest: physics snapshot overrides source animation with actual clamped body pose and inherited velocity
+ok 112 - physics snapshot overrides source animation with actual clamped body pose and inherited velocity
+  ---
+  duration_ms: 6.66346
+  type: 'test'
+  ...
+# Subtest: multiple cuts and save restoration conserve total mass with idempotent fragment claims and one corpse reward
+ok 113 - multiple cuts and save restoration conserve total mass with idempotent fragment claims and one corpse reward
+  ---
+  duration_ms: 39.403531
+  type: 'test'
+  ...
+# Subtest: internal core failure preserves living exterior and mass while reducing functions
+ok 114 - internal core failure preserves living exterior and mass while reducing functions
+  ---
+  duration_ms: 3.741786
+  type: 'test'
+  ...
+# Subtest: offscreen damage survives save and lazily reconstructs its recorded pre-cut pose once
+ok 115 - offscreen damage survives save and lazily reconstructs its recorded pre-cut pose once
+  ---
+  duration_ms: 14.486297
+  type: 'test'
+  ...
+# Subtest: mass ledger conflicts and overdraw never create a duplicate fragment or alter world sources
+ok 116 - mass ledger conflicts and overdraw never create a duplicate fragment or alter world sources
+  ---
+  duration_ms: 9.179432
+  type: 'test'
+  ...
+# Subtest: real SDK limb reaches actual Rapier cuboids with exact mass, falls, and preserves its landed pose across saves
+ok 117 - real SDK limb reaches actual Rapier cuboids with exact mass, falls, and preserves its landed pose across saves
+  ---
+  duration_ms: 299.997644
+  type: 'test'
+  ...
+# Subtest: all 34 actual species survive internal core failure without exterior loss or duplicate mass
+ok 118 - all 34 actual species survive internal core failure without exterior loss or duplicate mass
+  ---
+  duration_ms: 195.123044
+  type: 'test'
+  ...
+# Subtest: all 34 canonical species produce distinct typed bodies and finite serializable states
+ok 119 - all 34 canonical species produce distinct typed bodies and finite serializable states
+  ---
+  duration_ms: 21.083117
+  type: 'test'
+  ...
+# Subtest: natural healing charges actual restored HP and never increases low calorie balance
+ok 120 - natural healing charges actual restored HP and never increases low calorie balance
+  ---
+  duration_ms: 2.9284
+  type: 'test'
+  ...
+# Subtest: inorganic creatures never heal naturally; repair consumes one material after full duration
+ok 121 - inorganic creatures never heal naturally; repair consumes one material after full duration
+  ---
+  duration_ms: 6.054582
+  type: 'test'
+  ...
+# Subtest: region initialization and corpse rewards never duplicate after save or repeated ensure
+ok 122 - region initialization and corpse rewards never duplicate after save or repeated ensure
+  ---
+  duration_ms: 4.540476
+  type: 'test'
+  ...
+# Subtest: safe bypass regions exclude hostile predators at initial placement
+ok 123 - safe bypass regions exclude hostile predators at initial placement
+  ---
+  duration_ms: 1.125486
+  type: 'test'
+  ...
+# Subtest: dungeon food, water, room limits and permanent extinction survive a two-hour offline run
+ok 124 - dungeon food, water, room limits and permanent extinction survive a two-hour offline run
+  ---
+  duration_ms: 50.023522
+  type: 'test'
+  ...
+# Subtest: living outdoor and closed dungeon ecology remains finite and bounded for two hours
+ok 125 - living outdoor and closed dungeon ecology remains finite and bounded for two hours
+  ---
+  duration_ms: 82.894341
+  type: 'test'
+  ...
+# Subtest: births debit both parents, require room capacity and persist their serial
+ok 126 - births debit both parents, require room capacity and persist their serial
+  ---
+  duration_ms: 7.51784
+  type: 'test'
+  ...
+# Subtest: whole-body damage applies once while structural injury changes movement without calorie regrowth
+ok 127 - whole-body damage applies once while structural injury changes movement without calorie regrowth
+  ---
+  duration_ms: 22.144821
+  type: 'test'
+  ...
+# Subtest: attack telegraphs survive reload, can be dodged, and produce exactly one hit
+ok 128 - attack telegraphs survive reload, can be dodged, and produce exactly one hit
+  ---
+  duration_ms: 14.825228
+  type: 'test'
+  ...
+# Subtest: wall occlusion prevents attacks and solid terrain prevents crossing
+ok 129 - wall occlusion prevents attacks and solid terrain prevents crossing
+  ---
+  duration_ms: 9.271223
+  type: 'test'
+  ...
+# Subtest: communal trade is finite, atomic and drops only existing personal inventory
+ok 130 - communal trade is finite, atomic and drops only existing personal inventory
+  ---
+  duration_ms: 0.66284
+  type: 'test'
+  ...
+# Subtest: feeding consumes inventory and different frame partitions produce the same state
+ok 131 - feeding consumes inventory and different frame partitions produce the same state
+  ---
+  duration_ms: 9.581389
+  type: 'test'
+  ...
+# Subtest: invalid saves, invalid time and unknown parts do not silently mutate population
+ok 132 - invalid saves, invalid time and unknown parts do not silently mutate population
+  ---
+  duration_ms: 1.085496
+  type: 'test'
+  ...
+# Subtest: producer destruction and harvesting share finite food; corpse decomposition conserves edible CP
+ok 133 - producer destruction and harvesting share finite food; corpse decomposition conserves edible CP
+  ---
+  duration_ms: 5.697861
+  type: 'test'
+  ...
+# Subtest: migration moves the same individual across an actual boundary and respects closed ecology
+ok 134 - migration moves the same individual across an actual boundary and respects closed ecology
+  ---
+  duration_ms: 20.293944
+  type: 'test'
+  ...
+# Subtest: retrying a repair transaction after an independently persisted inventory does not pay twice
+ok 135 - retrying a repair transaction after an independently persisted inventory does not pay twice
+  ---
+  duration_ms: 0.703108
+  type: 'test'
+  ...
+# Subtest: overlay species consume their host allocation instead of adding another ecology budget
+ok 136 - overlay species consume their host allocation instead of adding another ecology budget
+  ---
+  duration_ms: 0.933529
+  type: 'test'
+  ...
+# Subtest: only nearby capped individuals run detailed AI; remote ecology catches up without player hits
+ok 137 - only nearby capped individuals run detailed AI; remote ecology catches up without player hits
+  ---
+  duration_ms: 331.403133
+  type: 'test'
+  ...
+# Subtest: weapon attachment damage disables attack without killing an otherwise viable body
+ok 138 - weapon attachment damage disables attack without killing an otherwise viable body
+  ---
+  duration_ms: 1.656326
+  type: 'test'
+  ...
+# Subtest: unclaimed dead creatures remain visible for ray-selected loot and disappear after claiming
+ok 139 - unclaimed dead creatures remain visible for ray-selected loot and disappear after claiming
+  ---
+  duration_ms: 0.452008
+  type: 'test'
+  ...
+# Subtest: all 34 real art models animate from original pivots with finite joint poses and instance collision ownership
+ok 140 - all 34 real art models animate from original pivots with finite joint poses and instance collision ownership
+  ---
+  duration_ms: 30.550436
+  type: 'test'
+  ...
+# Subtest: logical limb loss hides the real model part and removes its collider; death and work poses are explicit
+ok 141 - logical limb loss hides the real model part and removes its collider; death and work poses are explicit
+  ---
+  duration_ms: 2.096248
+  type: 'test'
+  ...
+# Subtest: wounded flying creatures fall even when idle, and amphibious movement uses actual fluid depth
+ok 142 - wounded flying creatures fall even when idle, and amphibious movement uses actual fluid depth
+  ---
+  duration_ms: 1.087248
+  type: 'test'
+  ...
+# Subtest: near-height floor queries and actual collision line-of-sight hooks receive ownership
+ok 143 - near-height floor queries and actual collision line-of-sight hooks receive ownership
+  ---
+  duration_ms: 1.044335
+  type: 'test'
+  ...
+# Subtest: all species can die from exterior-only hits or HP damage without breaking core bones
+ok 144 - all species can die from exterior-only hits or HP damage without breaking core bones
+  ---
+  duration_ms: 44.482206
+  type: 'test'
+  ...
+# Subtest: core and spine faults impair behavior while HP and intact exterior remain alive
+ok 145 - core and spine faults impair behavior while HP and intact exterior remain alive
+  ---
+  duration_ms: 1.244434
+  type: 'test'
+  ...
+# Subtest: piercing and transmitted impact allocate one HP budget across exterior and internal injuries
+ok 146 - piercing and transmitted impact allocate one HP budget across exterior and internal injuries
+  ---
+  duration_ms: 0.957449
+  type: 'test'
+  ...
+# Subtest: caller structural and energy over-allocation rejects the entire hit before changing HP
+ok 147 - caller structural and energy over-allocation rejects the entire hit before changing HP
+  ---
+  duration_ms: 0.438988
+  type: 'test'
+  ...
+# Subtest: authored armor reduces the whole-body hit once and its broken shell loses that protection
+ok 148 - authored armor reduces the whole-body hit once and its broken shell loses that protection
+  ---
+  duration_ms: 5.319007
+  type: 'test'
+  ...
+# Subtest: proposed content links and all self-research bootstrap paths are consistent
+ok 149 - proposed content links and all self-research bootstrap paths are consistent
+  ---
+  duration_ms: 26.951106
+  type: 'test'
+  ...
+# Subtest: first divinity cannot depend on the relic it must allow players to craft
+ok 150 - first divinity cannot depend on the relic it must allow players to craft
+  ---
+  duration_ms: 23.343327
+  type: 'test'
+  ...
+# Subtest: missing animal rewards are detected across separate design files
+ok 151 - missing animal rewards are detected across separate design files
+  ---
+  duration_ms: 19.335796
+  type: 'test'
+  ...
+# Subtest: a valid-looking corridor with its endpoint outside the target room is rejected
+ok 152 - a valid-looking corridor with its endpoint outside the target room is rejected
+  ---
+  duration_ms: 23.459339
+  type: 'test'
+  ...
+# Subtest: shortening a boss warning below the calculated escape time fails review
+ok 153 - shortening a boss warning below the calculated escape time fails review
+  ---
+  duration_ms: 18.855896
+  type: 'test'
+  ...
+# Subtest: a phase cannot expose its weak point only after an attack absent from that phase
+ok 154 - a phase cannot expose its weak point only after an attack absent from that phase
+  ---
+  duration_ms: 22.431474
+  type: 'test'
+  ...
+# Subtest: root manor opens only through powered gate travel; range, pose, collision and destructive bypass persist
+ok 155 - root manor opens only through powered gate travel; range, pose, collision and destructive bypass persist
+  ---
+  duration_ms: 8.306084
+  type: 'test'
+  ...
+# Subtest: 60 Hz gate operation snaps to the clearance threshold without a floating-point stall
+ok 156 - 60 Hz gate operation snaps to the clearance threshold without a floating-point stall
+  ---
+  duration_ms: 4.761635
+  type: 'test'
+  ...
+# Subtest: fixture supply checks a real local output store and drains finite EU into device reserve
+ok 157 - fixture supply checks a real local output store and drains finite EU into device reserve
+  ---
+  duration_ms: 2.945244
+  type: 'test'
+  ...
+# Subtest: floodworks pump conserves its separate 400L circuit and samples exactly the 4m² pool
+ok 158 - floodworks pump conserves its separate 400L circuit and samples exactly the 4m² pool
+  ---
+  duration_ms: 3.174661
+  type: 'test'
+  ...
+# Subtest: 60 Hz flood pumping reaches the exact 0.05 m safe-depth threshold
+ok 159 - 60 Hz flood pumping reaches the exact 0.05 m safe-depth threshold
+  ---
+  duration_ms: 12.455441
+  type: 'test'
+  ...
+# Subtest: foundry exhausts a finite heat source but has enough finite coolant to reach the safe band
+ok 160 - foundry exhausts a finite heat source but has enough finite coolant to reach the safe band
+  ---
+  duration_ms: 5.963947
+  type: 'test'
+  ...
+# Subtest: inertia brake integrates power, speed and position; platform hazard requires feet at its top
+ok 161 - inertia brake integrates power, speed and position; platform hazard requires feet at its top
+  ---
+  duration_ms: 2.390493
+  type: 'test'
+  ...
+# Subtest: damage hides persistent vane, altar and platform parts without completing or respawning them
+ok 162 - damage hides persistent vane, altar and platform parts without completing or respawning them
+  ---
+  duration_ms: 11.62594
+  type: 'test'
+  ...
+# Subtest: non-axis-aligned vane uses disjoint SDK-filled boxes and changes its physical pose
+ok 163 - non-axis-aligned vane uses disjoint SDK-filled boxes and changes its physical pose
+  ---
+  duration_ms: 3.909252
+  type: 'test'
+  ...
+# Subtest: breaking the moving platform removes its support without clearing momentum
+ok 164 - breaking the moving platform removes its support without clearing momentum
+  ---
+  duration_ms: 0.543918
+  type: 'test'
+  ...
+# Subtest: destroying a platform lock support releases residual motion without free braking
+ok 165 - destroying a platform lock support releases residual motion without free braking
+  ---
+  duration_ms: 0.943197
+  type: 'test'
+  ...
+# Subtest: all 12 structures expose all 84 rooms, translated entrances, spawn and boss anchors
+ok 166 - all 12 structures expose all 84 rooms, translated entrances, spawn and boss anchors
+  ---
+  duration_ms: 80.207977
+  type: 'test'
+  ...
+# Subtest: starter manor has a deterministic walkable approach outside spawn; large buildings span chunks
+ok 167 - starter manor has a deterministic walkable approach outside spawn; large buildings span chunks
+  ---
+  duration_ms: 11.799908
+  type: 'test'
+  ...
+# Subtest: enter -> install joint -> supply held work -> defeat boss -> claim once -> damage -> reload
+ok 168 - enter -> install joint -> supply held work -> defeat boss -> claim once -> damage -> reload
+  ---
+  duration_ms: 22.610164
+  type: 'test'
+  ...
+# Subtest: archive discovery unlocks research without boss or puzzle; out-of-range collection does not mutate
+ok 169 - archive discovery unlocks research without boss or puzzle; out-of-range collection does not mutate
+  ---
+  duration_ms: 5.450013
+  type: 'test'
+  ...
+# Subtest: legacy paid openings finish without repayment while new saves never gain a timer shortcut
+ok 170 - legacy paid openings finish without repayment while new saves never gain a timer shortcut
+  ---
+  duration_ms: 8.74074
+  type: 'test'
+  ...
+# Subtest: four explicit boss variants preserve encounter tier and only override the one-time boss reward
+ok 171 - four explicit boss variants preserve encounter tier and only override the one-time boss reward
+  ---
+  duration_ms: 42.916693
+  type: 'test'
+  ...
+# Subtest: destroying gate or entering alternate rooms never grants boss completion
+ok 172 - destroying gate or entering alternate rooms never grants boss completion
+  ---
+  duration_ms: 6.697965
+  type: 'test'
+  ...
+# Subtest: failed reward delivery leaves claim unconsumed; successful partial inventory uses progression overflow
+ok 173 - failed reward delivery leaves claim unconsumed; successful partial inventory uses progression overflow
+  ---
+  duration_ms: 2.878032
+  type: 'test'
+  ...
+# Subtest: small ruin reuses archive model and requires two persistent observations before research reward
+ok 174 - small ruin reuses archive model and requires two persistent observations before research reward
+  ---
+  duration_ms: 2.063935
+  type: 'test'
+  ...
+# Subtest: basin and producer destruction emit one-way ecology events and persist through reload
+ok 175 - basin and producer destruction emit one-way ecology events and persist through reload
+  ---
+  duration_ms: 4.726895
+  type: 'test'
+  ...
+# Subtest: Atlas reservation and generated sites are deterministic and preserve prototype combat tier
+ok 176 - Atlas reservation and generated sites are deterministic and preserve prototype combat tier
+  ---
+  duration_ms: 25.33263
+  type: 'test'
+  ...
+# Subtest: procedural footprints reject steep/wet/bypass sites and keep overlapping buildings apart
+ok 177 - procedural footprints reject steep/wet/bypass sites and keep overlapping buildings apart
+  ---
+  duration_ms: 3.753029
+  type: 'test'
+  ...
+# Subtest: candidate retries are bounded and deterministic while existing placements survive reload
+ok 178 - candidate retries are bounded and deterministic while existing placements survive reload
+  ---
+  duration_ms: 13.122517
+  type: 'test'
+  ...
+# Subtest: cached broad phase retains every authored solid center and invalidates after new structures and asset replacement
+ok 179 - cached broad phase retains every authored solid center and invalidates after new structures and asset replacement
+  ---
+  duration_ms: 163.432275
+  type: 'test'
+  ...
+# Subtest: actual liquid geometry has volume-exact height, outward winding and no internal shared faces
+ok 180 - actual liquid geometry has volume-exact height, outward winding and no internal shared faces
+  ---
+  duration_ms: 10.648929
+  type: 'test'
+  ...
+# Subtest: opaque neighbor hides its liquid face; acid color reflects the saved reagent fraction
+ok 181 - opaque neighbor hides its liquid face; acid color reflects the saved reagent fraction
+  ---
+  duration_ms: 8.09659
+  type: 'test'
+  ...
+# Subtest: view uses persisted fluids, burning and heat with bounded instances and never changes game state
+ok 182 - view uses persisted fluids, burning and heat with bounded instances and never changes game state
+  ---
+  duration_ms: 19.428057
+  type: 'test'
+  ...
+# Subtest: natural water is observed without materialization and a saved depleted surface is not redrawn
+ok 183 - natural water is observed without materialization and a saved depleted surface is not redrawn
+  ---
+  duration_ms: 140.50431
+  type: 'test'
+  ...
+# Subtest: restored fluids create identical geometry and disappear after being withdrawn
+ok 184 - restored fluids create identical geometry and disappear after being withdrawn
+  ---
+  duration_ms: 7.956323
+  type: 'test'
+  ...
+# Subtest: all 10 gear and 3 tool models align their declared hand anchors without altering canonical pivots
+ok 185 - all 10 gear and 3 tool models align their declared hand anchors without altering canonical pivots
+  ---
+  duration_ms: 38.465026
+  type: 'test'
+  ...
+# Subtest: selection respects ownership, active required harvesting tool and all equipped tiers
+ok 186 - selection respects ownership, active required harvesting tool and all equipped tiers
+  ---
+  duration_ms: 3.048312
+  type: 'test'
+  ...
+# Subtest: camera-held attack, harvesting and rest animation is read-only and disposes replaced geometry
+ok 187 - camera-held attack, harvesting and rest animation is read-only and disposes replaced geometry
+  ---
+  duration_ms: 2.975672
+  type: 'test'
+  ...
+# Subtest: late asset loads and errors never restore stale equipment or silently substitute another model
+ok 188 - late asset loads and errors never restore stale equipment or silently substitute another model
+  ---
+  duration_ms: 6.007238
+  type: 'test'
+  ...
+# Subtest: disposing while loading prevents later camera children and geometry allocation
+ok 189 - disposing while loading prevents later camera children and geometry allocation
+  ---
+  duration_ms: 0.363652
+  type: 'test'
+  ...
+# Subtest: strike, pierce and impact have distinct pure offsets and restore the original grip
+ok 190 - strike, pierce and impact have distinct pure offsets and restore the original grip
+  ---
+  duration_ms: 0.38893
+  type: 'test'
+  ...
+# Subtest: attack style is captured per strike, preserves state and returns both hands to their original grips
+ok 191 - attack style is captured per strike, preserves state and returns both hands to their original grips
+  ---
+  duration_ms: 1.572945
+  type: 'test'
+  ...
+# Subtest: faith uses real ruin/monastery anchors, proximity and visibility; membership never changes research
+ok 192 - faith uses real ruin/monastery anchors, proximity and visibility; membership never changes research
+  ---
+  duration_ms: 6.979368
+  type: 'test'
+  ...
+# Subtest: delivery consumes real inputs once and quest reward is one-time across leave/rejoin and reload
+ok 193 - delivery consumes real inputs once and quest reward is one-time across leave/rejoin and reload
+  ---
+  duration_ms: 3.503928
+  type: 'test'
+  ...
+# Subtest: discovery and boss quests require new accepted-time evidence and explicit nearby claim
+ok 194 - discovery and boss quests require new accepted-time evidence and explicit nearby claim
+  ---
+  duration_ms: 10.298679
+  type: 'test'
+  ...
+# Subtest: independent trial requires paid supply, all three timed actions and 12 seconds; reload preserves progress
+ok 195 - independent trial requires paid supply, all three timed actions and 12 seconds; reload preserves progress
+  ---
+  duration_ms: 5.193328
+  type: 'test'
+  ...
+# Subtest: failure reasons cover departure, damage, death and missed windows; each retry pays again
+ok 196 - failure reasons cover departure, damage, death and missed windows; each retry pays again
+  ---
+  duration_ms: 5.392329
+  type: 'test'
+  ...
+# Subtest: cannot pass from afar, use large dt, start parallel trials or repeat a reward after failed delivery
+ok 197 - cannot pass from afar, use large dt, start parallel trials or repeat a reward after failed delivery
+  ---
+  duration_ms: 0.835599
+  type: 'test'
+  ...
+# Subtest: save validation rejects fabricated completed trials, unsupported versions and duplicate active attempts
+ok 198 - save validation rejects fabricated completed trials, unsupported versions and duplicate active attempts
+  ---
+  duration_ms: 4.059593
+  type: 'test'
+  ...
+# Subtest: save validation keeps faith phases aligned with paid and claimed progression receipts
+ok 199 - save validation keeps faith phases aligned with paid and claimed progression receipts
+  ---
+  duration_ms: 8.555929
+  type: 'test'
+  ...
+# Subtest: reusable recovery fairy is authored through SDK with exclusive occupancy and cosmetic materials
+ok 200 - reusable recovery fairy is authored through SDK with exclusive occupancy and cosmetic materials
+  ---
+  duration_ms: 6.677396
+  type: 'test'
+  ...
+# Subtest: damage flashes and HP labels expire; loading an old damage timestamp does not replay a hit
+ok 201 - damage flashes and HP labels expire; loading an old damage timestamp does not replay a hit
+  ---
+  duration_ms: 3.135569
+  type: 'test'
+  ...
+# Subtest: saved death items drive markers, partial recovery keeps its fairy and full recovery removes it
+ok 202 - saved death items drive markers, partial recovery keeps its fairy and full recovery removes it
+  ---
+  duration_ms: 3.748884
+  type: 'test'
+  ...
+# Subtest: recovery uses exact three-dimensional ten-metre boundary and describes full inventory without claiming
+ok 203 - recovery uses exact three-dimensional ten-metre boundary and describes full inventory without claiming
+  ---
+  duration_ms: 2.982708
+  type: 'test'
+  ...
+# Subtest: many historical deaths and repeated claims stay within visual instance caps without event accumulation
+ok 204 - many historical deaths and repeated claims stay within visual instance caps without event accumulation
+  ---
+  duration_ms: 40.785411
+  type: 'test'
+  ...
+# Subtest: new death announces retained items, restored ledger does not manufacture recovery or mutate gameplay
+ok 205 - new death announces retained items, restored ledger does not manufacture recovery or mutate gameplay
+  ---
+  duration_ms: 2.581332
+  type: 'test'
+  ...
+# Subtest: owned DOM overlays are bounded, noninteractive and removed on dispose
+ok 206 - owned DOM overlays are bounded, noninteractive and removed on dispose
+  ---
+  duration_ms: 1.673313
+  type: 'test'
+  ...
+# Subtest: a death holding only crafted weapons still displays a fairy and recovery flight
+ok 207 - a death holding only crafted weapons still displays a fairy and recovery flight
+  ---
+  duration_ms: 4.880517
+  type: 'test'
+  ...
+# Subtest: unlinked nearby and distant stores remain isolated; explicit paid links carry power and removal stops transfer
+ok 208 - unlinked nearby and distant stores remain isolated; explicit paid links carry power and removal stops transfer
+  ---
+  duration_ms: 12.229884
+  type: 'test'
+  ...
+# Subtest: station energy requires directed ports and linked converters; leaving the work site pauses the job
+ok 209 - station energy requires directed ports and linked converters; leaving the work site pauses the job
+  ---
+  duration_ms: 31.777585
+  type: 'test'
+  ...
+# Subtest: fuel remains local and finite across range changes, save and link removal
+ok 210 - fuel remains local and finite across range changes, save and link removal
+  ---
+  duration_ms: 29.087256
+  type: 'test'
+  ...
+# Subtest: personal divinity funds the first relic only after explicit reservation at its actual workbench
+ok 211 - personal divinity funds the first relic only after explicit reservation at its actual workbench
+  ---
+  duration_ms: 15.88909
+  type: 'test'
+  ...
+# Subtest: legacy nonpositional mode is unchanged; migration quarantines pooled energy instead of assigning it to a distant store
+ok 212 - legacy nonpositional mode is unchanged; migration quarantines pooled energy instead of assigning it to a distant store
+  ---
+  duration_ms: 5.453358
+  type: 'test'
+  ...
+# Subtest: avatar mana uses paid growth and actual liquid without summing fixed tanks or the cup
+ok 213 - avatar mana uses paid growth and actual liquid without summing fixed tanks or the cup
+  ---
+  duration_ms: 2.724853
+  type: 'test'
+  ...
+# Subtest: two simulated hours preserve source, storage, dissipation budgets without charging distant or personal stores
+ok 214 - two simulated hours preserve source, storage, dissipation budgets without charging distant or personal stores
+  ---
+  duration_ms: 1578.208195
+  type: 'test'
+  ...
+# Subtest: breakage cuts links and repair never silently reconnects; a single player cannot multiply manual power
+ok 215 - breakage cuts links and repair never silently reconnects; a single player cannot multiply manual power
+  ---
+  duration_ms: 1.757146
+  type: 'test'
+  ...
+# Subtest: legacy queued input and work survive explicit station binding; live reservations cannot move
+ok 216 - legacy queued input and work survive explicit station binding; live reservations cannot move
+  ---
+  duration_ms: 18.193896
+  type: 'test'
+  ...
+# Subtest: support loss replaces fixed owner with actual dynamic compound, falls and lands without granting function
+ok 217 - support loss replaces fixed owner with actual dynamic compound, falls and lands without granting function
+  ---
+  duration_ms: 164.734815
+  type: 'test'
+  ...
+# Subtest: mid-fall save reload retains owner, authored mass, health, quaternion and momentum then lands
+ok 218 - mid-fall save reload retains owner, authored mass, health, quaternion and momentum then lands
+  ---
+  duration_ms: 31.081395
+  type: 'test'
+  ...
+# Subtest: rotated solids use OBB occupancy and allow objects in the empty corners of their AABB
+ok 219 - rotated solids use OBB occupancy and allow objects in the empty corners of their AABB
+  ---
+  duration_ms: 2.875163
+  type: 'test'
+  ...
+# Subtest: destroyed supporting fixture releases its stack under original owners and preserves upper HP
+ok 220 - destroyed supporting fixture releases its stack under original owners and preserves upper HP
+  ---
+  duration_ms: 2.934172
+  type: 'test'
+  ...
+# Subtest: legacy placement saves migrate to fixed identity; invalid rotation and velocity are rejected
+ok 221 - legacy placement saves migrate to fixed identity; invalid rotation and velocity are rejected
+  ---
+  duration_ms: 4.60997
+  type: 'test'
+  ...
+# Subtest: fixed generator network transfers finite EU to and from a rotated machine host with conserved save state
+ok 222 - fixed generator network transfers finite EU to and from a rotated machine host with conserved save state
+  ---
+  duration_ms: 18.163842
+  type: 'test'
+  ...
+# Subtest: rejects out-of-range, incompatible, depleted, and over-capacity transfers without partial ledger writes
+ok 223 - rejects out-of-range, incompatible, depleted, and over-capacity transfers without partial ledger writes
+  ---
+  duration_ms: 3.362031
+  type: 'test'
+  ...
+# Subtest: machine panel selects a nearby compatible fixture and calls the explicit 10 EU transfer
+ok 224 - machine panel selects a nearby compatible fixture and calls the explicit 10 EU transfer
+  ---
+  duration_ms: 11.631164
+  type: 'test'
+  ...
+# Subtest: arc_thrower is a normally crafted explicit component, not a motor or geometry-derived function
+ok 225 - arc_thrower is a normally crafted explicit component, not a motor or geometry-derived function
+  ---
+  duration_ms: 39.702467
+  type: 'test'
+  ...
+# Subtest: forge-to-power bootstrap needs no electrical assembly input; the real engine-generator-battery network charges 120 EU
+ok 226 - forge-to-power bootstrap needs no electrical assembly input; the real engine-generator-battery network charges 120 EU
+  ---
+  duration_ms: 276.916388
+  type: 'test'
+  ...
+# Subtest: shielded shots spend once, preserve blocked receipts, and do not consume reserve while idle
+ok 227 - shielded shots spend once, preserve blocked receipts, and do not consume reserve while idle
+  ---
+  duration_ms: 77.051181
+  type: 'test'
+  ...
+# Subtest: projectile receipts remain compact and retry-safe past the former 4096-shot limit
+ok 228 - projectile receipts remain compact and retry-safe past the former 4096-shot limit
+  ---
+  duration_ms: 69.147498
+  type: 'test'
+  ...
+# Subtest: SDK placement debits exact material volume and is separate from component functions
+ok 229 - SDK placement debits exact material volume and is separate from component functions
+  ---
+  duration_ms: 6.339461
+  type: 'test'
+  ...
+# Subtest: finite paid fuel moves a real connected cart and stops providing power when exhausted
+ok 230 - finite paid fuel moves a real connected cart and stops providing power when exhausted
+  ---
+  duration_ms: 104.081773
+  type: 'test'
+  ...
+# Subtest: ports must be explicit; disconnected motor shape produces no propulsion
+ok 231 - ports must be explicit; disconnected motor shape produces no propulsion
+  ---
+  duration_ms: 6.809624
+  type: 'test'
+  ...
+# Subtest: destroying a bridge separates structural groups, preserves momentum and cuts cross-fragment ports
+ok 232 - destroying a bridge separates structural groups, preserves momentum and cuts cross-fragment ports
+  ---
+  duration_ms: 4.572652
+  type: 'test'
+  ...
+# Subtest: cargo actually leaves inventory, adds mass and can be returned exactly once per request
+ok 233 - cargo actually leaves inventory, adds mass and can be returned exactly once per request
+  ---
+  duration_ms: 1.843889
+  type: 'test'
+  ...
+# Subtest: liquid transfer needs a powered pump, preserves litres, and uses inventory fuel
+ok 234 - liquid transfer needs a powered pump, preserves litres, and uses inventory fuel
+  ---
+  duration_ms: 15.556183
+  type: 'test'
+  ...
+# Subtest: external physics advances fuel exactly once and persists live corrected pose without geometry rebuilds
+ok 235 - external physics advances fuel exactly once and persists live corrected pose without geometry rebuilds
+  ---
+  duration_ms: 9.307809
+  type: 'test'
+  ...
+# Subtest: placement rejects external collisions before debit; repair consumes missing material and damage events replay once
+ok 236 - placement rejects external collisions before debit; repair consumes missing material and damage events replay once
+  ---
+  duration_ms: 2.990101
+  type: 'test'
+  ...
+# Subtest: manual push cannot create motion without an actual finite mechanical energy debit
+ok 237 - manual push cannot create motion without an actual finite mechanical energy debit
+  ---
+  duration_ms: 4.054872
+  type: 'test'
+  ...
+# Subtest: rotating fragments retain the tangential velocities of their new centers of mass
+ok 238 - rotating fragments retain the tangential velocities of their new centers of mass
+  ---
+  duration_ms: 1.687952
+  type: 'test'
+  ...
+# Subtest: imprinting reserves real mana, pauses without the apparatus, and adds actual mitigation once across save
+ok 239 - imprinting reserves real mana, pauses without the apparatus, and adds actual mitigation once across save
+  ---
+  duration_ms: 10.373835
+  type: 'test'
+  ...
+# Subtest: consecration strengthens an existing property without healing, changing mass or granting a function
+ok 240 - consecration strengthens an existing property without healing, changing mass or granting a function
+  ---
+  duration_ms: 1.632293
+  type: 'test'
+  ...
+# Subtest: all six energy attacks consume finite resources and retries never deliver damage twice
+ok 241 - all six energy attacks consume finite resources and retries never deliver damage twice
+  ---
+  duration_ms: 1.801918
+  type: 'test'
+  ...
+# Subtest: water and wind are paid magical attributes; thermal work is bounded by fuel, elapsed time and capacity
+ok 242 - water and wind are paid magical attributes; thermal work is bounded by fuel, elapsed time and capacity
+  ---
+  duration_ms: 1.613454
+  type: 'test'
+  ...
+# Subtest: strength and acid upgrades reduce the corresponding real machine damage rather than remaining display-only stats
+ok 243 - strength and acid upgrades reduce the corresponding real machine damage rather than remaining display-only stats
+  ---
+  duration_ms: 1.309817
+  type: 'test'
+  ...
+# Subtest: machine-mounted imprinter requires routed energy and local relic strengthens with its own finite reserve
+ok 244 - machine-mounted imprinter requires routed energy and local relic strengthens with its own finite reserve
+  ---
+  duration_ms: 37.565023
+  type: 'test'
+  ...
+# Subtest: cutting a rotated detached trunk preserves split owners, remaining mass, damage and a single harvest
+ok 245 - cutting a rotated detached trunk preserves split owners, remaining mass, damage and a single harvest
+  ---
+  duration_ms: 9.958466
+  type: 'test'
+  ...
+# Subtest: severed trunk transfers exact original cell mass and volume with exclusive SDK geometry
+ok 246 - severed trunk transfers exact original cell mass and volume with exclusive SDK geometry
+  ---
+  duration_ms: 1.114644
+  type: 'test'
+  ...
+# Subtest: connected foundations, fixed building cells and unknown blocks prevent detachment
+ok 247 - connected foundations, fixed building cells and unknown blocks prevent detachment
+  ---
+  duration_ms: 17.869086
+  type: 'test'
+  ...
+# Subtest: bounded search preserves large connected masses without partial deletion
+ok 248 - bounded search preserves large connected masses without partial deletion
+  ---
+  duration_ms: 12.632718
+  type: 'test'
+  ...
+# Subtest: two disjoint unsupported branches get independent object owners while grounded branch stays
+ok 249 - two disjoint unsupported branches get independent object owners while grounded branch stays
+  ---
+  duration_ms: 6.135707
+  type: 'test'
+  ...
+# Subtest: saved pose, materials and finite cells restore with no repeated detachment
+ok 250 - saved pose, materials and finite cells restore with no repeated detachment
+  ---
+  duration_ms: 1.062937
+  type: 'test'
+  ...
+# Subtest: failed world mutation restores removed material and creates no object
+ok 251 - failed world mutation restores removed material and creates no object
+  ---
+  duration_ms: 0.628976
+  type: 'test'
+  ...
+# Subtest: invalid saves and unallocated biological fragments cannot create duplicate mass
+ok 252 - invalid saves and unallocated biological fragments cannot create duplicate mass
+  ---
+  duration_ms: 0.742839
+  type: 'test'
+  ...
+# Subtest: actual procedural tree crown detaches after every supporting trunk cell is cut
+ok 253 - actual procedural tree crown detaches after every supporting trunk cell is cut
+  ---
+  duration_ms: 127.369465
+  type: 'test'
+  ...
+# Subtest: mana investments spend existing authored materials, increase avatar capacity and never grant energy
+ok 254 - mana investments spend existing authored materials, increase avatar capacity and never grant energy
+  ---
+  duration_ms: 7.819091
+  type: 'test'
+  ...
+# Subtest: one owned focus changes capacity; unequip reserves excess without reusable free mana or reserve refill while unequipped
+ok 255 - one owned focus changes capacity; unequip reserves excess without reusable free mana or reserve refill while unequipped
+  ---
+  duration_ms: 1.712603
+  type: 'test'
+  ...
+# Subtest: death-style inventory removal, save and recovery preserve the exact existing mana budget
+ok 256 - death-style inventory removal, save and recovery preserve the exact existing mana budget
+  ---
+  duration_ms: 2.768664
+  type: 'test'
+  ...
+# Subtest: cup storage stays separate from avatar mana and cannot bypass its capacity
+ok 257 - cup storage stays separate from avatar mana and cannot bypass its capacity
+  ---
+  duration_ms: 1.393309
+  type: 'test'
+  ...
+# Subtest: investment and focus maxima are bounded and a full capacity investment never charges materials twice
+ok 258 - investment and focus maxima are bounded and a full capacity investment never charges materials twice
+  ---
+  duration_ms: 2.966076
+  type: 'test'
+  ...
+# Subtest: all 41 installable models consume real items and preserve distinct machine owners
+ok 259 - all 41 installable models consume real items and preserve distinct machine owners
+  ---
+  duration_ms: 285.063071
+  type: 'test'
+  ...
+# Subtest: actual cuboids allow a battery under a table but reject solid overlap without spending
+ok 260 - actual cuboids allow a battery under a table but reject solid overlap without spending
+  ---
+  duration_ms: 2.400816
+  type: 'test'
+  ...
+# Subtest: terrain, support, distance and real building wall checks fail before inventory consumption
+ok 261 - terrain, support, distance and real building wall checks fail before inventory consumption
+  ---
+  duration_ms: 10.118906
+  type: 'test'
+  ...
+# Subtest: nearby station access, breakage, paid repair and save restoration synchronize progression
+ok 262 - nearby station access, breakage, paid repair and save restoration synchronize progression
+  ---
+  duration_ms: 2.748698
+  type: 'test'
+  ...
+# Subtest: component condition and damaged salvage survive reload without duplicating assemblies or items
+ok 263 - component condition and damaged salvage survive reload without duplicating assemblies or items
+  ---
+  duration_ms: 5.958659
+  type: 'test'
+  ...
+# Subtest: concurrent placements serialize their commits and reject corrupted restore state
+ok 264 - concurrent placements serialize their commits and reject corrupted restore state
+  ---
+  duration_ms: 1.495524
+  type: 'test'
+  ...
+# Subtest: dismantling a supporting table requires packing the fixture resting on it first
+ok 265 - dismantling a supporting table requires packing the fixture resting on it first
+  ---
+  duration_ms: 1.403975
+  type: 'test'
+  ...
+# Subtest: async loading cannot race past the 256 fixture limit
+ok 266 - async loading cannot race past the 256 fixture limit
+  ---
+  duration_ms: 468.253433
+  type: 'test'
+  ...
+# Subtest: external actor or rotated-machine overlap rejects before any item is consumed
+ok 267 - external actor or rotated-machine overlap rejects before any item is consumed
+  ---
+  duration_ms: 8.591906
+  type: 'test'
+  ...
+# Subtest: geometry and access caches invalidate at exact range boundary and every dynamic pose
+ok 268 - geometry and access caches invalidate at exact range boundary and every dynamic pose
+  ---
+  duration_ms: 4.124834
+  type: 'test'
+  ...
+# Subtest: empty inventory bootstraps wood, stone and kiln using actual harvest, samples and timed costs
+ok 269 - empty inventory bootstraps wood, stone and kiln using actual harvest, samples and timed costs
+  ---
+  duration_ms: 7.339674
+  type: 'test'
+  ...
+# Subtest: harvest is immediate and still requires tool, source environment, depletion and persistent unique claim
+ok 270 - harvest is immediate and still requires tool, source environment, depletion and persistent unique claim
+  ---
+  duration_ms: 3.362499
+  type: 'test'
+  ...
+# Subtest: inventory debit and energy costs are atomic, overflow remains reclaimable, legacy IDs are rejected
+ok 271 - inventory debit and energy costs are atomic, overflow remains reclaimable, legacy IDs are rejected
+  ---
+  duration_ms: 0.899786
+  type: 'test'
+  ...
+# Subtest: research pause/save/resume charges samples once; discovered blueprints immediately unlock
+ok 272 - research pause/save/resume charges samples once; discovered blueprints immediately unlock
+  ---
+  duration_ms: 1.350314
+  type: 'test'
+  ...
+# Subtest: craft reserves inputs, pauses without energy, survives save and never repeats output
+ok 273 - craft reserves inputs, pauses without energy, survives save and never repeats output
+  ---
+  duration_ms: 35.463781
+  type: 'test'
+  ...
+# Subtest: all 39 research nodes execute from samples without discovery, preserving four freely mixed fields
+ok 274 - all 39 research nodes execute from samples without discovery, preserving four freely mixed fields
+  ---
+  duration_ms: 14.475112
+  type: 'test'
+  ...
+# Subtest: all 142 crafting contracts execute with finite debited energy and exact item output
+ok 275 - all 142 crafting contracts execute with finite debited energy and exact item output
+  ---
+  duration_ms: 740.535172
+  type: 'test'
+  ...
+# Subtest: mechanical-electric-mechanical loop never creates energy and battery discharge obeys rated power
+ok 276 - mechanical-electric-mechanical loop never creates energy and battery discharge obeys rated power
+  ---
+  duration_ms: 2.982514
+  type: 'test'
+  ...
+# Subtest: first divinity comes from paid community work, then an intact relic generates at .1 EU/s
+ok 277 - first divinity comes from paid community work, then an intact relic generates at .1 EU/s
+  ---
+  duration_ms: 24.076714
+  type: 'test'
+  ...
+# Subtest: mana condenser and ordinary fluid container work without a preexisting mana item
+ok 278 - mana condenser and ordinary fluid container work without a preexisting mana item
+  ---
+  duration_ms: 13.650917
+  type: 'test'
+  ...
+# Subtest: machine material properties cannot invent functions or multiply component cores without spending them
+ok 279 - machine material properties cannot invent functions or multiply component cores without spending them
+  ---
+  duration_ms: 2.608159
+  type: 'test'
+  ...
+# Subtest: reward claims, kit ownership and save validation reject duplication or invalid state
+ok 280 - reward claims, kit ownership and save validation reject duplication or invalid state
+  ---
+  duration_ms: 2.555173
+  type: 'test'
+  ...
+# Subtest: manual mechanical supply and a real generator power a mixed-channel recipe with a conserved budget
+ok 281 - manual mechanical supply and a real generator power a mixed-channel recipe with a conserved budget
+  ---
+  duration_ms: 26.909886
+  type: 'test'
+  ...
+# Subtest: acid extraction debits fluid once and stores the unspent chemical energy in the correct tank
+ok 282 - acid extraction debits fluid once and stores the unspent chemical energy in the correct tank
+  ---
+  duration_ms: 3.309778
+  type: 'test'
+  ...
+# Subtest: finite mining tool wear persists through save and replacement requires a second crafted tool
+ok 283 - finite mining tool wear persists through save and replacement requires a second crafted tool
+  ---
+  duration_ms: 2.588308
+  type: 'test'
+  ...
+# Subtest: physical workshop access is local, changes atomically and survives reload without duplicating counts
+ok 284 - physical workshop access is local, changes atomically and survives reload without duplicating counts
+  ---
+  duration_ms: 1.610562
+  type: 'test'
+  ...
+# Subtest: community activity request retries preserve the original job and consume inputs once across reload
+ok 285 - community activity request retries preserve the original job and consume inputs once across reload
+  ---
+  duration_ms: 1.15144
+  type: 'test'
+  ...
+# Subtest: legacy tick-local assembly caches match uncached stepping and expire between calls
+ok 286 - legacy tick-local assembly caches match uncached stepping and expire between calls
+  ---
+  duration_ms: 79.220804
+  type: 'test'
+  ...
+# canonical per-part draws 2267 -> 1419; 1155 independent part calls
+# Subtest: compatible opaque colors merge in linear RGB without changing any colored face or input
+ok 287 - compatible opaque colors merge in linear RGB without changing any colored face or input
+  ---
+  duration_ms: 9.923935
+  type: 'test'
+  ...
+# Subtest: roughness, metalness, emission, emissive color and transparency remain separate
+ok 288 - roughness, metalness, emission, emissive color and transparency remain separate
+  ---
+  duration_ms: 2.717267
+  type: 'test'
+  ...
+# Subtest: original ray grid keeps floor edges, enclosed holes and independently transformed parts
+ok 289 - original ray grid keeps floor edges, enclosed holes and independently transformed parts
+  ---
+  duration_ms: 43.924194
+  type: 'test'
+  ...
+# Subtest: every canonical model preserves triangle count per part; independent part geometry is never fused
+ok 290 - every canonical model preserves triangle count per part; independent part geometry is never fused
+  ---
+  duration_ms: 3558.133825
+  type: 'test'
+  ...
+# Subtest: empty parts allocate nothing and invalid material references fail before GPU resources
+ok 291 - empty parts allocate nothing and invalid material references fail before GPU resources
+  ---
+  duration_ms: 0.560923
+  type: 'test'
+  ...
+# Subtest: the tiers: within 32 m every step, to 64 m every second step, beyond every fourth
+ok 292 - the tiers: within 32 m every step, to 64 m every second step, beyond every fourth
+  ---
+  duration_ms: 21.183345
+  type: 'test'
+  ...
+# Subtest: a far creature loses no time: its age and calories follow the clock like a near one
+ok 293 - a far creature loses no time: its age and calories follow the clock like a near one
+  ---
+  duration_ms: 15.645617
+  type: 'test'
+  ...
+# Subtest: without a player (offline catch-up, tests) every creature keeps the full rate
+ok 294 - without a player (offline catch-up, tests) every creature keeps the full rate
+  ---
+  duration_ms: 0.988871
+  type: 'test'
+  ...
+# Subtest: a far creature moving in coarse substeps still stops at a wall
+ok 295 - a far creature moving in coarse substeps still stops at a wall
+  ---
+  duration_ms: 2.827253
+  type: 'test'
+  ...
+# Subtest: the spatial index finds creatures on every side of the origin (numeric cell keys)
+ok 296 - the spatial index finds creatures on every side of the origin (numeric cell keys)
+  ---
+  duration_ms: 8.127834
+  type: 'test'
+  ...
+# Subtest: tools specialize in materials
+ok 297 - tools specialize in materials
+  ---
+  duration_ms: 0.660367
+  type: 'test'
+  ...
+# Subtest: runtime weapon damage, wear, nine-item death overflow and repeated save/recovery share one inventory identity
+ok 298 - runtime weapon damage, wear, nine-item death overflow and repeated save/recovery share one inventory identity
+  ---
+  duration_ms: 245.81301
+  type: 'test'
+  ...
+# Subtest: crafted weapon material changes only the held working surface and preserves canonical geometry
+ok 299 - crafted weapon material changes only the held working surface and preserves canonical geometry
+  ---
+  duration_ms: 66.658523
+  type: 'test'
+  ...
+# Subtest: worker preparations coalesce to latest immutable snapshot, preserving two generations
+ok 300 - worker preparations coalesce to latest immutable snapshot, preserving two generations
+  ---
+  duration_ms: 4.717479
+  type: 'test'
+  ...
+# Subtest: synchronous manual save cancels old worker results including queued error callbacks
+ok 301 - synchronous manual save cancels old worker results including queued error callbacks
+  ---
+  duration_ms: 0.978496
+  type: 'test'
+  ...
+# Subtest: direct store.write also supersedes active and queued autosaves even if manual save fails
+ok 302 - direct store.write also supersedes active and queued autosaves even if manual save fails
+  ---
+  duration_ms: 1.482468
+  type: 'test'
+  ...
+# Subtest: corruption, storage quota and malformed worker response keep previous valid generation
+ok 303 - corruption, storage quota and malformed worker response keep previous valid generation
+  ---
+  duration_ms: 3.32308
+  type: 'test'
+  ...
+# Subtest: worker unavailable or startup failure safely falls back, disposed requests never write
+ok 304 - worker unavailable or startup failure safely falls back, disposed requests never write
+  ---
+  duration_ms: 60.334208
+  type: 'test'
+  ...
+# Subtest: worker validation rejects invalid player data without overwriting saved state
+ok 305 - worker validation rejects invalid player data without overwriting saved state
+  ---
+  duration_ms: 0.554417
+  type: 'test'
+  ...
+# Subtest: real background worker roundtrip preserves large Unicode and fractional world data
+ok 306 - real background worker roundtrip preserves large Unicode and fractional world data
+  ---
+  duration_ms: 348.780566
+  type: 'test'
+  ...
+# Subtest: actual atlas harvest nodes are compatible with progression source ownership
+ok 307 - actual atlas harvest nodes are compatible with progression source ownership
+  ---
+  duration_ms: 303.75654
+  type: 'test'
+  ...
+# Subtest: zero inventory reaches a researched crafted kit using actual atlas nodes and consumed materials
+ok 308 - zero inventory reaches a researched crafted kit using actual atlas nodes and consumed materials
+  ---
+  duration_ms: 131.965083
+  type: 'test'
+  ...
+# Subtest: all authored dungeons instantiate ecological rooms and their corresponding boss together
+ok 309 - all authored dungeons instantiate ecological rooms and their corresponding boss together
+  ---
+  duration_ms: 23.066466
+  type: 'test'
+  ...
+# Subtest: boss, dungeon and progression ledgers survive a full six-system saved reward claim
+ok 310 - boss, dungeon and progression ledgers survive a full six-system saved reward claim
+  ---
+  duration_ms: 59.480387
+  type: 'test'
+  ...
+# Subtest: runtime structure damage changes both rendered geometry and solid queries after restoration
+ok 311 - runtime structure damage changes both rendered geometry and solid queries after restoration
+  ---
+  duration_ms: 71.296395
+  type: 'test'
+  ...
+# Subtest: actual runtime initializes outdoor creatures on terrain and rejects inedible item consumption
+ok 312 - actual runtime initializes outdoor creatures on terrain and rejects inedible item consumption
+  ---
+  duration_ms: 42.8813
+  type: 'test'
+  ...
+# Subtest: actual runtime recovers death inventory at 10 metres and keeps partial recovery after save
+ok 313 - actual runtime recovers death inventory at 10 metres and keeps partial recovery after save
+  ---
+  duration_ms: 191.795224
+  type: 'test'
+  ...
+# Subtest: runtime mining follows the frontier rule, removes the cell once and keeps wounds and holes after reload
+ok 314 - runtime mining follows the frontier rule, removes the cell once and keeps wounds and holes after reload
+  ---
+  duration_ms: 388.313014
+  type: 'test'
+  ...
+# Subtest: machine rendered quaternion and gameplay hit identify the same rotated paid voxel without rebuilding on motion
+ok 315 - machine rendered quaternion and gameplay hit identify the same rotated paid voxel without rebuilding on motion
+  ---
+  duration_ms: 49.20614
+  type: 'test'
+  ...
+# Subtest: thermal interaction consumes fuel once and deposits heat rather than duplicating heat and direct damage
+ok 316 - thermal interaction consumes fuel once and deposits heat rather than duplicating heat and direct damage
+  ---
+  duration_ms: 70.26078
+  type: 'test'
+  ...
+# Subtest: energy channels reach building cells and fixed equipment using actual material resistance
+ok 317 - energy channels reach building cells and fixed equipment using actual material resistance
+  ---
+  duration_ms: 103.442238
+  type: 'test'
+  ...
+# Subtest: actual scene renders puzzle gate and keeps damage separate between repeated building instances
+ok 318 - actual scene renders puzzle gate and keeps damage separate between repeated building instances
+  ---
+  duration_ms: 382.299683
+  type: 'test'
+  ...
+# Subtest: actual scene accepts SDK-authored inline resource geometry outside the canonical manifest
+ok 319 - actual scene accepts SDK-authored inline resource geometry outside the canonical manifest
+  ---
+  duration_ms: 2.922847
+  type: 'test'
+  ...
+# Subtest: runtime arc thrower spends and damages once across save retry; LOS is controlled, not physical proof
+ok 320 - runtime arc thrower spends and damages once across save retry; LOS is controlled, not physical proof
+  ---
+  duration_ms: 426.787248
+  type: 'test'
+  ...
+# Subtest: paid dungeon lift moves its actual Rapier gate while retaining unchanged building colliders
+ok 321 - paid dungeon lift moves its actual Rapier gate while retaining unchanged building colliders
+  ---
+  duration_ms: 229.578606
+  type: 'test'
+  ...
+# Subtest: actual atlas 0.5m terrain becomes Rapier solids and supports a swept player
+ok 322 - actual atlas 0.5m terrain becomes Rapier solids and supports a swept player
+  ---
+  duration_ms: 59.706448
+  type: 'test'
+  ...
+# Subtest: different moving entity blocks player, with actual cuboid gaps left traversable
+ok 323 - different moving entity blocks player, with actual cuboid gaps left traversable
+  ---
+  duration_ms: 16.920845
+  type: 'test'
+  ...
+# Subtest: child matrixWorld rotates/translates colliders and same entity joints do not self-block
+ok 324 - child matrixWorld rotates/translates colliders and same entity joints do not self-block
+  ---
+  duration_ms: 12.19853
+  type: 'test'
+  ...
+# Subtest: kinematic entity movement is actually swept against terrain rather than teleported through it
+ok 325 - kinematic entity movement is actually swept against terrain rather than teleported through it
+  ---
+  duration_ms: 3.682491
+  type: 'test'
+  ...
+# Subtest: a boss variant reposition is clamped by its real part sweep and the next tick cancels the blocked move
+ok 326 - a boss variant reposition is clamped by its real part sweep and the next tick cancels the blocked move
+  ---
+  duration_ms: 13.298015
+  type: 'test'
+  ...
+# Subtest: structure destruction rebuilds exact renderBoxes; water excluded and translucent glass remains solid
+ok 327 - structure destruction rebuilds exact renderBoxes; water excluded and translucent glass remains solid
+  ---
+  duration_ms: 3.261024
+  type: 'test'
+  ...
+# Subtest: moving dungeon device parts preserve static colliders and their shared collision owner
+ok 328 - moving dungeon device parts preserve static colliders and their shared collision owner
+  ---
+  duration_ms: 3.02363
+  type: 'test'
+  ...
+# Subtest: unbounded atlas streaming handles negative distant coordinates and mining revisions
+ok 329 - unbounded atlas streaming handles negative distant coordinates and mining revisions
+  ---
+  duration_ms: 9.059982
+  type: 'test'
+  ...
+# Subtest: 64 instance owners remain independent and retain articulated children in the integrated scene
+ok 330 - 64 instance owners remain independent and retain articulated children in the integrated scene
+  ---
+  duration_ms: 10.230133
+  type: 'test'
+  ...
+# Subtest: a collision-limited articulated owner keeps sibling body offsets and its visible root
+ok 331 - a collision-limited articulated owner keeps sibling body offsets and its visible root
+  ---
+  duration_ms: 2.033485
+  type: 'test'
+  ...
+# Subtest: moving kinematic owners are blocked by a stationary external player capsule
+ok 332 - moving kinematic owners are blocked by a stationary external player capsule
+  ---
+  duration_ms: 2.016
+  type: 'test'
+  ...
+# Subtest: phase growth walls use exact shared bounds, block players and disappear when broken; water stays nonsolid
+ok 333 - phase growth walls use exact shared bounds, block players and disappear when broken; water stays nonsolid
+  ---
+  duration_ms: 1.988889
+  type: 'test'
+  ...
+# Subtest: attack rays exclude only source and target owners, preserving articulated gaps and external solid glass
+ok 334 - attack rays exclude only source and target owners, preserving articulated gaps and external solid glass
+  ---
+  duration_ms: 1.406261
+  type: 'test'
+  ...
+# Subtest: actual fluid displacement floats a light wooden hull while paid cargo changes its draft and can sink it
+ok 335 - actual fluid displacement floats a light wooden hull while paid cargo changes its draft and can sink it
+  ---
+  duration_ms: 133.578938
+  type: 'test'
+  ...
+# Subtest: real machine cuboids fall, collide with terrain, retain physical mass/inertia and skip duplicate model integration
+ok 336 - real machine cuboids fall, collide with terrain, retain physical mass/inertia and skip duplicate model integration
+  ---
+  duration_ms: 56.663374
+  type: 'test'
+  ...
+# Subtest: dynamic assemblies exchange momentum with external owners and rotate on all three axes
+ok 337 - dynamic assemblies exchange momentum with external owners and rotate on all three axes
+  ---
+  duration_ms: 13.89823
+  type: 'test'
+  ...
+# Subtest: rotated machine damage uses actual cuboids, finite distribution, persistent claims and fragment body rebuilding
+ok 338 - rotated machine damage uses actual cuboids, finite distribution, persistent claims and fragment body rebuilding
+  ---
+  duration_ms: 26.924806
+  type: 'test'
+  ...
+# Subtest: machine OBB respects annular hole and tiny sphere outside a rotated cuboid AABB
+ok 339 - machine OBB respects annular hole and tiny sphere outside a rotated cuboid AABB
+  ---
+  duration_ms: 2.829005
+  type: 'test'
+  ...
+# Subtest: placements become fixed collision before their async render model exists and prevent paid overlapping voxel placement
+ok 340 - placements become fixed collision before their async render model exists and prevent paid overlapping voxel placement
+  ---
+  duration_ms: 6.586005
+  type: 'test'
+  ...
+# Subtest: a real boss cast damages a rotating dynamic machine once, with actual collider cover blocking another cast
+ok 341 - a real boss cast damages a rotating dynamic machine once, with actual collider cover blocking another cast
+  ---
+  duration_ms: 19.924542
+  type: 'test'
+  ...
+# Subtest: detached matter uses cell masses, falls through no false leaf solids and reports saved 6DOF pose
+ok 342 - detached matter uses cell masses, falls through no false leaf solids and reports saved 6DOF pose
+  ---
+  duration_ms: 11.353413
+  type: 'test'
+  ...
+# Subtest: connected paid machine fuel drives actual Rapier forces once and recreated physics restores quaternion, momentum and ledger
+ok 343 - connected paid machine fuel drives actual Rapier forces once and recreated physics restores quaternion, momentum and ledger
+  ---
+  duration_ms: 9.454458
+  type: 'test'
+  ...
+# Subtest: fixture placement checks rotating cuboid occupancy without filling its empty AABB corners
+ok 344 - fixture placement checks rotating cuboid occupancy without filling its empty AABB corners
+  ---
+  duration_ms: 1.822421
+  type: 'test'
+  ...
+# Subtest: real WorldObjects detachment feeds exact original mass into Rapier and saves the landed pose
+ok 345 - real WorldObjects detachment feeds exact original mass into Rapier and saves the landed pose
+  ---
+  duration_ms: 11.71786
+  type: 'test'
+  ...
+# Subtest: grabbing applies the frontier grip (at most 3500 N), carrying slows the player by mass, and a throw adds min(5, 1100/m) m/s
+ok 346 - grabbing applies the frontier grip (at most 3500 N), carrying slows the player by mass, and a throw adds min(5, 1100/m) m/s
+  ---
+  duration_ms: 2.015867
+  type: 'test'
+  ...
+# Subtest: settled machine cells allow ground contact but reject real 2mm overlaps before payment
+ok 347 - settled machine cells allow ground contact but reject real 2mm overlaps before payment
+  ---
+  duration_ms: 256.13033
+  type: 'test'
+  ...
+# Subtest: failed or corrupted next save retains the previous complete world
+ok 348 - failed or corrupted next save retains the previous complete world
+  ---
+  duration_ms: 3.780181
+  type: 'test'
+  ...
+# Subtest: saved generations preserve non-expedition legacy data and reject invalid state
+ok 349 - saved generations preserve non-expedition legacy data and reject invalid state
+  ---
+  duration_ms: 0.869028
+  type: 'test'
+  ...
+# Subtest: lossless compressed generations preserve large idempotency ledgers and remain backward compatible
+ok 350 - lossless compressed generations preserve large idempotency ledgers and remain backward compatible
+  ---
+  duration_ms: 694.123154
+  type: 'test'
+  ...
+# Subtest: far signed-coordinate roundtrip retains mining, damage, fixtures, deaths and object owners
+ok 351 - far signed-coordinate roundtrip retains mining, damage, fixtures, deaths and object owners
+  ---
+  duration_ms: 3781.583613
+  type: 'test'
+  ...
+# Subtest: chunk caps, signed floor boundaries and headless model pruning stay bounded across travel
+ok 352 - chunk caps, signed floor boundaries and headless model pruning stay bounded across travel
+  ---
+  duration_ms: 554.91672
+  type: 'test'
+  ...
+# Subtest: two-hour inactive ecology catches up once and preserves pending time and identities on reload
+ok 353 - two-hour inactive ecology catches up once and preserves pending time and identities on reload
+  ---
+  duration_ms: 950.510362
+  type: 'test'
+  ...
+# Subtest: village trade and aid are atomic, finite and local, and lead to an alliance without a boss
+ok 354 - village trade and aid are atomic, finite and local, and lead to an alliance without a boss
+  ---
+  duration_ms: 140.435063
+  type: 'test'
+  ...
+# Subtest: distant settlements produce and consume; diplomatic conflict drains their stocks
+ok 355 - distant settlements produce and consume; diplomatic conflict drains their stocks
+  ---
+  duration_ms: 94.644201
+  type: 'test'
+  ...
+# Subtest: raiding breaks alliances and sets the guards on the player; peace restores trade
+ok 356 - raiding breaks alliances and sets the guards on the player; peace restores trade
+  ---
+  duration_ms: 36.207052
+  type: 'test'
+  ...
+# Subtest: guardian telegraphs can be dodged, hit the player on impact, and the guardian rewards only once
+ok 357 - guardian telegraphs can be dodged, hit the player on impact, and the guardian rewards only once
+  ---
+  duration_ms: 28.83088
+  type: 'test'
+  ...
+# Subtest: the ruin needs its three relays, is claimed once and only in reach; its field hurts while sealed
+ok 358 - the ruin needs its three relays, is claimed once and only in reach; its field hurts while sealed
+  ---
+  duration_ms: 29.096176
+  type: 'test'
+  ...
+# Subtest: the campaign state saves with the world; damaged records are refused
+ok 359 - the campaign state saves with the world; damaged records are refused
+  ---
+  duration_ms: 86.838289
+  type: 'test'
+  ...
+# Subtest: camp commands need the camp, their prerequisites and their goods, change nothing on failure and reward once
+ok 360 - camp commands need the camp, their prerequisites and their goods, change nothing on failure and reward once
+  ---
+  duration_ms: 33.176342
+  type: 'test'
+  ...
+# Subtest: camp facilities and crops survive travel and a reload; older records migrate and malformed ones are refused
+ok 361 - camp facilities and crops survive travel and a reload; older records migrate and malformed ones are refused
+  ---
+  duration_ms: 135.211866
+  type: 'test'
+  ...
+# Subtest: a single region renews timber and building stone without a guardian
+ok 362 - a single region renews timber and building stone without a guardian
+  ---
+  duration_ms: 32.724852
+  type: 'test'
+  ...
+# Subtest: gathering sites are fixed, in reach only, regrow or run out, and keep their state through a reload
+ok 363 - gathering sites are fixed, in reach only, regrow or run out, and keep their state through a reload
+  ---
+  duration_ms: 75.682193
+  type: 'test'
+  ...
+# Subtest: relays, the ruin cache, observations and contracts count once and persist
+ok 364 - relays, the ruin cache, observations and contracts count once and persist
+  ---
+  duration_ms: 62.637834
+  type: 'test'
+  ...
+# Subtest: older ruin progress migrates; duplicate relays, observations or contracts are refused
+ok 365 - older ruin progress migrates; duplicate relays, observations or contracts are refused
+  ---
+  duration_ms: 76.640528
+  type: 'test'
+  ...
+# Subtest: the frontier preset plays on the runtime with the first-signal module, survival on and belongings kept on death
+ok 366 - the frontier preset plays on the runtime with the first-signal module, survival on and belongings kept on death
+  ---
+  duration_ms: 134.64962
+  type: 'test'
+  ...
+# Subtest: a new expedition receives the frontier starting supplies once, as catalog items
+ok 367 - a new expedition receives the frontier starting supplies once, as catalog items
+  ---
+  duration_ms: 130.874007
+  type: 'test'
+  ...
+# Subtest: campaign things stand in the shared scene as voxel assets; the list is rebuilt only when the campaign changes
+ok 368 - campaign things stand in the shared scene as voxel assets; the list is rebuilt only when the campaign changes
+  ---
+  duration_ms: 76.624542
+  type: 'test'
+  ...
+# Subtest: the guardian is fought through the runtime attack with the held loadout and leaves the scene when it falls
+ok 369 - the guardian is fought through the runtime attack with the held loadout and leaves the scene when it falls
+  ---
+  duration_ms: 76.497784
+  type: 'test'
+  ...
+# Subtest: the guardian telegraph zones are in world metres and kept for one wind-up
+ok 370 - the guardian telegraph zones are in world metres and kept for one wind-up
+  ---
+  duration_ms: 27.935184
+  type: 'test'
+  ...
+# Subtest: an original frontier save is carried over: region terrain versions and edits, campaign, items and a list of what has no counterpart
+ok 371 - an original frontier save is carried over: region terrain versions and edits, campaign, items and a list of what has no counterpart
+  ---
+  duration_ms: 345.275678
+  type: 'test'
+  ...
+# Subtest: a campaign record the rules reject starts a new campaign and says so; the rest still carries over
+ok 372 - a campaign record the rules reject starts a new campaign and says so; the rest still carries over
+  ---
+  duration_ms: 171.299728
+  type: 'test'
+  ...
+# First signal on the unified runtime {
+#   gathered: 7,
+#   guardianHits: 21,
+#   deaths: 0,
+#   regions: [ '0,0', '1,0', '0,-1' ],
+#   prepared: { dirt: 4, plank: 26 },
+#   simulatedSeconds: 230,
+#   cores: 7,
+#   researchWork: 270
+# }
+# Subtest: every campaign item maps onto a catalog item with an outdoor source or a recipe
+ok 373 - every campaign item maps onto a catalog item with an outdoor source or a recipe
+  ---
+  duration_ms: 1.075707
+  type: 'test'
+  ...
+# Subtest: a fresh frontier world finishes all chapters, all three signal routes and all sorties on the unified runtime
+ok 374 - a fresh frontier world finishes all chapters, all three signal routes and all sorties on the unified runtime
+  ---
+  duration_ms: 936.411971
+  type: 'test'
+  ...
+# Subtest: rewards become catalog items and research work; costs are paid atomically
+ok 375 - rewards become catalog items and research work; costs are paid atomically
+  ---
+  duration_ms: 31.986632
+  type: 'test'
+  ...
+# Subtest: camp recovery and repair use the runtime body and gear; no food buff or experience
+ok 376 - camp recovery and repair use the runtime body and gear; no food buff or experience
+  ---
+  duration_ms: 52.028671
+  type: 'test'
+  ...
+# Subtest: travel costs one food from the camp or the shore, keeps every region, and arriving by any route switches region
+ok 377 - travel costs one food from the camp or the shore, keeps every region, and arriving by any route switches region
+  ---
+  duration_ms: 161.675596
+  type: 'test'
+  ...
+# Subtest: campaign hazards hurt through the runtime: guards and guardians follow the survival setting
+ok 378 - campaign hazards hurt through the runtime: guards and guardians follow the survival setting
+  ---
+  duration_ms: 52.878132
+  type: 'test'
+  ...
+# Subtest: module state lives in the runtime save; a world without the module keeps it untouched; unknown modules are refused
+ok 379 - module state lives in the runtime save; a world without the module keeps it untouched; unknown modules are refused
+  ---
+  duration_ms: 155.959123
+  type: 'test'
+  ...
+# Subtest: the shared mining rule is the frontier rule
+ok 380 - the shared mining rule is the frontier rule
+  ---
+  duration_ms: 1.352447
+  type: 'test'
+  ...
+# Subtest: gathering is immediate and nodes still deplete and regrow
+ok 381 - gathering is immediate and nodes still deplete and regrow
+  ---
+  duration_ms: 132.5607
+  type: 'test'
+  ...
+# Subtest: terrain takes the frontier number of strikes, faster with a matching tool
+ok 382 - terrain takes the frontier number of strikes, faster with a matching tool
+  ---
+  duration_ms: 142.021496
+  type: 'test'
+  ...
+# Subtest: a 1 m strike works the whole 2×2×2 region and grass gives soil and a seed
+ok 383 - a 1 m strike works the whole 2×2×2 region and grass gives soil and a seed
+  ---
+  duration_ms: 61.468592
+  type: 'test'
+  ...
+# Subtest: a detached log is cut like the frontier and keeps falling as a piece
+ok 384 - a detached log is cut like the frontier and keeps falling as a piece
+  ---
+  duration_ms: 68.540388
+  type: 'test'
+  ...
+# Subtest: saves from before 0.14 keep their terrain wounds
+ok 385 - saves from before 0.14 keep their terrain wounds
+  ---
+  duration_ms: 55.122872
+  type: 'test'
+  ...
+# Subtest: creature bodies are layered like the frontier: bone inside the shell, wounds cut the shell
+ok 386 - creature bodies are layered like the frontier: bone inside the shell, wounds cut the shell
+  ---
+  duration_ms: 5.89253
+  type: 'test'
+  ...
+# Subtest: a shell hit bites the shell and wears its plating; exposed bone takes the structural hit; wounds are saved
+ok 387 - a shell hit bites the shell and wears its plating; exposed bone takes the structural hit; wounds are saved
+  ---
+  duration_ms: 61.921342
+  type: 'test'
+  ...
+# Subtest: what is held decides how a blow lands: tools bite a point, swords slash, spears drive a line, blunt weapons reach bone
+ok 388 - what is held decides how a blow lands: tools bite a point, swords slash, spears drive a line, blunt weapons reach bone
+  ---
+  duration_ms: 27.956874
+  type: 'test'
+  ...
+# Subtest: every region is the frontier region terrain at its own island, with sea between
+ok 389 - every region is the frontier region terrain at its own island, with sea between
+  ---
+  duration_ms: 401.634777
+  type: 'test'
+  ...
+# Subtest: regions made by an older frontier keep their terrain version through save and load
+ok 390 - regions made by an older frontier keep their terrain version through save and load
+  ---
+  duration_ms: 83.817413
+  type: 'test'
+  ...
+# Subtest: region places and starter piles follow each region island
+ok 391 - region places and starter piles follow each region island
+  ---
+  duration_ms: 86.513827
+  type: 'test'
+  ...
+# Subtest: a frontier world starts at the expedition camp on the unified runtime and reopens its terrain
+ok 392 - a frontier world starts at the expedition camp on the unified runtime and reopens its terrain
+  ---
+  duration_ms: 240.684747
+  type: 'test'
+  ...
+# Subtest: death follows the world setting: keep belongings or leave them for the fairy, waking at the region camp
+ok 393 - death follows the world setting: keep belongings or leave them for the fairy, waking at the region camp
+  ---
+  duration_ms: 203.825993
+  type: 'test'
+  ...
+# Subtest: the wrench and grapple are craftable catalog tools with models
+ok 394 - the wrench and grapple are craftable catalog tools with models
+  ---
+  duration_ms: 3.022762
+  type: 'test'
+  ...
+# Subtest: a pinned object is fixed in place, refuses grab and push, keeps the pin through save, and falls once freed
+ok 395 - a pinned object is fixed in place, refuses grab and push, keeps the pin through save, and falls once freed
+  ---
+  duration_ms: 251.754239
+  type: 'test'
+  ...
+# Subtest: splitting a pinned object leaves the pin on the largest piece
+ok 396 - splitting a pinned object leaves the pin on the largest piece
+  ---
+  duration_ms: 3.852921
+  type: 'test'
+  ...
+# Subtest: a held block attaches beside the struck face, adds its mass, refuses occupied or blocked cells and refunds the block when mined
+ok 397 - a held block attaches beside the struck face, adds its mass, refuses occupied or blocked cells and refunds the block when mined
+  ---
+  duration_ms: 139.98368
+  type: 'test'
+  ...
+# Subtest: the grapple grips from 6.5 m with 22000 N, lifts what a hand cannot, and throws by min(8, 4200/m)
+ok 398 - the grapple grips from 6.5 m with 22000 N, lifts what a hand cannot, and throws by min(8, 4200/m)
+  ---
+  duration_ms: 28.549929
+  type: 'test'
+  ...
+# Subtest: an anchored machine is fixed where it stands, saves the anchor, and falls once released
+ok 399 - an anchored machine is fixed where it stands, saves the anchor, and falls once released
+  ---
+  duration_ms: 27.939069
+  type: 'test'
+  ...
+# Subtest: the runtime wrench toggles pins and anchors in reach and needs the tool
+ok 400 - the runtime wrench toggles pins and anchors in reach and needs the tool
+  ---
+  duration_ms: 34.170082
+  type: 'test'
+  ...
+# Subtest: frontier regions are seed-stable and structures retain player edits
+ok 401 - frontier regions are seed-stable and structures retain player edits
+  ---
+  duration_ms: 157.42352
+  type: 'test'
+  ...
+# Subtest: damaged HUD preferences cannot hide core controls or inject unknown elements
+ok 402 - damaged HUD preferences cannot hide core controls or inject unknown elements
+  ---
+  duration_ms: 3.163784
+  type: 'test'
+  ...
+# Subtest: custom HUD positions fit resized screens and keep touch buttons usable
+ok 403 - custom HUD positions fit resized screens and keep touch buttons usable
+  ---
+  duration_ms: 0.750212
+  type: 'test'
+  ...
+# Subtest: orientation and handedness select independent layouts
+ok 404 - orientation and handedness select independent layouts
+  ---
+  duration_ms: 0.263582
+  type: 'test'
+  ...
+# Subtest: impact toughness keeps the frontier values and scales design blocks by durability within their kind
+ok 405 - impact toughness keeps the frontier values and scales design blocks by durability within their kind
+  ---
+  duration_ms: 1.832164
+  type: 'test'
+  ...
+# Subtest: terrain cells wear by energy × 0.35 ÷ toughness, at most every 0.35 s, and a broken cell is knocked loose
+ok 406 - terrain cells wear by energy × 0.35 ÷ toughness, at most every 0.35 s, and a broken cell is knocked loose
+  ---
+  duration_ms: 73.361627
+  type: 'test'
+  ...
+# Subtest: an object hit hard enough sheds the struck cell as its own piece; a single loose cell absorbs further hits
+ok 407 - an object hit hard enough sheds the struck cell as its own piece; a single loose cell absorbs further hits
+  ---
+  duration_ms: 23.393409
+  type: 'test'
+  ...
+# Subtest: machine voxels take min(60, energy ÷ 180)
+ok 408 - machine voxels take min(60, energy ÷ 180)
+  ---
+  duration_ms: 22.081971
+  type: 'test'
+  ...
+# Subtest: in Rapier a heavy block thrown down at 12 m/s wears the ground and itself; a gentle 2 m/s drop does not
+ok 409 - in Rapier a heavy block thrown down at 12 m/s wears the ground and itself; a gentle 2 m/s drop does not
+  ---
+  duration_ms: 498.471393
+  type: 'test'
+  ...
+# Subtest: the contact point speed includes spin, and a wheel voxel judges impacts from 8 m/s
+ok 410 - the contact point speed includes spin, and a wheel voxel judges impacts from 8 m/s
+  ---
+  duration_ms: 60.756056
+  type: 'test'
+  ...
+# Subtest: landing faster than 8 m/s hurts by the frontier fall rule; slower landings, peaceful worlds and driving do not
+ok 411 - landing faster than 8 m/s hurts by the frontier fall rule; slower landings, peaceful worlds and driving do not
+  ---
+  duration_ms: 158.075869
+  type: 'test'
+  ...
+# Subtest: a moving body that strikes the player hurts by its energy, once per 0.45 s; slow, held and driven bodies do not
+ok 412 - a moving body that strikes the player hurts by its energy, once per 0.45 s; slow, held and driven bodies do not
+  ---
+  duration_ms: 219.735433
+  type: 'test'
+  ...
+# Subtest: struck damage follows the survival setting and worn armour, with a message
+ok 413 - struck damage follows the survival setting and worn armour, with a message
+  ---
+  duration_ms: 95.235285
+  type: 'test'
+  ...
+# Subtest: a thrown object that hits a creature part strikes that creature once by the two masses
+ok 414 - a thrown object that hits a creature part strikes that creature once by the two masses
+  ---
+  duration_ms: 26.072845
+  type: 'test'
+  ...
+# Subtest: a struck creature takes the frontier collision damage on its struck part
+ok 415 - a struck creature takes the frontier collision damage on its struck part
+  ---
+  duration_ms: 38.31182
+  type: 'test'
+  ...
+# Subtest: legacy blocks, items and species point at real design entries
+ok 416 - legacy blocks, items and species point at real design entries
+  ---
+  duration_ms: 1.10946
+  type: 'test'
+  ...
+# Subtest: the island map builds the original island terrain on the shared runtime
+ok 417 - the island map builds the original island terrain on the shared runtime
+  ---
+  duration_ms: 252.74001
+  type: 'test'
+  ...
+# Subtest: island rules are peaceful and survive save and load
+ok 418 - island rules are peaceful and survive save and load
+  ---
+  duration_ms: 171.13646
+  type: 'test'
+  ...
+# Subtest: an original island save converts without touching the original
+ok 419 - an original island save converts without touching the original
+  ---
+  duration_ms: 101.907992
+  type: 'test'
+  ...
+# Subtest: sandbox maps build with mined resources, one unit per 0.5 m cell; the expedition does not
+ok 420 - sandbox maps build with mined resources, one unit per 0.5 m cell; the expedition does not
+  ---
+  duration_ms: 34.507153
+  type: 'test'
+  ...
+# Subtest: a block placed into water pushes the water up instead of deleting it
+ok 421 - a block placed into water pushes the water up instead of deleting it
+  ---
+  duration_ms: 18.495942
+  type: 'test'
+  ...
+# Subtest: sandbox life follows the terrain generator: the island keeps its grove, an endless world uses the environment there
+ok 422 - sandbox life follows the terrain generator: the island keeps its grove, an endless world uses the environment there
+  ---
+  duration_ms: 32.892509
+  type: 'test'
+  ...
+# Subtest: worlds made before 0.15 get their preset settings; the list stays readable by older builds
+ok 423 - worlds made before 0.15 get their preset settings; the list stays readable by older builds
+  ---
+  duration_ms: 2.881794
+  type: 'test'
+  ...
+# Subtest: a world is made with its own settings; only what its session reads is accepted
+ok 424 - a world is made with its own settings; only what its session reads is accepted
+  ---
+  duration_ms: 5.541065
+  type: 'test'
+  ...
+# Subtest: settings that shaped the world are fixed after creation; the name and play rules can change
+ok 425 - settings that shaped the world are fixed after creation; the name and play rules can change
+  ---
+  duration_ms: 0.764963
+  type: 'test'
+  ...
+# Subtest: a world from a newer settings format is refused instead of being misread
+ok 426 - a world from a newer settings format is refused instead of being misread
+  ---
+  duration_ms: 0.401715
+  type: 'test'
+  ...
+# Subtest: sessions only record when a world was last played; saves and deletion keep the original keys
+ok 427 - sessions only record when a world was last played; saves and deletion keep the original keys
+  ---
+  duration_ms: 0.875318
+  type: 'test'
+  ...
+# Subtest: the launcher and the game session are separate pages; every world starts the one runtime
+ok 428 - the launcher and the game session are separate pages; every world starts the one runtime
+  ---
+  duration_ms: 1.900055
+  type: 'test'
+  ...
+# Subtest: session code never compares map or preset names; only the session router picks by preset
+ok 429 - session code never compares map or preset names; only the session router picks by preset
+  ---
+  duration_ms: 13.071209
+  type: 'test'
+  ...
+# Subtest: the runtime entry starts nothing when imported; the launcher can load it to check the files
+ok 430 - the runtime entry starts nothing when imported; the launcher can load it to check the files
+  ---
+  duration_ms: 47.534073
+  type: 'test'
+  ...
+# Subtest: the runtime starts from the world config: terrain generator and rules, never a map name
+ok 431 - the runtime starts from the world config: terrain generator and rules, never a map name
+  ---
+  duration_ms: 233.611766
+  type: 'test'
+  ...
+# Subtest: saves follow the player when a build is picked in the app version list (it starts with empty storage)
+ok 432 - saves follow the player when a build is picked in the app version list (it starts with empty storage)
+  ---
+  duration_ms: 1.638899
+  type: 'test'
+  ...
+# Subtest: the latest copy follows back to a build that ran before; a newer save schema is never taken or overwritten
+ok 433 - the latest copy follows back to a build that ran before; a newer save schema is never taken or overwritten
+  ---
+  duration_ms: 0.571687
+  type: 'test'
+  ...
+# Subtest: storage from a build before the vault stays where the player left off and replaces the copy whole
+ok 434 - storage from a build before the vault stays where the player left off and replaces the copy whole
+  ---
+  duration_ms: 0.657325
+  type: 'test'
+  ...
+# Subtest: copying unchanged data writes nothing; a build that never saved leaves the vault as it was
+ok 435 - copying unchanged data writes nothing; a build that never saved leaves the vault as it was
+  ---
+  duration_ms: 0.495538
+  type: 'test'
+  ...
+# Subtest: the runtime copies its saves into the vault; the launcher restores before anything reads
+ok 436 - the runtime copies its saves into the vault; the launcher restores before anything reads
+  ---
+  duration_ms: 1.074569
+  type: 'test'
+  ...
+# Subtest: all human roles share structural capabilities while detailed skin and bone damage remain independent
+ok 437 - all human roles share structural capabilities while detailed skin and bone damage remain independent
+  ---
+  duration_ms: 18.124717
+  type: 'test'
+  ...
+# Subtest: character structural saves round-trip and malformed structural damage is rejected
+ok 438 - character structural saves round-trip and malformed structural damage is rejected
+  ---
+  duration_ms: 3.194915
+  type: 'test'
+  ...
+# Subtest: cutting the last support converts the whole island, retaining material and mining damage
+ok 439 - cutting the last support converts the whole island, retaining material and mining damage
+  ---
+  duration_ms: 7.120767
+  type: 'test'
+  ...
+# Subtest: a second support prevents detachment, and connectivity work resumes after a save
+ok 440 - a second support prevents detachment, and connectivity work resumes after a save
+  ---
+  duration_ms: 16.651283
+  type: 'test'
+  ...
+# Subtest: further cuts split bodies without creating resources or losing angular momentum
+ok 441 - further cuts split bodies without creating resources or losing angular momentum
+  ---
+  duration_ms: 0.959498
+  type: 'test'
+  ...
+# Subtest: rotated bodies raycast in their own coordinates; nearest terrain can occlude them
+ok 442 - rotated bodies raycast in their own coordinates; nearest terrain can occlude them
+  ---
+  duration_ms: 1.790172
+  type: 'test'
+  ...
+# Subtest: compound collider merging preserves occupied volume and material mass
+ok 443 - compound collider merging preserves occupied volume and material mass
+  ---
+  duration_ms: 0.496793
+  type: 'test'
+  ...
+# Subtest: saved bodies preserve pose, pins and partial damage; malformed data is rejected
+ok 444 - saved bodies preserve pose, pins and partial damage; malformed data is rejected
+  ---
+  duration_ms: 18.678947
+  type: 'test'
+  ...
+# Subtest: impact rules forgive small falls, scale with mass, and stronger grips retain weight differences
+ok 445 - impact rules forgive small falls, scale with mass, and stronger grips retain weight differences
+  ---
+  duration_ms: 0.258622
+  type: 'test'
+  ...
+# Subtest: the machine field preset plays on the runtime with the field terrain and module, no survival and no wildlife
+ok 446 - the machine field preset plays on the runtime with the field terrain and module, no survival and no wildlife
+  ---
+  duration_ms: 10.053532
+  type: 'test'
+  ...
+# Subtest: the field gives its starting equipment and the light example once, and both survive a reload
+ok 447 - the field gives its starting equipment and the light example once, and both survive a reload
+  ---
+  duration_ms: 24.207881
+  type: 'test'
+  ...
+# Subtest: an example replaces the earlier one and its fragments; a machine returns to the start pad at rest
+ok 448 - an example replaces the earlier one and its fragments; a machine returns to the start pad at rest
+  ---
+  duration_ms: 8.403701
+  type: 'test'
+  ...
+# Subtest: an old machine field save carries over: the part group on the core, health shares, turned to face +Z
+ok 449 - an old machine field save carries over: the part group on the core, health shares, turned to face +Z
+  ---
+  duration_ms: 7.881249
+  type: 'test'
+  ...
+# Subtest: wheels carry the light example on suspension and drive it like the old field: ~9 m/s, steering and braking
+ok 450 - wheels carry the light example on suspension and drive it like the old field: ~9 m/s, steering and braking
+  ---
+  duration_ms: 571.98997
+  type: 'test'
+  ...
+# Subtest: the heavy example is slower; a machine on its side has no traction
+ok 451 - the heavy example is slower; a machine on its side has no traction
+  ---
+  duration_ms: 144.954994
+  type: 'test'
+  ...
+# Subtest: the physics body follows the machine mass as fuel burns, without setting masses again for grams
+ok 452 - the physics body follows the machine mass as fuel burns, without setting masses again for grams
+  ---
+  duration_ms: 57.806547
+  type: 'test'
+  ...
+# Subtest: a driven rotorcraft climbs, holds altitude, cruises and descends by its inputs, and drops when nobody steers
+ok 453 - a driven rotorcraft climbs, holds altitude, cruises and descends by its inputs, and drops when nobody steers
+  ---
+  duration_ms: 602.171783
+  type: 'test'
+  ...
+# Subtest: rotor lift is limited by rotor power, and a lost rotor tips the craft
+ok 454 - rotor lift is limited by rotor power, and a lost rotor tips the craft
+  ---
+  duration_ms: 96.375431
+  type: 'test'
+  ...
+# Subtest: leaving a machine steps off beside it on free ground, or above it when every side is blocked
+ok 455 - leaving a machine steps off beside it on free ground, or above it when every side is blocked
+  ---
+  duration_ms: 104.512303
+  type: 'test'
+  ...
+# Subtest: atlas records changed sections; a face cell also marks the neighbour; a reservation resets every section
+ok 456 - atlas records changed sections; a face cell also marks the neighbour; a reservation resets every section
+  ---
+  duration_ms: 12.563531
+  type: 'test'
+  ...
+# Subtest: fast cell reads equal the edit map and base terrain on loaded and unloaded chunks
+ok 457 - fast cell reads equal the edit map and base terrain on loaded and unloaded chunks
+  ---
+  duration_ms: 239.09739
+  type: 'test'
+  ...
+# Subtest: greedy terrain section boxes are the exact union of solid cells
+ok 458 - greedy terrain section boxes are the exact union of solid cells
+  ---
+  duration_ms: 201.487543
+  type: 'test'
+  ...
+# Subtest: terrain colliders: a jittering loose body and distant edits rebuild nothing; an edit rebuilds only its section
+ok 459 - terrain colliders: a jittering loose body and distant edits rebuild nothing; an edit rebuilds only its section
+  ---
+  duration_ms: 139.53124
+  type: 'test'
+  ...
+# Subtest: part shapes ignore matrix decomposition jitter in scale
+ok 460 - part shapes ignore matrix decomposition jitter in scale
+  ---
+  duration_ms: 1.112318
+  type: 'test'
+  ...
+# Subtest: liquid meshes are cached per section: distant edits and walking reuse them, a change rebuilds only its section
+ok 461 - liquid meshes are cached per section: distant edits and walking reuse them, a change rebuilds only its section
+  ---
+  duration_ms: 12.848059
+  type: 'test'
+  ...
+# Subtest: the frame loop runs at most three fixed steps and drops the backlog; background work gets what is left
+ok 462 - the frame loop runs at most three fixed steps and drops the backlog; background work gets what is left
+  ---
+  duration_ms: 0.47078
+  type: 'test'
+  ...
+# Subtest: staggered creature AI updates every active creature once per step, a fifth at a time
+ok 463 - staggered creature AI updates every active creature once per step, a fifth at a time
+  ---
+  duration_ms: 16.413827
+  type: 'test'
+  ...
+# Subtest: voxel damage survives different targets, time, tool and footprint changes, then clears only destroyed cells
+ok 464 - voxel damage survives different targets, time, tool and footprint changes, then clears only destroyed cells
+  ---
+  duration_ms: 2.388614
+  type: 'test'
+  ...
+# Subtest: damage reloads with terrain, rejects stale/corrupt records, and legacy saves have no damage
+ok 465 - damage reloads with terrain, rejects stale/corrupt records, and legacy saves have no damage
+  ---
+  duration_ms: 15.882164
+  type: 'test'
+  ...
+# Subtest: mixed-material mining and protected cells use their own hardness without duplicate drops
+ok 466 - mixed-material mining and protected cells use their own hardness without duplicate drops
+  ---
+  duration_ms: 0.972129
+  type: 'test'
+  ...
+# Subtest: regression: old five-centimetre foot gap oscillates; swept support stays constant
+ok 467 - regression: old five-centimetre foot gap oscillates; swept support stays constant
+  ---
+  duration_ms: 20.64768
+  type: 'test'
+  ...
+# Subtest: stationary floor contact is stable under irregular rendered frame intervals
+ok 468 - stationary floor contact is stable under irregular rendered frame intervals
+  ---
+  duration_ms: 4.55719
+  type: 'test'
+  ...
+# Subtest: jump lands once on exact ground without subsequent floor bounce
+ok 469 - jump lands once on exact ground without subsequent floor bounce
+  ---
+  duration_ms: 7.200933
+  type: 'test'
+  ...
+# Subtest: jump clears a one-metre ledge with headroom and holding does not bounce
+ok 470 - jump clears a one-metre ledge with headroom and holding does not bounce
+  ---
+  duration_ms: 5.362652
+  type: 'test'
+  ...
+# Subtest: removing the support causes a real fall; half-metre platforms stop it exactly
+ok 471 - removing the support causes a real fall; half-metre platforms stop it exactly
+  ---
+  duration_ms: 5.545331
+  type: 'test'
+  ...
+# Subtest: half-metre stair climb fits the full 1.5 metre body
+ok 472 - half-metre stair climb fits the full 1.5 metre body
+  ---
+  duration_ms: 6.479089
+  type: 'test'
+  ...
+# Subtest: a solid one-metre wall blocks walking and a low ceiling blocks jumping
+ok 473 - a solid one-metre wall blocks walking and a low ceiling blocks jumping
+  ---
+  duration_ms: 3.553355
+  type: 'test'
+  ...
+# Subtest: half-cell edits preserve the other seven children and collapse uniform cells
+ok 474 - half-cell edits preserve the other seven children and collapse uniform cells
+  ---
+  duration_ms: 0.3385
+  type: 'test'
+  ...
+# Subtest: tools remove 0.125, 1 and 8 cubic metres on filled terrain
+ok 475 - tools remove 0.125, 1 and 8 cubic metres on filled terrain
+  ---
+  duration_ms: 13.490372
+  type: 'test'
+  ...
+# Subtest: ray picking finds the excavated half-cell boundary
+ok 476 - ray picking finds the excavated half-cell boundary
+  ---
+  duration_ms: 0.90174
+  type: 'test'
+  ...
+# Subtest: save and load preserve fine terrain and half-height support
+ok 477 - save and load preserve fine terrain and half-height support
+  ---
+  duration_ms: 18.311681
+  type: 'test'
+  ...
+# Subtest: release publication happens before stable advances and failed uploads do not advance it
+ok 478 - release publication happens before stable advances and failed uploads do not advance it
+  ---
+  duration_ms: 75.502204
+  type: 'test'
+  ...
+# Subtest: native release guard compares app codes independently of game codes
+ok 479 - native release guard compares app codes independently of game codes
+  ---
+  duration_ms: 52.249061
+  type: 'test'
+  ...
+# Subtest: browser catalog preserves all six canonical documents and freezes definitions
+ok 480 - browser catalog preserves all six canonical documents and freezes definitions
+  ---
+  duration_ms: 33.047163
+  type: 'test'
+  ...
+# Subtest: lazy browser assets preserve every canonical model and manifest metadata
+ok 481 - lazy browser assets preserve every canonical model and manifest metadata
+  ---
+  duration_ms: 545.446768
+  type: 'test'
+  ...
+# Subtest: instanced environment loads a complete reusable hierarchy with independent owner identities
+ok 482 - instanced environment loads a complete reusable hierarchy with independent owner identities
+  ---
+  duration_ms: 4.906104
+  type: 'test'
+  ...
+# Subtest: packaged authoring SDK can safely edit a copy without mutating cached source assets
+ok 483 - packaged authoring SDK can safely edit a copy without mutating cached source assets
+  ---
+  duration_ms: 3.959207
+  type: 'test'
+  ...
+# Subtest: runtime package is deterministic and committed files equal canonical compilation
+ok 484 - runtime package is deterministic and committed files equal canonical compilation
+  ---
+  duration_ms: 1166.168402
+  type: 'test'
+  ...
+# Subtest: read-only package check rejects a modified generated file without repairing it
+ok 485 - read-only package check rejects a modified generated file without repairing it
+  ---
+  duration_ms: 900.158809
+  type: 'test'
+  ...
+# Subtest: canonical source hash corruption aborts compilation before outputs are written
+ok 486 - canonical source hash corruption aborts compilation before outputs are written
+  ---
+  duration_ms: 247.266742
+  type: 'test'
+  ...
+# Subtest: complete browser package stays within existing native update file and byte limits
+ok 487 - complete browser package stays within existing native update file and byte limits
+  ---
+  duration_ms: 682.131041
+  type: 'test'
+  ...
+# Subtest: seed gives identical terrain and one metre cells
+ok 488 - seed gives identical terrain and one metre cells
+  ---
+  duration_ms: 52.563462
+  type: 'test'
+  ...
+# Subtest: fluid movement conserves volume and acid mass in a sealed basin
+ok 489 - fluid movement conserves volume and acid mass in a sealed basin
+  ---
+  duration_ms: 41.177909
+  type: 'test'
+  ...
+# Subtest: mixing clean water dilutes acid without destroying solute
+ok 490 - mixing clean water dilutes acid without destroying solute
+  ---
+  duration_ms: 5.902698
+  type: 'test'
+  ...
+# Subtest: water and lava form basalt and account for steam
+ok 491 - water and lava form basalt and account for steam
+  ---
+  duration_ms: 2.402793
+  type: 'test'
+  ...
+# Subtest: burning wood consumes fuel and completes
+ok 492 - burning wood consumes fuel and completes
+  ---
+  duration_ms: 1.459877
+  type: 'test'
+  ...
+# Subtest: water extinguishes a burning wooden cell
+ok 493 - water extinguishes a burning wooden cell
+  ---
+  duration_ms: 0.659934
+  type: 'test'
+  ...
+# Subtest: concentrated acid consumes reagent while corroding organic material
+ok 494 - concentrated acid consumes reagent while corroding organic material
+  ---
+  duration_ms: 0.78919
+  type: 'test'
+  ...
+# Subtest: worker chunks equal main-thread chunks: infinite
+ok 495 - worker chunks equal main-thread chunks: infinite
+  ---
+  duration_ms: 230.081362
+  type: 'test'
+  ...
+# Subtest: worker chunks equal main-thread chunks: island
+ok 496 - worker chunks equal main-thread chunks: island
+  ---
+  duration_ms: 159.843906
+  type: 'test'
+  ...
+# Subtest: worker chunks equal main-thread chunks: frontier
+ok 497 - worker chunks equal main-thread chunks: frontier
+  ---
+  duration_ms: 253.191745
+  type: 'test'
+  ...
+# Subtest: worker chunks equal main-thread chunks: frontier (region terrain version 2)
+ok 498 - worker chunks equal main-thread chunks: frontier (region terrain version 2)
+  ---
+  duration_ms: 183.043649
+  type: 'test'
+  ...
+# Subtest: worker chunks equal main-thread chunks: machine-field
+ok 499 - worker chunks equal main-thread chunks: machine-field
+  ---
+  duration_ms: 50.534859
+  type: 'test'
+  ...
+# Subtest: the region terrain version reaches the worker copy (version 3 adds the workyard playground)
+ok 500 - the region terrain version reaches the worker copy (version 3 adds the workyard playground)
+  ---
+  duration_ms: 67.723668
+  type: 'test'
+  ...
+# Subtest: edits made while a chunk is in flight and a reservation that drops its result both reach the installed chunk
+ok 501 - edits made while a chunk is in flight and a reservation that drops its result both reach the installed chunk
+  ---
+  duration_ms: 258.519717
+  type: 'test'
+  ...
+# Subtest: until the worker is ready, and after it fails, the atlas builds chunks itself
+ok 502 - until the worker is ready, and after it fails, the atlas builds chunks itself
+  ---
+  duration_ms: 122.034391
+  type: 'test'
+  ...
+# Subtest: a worker chunk meshes like a main-thread chunk before its neighbours load, with their edits, and carries its natural water
+ok 503 - a worker chunk meshes like a main-thread chunk before its neighbours load, with their edits, and carries its natural water
+  ---
+  duration_ms: 144.77826
+  type: 'test'
+  ...
+# Subtest: every failure code a content system can return has player-facing Korean text
+ok 504 - every failure code a content system can return has player-facing Korean text
+  ---
+  duration_ms: 14.733618
+  type: 'test'
+  ...
+# Subtest: craft queue jobs can be cancelled for their item inputs, prioritized and explained
+ok 505 - craft queue jobs can be cancelled for their item inputs, prioritized and explained
+  ---
+  duration_ms: 4.158992
+  type: 'test'
+  ...
+# Subtest: research can be paused and resumed without paying samples twice
+ok 506 - research can be paused and resumed without paying samples twice
+  ---
+  duration_ms: 3.413587
+  type: 'test'
+  ...
+# Subtest: dungeon devices release dead supply links and restore destroyed puzzle structures
+ok 507 - dungeon devices release dead supply links and restore destroyed puzzle structures
+  ---
+  duration_ms: 8.481114
+  type: 'test'
+  ...
+# Subtest: runtime turns boss, creature, dungeon and community events into screen messages
+ok 508 - runtime turns boss, creature, dungeon and community events into screen messages
+  ---
+  duration_ms: 174.576804
+  type: 'test'
+  ...
+# Subtest: a melee swing breaks the arena gimmick the player faces, and wind pushes at most 1 m
+ok 509 - a melee swing breaks the arena gimmick the player faces, and wind pushes at most 1 m
+  ---
+  duration_ms: 139.381677
+  type: 'test'
+  ...
+# (node:31266) ExperimentalWarning: The MockTimers API is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: every world opens the one game session page; the launcher is a separate page
+ok 510 - every world opens the one game session page; the launcher is a separate page
+  ---
+  duration_ms: 2.373359
+  type: 'test'
+  ...
+# Subtest: maps share the shell module instead of keeping their own screen code
+ok 511 - maps share the shell module instead of keeping their own screen code
+  ---
+  duration_ms: 4.638459
+  type: 'test'
+  ...
+# Subtest: the update package stays under the native file limit
+ok 512 - the update package stays under the native file limit
+  ---
+  duration_ms: 3.038925
+  type: 'test'
+  ...
+# Subtest: every element the expedition screen reads exists on the shared page or is built by a shared module
+ok 513 - every element the expedition screen reads exists on the shared page or is built by a shared module
+  ---
+  duration_ms: 2.373955
+  type: 'test'
+  ...
+# Subtest: the shared bag lays count-based items into 36 slots, stacks of 64 and a 9-slot hotbar
+ok 514 - the shared bag lays count-based items into 36 slots, stacks of 64 and a 9-slot hotbar
+  ---
+  duration_ms: 2.826153
+  type: 'test'
+  ...
+# Subtest: design catalog items get names, art, wear, uses and recipes for the shared bag
+ok 515 - design catalog items get names, art, wear, uses and recipes for the shared bag
+  ---
+  duration_ms: 4.936968
+  type: 'test'
+  ...
+# Subtest: one notification line: results replace, world events queue without duplicates
+ok 516 - one notification line: results replace, world events queue without duplicates
+  ---
+  duration_ms: 0.967768
+  type: 'test'
+  ...
+# Subtest: actual release bundle matches the pinned Android verification key and payload
+ok 517 - actual release bundle matches the pinned Android verification key and payload
+  ---
+  duration_ms: 3698.520851
+  type: 'test'
+  ...
+# Note: Some input files use or override a deprecated API.
+# Note: Recompile with -Xlint:deprecation for details.
+# Subtest: native package verification, activation, interrupted startup and save rollback
+ok 518 - native package verification, activation, interrupted startup and save rollback
+  ---
+  duration_ms: 2044.608982
+  type: 'test'
+  ...
+# Subtest: version files agree with authoritative version.json
+ok 519 - version files agree with authoritative version.json
+  ---
+  duration_ms: 43.54133
+  type: 'test'
+  ...
+# Subtest: public update transport works without credentials and enforces download boundaries
+ok 520 - public update transport works without credentials and enforces download boundaries
+  ---
+  duration_ms: 1206.187842
+  type: 'test'
+  ...
+# Subtest: world slots preserve legacy save and isolate create rename delete
+ok 521 - world slots preserve legacy save and isolate create rename delete
+  ---
+  duration_ms: 9.782669
+  type: 'test'
+  ...
+# Subtest: failed catalogue write retains previous world data
+ok 522 - failed catalogue write retains previous world data
+  ---
+  duration_ms: 0.30642
+  type: 'test'
+  ...
+1..522
+# tests 522
+# suites 0
+# pass 522
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 23750.457541

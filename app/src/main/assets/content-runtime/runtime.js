@@ -554,7 +554,7 @@ export class ExpeditionRuntime {
  }
  descriptors(){
   const p=this.player,rows=[];
-  for(const e of this.creatures.visibleEntities(p))rows.push({id:e.id,assetId:e.assetId??e.speciesId,kind:'creature',position:e,yaw:e.yaw,pose:e.pose,missingParts:e.pose?.missingParts,moving:['walk','hunt','flee','forage'].includes(e.state),entity:e});
+  for(const e of this.creatures.visibleEntities(p))rows.push({id:e.id,assetId:e.assetId??e.speciesId,kind:'creature',position:e,yaw:e.yaw,pose:e.pose,missingParts:e.pose?.missingParts,moving:['walk','hunt','flee','forage'].includes(e.state),entity:e,interval:this.creatures.updateInterval(e.id)});
   for(const e of this.bosses.entities.values())if((!e.defeated||Number.isFinite(e.defeatedAt)&&this.bosses.time-e.defeatedAt<1.6)&&distance(p,e.position)<220)rows.push({id:e.id,assetId:e.bossId,kind:'boss',position:e.position,yaw:Math.atan2(e.facing.x,e.facing.z),entity:e,bossSystem:this.bosses});
   for(const e of this.nearbyStructures){const origin=e.origin??e.position;if(!origin)continue;rows.push({id:e.id,assetId:e.templateId,kind:'structure',position:Array.isArray(origin)?{x:origin[0],y:origin[1],z:origin[2]}:origin,revision:e.revision,getBoxes:()=>this.dungeons.renderBoxes(e.id)});}
   for(const module of this.moduleList)if(module.descriptors)rows.push(...module.descriptors());

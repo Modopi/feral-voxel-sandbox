@@ -3,6 +3,7 @@
 // Uses the game's own phase timing (FERAL.perf) plus V8 CPU samples, in Chromium SwiftShader
 // served with the Android app's MIME/CSP rules. SwiftShader draws on the CPU, so compare JS
 // phases between versions, not absolute FPS with a phone.
+// Each map starts with its first fill (terrain streaming until every wanted chunk is generated and meshed).
 // Scenarios use real input (held keys, the real attack button) except the loose-object setup,
 // which removes one trunk cell the way a felled tree does and is recorded as prepared state.
 //   node tools/profile-runtime.mjs [island,expedition,frontier,machine]
@@ -26,6 +27,7 @@ async function open(world,type){
  await page.goto(`${assets}/play.html?world=${world}`);
  // Builds before 0.17.0 send the machine field to its own page; the scenario skips it there.
  await page.waitForFunction(()=>location.pathname.endsWith('machine.html')||window.FERAL?.ready&&FERAL.stats().running,null,{timeout:180000});
+ const readyAt=Date.now();
  if(page.url().includes('machine.html'))return {context,page,errors,world,type,oldPage:true};
  // Methods present in every version since 0.13 are timed from outside, so builds can be compared
  // with the same numbers; FERAL.perf (0.15.1+) adds the frame loop's own phases.
@@ -38,7 +40,7 @@ async function open(world,type){
    [f.view,'syncTerrain','view.syncTerrain'],[f.view,'syncModels','view.syncModels'],[f.view,'draw','view.draw'],[r.atlas,'loadAround','atlas.loadAround'],[EnvironmentView.prototype,'sync','environment.sync']])wrap(target,key,label);
  });
  const cdp=await context.newCDPSession(page);await cdp.send('Profiler.enable');await cdp.send('Profiler.setSamplingInterval',{interval:500});
- return {context,page,cdp,errors,world,type};
+ return {context,page,cdp,errors,world,type,readyAt};
 }
 function cpuTop(profile,count=12){
  const nodes=new Map(profile.nodes.map(n=>[n.id,n])),self=new Map();let total=0;
@@ -63,6 +65,18 @@ async function measure(s,name,ms,{action,prepared}={}){
  for(const [k,v]of Object.entries(m).slice(0,7))console.log(`   ${k.padEnd(20)} ${v.msPerFrame.toFixed(2)}ms/frame  calls ${v.callsPerFrame.toFixed(1)}  max ${v.maxMs.toFixed(1)}`);
  return row;
 }
+// First fill (0.18.0+ tool): the frames from the start until every wanted chunk is generated and meshed, terrain
+// streaming at its busiest, with how long both took from when the session reported ready. Older builds are
+// measured the same way, so the times compare between versions.
+async function fill(s){
+ const times={};
+ const row=await measure(s,'first fill',0,{action:async()=>{
+  await s.page.waitForFunction(()=>FERAL.runtime.atlas.pendingChunkCount===0,null,{timeout:120000,polling:100});times.generatedMs=Date.now()-s.readyAt;
+  await s.page.waitForFunction(()=>{const a=FERAL.runtime.atlas;return a.pendingChunkCount===0&&FERAL.view.chunks.size>=a.activeChunks.size;},null,{timeout:120000,polling:100});times.meshedMs=Date.now()-s.readyAt;
+ }});
+ row.fill={...times,...await s.page.evaluate(()=>({chunks:FERAL.runtime.atlas.activeChunks.size,generator:FERAL.stats().terrainGenerator??'main'}))};
+ console.log(`   first fill: ${row.fill.chunks} chunks generated ${row.fill.generatedMs} ms, meshed ${row.fill.meshedMs} ms after ready (${row.fill.generator})`);
+}
 const walk=s=>async()=>{await s.page.keyboard.down('KeyW');await s.page.waitForTimeout(5800);await s.page.keyboard.up('KeyW');};
 async function holdAttack(s,ms){
  const box=await s.page.locator('#actBtn').boundingBox(),x=box.x+box.width/2,y=box.y+box.height/2;
@@ -86,7 +100,7 @@ async function aimAt(s,[bx,by,bz]){
 const releaseAim=s=>s.page.evaluate(()=>{const v=FERAL.view;if(v.__aim)v.aim=v.__aim;});
 const scenarios={
  async island(){
-  const s=await open('profile-island','island');await s.page.waitForTimeout(4000);
+  const s=await open('profile-island','island');await fill(s);
   await measure(s,'idle',5000);
   await measure(s,'walk',6000,{action:walk(s)});
   const found=await trees(s);
@@ -108,7 +122,7 @@ const scenarios={
   report.errors=[...(report.errors??[]),...s.errors];await s.context.close();
  },
  async expedition(){
-  const s=await open('profile-expedition','expedition');await s.page.waitForTimeout(4000);
+  const s=await open('profile-expedition','expedition');await fill(s);
   await measure(s,'idle',5000);
   await measure(s,'walk',6000,{action:walk(s)});
   report.errors=[...(report.errors??[]),...s.errors];await s.context.close();
@@ -118,7 +132,7 @@ const scenarios={
  async frontier(){
   const s=await open('profile-frontier','frontier');
   if(!(await s.page.evaluate(()=>!!FERAL.runtime?.modules?.['first-signal']))){await s.context.close();return;}
-  await s.page.waitForTimeout(4000);
+  await fill(s);
   await measure(s,'camp',5000);
   await measure(s,'camp, walking',6000,{action:walk(s)});
   const prepared=await s.page.evaluate(()=>{const rt=FERAL.runtime,m=rt.modules['first-signal'],b=m.activeBoss,w=m.world(b);rt.hurt=()=>{};Object.assign(rt.player,{x:w.x+7,z:w.z,y:rt.atlas.heightAt(w.x+7,w.z)+.1,yaw:Math.PI/2});return 'player 7 m from the guardian (damage to the player switched off so the scene keeps running)';});
@@ -131,7 +145,7 @@ const scenarios={
  async machine(){
   const s=await open('profile-machine','machine');
   if(s.oldPage||!(await s.page.evaluate(()=>!!FERAL.runtime?.modules?.['machine-field']))){await s.context.close();return;}
-  await s.page.waitForTimeout(3000);
+  await fill(s);
   await measure(s,'field',5000);
   const prepared=await s.page.evaluate(()=>{const rt=FERAL.runtime,m=[...rt.machines.machines.values()].find(m=>m.fieldExample);rt.drivingMachineId=m.id;return 'player put in the light example\'s seat (drivingMachineId), then W held';});
   await measure(s,'driving the example',6000,{action:walk(s),prepared});

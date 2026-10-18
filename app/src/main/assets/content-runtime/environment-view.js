@@ -1,5 +1,5 @@
 import * as T from '../vendor/three.module.js';
-import {SECTION_CELLS} from './atlas.js';
+import {SECTION_CELLS, NO_WATER} from './atlas.js';
 
 const CELL=.5, AREA=.25, S=SECTION_CELLS, SECTION_M=S*CELL;
 const key=(x,y,z)=>`${x},${y},${z}`;
@@ -61,7 +61,11 @@ export class EnvironmentView{
   for(const [k,c]of wanted)if(!this.columns.has(k))this.columns.set(k,{...c,cursor:0});
   const jobs=[...this.columns.entries()].filter(([,c])=>c.cursor<1024).sort((a,b)=>a[1].distance-b[1].distance);let scanned=0;
   const deadline=performance.now()+2;
-  for(const [chunk,c]of jobs){while(c.cursor<1024&&scanned<this.columnBudget){if((scanned&15)===0&&performance.now()>=deadline)break;const i=c.cursor++,hx=c.cx*32+i%32,hz=c.cz*32+Math.floor(i/32),s=this.atlas.sample(hx*.5+.25,hz*.5+.25);scanned++;
+  for(const [chunk,c]of jobs){
+   // Loaded chunks carry their natural water (atlas.naturalWater): a whole chunk column is read without sampling.
+   const water=c.cursor===0&&this.atlas.naturalWater?.(c.cx,c.cz);
+   if(water){for(let i=0;i<1024;i++){if(water[i*2]===NO_WATER||this.natural.size>=8192)continue;const hx=c.cx*32+i%32,hz=c.cz*32+Math.floor(i/32),column={hx,hz,hy:water[i*2],bottom:water[i*2+1],chunk};this.natural.set(`${hx},${hz}`,column);this._footprintColumn(column,true);changed=true;}c.cursor=1024;continue;}
+   while(c.cursor<1024&&scanned<this.columnBudget){if((scanned&15)===0&&performance.now()>=deadline)break;const i=c.cursor++,hx=c.cx*32+i%32,hz=c.cz*32+Math.floor(i/32),s=this.atlas.sample(hx*.5+.25,hz*.5+.25);scanned++;
     if(s.waterLevel!==null&&s.waterLevel>s.height&&this.natural.size<8192){const column={hx,hz,hy:Math.ceil(s.waterLevel*2)-1,bottom:Math.floor(s.height*2),chunk};this.natural.set(`${hx},${hz}`,column);this._footprintColumn(column,true);changed=true;}
    }if(scanned>=this.columnBudget||performance.now()>=deadline)break;
   }this.stats.scannedColumns=scanned;return changed;

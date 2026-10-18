@@ -3,8 +3,14 @@ import { skeleton, structureState, breakBone, evaluateStructure, boneHealth, sav
 const MAX_WOUNDS = 96;
 
 const STEP = 0.25;
+// Distance tiers of the active AI (P2, user decision 2026-10-18): a creature within nearM of the player updates
+// every STEP as before; farther ones update every `every` STEPs with the elapsed time and move in coarser substeps,
+// by the same rules. The view glides each creature over its own interval (updateInterval).
+export const AI_LOD = Object.freeze([{ nearM: 32, every: 1 }, { nearM: 64, every: 2 }, { nearM: Infinity, every: 4 }]);
+const SUBSTEP_M = .25;
 const MAX_CATCHUP = 7200;
 const SPATIAL_CELL = 64;
+const cellKey = (cx, cz) => cx * 2097152 + cz;
 // Indexed heap: rescheduling an active owner replaces its one node, rather than
 // accumulating stale timer entries during a long session.
 class DueQueue {
@@ -80,7 +86,9 @@ export class CreatureSystem {
     this._entityIndex = new Map(); this._regionMembers = new Map(); this._regionCorpses = new Map();
     this._regionOrder = new Map(); this._liveIds = new Set(); this._playerAttacking = new Set();
     this._entityDue = new DueQueue(); this._regionDue = new DueQueue();
-    this.work = {steps:0,spatialCandidates:0,activeEntityUpdates:0,passiveEntityUpdates:0,regionUpdates:0};
+    this.work = {steps:0,spatialCandidates:0,activeEntityUpdates:0,passiveEntityUpdates:0,regionUpdates:0,lodSkips:0};
+    // Per active creature: when its next tiered update is due and its tier's step count (not saved: rebuilt from distance).
+    this._lodDue = new Map(); this._lodEvery = new Map(); this._substepM = SUBSTEP_M;
     const baseline = this.content.progression?.entries?.find(e => e.id === 'calorie_baseline');
     this.foodCalories = baseline?.foodCalories ?? 400;
     if (options.state) this._load(options.state);
@@ -93,12 +101,13 @@ export class CreatureSystem {
     if(add){if(!map.has(key))map.set(key,new Set());map.get(key).add(id);}
     else {const set=map.get(key);set?.delete(id);if(set?.size===0)map.delete(key);}
   }
-  _spatialKey(x,z) { return `${Math.floor(x/SPATIAL_CELL)},${Math.floor(z/SPATIAL_CELL)}`; }
+  // Numeric cell keys (no string per move): unique while |cell z| < 2^20, i.e. 67 000 km.
+  _spatialKey(x,z) { return cellKey(Math.floor(x/SPATIAL_CELL),Math.floor(z/SPATIAL_CELL)); }
   _nearIds(map,point,radius) {
     const ids=[];
     for(let x=Math.floor((point.x-radius)/SPATIAL_CELL);x<=Math.floor((point.x+radius)/SPATIAL_CELL);x++)
       for(let z=Math.floor((point.z-radius)/SPATIAL_CELL);z<=Math.floor((point.z+radius)/SPATIAL_CELL);z++)
-        for(const id of map.get(`${x},${z}`)??[])ids.push(id);
+        for(const id of map.get(cellKey(x,z))??[])ids.push(id);
     return ids;
   }
   _indexRegion(r) {
@@ -114,7 +123,7 @@ export class CreatureSystem {
       if(old.alive)this._bucket(this._regionMembers,old.region,e.id,false);
       old.region=e.regionId;old.alive=!e.dead;
       if(old.alive){this._liveIds.add(e.id);this._bucket(this._regionMembers,e.regionId,e.id,true);}
-      else {this._liveIds.delete(e.id);this._entityDue.delete(e.id);}
+      else {this._liveIds.delete(e.id);this._entityDue.delete(e.id);this._lodDue.delete(e.id);this._lodEvery.delete(e.id);}
     }
   }
   _indexEntity(e) {
@@ -414,22 +423,39 @@ export class CreatureSystem {
         if(!e.dead)this._entityDue.set(e.id,e.lastUpdatedAt+60);
         continue;
       }
-      if (elapsed > dt + 1e-8) this._passive(e, s, elapsed - dt, nearby, context);
+      // Distance tier: a far creature waits for its turn and then advances by the time since its last update.
+      const every = this._lodTier(e, context.player);
+      if (every > 1 && this.time + 1e-8 < (this._lodDue.get(e.id) ?? -Infinity)) { this.work.lodSkips++; continue; }
+      const span = Math.min(Math.max(dt, elapsed), dt * every);
+      this._lodDue.set(e.id, this.time + dt * every); this._lodEvery.set(e.id, every);
+      if (elapsed > span + 1e-8) this._passive(e, s, elapsed - span, nearby, context);
       e.lastUpdatedAt = this.time;
       this.work.activeEntityUpdates++;
       this._entityDue.set(e.id,this.time+60);
       if (e.dead) continue;
-      e.age += dt; this._metabolism(e, s, dt);
+      e.age += span; this._metabolism(e, s, span);
       if (e.dead) continue;
       if (this.time >= e.nextDecisionAt && !e.attack) {
         this._decide(e, s, nearby, context); e.nextDecisionAt = this.time + .5;
       }
-      this._act(e, s, dt, context); this._vertical(e, s, dt, context); this._pose(e);
+      this._substepM = SUBSTEP_M * every;
+      this._act(e, s, span, context); this._vertical(e, s, span, context); this._pose(e);
+      this._substepM = SUBSTEP_M;
     }
     for (const id of processed) { const r=this.regions.get(id);if(this.time + 1e-8 >= r.nextBirthAt) {
       this._breed(r); r.nextBirthAt = this.time + 60;
     }}
   }
+
+  /** The AI_LOD step count for a creature at its distance from the player (1 without a player: offline, tests). */
+  _lodTier(e, player) {
+    if (!player) return 1;
+    const d = Math.hypot(e.x - player.x, e.z - player.z);
+    for (const tier of AI_LOD) if (d < tier.nearM) return tier.every;
+    return AI_LOD[AI_LOD.length - 1].every;
+  }
+  /** Seconds between a creature's AI updates (its tier), for the view to glide it over. */
+  updateInterval(id) { return STEP * (this._lodEvery.get(id) ?? 1); }
 
   // Inactive owners advance in bounded 60-second ecology steps. No player combat
   // or remote damage callback is possible. Hunting debits the same attack and
@@ -705,7 +731,10 @@ export class CreatureSystem {
     if (!Number.isFinite(ground)) return false;
     const s = this.species.get(e.speciesId), flying = this._flightEnabled(e, s);
     const stepHeight = Math.min(1.2, Math.max(.25, s.body.lengthWidthHeightM[2] * .5)) * Math.max(.2, e.pose.speedFactor);
-    const currentGround = t.heightAt?.(e.x, e.z, e.y) ?? e.y;
+    // The ground under the creature is the same for all candidate steps from one place: read it once.
+    const memo = this._groundMemo ??= { id: null, x: NaN, z: NaN, y: NaN, ground: 0 };
+    if (memo.id !== e.id || memo.x !== e.x || memo.z !== e.z || memo.y !== e.y) { memo.id = e.id; memo.x = e.x; memo.z = e.z; memo.y = e.y; memo.ground = t.heightAt?.(e.x, e.z, e.y) ?? e.y; }
+    const currentGround = memo.ground;
     if (!flying && ground - currentGround > stepHeight) return false;
     if (!flying && currentGround - ground > Math.max(1.5, s.body.lengthWidthHeightM[2]) && e.state !== 'flee') return false;
     const fluid = this._waterAt(t, p.x, ground, p.z);
@@ -717,7 +746,10 @@ export class CreatureSystem {
       const yaw = Math.atan2(p.x - e.x, p.z - e.z), c = Math.abs(Math.cos(yaw)), sn = Math.abs(Math.sin(yaw));
       const halfX = width * .45 * c + length * .45 * sn, halfZ = length * .45 * c + width * .45 * sn;
       const base = flying ? Math.max(e.y, ground + .05) : ground;
-      for (const dx of [-halfX, 0, halfX]) for (const dz of [-halfZ, 0, halfZ]) for (const dy of [.05, h * .5, Math.max(.05, h - .05)]) {
+      // The body's 3 × 3 × 3 sample points (corners, edge middles and centre at foot, middle and head height).
+      const top = Math.max(.05, h - .05);
+      for (let i = 0; i < 27; i++) {
+        const dx = (i % 3 - 1) * halfX, dz = ((i / 3 | 0) % 3 - 1) * halfZ, k = i / 9 | 0, dy = k === 0 ? .05 : k === 1 ? h * .5 : top;
         if (this._solid(t, Math.floor((p.x + dx) * 2), Math.floor((base + dy) * 2), Math.floor((p.z + dz) * 2))) return false;
       }
     }
@@ -734,17 +766,21 @@ export class CreatureSystem {
     const speed = baseSpeed * e.pose.speedFactor * medium * (e.slowUntil > this.time ? .7 : 1);
     const distance = Math.min(len, speed * dt);
     if (distance <= 0) { e.pose.moving = false; return; }
-    // Substeps prevent coarse passive movement from skipping a wall or water edge.
-    const steps = Math.max(1, Math.ceil(distance / .25));
+    // Substeps prevent coarse passive movement from skipping a wall or water edge (coarser for far tiers).
+    // Each substep tries the straight step, then sliding along x, then along z, in one reused point.
+    const steps = Math.max(1, Math.ceil(distance / this._substepM)), sx = dx / len * distance / steps, sz = dz / len * distance / steps;
+    const p = this._stepPoint ??= { x: 0, z: 0 };
     let moved = 0;
     for (let i = 0; i < steps; i++) {
-      const nx = e.x + dx / len * distance / steps, nz = e.z + dz / len * distance / steps;
-      const candidates = [{ x: nx, z: nz }, { x: nx, z: e.z }, { x: e.x, z: nz }];
-      const selected = candidates.find(p => Math.hypot(p.x - e.x, p.z - e.z) > 1e-7 && this._canStep(e, p, context));
-      if (!selected) break;
-      const travelled = Math.hypot(selected.x - e.x, selected.z - e.z);
-      e.yaw = Math.atan2(selected.x - e.x, selected.z - e.z);
-      e.x = selected.x; e.z = selected.z; moved += travelled;
+      let found = false;
+      for (let option = 0; option < 3 && !found; option++) {
+        p.x = option === 2 ? e.x : e.x + sx; p.z = option === 1 ? e.z : e.z + sz;
+        found = Math.hypot(p.x - e.x, p.z - e.z) > 1e-7 && this._canStep(e, p, context);
+      }
+      if (!found) break;
+      const travelled = Math.hypot(p.x - e.x, p.z - e.z);
+      e.yaw = Math.atan2(p.x - e.x, p.z - e.z);
+      e.x = p.x; e.z = p.z; moved += travelled;
     }
     e.pose.moving = moved > 0;
     e.pose.phase += moved * 3;

@@ -691,6 +691,7 @@ async function boot(selected){
  if(legacySave){await stage(`${legacy.name}을 옮기는 중`,70);converted=legacy.apply(runtime,legacySave,saveKey(world));}
  await stage('장면을 준비하는 중',72);
  view=new ExpeditionScene($('world'),runtime.atlas);controller=new CharacterController(runtime.terrain,runtime.player);
+ startTerrainWorker();
  settings=initSettings({view,onLeftHand:()=>hudEditor?.apply()});view.camera.fov=+$('fov').value;view.camera.updateProjectionMatrix();if(!view.loadRadiusChunks)view.qualitySet($('quality').value);
  autosave=new Autosave(saveStore,{onSaved:()=>{syncVault();$('saveState').textContent='SAVED '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});},onError:error=>{$('saveState').textContent='SAVE FAILED';console.warn(error);notify('자동 저장하지 못했습니다. 이전 정상 저장은 보존됩니다.');}});
  bossView=new BossView(view);equipmentView=new EquipmentView(view);feedbackView=new FeedbackView(view);anchorMarkers=new AnchorMarkers(view);
@@ -718,9 +719,15 @@ async function boot(selected){
  if(converted){save();notify(`${runtime.generator.legacySave?.name??'이전 저장'}을 옮겼습니다${converted.unmapped.length?` · 옮기지 못한 항목 ${converted.unmapped.length}개는 지도 버튼의 여정에서 확인하세요.`:'.'}`);}
  loading.finish();$('titleScreen').classList.add('hidden');$('hud').classList.remove('hidden');hudEditor.apply();
  installErrorScreen();
- window.FERAL={ready:true,map:'expedition',moduleViews,machinePanel,perf,environment:environmentView,bootTimings:loading.timings,runtime,view,controller,physics:physical,slots,bag,ledger,save,pause,interact,openBag,selectHotbar,stats:()=>({running:ready&&!paused,paused,rewardMarkers:anchorMarkers.markers.size,warning:$('warning').textContent,toast:$('toast').textContent,version:VERSION.version,versionCode:VERSION.versionCode,player:{...runtime.player},regions:runtime.seenRegions.size,models:view.models.size,chunks:runtime.atlas.activeChunks.size,held:slots.held})};
+ window.FERAL={ready:true,map:'expedition',moduleViews,machinePanel,perf,environment:environmentView,bootTimings:loading.timings,runtime,view,controller,physics:physical,slots,bag,ledger,save,pause,interact,openBag,selectHotbar,stats:()=>({running:ready&&!paused,paused,rewardMarkers:anchorMarkers.markers.size,warning:$('warning').textContent,toast:$('toast').textContent,version:VERSION.version,versionCode:VERSION.versionCode,player:{...runtime.player},regions:runtime.seenRegions.size,models:view.models.size,chunks:runtime.atlas.activeChunks.size,terrainGenerator:runtime.atlas.generatorState,held:slots.held})};
  window.FeralNative={save,pause:()=>{save();if(!paused)pause(true,{quiet:true});},back:()=>{if(hudEditor.editing)hudEditor.cancel();else if(ledger.isOpen)pause(false);else pause();}};
  requestAnimationFrame(frame);
+}
+/** Chunk generation moves to a worker once it has loaded (docs/ARCHITECTURE.md §7), overlapping the rest of the
+ * boot; until then, and if it fails, the atlas builds chunks within the frame budget. */
+function startTerrainWorker(){
+ if(typeof Worker==='undefined')return;
+ try{runtime.atlas.attachGenerator(new Worker(new URL('./terrain-worker.js',import.meta.url),{type:'module'}));}catch(error){console.warn('지형 작업자를 시작하지 못해 주 스레드에서 지형을 만듭니다.',error);}
 }
 /** Starts a game session for one world from the launcher's list (game.js routes here). */
 export function start(selected){return boot(selected).catch(e=>{console.error(e);loading.fail(`세계 준비를 완료하지 못했습니다: ${e.message}`);});}

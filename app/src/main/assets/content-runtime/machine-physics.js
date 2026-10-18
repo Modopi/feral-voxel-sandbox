@@ -2,6 +2,9 @@ import * as T from '../vendor/three.module.js';
 const xyz = (v) => ({ x: v.x, y: v.y, z: v.z });
 const arr = (v) => [v.x, v.y, v.z];
 const identity = { x: 0, y: 0, z: 0, w: 1 };
+// A running engine burns a little fuel every step: a collider's mass (and the cargo) is set again once it moved by
+// 0.1 %, so Rapier does not recompute the body's mass properties every step for grams.
+export const MASS_TOLERANCE = 1e-3;
 const rotation = (m) => m.rotation ?? { x: 0, y: Math.sin(m.yaw / 2), z: 0, w: Math.cos(m.yaw / 2) };
 
 /** One dynamic compound per connected assembly. Every authored voxel remains a
@@ -10,15 +13,15 @@ const rotation = (m) => m.rotation ?? { x: 0, y: Math.sin(m.yaw / 2), z: 0, w: M
 export class MachinePhysicsBridge {
   constructor(physics, R) {
     this.physics = physics; this.R = R; this.system = physics.runtime.machines;
-    this.bodies = new Map(); this.contacts = new Map();
+    this.bodies = new Map(); this.contacts = new Map(); this.pass = 0;
     this.system?.setPhysicsDriver(physics);
   }
   sync() {
     if (!this.system) return;
-    const alive = new Set(), player = this.physics.runtime.player;
+    const player = this.physics.runtime.player, pass = ++this.pass;
     for (const m of this.system.machines.values()) {
-      if (!m.voxels.length || Math.hypot(m.position.x - player.x, m.position.z - player.z) > 64) continue;
-      alive.add(m.id);
+      const dx = m.position.x - player.x, dz = m.position.z - player.z;
+      if (!m.voxels.length || dx * dx + dz * dz > 64 * 64) continue;
       let cache = this.bodies.get(m.id);
       // The colliders change only with the machine's voxels, wheels or anchor: look only when its revision moves.
       if (cache?.revision !== m.revision || cache.anchored !== !!m.anchored) {
@@ -39,7 +42,9 @@ export class MachinePhysicsBridge {
             this.physics.adapter.colliderOwners.set(c.handle, Object.freeze({ ownerId: m.id, partId: voxelIds[i], bodyHandle: entry.body.handle }));
             if (rolling.has(voxelIds[i])) c.setFrictionCombineRule(this.R.CoefficientCombineRule.Min);
           });
-          cache = { entry, signature, voxelIds, placed: m.placed ?? 0 }; this.bodies.set(m.id, cache);
+          // Collider masses are compared and set in place each step (mass()); cargo is the last entry.
+          cache = { entry, signature, voxelIds, voxelIndex: new Map(voxelIds.map((id, i) => [id, i])), masses: new Float64Array(voxelIds.length + 1).fill(NaN), nextMasses: new Float64Array(voxelIds.length + 1), placed: m.placed ?? 0, seen: 0 };
+          this.bodies.set(m.id, cache);
         }
         cache.revision = m.revision; cache.anchored = !!m.anchored;
       }
@@ -48,25 +53,32 @@ export class MachinePhysicsBridge {
         const body = cache.entry.body; body.setTranslation(m.position, true); body.setRotation(rotation(m), true);
         body.setLinvel(m.velocity, true); body.setAngvel(m.angularVelocity, true); cache.placed = m.placed ?? 0;
       }
-      this.mass(m, cache);
+      cache.seen = pass; this.mass(m, cache);
     }
-    for (const id of this.bodies.keys()) if (!alive.has(id)) {
+    // Machines out of reach or gone this pass lose their bodies (deleting during Map iteration is safe).
+    for (const [id, cache] of this.bodies) if (cache.seen !== pass) {
       this.physics.adapter.removeOwner(id); this.bodies.delete(id); this.contacts.delete(id);
     }
   }
+  /** Sets the collider masses when one of them or the cargo moved by MASS_TOLERANCE (fuel burnt, cargo loaded).
+   * Per step and without allocating: the masses are written into the cache's arrays and compared there. */
   mass(m, cache) {
     if (m.anchored) return; // fixed bodies carry no mass
-    const distribution = this.system.physicsMasses(m.id), key = JSON.stringify(distribution);
-    if (key === cache.massKey) return;
-    cache.entry.colliders.forEach((c, i) => c.setMass(distribution.voxelMasses[cache.voxelIds[i]]));
-    const cargo = distribution.cargoMassKg, inertia = cargo * m.gridM ** 2 / 6;
+    const next = this.system.writePhysicsMasses(m, cache.voxelIndex, cache.nextMasses), applied = cache.masses;
+    // NaN (never applied) always differs.
+    let i = 0; while (i < next.length && Math.abs(next[i] - applied[i]) <= MASS_TOLERANCE * Math.max(1, applied[i])) i++;
+    if (i === next.length) return;
+    applied.set(next);
+    const colliders = cache.entry.colliders;
+    for (let j = 0; j < colliders.length; j++) colliders[j].setMass(applied[j]);
+    const cargo = applied[colliders.length], inertia = cargo * m.gridM ** 2 / 6;
     cache.entry.body.setAdditionalMassProperties(cargo, { x: 0, y: 0, z: 0 }, { x: inertia, y: inertia, z: inertia }, identity, true);
-    cache.entry.body.recomputeMassPropertiesFromColliders(); cache.massKey = key;
+    cache.entry.body.recomputeMassPropertiesFromColliders();
   }
   prepare(dt) {
     if (!this.system) return;
     this.sync();
-    const packets = this.system.preparePhysicsStep(dt, { activeIds: [...this.bodies.keys()] });
+    const packets = this.system.preparePhysicsStep(dt, { active: this.bodies });
     for (const packet of packets) {
       const cache = this.bodies.get(packet.id); if (!cache) continue;
       const body = cache.entry.body; body.resetForces(false); body.resetTorques(false);
