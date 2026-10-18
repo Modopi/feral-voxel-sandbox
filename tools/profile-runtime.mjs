@@ -5,7 +5,7 @@
 // phases between versions, not absolute FPS with a phone.
 // Scenarios use real input (held keys, the real attack button) except the loose-object setup,
 // which removes one trunk cell the way a felled tree does and is recorded as prepared state.
-//   node tools/profile-runtime.mjs [island,expedition,frontier]
+//   node tools/profile-runtime.mjs [island,expedition,frontier,machine]
 //   FERAL_CHROME=chrome path, FERAL_ASSETS=served assets URL (e.g. an older build), FERAL_PERF_OUT=report path
 import fs from 'node:fs/promises';
 import {createRequire} from 'node:module';
@@ -24,7 +24,9 @@ async function open(world,type){
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.addInitScript(([id,t])=>localStorage.setItem('feral.worlds.v1',JSON.stringify([{id,name:id,type:t,seed:63026}])),[world,type]);
  await page.goto(`${assets}/play.html?world=${world}`);
- await page.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:180000});
+ // Builds before 0.17.0 send the machine field to its own page; the scenario skips it there.
+ await page.waitForFunction(()=>location.pathname.endsWith('machine.html')||window.FERAL?.ready&&FERAL.stats().running,null,{timeout:180000});
+ if(page.url().includes('machine.html'))return {context,page,errors,world,type,oldPage:true};
  // Methods present in every version since 0.13 are timed from outside, so builds can be compared
  // with the same numbers; FERAL.perf (0.15.1+) adds the frame loop's own phases.
  await page.evaluate(async()=>{
@@ -122,6 +124,17 @@ const scenarios={
   const prepared=await s.page.evaluate(()=>{const rt=FERAL.runtime,m=rt.modules['first-signal'],b=m.activeBoss,w=m.world(b);rt.hurt=()=>{};Object.assign(rt.player,{x:w.x+7,z:w.z,y:rt.atlas.heightAt(w.x+7,w.z)+.1,yaw:Math.PI/2});return 'player 7 m from the guardian (damage to the player switched off so the scene keeps running)';});
   await s.page.waitForTimeout(2500);
   await measure(s,'guardian fight',6000,{prepared});
+  report.errors=[...(report.errors??[]),...s.errors];await s.context.close();
+ },
+ // The machine field on the runtime (0.17.0+): the field with the light example, then driving it down the field
+ // with held input (wheel suspension, traction and the readout). Builds before 0.17.0 run the old field page (skipped).
+ async machine(){
+  const s=await open('profile-machine','machine');
+  if(s.oldPage||!(await s.page.evaluate(()=>!!FERAL.runtime?.modules?.['machine-field']))){await s.context.close();return;}
+  await s.page.waitForTimeout(3000);
+  await measure(s,'field',5000);
+  const prepared=await s.page.evaluate(()=>{const rt=FERAL.runtime,m=[...rt.machines.machines.values()].find(m=>m.fieldExample);rt.drivingMachineId=m.id;return 'player put in the light example\'s seat (drivingMachineId), then W held';});
+  await measure(s,'driving the example',6000,{action:walk(s),prepared});
   report.errors=[...(report.errors??[]),...s.errors];await s.context.close();
  },
 };

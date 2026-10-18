@@ -28,7 +28,7 @@ export const MACHINE_MOTION = Object.freeze({ joulesPerEU: 100, maxAcceleration:
 // Rotor flight (S2c2): lift per useful mechanical EU/s at a rotor, climb rate at full up/down input, the share of
 // lift that pushes forward, air damping while rotors carry the craft, and how long a control command keeps them running.
 export const ROTOR_FLIGHT = Object.freeze({ liftNPerEU: 50, climbMS: 3, forwardShare: .3, airDrag: .35, engagedS: .25 });
-// Wheel drive (S3, docs/GAME-RULES.md §5). Suspension holds each wheel's voxel `clearanceM` above the ground,
+// Wheel drive (S3, docs/GAME-RULES.md §6). Suspension holds each wheel's voxel `clearanceM` above the ground,
 // sinking `sagM` under the machine's weight, with `damping` of critical, so the voxels never scrape the ground;
 // the ground is looked for `reachM` below a wheel. A wheel whose suspension carries weight is on the ground.
 // Traction per useful mechanical EU/s reaching the wheels on the ground (at most gripG of the weight), damping

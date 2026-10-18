@@ -11,14 +11,15 @@ export const FIELD_KIT = Object.freeze({wood:640,scrap_iron:256,raw_timber:64,he
 export const FIELD_RESEARCH = Object.freeze(['heat_engine','transmission','controller']);
 
 /** The old field's example designs (machine/model.js preset) in runtime cells: a three-voxel spine with the
- * engine on top and four wheels; the heavy one adds a 3 × 5 deck. Front is +Z on the machine. */
+ * engine on top and four wheels; the heavy one adds a 3 × 5 deck. Front is +Z on the machine. The driver sits
+ * at the front (the controller's voxel) with nothing above or ahead, so the view down the field is open. */
 export function exampleDesign(heavy=false){
   const voxels=[],components=[],links=[],cell=(x,y,z)=>voxels.push({cell:[x,y,z],materialId:'wood'});
   for(let z=-1;z<=1;z++)cell(0,0,z);
   cell(0,1,0);
   for(const x of [-1,1])for(const z of [-1,1])cell(x,0,z);
   if(heavy)for(let z=-2;z<=2;z++)for(const x of [-1,0,1])if(x||z)cell(x,1,z);
-  components.push({cell:[0,1,0],componentId:'heat_engine',fuelItems:8},{cell:[0,0,0],componentId:'controller'});
+  components.push({cell:[0,1,0],componentId:'heat_engine',fuelItems:8},{cell:heavy?[0,1,2]:[0,0,1],componentId:'controller'});
   for(const x of [-1,1])for(const z of [-1,1]){components.push({cell:[x,0,z],componentId:'transmission',legacyType:'wheel'});links.push({from:0,to:components.length-1,type:'mechanical'});}
   return {name:heavy?'중량 예제':'경량 예제',gridM:.5,voxels,components,links};
 }
@@ -96,7 +97,10 @@ export function applyLegacyMachineField(runtime,old,from){
     for(const p of parts)if(OLD_PARTS[p.type])components.push({cell:[-p.x,p.y,-p.z],...OLD_PARTS[p.type]});
     const engines=components.flatMap((c,i)=>c.componentId==='heat_engine'?[i]:[]),wheels=components.flatMap((c,i)=>c.legacyType==='wheel'?[i]:[]);
     for(const from of engines)for(const to of wheels)links.push({from,to,type:'mechanical'});
-    const seat=parts.find(p=>p.type==='hull'&&!p.x&&!p.y&&!p.z)??parts.find(p=>p.type==='hull');
+    // The seat: the frontmost hull with nothing above it (old front is -Z), nearest the centre line, so the
+    // driver's view ahead is open; else any hull.
+    const filled=new Set(parts.map(p=>`${p.x},${p.y},${p.z}`)),open=parts.filter(p=>p.type==='hull'&&!filled.has(`${p.x},${p.y+1},${p.z}`));
+    const seat=open.sort((a,b)=>a.z-b.z||Math.abs(a.x)-Math.abs(b.x)||b.y-a.y)[0]??parts.find(p=>p.type==='hull');
     if(seat)components.push({cell:[-seat.x,seat.y,-seat.z],componentId:'controller'});else note('조종석','차체가 없어 조종 장치를 달지 못했습니다.');
     // The old body stood at (x, z) with its core cell's centre there; forward (sin yaw, -cos yaw) is runtime yaw π - yaw.
     const body=old.body??{x:0,z:5,yaw:0},yaw=Math.PI-(Number(body.yaw)||0),half=.25;

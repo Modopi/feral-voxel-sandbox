@@ -538,7 +538,8 @@ function hud(){
 // The shared readout while driving a machine: speed, height over the ground, power, mass, wheels on the ground, damage.
 function machineReadout(){
  const out=$('flightReadout'),m=runtime.machines.machines.get(runtime.drivingMachineId);
- out.hidden=!m;if(!m)return;
+ // The readout takes the journey line's place while driving.
+ out.hidden=!m;journey.hidden=!!m;if(!m)return;
  const stats=runtime.machines.evaluate(m.id),wheels=runtime.machines.wheelsOnGround(m.id),damaged=m.voxels.filter(v=>v.hp<v.maxHp).length;
  const height=Math.max(0,m.position.y-runtime.surfaceHeight(m.position.x,m.position.z,m.position.y));
  out.textContent=`속도 ${(Math.hypot(m.velocity.x,m.velocity.z)*3.6).toFixed(0)} km/h · 높이 ${height.toFixed(1)} m\n출력 ${stats.powerEUPerSecond.toFixed(1)} EU/s · 질량 ${stats.mass.toFixed(0)} kg\n${wheels.count?`바퀴 접지 ${wheels.ground}/${wheels.count} · `:''}손상 복셀 ${damaged}/${m.voxels.length}`;

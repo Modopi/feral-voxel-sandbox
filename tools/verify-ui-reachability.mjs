@@ -28,6 +28,14 @@ async function open(context,url){
 // An original island save (0.13.0 and earlier format) made by the original island game: placed stone, a plank
 // half-cell, poured water, berries, crystals, arrows and 12 animals (tests/fixtures/island-save-v2.json).
 const legacyIslandSave=()=>fs.readFile(new URL('../tests/fixtures/island-save-v2.json',import.meta.url),'utf8');
+// Tap the first match with a touch. The shared ledger re-renders after each report, so a button found a moment
+// earlier can be replaced before the tap: then find it again (at most three more times).
+const retryTap=page=>async selector=>{
+ for(let i=0;;i++){
+  try{const target=page.locator(selector).first();await target.scrollIntoViewIfNeeded();const box=await target.boundingBox();assert(box,selector);await page.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);return;}
+  catch(e){if(i>=3||!/not attached|detached/.test(e.message))throw e;await page.waitForTimeout(200);}
+ }
+};
 const present=(page,ids)=>page.evaluate(ids=>ids.filter(id=>!document.getElementById(id)),ids);
 try{
  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:1});
@@ -168,7 +176,7 @@ try{
  assert.deepEqual(fconv.reputation,[30,-5,0]);assert.equal(fconv.original,frontierSave.length,'original frontier save untouched');assert(fconv.generation,'converted world saved in the shared format');
  assert(fconv.unmapped.includes('경험치·레벨')&&fconv.unmapped.includes('아이템'),'what could not move is listed');assert(fconv.things>=30,'campaign things in the scene');
  check(report.frontier,'original frontier save converts onto the runtime with its campaign, region terrain and items',{prepared:'old-engine frontier save fixture (tests/fixtures/frontier-save-v2.json)',converted:fconv});
- const ftap=async selector=>{await fpage.locator(selector).first().scrollIntoViewIfNeeded();const box=await fpage.locator(selector).first().boundingBox();assert(box,selector);await fpage.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);};
+ const ftap=retryTap(fpage);
  await ftap('#journeyHUD');assert.equal(await fpage.locator('#frontierTitle').textContent(),'여정과 발견');
  assert.deepEqual(await fpage.$$eval('[data-campaign-page]',b=>b.map(x=>x.textContent)),['목표','야영지','신호망','원정']);
  assert.match(await fpage.locator('#frontierContent').textContent(),/기존 개척 원정 저장을 옮겼습니다/);
@@ -184,9 +192,11 @@ try{
  const talked=await fpage.evaluate(()=>{const m=FERAL.runtime.modules['first-signal'],v=m.region.villages[0];return FERAL.moduleViews[0].interact({kind:'module',id:`first-signal/village:${v.id}`,distance:2,point:FERAL.runtime.player});});
  assert(talked);await fpage.waitForTimeout(300);assert.equal(await fpage.locator('#frontierTitle').textContent(),'공동체');
  assert.equal(await fpage.locator('.villageRow').count(),2);const crystal=await fpage.evaluate(()=>FERAL.runtime.progression.count('mana_crystal_ore'));
- await fpage.evaluate(()=>FERAL.runtime.progression.grant({raw_timber:4},{claimId:'ui-check:trade'}));await fpage.evaluate(()=>FERAL.ledger.render());
- await ftap('.villageRow [data-action=trade]');await fpage.waitForTimeout(300);
- assert.equal(await fpage.evaluate(()=>FERAL.runtime.progression.count('mana_crystal_ore')),crystal+2,'trade: timber 4 → crystal 2');
+ // Put the player back beside the village (physics may have moved them since) before trading.
+ await fpage.evaluate(()=>{const rt=FERAL.runtime,m=rt.modules['first-signal'],v=m.region.villages[0],w=m.world(v),x=w.x+3,z=w.z+2;Object.assign(rt.player,{x,z,vx:0,vz:0,y:rt.atlas.heightAt(x,z)+.1});rt.progression.grant({raw_timber:4},{claimId:'ui-check:trade'});FERAL.ledger.render();});
+ await fpage.waitForTimeout(300);await ftap('.villageRow [data-action=trade]');
+ await fpage.waitForFunction(c=>FERAL.runtime.progression.count('mana_crystal_ore')>=c+2,crystal,{timeout:3000}).catch(()=>{});
+ assert.equal(await fpage.evaluate(()=>FERAL.runtime.progression.count('mana_crystal_ore')),crystal+2,`trade: timber 4 → crystal 2 (${await fpage.locator('#toast').textContent()})`);
  await fpage.screenshot({path:new URL('frontier-village.png',out).pathname});await ftap('#frontierClose');
  check(report.frontier,'village conversation and trade through the shared ledger',{prepared:'player placed beside the first village; 4 timber granted'});
  // Travel by the map: one food to the next region's camp, no reload.
@@ -211,8 +221,8 @@ try{
  assert.equal(mconv.original,machineSave.length,'original machine save untouched');assert(mconv.generation,'converted world saved in the shared format');
  assert.deepEqual(mconv.unmapped,['부서진 부품','떨어져 나간 부품','시험장 재료']);assert.deepEqual([mconv.wall,mconv.scrap],['stone','iron_scrap_block']);
  check(report.machine,'old machine field save converts onto the runtime: the part group on the core, health shares, the field kit; what could not move is listed',{prepared:'old field page save fixture (tests/fixtures/machine-save-v1.json)',converted:mconv});
- const mtap=async selector=>{await mpage.locator(selector).first().scrollIntoViewIfNeeded();const box=await mpage.locator(selector).first().boundingBox();assert(box,selector);await mpage.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);};
- const tapText=async text=>mtap(`#frontierContent button:text-is("${text}")`);
+ const mtap=retryTap(mpage);
+ const tapText=text=>mtap(`#frontierContent button:text-is("${text}")`);
  await mpage.evaluate(()=>FERAL.ledger.open('machine'));await mpage.waitForTimeout(300);
  await tapText('경량 예제 불러오기');await mpage.waitForTimeout(300);
  const example=await mpage.evaluate(()=>[...FERAL.runtime.machines.machines.values()].filter(m=>m.fieldExample).map(m=>[m.name,m.voxels.length]));
@@ -234,9 +244,9 @@ try{
  await mpage.screenshot({path:new URL('machine-drive.png',out).pathname});
  await mtap('#interactBtn');await mpage.waitForTimeout(300);assert.equal(await mpage.evaluate(()=>FERAL.runtime.drivingMachineId),null,'leave through the shared interact button');
  await mpage.evaluate(()=>FERAL.ledger.open('machine'));await mpage.waitForTimeout(300);await tapText('선택한 기계를 출발 패드로');await mpage.waitForTimeout(500);
- const back=await mpage.evaluate(id=>{const m=FERAL.runtime.machines.machines.get(id);return Math.hypot(m.position.x-.25,m.position.z-5.25);},exampleId);
- assert(back<.5,`back at the start pad (${back} m)`);await machine.close();
- check(report.machine,'drive the example with the shared readout, leave, and return it to the start pad',{drive,back});
+ const returned=await mpage.evaluate(id=>{const m=FERAL.runtime.machines.machines.get(id);return Math.hypot(m.position.x-.25,m.position.z-5.25);},exampleId);
+ assert(returned<.5,`back at the start pad (${returned} m)`);await machine.close();
+ check(report.machine,'drive the example with the shared readout, leave, and return it to the start pad',{drive,returned});
 
  // Basic island: the same runtime and screen as the expedition (island map preset with sandbox rules).
  // An original island save is converted once; the original key stays untouched.
