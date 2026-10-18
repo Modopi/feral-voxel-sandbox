@@ -1,5 +1,5 @@
 // Impact breaking on the unified runtime (S2c4): fast loose objects and machines wear what they hit by the
-// frontier rule (impact.js / impact-physics.js) — terrain cells, other objects, machine voxels and themselves.
+// frontier rule (impact.js) — terrain cells, other objects, machine voxels and themselves.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { ExpeditionRuntime } from '../app/src/main/assets/content-runtime/runtime.js';

@@ -19,7 +19,6 @@ import {
   skinVoxels,
 } from "../app/src/main/assets/character-body.js";
 import { characterModel } from "../app/src/main/assets/character-model.js";
-import { Frontier } from "../app/src/main/assets/frontier/model.js";
 function setup(type = 0) {
   const w = new World(2);
   w.surface = () => 10;
@@ -167,14 +166,12 @@ test("all human roles share structural capabilities while detailed skin and bone
     assert.deepEqual(restored.status().functions, b.status().functions);
   }
 });
-test("training body belongs to persistent region state and rejects malformed structural saves", () => {
-  const s = new Frontier(1),
-    b = new CharacterBody(characterModel());
+test("character structural saves round-trip and malformed structural damage is rejected", () => {
+  const b = new CharacterBody(characterModel());
   b.damageBone("armR:0", 24);
-  s.region.trainingBody = b.save();
-  const copy = Frontier.load(JSON.parse(JSON.stringify(s.save())));
-  assert.deepEqual(copy.region.trainingBody, b.save());
-  const invalid = JSON.parse(JSON.stringify(s.save()));
-  invalid.regions[s.key].trainingBody.structure.hp["unknown:0"] = 0;
-  assert.throws(() => Frontier.load(invalid), /structural damage/);
+  const copy = new CharacterBody(characterModel(), JSON.parse(JSON.stringify(b.save())));
+  assert.deepEqual(copy.save(), b.save());
+  const invalid = JSON.parse(JSON.stringify(b.save()));
+  invalid.structure.hp["unknown:0"] = 0;
+  assert.throws(() => new CharacterBody(characterModel(), invalid), /structural damage/);
 });

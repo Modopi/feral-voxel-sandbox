@@ -23,23 +23,21 @@ test('every world opens the one game session page; the launcher is a separate pa
 });
 
 test('maps share the shell module instead of keeping their own screen code', () => {
-  const expedition = read('content-runtime/game.js'), island = read('main.js'), frontier = read('frontier/view.js'), shell = read('shell.js');
+  // Every world but the machine field plays on content-runtime/game.js (the frontier engine was removed in 0.16.0).
+  const expedition = read('content-runtime/game.js'), shell = read('shell.js');
   for (const name of ['createInput', 'createNotifier', 'initSettings', 'bindMenuTabs', 'showPauseScreen', 'bindBackground', 'showMovementState', 'changeStance', 'changeSprint', 'GameWindow', 'mountFieldHUD', 'setVitals'])
     assert.match(shell, new RegExp(`export (?:function|class) ${name}\\b`), `shell exports ${name}`);
   for (const name of ['createInput', 'createNotifier', 'initSettings', 'bindMenuTabs', 'showMovementState', 'changeStance'])
     assert(new RegExp(`\\b${name}\\b[^;]*from '\\.\\./shell\\.js'`, 's').test(expedition), `expedition uses ${name}`);
-  for (const name of ['createInput', 'createNotifier', 'initSettings', 'bindMenuTabs', 'showMovementState', 'changeStance'])
-    assert(new RegExp(`\\b${name}\\b[^;]*from "\\./shell\\.js"`, 's').test(island), `island/frontier uses ${name}`);
   for (const shared of ['inventory-ui.js', 'hud-editor.js'])
     assert(expedition.includes(`'../${shared}'`), `expedition uses ${shared}`);
-  assert.match(frontier, /GameWindow[^;]*from "\.\.\/shell\.js"/s);
-  assert.match(frontier, /mountFieldHUD[^;]*from "\.\.\/shell\.js"/s);
+  assert.match(expedition, /GameWindow[^;]*from '\.\.\/shell\.js'/s);
+  assert.match(expedition, /mountFieldHUD[^;]*from '\.\.\/shell\.js'/s);
   const runtimeFiles = fs.readdirSync(new URL('content-runtime/', ASSETS));
   assert.deepEqual(runtimeFiles.filter(f => f.endsWith('.css') || f.endsWith('.html')), [], 'no map-only stylesheet or page');
   assert(!runtimeFiles.includes('entry.js'), 'the separate expedition screen is gone');
   for (const old of ['toastQueue', 'movePad', 'panelList', 'openBag\')', 'aimLabel', 'actionProgress', 'function holdButton', 'function showToast'])
     assert(!expedition.includes(old), `expedition does not rebuild ${old}`);
-  assert(!island.includes('function holdButton') && !island.includes('function persistSettings'), 'island moved its controls and settings to the shell');
 });
 
 test('the update package stays under the native file limit', () => {

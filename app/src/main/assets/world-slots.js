@@ -30,9 +30,9 @@ export const PRESETS = {
     rules: { survival: false, sandbox: true, starterKit: true, dropOnDeath: true },
   },
   frontier: {
-    name: "첫 신호", summary: "야영지 성장 · 신호망 복원 · 자유 원정", engine: "frontier", terrain: "frontier",
-    description: "지역을 오가며 마을과 협력하고 세 신호를 복원하는 원정입니다. 아직 통합 전이라 바꿀 수 있는 설정이 없습니다.",
-    rules: {},
+    name: "첫 신호", summary: "야영지 성장 · 신호망 복원 · 자유 원정", engine: "runtime", terrain: "frontier", modules: ["first-signal"],
+    description: "바다로 나뉜 지역 섬을 오가며 마을과 협력하고 세 신호를 복원하는 원정입니다. 지역 사이는 식량 1개로 이동하거나 기계로 날아 건넙니다.",
+    rules: { survival: true, dropOnDeath: false },
   },
   machine: {
     name: "기계 시험장", summary: "BETA · 기계 조립 시험", engine: "machine", terrain: "machine-field",
@@ -61,7 +61,8 @@ export function worldConfig(w) {
     const saved = stored?.rules?.[key];
     rules[key] = typeof saved === "boolean" ? saved : value;
   }
-  return { configVersion: CONFIG_VERSION, preset: w.type, seed: w.seed, terrain: { generator: preset.terrain }, rules };
+  // Modules belong to the preset (docs/ARCHITECTURE.md §5): they are always taken from it, never from a stored copy.
+  return { configVersion: CONFIG_VERSION, preset: w.type, seed: w.seed, terrain: { generator: preset.terrain }, rules, modules: [...(preset.modules ?? [])] };
 }
 
 export function listWorlds(store) {
@@ -174,7 +175,7 @@ export function deleteWorld(store, id) {
   store.setItem(CATALOG, JSON.stringify(rows.filter((w) => w.id !== id)));
   store.removeItem(saveKey(w));
   // Worlds on the one runtime keep two save generations next to the original key.
-  if (w.type === "expedition" || w.type === "island") {
+  if (PRESETS[w.type]?.engine === "runtime") {
     store.removeItem(saveKey(w) + ".a");
     store.removeItem(saveKey(w) + ".b");
   }

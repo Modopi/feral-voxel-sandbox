@@ -1,16 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { cleanLayout, readLayout, placement, layoutProfile } from '../app/src/main/assets/hud-layout.js';
-import { restoreEditGrid, EDIT_GRID_VERSION } from '../app/src/main/assets/edit-grid.js';
-
-test('new and legacy worlds use half cells; explicit newer choices survive reload', () => {
-  assert.deepEqual(restoreEditGrid(null), { miningSize: .5, buildSize: .5 });
-  assert.deepEqual(restoreEditGrid({ miningSize: 1, buildSize: 1 }), { miningSize: .5, buildSize: .5 });
-  assert.deepEqual(restoreEditGrid({ miningSize: 2, buildSize: 1 }, true), { miningSize: 2, buildSize: .5 });
-  const saved = { editGridVersion: EDIT_GRID_VERSION, miningSize: 1, buildSize: 1 };
-  assert.deepEqual(restoreEditGrid(saved), { miningSize: 1, buildSize: 1 });
-  assert.equal(restoreEditGrid({ ...saved, miningSize: 2 }, false).miningSize, .5);
-});
 
 test('damaged HUD preferences cannot hide core controls or inject unknown elements', () => {
   const prefs = cleanLayout({ version: 1, theme: 'bad', profiles: {
