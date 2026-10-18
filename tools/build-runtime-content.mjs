@@ -77,7 +77,9 @@ export async function loadAssetLibrary(id) {
     ensure(!/\b(?:process|Buffer)\.|\brequire\s*\(|['"]node:/.test(source), `Node-only dependency in ${helper}`);
     const imports = [...source.matchAll(/\b(?:from\s*|import\s*\(?\s*)['"]([^'"]+)['"]/g)].map(match => match[1]);
     for (const specifier of imports) ensure(HELPERS.some(name => specifier === `./${name}.mjs`), `Unpackaged dependency ${helper}: ${specifier}`);
-    files.set(`voxel/${helper}.mjs`, source);
+    // The Android asset interceptor serves only .js as JavaScript; module scripts with any other
+    // MIME are rejected, so the browser copy changes nothing but the sibling import extension.
+    files.set(`voxel/${helper}.js`, source.replace(/(\b(?:from\s*|import\s*\(?\s*)['"]\.\/[a-z-]+)\.mjs(['"])/g, '$1.js$2'));
   }
   return { files, assetCount: library.size, counts: audit.counts };
 }

@@ -1,0 +1,145 @@
+{
+  "version": "0.12.1",
+  "assets": "Android app MIME/CSP rules",
+  "scope": "Chromium SwiftShader with touch input. Prepared items/positions are listed per check; this is not Android hardware or normal-progression evidence.",
+  "expedition": [
+    {
+      "name": "loading progress stages and boot under Android asset rules",
+      "stages": [
+        "건축물 모델을 불러오는 중 · 10%",
+        "설치한 설비를 불러오는 중 · 65%",
+        "물리 엔진을 준비하는 중 · 82%",
+        "탐험을 시작하는 중 · 100%"
+      ],
+      "bootTimings": [
+        {
+          "stage": "게임 파일을 불러오는 중",
+          "ms": 172
+        },
+        {
+          "stage": "저장을 확인하는 중",
+          "ms": 5
+        },
+        {
+          "stage": "건축물 모델을 불러오는 중",
+          "ms": 201
+        },
+        {
+          "stage": "세계와 생태계를 구성하는 중",
+          "ms": 52
+        },
+        {
+          "stage": "설치한 설비를 불러오는 중",
+          "ms": 3
+        },
+        {
+          "stage": "장면을 준비하는 중",
+          "ms": 36
+        },
+        {
+          "stage": "물리 엔진을 준비하는 중",
+          "ms": 91
+        },
+        {
+          "stage": "탐험을 시작하는 중",
+          "ms": 11
+        }
+      ]
+    },
+    {
+      "name": "sprint button inside viewport at three sizes",
+      "layout": [
+        {
+          "width": 390,
+          "height": 844,
+          "sprint": {
+            "x": 206.53125,
+            "y": 781,
+            "w": 83.46875,
+            "h": 43
+          }
+        },
+        {
+          "width": 844,
+          "height": 390,
+          "sprint": {
+            "x": 635.953125,
+            "y": 330,
+            "w": 92.046875,
+            "h": 45
+          }
+        },
+        {
+          "width": 360,
+          "height": 640,
+          "sprint": {
+            "x": 176.53125,
+            "y": 577,
+            "w": 83.46875,
+            "h": 43
+          }
+        }
+      ]
+    },
+    {
+      "name": "touch sprint toggle",
+      "walkM": 3.1991622190849323,
+      "sprintM": 4.718046851470451
+    },
+    {
+      "name": "touch machine descend/brake",
+      "prepared": "machine created by script",
+      "brake": true,
+      "pitch": -1
+    },
+    {
+      "name": "warning banner and toast queue",
+      "toasts": [
+        "첫 번째 알림",
+        "두 번째 알림",
+        "세 번째 알림"
+      ]
+    },
+    {
+      "name": "research pause and resume",
+      "prepared": "samples granted",
+      "pausedWork": 1.6833333333333322
+    },
+    {
+      "name": "craft queue batch/prioritize/cancel",
+      "prepared": "inputs granted",
+      "recipe": "make_bark_cup"
+    },
+    {
+      "name": "tool durability and translated reasons"
+    },
+    {
+      "name": "reward marker, claim, journal, device details and supply disconnect",
+      "prepared": "teleport to dungeon; dead supply link injected",
+      "template": "root_manor",
+      "supplyInjected": true
+    },
+    {
+      "name": "module load failure shows retry instead of endless loading",
+      "text": "게임 파일을 불러오지 못했습니다. 다시 시도하거나 게임 버전을 바꿔 보세요.",
+      "retry": true,
+      "runtimeFailed": 1
+    }
+  ],
+  "island": [
+    {
+      "name": "empty-hand observe lens"
+    },
+    {
+      "name": "sandbox water tool via menu and use button",
+      "waterBefore": 4571,
+      "waterAfter": 4576
+    },
+    {
+      "name": "minimap setting and discovery toast",
+      "prepared": "teleport to landmark",
+      "landmark": "잊힌 관측소"
+    }
+  ],
+  "errors": []
+}

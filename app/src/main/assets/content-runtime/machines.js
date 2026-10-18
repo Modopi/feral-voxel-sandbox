@@ -1,4 +1,4 @@
-import { VoxelAssetBuilder } from './voxel/authoring.mjs';
+import { VoxelAssetBuilder } from './voxel/authoring.js';
 import { components as connectedGroups, massProperties } from '../structure.js';
 import { TYPES as LEGACY_PARTS } from '../machine/model.js';
 import { MATERIAL_EFFECT_RULES } from './material-effects.js';

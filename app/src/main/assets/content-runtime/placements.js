@@ -1,6 +1,6 @@
 import { loadAsset } from './assets.generated.js';
-import { flattenAsset, boundsOf } from './voxel/model.mjs';
-import { assertAuthoringInvariant } from './voxel/authoring.mjs';
+import { flattenAsset, boundsOf } from './voxel/model.js';
+import { assertAuthoringInvariant } from './voxel/authoring.js';
 
 const EPS=1e-7,GRID=.03125,ACCESS_M=4,MAX_FIXTURES=256;
 const clone=x=>structuredClone(x),ok=x=>({ok:true,...x}),no=reason=>({ok:false,reason});

@@ -1,7 +1,7 @@
 import * as T from '../vendor/three.module.js';
 import {ASSETS, loadAssetLibrary} from './assets.generated.js';
 import {buildPartMeshes} from './render-surfaces.js';
-import {flattenAsset} from './voxel/model.mjs';
+import {flattenAsset} from './voxel/model.js';
 import {animateCreatureModel} from './creature-animation.js';
 import {animateBossModel,bossLogicalPart} from './boss-animation.js';
 export {T};

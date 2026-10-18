@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import R from '../app/src/main/assets/vendor/rapier/rapier.js';
-import {AssetCollisionWorld} from '../app/src/main/assets/content-runtime/voxel/physics.mjs';
+import {AssetCollisionWorld} from '../app/src/main/assets/content-runtime/voxel/physics.js';
 import {WorldPlacements} from '../app/src/main/assets/content-runtime/placements.js';
 import {FixturePhysicsBridge} from '../app/src/main/assets/content-runtime/fixture-physics.js';
 import {Progression} from '../app/src/main/assets/content-runtime/progression.js';

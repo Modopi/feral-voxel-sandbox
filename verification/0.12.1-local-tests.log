@@ -1,0 +1,513 @@
+ok 1 - every item and prerequisite has a route without starter items in both game modes
+ok 2 - every recipe executes from an empty bag using actual mining, regrowth, animals and prerequisite crafts
+ok 3 - extinction recovery consumes fertile habitat, stays away from player and survives save
+ok 4 - a single region can renew timber, building minerals and research, and reconstruct relics without a boss
+ok 5 - wing lift scales with airspeed squared, loses lift after stall, and passive force never supplies energy
+ok 6 - internal hull faces do not multiply drag, and reversed airflow reverses drag
+ok 7 - elevator, fin and opposite wing deflections create pitch, yaw and roll forces in the commanded direction
+ok 8 - a connected craft takes off from a runway using its propeller and wings; output is retained at neutral stick
+ok 9 - asymmetric wing loss changes real angular motion; unpiloted panels and wind still produce forces
+ok 10 - aircraft parts use research and shared inventory, including atomic kit crafting
+ok 11 - only crawling fits a half-metre tunnel; standing remains blocked until outside, including camera height
+ok 12 - crouching fits a metre tunnel; sprint is disabled in low stances and crawling cannot jump
+ok 13 - standing clearance also checks moving assemblies, and the physics capsule fits the chosen stance
+ok 14 - destroying the connected motor removes propeller thrust while the intact craft accelerates
+ok 15 - MainActivity asset rules are parsed from the shipped native source
+ok 16 - every script and stylesheet the game loads is served with a usable MIME on Android
+ok 17 - content expedition does not depend on network fetches the app CSP blocks
+ok 18 - SDK rejects overlapping add atomically instead of repairing the existing model
+ok 19 - invalid SDK mutations leave model state unchanged
+ok 20 - explicit replace transfers only intersecting volume to the new material
+ok 21 - explicit fill preserves occupied material and inserts only empty volume
+ok 22 - removal creates a real cavity with conserved remaining volume and local pivot
+ok 23 - articulated children may overlap other parts while same-part additions stay exclusive
+ok 24 - corrupt imported occupancy is rejected and never normalized as a side effect
+ok 25 - tool provenance is runtime-created identity, not a copied metadata label
+ok 26 - SDK copies input and exported data to prevent accidental alias mutations
+ok 27 - actual Rapier: distinct owners collide and exchange impulses
+ok 28 - actual Rapier: articulated child bodies of one owner pass through each other
+ok 29 - actual Rapier: same-owner colliders on one rigid body do not self-resolve
+ok 30 - actual Rapier: registered terrain and external terrain support dynamic assets
+ok 31 - actual Rapier: local cuboid holes remain empty instead of using a combined AABB
+ok 32 - actual Rapier: more than sixteen independent owners have no collision-mask aliases
+ok 33 - actual Rapier: kinematic external bodies push dynamics while same-owner parts are ignored
+ok 34 - ownership cleanup is selective and handle reuse does not inherit removed ownership
+ok 35 - invalid mass, shape, pose and friction are rejected without leaving physics bodies
+ok 36 - overlap removal preserves union volume and gives later material ownership
+ok 37 - duplicate boxes collapse and partial opaque contacts lose only hidden faces
+ok 38 - independent joint parts retain overlapping geometry and pivots
+ok 39 - same species instances receive distinct collision ownership paths
+ok 40 - adjacent cells of one translucent liquid have no internal seam
+ok 41 - branch preparation preserves native version and creates unique game builds
+ok 42 - all campaign costs and rewards use reachable items; nearby regions guarantee all channels
+ok 43 - a fresh empty-bag campaign finishes all chapters, all three routes and all repeatable sorties using real sources
+ok 44 - campaign commands enforce location, prerequisites, atomic inventory and one-time rewards
+ok 45 - new campaign state migrates old saves and survives travel, death and malformed-save checks
+ok 46 - telegraphs and collisions share all five shapes including safe ring centres and charge flanks
+ok 47 - food buffs expire without stacking and field workshop restores worn equipment at a real cost
+ok 48 - jointed locomotion and crouch/crawl keep a supporting boot on the ground; reset clears gestures
+ok 49 - all roles have connected elbow/knee/ankle rigs and share immutable geometry without sharing poses
+ok 50 - an external antler hit removes its owning physical cell and decoration, including after save/load
+ok 51 - every species detail is owned by a valid saved cell; lost limbs leave no floating eyes/feet/ears
+ok 52 - dense detailed herds stay within both GPU instance buffer capacities
+ok 53 - strike HP budget reaches surface; pierce and impulse reach actual internal part with no duplicate energy
+ok 54 - resistant front shell stops internal damage; thickness, finite depth and exact rotation matter
+ok 55 - real Rapier external cuboid blocks all modes before owner while exact gaps remain open
+ok 56 - weapon patterns are separate from the 53 existing equipment results and reference only catalog materials
+ok 57 - quote enforces the selected material recipe research and actual station, then crafts with real costs and time
+ok 58 - equipping, cooldown, durability, serialization, death drain and recovery preserve the exact weapon record
+ok 59 - rack holds eight carried weapons plus one equipped item and retains overflow for retry
+ok 60 - atlas named random stream exactly matches SHA256 first 53 bits including negative/large coordinates
+ok 61 - initial spawn is dry grove tier one and starter resources are accessible without inventory grants
+ok 62 - negative chunk coordinates and exact boundaries map edits to unique cells and packed indices
+ok 63 - edited terrain, deep cells and high construction survive unloading and JSON reload
+ok 64 - visit ordering and bounded active residency do not change generated cells or regions
+ok 65 - four directional high-tier anchors are isolated by connected dry baseline corridors
+ok 66 - moving a reservation invalidates old and new chunks and persists its new position
+ok 67 - capsule caves actually carve rock, preserve roof and respect structure reservations
+ok 68 - building candidates identify original templates and preserve deterministic ruin variants
+ok 69 - invalid cells, unknown saves and non-finite loading budgets fail explicitly
+ok 70 - harvest candidates agree with the actual environment at their rounded position
+ok 71 - incremental chunks remain private until complete and match pre-optimization bytes
+ok 72 - edits during incremental generation are reflected at atomic chunk publication
+ok 73 - finite flowing liquid conserves volume, reagent and thermal energy across negative chunk boundaries
+ok 74 - withdrawing natural water persists depletion and building cannot erase a live liquid cell
+ok 75 - partial burning survives reload, spreads through heat and never refills fuel after extinguishing
+ok 76 - acid damage is bounded by available reagent and thermal energy actually damages vulnerable material
+ok 77 - environment simulation is fixed-step, read-only queries do not advance it, and long catchup is bounded
+ok 78 - environment snapshots are independent and resume the same fluid and fire evolution
+ok 79 - editing a chunk boundary refreshes both exposed meshes without editing the neighbor voxels
+ok 80 - 96 chunk residency selects all 49 nearby surface layers before remote underground or sky layers
+ok 81 - default loading cell budget can use the remaining time instead of stopping at 2048 cells
+ok 82 - environment destruction emits one support notification; ordinary edits and restoration do not
+ok 83 - all eight actual boss rigs keep pivots/hierarchy while 24 phase poses and all 32 cast poses differ
+ok 84 - actual locomotion, broken organs and frozen grounded death poses never mutate gameplay or lose nested wings/rings
+ok 85 - logical boss damage regions use real part ancestry and authored weakpoint anchors
+ok 86 - four explicit boss variants animate through their derived definitions on the preserved base rigs
+ok 87 - Rapier reads the same animated parent/joint matrices and omitted real parts as rendering
+ok 88 - death clock survives save/reload and resumed animation uses elapsed time instead of replaying the fall
+ok 89 - inside sphere warning retains exact height/floor boundaries while limiting full-screen tint
+ok 90 - sphere countdown represents windup plus actual projectile travel and stays continuous at launch
+ok 91 - BossView renders all explicit T9/T10 variant cast volumes from the base asset identity
+ok 92 - all eight bosses use real HP transitions through all 24 authored phases
+ok 93 - four reviewed variants preserve the eight prototypes and use explicit tier-bound definitions
+ok 94 - variant saves retain encounter identity and pending reposition; defeat keeps the original reward key
+ok 95 - variant movement uses saved phase triggers, stops at consumed gimmicks or blocked sweeps
+ok 96 - all 32 authored skills actually cast, spend channel EU, share telegraph/hit shape and enter recovery
+ok 97 - same-owner multiple target parts receive at most one hit per cast and fixed aim can be evaded
+ok 98 - 3D height/OBB/SAT use actual volumes, preserving flight and machine holes
+ok 99 - terrain blocks targeting, active attacks and moving projectiles
+ok 100 - exterior shell hits reduce total HP and exposed core break changes skills without forcing death
+ok 101 - authored phase mechanics include water/draining, growth cover, heat exposure, shields and orbit
+ok 102 - terrain solid lookups reuse a spatial effect index and invalidate it on boss state changes
+ok 103 - organic combat recovery consumes calories; inorganic repair consumes supplies and interrupts on hit
+ok 104 - glider alternates actual altitude and grounded windows with phase-specific limits
+ok 105 - casting save/reload replays full warning without spending twice or repeating owner damage; inactive chunks freeze
+ok 106 - defeat creates a durable entitlement and rewards require idempotent successful transfer
+ok 107 - disengagement does not refill energy, restore parts, regenerate robots or respawn defeated bosses
+ok 108 - gimmick forced landing takes priority over an existing schedule cursor
+ok 109 - area damage splits a finite EU budget across distinct owners and saves remaining budget
+ok 110 - Three boss view renders all 32 actual 3D skill volumes without changing simulation state
+ok 111 - boss view tracks actual projectile, phase water and breakable growth-wall bounds
+ok 112 - weakpoint overlays follow authored part matrices and exposure without mutating asset materials
+ok 113 - multi-part allocations consume one total HP budget and reject duplicated structural damage
+ok 114 - authored communal residents initialize once, preserve corpses, and never invent quest/trial rewards
+ok 115 - trade checks civilization, actual distance, visibility, hostility and finite inventory
+ok 116 - feeding charges actual food once and rest only invokes calorie-based player healing state
+ok 117 - three paid timed contributions reward only through progression and survive each save boundary
+ok 118 - only live civilized communities accept activities and queued cancellations grant no contribution
+ok 119 - repair consumes finite material after elapsed work, pauses out of range and restores without replay
+ok 120 - invalid actions and invalid time cannot mutate balances
+ok 121 - activity request survives independently newer progression save without paying or rewarding twice
+ok 122 - explicit request IDs cannot be reused for different actions
+ok 123 - all 34 authored SDK species allocate exactly existing mass with one owner for joint union volume
+ok 124 - actual animated leg transfers source boxes, posed world transform and exact budget to a new inert owner
+ok 125 - physics snapshot overrides source animation with actual clamped body pose and inherited velocity
+ok 126 - multiple cuts and save restoration conserve total mass with idempotent fragment claims and one corpse reward
+ok 127 - internal core failure preserves living exterior and mass while reducing functions
+ok 128 - offscreen damage survives save and lazily reconstructs its recorded pre-cut pose once
+ok 129 - mass ledger conflicts and overdraw never create a duplicate fragment or alter world sources
+ok 130 - real SDK limb reaches actual Rapier cuboids with exact mass, falls, and preserves its landed pose across saves
+ok 131 - all 34 actual species survive internal core failure without exterior loss or duplicate mass
+ok 132 - all 34 canonical species produce distinct typed bodies and finite serializable states
+ok 133 - natural healing charges actual restored HP and never increases low calorie balance
+ok 134 - inorganic creatures never heal naturally; repair consumes one material after full duration
+ok 135 - region initialization and corpse rewards never duplicate after save or repeated ensure
+ok 136 - safe bypass regions exclude hostile predators at initial placement
+ok 137 - dungeon food, water, room limits and permanent extinction survive a two-hour offline run
+ok 138 - living outdoor and closed dungeon ecology remains finite and bounded for two hours
+ok 139 - births debit both parents, require room capacity and persist their serial
+ok 140 - whole-body damage applies once while structural injury changes movement without calorie regrowth
+ok 141 - attack telegraphs survive reload, can be dodged, and produce exactly one hit
+ok 142 - wall occlusion prevents attacks and solid terrain prevents crossing
+ok 143 - communal trade is finite, atomic and drops only existing personal inventory
+ok 144 - feeding consumes inventory and different frame partitions produce the same state
+ok 145 - invalid saves, invalid time and unknown parts do not silently mutate population
+ok 146 - producer destruction and harvesting share finite food; corpse decomposition conserves edible CP
+ok 147 - migration moves the same individual across an actual boundary and respects closed ecology
+ok 148 - retrying a repair transaction after an independently persisted inventory does not pay twice
+ok 149 - overlay species consume their host allocation instead of adding another ecology budget
+ok 150 - only nearby capped individuals run detailed AI; remote ecology catches up without player hits
+ok 151 - weapon attachment damage disables attack without killing an otherwise viable body
+ok 152 - unclaimed dead creatures remain visible for ray-selected loot and disappear after claiming
+ok 153 - all 34 real art models animate from original pivots with finite joint poses and instance collision ownership
+ok 154 - logical limb loss hides the real model part and removes its collider; death and work poses are explicit
+ok 155 - wounded flying creatures fall even when idle, and amphibious movement uses actual fluid depth
+ok 156 - near-height floor queries and actual collision line-of-sight hooks receive ownership
+ok 157 - all species can die from exterior-only hits or HP damage without breaking core bones
+ok 158 - core and spine faults impair behavior while HP and intact exterior remain alive
+ok 159 - piercing and transmitted impact allocate one HP budget across exterior and internal injuries
+ok 160 - caller structural and energy over-allocation rejects the entire hit before changing HP
+ok 161 - authored armor reduces the whole-body hit once and its broken shell loses that protection
+ok 162 - proposed content links and all self-research bootstrap paths are consistent
+ok 163 - first divinity cannot depend on the relic it must allow players to craft
+ok 164 - missing animal rewards are detected across separate design files
+ok 165 - a valid-looking corridor with its endpoint outside the target room is rejected
+ok 166 - shortening a boss warning below the calculated escape time fails review
+ok 167 - a phase cannot expose its weak point only after an attack absent from that phase
+ok 168 - root manor opens only through powered gate travel; range, pose, collision and destructive bypass persist
+ok 169 - 60 Hz gate operation snaps to the clearance threshold without a floating-point stall
+ok 170 - fixture supply checks a real local output store and drains finite EU into device reserve
+ok 171 - floodworks pump conserves its separate 400L circuit and samples exactly the 4m² pool
+ok 172 - 60 Hz flood pumping reaches the exact 0.05 m safe-depth threshold
+ok 173 - foundry exhausts a finite heat source but has enough finite coolant to reach the safe band
+ok 174 - inertia brake integrates power, speed and position; platform hazard requires feet at its top
+ok 175 - damage hides persistent vane, altar and platform parts without completing or respawning them
+ok 176 - non-axis-aligned vane uses disjoint SDK-filled boxes and changes its physical pose
+ok 177 - breaking the moving platform removes its support without clearing momentum
+ok 178 - destroying a platform lock support releases residual motion without free braking
+ok 179 - all 12 structures expose all 84 rooms, translated entrances, spawn and boss anchors
+ok 180 - starter manor has a deterministic walkable approach outside spawn; large buildings span chunks
+ok 181 - enter -> install joint -> supply held work -> defeat boss -> claim once -> damage -> reload
+ok 182 - archive discovery unlocks research without boss or puzzle; out-of-range collection does not mutate
+ok 183 - legacy paid openings finish without repayment while new saves never gain a timer shortcut
+ok 184 - four explicit boss variants preserve encounter tier and only override the one-time boss reward
+ok 185 - destroying gate or entering alternate rooms never grants boss completion
+ok 186 - failed reward delivery leaves claim unconsumed; successful partial inventory uses progression overflow
+ok 187 - small ruin reuses archive model and requires two persistent observations before research reward
+ok 188 - basin and producer destruction emit one-way ecology events and persist through reload
+ok 189 - Atlas reservation and generated sites are deterministic and preserve prototype combat tier
+ok 190 - procedural footprints reject steep/wet/bypass sites and keep overlapping buildings apart
+ok 191 - candidate retries are bounded and deterministic while existing placements survive reload
+ok 192 - cached broad phase retains every authored solid center and invalidates after new structures and asset replacement
+ok 193 - actual liquid geometry has volume-exact height, outward winding and no internal shared faces
+ok 194 - opaque neighbor hides its liquid face; acid color reflects the saved reagent fraction
+ok 195 - view uses persisted fluids, burning and heat with bounded instances and never changes game state
+ok 196 - natural water is observed without materialization and a saved depleted surface is not redrawn
+ok 197 - restored fluids create identical geometry and disappear after being withdrawn
+ok 198 - all 10 gear and 3 tool models align their declared hand anchors without altering canonical pivots
+ok 199 - selection respects ownership, active required harvesting tool and all equipped tiers
+ok 200 - camera-held attack, harvesting and rest animation is read-only and disposes replaced geometry
+ok 201 - late asset loads and errors never restore stale equipment or silently substitute another model
+ok 202 - disposing while loading prevents later camera children and geometry allocation
+ok 203 - strike, pierce and impact have distinct pure offsets and restore the original grip
+ok 204 - attack style is captured per strike, preserves state and returns both hands to their original grips
+ok 205 - faith uses real ruin/monastery anchors, proximity and visibility; membership never changes research
+ok 206 - delivery consumes real inputs once and quest reward is one-time across leave/rejoin and reload
+ok 207 - discovery and boss quests require new accepted-time evidence and explicit nearby claim
+ok 208 - independent trial requires paid supply, all three timed actions and 12 seconds; reload preserves progress
+ok 209 - failure reasons cover departure, damage, death and missed windows; each retry pays again
+ok 210 - cannot pass from afar, use large dt, start parallel trials or repeat a reward after failed delivery
+ok 211 - save validation rejects fabricated completed trials, unsupported versions and duplicate active attempts
+ok 212 - save validation keeps faith phases aligned with paid and claimed progression receipts
+ok 213 - reusable recovery fairy is authored through SDK with exclusive occupancy and cosmetic materials
+ok 214 - damage flashes and HP labels expire; loading an old damage timestamp does not replay a hit
+ok 215 - saved death items drive markers, partial recovery keeps its fairy and full recovery removes it
+ok 216 - recovery uses exact three-dimensional ten-metre boundary and describes full inventory without claiming
+ok 217 - many historical deaths and repeated claims stay within visual instance caps without event accumulation
+ok 218 - new death announces retained items, restored ledger does not manufacture recovery or mutate gameplay
+ok 219 - owned DOM overlays are bounded, noninteractive and removed on dispose
+ok 220 - a death holding only crafted weapons still displays a fairy and recovery flight
+ok 221 - unlinked nearby and distant stores remain isolated; explicit paid links carry power and removal stops transfer
+ok 222 - station energy requires directed ports and linked converters; leaving the work site pauses the job
+ok 223 - fuel remains local and finite across range changes, save and link removal
+ok 224 - personal divinity funds the first relic only after explicit reservation at its actual workbench
+ok 225 - legacy nonpositional mode is unchanged; migration quarantines pooled energy instead of assigning it to a distant store
+ok 226 - avatar mana uses paid growth and actual liquid without summing fixed tanks or the cup
+ok 227 - two simulated hours preserve source, storage, dissipation budgets without charging distant or personal stores
+ok 228 - breakage cuts links and repair never silently reconnects; a single player cannot multiply manual power
+ok 229 - legacy queued input and work survive explicit station binding; live reservations cannot move
+ok 230 - support loss replaces fixed owner with actual dynamic compound, falls and lands without granting function
+ok 231 - mid-fall save reload retains owner, authored mass, health, quaternion and momentum then lands
+ok 232 - rotated solids use OBB occupancy and allow objects in the empty corners of their AABB
+ok 233 - destroyed supporting fixture releases its stack under original owners and preserves upper HP
+ok 234 - legacy placement saves migrate to fixed identity; invalid rotation and velocity are rejected
+ok 235 - fixed generator network transfers finite EU to and from a rotated machine host with conserved save state
+ok 236 - rejects out-of-range, incompatible, depleted, and over-capacity transfers without partial ledger writes
+ok 237 - machine panel selects a nearby compatible fixture and calls the explicit 10 EU transfer
+ok 238 - arc_thrower is a normally crafted explicit component, not a motor or geometry-derived function
+ok 239 - forge-to-power bootstrap needs no electrical assembly input; the real engine-generator-battery network charges 120 EU
+ok 240 - shielded shots spend once, preserve blocked receipts, and do not consume reserve while idle
+ok 241 - projectile receipts remain compact and retry-safe past the former 4096-shot limit
+ok 242 - SDK placement debits exact material volume and is separate from component functions
+ok 243 - finite paid fuel moves a real connected cart and stops providing power when exhausted
+ok 244 - ports must be explicit; disconnected motor shape produces no propulsion
+ok 245 - destroying a bridge separates structural groups, preserves momentum and cuts cross-fragment ports
+ok 246 - cargo actually leaves inventory, adds mass and can be returned exactly once per request
+ok 247 - liquid transfer needs a powered pump, preserves litres, and uses inventory fuel
+ok 248 - external physics advances fuel exactly once and persists live corrected pose without geometry rebuilds
+ok 249 - placement rejects external collisions before debit; repair consumes missing material and damage events replay once
+ok 250 - manual push cannot create motion without an actual finite mechanical energy debit
+ok 251 - rotating fragments retain the tangential velocities of their new centers of mass
+ok 252 - imprinting reserves real mana, pauses without the apparatus, and adds actual mitigation once across save
+ok 253 - consecration strengthens an existing property without healing, changing mass or granting a function
+ok 254 - all six energy attacks consume finite resources and retries never deliver damage twice
+ok 255 - water and wind are paid magical attributes; thermal work is bounded by fuel, elapsed time and capacity
+ok 256 - strength and acid upgrades reduce the corresponding real machine damage rather than remaining display-only stats
+ok 257 - machine-mounted imprinter requires routed energy and local relic strengthens with its own finite reserve
+ok 258 - cutting a rotated detached trunk preserves split owners, remaining mass, damage and a single harvest
+ok 259 - severed trunk transfers exact original cell mass and volume with exclusive SDK geometry
+ok 260 - connected foundations, fixed building cells and unknown blocks prevent detachment
+ok 261 - bounded search preserves large connected masses without partial deletion
+ok 262 - two disjoint unsupported branches get independent object owners while grounded branch stays
+ok 263 - saved pose, materials and finite cells restore with no repeated detachment
+ok 264 - failed world mutation restores removed material and creates no object
+ok 265 - invalid saves and unallocated biological fragments cannot create duplicate mass
+ok 266 - actual procedural tree crown detaches after every supporting trunk cell is cut
+ok 267 - mana investments spend existing authored materials, increase avatar capacity and never grant energy
+ok 268 - one owned focus changes capacity; unequip reserves excess without reusable free mana or reserve refill while unequipped
+ok 269 - death-style inventory removal, save and recovery preserve the exact existing mana budget
+ok 270 - cup storage stays separate from avatar mana and cannot bypass its capacity
+ok 271 - investment and focus maxima are bounded and a full capacity investment never charges materials twice
+ok 272 - all 41 installable models consume real items and preserve distinct machine owners
+ok 273 - actual cuboids allow a battery under a table but reject solid overlap without spending
+ok 274 - terrain, support, distance and real building wall checks fail before inventory consumption
+ok 275 - nearby station access, breakage, paid repair and save restoration synchronize progression
+ok 276 - component condition and damaged salvage survive reload without duplicating assemblies or items
+ok 277 - concurrent placements serialize their commits and reject corrupted restore state
+ok 278 - dismantling a supporting table requires packing the fixture resting on it first
+ok 279 - async loading cannot race past the 256 fixture limit
+ok 280 - external actor or rotated-machine overlap rejects before any item is consumed
+ok 281 - geometry and access caches invalidate at exact range boundary and every dynamic pose
+ok 282 - empty inventory bootstraps wood, stone and kiln using actual harvest, samples and timed costs
+ok 283 - harvest requires time, tool, source environment, depletion and persistent unique claim
+ok 284 - inventory debit and energy costs are atomic, overflow remains reclaimable, legacy IDs are rejected
+ok 285 - research pause/save/resume charges samples once; discovered blueprints immediately unlock
+ok 286 - craft reserves inputs, pauses without energy, survives save and never repeats output
+ok 287 - all 39 research nodes execute from samples without discovery, preserving four freely mixed fields
+ok 288 - all 142 crafting contracts execute with finite debited energy and exact item output
+ok 289 - mechanical-electric-mechanical loop never creates energy and battery discharge obeys rated power
+ok 290 - first divinity comes from paid community work, then an intact relic generates at .1 EU/s
+ok 291 - mana condenser and ordinary fluid container work without a preexisting mana item
+ok 292 - machine material properties cannot invent functions or multiply component cores without spending them
+ok 293 - reward claims, kit ownership and save validation reject duplication or invalid state
+ok 294 - manual mechanical supply and a real generator power a mixed-channel recipe with a conserved budget
+ok 295 - acid extraction debits fluid once and stores the unspent chemical energy in the correct tank
+ok 296 - finite mining tool wear persists through save and replacement requires a second crafted tool
+ok 297 - physical workshop access is local, changes atomically and survives reload without duplicating counts
+ok 298 - community activity request retries preserve the original job and consume inputs once across reload
+ok 299 - legacy tick-local assembly caches match uncached stepping and expire between calls
+ok 300 - compatible opaque colors merge in linear RGB without changing any colored face or input
+ok 301 - roughness, metalness, emission, emissive color and transparency remain separate
+ok 302 - original ray grid keeps floor edges, enclosed holes and independently transformed parts
+ok 303 - every canonical model preserves triangle count per part; independent part geometry is never fused
+ok 304 - empty parts allocate nothing and invalid material references fail before GPU resources
+ok 305 - gear crafting, ammo, breakage, repair and save restore form a finite loop
+ok 306 - tools specialize in materials
+ok 307 - limb loss impairs movement; only depleted HP kills once; health is independent of food
+ok 308 - legacy animal and inventory saves migrate without losing materials or injuries
+ok 309 - legacy head loss preserves positive HP while exhausted health or food still kills
+ok 310 - runtime weapon damage, wear, nine-item death overflow and repeated save/recovery share one inventory identity
+ok 311 - crafted weapon material changes only the held working surface and preserves canonical geometry
+ok 312 - worker preparations coalesce to latest immutable snapshot, preserving two generations
+ok 313 - synchronous manual save cancels old worker results including queued error callbacks
+ok 314 - direct store.write also supersedes active and queued autosaves even if manual save fails
+ok 315 - corruption, storage quota and malformed worker response keep previous valid generation
+ok 316 - worker unavailable or startup failure safely falls back, disposed requests never write
+ok 317 - worker validation rejects invalid player data without overwriting saved state
+ok 318 - real background worker roundtrip preserves large Unicode and fractional world data
+ok 319 - actual atlas harvest nodes are compatible with progression source ownership
+ok 320 - zero inventory reaches a researched crafted kit using actual atlas nodes and consumed materials
+ok 321 - all authored dungeons instantiate ecological rooms and their corresponding boss together
+ok 322 - boss, dungeon and progression ledgers survive a full six-system saved reward claim
+ok 323 - runtime structure damage changes both rendered geometry and solid queries after restoration
+ok 324 - actual runtime initializes outdoor creatures on terrain and rejects inedible item consumption
+ok 325 - actual runtime recovers death inventory at 10 metres and keeps partial recovery after save
+ok 326 - runtime mining spends the full harvest time, removes the cell once and preserves depletion after reload
+ok 327 - machine rendered quaternion and gameplay hit identify the same rotated paid voxel without rebuilding on motion
+ok 328 - thermal interaction consumes fuel once and deposits heat rather than duplicating heat and direct damage
+ok 329 - energy channels reach building cells and fixed equipment using actual material resistance
+ok 330 - actual scene renders puzzle gate and keeps damage separate between repeated building instances
+ok 331 - actual scene accepts SDK-authored inline resource geometry outside the canonical manifest
+ok 332 - runtime arc thrower spends and damages once across save retry; LOS is controlled, not physical proof
+ok 333 - paid dungeon lift moves its actual Rapier gate while retaining unchanged building colliders
+ok 334 - actual atlas 0.5m terrain becomes Rapier solids and supports a swept player
+ok 335 - different moving entity blocks player, with actual cuboid gaps left traversable
+ok 336 - child matrixWorld rotates/translates colliders and same entity joints do not self-block
+ok 337 - kinematic entity movement is actually swept against terrain rather than teleported through it
+ok 338 - a boss variant reposition is clamped by its real part sweep and the next tick cancels the blocked move
+ok 339 - structure destruction rebuilds exact renderBoxes; water excluded and translucent glass remains solid
+ok 340 - moving dungeon device parts preserve static colliders and their shared collision owner
+ok 341 - unbounded atlas streaming handles negative distant coordinates and mining revisions
+ok 342 - 64 instance owners remain independent and retain articulated children in the integrated scene
+ok 343 - a collision-limited articulated owner keeps sibling body offsets and its visible root
+ok 344 - moving kinematic owners are blocked by a stationary external player capsule
+ok 345 - phase growth walls use exact shared bounds, block players and disappear when broken; water stays nonsolid
+ok 346 - attack rays exclude only source and target owners, preserving articulated gaps and external solid glass
+ok 347 - actual fluid displacement floats a light wooden hull while paid cargo changes its draft and can sink it
+ok 348 - real machine cuboids fall, collide with terrain, retain physical mass/inertia and skip duplicate model integration
+ok 349 - dynamic assemblies exchange momentum with external owners and rotate on all three axes
+ok 350 - rotated machine damage uses actual cuboids, finite distribution, persistent claims and fragment body rebuilding
+ok 351 - machine OBB respects annular hole and tiny sphere outside a rotated cuboid AABB
+ok 352 - placements become fixed collision before their async render model exists and prevent paid overlapping voxel placement
+ok 353 - a real boss cast damages a rotating dynamic machine once, with actual collider cover blocking another cast
+ok 354 - detached matter uses cell masses, falls through no false leaf solids and reports saved 6DOF pose
+ok 355 - connected paid machine fuel drives actual Rapier forces once and recreated physics restores quaternion, momentum and ledger
+ok 356 - fixture placement checks rotating cuboid occupancy without filling its empty AABB corners
+ok 357 - real WorldObjects detachment feeds exact original mass into Rapier and saves the landed pose
+ok 358 - grabbing applies bounded physical impulses and throwing adds at most the specified work to a moving object
+ok 359 - settled machine cells allow ground contact but reject real 2mm overlaps before payment
+ok 360 - whole-route energy balance allows only scale-sized floating point residue
+ok 361 - harvest candidate cursor preserves find order and retries regrowing nodes
+ok 362 - all ten tiers and four research fields are reached from actual terrain with consumed resources
+ok 363 - failed or corrupted next save retains the previous complete world
+ok 364 - saved generations preserve non-expedition legacy data and reject invalid state
+ok 365 - lossless compressed generations preserve large idempotency ledgers and remain backward compatible
+ok 366 - far signed-coordinate roundtrip retains mining, damage, fixtures, deaths and object owners
+ok 367 - chunk caps, signed floor boundaries and headless model pruning stay bounded across travel
+ok 368 - two-hour inactive ecology catches up once and preserves pending time and identities on reload
+ok 369 - frontier regions are seed-stable and structures retain player edits
+ok 370 - trade and aid are atomic, finite, local, and lead to an alliance without a boss
+ok 371 - distant settlements produce and consume, diplomacy conflicts drain stocks
+ok 372 - raiding breaks alliances and triggers guards; peace restores trade
+ok 373 - boss telegraphs can be dodged, damages the player on impact and rewards only once
+ok 374 - dungeon requires three relay interactions, claims once, and cannot be claimed remotely
+ok 375 - technology is obtainable without boss kills and prerequisite research survives save
+ok 376 - machine editing uses shared resources, connected damaged components change output, no duplication
+ok 377 - travel validates adjacency, location, food and returns to persistent region state
+ok 378 - save roundtrip preserves social, boss, machine and health; rejects malformed states
+ok 379 - starvation and defeat recover at camp without deleting inventory or blueprint
+ok 380 - vehicle movement belongs to the assembly and dismount preserves its world position
+ok 381 - new and legacy worlds use half cells; explicit newer choices survive reload
+ok 382 - damaged HUD preferences cannot hide core controls or inject unknown elements
+ok 383 - custom HUD positions fit resized screens and keep touch buttons usable
+ok 384 - orientation and handedness select independent layouts
+ok 385 - removing a whole foot exterior changes mass and appearance, reduces HP once while preserving support and identity
+ok 386 - a front ray hits coat before bone, then exposed bone; only a full internal fracture disables support
+ok 387 - all head coating can be removed without severing ears or destroying the vital skeleton
+ok 388 - severing the shared rear spine disconnects both hind limbs while front support survives
+ok 389 - surface-only injuries and partial bone damage persist independently through save/load
+ok 390 - old missing feet remain disabled when migrating the legacy all-voxel support policy
+ok 391 - all human roles share structural capabilities while detailed skin and bone damage remain independent
+ok 392 - training body belongs to persistent region state and rejects malformed structural saves
+ok 393 - legacy ordinary exterior hits alone kill by HP with preserved skeleton; HP saves between hits
+ok 394 - legacy core and brain fractures change function without forced death or whole-body disappearance
+ok 395 - legacy spear ray reaches covered bone in one attack and applies its HP budget only once
+ok 396 - legacy impact weapon and physical collisions distribute one finite HP and structural budget
+ok 397 - cutting the last support converts the whole island, retaining material and mining damage
+ok 398 - a second support prevents detachment, and connectivity work resumes after a save
+ok 399 - further cuts split bodies without creating resources or losing angular momentum
+ok 400 - rotated bodies raycast in their own coordinates; nearest terrain can occlude them
+ok 401 - compound collider merging preserves occupied volume and material mass
+ok 402 - saved bodies preserve pose, pins and partial damage; malformed data is rejected
+ok 403 - physical fall causes one resource-conserving impact, resting contact does not keep damaging
+ok 404 - mass-limited grabbing lifts a light object while a heavy stone stays on the ground and can be pushed
+ok 405 - momentum damages contacted actors once and is not triggered by support force
+ok 406 - impact rules forgive small falls, scale with mass, and stronger grips retain weight differences
+ok 407 - animal impact is absorbed by the outer layer before damaging the internal skeleton
+ok 408 - same command produces different acceleration with different mass
+ok 409 - motor damage reduces force, repair restores, blueprint remains unchanged
+ok 410 - wheel damage degrades grip and steering and disconnected motor cannot drive
+ok 411 - collision damages local voxel and remains in bounded world
+ok 412 - resource checks are atomic, mining finite and repair cannot mint resources
+ok 413 - machine save roundtrip and invalid data rejected
+ok 414 - world slots preserve legacy save and isolate create rename delete
+ok 415 - failed catalogue write retains previous world data
+ok 416 - voxel damage survives different targets, time, tool and footprint changes, then clears only destroyed cells
+ok 417 - damage reloads with terrain, rejects stale/corrupt records, and legacy saves have no damage
+ok 418 - mixed-material mining and protected cells use their own hardness without duplicate drops
+ok 419 - gathering has finite/re-growing sources, atomic full-bag failure and deterministic locations
+ok 420 - ruin relays, bonus cache, observations and contracts are persistent one-time progression
+ok 421 - legacy ruin progress migrates and malformed new content is rejected
+ok 422 - new gathering materials close crafting loop and relic tool uses real durability
+ok 423 - animal healing consumes once only when injured and never restores lost limbs
+ok 424 - regression: old five-centimetre foot gap oscillates; swept support stays constant
+ok 425 - stationary floor contact is stable under irregular rendered frame intervals
+ok 426 - jump lands once on exact ground without subsequent floor bounce
+ok 427 - jump clears a one-metre ledge with headroom and holding does not bounce
+ok 428 - removing the support causes a real fall; half-metre platforms stop it exactly
+ok 429 - half-metre stair climb fits the full 1.5 metre body
+ok 430 - a solid one-metre wall blocks walking and a low ceiling blocks jumping
+ok 431 - half-cell edits preserve the other seven children and collapse uniform cells
+ok 432 - tools remove 0.125, 1 and 8 cubic metres on filled terrain
+ok 433 - ray picking and visible half-cell mesh agree on the excavated boundary
+ok 434 - save and load preserve fine terrain and half-height support
+ok 435 - crafting is atomic: missing resources never disappear and outputs are exact
+ok 436 - resource collection enables crafted tools and an unlock cannot be charged twice
+ok 437 - mined drops remain until approached, then collect only once
+ok 438 - voxel damage routes collectable fragments; death yields a separate reward once
+ok 439 - inventory, crafted unlocks and uncollected drops survive serialization
+ok 440 - release publication happens before stable advances and failed uploads do not advance it
+ok 441 - native release guard compares app codes independently of game codes
+ok 442 - browser catalog preserves all six canonical documents and freezes definitions
+ok 443 - lazy browser assets preserve every canonical model and manifest metadata
+ok 444 - instanced environment loads a complete reusable hierarchy with independent owner identities
+ok 445 - packaged authoring SDK can safely edit a copy without mutating cached source assets
+ok 446 - runtime package is deterministic and committed files equal canonical compilation
+ok 447 - read-only package check rejects a modified generated file without repairing it
+ok 448 - canonical source hash corruption aborts compilation before outputs are written
+ok 449 - complete browser package stays within existing native update file and byte limits
+ok 450 - seed gives identical terrain and one metre cells
+ok 451 - both quarter and eighth metre creatures are defined
+ok 452 - fluid movement conserves volume and acid mass in a sealed basin
+ok 453 - mixing clean water dilutes acid without destroying solute
+ok 454 - water and lava form basalt and account for steam
+ok 455 - burning wood consumes fuel and completes
+ok 456 - exposed internal joint damage severs a limb and changes locomotion capability
+ok 457 - head detachment propagates to attached ears
+ok 458 - grazing consumes vegetation and returns energy
+ok 459 - predation transfers energy and death returns soil nutrients
+ok 460 - well fed mature creatures reproduce within population budget
+ok 461 - save roundtrip preserves terrain, fluid, population and severed parts
+ok 462 - 3000 entities tick with finite positions and bounded population
+ok 463 - water extinguishes a burning wooden cell
+ok 464 - concentrated acid consumes reagent while corroding organic material
+ok 465 - 36 real slots split at 64 and transfers conserve counts through merge and swap
+ok 466 - full inventory does not discard pickups or charge failed crafting; costs can free output slots
+ok 467 - hotbar selection, exact layout, gear wear and consumption persist without duplicating items
+ok 468 - legacy large inventories migrate to recoverable overflow instead of losing items
+ok 469 - earned rewards are recoverable and selected stacks are consumed first
+ok 470 - feeding two nearby adults consumes two seeds, creates one offspring, then enforces cooldown
+ok 471 - passive animals follow held seeds, flee hits, and predators attack only at night or in retaliation
+ok 472 - hunting materials can be cooked into food in the same inventory
+ok 473 - a missing foot disables support before the whole leg detaches, changing speed and posture
+ok 474 - severing a joint drops the disconnected foot and all missing supports stop pursuit immediately
+ok 475 - support arrangement changes crawl capability; save/load retains wounds and recomputes anatomy
+ok 476 - lowered and tilted body coordinates round-trip for ray hits on animated limbs
+ok 477 - an entity killed by its decision step cannot take one last movement step
+ok 478 - a released assembly falls and lands without being attached to a player
+ok 479 - motor damage prevents powered motion while an intact assembly drives and steers
+ok 480 - a broken bridge splits a rigid body; mass, fragments and six-axis transforms survive reload
+ok 481 - terrain removal updates real colliders and an anchored structure stays still until released
+ok 482 - lost left/front support lowers that side rather than the healthy side
+ok 483 - walking collides with the actual assembly and can stand on top
+ok 484 - balanced rotors lift the body and losing one changes its angular motion
+ok 485 - a fragment can break again and no disconnected part retains powered function
+ok 486 - invalid rigid transforms are rejected before entering the physics engine
+ok 487 - old saves with destroyed body attachment points cannot retain functional floating legs
+ok 488 - every failure code a content system can return has player-facing Korean text
+ok 489 - craft queue jobs can be cancelled for their item inputs, prioritized and explained
+ok 490 - research can be paused and resumed without paying samples twice
+ok 491 - dungeon devices release dead supply links and restore destroyed puzzle structures
+ok 492 - runtime turns boss, creature, dungeon and community events into screen messages
+ok 493 - a melee swing breaks the arena gimmick the player faces, and wind pushes at most 1 m
+ok 494 - actual release bundle matches the pinned Android verification key and payload
+ok 495 - native package verification, activation, interrupted startup and save rollback
+ok 496 - version files agree with authoritative version.json
+ok 497 - public update transport works without credentials and enforces download boundaries
+ok 498 - visual catalog covers every content ID and enforces coordinates/materials/hierarchy
+ok 499 - creature and boss silhouettes fit design dimensions and stand on ground
+ok 500 - environment references canonical entrance after translation and remains deterministic
+ok 501 - invalid references and cyclic hierarchy fail before export
+ok 502 - GLB preserves part and attachment names without invalid empty child arrays
+ok 503 - emission above one survives GLB export as standard strength extension
+ok 504 - GLB material colors use canonical decimal precision across JavaScript engines
+ok 505 - equipment catalog covers authored tools, stations, components, kits and weapon patterns
+# tests 505
+# suites 0
+# pass 505
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 458848.94886

@@ -1,6 +1,6 @@
 import * as T from '../vendor/three.module.js';
-import { VoxelAssetBuilder } from './voxel/authoring.mjs';
-import { disjointBoxes } from './voxel/solid.mjs';
+import { VoxelAssetBuilder } from './voxel/authoring.js';
+import { disjointBoxes } from './voxel/solid.js';
 import { animateCreatureModel, creatureBodyPart } from './creature-animation.js';
 
 const copy = value => structuredClone(value);

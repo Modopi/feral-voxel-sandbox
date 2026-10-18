@@ -63,4 +63,5 @@
 
 - `tests/ui-reachability.test.js`: 실패 코드 번역 전수 검사, 제작 취소·우선 진행·막힌 이유, 연구 일시정지·재개, 공급선 분리·구조 부품 복구와 저장, 보스·생명체·던전·공동체 이벤트 알림, 장치 근접 파괴와 1m 밀림.
 - `tools/verify-ui-reachability.mjs`: Chromium 터치 입력으로 콘텐츠 탐험 8개, 기본 섬 3개 경로를 확인한다. 결과는 [보고서](../verification/0.12.0-ui/report.json)와 스크린샷에 있다. 자원 지급과 순간 이동은 준비 단계이며 정상 성장의 증거가 아니다.
+- 0.12.1부터 이 화면 검증은 Android 앱과 같은 MIME·CSP 규칙의 `tools/android-asset-server.mjs`로 실행한다. 0.12.0 당시 검증은 일반 개발 서버를 써서 콘텐츠 탐험이 Android 앱에서 로딩 화면에 멈추는 문제를 잡지 못했다([0.12.1 검증](../verification/0.12.1.md)).
 - 실제 Android 기기의 터치·표시는 확인하지 않았다.

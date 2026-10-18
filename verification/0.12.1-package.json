@@ -1,0 +1,14 @@
+{
+  "version": "0.12.1",
+  "versionCode": 1201,
+  "minNativeCode": 303,
+  "files": 120,
+  "mjsFiles": [],
+  "archiveBytes": 2797982,
+  "expandedBytes": 11515898,
+  "archiveSha256": "9af9f739bc389ac5df4900878baace5cc4555c421270576ffeedb0d9ac69ac85",
+  "packageSha256": "2df63edac198f0ac065a70fd39b352e4375aa367033779aacdbbcb4d81265e72",
+  "apkAssetsIdenticalToUpdate": true,
+  "withinLimits": true,
+  "note": "Local build with the shared test signing key; CI rebuilds and publishes after merge."
+}

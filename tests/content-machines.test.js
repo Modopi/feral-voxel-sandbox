@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { Progression } from '../app/src/main/assets/content-runtime/progression.js';
 import { MachineSystem } from '../app/src/main/assets/content-runtime/machines.js';
-import { assertAuthoringInvariant } from '../app/src/main/assets/content-runtime/voxel/authoring.mjs';
+import { assertAuthoringInvariant } from '../app/src/main/assets/content-runtime/voxel/authoring.js';
 const CONTENT=Object.fromEntries(['progression','environments','blocks'].map(n=>[n,JSON.parse(fs.readFileSync(new URL(`../design/content/${n}.json`,import.meta.url)))]));
 let n=0;
 const grant=(p,items)=>assert.equal(p.grant(items,{claimId:'fixture:'+n++}).ok,true);

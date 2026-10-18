@@ -17,8 +17,8 @@
 |---|---|---|---|
 | 6개 원본 문서 구조·ID·단위 보존 | `tools/build-runtime-content.mjs`, `content-runtime/catalog.generated.js` | `tests/runtime-content-contract.test.js`: 원본 6문서 전수 동일성·deep freeze·재현성 | 119모델 포함 패키징 계약 8개 검사 통과 |
 | 119에셋(8환경·34종·12건물·8보스·57장비), 원본/manifest 연결 | `content-runtime/assets.generated.js`, `models/*.generated.js`, `equipment-view.js` | 모델/metadata 동일성, 중첩 인스턴스·앵커·재질 색상, 해시·충돌·계층 계약 | 무기 패턴의 `main_hand` 외형 선택과 재질별 표면 tint가 런타임에 연결됐다. 119개 GLB 형식·생성 해시와 131개 렌더 기록을 확인했다. SwiftShader 기록은 Android 표시 검증과 구분한다. |
-| 제작 도구·같은 부위 중복 점유 금지·관절 피벗 보존 | `content-runtime/voxel/{authoring,model,solid}.mjs` | 도구 원본과 바이트 동일; SDK 복사 편집 및 기존 `asset-authoring`/`asset-solid` 검사 | SDK 패키징·기계 모델 검사 완료; 실제 UI로 기계4칸·차폐벽12칸 조립 및 저장 재개를 확인했다. 안착 접촉 오차로 옆 칸 추가가 거절되던 결함도 수정했다. |
-| 같은 엔티티 자기 충돌 제외, 다른 엔티티/지형 충돌 | `content-runtime/voxel/physics.mjs`, 통합 렌더/물리 계층 | 기존 `asset-physics` 검사 + 실제 게임 owner·접촉·구멍 통과·관절 확인 | 어댑터·실제 Rapier 모델 검사 통과(물리 담당 보고); 설치 겹침 검사는 독립9개 통과; 주행 실측 별도 |
+| 제작 도구·같은 부위 중복 점유 금지·관절 피벗 보존 | `content-runtime/voxel/{authoring,model,solid}.js` | 도구 원본과 같은 코드(0.12.1부터 형제 import 확장자만 `.js`); SDK 복사 편집 및 기존 `asset-authoring`/`asset-solid` 검사 | SDK 패키징·기계 모델 검사 완료; 실제 UI로 기계4칸·차폐벽12칸 조립 및 저장 재개를 확인했다. 안착 접촉 오차로 옆 칸 추가가 거절되던 결함도 수정했다. |
+| 같은 엔티티 자기 충돌 제외, 다른 엔티티/지형 충돌 | `content-runtime/voxel/physics.js`, 통합 렌더/물리 계층 | 기존 `asset-physics` 검사 + 실제 게임 owner·접촉·구멍 통과·관절 확인 | 어댑터·실제 Rapier 모델 검사 통과(물리 담당 보고); 설치 겹침 검사는 독립9개 통과; 주행 실측 별도 |
 | 기존 저장·지역 보존 및 별도 expedition 진입 | `content-runtime/runtime.js`, `save.js`, 기존 진입/UI | 기존 월드 비파괴, 신규/기존 저장 로딩, 업데이트 복원 회귀 | 별도 저장 및 시스템 JSON 왕복 독립 검사 통과; 장기 저장 용량·실제 업데이트 복귀는 추가 검사 중 |
 | 최초 스폰 (0,0), 거리 난도, 5~6티어 중심 분포, 고난도 우회 | `content-runtime/atlas.js` | `tests/content-atlas.test.js`: 시드 결정성·방향/거리 표본·우회 | atlas 모델 검사 통과(환경 담당 보고); 실제 채집 위치는 독립 검사 통과; 장거리 난도 플레이 미검증 |
 | 8환경·33블록의 지형/광물/채집/건축 입지 | `content-runtime/atlas.js`, 통합 월드 | 실제 복셀 배치·물성·가공 원천·청크 경계 | 환경 생성/채집 모델 검사 및 실제 노드-성장 원천 독립 대조 통과; 물리/화면 통합은 별도 |
@@ -40,8 +40,8 @@
 | 사망 전아이템 현장 보관·소멸 없음·10m 요정 회수 | `content-runtime/progression.js`, `save.js`, UI | 여러 사망·가방 포화·10m 경계·저장 중단·지역 이탈 후 회수 | 10.01m/9.99m·가방 포화·일부 회수·저장 재개 독립 통합 검사 통과; 실제 화면 조작 별도 |
 | 생성 시드/객체ID·보상 원장·영구 손상·저장 안전 | 전체 모델 `serialize()`, `save.js` | JSON 왕복·멱등 거래·다중 객체·손상 복구·실패 시 정상 저장 보존 | 시드·보상 원장·영구 손상·여섯 시스템 JSON 왕복 독립 검사 통과; 최종 경제 경로7,392,216글자의 두 세대 압축 저장·worker 복원 통과; 생명체/기계를 누적한 전체 무한 월드 상한은 미검증 |
 | 탐험→채집→연구→제작→개인/기계 보스→다음 탐험 | 통합 런타임/화면/기존 게임 연결 | 처음부터 수량/시간을 소비한 브라우저 완주·게임 저장 후 재개 | 기존 사용자 저장을 초기화하지 않고 실제 채집→돌 곡괭이 제작→목재 가공까지 진행; 메뉴 저장·페이지 재접속 뒤 인벤토리/연구/설비/배치가 일치. [실행 보고서](../../verification/screenshots/expedition-browser-report.json); 보스/장거리 진행은 미검증 |
-| 모바일 조작·화면 접근·성능·안드로이드 생명주기 | 통합 UI/렌더·기존 Android 앱 | 실제 입력·프레임/메모리/발열·백그라운드 복귀·충돌 활성 범위 | 0.12.0에서 터치 달리기·기계 하강·제동 버튼을 추가하고 실제 터치로 확인했다. Chromium/desktop SwiftShader 터치 검사 390×844·844×390·360×640에서 레이아웃·터치 모드·제작 스크롤·시점·조이스틱·메뉴 일시정지·저장 재접속 통과; Android 실기기 설치/측정 없음. 실제 기기 확인은 사용자의 Android 모델·SoC·RAM·OS/WebView에서 native0.3.3/code303 + game0.11.0/code1100, 일반 플레이·밀집 던전/기계 장면의 30분 및 2시간 세션으로 수행하고 p50/p95 프레임·프로세스 메모리 증가·열 제한·백그라운드 복귀/프로세스 종료 후 저장 복원을 기록해야 함 |
-| 회귀·APK·서명 업데이트·공개 배포 | 전체 tests, 빌드/배포 도구 | 필수 검사·빌드·리뷰·릴리스 조회·버전/해시 일치 | 0.12.0 / 1200 공개 게시 완료: PR #18 병합, 배포 Actions·제작 하네스 성공, v0.12.0 Release·stable·불변 패키지·카탈로그 해시 일치, 로컬 빌드와 동일 패키지, 과거 항목 불변([게시 결과](../../verification/0.12.0.md#공개-게시-결과)). 0.11.0 / 1100 공개 게시 완료: PR #16 병합, 배포 Actions·제작 하네스 성공, v0.11.0 Release와 `updates`의 stable·불변 패키지·카탈로그 해시 일치, 과거 항목 불변 확인. 휴대폰 업데이트 적용·재시작은 미검증 |
+| 모바일 조작·화면 접근·성능·안드로이드 생명주기 | 통합 UI/렌더·기존 Android 앱 | 실제 입력·프레임/메모리/발열·백그라운드 복귀·충돌 활성 범위 | 0.11.0~0.12.0의 콘텐츠 탐험은 Android 앱이 `.mjs` 모듈을 JavaScript로 응답하지 않아 로딩 화면에서 멈췄다. 0.12.1에서 모듈을 `.js`로 바꾸고 앱의 MIME·CSP 규칙으로 검증한다(`tests/android-asset-mime.test.js`, `tools/android-asset-server.mjs`). 0.12.0에서 터치 달리기·기계 하강·제동 버튼을 추가하고 실제 터치로 확인했다. Chromium/desktop SwiftShader 터치 검사 390×844·844×390·360×640에서 레이아웃·터치 모드·제작 스크롤·시점·조이스틱·메뉴 일시정지·저장 재접속 통과; Android 실기기 설치/측정 없음. 실제 기기 확인은 사용자의 Android 모델·SoC·RAM·OS/WebView에서 native0.3.3/code303 + game0.11.0/code1100, 일반 플레이·밀집 던전/기계 장면의 30분 및 2시간 세션으로 수행하고 p50/p95 프레임·프로세스 메모리 증가·열 제한·백그라운드 복귀/프로세스 종료 후 저장 복원을 기록해야 함 |
+| 회귀·APK·서명 업데이트·공개 배포 | 전체 tests, 빌드/배포 도구 | 필수 검사·빌드·리뷰·릴리스 조회·버전/해시 일치 | 0.12.1 / 1201 핫픽스는 병합 후 게시 확인 예정. 0.12.0 / 1200 공개 게시 완료: PR #18 병합, 배포 Actions·제작 하네스 성공, v0.12.0 Release·stable·불변 패키지·카탈로그 해시 일치, 로컬 빌드와 동일 패키지, 과거 항목 불변([게시 결과](../../verification/0.12.0.md#공개-게시-결과)). 0.11.0 / 1100 공개 게시 완료: PR #16 병합, 배포 Actions·제작 하네스 성공, v0.11.0 Release와 `updates`의 stable·불변 패키지·카탈로그 해시 일치, 과거 항목 불변 확인. 휴대폰 업데이트 적용·재시작은 미검증 |
 
 ## 0.12.0 화면 연결
 
@@ -69,7 +69,7 @@
 - `catalog.generated.js`: `CONTENT`. 원본 JSON의 `status: proposed`도 보존한다. 콘텐츠 실행 상태는 별도 객체에 둔다.
 - `assets.generated.js`: `ASSETS`는 ID→원본 manifest metadata, `loadAsset(id)`는 불변 모델, `loadAssetLibrary(id)`는 해당 모델과 중첩 인스턴스의 `Map`을 비동기로 반환한다.
 - `models/{creature,boss,structure,environment,equipment}.generated.js`: 5개 lazy chunk. 파일 수를 제한하면서 초기 전체 모델 파싱을 피한다.
-- `voxel/{authoring,model,solid,physics}.mjs`: 기존 도구/충돌 어댑터와 동일 바이트의 브라우저 모듈. Node 전용 의존성과 패키지 밖 import를 빌드 단계에서 거부한다.
+- `voxel/{authoring,model,solid,physics}.js`: 기존 도구/충돌 어댑터와 같은 코드의 브라우저 모듈. Android 앱은 `.js`만 JavaScript로 응답하므로 0.12.1부터 파일과 형제 import의 확장자만 `.js`로 바꿔 생성한다. Node 전용 의존성과 패키지 밖 import를 빌드 단계에서 거부한다.
 
 초기 패키징 직후 생성 산출물은 10파일/3,353,469바이트다. 당시 앱 전체는 78파일/9,660,509바이트, ZIP 표본 2,468,570바이트다. Android 업데이트 제한은 128파일/압축8MiB/해제32MiB이며, **통합 코드 추가 후 최종 패키지를 다시 측정해야 한다**. 이는 네이티브 설치나 업데이트 성공 검사 자체를 대체하지 않는다.
 

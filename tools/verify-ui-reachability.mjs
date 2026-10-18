@@ -1,20 +1,30 @@
-// Browser check for 0.12.0 UI reachability: every connected feature is used through real taps/clicks.
+// Browser check for UI reachability: every connected feature is used through real taps/clicks.
+// By default assets are served with the Android app's MIME/CSP rules (tools/android-asset-server.mjs).
 // Setup steps that grant items or teleport are recorded as prepared state, not as normal progression evidence.
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {createRequire} from 'node:module';
+import {startAndroidAssetServer} from './android-asset-server.mjs';
 const {chromium}=createRequire(import.meta.url)('playwright');
-const out=new URL('../verification/0.12.0-ui/',import.meta.url),base=process.env.FERAL_BASE||'http://127.0.0.1:8081';
+const version=JSON.parse(await fs.readFile(new URL('../version.json',import.meta.url),'utf8')).version;
+const out=new URL(process.env.FERAL_UI_OUT||`../verification/${version}-ui/`,import.meta.url);
+const server=process.env.FERAL_ASSETS?null:await startAndroidAssetServer();
+const assets=process.env.FERAL_ASSETS||`http://127.0.0.1:${server.address().port}/assets`;
 await fs.mkdir(out,{recursive:true});
 const browser=await chromium.launch({executablePath:process.env.FERAL_CHROME||'/usr/bin/chromium',headless:true,args:['--no-sandbox','--enable-webgl','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-dev-shm-usage']});
-const report={scope:'Chromium SwiftShader with touch input. Prepared items/positions are listed per check; this is not Android hardware or normal-progression evidence.',expedition:[],island:[],errors:[]};
+const report={version,assets:server?'Android app MIME/CSP rules':assets,scope:'Chromium SwiftShader with touch input. Prepared items/positions are listed per check; this is not Android hardware or normal-progression evidence.',expedition:[],island:[],errors:[]};
 const check=(list,name,detail={})=>{list.push({name,...detail});console.log('ok',name);};
 try{
  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:1});
  const page=await context.newPage();page.on('pageerror',e=>report.errors.push(e.message));
  await page.addInitScript(()=>{window.AndroidApp={};if(!localStorage.getItem('feral.worlds.v1'))localStorage.setItem('feral.worlds.v1',JSON.stringify([{id:'ui-check',name:'UI 검사',type:'expedition',seed:63026}]));});
- await page.goto(`${base}/app/src/main/assets/expedition.html?world=ui-check`);
- await page.waitForFunction(()=>window.FERAL?.ready,null,{timeout:120000});
+ await page.goto(`${assets}/expedition.html?world=ui-check`);
+ const stages=[];for(const started=Date.now();Date.now()-started<120000;){const s=await page.evaluate(()=>({stage:document.getElementById('loadingStage')?.textContent.replace(/ · \d+초$/,''),ready:!!window.FERAL?.ready}));if(s.stage&&stages.at(-1)!==s.stage)stages.push(s.stage);if(s.ready)break;await page.waitForTimeout(50);}
+ await page.waitForFunction(()=>window.FERAL?.ready,null,{timeout:1000});
+ const bootTimings=await page.evaluate(()=>FERAL.bootTimings);
+ assert(bootTimings.some(t=>t.stage.startsWith('건축물 모델'))&&bootTimings.some(t=>t.stage.startsWith('물리 엔진')),'loading reports its stages');
+ assert(await page.locator('#loading').isHidden(),'loading screen hides when ready');
+ check(report.expedition,'loading progress stages and boot under Android asset rules',{stages,bootTimings});
  const cdp=await context.newCDPSession(page);
  // The panel list re-renders every second, so resolve, scroll and tap again if a row is replaced mid-way.
  const tap=async selector=>{for(let attempt=0;;attempt++){try{const target=page.locator(selector).first();await target.scrollIntoViewIfNeeded({timeout:3000});const b=await target.boundingBox();assert(b,selector);await page.touchscreen.tap(b.x+b.width/2,b.y+b.height/2);return;}catch(e){if(attempt>=4)throw e;await page.waitForTimeout(150);}}};
@@ -107,7 +117,7 @@ try{
  const island=await browser.newContext({viewport:{width:900,height:412},isMobile:true,hasTouch:true,deviceScaleFactor:1});
  const ip=await island.newPage();ip.on('pageerror',e=>report.errors.push(e.message));
  await ip.addInitScript(()=>{window.AndroidApp={};localStorage.removeItem('feral.world.v1');});
- await ip.goto(`${base}/app/src/main/assets/index.html`);await ip.waitForFunction(()=>window.FERAL?.ready,null,{timeout:120000});
+ await ip.goto(`${assets}/index.html`);await ip.waitForFunction(()=>window.FERAL?.ready,null,{timeout:120000});
  await ip.click('#startBtn');await ip.waitForTimeout(1500);
  const itap=async selector=>{await ip.locator(selector).first().scrollIntoViewIfNeeded();const box=await ip.locator(selector).first().boundingBox();assert(box,selector);await ip.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);};
  const aimDown=()=>ip.evaluate(()=>{FERAL.player.pitch=-1;});
@@ -129,6 +139,14 @@ try{
  let discovered=false;for(let i=0;i<20&&!discovered;i++){discovered=(await ip.locator('#toast').textContent()).includes('새 장소 발견');await ip.waitForTimeout(150);}
  assert(discovered,'discovery toast');await ip.screenshot({path:new URL('island.png',out).pathname});
  check(report.island,'minimap setting and discovery toast',{prepared:'teleport to landmark',landmark});
+ // A module that cannot load must end in a visible failure with retry, never an endless loading screen.
+ const failing=await browser.newContext({viewport:{width:900,height:412},isMobile:true,hasTouch:true});const fp=await failing.newPage();
+ await fp.addInitScript(()=>{window.__runtimeFailed=0;window.AndroidApp={runtimeFailed(){window.__runtimeFailed++;}};localStorage.setItem('feral.worlds.v1',JSON.stringify([{id:'ui-check',name:'UI 검사',type:'expedition',seed:63026}]));});
+ await fp.route('**/content-runtime/voxel/solid.js',route=>route.fulfill({status:200,contentType:'application/octet-stream',body:'export {}'}));
+ await fp.goto(`${assets}/expedition.html?world=ui-check`);await fp.waitForFunction(()=>window.FeralLoading?.failed,null,{timeout:20000});
+ const failure=await fp.evaluate(()=>({text:document.getElementById('loadingText').textContent,retry:!document.getElementById('loadingRetry').hidden,runtimeFailed:window.__runtimeFailed}));
+ assert.match(failure.text,/불러오지 못했습니다/);assert(failure.retry);assert.equal(failure.runtimeFailed,1);await fp.screenshot({path:new URL('loading-failure.png',out).pathname});await failing.close();
+ check(report.expedition,'module load failure shows retry instead of endless loading',failure);
  assert.deepEqual(report.errors,[]);
-}catch(e){report.failure=e.stack;process.exitCode=1;}finally{await fs.writeFile(new URL('report.json',out),JSON.stringify(report,null,2));await browser.close();}
+}catch(e){report.failure=e.stack;process.exitCode=1;}finally{await fs.writeFile(new URL('report.json',out),JSON.stringify(report,null,2));await browser.close();server?.close();}
 console.log(JSON.stringify({expedition:report.expedition.length,island:report.island.length,errors:report.errors,failure:report.failure?.split('\n')[0]}));

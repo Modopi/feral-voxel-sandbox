@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync,readdirSync} from 'node:fs';
 import * as T from '../app/src/main/assets/vendor/three.module.js';
-import {surfaceGroups} from '../app/src/main/assets/content-runtime/voxel/solid.mjs';
+import {surfaceGroups} from '../app/src/main/assets/content-runtime/voxel/solid.js';
 import {buildPartMeshes} from '../app/src/main/assets/content-runtime/render-surfaces.js';
 const mat=(id,color,extra={})=>({id,color,opacity:1,roughness:.9,metallic:0,emission:0,...extra});
 const box=(center,size,material)=>({center,size,material});

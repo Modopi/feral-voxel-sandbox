@@ -1,6 +1,6 @@
 import * as T from '../vendor/three.module.js';
 import {loadAsset} from './assets.generated.js';
-import {surfaceGroups} from './voxel/solid.mjs';
+import {surfaceGroups} from './voxel/solid.js';
 import {materialColor} from './machines.js';
 
 const TOOL_IDS=new Set(['hand_knife','stone_pick','bark_cup']);

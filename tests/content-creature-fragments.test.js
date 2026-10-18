@@ -7,7 +7,7 @@ import { CreatureSystem } from '../app/src/main/assets/content-runtime/creatures
 import { WorldObjects } from '../app/src/main/assets/content-runtime/objects.js';
 import { CreatureFragments,allocateCreatureMass,captureCreaturePose,CREATURE_MASS_POLICY } from '../app/src/main/assets/content-runtime/creature-fragments.js';
 import { animateCreatureModel } from '../app/src/main/assets/content-runtime/creature-animation.js';
-import { VoxelAssetBuilder,assertAuthoringInvariant } from '../app/src/main/assets/content-runtime/voxel/authoring.mjs';
+import { VoxelAssetBuilder,assertAuthoringInvariant } from '../app/src/main/assets/content-runtime/voxel/authoring.js';
 import { RuntimePhysics } from '../app/src/main/assets/content-runtime/physics.js';
 const load=id=>JSON.parse(fs.readFileSync(new URL(`../design/assets/models/${id}.voxel.json`,import.meta.url)));
 const near=(a,b,tol=1e-7)=>assert.ok(Math.abs(a-b)<=tol,`${a} != ${b}`);

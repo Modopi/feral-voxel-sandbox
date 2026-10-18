@@ -1,5 +1,5 @@
 // Two complete generations; the previous valid generation survives quota errors.
-import {LZString} from '../vendor/lz-string.mjs';
+import {LZString} from '../vendor/lz-string.js';
 export const EXPEDITION_SCHEMA = 1;
 function checksum(text) {
   let hash = 2166136261;

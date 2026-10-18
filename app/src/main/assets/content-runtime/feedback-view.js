@@ -1,6 +1,6 @@
 import * as T from '../vendor/three.module.js';
-import { VoxelAssetBuilder } from './voxel/authoring.mjs';
-import { surfaceGroups } from './voxel/solid.mjs';
+import { VoxelAssetBuilder } from './voxel/authoring.js';
+import { surfaceGroups } from './voxel/solid.js';
 
 const RANGE = 10, MAX_MARKERS = 4, MAX_FLIGHTS = 4, GRID = 1 / 32;
 const quantity = death => Object.values(death?.items ?? {}).reduce((n, v) => n + (Number.isFinite(v) && v > 0 ? v : 0), death?.weapons?.length??0);
