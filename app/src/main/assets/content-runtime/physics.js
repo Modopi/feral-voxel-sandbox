@@ -442,6 +442,15 @@ export class RuntimePhysics {
     return { movement: { x: current.x - start.x, y: current.y - start.y, z: current.z - start.z }, grounded };
   }
 
+  /** Part-local metres of a world point on an owner's rendered part (shell wounds). */
+  partLocalPoint(ownerId, partId, point) {
+    const node = (this.sceneModels ?? this.scene?.models)?.get(ownerId)?.parts.get(partId);
+    if (!node || !point) return null;
+    node.updateMatrixWorld(true);
+    const v = new T.Vector3(point.x, point.y, point.z).applyMatrix4(node.matrixWorld.clone().invert());
+    return [v.x, v.y, v.z];
+  }
+
   /** True only when the actual collider segment is clear. Ignore attacker and
    * intended target bodies, but retain other owners and all terrain/structures. */
   traceCombat(options) {

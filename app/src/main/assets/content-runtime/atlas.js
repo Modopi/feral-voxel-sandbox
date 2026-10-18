@@ -41,7 +41,7 @@ export class WorldAtlas {
   constructor(content, options={}) {
     if(!content?.environments?.entries||!content?.blocks?.entries)throw new TypeError('WorldAtlas needs CONTENT.environments and CONTENT.blocks');
     const state=options.state;
-    if(state&&(state.schemaVersion!==ATLAS_VERSION||state.generator!=='expedition-atlas-v1'))throw new Error('Unsupported atlas save version');
+    if(state&&(state.schemaVersion!==ATLAS_VERSION||state.generator!==this.generatorId))throw new Error('Unsupported atlas save version');
     this.content=content;this.seed=String(state?.seed??options.seed??63026);
     this.environments=new Map(content.environments.entries.map(e=>[e.id,e]));
     this.blocks=new Map(content.blocks.entries.map(b=>[b.id,b]));
@@ -68,7 +68,9 @@ export class WorldAtlas {
     }
     this._restoring=false;
   }
-  static fromState(content,state,options={}){return new WorldAtlas(content,{...options,state});}
+  static fromState(content,state,options={}){return new this(content,{...options,state});}
+  /** Map presets subclass the terrain generator; saves record which one made the world. */
+  get generatorId(){return 'expedition-atlas-v1';}
   _rand(...parts){return memo(this._hashes,JSON.stringify(parts),()=>deterministicUnit(this.seed,...parts),32768);}
   _noise(x,z,scale,channel){const u=x/scale,v=z/scale,ix=Math.floor(u),iz=Math.floor(v),fx=smooth(u-ix),fz=smooth(v-iz);const [a,b,c,d]=memo(this._noiseCorners,`${channel}:${ix},${iz}`,()=>[this._rand(channel,ix,iz),this._rand(channel,ix+1,iz),this._rand(channel,ix,iz+1),this._rand(channel,ix+1,iz+1)],4096);return(a+(b-a)*fx)*(1-fz)+(c+(d-c)*fx)*fz;}
   _reservationAt(x,z){for(const r of [...this.reservations.values()].sort((a,b)=>a.id.localeCompare(b.id)))if(x>=r.minX&&x<r.maxX&&z>=r.minZ&&z<r.maxZ)return r;return null;}
@@ -360,16 +362,19 @@ export class WorldAtlas {
         const low=Math.max(job.cy*32,c.topCell+1),high=Math.min(job.cy*32+31,c.topCell+24);
         for(let yy=low;yy<=high;yy++){const id=this._vegetationAt(hx,yy,hz,c);if(id!==null)job.flora.set(yy,id);}
       }
-      const key=cellKey(hx,hy,hz),c=job.column;let id;
-      if(this.edits.has(key))id=this.edits.get(key);
-      else if(hy>c.topCell)id=job.flora.get(hy)??null;
-      else if(hy===c.topCell)id=c.surface;
-      else if(this._caveAt(hx,hy,hz,c))id=null;
-      else if(hy>=c.topCell-c.soilCells)id=c.subsoil;
-      else id=this._oreMap(floorDiv(hx,128),floorDiv(hz,128)).get(key)??c.bedrock;
+      const key=cellKey(hx,hy,hz),id=this.edits.has(key)?this.edits.get(key):this._chunkCell(hx,hy,hz,job);
       job.blocks[x+z*32+y*1024]=this.blockNumbers.get(id)??0;job.cursor++;processed++;
     }
     return processed;
+  }
+  /** Generated block of one cell during chunk building (same rules as _baseCell, using the job's column cache). */
+  _chunkCell(hx,hy,hz,job){
+    const c=job.column;
+    if(hy>c.topCell)return job.flora.get(hy)??null;
+    if(hy===c.topCell)return c.surface;
+    if(this._caveAt(hx,hy,hz,c))return null;
+    if(hy>=c.topCell-c.soilCells)return c.subsoil;
+    return this._oreMap(floorDiv(hx,128),floorDiv(hz,128)).get(cellKey(hx,hy,hz))??c.bedrock;
   }
   _finishChunk(job){
     // Edits may have arrived after a cell was generated during an earlier frame.
@@ -451,5 +456,5 @@ export class WorldAtlas {
     if(Math.hypot(x-80,z-24)<=radius){const def=definitions.get('freshwater');result.push({id:'starter:freshwater',nodeId:'freshwater',sourceId:def.sourceId,resourceId:def.resourceId,x:80,y:0,z:24,regrowS:0});}
     return result;
   }
-  serialize(){return{schemaVersion:ATLAS_VERSION,generator:'expedition-atlas-v1',seed:this.seed,simulationTime:this.simulationTime,simulationAccumulator:this._simulationAccumulator,flowCursor:this._flowCursor,thermalCursor:this._thermalCursor,reactions:{...this.reactions},focus:this._focus?{...this._focus}:null,fluidActive:[...this._fluidActive],fluidCells:[...this.fluidCells].map(([k,v])=>[k,{...v}]),burning:[...this.burning].map(([k,v])=>[k,{...v}]),fuelRemaining:[...this.fuelRemaining],thermalCells:[...this.thermalCells].map(([k,v])=>[k,{...v}]),cellDamage:[...this.cellDamage].map(([k,v])=>[k,{...v}]),edits:[...this.edits].sort(([a],[b])=>a.localeCompare(b)),reservations:[...this.reservations.values()].sort((a,b)=>a.id.localeCompare(b.id))};}
+  serialize(){return{schemaVersion:ATLAS_VERSION,generator:this.generatorId,seed:this.seed,simulationTime:this.simulationTime,simulationAccumulator:this._simulationAccumulator,flowCursor:this._flowCursor,thermalCursor:this._thermalCursor,reactions:{...this.reactions},focus:this._focus?{...this._focus}:null,fluidActive:[...this._fluidActive],fluidCells:[...this.fluidCells].map(([k,v])=>[k,{...v}]),burning:[...this.burning].map(([k,v])=>[k,{...v}]),fuelRemaining:[...this.fuelRemaining],thermalCells:[...this.thermalCells].map(([k,v])=>[k,{...v}]),cellDamage:[...this.cellDamage].map(([k,v])=>[k,{...v}]),edits:[...this.edits].sort(([a],[b])=>a.localeCompare(b)),reservations:[...this.reservations.values()].sort((a,b)=>a.id.localeCompare(b.id))};}
 }

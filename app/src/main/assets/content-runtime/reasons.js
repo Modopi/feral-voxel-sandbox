@@ -77,6 +77,7 @@ export const REASON_TEXT = Object.freeze({
  component_inactive:'컴포넌트가 꺼져 있거나 파손됐습니다.',
  attachment_required:'기존 복셀의 면에 붙여야 합니다.',
  occupied:'그 칸에는 이미 복셀이 있습니다.',
+ not_buildable:'이 아이템으로는 블록을 쌓을 수 없습니다. 캐 온 돌·원목·모래·점토·철광석으로 쌓으세요.',
  mount_occupied:'그 복셀에는 이미 컴포넌트가 있습니다.',
  host_missing:'컴포넌트를 받친 복셀이 사라졌습니다.',
  remove_component_first:'복셀에 설치된 컴포넌트를 먼저 회수하세요.',

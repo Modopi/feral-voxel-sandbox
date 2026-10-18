@@ -10,6 +10,12 @@ export class ObjectPhysicsBridge {
   }
   rotate(v,q){const t={x:2*(q.y*v.z-q.z*v.y),y:2*(q.z*v.x-q.x*v.z),z:2*(q.x*v.y-q.y*v.x)};return {x:v.x+q.w*t.x+q.y*t.z-q.z*t.y,y:v.y+q.w*t.y+q.z*t.x-q.x*t.z,z:v.z+q.w*t.z+q.x*t.y-q.y*t.x};}
   release(){this.held=null;}
+  /** Frontier push: an empty-handed strike shoves a piece along the view, up to three times its mass or 650 N·s. */
+  push(id,point){
+    const cache=this.bodies.get(id),p=this.physics.runtime.player;if(!cache||!point)return {ok:false,reason:'target_missing'};
+    const body=cache.entry.body,pitch=p.pitch??0,d={x:-Math.sin(p.yaw)*Math.cos(pitch),y:Math.sin(pitch),z:-Math.cos(p.yaw)*Math.cos(pitch)},impulse=Math.min(body.mass()*3,650);
+    body.applyImpulseAtPoint({x:d.x*impulse,y:d.y*impulse,z:d.z*impulse},point,true);return {ok:true,pushed:true,impulse};
+  }
   throwHeld(){
     const cache=this.bodies.get(this.held?.id),p=this.physics.runtime.player;if(!cache)return {ok:false,reason:'잡고 있는 물체가 없습니다.'};
     const body=cache.entry.body,mass=body.mass(),pitch=p.pitch??0,direction={x:-Math.sin(p.yaw)*Math.cos(pitch),y:Math.sin(pitch),z:-Math.cos(p.yaw)*Math.cos(pitch)},velocity=body.linvel();

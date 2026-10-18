@@ -12,6 +12,7 @@ const PROFILE = {
   drift_grazer:'quadruped',phase_stalker:'quadruped',anchor_tick:'arthropod',survey_drone:'hover',
   wayfarer_organic:'biped',custodian_inorganic:'biped',
 };
+import {subtractBox,disjointBoxes} from './voxel/solid.js';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const limb=(index)=>`limb_${index}`;
 const profileOf=e=>e.bodyProfile??PROFILE[e.speciesId??e.assetId]??'quadruped';
@@ -37,6 +38,60 @@ export function creatureBodyPart(entity, visualPartId) {
   if(/folded_wings/.test(id))return 'shell';
   if(/root_shoulder/.test(id))return 'core';
   return null;
+}
+
+// Frontier layered body on design models: shell wounds are grid cubes cut out of a part's boxes, and bone
+// bars inside each logical part (skull, spine with shoulder and pelvis bars, limb bones) show through them.
+export const WOUND_GRID=1/32;
+export const BONE_MATERIAL=Object.freeze({id:'bone_core',color:'#e7dcc2',opacity:1,roughness:.8,metallic:0,emission:0,collision:false});
+const INSET=.002;
+export function creatureBones(part,logical){
+  if(!part?.boxes?.length||!logical||logical==='shell')return [];
+  const lo=[0,1,2].map(i=>Math.min(...part.boxes.map(b=>b.center[i]-b.size[i]/2))),hi=[0,1,2].map(i=>Math.max(...part.boxes.map(b=>b.center[i]+b.size[i]/2)));
+  const size=hi.map((v,i)=>v-lo[i]),center=lo.map((v,i)=>(v+hi[i])/2),snap=v=>Math.max(WOUND_GRID,Math.round(v/WOUND_GRID)*WOUND_GRID);
+  // Thin or sparse parts (ears, antlers, tails, wing membranes) carry no bone of their own.
+  const fill=part.boxes.reduce((v,b)=>v+b.size[0]*b.size[1]*b.size[2],0)/(size[0]*size[1]*size[2]);
+  if(fill<.4||Math.min(...size)<.09)return [];
+  const thick=Math.min(snap(Math.min(...size)*.34),.09),bones=[];
+  if(logical==='head')bones.push({center,size:size.map(v=>snap(v*.45))});
+  else{
+   const axis=size.indexOf(Math.max(...size)),bar=[thick,thick,thick];bar[axis]=snap(size[axis]*.84);
+   const cross=axis===0?2:0,trunk=logical==='core'&&axis!==1&&size[cross]>=.16&&size[1]>=.16;
+   if(!trunk)bones.push({center,size:bar});
+   else{
+    // A horizontal trunk: spine along the back and a closed rib cage down both flanks, close under the
+    // shell, so a blow across the trunk always meets bone once the shell over it is gone.
+    const top=center[1]+size[1]*.22,rib=2*WOUND_GRID,drop=snap(size[1]*.56),count=Math.max(3,Math.floor(size[axis]*.8/rib)),start=center[axis]-count*rib/2+rib/2;
+    bones.push({center:[center[0],top,center[2]],size:bar});
+    for(let i=0;i<count;i++)for(const side of [-1,1]){const c=[...center];c[axis]=start+i*rib;c[cross]+=side*size[cross]*.3;c[1]=top-drop/2;const s=[rib,rib,rib];s[1]=drop;bones.push({center:c,size:s});}
+   }
+  }
+  // Bones stay inside the shell's own solid; a small inset keeps their faces off its grid planes.
+  const pieces=[];
+  for(const bone of disjointBoxes(bones.map(b=>({...b,material:BONE_MATERIAL.id}))))for(const shell of part.boxes){
+   const l=[0,1,2].map(i=>Math.max(bone.center[i]-bone.size[i]/2,shell.center[i]-shell.size[i]/2)+INSET),h=[0,1,2].map(i=>Math.min(bone.center[i]+bone.size[i]/2,shell.center[i]+shell.size[i]/2)-INSET);
+   if(h.every((v,i)=>v-l[i]>WOUND_GRID/4))pieces.push({center:l.map((v,i)=>(v+h[i])/2),size:l.map((v,i)=>h[i]-v),material:BONE_MATERIAL.id});
+  }
+  return pieces;
+}
+/** Shell boxes left after the wounds ([x,y,z,sx,sy,sz] cuts, part-local metres; older saves hold cubes [x,y,z,s]). */
+export function woundedBoxes(boxes,wounds=[]){
+  let out=boxes;
+  for(const w of wounds){const cutter={center:w.slice(0,3),size:w.length===4?[w[3],w[3],w[3]]:w.slice(3,6)};out=out.flatMap(b=>subtractBox(b,cutter));}
+  return out;
+}
+/** One hit's cut, like the frontier's bite of shell voxels: wide across the struck face, shallow along
+ * the swing. Bigger hits bite wider and deeper; piercing is narrow and deep, impact wide. */
+export function woundCut(amount,mode='strike'){
+  const even=v=>Math.max(2*WOUND_GRID,Math.round(v/(2*WOUND_GRID))*2*WOUND_GRID);
+  const width=clamp(.125+amount*.006,.125,.3125)*(mode==='pierce'?.5:mode==='impact'?1.3:1),depth=clamp(.0625+amount*.002,.0625,.125)*(mode==='pierce'?2:1);
+  return {width:even(width),depth:even(depth)};
+}
+/** The cut box for a hit at a part-local point along a part-local swing direction. */
+export function woundBox(local,direction,cut){
+  const axis=[0,1,2].reduce((a,i)=>Math.abs(direction[i])>Math.abs(direction[a])?i:a,0),sign=Math.sign(direction[axis])||1;
+  const center=[...local],size=[cut.width,cut.width,cut.width];center[axis]+=sign*cut.depth/2;size[axis]=cut.depth;
+  return [...center.map(v=>Math.round(v/WOUND_GRID)*WOUND_GRID),...size];
 }
 
 function damageHidden(entity,id,mapping){

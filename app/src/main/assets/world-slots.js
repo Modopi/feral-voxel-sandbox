@@ -76,7 +76,8 @@ export function deleteWorld(store, id) {
   // 목록 갱신 성공 뒤 해당 월드 데이터만 제거
   store.setItem(CATALOG, JSON.stringify(rows.filter((w) => w.id !== id)));
   store.removeItem(saveKey(w));
-  if (w.type === "expedition") {
+  // Worlds on the one runtime keep two save generations next to the original key.
+  if (w.type === "expedition" || w.type === "island") {
     store.removeItem(saveKey(w) + ".a");
     store.removeItem(saveKey(w) + ".b");
   }

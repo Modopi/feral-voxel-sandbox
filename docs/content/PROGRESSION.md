@@ -342,7 +342,7 @@
 | 개념/분류 | 현재 변수·위치 | 새 데이터 경로 | 상태 | 타입·단위 | 허용 범위/밸런스 | 기본·개별값 | 근거·연관 | 검증·이전 |
 |---|---|---|---|---|---|---|---|---|
 | P-ITEM 원료/중간품 | inventory.js ITEMS, resourceForBlock | entries[kind=item].unit/origin | 신규/일부 이름 중복 | string·unit/recipe/source 참조 | unit=L,bundle,serving,sheet,piece,packet,document | 원료16종·중간품11종·설계도39종 | 원산 경로 추적 | source/recipe 출력에 존재; legacy iron/scrap/relic 자동매핑 금지 |
-| P-SOURCE 원산 획득 | acquisition.js acquisitionRules, frontier/content.js GATHERABLES | source.outputs/seconds/requiredTool | 신규 | 수량number·단위/item, seconds | 수량>0,시간>0; 후보1~2/4~12s | 원료표 | 손수집→도구→광물 경로 | 블록/노드 산출 ID와 대조; 생성 데이터 버전별 적용 |
+| P-SOURCE 원산 획득 | acquisition.js acquisitionRules, frontier/content.js GATHERABLES | source.outputs/seconds/requiredTool | 신규 | 수량number·단위/item, seconds | 수량>0, 시간 0(0.14.0부터 개척 원정처럼 즉시 획득, 재생 시간은 노드가 소유) | 원료표 | 손수집→도구→광물 경로 | 블록/노드 산출 ID와 대조; 생성 데이터 버전별 적용 |
 | P-MATERIAL 등급·계열 | content/catalog.js MATERIALS(미통합) | material.tier/field | 유지 계약 | integer/string/null | T1~10; 네계열 또는null | 31종 원본 유지 | 사용자 확정 재료표 | catalog ID/tier/field 완전 일치 검사 |
 | P-MATERIAL 질량·체적 | machine/model.js TYPES.mass 고정값 | material.properties.densityKgM3; quantity_contract | 신규 | kg/m³,m,L | 양수; 밀도600~9200 | 재료표·셀0.5m/125L | 실재질 밀도와 가상 고티어 균형 | 질량=밀도×체적; 기존 part mass 자동환산 금지 |
 | P-MATERIAL 내구·강도 | machine/model.js TYPES.hp 고정값 | properties.cellHp/strengthIndex | 신규 | HP/게임지수 | >0; HP45~1700,강도45~1900 | 재료표; 하중환산0.05 | 개체HP와 분리; 하중단면 의존 | 동일형태 파손 비교, 구부품 보존 |

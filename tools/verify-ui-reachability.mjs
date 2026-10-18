@@ -6,6 +6,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {startAndroidAssetServer} from './android-asset-server.mjs';
+import {World,B} from '../app/src/main/assets/world.js';
+import {Inventory} from '../app/src/main/assets/inventory.js';
+import {Ecology} from '../app/src/main/assets/entities.js';
 const {chromium}=createRequire(import.meta.url)('playwright');
 const version=JSON.parse(await fs.readFile(new URL('../version.json',import.meta.url),'utf8')).version;
 const out=new URL(process.env.FERAL_UI_OUT||`../verification/${version}-ui/`,import.meta.url);
@@ -15,7 +18,7 @@ await fs.mkdir(out,{recursive:true});
 const browser=await chromium.launch({executablePath:process.env.FERAL_CHROME||'/usr/bin/chromium',headless:true,args:['--no-sandbox','--enable-webgl','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-dev-shm-usage']});
 const report={version,assets:server?'Android app MIME/CSP rules':assets,scope:'Chromium SwiftShader with touch input. Prepared items/positions are listed per check; this is not Android hardware or normal-progression evidence.',shared:[],expedition:[],island:[],frontier:[],errors:[]};
 const check=(list,name,detail={})=>{list.push({name,...detail});console.log('ok',name);};
-const WORLDS=[{id:'default',name:'기본 탐험 맵',type:'island',seed:63026},{id:'frontier',name:'개척 원정',type:'frontier',seed:63026},{id:'beta',name:'기계 베타 맵',type:'machine',seed:63026},{id:'ui-check',name:'UI 검사',type:'expedition',seed:63026}];
+const WORLDS=[{id:'default',name:'기본 탐험 맵',type:'island',seed:63026},{id:'frontier',name:'개척 원정',type:'frontier',seed:63026},{id:'beta',name:'기계 베타 맵',type:'machine',seed:63026},{id:'ui-check',name:'UI 검사',type:'expedition',seed:63026},{id:'island-new',name:'새 섬',type:'island',seed:63026}];
 // The HUD every map shows; the field HUD (vitals, map/status/interact, journey) is shared by the frontier and the expedition.
 const SHARED_HUD=['hud','hotbar','stick','sprintBtn','crouchBtn','crawlBtn','jumpBtn','actBtn','useBtn','inventoryBtn','menuBtn','toast','warning','toolLabel','rangeBtn','crosshair'];
 const FIELD_HUD=['vitals','waypoint','journalBtn','statusBtn','journeyHUD','interactBtn'];
@@ -23,6 +26,12 @@ async function open(context,url){
  const page=await context.newPage();page.on('pageerror',e=>report.errors.push(`${url}: ${e.message}`));
  await page.addInitScript(worlds=>{window.AndroidApp=window.AndroidApp??{};if(!localStorage.getItem('feral.worlds.v1'))localStorage.setItem('feral.worlds.v1',JSON.stringify(worlds));},WORLDS);
  await page.goto(`${assets}/${url}`);return page;
+}
+// An original island save (0.13.0 and earlier format) with a built platform, items and animals.
+function legacyIslandSave(){
+ const world=new World(63026);world.generate();for(let x=74;x<=80;x++)world.set(x,13,88,B.PLANK);
+ const inventory=new Inventory();inventory.add('berry',3);inventory.add('arrow',2);const eco=new Ecology(world);eco.populate(20);
+ return JSON.stringify({version:2,inventory:inventory.save(),world:world.save(),eco:eco.save(),player:{x:77.5,y:13,z:84.5,yaw:3.14,pitch:-.1},playTime:77,discovered:['초록 능선']});
 }
 const present=(page,ids)=>page.evaluate(ids=>ids.filter(id=>!document.getElementById(id)),ids);
 try{
@@ -142,7 +151,7 @@ try{
  await page.screenshot({path:new URL('reward-marker.png',out).pathname});
  await tap('#interactBtn');await page.waitForTimeout(300);assert.match(await page.locator('#toast').textContent(),/물자 보관함 회수 · /);
  await page.waitForTimeout(800);assert.equal(await page.evaluate(()=>FERAL.stats().rewardMarkers),markers-1,'claimed marker removed');
- await tap('#journalBtn');assert.match(await page.locator('#frontierContent').textContent(),/물자 보관함 회수함/);await tap('#frontierClose');
+ await tap('#journalBtn');assert.equal(await page.locator('#frontierTitle').textContent(),'탐험 지도','the map button opens the frontier-style map page');assert(await page.locator('#destinations button').count()>0,'destinations listed');await tap('[data-frontier-tab=journey]');assert.match(await page.locator('#frontierContent').textContent(),/물자 보관함 회수함/);await tap('#frontierClose');
  const supply=await page.evaluate(id=>{const r=FERAL.runtime,d=r.dungeons.devices,p=d._anchorPosition(id,null);Object.assign(r.player,{x:p[0],y:p[1]+.05,z:p[2]+.6});d._state(id).supplies.electrical={ownerId:'removed-battery',type:'electrical',lengthM:2,anchorId:null,items:{}};return true;},site.id);
  await page.waitForTimeout(300);await tap('#statusBtn');await tap('[data-frontier-tab=devices]');await page.waitForTimeout(300);
  assert.match(await page.locator('#frontierContent').textContent(),/장치 세부/);
@@ -162,32 +171,97 @@ try{
  await fpage.screenshot({path:new URL('frontier-bag.png',out).pathname});await frontier.close();
  check(report.frontier,'frontier field HUD, ledger window and bag from shared modules');
 
- // Island (legacy world) on the shared controls.
+ // Basic island: the same runtime and screen as the expedition (island map preset with sandbox rules).
+ // An original island save is converted once; the original key stays untouched.
  const island=await browser.newContext({viewport:{width:900,height:412},isMobile:true,hasTouch:true,deviceScaleFactor:1});
  const ip=await island.newPage();ip.on('pageerror',e=>report.errors.push(e.message));
- await ip.addInitScript(()=>{window.AndroidApp={};localStorage.removeItem('feral.world.v1');});
- await ip.goto(`${assets}/index.html`);await ip.waitForFunction(()=>window.FERAL?.ready,null,{timeout:120000});
- assert.match(await ip.locator('#loadStatus').textContent(),/월드 준비 완료/,'island loading uses the shared loading display');
- await ip.click('#startBtn');await ip.waitForTimeout(1500);
- assert.deepEqual(await present(ip,SHARED_HUD),[],'island shows the shared HUD');
+ const legacy=legacyIslandSave();
+ await ip.addInitScript(legacy=>{window.AndroidApp={};if(!localStorage.getItem('feral.world.v1'))localStorage.setItem('feral.world.v1',legacy);},legacy);
+ await ip.goto(`${assets}/index.html`);await ip.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:120000});
+ const converted=await ip.evaluate(()=>({map:FERAL.runtime.map.id,platform:FERAL.runtime.atlas.getCell(150,26,176),berry:FERAL.runtime.progression.count('berry'),unmapped:FERAL.runtime.conversion?.unmapped.map(u=>u.name),original:localStorage.getItem('feral.world.v1')?.length,generation:!!(localStorage.getItem('feral.world.v1.a')||localStorage.getItem('feral.world.v1.b')),vitalsHidden:document.getElementById('vitals').hidden}));
+ assert.equal(converted.map,'island');assert.equal(converted.platform,'plank','built platform carried over');assert.equal(converted.berry,3);
+ assert.equal(converted.original,legacy.length,'original island save untouched');assert(converted.generation,'converted world saved in the shared format');
+ assert(converted.unmapped.includes('아이템')&&converted.unmapped.includes('동물 개체'),'unmapped items listed');assert(converted.vitalsHidden,'peaceful island hides health and food');
+ assert.match(await ip.locator('#toast').textContent(),/기존 섬 저장을 옮겼습니다|새 장소 발견/);
+ assert.deepEqual(await present(ip,[...SHARED_HUD,...FIELD_HUD]),[],'island shows the shared HUD');
  const itap=async selector=>{await ip.locator(selector).first().scrollIntoViewIfNeeded();const box=await ip.locator(selector).first().boundingBox();assert(box,selector);await ip.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);};
- const aimDown=()=>ip.evaluate(()=>{FERAL.player.pitch=-1;});
- await ip.evaluate(()=>{const inv=FERAL.inventory,empty=inv.slots.slice(0,9).findIndex(s=>!s);if(empty>=0)inv.select(empty);else{inv.slots[8]=null;inv.select(8);}});
- await ip.waitForTimeout(400);await aimDown();await ip.waitForTimeout(300);await itap('#useBtn');await ip.waitForTimeout(250);
+ await itap('#journalBtn');assert.equal(await ip.locator('#frontierTitle').textContent(),'탐험 지도');await itap('[data-frontier-tab=journey]');const journey=await ip.locator('#frontierContent').textContent();assert.match(journey,/기존 섬 저장을 옮겼습니다/);assert.match(journey,/옮기지 못한 항목 · 아이템/);assert.match(journey,/잿빛 분화구/);
+ await ip.screenshot({path:new URL('island-journey.png',out).pathname});await itap('#frontierClose');
+ check(report.island,'original island save converts onto the shared runtime and lists what could not move',{prepared:'0.13.0-format island save with a plank platform',converted});
+ const aimDown=()=>ip.evaluate(()=>{FERAL.runtime.player.pitch=-1;});
+ const emptySlot=await ip.evaluate(()=>{const i=FERAL.slots.slots.slice(0,9).findIndex(s=>!s);FERAL.selectHotbar(i);return i;});assert(emptySlot>=0);
+ await ip.waitForTimeout(300);await aimDown();await ip.waitForTimeout(400);assert.equal(await ip.locator('#useBtn small').textContent(),'관찰');await itap('#useBtn');await ip.waitForTimeout(250);
  assert.match(await ip.locator('#toast').textContent(),/지형 .* m · 거리/);check(report.island,'empty-hand observe lens');
- const water=()=>ip.evaluate(()=>{let n=0;for(const f of FERAL.world.fluids.values())n+=f.v;return n;});
+ const water=()=>ip.evaluate(()=>FERAL.runtime.atlas.fluidTotals().volumeM3);
  const waterBefore=await water();
  await itap('#menuBtn');await itap('[data-tab=life]');await itap('[data-sandbox-tool="4"]');await ip.waitForTimeout(400);assert.equal(await ip.evaluate(()=>FERAL.stats().paused),false,'choosing a tool resumes play');
  assert.equal(await ip.locator('#toolName').textContent(),'물 붓기');await aimDown();await itap('#useBtn');await ip.waitForTimeout(600);
  const waterAfter=await water();assert(waterAfter>waterBefore,`water ${waterBefore} -> ${waterAfter}`);
  check(report.island,'sandbox water tool via menu and use button',{waterBefore,waterAfter});
- await itap('#menuBtn');await itap('[data-tab=settings]');await itap('#showRadar');await itap('#resumeBtn');await ip.waitForTimeout(400);
+ const stoneSlot=await ip.evaluate(()=>FERAL.slots.slots.slice(0,9).findIndex(s=>s?.id==='loose_stone'));
+ // Face away from the poured water so the aimed cell is dry ground.
+ const built=await ip.evaluate(()=>{const p=FERAL.runtime.player;p.yaw+=Math.PI;p.pitch=-.9;return FERAL.runtime.progression.count('loose_stone');});
+ if(stoneSlot<0)await ip.evaluate(()=>{FERAL.runtime.progression.grant({loose_stone:2},{claimId:'ui-check:stone'});});
+ const stoneHotbar=await ip.evaluate(()=>FERAL.slots.slots.slice(0,9).findIndex(s=>s?.id==='loose_stone'));
+ await itap(`[data-hotbar="${stoneHotbar}"]`);await ip.waitForTimeout(300);assert.match(await ip.locator('#useBtn small').textContent(),/놓기 ×1/);
+ await itap('#useBtn');await ip.waitForTimeout(400);const buildToast=await ip.locator('#toast').textContent();
+ const stoneAfter=await ip.evaluate(()=>FERAL.runtime.progression.count('loose_stone'));assert(stoneAfter<Math.max(built,2),`placed a stone block (${built} -> ${stoneAfter}): ${buildToast}`);
+ check(report.island,'building a block from the hotbar with mined stone',{stoneBefore:built,stoneAfter});
+ await itap('#menuBtn');await itap('[data-tab=settings]');await itap('#showRadar');await itap('#resumeBtn');await ip.waitForTimeout(800);
  assert(await ip.locator('#radar').isVisible(),'radar visible after setting');
- const landmark=await ip.evaluate(()=>{const p=FERAL.world.landmarks.at(-1);FERAL.player.x=p.x;FERAL.player.z=p.z;FERAL.player.y=FERAL.world.surface(p.x,p.z)+.05;return p.name;});
- let discovered=false;for(let i=0;i<20&&!discovered;i++){discovered=(await ip.locator('#toast').textContent()).includes('새 장소 발견');await ip.waitForTimeout(150);}
+ const landmark=await ip.evaluate(()=>{const l=FERAL.runtime.map.landmarks.find(l=>!FERAL.runtime.discoveredLandmarks.has(l.name));const r=FERAL.runtime;Object.assign(r.player,{x:l.x,z:l.z,y:r.atlas.heightAt(l.x,l.z)+.05,vy:0});return l.name;});
+ let discovered=false;for(let i=0;i<30&&!discovered;i++){discovered=(await ip.locator('#toast').textContent()).includes('새 장소 발견');await ip.waitForTimeout(150);}
  assert(discovered,'discovery toast');await ip.screenshot({path:new URL('island.png',out).pathname});
- check(report.island,'minimap setting and discovery toast',{prepared:'teleport to landmark',landmark});
+ check(report.island,'minimap setting and place discovery',{prepared:'teleport to landmark',landmark});
  await island.close();
+ // A new island world: the island's starting kit, the shared stick, digging with the attack button,
+ // the sandbox herd button, and save → reopen keeping the island map, the dug cell and the items.
+ const fresh=await browser.newContext({viewport:{width:900,height:412},isMobile:true,hasTouch:true,deviceScaleFactor:1});
+ const np=await open(fresh,'index.html?world=island-new');await np.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:120000});
+ const ncdp=await fresh.newCDPSession(np);
+ const ntap=async selector=>{const box=await np.locator(selector).first().boundingBox();assert(box,selector);await np.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);};
+ const start=await np.evaluate(()=>({map:FERAL.runtime.map.id,items:FERAL.runtime.progression.inventory,starter:FERAL.runtime.map.starter,conversion:FERAL.runtime.conversion??null,x:FERAL.runtime.player.x,z:FERAL.runtime.player.z}));
+ assert.equal(start.map,'island');assert.deepEqual(start.items,start.starter,'a new island starts with the island kit');assert.equal(start.conversion,null);
+ const npad=await np.locator('#stick').boundingBox(),sx=npad.x+npad.width/2,sy=npad.y+npad.height/2;
+ await ncdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:sx,y:sy,id:3}]});await ncdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:sx,y:sy-40,id:3}]});await np.waitForTimeout(1200);await ncdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await np.waitForTimeout(300);
+ const walked=await np.evaluate(s=>Math.hypot(FERAL.runtime.player.x-s.x,FERAL.runtime.player.z-s.z),start);assert(walked>1,`walked ${walked} m`);
+ await np.evaluate(()=>{FERAL.runtime.player.pitch=-1.2;});await np.waitForTimeout(300);
+ const dig=await np.evaluate(()=>{const h=FERAL.view.aim();const c=['x','y','z'].map(k=>Math.floor((h.point[k]-h.normal[k]*.001)*2));return {kind:h.kind,cell:c,block:FERAL.runtime.atlas.getCell(...c)};});
+ assert.equal(dig.kind,'terrain');assert(dig.block,'aimed at a solid cell');
+ let taps=0;for(;taps<40&&await np.evaluate(c=>FERAL.runtime.atlas.getCell(...c),dig.cell);taps++){await ntap('#actBtn');await np.waitForTimeout(250);}
+ assert.equal(await np.evaluate(c=>FERAL.runtime.atlas.getCell(...c),dig.cell),null,`dug ${dig.block} with ${taps} taps`);
+ assert(taps<=3,`the frontier mining rule: ${dig.block} goes in ${taps} strikes`);
+ // Gathering is immediate: standing at a starter branch, one tap of the interact button gives the timber.
+ const branch=await np.evaluate(()=>{const r=FERAL.runtime,n=r.nodes.find(n=>n.id.startsWith('starter:fallen_branch'));Object.assign(r.player,{x:n.x+.6,z:n.z,y:r.atlas.heightAt(n.x+.6,n.z)+.05,vy:0});return {id:n.id,timber:r.progression.count('raw_timber')};});
+ await np.waitForTimeout(400);assert.match(await np.locator('#interactBtn').textContent(),/채집/);await ntap('#interactBtn');await np.waitForTimeout(150);
+ const gathered=await np.evaluate(()=>FERAL.runtime.progression.count('raw_timber'));assert(gathered>branch.timber,`timber ${branch.timber} -> ${gathered} at once`);
+ // Layered body: a calm deer side-on; real attack taps chip its flank and then hit the ribs under it.
+ const deer=await np.evaluate(()=>{const r=FERAL.runtime,p=r.player,x=p.x,z=p.z-1.6,e=r.creatures.spawn('moss_deer',{x,z},{regionId:`${Math.floor(x/64)},${Math.floor(z/64)}`,environmentId:'grove'});
+  const pin=()=>{if(!e.dead){e.state='idle';e.targetPoint=null;e.targetId=null;e.nextDecisionAt=1e9;e.nextWanderAt=1e9;e.angerUntil=0;e.attack=null;e.pose.moving=false;e.x=x;e.z=z;e.yaw=Math.PI/2;e.hp=e.maxHp;}if(window.__pinDeer)requestAnimationFrame(pin);};window.__pinDeer=true;pin();
+  window.__deerFrom={x:p.x,z:p.z};return {id:e.id,core:e.parts.core.hp};});
+ await np.waitForTimeout(1500);
+ const swings=[];
+ for(let i=0;i<5;i++){
+  await np.evaluate(id=>{const r=FERAL.runtime,p=r.player,v=FERAL.view,n=v.models.get(id).parts.get('thorax');Object.assign(p,{x:window.__deerFrom.x,z:window.__deerFrom.z,vx:0,vz:0});n.updateMatrixWorld(true);const t=n.getWorldPosition(v.camera.position.clone()),c=v.camera.position;p.yaw=Math.atan2(-(t.x-c.x),-(t.z-c.z));p.pitch=Math.atan2(t.y+.02-c.y,Math.hypot(t.x-c.x,t.z-c.z));},deer.id);
+  await np.waitForTimeout(250);const before=await np.evaluate(id=>FERAL.runtime.creatures.get(id).woundRevision,deer.id);
+  await ntap('#actBtn');await np.waitForTimeout(1100);
+  swings.push(await np.evaluate(([id,before])=>{const e=FERAL.runtime.creatures.get(id);return {wound:e.woundRevision>before,core:Math.round(e.parts.core.hp)};},[deer.id,before]));
+ }
+ const flank=await np.evaluate(id=>{window.__pinDeer=false;const e=FERAL.runtime.creatures.get(id);return {wounds:Object.values(e.wounds).reduce((n,l)=>n+l.length,0),core:e.parts.core.hp};},deer.id);
+ assert(flank.wounds>0,'shell bites are recorded');assert(flank.core<deer.core,`ribs under the bite take the structural hit (${deer.core} -> ${flank.core})`);
+ await np.screenshot({path:new URL('island-creature-wound.png',out).pathname});
+ await ntap('#menuBtn');await ntap('[data-tab=life]');const herdBefore=await np.evaluate(()=>FERAL.runtime.creatures.entities.length);
+ await ntap('#herdBtn');const herdAfter=await np.evaluate(()=>FERAL.runtime.creatures.entities.length);assert(herdAfter>=herdBefore+20,`herd ${herdBefore} -> ${herdAfter}`);
+ await ntap('#resumeBtn');await np.waitForTimeout(300);
+ await ntap('#menuBtn');await np.waitForTimeout(200);
+ const saved=await np.evaluate(()=>({x:FERAL.runtime.player.x,z:FERAL.runtime.player.z,items:FERAL.runtime.progression.inventory,places:[...FERAL.runtime.discoveredLandmarks]}));
+ await np.reload();await np.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:120000});
+ const reopened=await np.evaluate(([c,deerId])=>({wounds:Object.values(FERAL.runtime.creatures.get(deerId)?.wounds??{}).reduce((n,l)=>n+l.length,0),map:FERAL.runtime.map.id,cell:FERAL.runtime.atlas.getCell(...c),x:FERAL.runtime.player.x,z:FERAL.runtime.player.z,items:FERAL.runtime.progression.inventory,places:[...FERAL.runtime.discoveredLandmarks]}),[dig.cell,deer.id]);
+ assert.equal(reopened.map,'island');assert.equal(reopened.cell,null,'the dug cell stays dug');assert.deepEqual(reopened.items,saved.items);assert.deepEqual(reopened.places,saved.places);
+ assert(Math.hypot(reopened.x-saved.x,reopened.z-saved.z)<.05,'position restored');assert.equal(reopened.wounds,flank.wounds,'creature wounds survive save and reopen');
+ await np.screenshot({path:new URL('island-new.png',out).pathname});
+ check(report.island,'new island: starting kit, stick walk, frontier digging, instant gathering, shell bites and bone hits, herd button, save and reopen',{walkedM:walked,dug:dig.block,taps,gathered:[branch.timber,gathered],swings,flank,herd:[herdBefore,herdAfter],places:reopened.places,woundsAfterReopen:reopened.wounds});
+ await fresh.close();
 
  // A module that cannot load must end in a visible failure with retry on the shared loading screen.
  const failing=await browser.newContext({viewport:{width:900,height:412},isMobile:true,hasTouch:true});const fp=await failing.newPage();

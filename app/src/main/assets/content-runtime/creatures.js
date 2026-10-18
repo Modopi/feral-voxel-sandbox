@@ -1,5 +1,6 @@
 import { creatureBodyPart } from './creature-animation.js';
 import { skeleton, structureState, breakBone, evaluateStructure, boneHealth, saveStructure } from '../structural-body.js';
+const MAX_WOUNDS = 96;
 
 const STEP = 0.25;
 const MAX_CATCHUP = 7200;
@@ -186,7 +187,7 @@ export class CreatureSystem {
       inventory: clone(options.inventory ?? (s.civilization ? (s.entityType === 'organic' ? { wood: 6 } : { stone: 6 }) : {})),
       pose: { phase: 0, speedFactor: 1, limbSupport: [], missingParts: [], moving: false },
       parts: {}, massKg: s.body.massKg,
-      fragmentMass: null, fragmentCuts: [], fragmentSerial: 0, damageReceipts: {},
+      fragmentMass: null, fragmentCuts: [], fragmentSerial: 0, damageReceipts: {}, wounds: {}, woundRevision: 0,
     };
     this._entities.set(id, e);
     this._indexEntity(e);
@@ -892,6 +893,16 @@ export class CreatureSystem {
     return this.damage(id,amount,'body',{...packet,attackMode:packet.attackMode??packet.mode??'strike',structuralHits:hits});
   }
 
+  /** Frontier shell wound: a grid box [x,y,z,sx,sy,sz] cut out of one visual part (part-local metres). It is visual and
+   * saved; HP and structure stay in damage(). Returns false once the part holds MAX_WOUNDS cuts. */
+  wound(id, partId, cut) {
+    const e = this.get(id);
+    if (!e || typeof partId !== 'string' || !partId || partId.length > 64 || !Array.isArray(cut) || cut.length !== 6 || !cut.every(Number.isFinite) || cut.slice(3).some(v => v <= 0 || v > .5)) return false;
+    const list = e.wounds[partId] ??= [];
+    if (list.length >= MAX_WOUNDS || list.some(c => c.every((v, i) => Math.abs(v - cut[i]) < 1e-9))) return false;
+    list.push(cut); e.woundRevision++; return true;
+  }
+
   setFragmentBridge(bridge) { this.fragmentBridge = bridge; }
   massForVisualPart(id, partId) { const e = this.get(id), part = e?.fragmentMass?.parts?.[partId]; return part ? (part.objectId ? 0 : part.massKg) : null; }
 
@@ -1047,6 +1058,8 @@ export class CreatureSystem {
       e.damageReceipts ??= {};
       if (!e.damageReceipts || typeof e.damageReceipts !== 'object' || Array.isArray(e.damageReceipts) || Object.values(e.damageReceipts).some(r=>!r?.ok || !Number.isFinite(r.hpLost) || r.hpLost<0)) throw new Error('Invalid damage receipts');
       e.massKg ??= s.body.massKg; e.fragmentMass ??= null; e.fragmentCuts ??= []; e.fragmentSerial ??= 0;
+      e.wounds ??= {}; e.woundRevision ??= 0;
+      if (!e.wounds || typeof e.wounds !== 'object' || Array.isArray(e.wounds) || Object.values(e.wounds).some(list => !Array.isArray(list) || list.length > MAX_WOUNDS || list.some(c => !Array.isArray(c) || ![4, 6].includes(c.length) || !c.every(Number.isFinite) || c.slice(3).some(v => v <= 0))) || !Number.isSafeInteger(e.woundRevision)) throw new Error('Invalid shell wounds');
       finite(e.massKg, 'creature mass', 0);
       if (!Array.isArray(e.fragmentCuts) || !Number.isSafeInteger(e.fragmentSerial) || e.fragmentSerial < 0) throw new Error('Invalid fragment state');
       if (e.fragmentMass) {

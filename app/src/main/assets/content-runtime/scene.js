@@ -2,9 +2,10 @@ import * as T from '../vendor/three.module.js';
 import {ASSETS, loadAssetLibrary} from './assets.generated.js';
 import {buildPartMeshes} from './render-surfaces.js';
 import {flattenAsset} from './voxel/model.js';
-import {animateCreatureModel} from './creature-animation.js';
+import {animateCreatureModel,creatureBodyPart,creatureBones,woundedBoxes,BONE_MATERIAL} from './creature-animation.js';
 import {animateBossModel,bossLogicalPart} from './boss-animation.js';
 import {WorldUI} from '../world-ui.js';
+import {firstPersonHands} from '../character-view.js';
 export {T};
 const colors = {
  grass:0x688b49,dirt:0x80644b,stone:0x858b87,sand:0xc4b483,log:0x725238,
@@ -72,7 +73,17 @@ export class ExpeditionScene {
   this.shots=[];this.quality='balanced';
   // The same world-space aim and context cards as the other maps.
   this.worldUI=new WorldUI(this.scene,this.camera);
+  // The frontier's first-person hands; a held block or material shows as a small cube in the right hand.
+  this.hands=firstPersonHands();this.camera.add(this.hands);this.scene.add(this.camera);this.heldCube=null;this.handsArmored=false;this.heldId=null;
   this.resize();
+ }
+ setHands({armored=false,heldId=null,showCube=false}={}){
+  if(armored!==this.handsArmored){this.camera.remove(this.hands);this.hands.children.forEach(m=>m.geometry.dispose());this.hands=firstPersonHands(armored);this.camera.add(this.hands);this.handsArmored=armored;}
+  const id=showCube?heldId:null;if(id===this.heldId)return;this.heldId=id;
+  if(this.heldCube){this.camera.remove(this.heldCube);this.heldCube.geometry.dispose();this.heldCube.material.dispose();this.heldCube=null;}
+  if(!id)return;
+  this.heldCube=new T.Mesh(new T.BoxGeometry(1,1,1),new T.MeshStandardMaterial({color:colorFor(id),roughness:.8}));
+  this.heldCube.scale.setScalar(.1);this.heldCube.position.set(.22,-.17,-.4);this.heldCube.rotation.set(.1,.6,.1);this.heldCube.raycast=()=>{};this.camera.add(this.heldCube);
  }
  resize(){const w=innerWidth,h=innerHeight;this.renderer.setPixelRatio(Math.min(devicePixelRatio,this.quality==='low'?1:this.quality==='high'?2:1.5));this.renderer.setSize(w,h,false);this.camera.aspect=w/h;this.camera.updateProjectionMatrix();}
  /** Shared graphics setting: pixel ratio, view distance and terrain streaming radius. */
@@ -102,6 +113,12 @@ export class ExpeditionScene {
    if(!cached){cached=buildPartMeshes(p.boxes,asset.materials);if(!mutable)this.geometryCache.set(cacheKey,cached);}
    for(const cachedMesh of cached){const mesh=new T.Mesh(cachedMesh.geometry,cachedMesh.material);mesh.userData={id:desc.id,kind:desc.kind,partId:p.id};node.add(mesh);if(mutable)dynamicGeometry.push(mesh);}
   }
+  if(desc.kind==='creature')for(const p of asset.parts){
+   // Bones sit inside the shell and show only through wounds (frontier layered body).
+   const key=`bone:${asset.id}:${p.id}`;let cached=this.geometryCache.get(key);
+   if(!cached){cached=buildPartMeshes(creatureBones(p,creatureBodyPart(desc.entity??{},p.id)),[BONE_MATERIAL]);this.geometryCache.set(key,cached);}
+   for(const c of cached){const mesh=new T.Mesh(c.geometry,c.material);mesh.userData={id:desc.id,kind:desc.kind,partId:p.id,layer:'bone'};partGroups.get(p.id).add(mesh);}
+  }
   const value={group,parts:partGroups,asset,library,boxes:flattenAsset(asset,library),desc,revision:desc.revision,dynamicGeometry};
   if(desc.getBoxes)this.rebuildStructure(value,desc);
   if(this.wanted.has(desc.id)){this.models.set(desc.id,value);this.scene.add(group);}else releaseModel(value);
@@ -125,6 +142,18 @@ export class ExpeditionScene {
   model.dynamicGeometry=[...model.structureParts.values()].flatMap(p=>p.meshes);
   model.revision=desc.revision;model.boxes=boxes;
  }
+ /** Re-mesh only the wounded parts of one creature from its shell boxes minus the saved wound cubes. */
+ rebuildWounds(model,e){
+  model.woundRevision=e.woundRevision??0;model.woundMeshes??=new Map();
+  for(const [partId,cuts]of Object.entries(e.wounds??{})){
+   const node=model.parts.get(partId),part=model.asset.parts.find(p=>p.id===partId),old=model.woundMeshes.get(partId);
+   if(!node||!part||old?.count===cuts.length)continue;
+   for(const mesh of [...node.children])if(mesh.isMesh&&mesh.userData.layer!=='bone')mesh.removeFromParent();
+   if(old){for(const mesh of old.meshes){mesh.geometry.dispose();mesh.material.dispose();}model.dynamicGeometry=model.dynamicGeometry.filter(m=>!old.meshes.includes(m));}
+   const meshes=buildPartMeshes(woundedBoxes(part.boxes,cuts),model.asset.materials).map(({geometry,material})=>{const mesh=new T.Mesh(geometry,material);mesh.userData={id:e.id,kind:'creature',partId};node.add(mesh);return mesh;});
+   model.dynamicGeometry.push(...meshes);model.woundMeshes.set(partId,{count:cuts.length,meshes});
+  }
+ }
  syncModels(descriptors,time,dt=0){
   this.wanted=new Map(descriptors.map(d=>[d.id,d]));
   for(const[id,m]of this.models)if(!this.wanted.has(id)){releaseModel(m);this.models.delete(id);}
@@ -136,7 +165,11 @@ export class ExpeditionScene {
    m.desc=d;if(d.getBoxes&&m.revision!==d.revision)this.rebuildStructure(m,d);
    const p=d.position;m.group.position.set(p.x,p.y,p.z);
    if(d.rotation)m.group.quaternion.set(d.rotation.x,d.rotation.y,d.rotation.z,d.rotation.w);else m.group.rotation.set(0,d.yaw||0,0);
-   if(d.kind==='creature'&&d.entity){animateCreatureModel(m,d.entity,time,dt);continue;}
+   if(d.kind==='creature'&&d.entity){
+    if((m.woundRevision??0)!==(d.entity.woundRevision??0))this.rebuildWounds(m,d.entity);
+    for(const[id,node]of m.parts){const broken=!!d.entity.parts?.[creatureBodyPart(d.entity,id)]?.broken;for(const mesh of node.children)if(mesh.userData.layer==='bone')mesh.visible=!broken;}
+    animateCreatureModel(m,d.entity,time,dt);continue;
+   }
    if(d.kind==='boss'&&d.entity){animateBossModel(m,d.entity,d.bossSystem,time,dt);continue;}
    for(const[id,node]of m.parts){
     node.visible=!d.missingParts?.includes(id);node.rotation.set(0,0,0);

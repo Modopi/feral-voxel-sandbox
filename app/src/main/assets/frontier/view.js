@@ -1,6 +1,5 @@
 import { CharacterBodyView } from "../character-body-view.js";
 import { CharacterRig } from "../character-view.js";
-import { mountCharacterPortrait } from "../character-portrait.js";
 import { uiIcon } from "../ui-art.js";
 import { CampaignView } from "./campaign-view.js";
 import { BIOMES, CROPS, biomeIndex } from "./campaign.js";
@@ -20,7 +19,7 @@ import { FACTIONS } from "./model.js";
 import { AssemblyView } from "./assembly-view.js";
 import { FrontierMotion } from "./motion.js";
 import { evaluate, TYPES } from "../machine/model.js";
-import { mountFieldHUD, setVitals, waypointText, GameWindow } from "../shell.js";
+import { mountFieldHUD, setVitals, waypointText, GameWindow, renderCharacterSheet, renderMapPage } from "../shell.js";
 const $ = (id) => document.getElementById(id);
 const escape = (s) =>
   String(s).replace(
@@ -944,9 +943,16 @@ export class FrontierView {
     root.classList.toggle("journeyContent", this.tab === "journey");
     if (this.tab === "journey") this.campaignUI.render(root);
     if (this.tab === "map") {
-      root.innerHTML = `<div class="mapLayout"><div class="regionMap"><h3>${escape(s.info.name)}</h3><small>위험 ${s.info.tier} · ${Object.keys(s.regions).length}개 지역 발견</small>
-      <div class="routeGrid"><button data-route="0,-1">↑<small>북쪽 지역</small></button><button data-route="-1,0">←<small>서쪽</small></button><span><b>⌂</b><small>${s.x}, ${s.z}</small></span><button data-route="1,0">→<small>동쪽</small></button><button data-route="0,1">↓<small>남쪽 지역</small></button></div>
-      <p>야영지·지역 경계에서 이동<br>식량 1개 필요 · 보유 ${inv.count("food")}</p></div><div class="destinationList"><h3>목적지 표시</h3><div id="destinations"></div><p>목적지를 선택하면 탐험 화면에 방향과 거리를 표시합니다.</p></div></div>`;
+      renderMapPage(
+        root,
+        {
+          title: s.info.name,
+          subtitle: `위험 ${s.info.tier} · ${Object.keys(s.regions).length}개 지역 발견`,
+          map: `<div class="routeGrid"><button data-route="0,-1">↑<small>북쪽 지역</small></button><button data-route="-1,0">←<small>서쪽</small></button><span><b>⌂</b><small>${s.x}, ${s.z}</small></span><button data-route="1,0">→<small>동쪽</small></button><button data-route="0,1">↓<small>남쪽 지역</small></button></div>`,
+          footer: `야영지·지역 경계에서 이동<br>식량 1개 필요 · 보유 ${inv.count("food")}`,
+        },
+        (label, fn, id) => this.button(label, fn, id),
+      );
       root
         .querySelectorAll("[data-route]")
         .forEach(
@@ -1091,66 +1097,49 @@ export class FrontierView {
       const weapon = activeGear(inv, "weapon"),
         tool = activeGear(inv, "tool");
       const armor = inv.unlocks.has("armor");
-      root.innerHTML = `<div class="characterSheet"><div class="characterFigure"><div class="characterStage ${armor ? "armored" : ""}"><span>개척자 · 끌어 회전</span></div><div class="equippedSlots"><div title="${escape(weapon.name)}">${itemArt(gearId(inv, "weapon"))}<small>무기</small></div><div title="${escape(tool.name)}">${itemArt(gearId(inv, "tool"))}<small>도구</small></div><div class="armorSlot ${armor ? "equipped" : ""}" title="${armor ? "개척 갑옷 · 피해 35% 감소" : "갑옷 미착용"}"><b>⛨</b><small>${armor ? "갑옷" : "없음"}</small></div></div></div>
-      <div class="characterStats"><div class="characterName"><h3>개척자 <small>LV.</small> ${s.level}</h3><span>${s.riding ? (s.airborne ? "비행 중" : "탑승 중") : "탐험 중"}</span></div>
-      <div class="statMeter hp"><label>체력 <b>${Math.ceil(s.hp)} / ${s.maxHP}</b></label><progress max="${s.maxHP}" value="${s.hp}"></progress></div>
-      <div class="statMeter food"><label>포만 <b>${Math.ceil(s.hunger)} / 100</b></label><progress max="100" value="${s.hunger}"></progress></div>
-      <div class="statMeter xp"><label>경험 <b>${s.xp % 80} / 80</b></label><progress max="80" value="${s.xp % 80}"></progress></div>
-      <dl class="combatStats"><div><dt>${escape(weapon.name)}</dt><dd>공격 ${weapon.damage + (weapon.name === "기본 펄스" && inv.unlocks.has("blade") ? 12 : 0)}</dd></div><div><dt>${armor ? "개척 갑옷" : "기본 의복"}</dt><dd>피해 감소 ${armor ? "35" : "0"}%</dd></div></dl>
-      <p class="activeEffects">${[s.journey.fedUntil > s.time ? `든든함 ${Math.ceil(s.journey.fedUntil - s.time)}초 · 피해 10% 감소` : "", s.journey.tonicUntil > s.time ? `강장 ${Math.ceil(s.journey.tonicUntil - s.time)}초 · 체력 0.8/초` : ""].filter(Boolean).join("<br>") || "음식·강장제의 효과가 여기에 표시됩니다."}</p>
-      <div id="supplies" class="supplySlots"></div></div></div>
-      <div class="milestoneStrip"><span>⚑ <b>${s.allies.length}</b> 동맹</span><span>◆ <b>${wins}</b> 수호자</span><span>▧ <b>${inv.count("knowledge")}</b> 연구</span><span>◈ <b>${inv.count("relic")}</b> 유적 핵</span></div>
-      <details class="expeditionLog"><summary>원정 기록 <span>${s.log.length}</span></summary><ol>${s.log.map((t) => `<li>${escape(t)}</li>`).join("") || "<li>첫 원정을 시작했습니다.</li>"}</ol></details>`;
-      mountCharacterPortrait(root.querySelector(".characterStage"), {
-        armored: armor,
-        held: inv.slots[inv.selectedSlot]?.id,
-        stance: p.stance,
-      });
-      for (const [label, fn, id] of [
-        ["식량 먹기", () => s.consume("food", inv), "eatFood"],
-        ["회복약 사용 · H", () => s.consume("medicine", inv), "useMedicine"],
-        ["야채 스튜 먹기", () => s.consume("stew", inv), "eatStew"],
-        ["약초 강장제 사용", () => s.consume("tonic", inv), "useTonic"],
-        ["야영지 휴식", () => s.camp(p, inv), "campRest"],
-        [
-          "가방 · 제작과 연구",
-          () => {
-            this.close();
-            this.c.openBag();
-          },
-          "frontierBag",
-        ],
-        [
-          "원정 저장",
-          () =>
-            this.c.save()
-              ? "원정을 저장했습니다."
-              : "저장 실패 · 공간을 확인하세요.",
-          "frontierSave",
-        ],
-      ]) {
-        const button = this.button(
-          label,
-          () => {
-            const result = fn();
-            if (!$("frontierPanel").hidden) this.render();
-            return result;
-          },
-          id,
-        );
-        button.setAttribute("aria-label", label);
-        const item = {
-          eatFood: "food",
-          useMedicine: "medicine",
-          eatStew: "stew",
-          useTonic: "tonic",
-        }[id];
-        button.innerHTML = item
-          ? `${itemArt(item)}<b class="supplyCount">${inv.count(item)}</b><small>${item === "food" || item === "stew" ? "먹기" : "사용"}</small>`
-          : `<b aria-hidden="true">${uiIcon(id === "campRest" ? "village" : id === "frontierBag" ? "bag" : "journey")}</b><small>${id === "campRest" ? "휴식" : id === "frontierBag" ? "가방" : "저장"}</small>`;
-        if (item) button.disabled = inv.count(item) === 0;
-        $("supplies").append(button);
-      }
+      const supply = (item, short, label, id) => ({ label, short, id, art: itemArt(item), count: inv.count(item), disabled: inv.count(item) === 0, onClick: () => s.consume(item, inv) });
+      const refresh = (fn) => () => {
+        const result = fn();
+        if (!$("frontierPanel").hidden) this.render();
+        return result;
+      };
+      renderCharacterSheet(
+        root,
+        {
+          name: "개척자",
+          level: s.level,
+          state: s.riding ? (s.airborne ? "비행 중" : "탑승 중") : "탐험 중",
+          armored: armor,
+          slots: [
+            { art: itemArt(gearId(inv, "weapon")), label: "무기", title: weapon.name },
+            { art: itemArt(gearId(inv, "tool")), label: "도구", title: tool.name },
+            { art: "<b>⛨</b>", label: armor ? "갑옷" : "없음", title: armor ? "개척 갑옷 · 피해 35% 감소" : "갑옷 미착용", className: `armorSlot ${armor ? "equipped" : ""}` },
+          ],
+          meters: [
+            { kind: "hp", label: "체력", text: `${Math.ceil(s.hp)} / ${s.maxHP}`, value: s.hp, max: s.maxHP },
+            { kind: "food", label: "포만", text: `${Math.ceil(s.hunger)} / 100`, value: s.hunger, max: 100 },
+            { kind: "xp", label: "경험", text: `${s.xp % 80} / 80`, value: s.xp % 80, max: 80 },
+          ],
+          stats: [
+            [weapon.name, `공격 ${weapon.damage + (weapon.name === "기본 펄스" && inv.unlocks.has("blade") ? 12 : 0)}`],
+            [armor ? "개척 갑옷" : "기본 의복", `피해 감소 ${armor ? "35" : "0"}%`],
+          ],
+          effects: [s.journey.fedUntil > s.time ? `든든함 ${Math.ceil(s.journey.fedUntil - s.time)}초 · 피해 10% 감소` : "", s.journey.tonicUntil > s.time ? `강장 ${Math.ceil(s.journey.tonicUntil - s.time)}초 · 체력 0.8/초` : ""].filter(Boolean).join("<br>"),
+          actions: [
+            supply("food", "먹기", "식량 먹기", "eatFood"),
+            supply("medicine", "사용", "회복약 사용 · H", "useMedicine"),
+            supply("stew", "먹기", "야채 스튜 먹기", "eatStew"),
+            supply("tonic", "사용", "약초 강장제 사용", "useTonic"),
+            { label: "야영지 휴식", short: "휴식", id: "campRest", icon: uiIcon("village"), onClick: () => s.camp(p, inv) },
+            { label: "가방 · 제작과 연구", short: "가방", id: "frontierBag", icon: uiIcon("bag"), onClick: () => { this.close(); this.c.openBag(); } },
+            { label: "원정 저장", short: "저장", id: "frontierSave", icon: uiIcon("journey"), onClick: () => (this.c.save() ? "원정을 저장했습니다." : "저장 실패 · 공간을 확인하세요.") },
+          ].map((a) => ({ ...a, onClick: refresh(a.onClick) })),
+          milestones: [["⚑", s.allies.length, "동맹"], ["◆", wins, "수호자"], ["▧", inv.count("knowledge"), "연구"], ["◈", inv.count("relic"), "유적 핵"]],
+          log: s.log,
+          portrait: { held: inv.slots[inv.selectedSlot]?.id, stance: p.stance },
+        },
+        (label, fn, id) => this.button(label, fn, id),
+      );
     }
   }
   confirmRaid(v) {

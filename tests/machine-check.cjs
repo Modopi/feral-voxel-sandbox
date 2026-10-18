@@ -119,7 +119,9 @@ const assert = require("node:assert/strict");
       () => window.FERAL?.ready && window.FERAL.stats().running,
       { timeout: 60000 },
     );
-    assert.equal(await page.evaluate(() => FERAL.world.seed), 123);
+    // Island worlds run on the shared runtime from 0.14.0; the seed reaches the island generator.
+    assert.equal(await page.evaluate(() => Number(FERAL.runtime.seed)), 123);
+    assert.equal(await page.evaluate(() => FERAL.runtime.map.id), "island");
     await page.click("#menuBtn");
     await page.click("#worldListBtn");
     await page.waitForSelector("article");
