@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {LZString} from '../app/src/main/assets/vendor/lz-string.mjs';
+import {LZString} from '../app/src/main/assets/vendor/lz-string.js';
 import {ExpeditionSave} from '../app/src/main/assets/content-runtime/save.js';
 const state = x => ({player:{x,y:2,z:3,hp:100},deaths:[],schema:1});
 const memory = () => { const map = new Map(); return {map,getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v)}; };

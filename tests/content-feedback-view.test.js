@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as T from '../app/src/main/assets/vendor/three.module.js';
 import { FeedbackView,buildRecoveryFairyAsset } from '../app/src/main/assets/content-runtime/feedback-view.js';
-import { assertAuthoringInvariant,assertCreatedByTool } from '../app/src/main/assets/content-runtime/voxel/authoring.mjs';
+import { assertAuthoringInvariant,assertCreatedByTool } from '../app/src/main/assets/content-runtime/voxel/authoring.js';
 
 const runtime=()=>({player:{x:0,y:0,z:0,hp:100,maxHp:100,lastDamageAt:-100},progression:{inventory:{}},deaths:[],events:[]});
 const death=(id,x=0,items={wood:8})=>({id,position:{x,y:0,z:0},items,recovered:false});

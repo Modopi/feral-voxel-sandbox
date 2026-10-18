@@ -1,7 +1,7 @@
 // Persistent, authored puzzle machinery. Resource units and per-device rates are
 // local proposals; fixture components and their port contracts remain catalog-owned.
 import { FIXTURE_LINK_RULES } from './fixture-energy.js';
-import { VoxelAssetBuilder } from './voxel/authoring.mjs';
+import { VoxelAssetBuilder } from './voxel/authoring.js';
 
 const STRUCTURE_RESTORE_COST = Object.freeze({ wood: 2, stone: 2 });
 const STRUCTURE_PART_NAMES = Object.freeze({ windvane: '풍향판', platform: '운반대', altar: '제단 구조', mana_vine: '마나 수관' });

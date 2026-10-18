@@ -21,10 +21,14 @@ const firstSentence = text => String(text||'').split(/(?<=[.。])\s/)[0].trim();
 const SPECIES = new Map(CONTENT.creatures.entries.map(e=>[e.id,e]));
 const BOSS_ACTIONS = {repair:'수리',rest:'휴식',recharge:'재충전'};
 export class ExpeditionRuntime {
- static async create(seed,state=null){
-  const assets=new Map();
-  await Promise.all(CONTENT.structures.entries.map(async e=>assets.set(e.id,await loadAsset(e.id))));
-  const runtime=new ExpeditionRuntime(seed,state,assets);await runtime.placements.ready;runtime.placements.syncAccess(runtime.player);return runtime;
+ /** onProgress(step,done,total) reports loading steps; pause lets the screen repaint before synchronous construction. */
+ static async create(seed,state=null,{onProgress=()=>{},pause=null}={}){
+  const assets=new Map(),total=CONTENT.structures.entries.length;let done=0;
+  await Promise.all(CONTENT.structures.entries.map(async e=>{assets.set(e.id,await loadAsset(e.id));onProgress('assets',++done,total);}));
+  onProgress('world',0,1);if(pause)await pause();
+  const runtime=new ExpeditionRuntime(seed,state,assets);
+  onProgress('placements',0,1);if(pause)await pause();
+  await runtime.placements.ready;runtime.placements.syncAccess(runtime.player);return runtime;
  }
  constructor(seed,state,assets){
   this.calorieRule=CONTENT.progression.entries.find(e=>e.id==='calorie_baseline');

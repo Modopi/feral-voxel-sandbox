@@ -8,8 +8,8 @@ import { fileURLToPath } from 'node:url';
 import { CONTENT } from '../app/src/main/assets/content-runtime/catalog.generated.js';
 import { ASSETS, loadAsset, loadAssetLibrary } from '../app/src/main/assets/content-runtime/assets.generated.js';
 import { compileRuntimeContent, buildRuntimeContent } from '../tools/build-runtime-content.mjs';
-import { flattenAsset } from '../app/src/main/assets/content-runtime/voxel/model.mjs';
-import { VoxelAssetBuilder, assertCreatedByTool } from '../app/src/main/assets/content-runtime/voxel/authoring.mjs';
+import { flattenAsset } from '../app/src/main/assets/content-runtime/voxel/model.js';
+import { VoxelAssetBuilder, assertCreatedByTool } from '../app/src/main/assets/content-runtime/voxel/authoring.js';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 

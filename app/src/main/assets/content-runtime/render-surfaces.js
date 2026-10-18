@@ -1,5 +1,5 @@
 import * as T from '../vendor/three.module.js';
-import {surfaceGroups} from './voxel/solid.mjs';
+import {surfaceGroups} from './voxel/solid.js';
 
 /** Render-only batching inside one part. Callers retain part nodes/pivots and collider ownership.
  * The returned geometry/material are owned by the caller and must be disposed together.

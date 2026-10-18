@@ -1,4 +1,4 @@
-import {subtractBox,boxesOverlap,overlappingPairs} from './solid.mjs';
+import {subtractBox,boxesOverlap,overlappingPairs} from './solid.js';
 export const COLLISION_CONTRACT=Object.freeze({enabled:true,ownerScope:'entity_instance',selfCollision:false,externalCollision:true,shape:'part_cuboid_compound',jointOverlapAllowed:true});
 const createdAssets=new WeakSet();
 export function assertCreatedByTool(asset){if(!createdAssets.has(asset))throw Error('에셋은 FERAL 제작 도구로 생성해야 합니다.');}

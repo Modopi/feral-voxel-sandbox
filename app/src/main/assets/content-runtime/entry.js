@@ -311,19 +311,30 @@ function frame(now){
  }
  requestAnimationFrame(frame);
 }
+const loading=window.FeralLoading??{set(){},step(){},finish(){},fail(){},timings:[]};
+// Yield one frame so each stage label paints before the next synchronous step runs.
+const paint=()=>new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));
+async function stage(text,percent){loading.set(text,percent);await paint();}
+const LOAD_STEPS={world:['세계와 생태계를 구성하는 중',55],placements:['설치한 설비를 불러오는 중',65]};
 async function boot(){
- const world=currentWorld(localStorage,'expedition',location.search);saveStore=new ExpeditionSave(localStorage,saveKey(world));
- runtime=await ExpeditionRuntime.create(world.seed,saveStore.load());view=new ExpeditionScene($('scene'),runtime.atlas);controller=new CharacterController(runtime.terrain,runtime.player);
+ await stage('저장을 확인하는 중',6);
+ const world=currentWorld(localStorage,'expedition',location.search);saveStore=new ExpeditionSave(localStorage,saveKey(world));const saved=saveStore.load();
+ await stage('건축물 모델을 불러오는 중',10);
+ runtime=await ExpeditionRuntime.create(world.seed,saved,{pause:paint,onProgress:(step,done,total)=>step==='assets'?loading.step(`건축물 모델을 불러오는 중 ${done}/${total}`,10+40*done/total):loading.set(...LOAD_STEPS[step])});
+ await stage('장면을 준비하는 중',72);
+ view=new ExpeditionScene($('scene'),runtime.atlas);controller=new CharacterController(runtime.terrain,runtime.player);
  autosave=new Autosave(saveStore,{onSaved:()=>{$('saveStatus').textContent='현재 탐험을 저장했습니다.';},onError:error=>{$('saveStatus').textContent=error.message;notify('자동 저장하지 못했습니다. 이전 정상 저장은 보존됩니다.');}});
  bossView=new BossView(view);equipmentView=new EquipmentView(view);feedbackView=new FeedbackView(view);anchorMarkers=new AnchorMarkers(view);
  environmentView=new EnvironmentView(view,runtime.atlas);machinePanel=new MachinePanel(runtime,{report,drive:driveMachine});fixtureEnergyPanel=new FixtureEnergyPanel(runtime,{report,onManual:value=>{manual=value;if(value)held.attack=false;}});
  updates=initUpdates({beforeApply:save});
+ await stage('물리 엔진을 준비하는 중',82);
  const {RuntimePhysics}=await import('./physics.js');physical=await RuntimePhysics.create(runtime,view);
+ await stage('탐험을 시작하는 중',95);
  runtime.physics=physical;runtime.terrain.hasAttackLineOfSight=(a,b,options)=>runtime.lineOfSight(a,b)&&(physical.hasAttackLineOfSight?.(a,b,options)??true);
  fragments=new CreatureFragments(CONTENT,runtime.creatures,runtime.objects,{getModelRecord:id=>view.models.get(id),getPartPhysics:(owner,part)=>physical.getPartPhysics?.(owner,part)});
- ready=true;bind();$('loading').classList.add('hidden');
- window.FERAL={ready:true,runtime,view,controller,physics:physical,save,stats:()=>({running:ready&&!menuOpen,rewardMarkers:anchorMarkers.markers.size,warning:$('warning').textContent,toast:$('toast').textContent,version:VERSION.version,versionCode:VERSION.versionCode,player:{...runtime.player},regions:runtime.seenRegions.size,models:view.models.size,chunks:runtime.atlas.activeChunks.size})};
+ ready=true;bind();loading.finish();$('loading').classList.add('hidden');
+ window.FERAL={ready:true,bootTimings:loading.timings,runtime,view,controller,physics:physical,save,stats:()=>({running:ready&&!menuOpen,rewardMarkers:anchorMarkers.markers.size,warning:$('warning').textContent,toast:$('toast').textContent,version:VERSION.version,versionCode:VERSION.versionCode,player:{...runtime.player},regions:runtime.seenRegions.size,models:view.models.size,chunks:runtime.atlas.activeChunks.size})};
  window.FeralNative={save,pause:()=>showMenu(true)};
  requestAnimationFrame(frame);
 }
-boot().catch(e=>{$('loadingText').textContent=`세계 준비를 완료하지 못했습니다: ${e.message}`;console.error(e);window.AndroidApp?.runtimeFailed?.();});
+boot().catch(e=>{loading.fail(`세계 준비를 완료하지 못했습니다: ${e.message}`);$('loadingText').textContent=`세계 준비를 완료하지 못했습니다: ${e.message}`;console.error(e);window.AndroidApp?.runtimeFailed?.();});

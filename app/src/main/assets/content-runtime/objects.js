@@ -1,4 +1,4 @@
-import { VoxelAssetBuilder } from './voxel/authoring.mjs';
+import { VoxelAssetBuilder } from './voxel/authoring.js';
 import {components} from '../structure.js';
 import {resolveSurfaceDamage} from './material-effects.js';
 

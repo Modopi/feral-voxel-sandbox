@@ -11,7 +11,7 @@ const html = `<!doctype html><meta charset="utf-8"><style>body{margin:0;backgrou
 import * as T from '/app/src/main/assets/vendor/three.module.js';
 import {CONTENT} from '/app/src/main/assets/content-runtime/catalog.generated.js';
 import {loadAsset} from '/app/src/main/assets/content-runtime/assets.generated.js';
-import {surfaceGroups} from '/app/src/main/assets/content-runtime/voxel/solid.mjs';
+import {surfaceGroups} from '/app/src/main/assets/content-runtime/voxel/solid.js';
 import {BossSystem} from '/app/src/main/assets/content-runtime/bosses.js';
 import {animateBossModel} from '/app/src/main/assets/content-runtime/boss-animation.js';
 const renderer=new T.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});renderer.setSize(1600,1000);renderer.setPixelRatio(1);document.body.append(renderer.domElement);

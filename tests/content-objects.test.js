@@ -4,7 +4,7 @@ import { CONTENT } from '../app/src/main/assets/content-runtime/catalog.generate
 import { WorldObjects } from '../app/src/main/assets/content-runtime/objects.js';
 import { WorldAtlas } from '../app/src/main/assets/content-runtime/atlas.js';
 import {Progression} from '../app/src/main/assets/content-runtime/progression.js';
-import { assertAuthoringInvariant, assertCreatedByTool } from '../app/src/main/assets/content-runtime/voxel/authoring.mjs';
+import { assertAuthoringInvariant, assertCreatedByTool } from '../app/src/main/assets/content-runtime/voxel/authoring.js';
 
 const clone = x => structuredClone(x);
 function atlas(cells = []) {

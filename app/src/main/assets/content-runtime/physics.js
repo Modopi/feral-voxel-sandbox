@@ -1,6 +1,6 @@
 import R from '../vendor/rapier/rapier.js';
 import * as T from '../vendor/three.module.js';
-import { AssetCollisionWorld } from './voxel/physics.mjs';
+import { AssetCollisionWorld } from './voxel/physics.js';
 import { MachinePhysicsBridge } from './machine-physics.js';
 import { ObjectPhysicsBridge } from './object-physics.js';
 import { FixturePhysicsBridge } from './fixture-physics.js';

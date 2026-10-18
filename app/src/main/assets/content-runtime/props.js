@@ -1,4 +1,4 @@
-import { VoxelAssetBuilder } from './voxel/authoring.mjs';
+import { VoxelAssetBuilder } from './voxel/authoring.js';
 
 const GRID = 0.0625;
 const MODEL_CACHE = new Map();

@@ -1,4 +1,4 @@
-import {overlappingPairs} from './solid.mjs';
+import {overlappingPairs} from './solid.js';
 // Canonical hierarchy evaluation shared by validation, previews and export.
 export function flattenAsset(asset,library,options={},stack=[],ownerPath=asset.id){
  if(stack.includes(asset.id))throw Error(`Cyclic asset reference: ${[...stack,asset.id].join(' > ')}`);
