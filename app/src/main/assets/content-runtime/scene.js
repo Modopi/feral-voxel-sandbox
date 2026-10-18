@@ -69,6 +69,20 @@ export function chunkGeometry(atlas,chunk) {
 }
 const ORDER_POSITIVE=[0,1,2,0,2,3],ORDER_NEGATIVE=[0,3,2,0,2,1];
 function releaseModel(model){for(const mesh of model.dynamicGeometry??[]){mesh.geometry.dispose();mesh.material.dispose();}model.group.removeFromParent();}
+// Far creatures update every 0.5 s or 1 s (creatures.js AI_LOD); near ones every CREATURE_STEP, drawn where they are.
+// A far one glides from where it is drawn to each new position over its own interval, turning the short way.
+const CREATURE_STEP = .25;
+function glide(m,p,yaw,interval,time){
+ const g=m.glide??(m.glide={tx:NaN,ty:0,tz:0,tyaw:0,fx:0,fy:0,fz:0,fyaw:0,t0:0}),pos=m.group.position;
+ if(g.tx!==p.x||g.ty!==p.y||g.tz!==p.z||g.tyaw!==yaw){
+  // A new position: start from the drawn one, or jump there when it is new or far (respawn, teleport).
+  const jump=!Number.isFinite(g.tx)||Math.abs(p.x-pos.x)+Math.abs(p.z-pos.z)>12;
+  g.fx=jump?p.x:pos.x;g.fy=jump?p.y:pos.y;g.fz=jump?p.z:pos.z;g.fyaw=jump?yaw:m.group.rotation.y;
+  g.tx=p.x;g.ty=p.y;g.tz=p.z;g.tyaw=yaw;g.t0=time;
+ }
+ const k=Math.min(1,Math.max(0,(time-g.t0)/interval)),turn=Math.atan2(Math.sin(g.tyaw-g.fyaw),Math.cos(g.tyaw-g.fyaw));
+ pos.set(g.fx+(g.tx-g.fx)*k,g.fy+(g.ty-g.fy)*k,g.fz+(g.tz-g.fz)*k);m.group.rotation.set(0,g.fyaw+turn*k,0);
+}
 export class ExpeditionScene {
  constructor(canvas,atlas){
   this.atlas=atlas;this.renderer=new T.WebGLRenderer({canvas,antialias:false,powerPreference:'high-performance'});
@@ -185,8 +199,10 @@ export class ExpeditionScene {
    if(m&&d.asset&&m.asset!==d.asset){releaseModel(m);this.models.delete(d.id);m=null;}
    if(!m){if(!this.pending.has(d.id)){this.pending.add(d.id);this.makeModel(d).catch(e=>{this.pending.delete(d.id);this.lastError=e;});}continue;}
    m.desc=d;if(d.getBoxes&&m.revision!==d.revision)this.rebuildStructure(m,d);
-   const p=d.position;m.group.position.set(p.x,p.y,p.z);
-   if(d.rotation)m.group.quaternion.set(d.rotation.x,d.rotation.y,d.rotation.z,d.rotation.w);else m.group.rotation.set(0,d.yaw||0,0);
+   const p=d.position;
+   if(d.interval>CREATURE_STEP)glide(m,p,d.yaw||0,d.interval,time);
+   else{m.group.position.set(p.x,p.y,p.z);m.glide=null;
+    if(d.rotation)m.group.quaternion.set(d.rotation.x,d.rotation.y,d.rotation.z,d.rotation.w);else m.group.rotation.set(0,d.yaw||0,0);}
    if(d.kind==='creature'&&d.entity){
     if((m.woundRevision??0)!==(d.entity.woundRevision??0))this.rebuildWounds(m,d.entity);
     for(const[id,node]of m.parts){const broken=!!d.entity.parts?.[creatureBodyPart(d.entity,id)]?.broken;for(const mesh of node.children)if(mesh.userData.layer==='bone')mesh.visible=!broken;}
