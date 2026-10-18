@@ -179,7 +179,7 @@ try{
  const legacy=legacyIslandSave();
  await ip.addInitScript(legacy=>{window.AndroidApp={};if(!localStorage.getItem('feral.world.v1'))localStorage.setItem('feral.world.v1',legacy);},legacy);
  await ip.goto(`${assets}/play.html?world=default`);await ip.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:120000});
- const converted=await ip.evaluate(()=>({map:FERAL.runtime.map.id,platform:FERAL.runtime.atlas.getCell(150,26,176),berry:FERAL.runtime.progression.count('berry'),unmapped:FERAL.runtime.conversion?.unmapped.map(u=>u.name),original:localStorage.getItem('feral.world.v1')?.length,generation:!!(localStorage.getItem('feral.world.v1.a')||localStorage.getItem('feral.world.v1.b')),vitalsHidden:document.getElementById('vitals').hidden}));
+ const converted=await ip.evaluate(()=>({map:FERAL.runtime.generator.id,platform:FERAL.runtime.atlas.getCell(150,26,176),berry:FERAL.runtime.progression.count('berry'),unmapped:FERAL.runtime.conversion?.unmapped.map(u=>u.name),original:localStorage.getItem('feral.world.v1')?.length,generation:!!(localStorage.getItem('feral.world.v1.a')||localStorage.getItem('feral.world.v1.b')),vitalsHidden:document.getElementById('vitals').hidden}));
  assert.equal(converted.map,'island');assert.equal(converted.platform,'plank','built platform carried over');assert.equal(converted.berry,3);
  assert.equal(converted.original,legacy.length,'original island save untouched');assert(converted.generation,'converted world saved in the shared format');
  assert(converted.unmapped.includes('아이템')&&converted.unmapped.includes('동물 개체'),'unmapped items listed');assert(converted.vitalsHidden,'peaceful island hides health and food');
@@ -210,7 +210,7 @@ try{
  check(report.island,'building a block from the hotbar with mined stone',{stoneBefore:built,stoneAfter});
  await itap('#menuBtn');await itap('[data-tab=settings]');await itap('#showRadar');await itap('#resumeBtn');await ip.waitForTimeout(800);
  assert(await ip.locator('#radar').isVisible(),'radar visible after setting');
- const landmark=await ip.evaluate(()=>{const l=FERAL.runtime.map.landmarks.find(l=>!FERAL.runtime.discoveredLandmarks.has(l.name));const r=FERAL.runtime;Object.assign(r.player,{x:l.x,z:l.z,y:r.atlas.heightAt(l.x,l.z)+.05,vy:0});return l.name;});
+ const landmark=await ip.evaluate(()=>{const l=FERAL.runtime.generator.landmarks.find(l=>!FERAL.runtime.discoveredLandmarks.has(l.name));const r=FERAL.runtime;Object.assign(r.player,{x:l.x,z:l.z,y:r.atlas.heightAt(l.x,l.z)+.05,vy:0});return l.name;});
  let discovered=false;for(let i=0;i<30&&!discovered;i++){discovered=(await ip.locator('#toast').textContent()).includes('새 장소 발견');await ip.waitForTimeout(150);}
  assert(discovered,'discovery toast');await ip.screenshot({path:new URL('island.png',out).pathname});
  check(report.island,'minimap setting and place discovery',{prepared:'teleport to landmark',landmark});
@@ -221,7 +221,7 @@ try{
  const np=await open(fresh,'play.html?world=island-new');await np.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:120000});
  const ncdp=await fresh.newCDPSession(np);
  const ntap=async selector=>{const box=await np.locator(selector).first().boundingBox();assert(box,selector);await np.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);};
- const start=await np.evaluate(()=>({map:FERAL.runtime.map.id,items:FERAL.runtime.progression.inventory,starter:FERAL.runtime.map.starter,conversion:FERAL.runtime.conversion??null,x:FERAL.runtime.player.x,z:FERAL.runtime.player.z}));
+ const start=await np.evaluate(async()=>({map:FERAL.runtime.generator.id,items:FERAL.runtime.progression.inventory,starter:(await import('./content-runtime/maps.js')).STARTER_KIT,conversion:FERAL.runtime.conversion??null,x:FERAL.runtime.player.x,z:FERAL.runtime.player.z}));
  assert.equal(start.map,'island');assert.deepEqual(start.items,start.starter,'a new island starts with the island kit');assert.equal(start.conversion,null);
  const npad=await np.locator('#stick').boundingBox(),sx=npad.x+npad.width/2,sy=npad.y+npad.height/2;
  await ncdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x:sx,y:sy,id:3}]});await ncdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:sx,y:sy-40,id:3}]});await np.waitForTimeout(1200);await ncdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await np.waitForTimeout(300);
@@ -280,7 +280,7 @@ try{
  await ntap('#menuBtn');await np.waitForTimeout(200);
  const saved=await np.evaluate(()=>({x:FERAL.runtime.player.x,z:FERAL.runtime.player.z,items:FERAL.runtime.progression.inventory,places:[...FERAL.runtime.discoveredLandmarks]}));
  await np.reload();await np.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:120000});
- const reopened=await np.evaluate(([c,deerId])=>({wounds:Object.values(FERAL.runtime.creatures.get(deerId)?.wounds??{}).reduce((n,l)=>n+l.length,0),map:FERAL.runtime.map.id,cell:FERAL.runtime.atlas.getCell(...c),x:FERAL.runtime.player.x,z:FERAL.runtime.player.z,items:FERAL.runtime.progression.inventory,places:[...FERAL.runtime.discoveredLandmarks]}),[dig.cell,deer.id]);
+ const reopened=await np.evaluate(([c,deerId])=>({wounds:Object.values(FERAL.runtime.creatures.get(deerId)?.wounds??{}).reduce((n,l)=>n+l.length,0),map:FERAL.runtime.generator.id,cell:FERAL.runtime.atlas.getCell(...c),x:FERAL.runtime.player.x,z:FERAL.runtime.player.z,items:FERAL.runtime.progression.inventory,places:[...FERAL.runtime.discoveredLandmarks]}),[dig.cell,deer.id]);
  assert.equal(reopened.map,'island');assert.equal(reopened.cell,null,'the dug cell stays dug');assert.deepEqual(reopened.items,saved.items);assert.deepEqual(reopened.places,saved.places);
  assert(Math.hypot(reopened.x-saved.x,reopened.z-saved.z)<.05,'position restored');assert.equal(reopened.wounds,flank.wounds,'creature wounds survive save and reopen');
  await np.screenshot({path:new URL('island-new.png',out).pathname});
@@ -305,16 +305,16 @@ try{
  assert.deepEqual(listed,['기본 탐험 맵','개척 원정','기계 베타 맵'],'the default worlds are listed');
  await ltap('#newWorld');await lp.selectOption('#preset','expedition');
  const createRules=await lp.evaluate(()=>[...document.querySelectorAll('#worldRules input')].map(i=>[i.dataset.rule,i.checked,i.disabled]));
- assert.deepEqual(createRules,[['survival',true,false],['startStructures',true,false]],'an expedition world offers what its session reads');
- await ltap('#worldName');await lp.fill('#worldName','평화 탐험');await ltap('#rule-survival');
+ assert.deepEqual(createRules,[['survival',true,false],['sandbox',false,false],['startStructures',true,false]],'an expedition world offers what its session reads');
+ await ltap('#worldName');await lp.fill('#worldName','평화 탐험');await ltap('#rule-survival');await ltap('#rule-sandbox');
  await lp.screenshot({path:new URL('launcher-create.png',out).pathname});
  await ltap('#worldSubmit');
  const made=await lp.evaluate(()=>JSON.parse(localStorage.getItem('feral.worlds.v1')).find(w=>w.name==='평화 탐험'));
- assert.equal(made.type,'expedition');assert.deepEqual(made.config.rules,{survival:false,startStructures:true});assert.equal(made.config.configVersion,1);
+ assert.equal(made.type,'expedition');assert.deepEqual(made.config.rules,{survival:false,sandbox:true,startStructures:true});assert.equal(made.config.configVersion,1);
  check(report.launcher,'a new world is made in the launcher with its own settings',{stored:made.config});
  await ltap(`article[data-world="${made.id}"] button:nth-of-type(2)`);
  const editRules=await lp.evaluate(()=>[...document.querySelectorAll('#worldRules input')].map(i=>[i.dataset.rule,i.checked,i.disabled]));
- assert.deepEqual(editRules,[['survival',false,false],['startStructures',true,true]],'settings that shaped the world are fixed after creation');
+ assert.deepEqual(editRules,[['survival',false,false],['sandbox',true,false],['startStructures',true,true]],'settings that shaped the world are fixed after creation');
  await lp.fill('#worldName','평화 탐험 1');await ltap('#worldSubmit');
  assert.equal(await lp.evaluate(id=>JSON.parse(localStorage.getItem('feral.worlds.v1')).find(w=>w.id===id).name,made.id),'평화 탐험 1');
  check(report.launcher,'world settings are edited in the launcher; creation-only settings stay fixed',{editRules});
@@ -326,10 +326,21 @@ try{
  check(report.launcher,'global settings and the update panel are in the launcher (the same parts as the in-game menu)',{settings:stored});
  await ltap('#openWorlds');await ltap(`article[data-world="${made.id}"] button:nth-of-type(1)`);
  await lp.waitForURL(/play\.html\?world=/);await lp.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:120000});
- const session=await lp.evaluate(()=>({rules:FERAL.runtime.map.rules,vitalsHidden:document.getElementById('vitals').hidden,showEvents:document.getElementById('showEvents').checked,eventsClass:document.body.classList.contains('showEvents')}));
+ const session=await lp.evaluate(()=>({rules:FERAL.runtime.rules,vitalsHidden:document.getElementById('vitals').hidden,showEvents:document.getElementById('showEvents').checked,eventsClass:document.body.classList.contains('showEvents')}));
  assert.equal(session.rules.survival,false,'the session follows the world settings from the launcher');assert(session.vitalsHidden);
  assert(session.showEvents&&session.eventsClass,'the session reads the global settings made in the launcher');
- await ltap('#menuBtn');await ltap('[data-tab=world]');await ltap('#worldListBtn');
+ // Content exploration with the sandbox setting (S1): the same life tab and tools, placing the local ecology, not the island's.
+ await ltap('#menuBtn');await ltap('[data-tab=life]');
+ const ecology=await lp.evaluate(async()=>{const r=FERAL.runtime,{CONTENT}=await import('./content-runtime/catalog.generated.js'),env=r.atlas.sample(r.player.x,r.player.z).environmentId;
+  const species=CONTENT.environments.entries.find(e=>e.id===env).spawning.rules.map(x=>x.speciesId),grazer=CONTENT.creatures.entries.find(c=>species.includes(c.id)&&c.role==='primary_consumer');
+  return {env,species,grazer:grazer?.name,before:r.creatures.entities.map(e=>e.id),panel:document.querySelector('[data-panel="world"] > p').textContent};});
+ await ltap('#herdBtn');await lp.waitForTimeout(300);
+ const herd=await lp.evaluate(before=>{const r=FERAL.runtime,old=new Set(before);return {placed:r.creatures.entities.filter(e=>!old.has(e.id)).map(e=>e.speciesId),count:document.getElementById('herbCount').textContent,label:document.getElementById('herbName').textContent};},ecology.before);
+ assert.equal(herd.placed.length,24,'the herd button places 24 creatures');assert(herd.placed.every(id=>ecology.species.includes(id)),`placed ${[...new Set(herd.placed)]} from ${ecology.env} (${ecology.species})`);
+ assert.equal(herd.label,ecology.grazer,'the life tab names the grazer of the local ecology');assert(Number(herd.count)>0);
+ assert.match(ecology.panel,/평화 규칙/);assert.match(ecology.panel,/샌드박스/);
+ check(report.launcher,'content exploration with the sandbox setting uses the shared life tab and places the local ecology',{environment:ecology.env,placed:[...new Set(herd.placed)],label:herd.label});
+ await ltap('[data-tab=world]');await ltap('#worldListBtn');
  await lp.waitForURL(/index\.html$/);await lp.waitForFunction(()=>window.FeralLauncher?.ready,null,{timeout:30000});
  const back=await lp.evaluate(()=>({continueShown:!document.getElementById('continueWorld').hidden,name:document.getElementById('continueName').textContent}));
  assert.deepEqual(back,{continueShown:true,name:'평화 탐험 1'},'leaving saves and returns to the launcher, which offers to continue');
@@ -346,7 +357,7 @@ try{
  assert.match(afterSwitch.status,/이전 게임 버전의 저장 \d+개를 가져왔습니다/);assert.equal(afterSwitch.continueName,'평화 탐험 1');
  await lp.screenshot({path:new URL('launcher-vault-restored.png',out).pathname});
  await ltap('#continueWorld');await lp.waitForURL(/play\.html\?world=/);await lp.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:120000});
- const resumed=await lp.evaluate(()=>({survival:FERAL.runtime.map.rules.survival,time:FERAL.runtime.time}));assert.equal(resumed.survival,false);assert(resumed.time>0,'the world resumes from its save, not a new world');
+ const resumed=await lp.evaluate(()=>({survival:FERAL.runtime.rules.survival,time:FERAL.runtime.time}));assert.equal(resumed.survival,false);assert(resumed.time>0,'the world resumes from its save, not a new world');
  await ltap('#menuBtn');await ltap('[data-tab=world]');await ltap('#worldListBtn');await lp.waitForURL(/index\.html$/);await lp.waitForFunction(()=>window.FeralLauncher?.ready,null,{timeout:30000});
  check(report.launcher,'a version switch that empties the app storage keeps the worlds: the launcher restores them from the save vault and the world resumes',{prepared:'all feral.* keys cleared as app 0.3.3 does for a build picked in its version list',keys:afterSwitch.keys.length,restored:afterSwitch.restored,resumed});
  await ltap('#openWorlds');await ltap('article[data-world="beta"] button:nth-of-type(1)');await lp.waitForURL(/machine\.html\?world=beta/);

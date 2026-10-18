@@ -1,6 +1,8 @@
-// Map presets on the one runtime (docs/ARCHITECTURE.md §5–6). A map only chooses terrain, rules, start and
-// places; creatures, items, research, crafting and saving are the runtime's. The basic island reuses the
-// original island generator (world.js) and maps its blocks to design blocks.
+// Terrain generators on the one runtime (docs/ARCHITECTURE.md §5–6). A world config names its generator
+// (`config.terrain.generator`) and its rules; a generator owns only the shape of the world: atlas, spawn,
+// bounds, places, minimap framing, its ecology and the import of saves an older engine made for the same
+// terrain. Creatures, items, research, crafting and saving are the runtime's. The island generator reuses
+// the original island generator (world.js) and maps its blocks to design blocks.
 import {WorldAtlas} from './atlas.js';
 import {World, SIZE as ISLAND_SIZE, SEA as ISLAND_SEA} from '../world.js';
 import {GEAR, MINING_HARDNESS} from '../equipment.js';
@@ -81,17 +83,33 @@ export class IslandAtlas extends WorldAtlas {
   }
 }
 
-export const MAPS = Object.freeze({
-  expedition:Object.freeze({id:'expedition',name:'FERAL 탐험',spawn:{x:0,z:0,yaw:Math.PI},rules:{survival:true},atlas:WorldAtlas,
+export const GENERATORS = Object.freeze({
+  infinite:Object.freeze({id:'infinite',atlas:WorldAtlas,spawn:{x:0,z:0,yaw:Math.PI},spawnName:'출발지',
    description:'끝없이 이어지는 세계입니다. 출발지에서 멀어질수록 위험해집니다. 던전·공동체·유적을 찾고, 채집한 표본으로 연구해 제작과 설비를 넓혀 가세요.',
-   region:()=>true,landmarks:[],starter:{}}),
-  island:Object.freeze({id:'island',name:'기본 탐험 맵',spawn:ISLAND_SPAWN,rules:{survival:false,sandbox:true,structures:false},atlas:IslandAtlas,
-   description:'160 × 160 m의 섬입니다. 다섯 장소를 탐험하고 생태의 변화를 관찰하세요. 체력·식량이 줄지 않는 평화 규칙이며, 개발·생태 탭의 샌드박스 도구를 쓸 수 있습니다.',
+   region:()=>true,landmarks:[],minimap:{size:160,origin:null},ecology:null,legacySave:null}),
+  island:Object.freeze({id:'island',atlas:IslandAtlas,spawn:ISLAND_SPAWN,spawnName:'상륙 지점',
+   description:'160 × 160 m의 섬입니다. 다섯 장소를 탐험하고 생태의 변화를 관찰하세요.',
    region:(x,z)=>insideIsland(x,z),
    landmarks:[{x:77,z:81,name:'초록 능선'},{x:102,z:55,name:'굽이치는 강'},{x:140,z:35,name:'잿빛 분화구'},{x:35,z:45,name:'이끼 숲'},{x:48,z:120,name:'잊힌 관측소'}],
-   starter:{stone_pick:1,raw_timber:4,loose_stone:4,seed:4}}),
+   // The whole island fits the minimap; its life is the original island's three species (grove).
+   minimap:{size:160,origin:{x:0,z:0}},ecology:'grove',
+   legacySave:Object.freeze({name:'기존 섬 저장',matches:old=>[1,2].includes(old?.version)&&!!old.world,apply:(runtime,old)=>applyLegacyIsland(runtime,old)})}),
 });
-export function mapFor(type){return MAPS[type]??MAPS.expedition;}
+// Saves before 0.15.2 recorded the map preset instead of the generator.
+const SAVED_MAP_GENERATOR = Object.freeze({expedition:'infinite',island:'island'});
+export function generatorFor(id){return GENERATORS[id]??GENERATORS.infinite;}
+/** Spawn rules of the life the sandbox places at (x, z): the generator's own ecology (the island's grove)
+ * or the environment there. Each environment has a grazer, a predator and a decomposer. */
+export function ecologyAt(runtime,x,z){const id=runtime.generator.ecology??runtime.atlas.sample(x,z).environmentId;return runtime.creatures.environments.get(id)?.spawning.rules??[];}
+export function ecologySpecies(runtime,x,z,role){return ecologyAt(runtime,x,z).find(r=>runtime.creatures.species.get(r.speciesId)?.role===role)?.speciesId??null;}
+export function savedGenerator(state){return state?.terrain??SAVED_MAP_GENERATOR[state?.map]??null;}
+// The starting kit a world gets when its `starterKit` setting is on.
+export const STARTER_KIT = Object.freeze({stone_pick:1,raw_timber:4,loose_stone:4,seed:4});
+// A world config lists every rule its preset offers; a rule it does not offer is off. Without a config
+// (tests and tools) the runtime plays the full rule set: survival and start structures on.
+const RULES_OFF = Object.freeze({survival:false,sandbox:false,startStructures:false,starterKit:false});
+const RULES_WITHOUT_CONFIG = Object.freeze({survival:true,sandbox:false,startStructures:true,starterKit:false});
+export function worldRules(config){return config?{...RULES_OFF,...config.rules}:{...RULES_WITHOUT_CONFIG};}
 
 /** Carry an original island save into a fresh island runtime. The original save is not modified.
  * Returns what could not be carried over, for the player to see. */
@@ -127,7 +145,7 @@ export function applyLegacyIsland(runtime,old){
   if(Object.keys(items).length){const r=runtime.progression.grant(items,{claimId:'legacy-island:items'});if(!r.ok)note('아이템 지급 실패',r.reason);}
   const p=old?.player;
   if(p&&[p.x,p.y,p.z].every(Number.isFinite)){Object.assign(runtime.player,{x:p.x,y:p.y,z:p.z,yaw:Number.isFinite(p.yaw)?p.yaw:runtime.player.yaw,pitch:Number.isFinite(p.pitch)?p.pitch:0,vy:0,stance:'stand'});}
-  const discovered=(old?.discovered??[]).filter(name=>runtime.map.landmarks.some(l=>l.name===name));
+  const discovered=(old?.discovered??[]).filter(name=>runtime.generator.landmarks.some(l=>l.name===name));
   runtime.discoveredLandmarks=new Set(discovered);
   runtime.conversion={from:'feral.world.v1',version:old?.version??null,playTimeS:old?.playTime??0,items,unmapped};
   return runtime.conversion;

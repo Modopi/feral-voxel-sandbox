@@ -1,15 +1,18 @@
-// The basic island as a map preset of the one runtime: same terrain as the original generator,
+// The basic island world on the one runtime: the island generator builds the original terrain,
 // the same three species, peaceful rules, and conversion of original island saves.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CONTENT } from '../app/src/main/assets/content-runtime/catalog.generated.js';
 import { ExpeditionRuntime } from '../app/src/main/assets/content-runtime/runtime.js';
-import { MAPS, LEGACY_BLOCKS, LEGACY_ITEMS, LEGACY_SPECIES, applyLegacyIsland, mapFor } from '../app/src/main/assets/content-runtime/maps.js';
+import { GENERATORS, LEGACY_BLOCKS, LEGACY_ITEMS, LEGACY_SPECIES, STARTER_KIT, applyLegacyIsland, generatorFor, savedGenerator, ecologyAt, ecologySpecies } from '../app/src/main/assets/content-runtime/maps.js';
+import { worldConfig } from '../app/src/main/assets/world-slots.js';
 import { World, B } from '../app/src/main/assets/world.js';
 import { Inventory, ITEMS } from '../app/src/main/assets/inventory.js';
 import { Ecology } from '../app/src/main/assets/entities.js';
 
 const SEED = 63026;
+// The island world's own settings, as the launcher makes them.
+const island = (rules = {}) => { const config = worldConfig({ id: 'island', name: '섬', type: 'island', seed: SEED }); return { ...config, rules: { ...config.rules, ...rules } }; };
 const blocks = new Map(CONTENT.blocks.entries.map(b => [b.id, b]));
 const items = new Map(CONTENT.progression.entries.map(e => [e.id, e]));
 
@@ -27,14 +30,17 @@ test('legacy blocks, items and species point at real design entries', () => {
   }
   const grove = CONTENT.environments.entries.find(e => e.id === 'grove').spawning.rules.map(r => r.speciesId);
   for (const id of Object.values(LEGACY_SPECIES)) assert(grove.includes(id), `${id} lives in the island's grove`);
-  assert.equal(mapFor('island'), MAPS.island);
-  assert.equal(mapFor('unknown'), MAPS.expedition);
+  assert.equal(generatorFor('island'), GENERATORS.island);
+  assert.equal(generatorFor('unknown'), GENERATORS.infinite);
+  assert.equal(savedGenerator({ map: 'island' }), 'island', 'saves before 0.15.2 named the map');
+  assert.equal(savedGenerator({ map: 'expedition' }), 'infinite');
+  assert.equal(savedGenerator({ terrain: 'island', map: 'expedition' }), 'island');
 });
 
 test('the island map builds the original island terrain on the shared runtime', async () => {
-  const runtime = await ExpeditionRuntime.create(SEED, null, { map: 'island' });
+  const runtime = await ExpeditionRuntime.create(SEED, null, { config: island() });
   const legacy = new World(SEED); legacy.generate();
-  assert.equal(runtime.map.id, 'island');
+  assert.equal(runtime.generator.id, 'island');
   assert.equal(runtime.atlas.generatorId, 'island-v1');
   assert.equal(runtime.player.x, 77.5);
   assert.equal(runtime.atlas.heightAt(77.5, 84.5), legacy.surface(77.5, 84.5));
@@ -59,20 +65,20 @@ test('the island map builds the original island terrain on the shared runtime', 
   assert(runtime.creatures.entities.every(e => e.x >= 0 && e.z >= 0 && e.x < 160 && e.z < 160), 'creatures stay on the island');
   assert(runtime.nodes.every(n => n.x >= 0 && n.z >= 0 && n.x < 160 && n.z < 160), 'harvest nodes are on the island');
   assert(runtime.nodes.some(n => n.id.startsWith('starter:') && Math.hypot(n.x - 77.5, n.z - 84.5) < 26), 'starter branches near the landing');
-  assert.deepEqual(runtime.progression.inventory, MAPS.island.starter);
+  assert.deepEqual(runtime.progression.inventory, STARTER_KIT);
 });
 
 test('island rules are peaceful and survive save and load', async () => {
-  const runtime = await ExpeditionRuntime.create(SEED, null, { map: 'island' });
+  const runtime = await ExpeditionRuntime.create(SEED, null, { config: island() });
   runtime.hurt(500, 'test');
   for (let i = 0; i < 40; i++) runtime.tick(.1, { moving: true });
   assert.equal(runtime.player.hp, runtime.player.maxHp);
   assert.equal(runtime.player.calories, runtime.player.maxCalories);
   runtime.discoveredLandmarks.add('초록 능선');
   const state = JSON.parse(JSON.stringify(runtime.serialize()));
-  assert.equal(state.map, 'island');
+  assert.equal(state.terrain, 'island');
   const restored = new ExpeditionRuntime(SEED, state, new Map());
-  assert.equal(restored.map.id, 'island');
+  assert.equal(restored.generator.id, 'island');
   assert.deepEqual([...restored.discoveredLandmarks], ['초록 능선']);
   const expedition = await ExpeditionRuntime.create(SEED, null);
   expedition.hurt(10, 'test');
@@ -91,7 +97,7 @@ test('an original island save converts without touching the original', async () 
   const eco = new Ecology(world); eco.populate(12);
   const old = { version: 2, inventory: inventory.save(), world: world.save(), eco: eco.save(), player: { x: 90.5, y: 14, z: 70.5, yaw: 1, pitch: -0.2, flying: true }, playTime: 321, discovered: ['초록 능선', '굽이치는 강'] };
   const original = JSON.stringify(old);
-  const runtime = await ExpeditionRuntime.create(SEED, null, { map: 'island', starter: false });
+  const runtime = await ExpeditionRuntime.create(SEED, null, { config: island({ starterKit: false }) });
   assert.deepEqual(runtime.progression.inventory, {}, 'a converted save brings its own items instead of the new-world kit');
   const report = applyLegacyIsland(runtime, old);
   assert.equal(JSON.stringify(old), original, 'the original save object is unchanged');
@@ -120,7 +126,7 @@ test('an original island save converts without touching the original', async () 
 });
 
 test('sandbox maps build with mined resources, one unit per 0.5 m cell; the expedition does not', async () => {
-  const runtime = await ExpeditionRuntime.create(SEED, null, { map: 'island' });
+  const runtime = await ExpeditionRuntime.create(SEED, null, { config: island() });
   const p = runtime.player, ground = runtime.atlas.heightAt(p.x + 3, p.z);
   const hit = { kind: 'terrain', distance: 3, point: { x: p.x + 3.1, y: ground, z: p.z + .1 }, normal: { x: 0, y: 1, z: 0 } };
   const cell = [Math.floor((p.x + 3.1) * 2), Math.floor(ground * 2), Math.floor((p.z + .1) * 2)];
@@ -143,7 +149,7 @@ test('sandbox maps build with mined resources, one unit per 0.5 m cell; the expe
 });
 
 test('a block placed into water pushes the water up instead of deleting it', async () => {
-  const runtime = await ExpeditionRuntime.create(SEED, null, { map: 'island' });
+  const runtime = await ExpeditionRuntime.create(SEED, null, { config: island() });
   const p = runtime.player, x = p.x + 3.25, z = p.z + .25, ground = runtime.atlas.heightAt(x, z);
   runtime.atlas.pour(x, ground + .25, z, .1);
   const before = runtime.atlas.fluidTotals().volumeM3;
@@ -153,4 +159,20 @@ test('a block placed into water pushes the water up instead of deleting it', asy
   assert(placed.displacedM3 > 0, 'some water was in the cell');
   assert.equal(placed.lostM3, 0);
   assert(Math.abs(runtime.atlas.fluidTotals().volumeM3 - before) < 1e-9, 'water volume is conserved');
+});
+
+test('sandbox life follows the terrain generator: the island keeps its grove, an endless world uses the environment there', async () => {
+  const roles = ['primary_consumer', 'predator', 'detritivore'];
+  const isle = await ExpeditionRuntime.create(SEED, null, { config: island() });
+  assert.notEqual(isle.atlas.sample(-20, -20).environmentId, 'grove', 'the sea around the island is another environment');
+  assert.deepEqual(roles.map(r => ecologySpecies(isle, -20, -20, r)), ['moss_deer', 'copper_fox', 'azure_beetle']);
+  const endless = await ExpeditionRuntime.create(SEED, null, { config: worldConfig({ id: 'e', name: '탐험', type: 'expedition', seed: SEED }) });
+  let spot = null;
+  for (let r = 64; r < 4096 && !spot; r += 64) for (const [x, z] of [[r, 0], [0, r], [-r, 0], [0, -r]]) if (!spot && endless.atlas.sample(x, z).environmentId !== 'grove') spot = [x, z];
+  assert(spot, 'an environment other than the grove');
+  const env = endless.atlas.sample(...spot).environmentId, rules = CONTENT.environments.entries.find(e => e.id === env).spawning.rules;
+  assert.deepEqual(ecologyAt(endless, ...spot), rules);
+  const species = roles.map(r => ecologySpecies(endless, ...spot, r));
+  assert(species.every(id => rules.some(x => x.speciesId === id)), `${env}: ${species}`);
+  assert.equal(species.includes('moss_deer'), false, `${env} has its own grazer`);
 });

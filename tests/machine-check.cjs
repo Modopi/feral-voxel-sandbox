@@ -125,7 +125,7 @@ const assert = require("node:assert/strict");
     );
     // Island worlds run on the shared runtime from 0.14.0; the seed reaches the island generator.
     assert.equal(await page.evaluate(() => Number(FERAL.runtime.seed)), 123);
-    assert.equal(await page.evaluate(() => FERAL.runtime.map.id), "island");
+    assert.equal(await page.evaluate(() => FERAL.runtime.generator.id), "island");
     await page.click("#menuBtn");
     await page.click("#worldListBtn");
     await page.click("#openWorlds");
