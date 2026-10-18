@@ -1,12 +1,12 @@
 # FERAL 버전 관리와 배포
 
-현재 저장소는 **공개**이며 게임 **0.12.1 / 1201**, 앱 **0.3.3 / 303**, 최소 앱 **303**이다. 공개 업데이트는 로그인이나 토큰 없이 조회·다운로드한다.
+현재 저장소는 **공개**이며 게임 **0.13.0 / 1300**, 앱 **0.3.3 / 303**, 최소 앱 **303**이다. 공개 업데이트는 로그인이나 토큰 없이 조회·다운로드한다.
 
 ## 설치와 공개 업데이트
 
-앱 **0.3.3**을 사용 중이면 메뉴 → 업데이트 → **지금 확인 → 저장 후 적용**으로 게임 0.12.1을 받는다. 특정 게임에 고정한 경우 **게임 버전 → 0.12.1**을 선택한다. 콘텐츠 탐험은 0.12.1부터 Android 앱에서 시작된다. 이번 변경은 게임 파일만 수정하여 앱 재설치가 필요 없다.
+앱 **0.3.3**을 사용 중이면 메뉴 → 업데이트 → **지금 확인 → 저장 후 적용**으로 게임 0.13.0을 받는다. 특정 게임에 고정한 경우 **게임 버전 → 0.13.0**을 선택한다. 0.13.0부터 모든 월드(기계 시험장 제외)가 하나의 게임 화면을 쓴다. 이번 변경은 게임 파일만 수정하여 앱 재설치가 필요 없다.
 
-앱 0.3.2 이하이거나 처음 설치하는 경우 v0.12.1 Release의 `Feral-0.3.3-android.apk`를 설치한다. 기존 앱 위에 설치할 수 있고 앱을 삭제하거나 데이터를 지울 필요가 없다. 이 APK는 게임 0.12.1을 동봉한다. 앱 0.3.3에는 WebAssembly 실행 허용과 실패 버전 재시도가 포함된다.
+앱 0.3.2 이하이거나 처음 설치하는 경우 v0.13.0 Release의 `Feral-0.3.3-android.apk`를 설치한다. 기존 앱 위에 설치할 수 있고 앱을 삭제하거나 데이터를 지울 필요가 없다. 이 APK는 게임 0.13.0을 동봉한다. 앱 0.3.3에는 WebAssembly 실행 허용과 실패 버전 재시도가 포함된다.
 
 0.6.0을 다시 실행하려면 상단 **게임 버전 → 0.6.0 [실행 실패 · 재시도] → 다시 검증 후 실행**을 선택한다. 새 게임의 메뉴 → 업데이트 → **실패한 버전 다시 실행**도 같은 선택 창으로 연결된다. 패키지를 다시 받아 서명·해시·앱 호환성을 검증한 뒤 한 번 시작한다. 실패한 버전의 자동 재적용은 계속 차단하며 재실패 시 기존 게임과 저장으로 복구한다. 동봉 버전은 오프라인 재시도할 수 있다.
 
@@ -14,14 +14,14 @@
 
 자동 확인이 켜져 있고 특정 게임 버전에 고정하지 않았으면 시작할 때 확인한다(15분 간격 제한). 다운로드 후 서명·해시·파일 목록을 검증하고 다음 실행 때 전체 버전을 적용한다. **저장 후 적용**은 현재 저장 성공 후에만 재시작한다. 선택한 게임 버전별 저장 분리, 최소 앱 버전 검사와 시작 실패 시 복구는 유지한다.
 
-앱과 동봉 게임 버전은 독립적이다. `game-version.json`은 `version.json`에서 생성하며, 동봉 게임 선택·실행 확인·저장 키에 게임 코드 1201을 사용한다. APK 호환성 판단에는 네이티브 코드 303을 사용한다. 게임 0.12.1의 최소 네이티브는 303이다.
+앱과 동봉 게임 버전은 독립적이다. `game-version.json`은 `version.json`에서 생성하며, 동봉 게임 선택·실행 확인·저장 키에 게임 코드 1300을 사용한다. APK 호환성 판단에는 네이티브 코드 303을 사용한다. 게임 0.13.0의 최소 네이티브는 303이다.
 
 ## 버전의 기준
 
 | 항목 | 현재 값 | 의미 |
 | --- | --- | --- |
-| version | 0.12.1 | 게임 표시 버전 |
-| versionCode | 1201 | 게임 코드 |
+| version | 0.13.0 | 게임 표시 버전 |
+| versionCode | 1300 | 게임 코드 |
 | nativeVersion / nativeCode | 0.3.3 / 303 | APK 버전 |
 | minNativeCode | 303 | 이 게임 코드를 실행할 수 있는 최소 APK |
 | saveSchema | 2 | 월드 저장 형식. 앱 버전과 별개 |
@@ -29,13 +29,13 @@
 
 `version.json`만 수정한 뒤 `node tools/version.mjs`를 실행하면 AndroidManifest, Gradle, package.json과 게임 version.js·game-version.json을 함께 맞춘다. UI는 실제 실행 중인 게임 버전과 Android APK 버전을 각각 표시한다.
 
-다음 게임 패치는 0.12.2 / 1202 등으로 올린다. stable 코드 숫자는 항상 이전 stable 배포보다 커야 한다. 게임 코드만 변경했다면 minNativeCode 303을 유지할 수 있다. 네이티브 Java·권한·검증 키가 바뀌면 nativeCode를 증가한 새 APK를 배포하고 minNativeCode를 새 nativeCode와 같게 올린다. 지원하지 않는 앱에는 APK 설치가 필요하다고 표시한다. APK 자동 무인 설치는 구현하지 않는다.
+다음 게임 패치는 0.13.1 / 1301 등으로 올린다. stable 코드 숫자는 항상 이전 stable 배포보다 커야 한다. 게임 코드만 변경했다면 minNativeCode 303을 유지할 수 있다. 네이티브 Java·권한·검증 키가 바뀌면 nativeCode를 증가한 새 APK를 배포하고 minNativeCode를 새 nativeCode와 같게 올린다. 지원하지 않는 앱에는 APK 설치가 필요하다고 표시한다. APK 자동 무인 설치는 구현하지 않는다.
 
 ## 다음 버전 배포 순서
 
 1. 코드 변경 후 `version.json`의 버전과 versionCode 증가. `node tools/version.mjs` 실행.
 2. CHANGELOG 맨 위에 해당 버전의 변경 사항 추가. 저장 형식 변경은 읽기 호환·변환과 복구 시험 추가.
-3. `node --test tests/*.test.js` 실행. UI·플레이 변경에는 관련 `tests/*-check.cjs` 실행. 콘텐츠 탐험 화면 검증(`tools/verify-ui-reachability.mjs`)은 앱과 같은 MIME·CSP로 응답하는 `tools/android-asset-server.mjs`를 기본으로 쓴다. 일반 개발 서버는 `.mjs` 같은 파일을 JavaScript로 응답해 Android에서만 생기는 로딩 실패를 숨긴다.
+3. `node --test tests/*.test.js` 실행. UI·플레이 변경에는 관련 `tests/*-check.cjs` 실행. 하나의 게임 화면 검증(`tools/verify-ui-reachability.mjs`, 콘텐츠 탐험·섬·개척 원정)은 앱과 같은 MIME·CSP로 응답하는 `tools/android-asset-server.mjs`를 기본으로 쓴다. 일반 개발 서버는 `.mjs` 같은 파일을 JavaScript로 응답해 Android에서만 생기는 로딩 실패를 숨긴다.
 4. `bash build-apk.sh`와 `python3 tools/build-update.py`로 로컬 결과 확인.
 5. 검증된 변경을 main에 반영. **FERAL versioned release** Actions가 테스트·APK 빌드·서명 패키지 생성을 수행하고 GitHub Release에 결과를 올림.
 6. Release 게시가 완료되면 별도 `updates` 브랜치의 `versions/<버전>.feral`과 `stable.feral` 갱신. 앱은 공개 raw.githubusercontent.com 주소에서 stable.feral을 인증 없이 읽음.
@@ -57,11 +57,15 @@
 
 ## 릴리스 기록
 
+### 0.13.0 — 하나의 게임 화면 (통합 1단계)
+
+게임 1300 / 앱·최소 앱 303 / 저장 스키마 2. Java·권한·키 변경이 없는 게임 전용 릴리스다. 모든 월드(기계 시험장 제외)가 `index.html` 한 화면과 공용 `shell.js`을 쓰고, 콘텐츠 탐험은 기존 HUD·핫바·36칸 가방·장부 창·메뉴·설정·UI 편집기로 옮겼다. 콘텐츠 탐험 저장에는 가방 칸 배치(`itemSlots`)를 선택 필드로 추가하며 이전 저장도 그대로 읽는다. 예전 `expedition.html` 주소와 월드 목록은 `index.html`로 연결한다. 기준과 남은 단계는 `docs/UNIFIED-GAME.md`, 검증은 `verification/0.13.0.md`.
+
 ### 0.12.1 — Android 콘텐츠 탐험 로딩 수정
 
 게임 1201 / 앱·최소 앱 303 / 저장 스키마 2. Java·권한·키 변경이 없는 게임 전용 핫픽스다. 앱의 자산 응답(`MainActivity.shouldInterceptRequest`)은 `.js`·`.css`·`.html`·`.json`만 해당 형식으로, 나머지를 `application/octet-stream`으로 보낸다. 0.11.0부터 콘텐츠 탐험이 `.mjs` 모듈을 불러와 브라우저가 모듈 전체를 거부했고, 오류 표시 없이 로딩 화면에 멈췄다. 해당 모듈을 `.js`로 바꿔 앱 재설치 없이 고쳤다. 로딩 화면은 단계별 진행도를 보여 주고, 모듈을 불러오지 못하면 실패를 안내하며 앱에 시작 실패를 알린다.
 
-검증과 병합 후 기존 공식 `updates/catalog.json`, `updates/stable.feral` 및 불변 `updates/versions/0.12.1.feral`로 게시한다. 이미 배포한 0.12.0 이하의 파일·버전 선택 항목을 덮어쓰지 않는다. 검증은 `verification/0.12.1.md`. Android 실기기에서의 시작 확인은 아직 하지 않았다.
+2026-10-18 00:53 UTC [PR #20](https://github.com/Modopi/feral-voxel-sandbox/pull/20) 병합 커밋 `6c0824b`에서 [배포 Actions](https://github.com/Modopi/feral-voxel-sandbox/actions/runs/39084468288)가 성공해 01:02 UTC에 [v0.12.1 Release](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.12.1)와 기존 공식 `updates/catalog.json`, `updates/stable.feral`, 불변 `updates/versions/0.12.1.feral`로 게시됐다. stable과 버전 패키지는 같은 파일(SHA256 `2df63eda…5e72`)이고 내부 아카이브 SHA256 `9af9f739…ac85`가 카탈로그와 로컬 빌드에 일치한다. 0.12.0 이하의 카탈로그 항목과 패키지 파일은 바뀌지 않았다. 검증은 `verification/0.12.1.md`. Android 실기기에서의 시작 확인은 아직 하지 않았다.
 
 ### 0.12.0 — 구현된 기능의 화면 연결
 

@@ -2,6 +2,8 @@
 
 > 기준: 게임 0.11.0 공개 버전의 코드. 작성일 2026-10-17.
 >
+> **0.13.0 이후:** 아래 연결은 하나의 게임 화면으로 옮겨졌다. `entry.js`의 패널·버튼은 `content-runtime/game.js`가 공용 HUD(`#sprintBtn`·`#descendBtn`·`#brakeBtn`·`#warning`·`#toast`), 가방(제작·대기열), 장부 창(연구·무기·설비·기계·공동체·장치·신앙·여정·상태)과 조준 정보 카드로 그린다. 기준은 [하나의 게임으로 통합](UNIFIED-GAME.md), 검증은 `verification/0.13.0.md`.
+>
 > 코드에는 구현되어 있지만 플레이어가 화면에서 쓰거나 볼 수 없던 기능을 정리하고, 0.12.0에서 연결한 위치와 검증 근거를 기록한다. 새 기능을 추가한 목록이 아니며, 기존 기능을 화면·입력에 연결한 범위다. 전체 목표 완료 여부는 [구현 Goal](IMPLEMENTATION-GOAL.md)과 [구현 추적표](content/IMPLEMENTATION-STATUS.md)로 판단한다.
 
 ## 조사 방법

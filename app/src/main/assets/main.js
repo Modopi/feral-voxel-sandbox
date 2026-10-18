@@ -20,15 +20,28 @@ function preparePhysics() {
 }
 import { animalBodyInfo } from "./animal-skeleton.js";
 import { uiIcon, installHUDArt } from "./ui-art.js";
-import { InventoryUI } from "./inventory-ui.js";
+import { InventoryUI, drawHotbar } from "./inventory-ui.js";
 import { HudEditor } from "./hud-editor.js";
+import {
+  createInput,
+  createNotifier,
+  showDiscovery,
+  initSettings,
+  bindMenuTabs,
+  showPauseScreen,
+  bindBackground,
+  showError,
+  installErrorScreen,
+  showMovementState,
+  changeStance,
+  changeSprint,
+} from "./shell.js";
 import {
   DEFAULT_EDIT_SIZE,
   EDIT_GRID_VERSION,
   restoreEditGrid,
   editSizeLabel,
 } from "./edit-grid.js";
-import { itemArt } from "./item-art.js";
 import { GEAR, activeGear, spendGear, miningWork } from "./equipment.js";
 let nextStrike = 0,
   sandboxSelected = false;
@@ -54,7 +67,6 @@ import {
   FIXED_DT,
   EYE_HEIGHT,
   bodyHeight,
-  STANCES,
   BODY_RADIUS,
 } from "./physics.js";
 import {
@@ -97,10 +109,8 @@ let world,
   fps = 0,
   frameTimes = [],
   discovered = new Set(),
-  toastTimer = 0,
   eventTimer = 0,
-  sensitivity = 0.8,
-  soundEnabled = true,
+  settings = null,
   audio,
   useHeld = false,
   useCooldown = 0,
@@ -111,10 +121,13 @@ let world,
   benchmarkSamples = [],
   resetOnReturn = false,
   sprintLatched = false;
-const keys = new Set(),
-  cancelButtonHolds = new Set(),
-  joy = { x: 0, y: 0, id: null },
-  look = { id: null, x: 0, y: 0 };
+const input = createInput({
+    canControl: () => running && !paused,
+    isEditing: () => hudEditor?.editing === true,
+    rotateLook,
+  }),
+  keys = input.keys,
+  joy = input.joy;
 const player = {
   x: 77.5,
   y: 16,
@@ -126,24 +139,14 @@ const player = {
   flying: false,
 };
 const eventLog = [];
+const notify = createNotifier(document.getElementById("toast"));
 function toast(s) {
-  $("toast").textContent = s;
-  $("toast").classList.add("show");
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => $("toast").classList.remove("show"), 2600);
+  notify(s);
 }
-function reportError(err) {
-  window.FeralUpdates?.failed();
-  console.error(err);
-  $("errorScreen").classList.remove("hidden");
-  $("errorText").textContent =
-    String(err?.message || err) +
-    " · Android System WebView를 업데이트한 뒤 다시 실행해 주세요.";
-}
-window.addEventListener("error", (e) => reportError(e.error || e.message));
-window.addEventListener("unhandledrejection", (e) => reportError(e.reason));
+const reportError = showError;
+installErrorScreen();
 function sound(kind) {
-  if (!soundEnabled) return;
+  if (settings?.sound === false) return;
   try {
     audio ??= new (window.AudioContext || window.webkitAudioContext)();
     if (audio.state === "suspended") audio.resume();
@@ -236,31 +239,7 @@ function selectTool(n) {
   }
 }
 function renderHotbar() {
-  const bar = $("hotbar");
-  bar.replaceChildren();
-  for (let i = 0; i < 9; i++) {
-    const stack = inventory.slots[i],
-      id = stack?.id,
-      b = document.createElement("button");
-    b.className = "slot" + (inventory.selectedSlot === i ? " selected" : "");
-    b.dataset.hotbar = i;
-    b.setAttribute(
-      "aria-label",
-      `핫바 ${i + 1} · ${id ? ITEMS[id].name + " " + stack.count + "개" : "빈 칸"}`,
-    );
-    b.setAttribute("aria-pressed", String(inventory.selectedSlot === i));
-    b.innerHTML =
-      `<span class="num">${i + 1}</span>` +
-      (id
-        ? itemArt(id) +
-          (stack.count > 1 ? `<b class="stackCount">${stack.count}</b>` : "") +
-          (GEAR[id]?.durability
-            ? `<progress class="durability" max="${GEAR[id].durability}" value="${inventory.wear[id] || 0}"></progress>`
-            : "")
-        : "");
-    b.onclick = () => selectHotbar(i);
-    bar.append(b);
-  }
+  if (bagUI) drawHotbar($("hotbar"), inventory, bagUI.catalog, selectHotbar);
 }
 bagUI = new InventoryUI({
   get inventory() {
@@ -294,69 +273,20 @@ function home() {
 function toggleStance(stance) {
   if (!running || paused || frontierState?.riding) return;
   sprintLatched = false;
-  const target = player.stance === stance ? "stand" : stance;
-  controller.requestStance(target);
-  controller.updateStance(target);
-  if (player.stanceBlocked)
-    toast("천장이 낮아 일어설 수 없습니다. 밖으로 이동하세요.");
+  changeStance(controller, player, stance, toast);
   updateMovementHud();
 }
-let movementHudSignature = "";
 function updateMovementHud() {
-  const signature = [
-    frontierState?.riding,
-    frontierState?.airborne,
-    player.flying,
-    player.stance,
-    player.stanceBlocked,
-    player.sprinting,
+  const riding = !!frontierState?.riding;
+  showMovementState({
+    riding,
+    flying: !!frontierState?.airborne || (!riding && player.flying),
+    freeFlying: !riding && player.flying,
+    stance: player.stance,
+    stanceBlocked: player.stanceBlocked,
+    sprinting: !!player.sprinting,
     sprintLatched,
-  ].join(":");
-  if (signature === movementHudSignature) return;
-  movementHudSignature = signature;
-  const riding = !!frontierState?.riding,
-    flying = !!frontierState?.airborne || (!riding && player.flying);
-  document.body.classList.toggle("piloting", riding);
-  document.body.classList.toggle("freeFlying", !riding && player.flying);
-  for (const [id, stance] of [
-    ["crouchBtn", "crouch"],
-    ["crawlBtn", "crawl"],
-  ]) {
-    $(id).classList.toggle("enabled", !riding && player.stance === stance);
-    $(id).setAttribute(
-      "aria-pressed",
-      String(!riding && player.stance === stance),
-    );
-    $(id).hidden = riding;
-  }
-  $("sprintBtn").classList.toggle(
-    "enabled",
-    sprintLatched || !!player.sprinting,
-  );
-  $("sprintBtn").setAttribute(
-    "aria-pressed",
-    String(sprintLatched || !!player.sprinting),
-  );
-  $("sprintBtn").hidden = riding;
-  $("descendBtn").hidden = !flying;
-  $("jumpBtn").querySelector("small").textContent = flying
-    ? "상승"
-    : riding
-      ? "제동"
-      : "점프";
-  $("jumpBtn").setAttribute(
-    "aria-label",
-    flying ? "상승 · 기수 올리기" : riding ? "제동" : "점프",
-  );
-  $("movementState").textContent = riding
-    ? flying
-      ? "비행 조종"
-      : "차량 조종"
-    : player.stanceBlocked
-      ? "천장 낮음"
-      : player.sprinting
-        ? "달리기"
-        : STANCES[player.stance || "stand"].label;
+  });
 }
 function inputState() {
   return {
@@ -858,29 +788,19 @@ function setFlying() {
   );
 }
 function stopInput() {
-  for (const cancel of cancelButtonHolds) cancel();
-  keys.clear();
+  input.stop();
   sprintLatched = false;
-  joy.x = joy.y = 0;
-  joy.id = null;
-  look.id = null;
   actionHeld = false;
   useHeld = false;
   currentPhysics()?.loose.release();
-  $("knob").style.transform = "";
 }
 function pause(force) {
   if (!running) return;
   paused = force ?? !paused;
   stopInput();
-  $("pauseScreen").classList.toggle(
-    "hidden",
-    !paused || hudEditor?.editing === true,
-  );
-  document.body.classList.toggle("menuOpen", paused);
+  showPauseScreen(paused, hudEditor?.editing === true);
   if (!paused) frontierUI?.close();
   if (paused) {
-    document.exitPointerLock?.();
     updatePanels();
     refreshInventory();
   } else {
@@ -1114,11 +1034,7 @@ function discover() {
     }
     if (dist < 13 && !discovered.has(p.name)) {
       discovered.add(p.name);
-      $("discovery").querySelector("span").textContent =
-        "FIELD NOTE / 0" + discovered.size;
-      $("discovery").querySelector("strong").textContent = p.name;
-      $("discovery").classList.add("show");
-      setTimeout(() => $("discovery").classList.remove("show"), 4800);
+      showDiscovery(discovered.size, p.name);
       toast(`새 장소 발견 · ${p.name} (${discovered.size}/${world.landmarks.length})`);
       sound("scan");
     }
@@ -1419,13 +1335,13 @@ function frame(now) {
   }
   if (!ready) {
     view.rebuild(3);
-    $("loadStatus").textContent =
-      "지형 청크 준비 " + (100 - world.dirty.size) + " / 100";
+    const built = 100 - world.dirty.size;
+    window.FeralLoading?.step(`지형 청크를 준비하는 중 ${built}/100`, 10 + built * 0.88);
     if (!world.dirty.size) {
       ready = true;
       $("startBtn").disabled = false;
       $("startBtn").querySelector("span").textContent = "탐험 시작";
-      $("loadStatus").textContent = "월드 준비 완료 · 채굴·수집·제작";
+      window.FeralLoading?.finish("월드 준비 완료 · 채굴·수집·제작");
       if (localStorage.getItem(storageKey)) {
         $("continueBtn").classList.remove("hidden");
         $("startBtn").querySelector("span").textContent = "새로운 탐험";
@@ -1597,19 +1513,11 @@ $("crouchBtn").onclick = () => toggleStance("crouch");
 $("crawlBtn").onclick = () => toggleStance("crawl");
 $("sprintBtn").onclick = () => {
   if (!running || paused || frontierState?.riding) return;
-  if (player.stance !== "stand") {
-    controller.requestStance("stand");
-    controller.updateStance("stand");
-    if (player.stanceBlocked) {
-      toast("일어설 공간이 필요합니다.");
-      return;
-    }
-  }
-  sprintLatched = !sprintLatched;
+  sprintLatched = changeSprint(controller, player, sprintLatched, toast);
   updateMovementHud();
 };
 $("inventoryBtn").onclick = openBag;
-holdButton(
+input.holdButton(
   $("useBtn"),
   () => {
     useHeld = true;
@@ -1641,107 +1549,19 @@ $("stressBtn").onclick = () => {
   setPopulation(3000);
   updatePanels();
 };
-for (const b of document.querySelectorAll("[data-tab]"))
-  b.onclick = () => {
-    $("pauseScreen").classList.toggle("inventoryMode", b.dataset.tab === "bag");
-    $("panelTitle").textContent =
-      b.dataset.tab === "bag" ? "가방 · 제작" : "탐험 메뉴";
-    document
-      .querySelectorAll("[data-tab]")
-      .forEach((x) => x.classList.toggle("active", x === b));
-    document
-      .querySelectorAll("[data-panel]")
-      .forEach((x) =>
-        x.classList.toggle("hidden", x.dataset.panel !== b.dataset.tab),
-      );
-    updatePanels();
-  };
-function persistSettings() {
-  localStorage.setItem(
-    "feral.settings",
-    JSON.stringify({
-      layoutVersion: 2,
-      quality: $("quality").value,
-      sensitivity: $("sensitivity").value,
-      fov: $("fov").value,
-      sound: $("sound").checked,
-      leftHand: $("leftHand").checked,
-      showRadar: $("showRadar").checked,
-      showEvents: $("showEvents").checked,
-    }),
-  );
-}
-$("quality").onchange = () => {
-  view.qualitySet($("quality").value);
-  persistSettings();
-};
-$("sensitivity").oninput = () => {
-  sensitivity = $("sensitivity").value / 100;
-  persistSettings();
-};
-$("fov").oninput = () => {
-  view.camera.fov = +$("fov").value;
-  view.camera.updateProjectionMatrix();
-  persistSettings();
-};
-$("sound").onchange = () => {
-  soundEnabled = $("sound").checked;
-  persistSettings();
-};
-for (const [id, className] of [["showRadar", "showRadar"], ["showEvents", "showEvents"]])
-  $(id).onchange = () => {
-    document.body.classList.toggle(className, $(id).checked);
-    persistSettings();
-    if (id === "showRadar") map();
-  };
+bindMenuTabs(() => updatePanels());
 for (const b of document.querySelectorAll("[data-sandbox-tool]"))
   b.onclick = () => selectSandboxTool(+b.dataset.sandboxTool);
-$("leftHand").onchange = () => {
-  document.body.classList.toggle("leftHand", $("leftHand").checked);
-  persistSettings();
-  hudEditor?.apply();
-};
 function rotateLook(dx, dy) {
   if (!running || paused || hudEditor?.editing) return;
-  player.yaw -= dx * 0.003 * sensitivity;
-  player.pitch = clamp(player.pitch - dy * 0.003 * sensitivity, -1.48, 1.48);
+  player.yaw -= dx * 0.003 * settings.sensitivity;
+  player.pitch = clamp(
+    player.pitch - dy * 0.003 * settings.sensitivity,
+    -1.48,
+    1.48,
+  );
 }
-function holdButton(el, on, off) {
-  let pointer = null;
-  const cancel = () => {
-    if (!pointer) return;
-    const id = pointer.id;
-    pointer = null;
-    el.classList.remove("held");
-    off();
-    if (el.hasPointerCapture(id)) el.releasePointerCapture(id);
-  };
-  cancelButtonHolds.add(cancel);
-  el.addEventListener("pointerdown", (e) => {
-    if (!running || paused || hudEditor?.editing || pointer || e.button !== 0)
-      return;
-    e.preventDefault();
-    e.stopPropagation();
-    pointer = { id: e.pointerId, x: e.clientX, y: e.clientY };
-    el.setPointerCapture(e.pointerId);
-    el.classList.add("held");
-    on();
-  });
-  el.addEventListener("pointermove", (e) => {
-    if (e.pointerId !== pointer?.id) return;
-    e.preventDefault();
-    rotateLook(e.clientX - pointer.x, e.clientY - pointer.y);
-    pointer.x = e.clientX;
-    pointer.y = e.clientY;
-  });
-  for (const type of ["pointerup", "pointercancel", "lostpointercapture"])
-    el.addEventListener(type, (e) => {
-      if (e.pointerId !== pointer?.id) return;
-      e.preventDefault();
-      cancel();
-    });
-}
-holdButton(
+input.holdButton(
   $("actBtn"),
   () => {
     if (!paused) {
@@ -1753,7 +1573,7 @@ holdButton(
   },
   () => (actionHeld = false),
 );
-holdButton(
+input.holdButton(
   $("jumpBtn"),
   () => {
     if (player.stance !== "stand" && !frontierState?.riding)
@@ -1762,147 +1582,63 @@ holdButton(
   },
   () => keys.delete("Space"),
 );
-holdButton(
+input.holdButton(
   $("descendBtn"),
   () => keys.add("KeyQ"),
   () => keys.delete("KeyQ"),
 );
-$("stick").addEventListener("pointerdown", (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-  joy.id = e.pointerId;
-  $("stick").setPointerCapture(e.pointerId);
-  stickMove(e);
-});
-function stickMove(e) {
-  if (e.pointerId !== joy.id) return;
-  const r = $("stick").getBoundingClientRect(),
-    dx = e.clientX - r.x - r.width / 2,
-    dy = e.clientY - r.y - r.height / 2,
-    m = Math.max(35, Math.hypot(dx, dy));
-  joy.x = dx / m;
-  joy.y = dy / m;
-  $("knob").style.transform = `translate(${joy.x * 30}px,${joy.y * 30}px)`;
-}
-$("stick").addEventListener("pointermove", stickMove);
-for (const type of ["pointerup", "pointercancel", "lostpointercapture"])
-  $("stick").addEventListener(type, (e) => {
-    if (e.pointerId === joy.id) {
-      joy.id = null;
-      joy.x = joy.y = 0;
-      $("knob").style.transform = "";
-    }
-  });
+input.bindStick($("stick"), $("knob"));
 const canvas = $("world");
-canvas.addEventListener("pointerdown", (e) => {
-  if (!running || paused) return;
-  if (e.pointerType === "mouse") {
-    if (e.button === 2) {
-      use("secondary");
+input.bindCanvas(canvas, {
+  primary: (pressed) => {
+    actionHeld = pressed;
+    if (!pressed) return;
+    use("primary");
+    actionCooldown =
+      selected === 1 ? activeGear(inventory, "weapon").cooldown : 0.2;
+  },
+  secondary: () => use("secondary"),
+  wheel: (direction) =>
+    selectHotbar((inventory.selectedSlot + (direction > 0 ? 1 : 8)) % 9),
+  lockFailed: () => toast("클릭 후 마우스 시점을 사용할 수 있습니다."),
+});
+input.bindKeyboard({
+  isRunning: () => running,
+  toggleBag: () => (paused ? pause(false) : openBag()),
+  togglePause: () => pause(),
+  onKey: (e) => {
+    if (frontierUI && !e.repeat && frontierUI.key(e.code)) return;
+    if (!e.repeat && (e.code === "KeyC" || e.code === "KeyZ")) {
+      toggleStance(e.code === "KeyC" ? "crouch" : "crawl");
       return;
     }
-    if (document.pointerLockElement === canvas) {
-      actionHeld = true;
-      use("primary");
-      actionCooldown =
-        selected === 1 ? activeGear(inventory, "weapon").cooldown : 0.2;
-    } else
-      canvas
-        .requestPointerLock?.()
-        ?.catch?.(() => toast("클릭 후 마우스 시점을 사용할 수 있습니다."));
-    return;
-  }
-  look.id = e.pointerId;
-  look.x = e.clientX;
-  look.y = e.clientY;
-  canvas.setPointerCapture(e.pointerId);
-});
-canvas.addEventListener("pointermove", (e) => {
-  if (!running || paused) return;
-  let dx = 0,
-    dy = 0;
-  if (e.pointerType === "mouse" && document.pointerLockElement === canvas) {
-    dx = e.movementX;
-    dy = e.movementY;
-  } else if (e.pointerId === look.id) {
-    dx = e.clientX - look.x;
-    dy = e.clientY - look.y;
-    look.x = e.clientX;
-    look.y = e.clientY;
-  }
-  rotateLook(dx, dy);
-});
-for (const type of ["pointerup", "pointercancel", "lostpointercapture"])
-  canvas.addEventListener(type, (e) => {
-    if (e.pointerType === "mouse") actionHeld = false;
-    if (e.pointerId === look.id) look.id = null;
-  });
-canvas.addEventListener(
-  "wheel",
-  (e) => {
-    if (!running || paused) return;
-    e.preventDefault();
-    selectHotbar((inventory.selectedSlot + (e.deltaY > 0 ? 1 : 8)) % 9);
+    if (
+      !e.repeat &&
+      e.code === "Space" &&
+      player.stance !== "stand" &&
+      !frontierState?.riding
+    ) {
+      toggleStance(player.stance);
+      return;
+    }
+    keys.add(e.code);
+    if (e.code === "KeyB" && !e.repeat) cycleRange();
+    if (e.code === "KeyF" && !e.repeat) setFlying();
+    if (/^Digit[1-9]$/.test(e.code)) selectHotbar(+e.code.slice(-1) - 1);
   },
-  { passive: false },
-);
-canvas.addEventListener("contextmenu", (e) => e.preventDefault());
-window.addEventListener("keydown", (e) => {
-  if (hudEditor?.editing) return;
-  if (
-    e.code !== "Escape" &&
-    e.target.closest?.("input, textarea, select, [contenteditable=true]")
-  )
-    return;
-  if (e.target.closest?.("#frontierPanel") && e.code !== "Escape") return;
-  if (["Space", "Tab", "ArrowUp", "ArrowDown"].includes(e.code))
-    e.preventDefault();
-  if (["KeyI", "Tab"].includes(e.code) && running && !e.repeat) {
-    if (paused) pause(false);
-    else openBag();
-    return;
-  }
-  if (e.code === "Escape") {
-    pause();
-    return;
-  }
-  if (!running || paused) return;
-  if (frontierUI && !e.repeat && frontierUI.key(e.code)) return;
-  if (!e.repeat && (e.code === "KeyC" || e.code === "KeyZ")) {
-    toggleStance(e.code === "KeyC" ? "crouch" : "crawl");
-    return;
-  }
-  if (
-    !e.repeat &&
-    e.code === "Space" &&
-    player.stance !== "stand" &&
-    !frontierState?.riding
-  ) {
-    toggleStance(player.stance);
-    return;
-  }
-  keys.add(e.code);
-  if (e.code === "KeyB" && !e.repeat) cycleRange();
-  if (e.code === "KeyF" && !e.repeat) setFlying();
-  if (/^Digit[1-9]$/.test(e.code)) selectHotbar(+e.code.slice(-1) - 1);
 });
-window.addEventListener("keyup", (e) => keys.delete(e.code));
-window.addEventListener("blur", () => {
-  if (running) {
-    save(true);
-    pause(true);
-  }
+bindBackground({
+  onHide: () => {
+    if (running) {
+      save(true);
+      pause(true);
+    }
+  },
+  onUnload: () => {
+    if (running) save(true);
+  },
+  onBlur: stopInput,
 });
-document.addEventListener("visibilitychange", () => {
-  if (document.hidden && running) {
-    save(true);
-    pause(true);
-  }
-});
-window.addEventListener("beforeunload", () => {
-  if (running) save(true);
-});
-window.addEventListener("blur", stopInput);
 window.addEventListener("resize", () => view?.resize());
 window.FeralNative = {
   pause: () => {
@@ -1935,7 +1671,7 @@ try {
       inventory.add("stone", 8);
       inventory.add("crystal", 2);
     }
-    document.body.classList.add("frontier");
+    document.body.classList.add("frontier", "field");
   }
   world = makeWorld(frontierState ? frontierState.info.seed : activeWorld.seed);
   world.event = event;
@@ -1997,24 +1733,11 @@ try {
   });
   view.camera.position.set(85, 25, 98);
   view.camera.lookAt(74, 13, 58);
-  const settings = JSON.parse(localStorage.getItem("feral.settings") || "null");
-  if (settings) {
-    $("quality").value = settings.quality || "balanced";
-    $("sensitivity").value = settings.sensitivity || 80;
-    $("fov").value = settings.layoutVersion === 2 ? settings.fov || 82 : 82;
-    $("sound").checked = settings.sound !== false;
-    $("leftHand").checked = !!settings.leftHand;
-    $("showRadar").checked = !!settings.showRadar;
-    $("showEvents").checked = !!settings.showEvents;
-    document.body.classList.toggle("showRadar", $("showRadar").checked);
-    document.body.classList.toggle("showEvents", $("showEvents").checked);
-    sensitivity = $("sensitivity").value / 100;
-    soundEnabled = $("sound").checked;
-    document.body.classList.toggle("leftHand", $("leftHand").checked);
-    view.qualitySet($("quality").value);
-    view.camera.fov = +$("fov").value;
-    view.camera.updateProjectionMatrix();
-  }
+  settings = initSettings({
+    view,
+    onRadar: map,
+    onLeftHand: () => hudEditor?.apply(),
+  });
   hudEditor = new HudEditor({
     open: () => {
       pause(true);

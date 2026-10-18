@@ -53,7 +53,8 @@
 양력 · 중량
 비행 상태</output>
       <div id="events"></div>
-      <div id="toast"></div>
+      <div id="warning" role="alert" aria-live="assertive"></div>
+      <div id="toast" role="status"></div>
       <div id="touch">
         <div id="stick"><div id="knob"></div></div>
         <span id="stickLabel">MOVE</span>
@@ -62,6 +63,7 @@
         <button id="crawlBtn" class="round posture" aria-label="기어가기 전환" aria-pressed="false">━<small>기어가기</small></button>
         <span id="movementState">걷기</span>
         <button id="descendBtn" class="round small" aria-label="하강 · 기수 내리기" hidden>↓<small>하강</small></button>
+        <button id="brakeBtn" class="round small" aria-label="제동" hidden>■<small>제동</small></button>
         <div id="lookHint">오른쪽 화면을 밀어 둘러보기</div>
         <button id="useBtn" class="round small" aria-label="선택 아이템 사용">▣<small>사용</small></button>
         <button id="jumpBtn" class="round small" aria-label="점프">
@@ -97,7 +99,10 @@
           </button>
         </div>
         <a href="worlds.html" class="worldSelectButton">내 월드</a>
-        <div id="loadStatus">지형과 생태계를 준비합니다.</div>
+        <div id="loadStatus" role="status">게임 파일을 불러오는 중 · 0%</div>
+        <div id="loadingBar" role="progressbar" aria-label="세계 준비 진행도" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span></span></div>
+        <p id="loadingHint" hidden></p>
+        <button id="loadingRetry" class="secondary" hidden>다시 시도</button>
       </div>
       <div class="titleFooter">
         <span>오프라인 탐험 · 가로 화면 권장</span
@@ -247,7 +252,7 @@
               <b>모바일</b>
               <p>
                 왼쪽 스틱: 이동 · 달리기 버튼: 전환<br />화면 또는 누른 동작 버튼 드래그: 시점<br />↑: 점프 /
-                비행 중 상승<br />◇: 비행 전환 · ↓: 하강<br />달리기·웅크리기·기어가기: 누르면 전환<br />낮은 자세에서 ↑: 일어서기<br />공격·캐기: 타격/채굴 · 사용: 설치/먹이/소모품
+                비행 중 상승<br />◇: 비행 전환 · ↓: 하강<br />달리기·웅크리기·기어가기: 누르면 전환<br />낮은 자세에서 ↑: 일어서기<br />공격·캐기: 타격/채굴 · 사용: 설치/먹이/소모품<br />상호작용: 조준한 대상 · 지도·상태: 장부 창 (원정·탐험)
               </p>
             </div>
             <div>
@@ -255,7 +260,7 @@
               <p>
                 WASD: 이동 · Shift: 달리기 · C: 웅크리기 · Z: 기어가기<br />마우스: 시점 · 좌클릭: 공격/채굴 · 우클릭: 설치/사용<br />Space:
                 점프 · F: 비행<br />I / Tab: 가방 · B: 범위<br />1~9: 아이템 슬롯 ·
-                Esc: 메뉴<br />비행 중 Q: 하강 / E: 상승
+                Esc: 메뉴<br />비행 중 Q: 하강 / E: 상승<br />R: 상호작용 · J: 지도·여정 (원정·탐험)
               </p>
             </div>
           </div>
@@ -308,6 +313,68 @@
         <button onclick="location.reload()" class="primary">다시 시작</button>
       </div>
     </div>
-    <script type="module" src="main.js"></script>
+    <script>
+      // Classic script on purpose: it keeps reporting progress and failures even when the module graph cannot load.
+      (function () {
+        var $ = function (id) { return document.getElementById(id); },
+          start = Date.now(), stageAt = start, groupAt = start, group = "게임 파일을 불러오는 중",
+          current = { text: group, percent: 2 }, timings = [], done = false, failed = false;
+        function render() {
+          if (done) return;
+          var elapsed = Math.round((Date.now() - start) / 1000), stalled = (Date.now() - stageAt) / 1000;
+          if (!failed) $("loadStatus").textContent = current.text + " · " + Math.round(current.percent) + "% · " + elapsed + "초";
+          $("loadingBar").firstElementChild.style.width = current.percent + "%";
+          $("loadingBar").setAttribute("aria-valuenow", String(Math.round(current.percent)));
+          if (!failed && stalled > 25) {
+            $("loadingHint").hidden = false;
+            $("loadingHint").textContent = "이 단계가 " + Math.round(stalled) + "초째 진행 중입니다. 처음 실행하거나 저장이 크면 더 걸릴 수 있습니다. 계속 멈춰 있으면 다시 시도하세요.";
+            $("loadingRetry").hidden = false;
+          }
+        }
+        function activity(text, percent) {
+          stageAt = Date.now();
+          current = { text: text, percent: Math.max(current.percent, Math.min(100, percent)) };
+          $("loadingHint").hidden = true;
+          $("loadingRetry").hidden = true;
+          render();
+        }
+        window.FeralLoading = {
+          set: function (text, percent) {
+            if (done || failed) return;
+            var now = Date.now();
+            timings.push({ stage: group, ms: now - groupAt });
+            group = text; groupAt = now;
+            activity(text, percent);
+          },
+          // step keeps the current stage's timing entry but counts as activity for the stall hint.
+          step: function (text, percent) { if (!done && !failed) activity(text, percent); },
+          finish: function (text) {
+            if (done) return;
+            timings.push({ stage: group, ms: Date.now() - groupAt });
+            current.percent = 100; render(); done = true; clearInterval(timer);
+            if (text) $("loadStatus").textContent = text;
+          },
+          fail: function (message) {
+            failed = true;
+            $("loadStatus").textContent = message + " · 멈춘 단계: " + current.text + " · " + Math.round(current.percent) + "%";
+            $("loadingHint").hidden = true;
+            $("loadingRetry").hidden = false;
+            if (window.AndroidApp && window.AndroidApp.runtimeFailed) window.AndroidApp.runtimeFailed();
+          },
+          timings: timings,
+          get stage() { return current.text; },
+          get percent() { return current.percent; },
+          get failed() { return failed; },
+          get done() { return done; },
+        };
+        var timer = setInterval(render, 500);
+        $("loadingRetry").onclick = function () { location.reload(); };
+        window.addEventListener("error", function (e) {
+          if (!done && e.target && e.target.tagName === "SCRIPT") window.FeralLoading.fail("게임 파일을 불러오지 못했습니다. 다시 시도하거나 게임 버전을 바꿔 보세요.");
+        }, true);
+        render();
+      })();
+    </script>
+    <script type="module" src="game.js"></script>
   </body>
 </html>

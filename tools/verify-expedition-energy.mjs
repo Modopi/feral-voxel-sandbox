@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// Evidence tool for the 0.11–0.12 separate expedition screen (expedition.html, entry.js panels).
+// Since 0.13.0 every map uses the one game screen; check it with tools/verify-ui-reachability.mjs.
 import fs from 'node:fs/promises';
 import {createRequire} from 'node:module';
 import {createHash} from 'node:crypto';

@@ -20,6 +20,13 @@ const paths = {
     '<circle cx="15" cy="5" r="2"/><path d="m13 9-6 3 5 4-3 5M13 9l3 5h4M12 16h5v5"/>',
   crawl:
     '<circle cx="19" cy="12" r="2"/><path d="M16 14H7l-4 5M8 14l3 5h3M16 14l2 5h3"/>',
+  research: '<path d="M5 3h10l4 4v14H5Z"/><path d="M15 3v4h4M8 11h8M8 15h8M8 19h5"/>',
+  energy: '<path d="M13 2 5 14h6l-1 8 8-12h-6Z"/>',
+  device:
+    '<circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M5 19l3-3M16 8l3-3"/>',
+  faith:
+    '<path d="m12 2 2.6 6.2L21 9l-5 4.3 1.5 6.7L12 16.7 6.5 20 8 13.3 3 9l6.4-.8Z"/>',
+  brake: '<path d="M6 6h12v12H6Z"/>',
 };
 export function uiIcon(id) {
   return `<svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="square" stroke-linejoin="miter">${paths[id] || paths.journey}</svg>`;
@@ -33,6 +40,7 @@ export function installHUDArt() {
     crawlBtn: "crawl",
     jumpBtn: "jump",
     descendBtn: "down",
+    brakeBtn: "brake",
     flyBtn: "flight",
     useBtn: "use",
   })) {

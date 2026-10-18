@@ -20,6 +20,7 @@ import { FACTIONS } from "./model.js";
 import { AssemblyView } from "./assembly-view.js";
 import { FrontierMotion } from "./motion.js";
 import { evaluate, TYPES } from "../machine/model.js";
+import { mountFieldHUD, setVitals, waypointText, GameWindow } from "../shell.js";
 const $ = (id) => document.getElementById(id);
 const escape = (s) =>
   String(s).replace(
@@ -31,22 +32,11 @@ const escape = (s) =>
   );
 const distance = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 
-const pips = (kind) =>
-  `<div class="pipTrack ${kind}" aria-hidden="true">${"<i><b></b></i>".repeat(10)}</div>`;
-function fillPips(track, value) {
-  const amount = Math.ceil(Math.max(0, Math.min(100, value)) / 5);
-  if (track.dataset.amount === String(amount)) return;
-  track.dataset.amount = amount;
-  [...track.children].forEach((pip, i) => {
-    pip.firstChild.style.width = `${Math.min(2, Math.max(0, amount - i * 2)) * 50}%`;
-  });
-}
 export class FrontierView {
   constructor(ctx) {
     this.c = ctx;
     this.motion = new FrontierMotion(ctx);
     this.assembly = new AssemblyView(ctx, this.motion);
-    this.tab = "map";
     this.waypoint = null;
     this.revision = -1;
     this.oldPosition = null;
@@ -58,42 +48,31 @@ export class FrontierView {
     this.targets = [];
     this.resourceMeshes = [];
     this.relayMeshes = [];
-    const hud = document.createElement("div");
-    hud.id = "frontierHUD";
-    hud.innerHTML = `<div id="vitals"><span id="healthText" class="srOnly"></span><meter id="health" class="srOnly" min="0" max="100" value="100" aria-label="체력"></meter>${pips("hearts")}<b id="levelHUD"></b>${pips("hunger")}<small id="hungerText" class="srOnly"></small><progress id="experienceHUD" max="80" value="0" aria-label="다음 레벨 경험치"></progress></div>
-      <div id="waypoint"></div><div id="frontierActions"><button id="journalBtn" aria-label="원정 지도"><span aria-hidden="true">▧</span><small>지도</small></button><button id="statusBtn" aria-label="캐릭터 상태"><span aria-hidden="true">♟</span><small>상태</small></button><button id="interactBtn">상호작용 <small>R</small></button></div>`;
-    $("hud").append(hud);
-    const panel = document.createElement("section");
-    panel.id = "frontierPanel";
-    panel.hidden = true;
-    panel.setAttribute("role", "dialog");
-    panel.setAttribute("aria-modal", "true");
-    panel.setAttribute("aria-labelledby", "frontierTitle");
-    panel.innerHTML = `<div class="gameWindow"><header><h2 id="frontierTitle">원정 지도</h2><button id="frontierClose" aria-label="원정 장부 닫기">×</button></header>
-      <nav aria-label="원정 장부 메뉴"><button data-frontier-tab="journey" aria-label="여정과 야영지"><b aria-hidden="true">◈</b><span>여정</span></button><button data-frontier-tab="journal" aria-label="캐릭터 상태"><b aria-hidden="true">♟</b><span>상태</span></button><button data-frontier-tab="map" aria-label="원정 지도"><b aria-hidden="true">▧</b><span>지도</span></button><button data-frontier-tab="society" aria-label="공동체"><b aria-hidden="true">⚑</b><span>마을</span></button><button data-frontier-tab="machine" aria-label="기계 조립"><b aria-hidden="true">⚒</b><span>기계</span></button></nav>
-      <div id="frontierContent"></div><p id="frontierFeedback" role="status" aria-live="polite"></p></div>`;
-    document.body.append(panel);
-    $("journalBtn").onclick = () => this.open("map");
-    $("statusBtn").onclick = () => this.open("journal");
-    $("interactBtn").onclick = () => ctx.interact();
-    $("frontierClose").onclick = () => ctx.pause(false);
-    panel
-      .querySelectorAll("[data-frontier-tab]")
-      .forEach((b) => (b.onclick = () => this.open(b.dataset.frontierTab)));
-    panel.addEventListener("keydown", (e) => {
-      if (e.key !== "Tab") return;
-      const buttons = [
-        ...panel.querySelectorAll("button, select, summary"),
-      ].filter((e) => !e.disabled && e.offsetParent);
-      const first = buttons[0],
-        last = buttons.at(-1);
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last?.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first?.focus();
-      }
+    mountFieldHUD({
+      onJournal: () => this.open("map"),
+      onStatus: () => this.open("journal"),
+      onInteract: () => ctx.interact(),
+    });
+    this.window = new GameWindow({
+      initial: "map",
+      tabs: [
+        { id: "journey", label: "여정", ariaLabel: "여정과 야영지", icon: "journey" },
+        { id: "journal", label: "상태", ariaLabel: "캐릭터 상태", icon: "person" },
+        { id: "map", label: "지도", ariaLabel: "원정 지도", icon: "map" },
+        { id: "society", label: "마을", ariaLabel: "공동체", icon: "village" },
+        { id: "machine", label: "기계", ariaLabel: "기계 조립", icon: "tools" },
+      ],
+      titles: {
+        journey: "첫 신호 · 여정과 야영지",
+        map: "원정 지도",
+        society: "공동체",
+        machine: "기계 조립",
+        journal: "캐릭터 상태",
+      },
+      canOpen: () => this.c.running,
+      onOpen: () => this.c.pause(true),
+      onClose: () => ctx.pause(false),
+      render: () => this.render(),
     });
     document.querySelector('[data-panel="world"] > p').textContent =
       "절차 생성 지역을 탐험하세요. 야영지 또는 지역 가장자리에서 원정 장부를 열어 인접 지역으로 이동할 수 있습니다.";
@@ -106,17 +85,6 @@ export class FrontierView {
     };
     $("flyBtn").setAttribute("aria-label", "차량 비행 전환");
     $("flyBtn").innerHTML = "◇<small>비행</small>";
-    for (const [tab, icon] of Object.entries({
-      journey: "journey",
-      journal: "person",
-      map: "map",
-      society: "village",
-      machine: "tools",
-    }))
-      panel.querySelector(`[data-frontier-tab="${tab}"] b`).innerHTML =
-        uiIcon(icon);
-    $("journalBtn").querySelector("span").innerHTML = uiIcon("map");
-    $("statusBtn").querySelector("span").innerHTML = uiIcon("person");
     $("flyBtn").innerHTML = uiIcon("flight") + "<small>비행</small>";
     this.waypoint = ctx.model.region.villages[0];
     this.campaignUI = new CampaignView(this);
@@ -869,16 +837,16 @@ export class FrontierView {
   hud() {
     const { model: s, player: p } = this.c;
     this.campaignUI.hud();
-    $("healthText").textContent =
-      `체력 ${Math.ceil(s.hp)} / ${s.maxHP} · Lv.${s.level}`;
-    $("health").max = s.maxHP;
-    $("health").value = s.hp;
-    fillPips($("vitals").querySelector(".hearts"), (s.hp / s.maxHP) * 100);
-    fillPips($("vitals").querySelector(".hunger"), s.hunger);
-    $("levelHUD").textContent = s.level;
-    $("experienceHUD").value = s.xp % 80;
-    $("hungerText").textContent =
-      `포만 ${Math.ceil(s.hunger)} · ${s.riding ? (s.airborne ? "비행 중" : "탑승 중") : "도보"}`;
+    setVitals({
+      hp: s.hp,
+      maxHp: s.maxHP,
+      food: s.hunger,
+      level: s.level,
+      xp: s.xp % 80,
+      healthText: `체력 ${Math.ceil(s.hp)} / ${s.maxHP} · Lv.${s.level}`,
+      foodText: `포만 ${Math.ceil(s.hunger)} · ${s.riding ? (s.airborne ? "비행 중" : "탑승 중") : "도보"}`,
+      hurt: s.hurtClock > 0,
+    });
     const b = s.activeBoss,
       near = !b.defeated && distance(p, b) < 28;
     const bossName = `${BIOMES[s.info.biome].boss}${s.region.outpost.sortie?.kind === "hunt" ? " 잔향" : ""} · 위험 ${s.info.tier}`;
@@ -906,25 +874,7 @@ export class FrontierView {
           }
         : null,
     );
-    $("vitals").classList.toggle("hurt", s.hurtClock > 0);
-    if (this.waypoint) {
-      const dx = this.waypoint.x - p.x,
-        dz = this.waypoint.z - p.z;
-      const angle = Math.atan2(
-        Math.cos(p.yaw) * dx - Math.sin(p.yaw) * dz,
-        -Math.sin(p.yaw) * dx - Math.cos(p.yaw) * dz,
-      );
-      const arrow =
-        Math.abs(angle) < 0.5
-          ? "↑"
-          : Math.abs(angle) > 2.5
-            ? "↓"
-            : angle > 0
-              ? "→"
-              : "←";
-      $("waypoint").textContent =
-        `${arrow} ${this.waypoint.name} · ${Math.round(distance(p, this.waypoint))} m`;
-    }
+    if (this.waypoint) $("waypoint").textContent = waypointText(p, this.waypoint);
     const village = s.region.villages.find((v) => distance(p, v) < 12);
     if (village && !near)
       this.c.view.worldUI.set("context", {
@@ -972,46 +922,20 @@ export class FrontierView {
       !s.riding || !this.c.inventory.unlocks.has("aviation"),
     );
   }
+  get tab() {
+    return this.window.tab;
+  }
   feedback(message) {
-    $("frontierFeedback").textContent = message;
+    this.window.feedback(message);
   }
   close() {
-    $("frontierPanel").hidden = true;
+    this.window.close();
   }
-  open(tab = this.tab) {
-    if (!this.c.running) return;
-    this.c.pause(true);
-    $("pauseScreen").classList.add("hidden");
-    $("frontierPanel").hidden = false;
-    this.tab = tab;
-    $("frontierPanel").dataset.page = tab;
-    $("frontierTitle").textContent = {
-      journey: "첫 신호 · 여정과 야영지",
-      map: "원정 지도",
-      society: "공동체",
-      machine: "기계 조립",
-      journal: "캐릭터 상태",
-    }[tab];
-    $("frontierPanel")
-      .querySelectorAll("[data-frontier-tab]")
-      .forEach((b) => {
-        b.classList.toggle("active", b.dataset.frontierTab === tab);
-        b.setAttribute("aria-pressed", String(b.dataset.frontierTab === tab));
-      });
-    this.feedback("");
-    this.render();
-    $("frontierContent").scrollTop = 0;
-    $("frontierClose").focus({ preventScroll: true });
+  open(tab) {
+    this.window.open(tab);
   }
   button(label, fn, id) {
-    const b = document.createElement("button");
-    b.textContent = label;
-    if (id) b.id = id;
-    b.onclick = () => {
-      const result = fn();
-      if (typeof result === "string") this.feedback(result);
-    };
-    return b;
+    return this.window.button(label, fn, id);
   }
   render() {
     const { model: s, inventory: inv, player: p } = this.c,

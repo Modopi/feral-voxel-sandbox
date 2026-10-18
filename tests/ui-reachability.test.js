@@ -26,7 +26,7 @@ test('every failure code a content system can return has player-facing Korean te
   assert.equal(reasonText('research_busy'), REASON_TEXT.research_busy);
   assert.equal(reasonText('이미 사람이 읽는 문장입니다.'), '이미 사람이 읽는 문장입니다.');
   assert.match(reasonText(undefined), /할 수 없습니다/);
-  const entry = readFileSync(new URL('entry.js', ROOT), 'utf8');
+  const entry = readFileSync(new URL('game.js', ROOT), 'utf8');
   assert.doesNotMatch(entry, /reasonNames/, 'the screen layer translates through reasons.js only');
 });
 

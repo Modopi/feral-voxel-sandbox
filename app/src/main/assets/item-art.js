@@ -205,3 +205,55 @@ export function itemArt(id) {
   cache.set(id, svg);
   return svg;
 }
+// Design catalog items reuse the legacy sprite when the item is the same thing,
+// otherwise they get a sprite in the same style by kind.
+const DESIGN_ART = {
+  berry: "berry",
+  herb: "herb",
+  meat: "meat",
+  food: "food",
+  seed: "seed",
+  loose_stone: "stone",
+  raw_timber: "wood",
+  wood: "plank",
+  sand: "sand",
+  plant_fiber: "fiber",
+  scrap_iron: "scrap",
+  steel: "iron",
+};
+const TIER_COLORS = ["#9f7849", "#99a5a7", "#a7896b", "#b8c4cf", "#8fb7c2", "#a68fd0", "#d8c27a", "#e0a7c0", "#9fe0d0", "#f1e6b0"];
+const FLUIDS = { water: "#4f93a8", acid_fluid: "#a7b04a", liquid_mana: "#8a7fe0", sap: "#d8a650", acid_sap: "#b9b84d", mana_sap: "#9d8fe6" };
+function hue(id) {
+  let h = 0;
+  for (const c of id) h = (h * 31 + c.charCodeAt(0)) % 360;
+  return `hsl(${h} 32% 58%)`;
+}
+export function designItemArt(entry) {
+  if (!entry) return "";
+  if (DESIGN_ART[entry.id]) return itemArt(DESIGN_ART[entry.id]);
+  if (entry.id.startsWith("blueprint:")) return itemArt("engineering");
+  const key = "design:" + entry.id;
+  if (cache.has(key)) return cache.get(key);
+  const rect = (x, y, w, h, c) =>
+    `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`;
+  const color = FLUIDS[entry.id] || (entry.tier ? TIER_COLORS[(entry.tier - 1) % 10] : hue(entry.id));
+  let body;
+  if (FLUIDS[entry.id])
+    body = `<path d="M16 3C11 11 7 16 7 21a9 9 0 0 0 18 0c0-5-4-10-9-18Z" fill="${color}"/><path d="M12 20a4 4 0 0 0 4 5" stroke="#fff" stroke-width="2" opacity=".5" fill="none"/>`;
+  else if (entry.kind === "material" || entry.kind === "item") {
+    body = `<path d="M3 10L16 3 29 10 16 18Z" fill="${color}"/><path d="M3 10L16 18V30L3 22Z" fill="${color}"/><path d="M16 18L29 10V22L16 30Z" fill="${color}"/><path d="M3 10L16 18V30L3 22Z" fill="#fff" opacity=".16"/><path d="M16 18L29 10V22L16 30Z" fill="#000" opacity=".28"/>`;
+    if (entry.kind === "item") body += rect(8, 15, 3, 3, "#ffffff70") + rect(20, 19, 3, 3, "#00000050");
+  } else if (entry.kind === "station")
+    body = rect(3, 11, 26, 6, "#a37f52") + rect(5, 17, 4, 12, "#6f5232") + rect(23, 17, 4, 12, "#6f5232") + rect(8, 6, 7, 5, "#99a5a7") + rect(18, 7, 8, 4, color);
+  else if (entry.kind === "component")
+    body = `<circle cx="16" cy="16" r="11" fill="${color}"/><circle cx="16" cy="16" r="4" fill="#263537"/>` + [0, 1, 2, 3].map((i) => rect(i % 2 ? 13 : 1 + i * 13, i % 2 ? (i === 1 ? 1 : 27) : 13, i % 2 ? 6 : 4, i % 2 ? 4 : 6, color)).join("");
+  else if (entry.kind === "gear_baseline")
+    body = `<path d="M16 3L27 7V16C27 23 22 27 16 30 10 27 5 23 5 16V7Z" fill="${color}"/><path d="M16 7L23 9.5V16C23 20.5 20 23.5 16 25.5Z" fill="#000" opacity=".22"/>`;
+  else if (entry.kind === "tool")
+    body = rect(12, 13, 5, 16, "#885d37") + rect(4, 5, 24, 5, color) + rect(24, 8, 4, 8, color);
+  else
+    body = `<path d="M16 3L26 12 23 24 13 29 5 19 7 9Z" fill="${color}"/><path d="M16 3L17 17 7 9Z" fill="#fff" opacity=".4"/>`;
+  const svg = `<svg class="itemIcon" viewBox="0 0 32 32" aria-hidden="true" shape-rendering="crispEdges">${body}</svg>`;
+  cache.set(key, svg);
+  return svg;
+}

@@ -31,8 +31,9 @@ export function saveKey(w) {
       ? "feral.machine.v1"
       : `feral.slot.${w.id}`;
 }
+// Every world opens the one game screen, except the machine test field until it moves there.
 export function worldURL(w) {
-  return `${w.type === "machine" ? "machine" : w.type === "expedition" ? "expedition" : "index"}.html?world=${encodeURIComponent(w.id)}`;
+  return `${w.type === "machine" ? "machine" : "index"}.html?world=${encodeURIComponent(w.id)}`;
 }
 export function currentWorld(store, type, search) {
   const id = new URLSearchParams(search).get("world");

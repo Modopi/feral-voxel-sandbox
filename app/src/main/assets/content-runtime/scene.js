@@ -4,6 +4,7 @@ import {buildPartMeshes} from './render-surfaces.js';
 import {flattenAsset} from './voxel/model.js';
 import {animateCreatureModel} from './creature-animation.js';
 import {animateBossModel,bossLogicalPart} from './boss-animation.js';
+import {WorldUI} from '../world-ui.js';
 export {T};
 const colors = {
  grass:0x688b49,dirt:0x80644b,stone:0x858b87,sand:0xc4b483,log:0x725238,
@@ -68,10 +69,19 @@ export class ExpeditionScene {
   this.terrainMaterial=new T.MeshStandardMaterial({vertexColors:true,roughness:1});
   this.chunks=new Map();this.models=new Map();this.pending=new Set();this.wanted=new Map();this.geometryCache=new Map();
   this.ray=new T.Raycaster();this.ray.far=7;this.telegraphs=new T.Group();this.scene.add(this.telegraphs);
-  this.shots=[];
+  this.shots=[];this.quality='balanced';
+  // The same world-space aim and context cards as the other maps.
+  this.worldUI=new WorldUI(this.scene,this.camera);
   this.resize();
  }
- resize(){const w=innerWidth,h=innerHeight;this.renderer.setSize(w,h,false);this.camera.aspect=w/h;this.camera.updateProjectionMatrix();}
+ resize(){const w=innerWidth,h=innerHeight;this.renderer.setPixelRatio(Math.min(devicePixelRatio,this.quality==='low'?1:this.quality==='high'?2:1.5));this.renderer.setSize(w,h,false);this.camera.aspect=w/h;this.camera.updateProjectionMatrix();}
+ /** Shared graphics setting: pixel ratio, view distance and terrain streaming radius. */
+ qualitySet(q){
+  this.quality=['low','balanced','high'].includes(q)?q:'balanced';
+  this.loadRadiusChunks=this.quality==='low'?2:this.quality==='high'?4:3;
+  this.scene.fog.far=this.quality==='low'?150:this.quality==='high'?260:220;this.scene.fog.near=this.scene.fog.far*.39;
+  this.camera.far=this.scene.fog.far+100;this.camera.updateProjectionMatrix();this.resize();
+ }
  syncTerrain(){
   for(const[key,m]of this.chunks)if(!this.atlas.activeChunks.has(key)){this.scene.remove(m);m.geometry.dispose();this.chunks.delete(key);}
   let budget=1;
@@ -145,7 +155,7 @@ export class ExpeditionScene {
  }
  draw(player,eye=1.58){
   const now=performance.now();for(let i=this.shots.length-1;i>=0;i--)if(this.shots[i].expires<=now){const {line}=this.shots.splice(i,1)[0];line.removeFromParent();line.geometry.dispose();line.material.dispose();}
-  this.camera.position.set(player.x,player.y+eye,player.z);this.camera.rotation.set(player.pitch||0,player.yaw||0,0);this.renderer.render(this.scene,this.camera);
+  this.camera.position.set(player.x,player.y+eye,player.z);this.camera.rotation.set(player.pitch||0,player.yaw||0,0);this.camera.updateMatrixWorld();this.worldUI?.update();this.renderer.render(this.scene,this.camera);
  }
- dispose(){for(const {line}of this.shots){line.removeFromParent();line.geometry.dispose();line.material.dispose();}this.shots=[];for(const m of this.models.values())releaseModel(m);for(const m of this.chunks.values())m.geometry.dispose();for(const list of this.geometryCache.values())for(const m of list){m.geometry.dispose();m.material.dispose();}this.terrainMaterial.dispose();this.renderer.dispose();}
+ dispose(){this.worldUI?.dispose();for(const {line}of this.shots){line.removeFromParent();line.geometry.dispose();line.material.dispose();}this.shots=[];for(const m of this.models.values())releaseModel(m);for(const m of this.chunks.values())m.geometry.dispose();for(const list of this.geometryCache.values())for(const m of list){m.geometry.dispose();m.material.dispose();}this.terrainMaterial.dispose();this.renderer.dispose();}
 }

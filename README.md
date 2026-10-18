@@ -1,10 +1,14 @@
-# FERAL — 앱 0.3.3 / 게임 0.12.1
+# FERAL — 앱 0.3.3 / 게임 0.13.0
 
 Android에서 오프라인으로 탐험·직접 조립·재배·공동체 협력으로 성장하는 1인칭 복셀 샌드박스 RPG.
 
 **[현재까지의 진행 현황](docs/PROJECT-STATUS.md)** — 구현 범위, 플레이 루프, 구조·물리 아키텍처, 검증·배포 결과, 남은 과제와 다음 우선순위 (2026-10-17, 공개 배포 게임 0.11.0 기준).
 
-**이번 변경은 게임 0.12.1 / 1201 핫픽스입니다.** 직전 공개 버전은 [0.12.0](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.12.0)이며, 0.12.1의 공개 게시 여부는 아래 공식 버전 목록과 릴리스에서 확인합니다. 새 콘텐츠 구현과 검증의 최신 기준은 [요구사항 추적표](docs/content/IMPLEMENTATION-STATUS.md), 전체 완료 조건은 [구현 Goal](docs/IMPLEMENTATION-GOAL.md)을 확인하세요.
+**이번 변경은 게임 0.13.0 / 1300입니다.** 직전 공개 버전은 [0.12.1](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.12.1)이며, 0.13.0의 공개 게시 여부는 아래 공식 버전 목록과 릴리스에서 확인합니다. 새 콘텐츠 구현과 검증의 최신 기준은 [요구사항 추적표](docs/content/IMPLEMENTATION-STATUS.md), 전체 완료 조건은 [구현 Goal](docs/IMPLEMENTATION-GOAL.md)을 확인하세요.
+
+## 0.13.0 — 하나의 게임 화면 (통합 1단계)
+
+FERAL을 맵마다 다른 게임이 아닌 하나의 게임으로 합치기 시작했습니다. 이제 기본 섬·개척 원정·콘텐츠 탐험이 같은 화면을 씁니다. 콘텐츠 탐험에서도 기존 핫바, 36칸 가방(제작·제작 대기열), 체력·포만 HUD, 지도·상태·상호작용 버튼, 원정 장부 창(여정·상태·연구·무기·설비·기계·공동체·던전 장치·신앙), 일시정지 메뉴, 환경 설정, UI 배치 편집기를 그대로 사용합니다. 조작·알림·설정 코드도 모든 맵이 공유합니다. 기계 시험장과 규칙·데이터의 통합, 기존 맵을 같은 시스템의 맵으로 옮기는 작업은 다음 단계입니다. [통합 기준과 단계](docs/UNIFIED-GAME.md) · [0.13.0 검증 기록](verification/0.13.0.md)
 
 ## 0.12.1 — Android 콘텐츠 탐험 로딩 수정
 
@@ -64,12 +68,12 @@ npm run author:assets
 
 ## 설치·업데이트
 
-앱 0.3.3에서는 **메뉴 → 업데이트 → 지금 확인 → 저장 후 적용**으로 게임 0.12.1을 받습니다. 특정 버전에 고정했다면 **게임 버전 → 0.12.1**을 선택하세요. 버전 목록에 아직 없다면 공개 게시가 완료된 뒤 다시 확인합니다. 처음 설치하거나 앱 0.3.2 이하인 경우 [공개 릴리스](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.12.1)의 `Feral-0.3.3-android.apk`를 설치합니다. 기존 앱을 삭제할 필요가 없습니다.
+앱 0.3.3에서는 **메뉴 → 업데이트 → 지금 확인 → 저장 후 적용**으로 게임 0.13.0을 받습니다. 특정 버전에 고정했다면 **게임 버전 → 0.13.0**을 선택하세요. 버전 목록에 아직 없다면 공개 게시가 완료된 뒤 다시 확인합니다. 처음 설치하거나 앱 0.3.2 이하인 경우 [공개 릴리스](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.13.0)의 `Feral-0.3.3-android.apk`를 설치합니다. 기존 앱을 삭제할 필요가 없습니다.
 
 게임 1201, 앱/최소 앱 303, 저장 스키마 2. 기존 저장을 읽으며 기존 지역의 지형을 다시 생성하지 않습니다. 수동 게임 버전 전환은 빌드별 저장을 분리하며 첫 선택은 새 저장으로 시작합니다. [배포·설치 안내](docs/RELEASING.md), [자원 순환 규칙](docs/PERSISTENT-WORLD-AND-LOOPS.md).
 
 
-앱이 사용하는 공개 배포 경로는 동일 저장소의 `updates` 브랜치입니다: [버전 목록](https://raw.githubusercontent.com/Modopi/feral-voxel-sandbox/updates/catalog.json), [최신 게임 패키지](https://raw.githubusercontent.com/Modopi/feral-voxel-sandbox/updates/stable.feral). 0.12.1은 별도의 불변 패키지로 추가하며 0.12.0을 포함한 이전 패키지는 그대로 보존합니다. 콘텐츠 탐험을 Android 앱에서 하려면 0.12.1 이상을 사용하세요. 기존 저장에서 콘텐츠 탐험을 이용하려면 내 월드에 새 콘텐츠 탐험 월드를 만드세요.
+앱이 사용하는 공개 배포 경로는 동일 저장소의 `updates` 브랜치입니다: [버전 목록](https://raw.githubusercontent.com/Modopi/feral-voxel-sandbox/updates/catalog.json), [최신 게임 패키지](https://raw.githubusercontent.com/Modopi/feral-voxel-sandbox/updates/stable.feral). 0.13.0은 별도의 불변 패키지로 추가하며 0.12.1을 포함한 이전 패키지는 그대로 보존합니다. 콘텐츠 탐험을 Android 앱에서 하려면 0.12.1 이상을 사용하세요. 기존 저장에서 콘텐츠 탐험을 이용하려면 내 월드에 새 콘텐츠 탐험 월드를 만드세요.
 
 버전 목록은 **게임 버전** 창을 열 때 다시 요청합니다. 요청에 실패하면 “목록을 새로 받지 못했습니다. 저장된 목록을 표시합니다.” 안내와 함께 이전 목록을 보여줍니다. 자동 업데이트의 15분 간격 제한은 수동 **지금 확인**에는 적용되지 않습니다. 공개 서버 응답에 5분 캐시 설정이 있으나 기기별 갱신 지연의 상한을 보장하지는 않습니다.
 
