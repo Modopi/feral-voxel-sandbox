@@ -16,6 +16,7 @@ import {reasonText} from './reasons.js';
 import {generatorFor,savedGenerator,worldRules,STARTER_KIT,BUILD_BLOCKS,miningProfile,minedItem,TOOL_GEAR,BARE_GEAR} from './maps.js';
 import {miningWorkFor,MINING_PERIOD_S} from '../equipment.js';
 import {FirstSignal} from './first-signal.js';
+import {impactEnergy,impactHealth} from '../impact.js';
 import {hitShapeFor,hitShapeForMode,shapeCut,IMPACT_REACH_M} from './creature-animation.js';
 const clone = value => JSON.parse(JSON.stringify(value));
 export const distance = (a,b) => Math.hypot(a.x-b.x,(a.y||0)-(b.y||0),a.z-b.z);
@@ -53,7 +54,7 @@ export class ExpeditionRuntime {
   this.player=state?.player?clone(state.player):{x:spawn.x,y:this.atlas.heightAt(spawn.x,spawn.z)+.05,z:spawn.z,yaw:spawn.yaw,pitch:0,hp:100,maxHp:100,calories:this.calorieRule.capacity,maxCalories:this.calorieRule.capacity,vy:0,grounded:false,stance:'stand',lastDamageAt:-100,resting:false};
   this.deaths=clone(state?.deaths||[]);this.seenRegions=new Set(state?.seenRegions||[]);
   this.discoveredLandmarks=new Set(state?.discoveredLandmarks||[]);this.conversion=state?.conversion?clone(state.conversion):null;
-  this.messages=[];this.warnings=[];this.events=[];this.playerPush=null;this.lastStrike=0;this.lastMine=-Infinity;this.populationClock=Infinity;
+  this.messages=[];this.warnings=[];this.events=[];this.fallSpeed=0;this.playerPush=null;this.lastStrike=0;this.lastMine=-Infinity;this.populationClock=Infinity;
   this.terrain={unbounded:true,getCell:(x,y,z)=>this.isSolid(x*.5+.25,y*.5+.25,z*.5+.25)?1:0,
    isSolidCell:(x,y,z)=>this.isSolid(x*.5+.25,y*.5+.25,z*.5+.25),heightAt:(x,z,y)=>this.surfaceHeight(x,z,y),
    groundHeight:(x,z,y)=>this.surfaceHeight(x,z,y),fluidAt:(x,y,z)=>this.dungeons.fluidAt({x,y,z})??this.atlas.fluidAt(x,y,z),
@@ -181,6 +182,9 @@ export class ExpeditionRuntime {
   const rule=this.calorieRule;
   // Without the survival setting (peaceful worlds) food and health stay full; the rules are otherwise the same.
   if(!this.rules.survival){p.calories=p.maxCalories;p.hp=p.maxHp;}
+  // Landing: the previous step's fall speed once the body is on the ground (frontier rule, 80 kg, safe 8 m/s).
+  if(p.grounded&&this.fallSpeed>8&&!this.drivingMachineId){const n=this.impactDamage(impactEnergy(80,Infinity,this.fallSpeed,8),'fall');if(n)this.message(`낙하 충격 −${Math.ceil(n)}`);}
+  this.fallSpeed=p.grounded||p.flying||this.drivingMachineId?0:Math.max(0,-(p.vy||0));
   p.calories=Math.max(0,p.calories-dt*(!this.rules.survival?0:moving ? rule.activeDrainPerSecond : rule.idleDrainPerSecond));
   if(p.hp<p.maxHp&&p.calories>0&&(p.resting||this.time-p.lastDamageAt>=rule.noHitDelaySeconds)){
    const heal=Math.min(p.maxHp-p.hp,dt*rule.hpRegenPerSecond*(p.resting?rule.restMultiplier:1),p.calories/rule.caloriesPerHp);p.hp+=heal;p.calories-=heal*rule.caloriesPerHp;
@@ -219,6 +223,16 @@ export class ExpeditionRuntime {
   }
   if(p.hp<=0)this.die();
  }
+ /** Impact damage (impact.js): health from collision energy, reduced by worn armour like any hit. */
+ impactDamage(energy,source){const amount=impactHealth(energy);if(!(amount>0)||!this.rules.survival)return 0;this.hurt(amount*(1-this.progression.evaluateLoadout().damageReduction),source);return amount;}
+ /** A moving object struck a creature (physics.js creatureImpacts): the frontier's collision damage,
+  * min(80, energy / 100), lands like a blunt blow on the struck part's bone. */
+ strikeCreature(id,partId,energy,point,sourceId){
+  const amount=Math.min(80,energy/100);if(!(amount>0))return null;
+  return this.creatures.damage(id,amount,'body',{structuralHits:[{partId,amount}],sourceId,attackMode:'impact',energyType:'mechanical',point});
+ }
+ /** A loose object or machine struck the player (physics.js playerImpacts). */
+ strikePlayer(energy,sourceId){const n=this.impactDamage(energy,'impact');if(n)this.message(`물체 충돌 −${Math.ceil(n)}`);return n;}
  hurt(amount,source){if(!Number.isFinite(amount)||amount<=0||!this.rules.survival)return;this.player.hp=Math.max(0,this.player.hp-amount);this.player.lastDamageAt=this.time;this.player.resting=false;this.events.push({type:'player_hit',amount,source});if(this.events.length>64)this.events.shift();}
  die(){
   const p=this.player,g=this.generator,drop=this.rules.dropOnDeath;
