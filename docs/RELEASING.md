@@ -65,6 +65,8 @@
 
 게임 1503 / 앱·최소 앱 303 / 저장 스키마 2. Java·권한·키 변경이 없는 게임 전용 릴리스다. 월드 설정 "사망 시 소지품 남김"(콘텐츠 탐험·기본 섬 기본 켬, 지금과 같음)을 더했다. 이 항목이 없는 0.15.2 이하 월드는 기본값으로 읽고, 이전 빌드는 이 항목을 읽지 않아 설정 형식은 1 그대로다. 통합 런타임에 개척 원정 지역 섬들의 지형 생성기(`frontier`)를 등록했으나 개척 원정 프리셋은 아직 옛 엔진이다. 검증은 [검증 기록](../verification/0.15.3.md).
 
+2026-10-18 09:38 UTC [PR #31](https://github.com/Modopi/feral-voxel-sandbox/pull/31) 병합 커밋 `68c0ac5`에서 [배포 Actions](https://github.com/Modopi/feral-voxel-sandbox/actions/runs/39116105296)가 성공해 09:39 UTC에 [v0.15.3 Release](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.15.3)와 기존 공식 `updates/catalog.json`, `updates/stable.feral`, 불변 `updates/versions/0.15.3.feral`로 게시됐다. stable과 버전 패키지는 같은 파일(SHA256 `1f7e5b3a…623620`)이며 로컬 빌드와 바이트 단위로 같고, 내부 아카이브 SHA256 `c39b9054…`가 카탈로그와 일치한다. 카탈로그는 25개 항목이며 0.15.2(`290e0461…`) 항목은 그대로다. Release의 APK(`1f28b782…5ac7`)는 CI가 다시 빌드한 것이다. Android 실기기 확인은 아직 하지 않았다.
+
 ### 0.15.2 — 세션 입구 정리: 월드 설정으로 시작 (통합 S1)
 
 게임 1502 / 앱·최소 앱 303 / 저장 스키마 2. Java·권한·키·게임 규칙 변경이 없는 게임 전용 릴리스다. 통합 런타임이 맵 이름 대신 월드 설정(지형 생성기 이름과 규칙)으로 시작하고, 세션 코드의 맵 이름 비교를 없앴다(`tests/launcher.test.js`가 확인). 콘텐츠 탐험 월드의 프리셋에 샌드박스 설정(기본 끔)이 더해졌다. 새 저장은 지형 생성기 이름(`terrain`)을 남기고 이전 저장의 `map`도 읽는다. 0.15.1 이하 빌드는 월드 목록의 프리셋으로 지형을 고르므로 새 저장을 그대로 연다. 검증은 [검증 기록](../verification/0.15.2.md).
