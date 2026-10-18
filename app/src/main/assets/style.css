@@ -1374,3 +1374,8 @@ footer {
 input[type="range"] {
   touch-action: pan-x;
 }
+/* One loading display for every map: stage, percent, elapsed time and retry. */
+#loadingBar {width:min(320px,70vw);height:6px;margin-top:10px;border:1px solid var(--line);background:#0d1a1d;overflow:hidden;}
+#loadingBar span {display:block;width:0;height:100%;background:var(--gold);transition:width 0.3s;}
+#loadingHint {margin:8px 0 0;max-width:520px;font-size:11px;line-height:1.6;color:#e3c99a;}
+#loadingRetry {margin-top:10px;}

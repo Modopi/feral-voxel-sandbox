@@ -57,7 +57,7 @@
 .journeyPages {display:flex;gap:5px;position:sticky;top:0;z-index:1;background:var(--game-face);padding:4px 0 10px;}
 #frontierPanel .journeyPages button {flex:1;min-width:0;min-height:44px;padding:5px;touch-action:pan-y;}
 #frontierPanel .journeyPages button[aria-pressed=true] {border-color:#c6d5a5;color:#edf1d9;background:#53674d;}
-@media (orientation:landscape) {body.frontier #hud #toast {top:142px;} }
+@media (orientation:landscape) {body.field #hud #toast {top:142px;} }
 @media (orientation:portrait) {#hud #journeyHUD {left:16px;top:108px;width:170px;max-width:46vw;} }
 #frontierPanel h3 {font-size:15px;margin:0 0 8px;color:#30382b;}
 #frontierPanel h3 small {font-size:11px;color:#59624e;}
@@ -134,3 +134,34 @@
   #pauseScreen:not(.inventoryMode) .menuContents {padding:12px 9px;}#pauseScreen:not(.inventoryMode) .metricGrid {grid-template-columns:1fr;gap:4px;}.metricGrid>div {display:flex;justify-content:space-between;align-items:center;}.metricGrid span {margin:0;}
   #pauseScreen:not(.inventoryMode) .buttonRow {grid-template-columns:1fr;}#pauseScreen:not(.inventoryMode) .panelFooter>span {max-width:48%;font-size:8px!important;}.helpGrid {grid-template-columns:1fr;gap:10px;}
 }
+/* Ledger rows: research, weapons, energy, devices and other list pages of every map. */
+#frontierPanel .row {display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #7c978666;}
+#frontierPanel .row .copy {min-width:0;flex:1;}
+#frontierPanel .row b {font-size:13px;color:var(--ui-ink);}
+#frontierPanel .row p {margin:3px 0 0;font-size:12px;line-height:1.55;color:var(--ui-muted);white-space:pre-line;overflow-wrap:anywhere;}
+#frontierPanel .row .actions {display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;flex-shrink:0;}
+#frontierPanel .row button {flex-shrink:0;min-height:40px;min-width:56px;padding:4px 10px;}
+#frontierPanel .progress-bar,#craftQueue .progress-bar {height:6px;margin-top:6px;background:var(--ui-inset);border:1px solid #7c978666;}
+#frontierPanel .progress-bar span,#craftQueue .progress-bar span {display:block;height:100%;background:var(--ui-gold);}
+#frontierPanel .machine-card {padding:10px 0 14px;border-bottom:1px solid #7c978666;}
+#frontierPanel .machine-card>b {display:block;color:var(--ui-gold);margin-bottom:6px;}
+#frontierPanel .machine-card button {margin:5px 6px 5px 0;}
+#frontierPanel .machine-field {display:inline-flex;flex-direction:column;gap:4px;max-width:100%;margin:5px 10px 8px 0;}
+#frontierPanel .machine-field span {font-size:12px;color:var(--ui-muted);}
+#frontierPanel .machine-field input,#frontierPanel .machine-field select,#frontierPanel .ledgerSearch input,#frontierPanel .row select {font:inherit;color:var(--ui-ink);background:var(--ui-inset);border:1px solid #7c978699;padding:6px;max-width:100%;}
+#frontierPanel .machine-field input[type=number] {width:90px;}
+#frontierPanel .ledgerSearch {display:block;margin:0 0 6px;}#frontierPanel .ledgerSearch input {width:100%;}
+#frontierPanel .ledgerStatus {font-size:11px;color:var(--ui-gold);margin:8px 0 0;}
+@media (max-width:600px) {#frontierPanel .row {flex-wrap:wrap;}#frontierPanel .row .actions {width:100%;}}
+/* The bag's craft queue (count-based maps with timed crafting). */
+#craftQueue:empty {display:none;}
+#craftQueue {margin-top:8px;padding:6px 8px;border:1px solid #7c978666;background:var(--ui-inset);}
+#craftQueue h4 {margin:0 0 4px;font-size:12px;color:var(--ui-gold);}
+#craftQueue p {margin:2px 0;font-size:11px;line-height:1.5;color:var(--ui-muted);}
+#craftQueue .queueJob {padding:5px 0;border-top:1px solid #7c978644;}
+#craftQueue .queueJob b {font-size:12px;color:var(--ui-ink);}
+#craftQueue .queueJob button {min-height:36px;margin:4px 6px 0 0;padding:3px 9px;font-size:11px;}
+/* Attack telegraphs and hazards: one warning line for every map. */
+#hud #warning {position:absolute;top:30%;left:50%;transform:translateX(-50%);max-width:min(560px,86vw);padding:8px 15px;border:1px solid #f0a35a;background:#3a1d12e6;color:#ffe2c2;font-size:13px;font-weight:600;text-align:center;pointer-events:none;text-shadow:0 1px 2px #000;z-index:4;}
+#hud #warning:empty {display:none;}
+@media (orientation:portrait) {#hud #warning {top:24%;font-size:12px;}}

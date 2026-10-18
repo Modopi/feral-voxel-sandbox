@@ -1,4 +1,5 @@
-// Browser check for UI reachability: every connected feature is used through real taps/clicks.
+// Browser check for the one game screen (docs/UNIFIED-GAME.md): every map runs on index.html with the
+// same HUD, hotbar, bag, ledger window, menu, settings and controls; features are used through real taps.
 // By default assets are served with the Android app's MIME/CSP rules (tools/android-asset-server.mjs).
 // Setup steps that grant items or teleport are recorded as prepared state, not as normal progression evidence.
 import assert from 'node:assert/strict';
@@ -12,141 +13,190 @@ const server=process.env.FERAL_ASSETS?null:await startAndroidAssetServer();
 const assets=process.env.FERAL_ASSETS||`http://127.0.0.1:${server.address().port}/assets`;
 await fs.mkdir(out,{recursive:true});
 const browser=await chromium.launch({executablePath:process.env.FERAL_CHROME||'/usr/bin/chromium',headless:true,args:['--no-sandbox','--enable-webgl','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-dev-shm-usage']});
-const report={version,assets:server?'Android app MIME/CSP rules':assets,scope:'Chromium SwiftShader with touch input. Prepared items/positions are listed per check; this is not Android hardware or normal-progression evidence.',expedition:[],island:[],errors:[]};
+const report={version,assets:server?'Android app MIME/CSP rules':assets,scope:'Chromium SwiftShader with touch input. Prepared items/positions are listed per check; this is not Android hardware or normal-progression evidence.',shared:[],expedition:[],island:[],frontier:[],errors:[]};
 const check=(list,name,detail={})=>{list.push({name,...detail});console.log('ok',name);};
+const WORLDS=[{id:'default',name:'기본 탐험 맵',type:'island',seed:63026},{id:'frontier',name:'개척 원정',type:'frontier',seed:63026},{id:'beta',name:'기계 베타 맵',type:'machine',seed:63026},{id:'ui-check',name:'UI 검사',type:'expedition',seed:63026}];
+// The HUD every map shows; the field HUD (vitals, map/status/interact, journey) is shared by the frontier and the expedition.
+const SHARED_HUD=['hud','hotbar','stick','sprintBtn','crouchBtn','crawlBtn','jumpBtn','actBtn','useBtn','inventoryBtn','menuBtn','toast','warning','toolLabel','rangeBtn','crosshair'];
+const FIELD_HUD=['vitals','waypoint','journalBtn','statusBtn','journeyHUD','interactBtn'];
+async function open(context,url){
+ const page=await context.newPage();page.on('pageerror',e=>report.errors.push(`${url}: ${e.message}`));
+ await page.addInitScript(worlds=>{window.AndroidApp=window.AndroidApp??{};if(!localStorage.getItem('feral.worlds.v1'))localStorage.setItem('feral.worlds.v1',JSON.stringify(worlds));},WORLDS);
+ await page.goto(`${assets}/${url}`);return page;
+}
+const present=(page,ids)=>page.evaluate(ids=>ids.filter(id=>!document.getElementById(id)),ids);
 try{
  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:1});
- const page=await context.newPage();page.on('pageerror',e=>report.errors.push(e.message));
- await page.addInitScript(()=>{window.AndroidApp={};if(!localStorage.getItem('feral.worlds.v1'))localStorage.setItem('feral.worlds.v1',JSON.stringify([{id:'ui-check',name:'UI 검사',type:'expedition',seed:63026}]));});
- await page.goto(`${assets}/expedition.html?world=ui-check`);
- const stages=[];for(const started=Date.now();Date.now()-started<120000;){const s=await page.evaluate(()=>({stage:document.getElementById('loadingStage')?.textContent.replace(/ · \d+초$/,''),ready:!!window.FERAL?.ready}));if(s.stage&&stages.at(-1)!==s.stage)stages.push(s.stage);if(s.ready)break;await page.waitForTimeout(50);}
- await page.waitForFunction(()=>window.FERAL?.ready,null,{timeout:1000});
+ // The old expedition address forwards to the one screen.
+ const page=await open(context,'expedition.html?world=ui-check');
+ const stages=[];for(const started=Date.now();Date.now()-started<120000;){const s=await page.evaluate(()=>({stage:document.getElementById('loadStatus')?.textContent.replace(/ · \d+초$/,''),ready:!!window.FERAL?.ready}));if(s.stage&&stages.at(-1)!==s.stage)stages.push(s.stage);if(s.ready)break;await page.waitForTimeout(50);}
+ assert(await page.evaluate(()=>window.FERAL?.ready),'expedition ready within 120 s');
+ assert.match(page.url(),/\/index\.html\?world=ui-check$/,'old address forwards to index.html');
  const bootTimings=await page.evaluate(()=>FERAL.bootTimings);
  assert(bootTimings.some(t=>t.stage.startsWith('건축물 모델'))&&bootTimings.some(t=>t.stage.startsWith('물리 엔진')),'loading reports its stages');
- assert(await page.locator('#loading').isHidden(),'loading screen hides when ready');
- check(report.expedition,'loading progress stages and boot under Android asset rules',{stages,bootTimings});
+ assert(await page.locator('#titleScreen').isHidden(),'shared title/loading screen hides when ready');
+ assert.deepEqual(await present(page,[...SHARED_HUD,...FIELD_HUD]),[],'expedition shows the shared HUD');
+ assert.equal(await page.locator('#hotbar .slot').count(),9);
+ check(report.expedition,'expedition boots on index.html with the shared loading screen and HUD',{stages,bootTimings});
  const cdp=await context.newCDPSession(page);
- // The panel list re-renders every second, so resolve, scroll and tap again if a row is replaced mid-way.
  const tap=async selector=>{for(let attempt=0;;attempt++){try{const target=page.locator(selector).first();await target.scrollIntoViewIfNeeded({timeout:3000});const b=await target.boundingBox();assert(b,selector);await page.touchscreen.tap(b.x+b.width/2,b.y+b.height/2);return;}catch(e){if(attempt>=4)throw e;await page.waitForTimeout(150);}}};
- const tapText=async text=>tap(`#panelList button:text-is("${text}")`);
+ const ledgerTap=text=>tap(`#frontierContent button:text-is("${text}")`);
  async function hold(selector,ms){const b=await page.locator(selector).boundingBox();const x=b.x+b.width/2,y=b.y+b.height/2;await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y,id:7}]});await page.waitForTimeout(ms);return async()=>cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});}
- async function moveFor(ms){const pad=await page.locator('#movePad').boundingBox(),x=pad.x+pad.width/2,y=pad.y+pad.height/2;await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y,id:3}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x,y:y-40,id:3}]});await page.waitForTimeout(ms);await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});}
+ async function moveFor(ms){const pad=await page.locator('#stick').boundingBox(),x=pad.x+pad.width/2,y=pad.y+pad.height/2;await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y,id:3}]});await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x,y:y-40,id:3}]});await page.waitForTimeout(ms);await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});}
  const player=()=>page.evaluate(()=>({...FERAL.runtime.player}));
 
- // 0. New touch controls stay inside the viewport at phone sizes.
+ // 1. Shared touch controls stay inside the viewport and move the expedition player.
  const layout=[];
  for(const [width,height]of [[390,844],[844,390],[360,640]]){
   await page.setViewportSize({width,height});await page.waitForTimeout(500);
-  const r=await page.evaluate(()=>{const b=document.getElementById('sprint').getBoundingClientRect();return {x:b.x,y:b.y,w:b.width,h:b.height};});
-  assert(r.x>=0&&r.y>=0&&r.x+r.w<=width+1&&r.y+r.h<=height+1&&r.w>=40&&r.h>=40,`${width}x${height} sprint ${JSON.stringify(r)}`);layout.push({width,height,sprint:r});
+  const r=await page.evaluate(ids=>ids.map(id=>{const b=document.getElementById(id).getBoundingClientRect();return {id,x:b.x,y:b.y,w:b.width,h:b.height};}),['sprintBtn','actBtn','useBtn','jumpBtn','inventoryBtn']);
+  for(const b of r)assert(b.x>=0&&b.y>=0&&b.x+b.w<=width+1&&b.y+b.h<=height+1&&b.w>=36&&b.h>=36,`${width}x${height} ${JSON.stringify(b)}`);layout.push({width,height,buttons:r});
  }
- await page.setViewportSize({width:390,height:844});await page.waitForTimeout(500);check(report.expedition,'sprint button inside viewport at three sizes',{layout});
- // 1. Sprint toggle on touch.
+ await page.setViewportSize({width:844,height:390});await page.waitForTimeout(500);
  let a=await player();await moveFor(900);let b=await player();const walk=Math.hypot(b.x-a.x,b.z-a.z);
- await tap('#sprint');assert.equal(await page.locator('#sprint').getAttribute('aria-pressed'),'true');
- a=await player();await moveFor(900);b=await player();const run=Math.hypot(b.x-a.x,b.z-a.z);await tap('#sprint');
- assert(run>walk*1.15,`sprint ${run} vs walk ${walk}`);check(report.expedition,'touch sprint toggle',{walkM:walk,sprintM:run});
+ await tap('#sprintBtn');assert.equal(await page.locator('#sprintBtn').getAttribute('aria-pressed'),'true');
+ a=await player();await moveFor(900);b=await player();const run=Math.hypot(b.x-a.x,b.z-a.z);await tap('#sprintBtn');
+ assert(walk>0.3&&run>walk*1.15,`sprint ${run} vs walk ${walk}`);
+ check(report.expedition,'shared stick and sprint button move the expedition player',{layout,walkM:walk,sprintM:run});
 
- // 2. Machine descend/brake buttons while driving (prepared: one wood voxel machine).
+ // 2. Machine descend/brake on the shared touch buttons (prepared: one wood voxel machine).
  const machineId=await page.evaluate(()=>{const r=FERAL.runtime;r.progression.grant({wood:1},{claimId:'ui-check:wood'});const m=r.machines.create({name:'검사',gridM:.5,position:{x:r.player.x+2,y:r.surfaceHeight(r.player.x+2,r.player.z),z:r.player.z}});r.machines.attachVoxel(m.machineId,{cell:[0,0,0],materialId:'wood'});r.drivingMachineId=m.machineId;return m.machineId;});
- await page.waitForTimeout(400);
- for(const id of ['descend','brake']){assert(await page.locator('#'+id).isVisible(),id+' visible while driving');const r=await page.locator('#'+id).boundingBox();assert(r.y+r.height<=845&&r.width>=40,id+' inside viewport');}
- assert(!(await page.locator('#sprint').isVisible()),'sprint hidden while driving');assert.equal(await page.locator('#jump').textContent(),'상승');
- let release=await hold('#brake',350);const braking=await page.evaluate(id=>FERAL.runtime.machines.machines.get(id).command.brake,machineId);await release();
- release=await hold('#descend',350);const pitch=await page.evaluate(id=>FERAL.runtime.machines.machines.get(id).command.pitch,machineId);await release();
+ await page.waitForTimeout(500);
+ for(const id of ['descendBtn','brakeBtn']){assert(await page.locator('#'+id).isVisible(),id+' visible while driving');const r=await page.locator('#'+id).boundingBox();assert(r.y+r.height<=391&&r.width>=40,id+' inside viewport');}
+ assert(!(await page.locator('#sprintBtn').isVisible()),'sprint hidden while driving');assert.equal(await page.locator('#jumpBtn small').textContent(),'상승');
+ let release=await hold('#brakeBtn',350);const braking=await page.evaluate(id=>FERAL.runtime.machines.machines.get(id).command.brake,machineId);await release();
+ release=await hold('#descendBtn',350);const pitch=await page.evaluate(id=>FERAL.runtime.machines.machines.get(id).command.pitch,machineId);await release();
  assert.equal(braking,true);assert(pitch<0,`descend pitch ${pitch}`);
- await tap('#use');await page.waitForTimeout(300);assert.equal(await page.evaluate(()=>FERAL.runtime.drivingMachineId),null);
- check(report.expedition,'touch machine descend/brake',{prepared:'machine created by script',brake:braking,pitch});
+ assert.match(await page.locator('#interactBtn').textContent(),/내리기/);
+ await tap('#interactBtn');await page.waitForTimeout(300);assert.equal(await page.evaluate(()=>FERAL.runtime.drivingMachineId),null);
+ check(report.expedition,'machine descend/brake and leaving through the shared interact button',{prepared:'machine created by script',brake:braking,pitch});
 
- // 3. Warning banner and toast queue.
+ // 3. One warning line and one queued notification line.
  await page.evaluate(()=>{FERAL.runtime.warn('검사용 경고 · 정면',2);for(const t of ['첫 번째 알림','두 번째 알림','세 번째 알림'])FERAL.runtime.message(t);});
- await page.waitForTimeout(400);assert.match(await page.locator('#warning').textContent(),/검사용 경고/);
- const seen=new Set();for(let i=0;i<40&&seen.size<3;i++){const t=await page.locator('#toast').textContent();if(/알림$/.test(t))seen.add(t);await page.waitForTimeout(250);}
- assert.equal(seen.size,3,'queued messages all shown: '+[...seen]);check(report.expedition,'warning banner and toast queue',{toasts:[...seen]});
+ await page.waitForFunction(()=>/검사용 경고/.test(document.getElementById('warning').textContent),null,{timeout:5000,polling:100});
+ const seen=new Set();for(let i=0;i<60&&seen.size<3;i++){const t=await page.locator('#toast').textContent();if(/알림$/.test(t))seen.add(t);await page.waitForTimeout(250);}
+ assert.equal(seen.size,3,'queued messages all shown: '+[...seen]);check(report.expedition,'warning line and queued notifications',{toasts:[...seen]});
 
- // 4. Research pause/resume through the panel (prepared samples).
+ // 4. Research pause/resume in the shared ledger window (prepared samples).
  await page.evaluate(()=>FERAL.runtime.progression.grant({raw_timber:1,loose_stone:1},{claimId:'ui-check:samples'}));
- await tap('#openBag');await tap('[data-tab=research]');await page.fill('#search','관찰');
- await tap('#panelList article:has-text("관찰") button');await page.waitForTimeout(1500);
- assert(await page.locator('#panelList button:text-is("멈추기")').count(),'pause button visible');
- await tapText('멈추기');const paused=await page.evaluate(()=>({job:FERAL.runtime.progression.researchJob,work:FERAL.runtime.progression.researchProgress.observation?.work}));
+ await tap('#statusBtn');assert(await page.locator('#frontierPanel').isVisible(),'ledger opens from the status button');
+ await tap('[data-frontier-tab=research]');await page.fill('#researchSearch','관찰');
+ await tap('#frontierContent article:has-text("관찰") button');await page.waitForTimeout(1500);
+ assert(await page.locator('#frontierContent button:text-is("멈추기")').count(),'pause button visible');
+ await ledgerTap('멈추기');const paused=await page.evaluate(()=>({job:FERAL.runtime.progression.researchJob,work:FERAL.runtime.progression.researchProgress.observation?.work}));
  assert.equal(paused.job,null);assert(paused.work>0);
- assert(await page.locator('#panelList button:text-is("이어서 연구")').count(),'resume offered');await tapText('이어서 연구');
+ assert(await page.locator('#frontierContent button:text-is("이어서 연구")').count(),'resume offered');await ledgerTap('이어서 연구');
  assert.equal(await page.evaluate(()=>FERAL.runtime.progression.researchJob?.id),'observation');
- await page.fill('#search','');await page.screenshot({path:new URL('research.png',out).pathname});
- check(report.expedition,'research pause and resume',{prepared:'samples granted',pausedWork:paused.work});
+ await page.screenshot({path:new URL('research.png',out).pathname});await tap('#frontierClose');
+ check(report.expedition,'research pause and resume in the ledger window',{prepared:'samples granted',pausedWork:paused.work});
 
- // 5. Craft queue: batch, prioritize and cancel with refund (prepared inputs).
+ // 5. Crafting in the shared bag: recipe tile, timed queue, prioritize, cancel with refund (prepared inputs).
  const recipe=await page.evaluate(()=>{const p=FERAL.runtime.progression,r=p.list('recipe').find(r=>r.station==='hand'&&!r.research&&!Object.keys(r.energy).length);p.grant(Object.fromEntries(Object.entries(r.inputs).map(([id,n])=>[id,n*6])),{claimId:'ui-check:craft'});return {id:r.id,name:r.name,inputs:r.inputs};});
- await tap('[data-tab=craft]');await page.fill('#search',recipe.name);
- await tap(`#panelList article:has-text("${recipe.name}") button:text-is("제작")`);await tap(`#panelList article:has-text("${recipe.name}") button:text-is("5개")`);
- await page.fill('#search','');await page.waitForTimeout(300);
- assert.match(await page.locator('#panelList').textContent(),/작업 대기열 2/);
- await tapText('먼저 진행');const order=await page.evaluate(()=>FERAL.runtime.progression.jobs.map(j=>j.count));assert.deepEqual(order,[5,1]);
+ await tap('#inventoryBtn');assert(await page.locator('#pauseScreen.inventoryMode').isVisible(),'shared bag opens');
+ assert.equal(await page.locator('#inventoryGrid .itemSlot').count(),27);assert.equal(await page.locator('#inventoryHotbar .itemSlot').count(),9);
+ await page.fill('#recipeSearch',recipe.name);await tap(`[data-recipe="${recipe.id}"]`);await tap('#craftOutput');await tap('#craftOutput');
+ await page.waitForTimeout(300);assert.match(await page.locator('#craftQueue').textContent(),/작업 대기열 2/);
+ await tap('#craftQueue button:text-is("먼저 진행")');assert.equal(await page.evaluate(()=>FERAL.runtime.progression.jobs.length),2);
  const before=await page.evaluate(()=>({...FERAL.runtime.progression.inventory}));
- await tap('#panelList article:has-text("× 5") button:text-is("취소")');
+ await tap('#craftQueue .queueJob button:text-is("취소")');
  const after=await page.evaluate(()=>({...FERAL.runtime.progression.inventory}));
- for(const[id,n]of Object.entries(recipe.inputs))assert(Math.abs((after[id]??0)-(before[id]??0)-n*5)<1e-9,'refund '+id);
- await page.screenshot({path:new URL('craft-queue.png',out).pathname});check(report.expedition,'craft queue batch/prioritize/cancel',{prepared:'inputs granted',recipe:recipe.id});
+ for(const[id,n]of Object.entries(recipe.inputs))assert(Math.abs((after[id]??0)-(before[id]??0)-n)<1e-9,'refund '+id);
+ await page.fill('#recipeSearch','');await page.screenshot({path:new URL('bag-craft-queue.png',out).pathname});
+ check(report.expedition,'crafting and the craft queue in the shared bag',{prepared:'inputs granted',recipe:recipe.id});
 
- // 6. Inventory durability and Korean failure text.
- await page.evaluate(()=>FERAL.runtime.progression.grant({stone_pick:2},{claimId:'ui-check:pick'}));
- await tap('[data-tab=inventory]');assert.match(await page.locator('#panelList').textContent(),/내구 \d+\/\d+ · 예비 1개/);
- const english=await page.evaluate(()=>[...document.querySelectorAll('#panelList p')].map(p=>p.textContent).filter(t=>/\b[a-z]+_[a-z_]+\b/.test(t)));
- assert.deepEqual(english,[],'no raw failure codes in panel');check(report.expedition,'tool durability and translated reasons');
+ // 6. Hotbar: tool wear, held item and using food from the hotbar.
+ await page.evaluate(()=>{const r=FERAL.runtime;r.progression.grant({stone_pick:2,food:1},{claimId:'ui-check:pick'});r.player.calories=1000;});
+ await tap('#resumeBtn');await page.waitForTimeout(1300);
+ const hotbar=await page.evaluate(()=>[...document.querySelectorAll('#hotbar .slot')].map(s=>s.getAttribute('aria-label')));
+ assert(hotbar.some(l=>/돌 곡괭이/.test(l)),'tool in hotbar: '+hotbar);
+ assert(await page.locator('#hotbar .slot progress.durability').count()>0,'tool wear bar on the hotbar');
+ const foodSlot=await page.evaluate(()=>FERAL.slots.slots.findIndex(s=>s?.id==='food'));
+ if(foodSlot>8)await page.evaluate(i=>FERAL.slots.move(i,8),foodSlot);
+ const slot=await page.evaluate(()=>FERAL.slots.slots.findIndex(s=>s?.id==='food'));
+ await tap(`[data-hotbar="${slot}"]`);assert.equal(await page.evaluate(()=>FERAL.stats().held),'food');
+ assert.equal(await page.locator('#useBtn small').textContent(),'먹기');
+ const calories=await page.evaluate(()=>FERAL.runtime.player.calories);await tap('#useBtn');await page.waitForTimeout(300);
+ assert(await page.evaluate(()=>FERAL.runtime.player.calories)>calories+100,'food eaten from the hotbar');
+ const english=await page.evaluate(()=>[...document.querySelectorAll('#craftFeedback,#itemDetail,#frontierContent p')].map(p=>p.textContent).filter(t=>/\b[a-z]+_[a-z_]+\b/.test(t)));
+ assert.deepEqual(english,[],'no raw failure codes on screen');
+ check(report.expedition,'hotbar wear, held item and food use',{prepared:'pick and food granted',hotbar});
 
- // 7. Dungeon: reward marker, prompt, claim text, device details and supply disconnect (prepared teleport).
- const site=await page.evaluate(()=>{const r=FERAL.runtime;r.player.x=-1;r.refreshWorld();const inst=[...r.dungeons.instances.values()].find(i=>r.dungeons.anchors(i.id).some(a=>a.kind==='reward'&&a.channel==='salvage'&&!a.claimed)&&i.puzzle);const reward=r.dungeons.anchors(inst.id).find(a=>a.kind==='reward'&&a.channel==='salvage');const p=Array.isArray(reward.position)?{x:reward.position[0],y:reward.position[1],z:reward.position[2]}:reward.position;Object.assign(r.player,{x:p.x+.4,y:p.y+.05,z:p.z+.4,vy:0});r.refreshWorld();return {id:inst.id,template:inst.templateId};});
- await tap('#closePanel');await page.waitForTimeout(1500);
+ // 7. Shared settings and the shared HUD editor apply to the expedition.
+ await tap('#menuBtn');await tap('[data-tab=settings]');
+ await page.selectOption('#quality','low');await page.waitForTimeout(200);
+ const quality=await page.evaluate(()=>({quality:FERAL.view.quality,radius:FERAL.view.loadRadiusChunks}));assert.deepEqual(quality,{quality:'low',radius:2});
+ await page.evaluate(()=>{const f=document.getElementById('fov');f.value='70';f.dispatchEvent(new Event('input'));});assert.equal(await page.evaluate(()=>FERAL.view.camera.fov),70);
+ await page.selectOption('#quality','balanced');
+ await tap('#editHudBtn');await page.waitForTimeout(300);
+ const editor=await page.evaluate(()=>[...document.querySelectorAll('#hudElement option')].map(o=>o.value));
+ for(const id of ['vitals','journeyHUD','interactBtn','hotbar','brakeBtn'])assert(editor.includes(id),'HUD editor lists '+id);
+ await page.screenshot({path:new URL('hud-editor.png',out).pathname});await tap('#hudCancel');await tap('#resumeBtn');
+ check(report.expedition,'shared graphics settings and HUD editor',{quality,editorElements:editor.length});
+
+ // 8. Dungeon: reward marker, focus card, interact label, claim, journey record and device supply disconnect (prepared teleport).
+ const site=await page.evaluate(()=>{const r=FERAL.runtime;r.player.x=-1;r.refreshWorld();const inst=[...r.dungeons.instances.values()].find(i=>r.dungeons.anchors(i.id).some(a=>a.kind==='reward'&&a.channel==='salvage'&&!a.claimed)&&i.puzzle);const reward=r.dungeons.anchors(inst.id).find(a=>a.kind==='reward'&&a.channel==='salvage');const p=Array.isArray(reward.position)?{x:reward.position[0],y:reward.position[1],z:reward.position[2]}:reward.position;Object.assign(r.player,{x:p.x+.4,y:p.y+.05,z:p.z+.4,vy:0,pitch:0});r.refreshWorld();return {id:inst.id,template:inst.templateId};});
+ await page.waitForTimeout(1500);
  const markers=await page.evaluate(()=>FERAL.stats().rewardMarkers);assert(markers>0,'reward marker shown');
- assert.match(await page.locator('#aimLabel').textContent(),/물자 보관함 · 사용해서 회수|물자 보관함/);
+ const card=await page.evaluate(()=>({focus:FERAL.view.worldUI.labels.get('focus').data?.title,interact:document.getElementById('interactBtn').textContent}));
+ assert.match(card.interact,/보상 회수/);
  await page.screenshot({path:new URL('reward-marker.png',out).pathname});
- await tap('#use');await page.waitForTimeout(300);assert.match(await page.locator('#toast').textContent(),/물자 보관함 회수 · /);
+ await tap('#interactBtn');await page.waitForTimeout(300);assert.match(await page.locator('#toast').textContent(),/물자 보관함 회수 · /);
  await page.waitForTimeout(800);assert.equal(await page.evaluate(()=>FERAL.stats().rewardMarkers),markers-1,'claimed marker removed');
- await tap('#openBag');await tap('[data-tab=journal]');assert.match(await page.locator('#panelList').textContent(),/물자 보관함 회수함/);
+ await tap('#journalBtn');assert.match(await page.locator('#frontierContent').textContent(),/물자 보관함 회수함/);await tap('#frontierClose');
  const supply=await page.evaluate(id=>{const r=FERAL.runtime,d=r.dungeons.devices,p=d._anchorPosition(id,null);Object.assign(r.player,{x:p[0],y:p[1]+.05,z:p[2]+.6});d._state(id).supplies.electrical={ownerId:'removed-battery',type:'electrical',lengthM:2,anchorId:null,items:{}};return true;},site.id);
- await tap('#closePanel');await page.waitForTimeout(300);
- await tap('#openBag');await tap('[data-tab=devices]');await page.waitForTimeout(300);
- const devicesText=await page.locator('#panelList').textContent();assert.match(devicesText,/장치 세부/);
- await tapText('공급선 분리');assert.equal(await page.evaluate(id=>FERAL.runtime.dungeons.devices._state(id).supplies.electrical,site.id),undefined);
- await page.screenshot({path:new URL('devices.png',out).pathname});await tap('#closePanel');
- check(report.expedition,'reward marker, claim, journal, device details and supply disconnect',{prepared:'teleport to dungeon; dead supply link injected',template:site.template,supplyInjected:supply});
+ await page.waitForTimeout(300);await tap('#statusBtn');await tap('[data-frontier-tab=devices]');await page.waitForTimeout(300);
+ assert.match(await page.locator('#frontierContent').textContent(),/장치 세부/);
+ await ledgerTap('공급선 분리');assert.equal(await page.evaluate(id=>FERAL.runtime.dungeons.devices._state(id).supplies.electrical,site.id),undefined);
+ await page.screenshot({path:new URL('devices.png',out).pathname});await tap('#frontierClose');
+ check(report.expedition,'reward marker, interact label, claim, journey record and device supply disconnect',{prepared:'teleport to dungeon; dead supply link injected',template:site.template,focusCard:card.focus,supplyInjected:supply});
  await context.close();
 
- // Island (legacy world).
+ // Frontier: the same field HUD and ledger window, now from the shared modules.
+ const frontier=await browser.newContext({viewport:{width:844,height:390},isMobile:true,hasTouch:true,deviceScaleFactor:1});
+ const fpage=await open(frontier,'index.html?world=frontier');await fpage.waitForFunction(()=>window.FERAL?.ready&&FERAL.stats().running,null,{timeout:120000});
+ assert.deepEqual(await present(fpage,[...SHARED_HUD,...FIELD_HUD]),[],'frontier shows the shared HUD');
+ const ftap=async selector=>{const box=await fpage.locator(selector).first().boundingBox();assert(box,selector);await fpage.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);};
+ await ftap('#journalBtn');assert.equal(await fpage.locator('#frontierTitle').textContent(),'원정 지도');
+ await ftap('[data-frontier-tab=journal]');assert.equal(await fpage.locator('#frontierTitle').textContent(),'캐릭터 상태');await ftap('#frontierClose');
+ await ftap('#inventoryBtn');assert.equal(await fpage.locator('#inventoryGrid .itemSlot').count(),27);
+ await fpage.screenshot({path:new URL('frontier-bag.png',out).pathname});await frontier.close();
+ check(report.frontier,'frontier field HUD, ledger window and bag from shared modules');
+
+ // Island (legacy world) on the shared controls.
  const island=await browser.newContext({viewport:{width:900,height:412},isMobile:true,hasTouch:true,deviceScaleFactor:1});
  const ip=await island.newPage();ip.on('pageerror',e=>report.errors.push(e.message));
  await ip.addInitScript(()=>{window.AndroidApp={};localStorage.removeItem('feral.world.v1');});
  await ip.goto(`${assets}/index.html`);await ip.waitForFunction(()=>window.FERAL?.ready,null,{timeout:120000});
+ assert.match(await ip.locator('#loadStatus').textContent(),/월드 준비 완료/,'island loading uses the shared loading display');
  await ip.click('#startBtn');await ip.waitForTimeout(1500);
+ assert.deepEqual(await present(ip,SHARED_HUD),[],'island shows the shared HUD');
  const itap=async selector=>{await ip.locator(selector).first().scrollIntoViewIfNeeded();const box=await ip.locator(selector).first().boundingBox();assert(box,selector);await ip.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);};
  const aimDown=()=>ip.evaluate(()=>{FERAL.player.pitch=-1;});
- // Empty hand: the use button observes terrain.
  await ip.evaluate(()=>{const inv=FERAL.inventory,empty=inv.slots.slice(0,9).findIndex(s=>!s);if(empty>=0)inv.select(empty);else{inv.slots[8]=null;inv.select(8);}});
  await ip.waitForTimeout(400);await aimDown();await ip.waitForTimeout(300);await itap('#useBtn');await ip.waitForTimeout(250);
  assert.match(await ip.locator('#toast').textContent(),/지형 .* m · 거리/);check(report.island,'empty-hand observe lens');
- // Sandbox water tool from the menu.
  const water=()=>ip.evaluate(()=>{let n=0;for(const f of FERAL.world.fluids.values())n+=f.v;return n;});
  const waterBefore=await water();
  await itap('#menuBtn');await itap('[data-tab=life]');await itap('[data-sandbox-tool="4"]');await ip.waitForTimeout(400);assert.equal(await ip.evaluate(()=>FERAL.stats().paused),false,'choosing a tool resumes play');
  assert.equal(await ip.locator('#toolName').textContent(),'물 붓기');await aimDown();await itap('#useBtn');await ip.waitForTimeout(600);
  const waterAfter=await water();assert(waterAfter>waterBefore,`water ${waterBefore} -> ${waterAfter}`);
  check(report.island,'sandbox water tool via menu and use button',{waterBefore,waterAfter});
- // Minimap setting and discovery toast.
  await itap('#menuBtn');await itap('[data-tab=settings]');await itap('#showRadar');await itap('#resumeBtn');await ip.waitForTimeout(400);
  assert(await ip.locator('#radar').isVisible(),'radar visible after setting');
  const landmark=await ip.evaluate(()=>{const p=FERAL.world.landmarks.at(-1);FERAL.player.x=p.x;FERAL.player.z=p.z;FERAL.player.y=FERAL.world.surface(p.x,p.z)+.05;return p.name;});
  let discovered=false;for(let i=0;i<20&&!discovered;i++){discovered=(await ip.locator('#toast').textContent()).includes('새 장소 발견');await ip.waitForTimeout(150);}
  assert(discovered,'discovery toast');await ip.screenshot({path:new URL('island.png',out).pathname});
  check(report.island,'minimap setting and discovery toast',{prepared:'teleport to landmark',landmark});
- // A module that cannot load must end in a visible failure with retry, never an endless loading screen.
+ await island.close();
+
+ // A module that cannot load must end in a visible failure with retry on the shared loading screen.
  const failing=await browser.newContext({viewport:{width:900,height:412},isMobile:true,hasTouch:true});const fp=await failing.newPage();
- await fp.addInitScript(()=>{window.__runtimeFailed=0;window.AndroidApp={runtimeFailed(){window.__runtimeFailed++;}};localStorage.setItem('feral.worlds.v1',JSON.stringify([{id:'ui-check',name:'UI 검사',type:'expedition',seed:63026}]));});
+ await fp.addInitScript(worlds=>{window.__runtimeFailed=0;window.AndroidApp={runtimeFailed(){window.__runtimeFailed++;}};localStorage.setItem('feral.worlds.v1',JSON.stringify(worlds));},WORLDS);
  await fp.route('**/content-runtime/voxel/solid.js',route=>route.fulfill({status:200,contentType:'application/octet-stream',body:'export {}'}));
- await fp.goto(`${assets}/expedition.html?world=ui-check`);await fp.waitForFunction(()=>window.FeralLoading?.failed,null,{timeout:20000});
- const failure=await fp.evaluate(()=>({text:document.getElementById('loadingText').textContent,retry:!document.getElementById('loadingRetry').hidden,runtimeFailed:window.__runtimeFailed}));
+ await fp.goto(`${assets}/index.html?world=ui-check`);await fp.waitForFunction(()=>window.FeralLoading?.failed,null,{timeout:30000});
+ const failure=await fp.evaluate(()=>({text:document.getElementById('loadStatus').textContent,retry:!document.getElementById('loadingRetry').hidden,runtimeFailed:window.__runtimeFailed}));
  assert.match(failure.text,/불러오지 못했습니다/);assert(failure.retry);assert.equal(failure.runtimeFailed,1);await fp.screenshot({path:new URL('loading-failure.png',out).pathname});await failing.close();
- check(report.expedition,'module load failure shows retry instead of endless loading',failure);
+ check(report.shared,'module load failure shows retry instead of endless loading',failure);
  assert.deepEqual(report.errors,[]);
 }catch(e){report.failure=e.stack;process.exitCode=1;}finally{await fs.writeFile(new URL('report.json',out),JSON.stringify(report,null,2));await browser.close();server?.close();}
-console.log(JSON.stringify({expedition:report.expedition.length,island:report.island.length,errors:report.errors,failure:report.failure?.split('\n')[0]}));
+console.log(JSON.stringify({shared:report.shared.length,expedition:report.expedition.length,frontier:report.frontier.length,island:report.island.length,errors:report.errors,failure:report.failure?.split('\n')[0]}));

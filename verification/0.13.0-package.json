@@ -1,0 +1,16 @@
+{
+  "version": "0.13.0",
+  "versionCode": 1300,
+  "minNativeCode": 303,
+  "files": 122,
+  "nativeFileLimit": 128,
+  "removedScreenFiles": [],
+  "mjsFiles": [],
+  "archiveBytes": 2807300,
+  "expandedBytes": 11540935,
+  "archiveSha256": "3869ee54166888ee4df1c937253c8d5c375722a72b42fce19861632b4305fcf8",
+  "packageSha256": "11aba7f20ec064cfa67bb6b0be71c57a264d091b18dbf144bc3d60ecf29d1546",
+  "apkAssetsIdenticalToUpdate": true,
+  "withinLimits": true,
+  "note": "Local build with the shared test signing key; CI rebuilds and publishes after merge."
+}

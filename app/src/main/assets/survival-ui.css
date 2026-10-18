@@ -49,7 +49,7 @@ body.leftHand #hud #target {left:auto;right:16px;}
 .recipeBook h3,.craftBench h3 {font-size:13px;margin:0 0 6px;font-weight:600;}
 .recipeFilters {flex:none;display:flex;gap:3px;margin-bottom:8px;}
 #pauseScreen.inventoryMode button {font-family:inherit;touch-action:pan-y;}
-.recipeFilters button,#splitStack,#cancelMove,#itemDetail button,#reclaimItems {border:2px solid;border-color:#fff #5b5b5b #5b5b5b #fff;border-radius:0;background:#a6a6a6;color:#222;padding:5px 6px;min-height:32px;font-size:11px;}
+.recipeFilters button,#splitStack,#cancelMove,#itemDetail button,#reclaimItems,#craftQueue button {border:2px solid;border-color:#fff #5b5b5b #5b5b5b #fff;border-radius:0;background:#a6a6a6;color:#222;padding:5px 6px;min-height:32px;font-size:11px;}
 #pauseScreen #recipeList {display:grid;grid-template-columns:repeat(auto-fit,minmax(44px,1fr));gap:4px;flex:1;min-height:0;overflow-x:hidden;overflow-y:auto;align-content:start;touch-action:pan-y;overscroll-behavior:contain;scrollbar-gutter:stable;padding:2px 4px 4px 2px;}
 .recipeTile {height:48px;min-width:0;padding:4px;background:#8b8b8b;border:2px solid;border-color:#555 #fff #fff #555;border-radius:0;}
 .recipeTile.unavailable {background:#a49c9c;}

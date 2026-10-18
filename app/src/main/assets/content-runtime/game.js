@@ -1,0 +1,526 @@
+// Content expedition on the shared game screen: the same HUD, hotbar, bag, ledger window,
+// menu, settings, notifications and controls as every other map.
+import {ExpeditionRuntime,distance} from './runtime.js';
+import {ExpeditionScene,T} from './scene.js';
+import {CONTENT} from './catalog.generated.js';
+import {ExpeditionSave} from './save.js';
+import {Autosave} from './autosave.js';
+import {CharacterController,FIXED_DT} from '../physics.js';
+import {currentWorld,saveKey} from '../world-slots.js';
+import {initUpdates} from '../updates.js';
+import {BossView} from './boss-view.js';
+import {isResourceAvailable} from './props.js';
+import {MachinePanel} from './machine-panel.js';
+import {EnvironmentView} from './environment-view.js';
+import {EquipmentView} from './equipment-view.js';
+import {FeedbackView} from './feedback-view.js';
+import {FixtureEnergyPanel} from './fixture-energy-panel.js';
+import {CreatureFragments} from './creature-fragments.js';
+import {AnchorMarkers} from './anchor-markers.js';
+import {ItemSlots,designCatalog} from './item-slots.js';
+import {VERSION} from '../version.js';
+import {reasonText} from './reasons.js';
+import {InventoryUI,drawHotbar} from '../inventory-ui.js';
+import {HudEditor} from '../hud-editor.js';
+import {installHUDArt} from '../ui-art.js';
+import {createInput,createNotifier,showDiscovery,initSettings,bindMenuTabs,selectTab,showPauseScreen,bindBackground,installErrorScreen,mountFieldHUD,mountJourney,setJourney,setVitals,waypointText,GameWindow,showMovementState,changeStance,changeSprint} from '../shell.js';
+const $=id=>document.getElementById(id);
+const loading=window.FeralLoading??{set(){},step(){},finish(){},fail(){},timings:[]};
+const notify=createNotifier($('toast'),{translate:reasonText});
+let runtime,view,bossView,environmentView,equipmentView,feedbackView,machinePanel,fixtureEnergyPanel,fragments,anchorMarkers,controller,physical,saveStore,autosave,updates,slots,catalog,bag,ledger,journey,hudEditor,settings,world;
+let ready=false,paused=false,last=0,accum=0,saveClock=0,hudClock=0,tabClock=0,fpsFrames=0,fpsTime=0,fps=0,sprintLatched=false,actionHeld=false,manual=false,manualDeviceId=null;
+let communityTarget=null,deviceTarget=null,deviceAngleRad=0,weaponPattern='weapon_slash',weaponMaterial='wood',hitFlash=null,jobWatch={id:null,progress:0,since:0},destination=null,researchQuery='',bagSignature='';
+const held={descend:false,brake:false},ledgerPointers=new Set(),discovered=new Set();
+const input=createInput({canControl:()=>ready&&!paused,isEditing:()=>hudEditor?.editing===true,rotateLook});
+const energyNames={mechanical:'역학',electrical:'전기',thermal:'열',chemical:'화학',magic:'마법',divine:'신성'};
+const attackStyles={strike:'일반 타격',pierce:'관통 찌르기',impact:'충격 전달'};
+const HAZARDS={heat:'고온',acid_fluid:'산성 액체',water:'깊은 물',ecology_water:'저수조 물',crosswind:'강한 횡풍',mana_pressure:'마나 압력',moving_platform:'움직이는 운반대'};
+const TABS=[
+ {id:'journey',label:'여정',ariaLabel:'여정과 발견',icon:'journey'},
+ {id:'status',label:'상태',ariaLabel:'캐릭터 상태',icon:'person'},
+ {id:'research',label:'연구',icon:'research'},
+ {id:'weapons',label:'무기',ariaLabel:'무기 제작',icon:'attack'},
+ {id:'energy',label:'설비',ariaLabel:'설비와 에너지',icon:'energy'},
+ {id:'machine',label:'기계',ariaLabel:'기계 조립',icon:'tools'},
+ {id:'community',label:'공동체',icon:'village'},
+ {id:'devices',label:'장치',ariaLabel:'던전 장치',icon:'device'},
+ {id:'faith',label:'신앙',ariaLabel:'신앙과 시련',icon:'faith'},
+];
+const TITLES={journey:'여정과 발견',status:'캐릭터 상태',research:'연구',weapons:'무기 제작',energy:'설비·에너지',machine:'기계 조립',community:'공동체',devices:'던전 장치',faith:'신앙·시련'};
+
+function name(id){if(id==='hand')return '맨손';return runtime?.progression.catalog.get(id)?.name??CONTENT.creatures.entries.find(e=>e.id===id)?.name??CONTENT.bosses.entries.find(e=>e.id===id)?.name??id;}
+function quantities(items){return Object.entries(items||{}).map(([id,n])=>`${name(id)} ${Number(n.toFixed(2))}`).join(' · ')||'없음';}
+function report(result,success='완료했습니다.'){if(result?.ok||result===true||result?.accepted===true)notify(success);else notify(result?.reason);refreshPanels();}
+function rotateLook(dx,dy){
+ if(!ready||paused||hudEditor?.editing)return;const p=runtime.player;
+ p.yaw-=dx*.003*settings.sensitivity;p.pitch=Math.max(-1.45,Math.min(1.45,p.pitch-dy*.003*settings.sensitivity));
+}
+function stopInput(){input.stop();sprintLatched=false;actionHeld=false;held.descend=held.brake=false;manual=false;manualDeviceId=null;fixtureEnergyPanel?.stopManual();physical?.objectPhysics.release();}
+// The world keeps running while the bag or ledger is open (timed crafting, manual devices); the menu stops it.
+function frozen(){return paused&&!ledger.isOpen&&!$('pauseScreen').classList.contains('inventoryMode');}
+function pause(force,{quiet=false}={}){
+ if(!ready)return;
+ paused=force??!paused;stopInput();
+ showPauseScreen(paused,hudEditor?.editing===true);
+ if(!paused)ledger.close();
+ if(paused){runtime.player.resting=false;updates?.refresh();updatePanels();if(!quiet)save();}
+ else{last=performance.now();accum=0;}
+}
+// Opening the bag does not save: a full synchronous save of a large world would stall the tap.
+function openBag(){pause(true,{quiet:true});selectTab('bag',updatePanels);}
+function refreshPanels(){if(!ready)return;if(ledger?.isOpen)ledger.render();if(paused&&$('pauseScreen').classList.contains('inventoryMode'))bag.render();renderHotbar();}
+function updatePanels(tab){
+ if(!ready)return;
+ $('foundCount').textContent=`${runtime.nearbyStructures.filter(d=>d.visitedRooms.length).length}`;
+ $('elapsed').textContent=`${Math.floor(runtime.time/60)}:${String(Math.floor(runtime.time%60)).padStart(2,'0')}`;
+ $('seedValue').textContent=world.seed;
+ if(tab==='bag'||$('pauseScreen').classList.contains('inventoryMode'))bag.render();
+ $('bagCount').textContent=slots.slots.filter(Boolean).length;
+}
+
+function selectHotbar(n){
+ slots.select(n);const id=slots.held,d=id&&runtime.progression.catalog.get(id);
+ if(d?.kind==='gear_baseline'&&runtime.progression.equipped!==id){const r=runtime.progression.equip(id);if(r.ok)notify(`${d.name} 장착`);}
+ renderHotbar();updateToolLabel();buttonLabels();
+}
+function renderHotbar(){if(slots)drawHotbar($('hotbar'),slots,catalog,selectHotbar);}
+function updateToolLabel(){
+ const id=slots.held,d=id&&runtime.progression.catalog.get(id),weapon=runtime.armaments.loadout(),wear=id&&catalog.durability(id);
+ $('toolName').textContent=weapon?weapon.name:id?d.name:'맨손';
+ $('toolHelp').textContent=weapon?`${attackStyles[weapon.attackMode]} · 내구 ${weapon.durability}/${weapon.maxDurability}`:wear?`도구 내구 ${wear.value}/${wear.max}`:id==='food'?'사용: 먹기':d?.kind==='station'||d?.kind==='component'?'사용: 앞에 설치':`공격 방식 ${attackStyles[runtime.player.attackStyle??'strike']}`;
+ $('rangeBtn').textContent=`방식: ${attackStyles[weapon?.attackMode??runtime.player.attackStyle??'strike']} ↻`;
+ $('rangeBtn').disabled=!!weapon;
+}
+function cycleAttackStyle(){
+ if(runtime.armaments.loadout()){notify('장착한 무기의 공격 방식을 사용합니다.');return;}
+ const modes=Object.keys(attackStyles),mode=modes[(modes.indexOf(runtime.player.attackStyle??'strike')+1)%modes.length];runtime.player.attackStyle=mode;
+ notify(mode==='pierce'?'외피를 관통해 안쪽 부위를 노립니다.':mode==='impact'?'충격을 가까운 내부 부위로 전달합니다.':'접촉한 부위를 타격합니다.');updateToolLabel();
+}
+
+function attack(){
+ if(!ready||paused)return;
+ if(physical.objectPhysics.held){report(physical.objectPhysics.throwHeld(),'물체를 던졌습니다.');actionHeld=false;return;}
+ if(runtime.drivingMachineId){const hit=view.aim({range:24,excludeOwnerId:runtime.drivingMachineId}),r=runtime.fireMachine(hit);if(r.ok&&!r.duplicate&&!r.blocked)view.flashTrace(r.packet.rayOrigin,hit.point);else if(!r.ok&&!notify.busy()&&!['cooldown','fire_cooldown'].includes(r.reason))notify(r.reason);return;}
+ const type=runtime.player.attackEnergy,hit=view.aim();
+ const result=type?runtime.energyStrike(hit,type,25,{magicAttribute:runtime.player.magicAttribute??null}):runtime.strike(hit);
+ if(result.ok||result.accepted){const amount=result.hpLost??result.damage;if(result.gimmick)hitFlash={text:`장치 내구 ${Math.ceil(result.remainingHp)}`,until:performance.now()+900};else if(Number.isFinite(amount)&&amount>0)hitFlash={text:`피해 ${amount.toFixed(1)}`,until:performance.now()+700};}
+ else if(!['공격 준비 중','attack_cooldown'].includes(result.reason)&&!notify.busy())notify(result.reason??'지금은 피해를 줄 수 없습니다.');
+}
+async function placeEquipment(id){
+ const x=runtime.player.x-Math.sin(runtime.player.yaw)*3,z=runtime.player.z-Math.cos(runtime.player.yaw)*3;
+ const result=await runtime.placements.place(id,{x,y:runtime.surfaceHeight(x,z),z},{actorPosition:runtime.player});report(result,'설비를 설치했습니다.');
+}
+// Use: the held item's own use (eat, place) first, otherwise interact with what is aimed at.
+function secondary(){
+ if(!ready||paused)return;
+ const id=slots.held,d=id&&runtime.progression.catalog.get(id);
+ if(physical.objectPhysics.held||runtime.drivingMachineId){interact();return;}
+ if(id==='food'){report(runtime.eat(),'음식을 먹었습니다.');return;}
+ if(d?.kind==='station'||d?.kind==='component'){placeEquipment(id).catch(e=>notify(e.message));return;}
+ interact();
+}
+function driveMachine(id){
+ const m=runtime.machines.machines.get(id);if(!m||distance(runtime.player,m.position)>5||!m.components.some(c=>c.componentId==='controller'))return {ok:false,reason:'가까운 조종 장치가 필요합니다.'};
+ runtime.drivingMachineId=id;runtime.machines.control(id,{throttle:0,steer:0,brake:false});pause(false);notify('이동 입력으로 조종합니다. 점프는 상승, 하강·제동 버튼(Shift·Ctrl)으로 조절하고 상호작용으로 내립니다.');return {ok:true};
+}
+function leaveMachine(){
+ const m=runtime.machines.machines.get(runtime.drivingMachineId);if(m)runtime.machines.control(m.id,{throttle:0,steer:0,pitch:0,brake:true});
+ runtime.drivingMachineId=null;runtime.player.vy=0;notify('조종을 마쳤습니다.');
+}
+function save(){
+ if(!ready)return false;
+ try{autosave.writeNow(snapshot());$('saveState').textContent='SAVED '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});return true;}
+ catch(e){$('saveState').textContent='SAVE FAILED';notify('저장하지 못했습니다. 이전 정상 저장은 보존됩니다.');return false;}
+}
+function snapshot(){return {...runtime.serialize(),itemSlots:slots.serialize()};}
+function nearestNode(){return runtime.nodes.filter(n=>isResourceAvailable(runtime,n)).map(n=>({...n,distance:distance(runtime.player,n)})).sort((a,b)=>a.distance-b.distance)[0];}
+const anchorPoint=a=>Array.isArray(a.position)?{x:a.position[0],y:a.position[1],z:a.position[2]}:a.position;
+function nearbyAnchors(){
+ const priority=a=>a.kind==='reward'&&!a.claimed?0:a.kind==='gimmick'?1:a.kind==='reward'?3:2;
+ return runtime.dungeons.nearbyAnchors(runtime.player,3).filter(a=>!['spawn','producer','boss','entrance'].includes(a.kind)).sort((a,b)=>priority(a)-priority(b)||distance(runtime.player,anchorPoint(a))-distance(runtime.player,anchorPoint(b)));
+}
+function rewardText(result){
+ const items=Object.fromEntries(Object.entries(result.items??{}).filter(([id])=>!id.startsWith('blueprint:')));
+ const parts=[Object.keys(items).length?quantities(items):'',...(result.unlocked??[]).map(id=>`연구 해금: ${name(id)}`),result.energy?`신성 ${result.energy} EU`:''].filter(Boolean);
+ return parts.join(' · ')||'보상 없음';
+}
+function interact(){
+ if(!ready||paused)return;const hit=view.aim();
+ if(physical.objectPhysics.held){physical.objectPhysics.release();notify('물체를 놓았습니다.');return;}
+ if(runtime.drivingMachineId){leaveMachine();return;}
+ if(hit?.kind==='machine'){machinePanel.selected=hit.id;ledger.open('machine');return;}
+ if(hit?.kind==='fixture'&&hit.distance<5){ledger.open('energy');return;}
+ if(hit?.kind==='object'&&hit.distance<4){const owner=runtime.objects.get(hit.id)?.fragment?.lootOwnerId,corpse=owner?runtime.creatures.corpses.get(`corpse:${owner}`):null;if(corpse&&!corpse.claimed){report(runtime.creatures.claimDrops(owner,runtime.progression),'전리품을 회수했습니다.');return;}report(physical.objectPhysics.grab(hit.id,hit.point),'물체를 잡았습니다. 상호작용은 놓기, 공격은 던지기입니다.');return;}
+ if(hit?.kind==='resource'){const node=runtime.nodes.find(n=>n.id===hit.id);if(node){report(runtime.beginHarvest(node),'채집하고 있습니다.');return;}}
+ if(hit?.kind==='creature'&&hit.distance<4){const e=runtime.creatures.get(hit.id);if(e?.dead){report(runtime.creatures.claimDrops(e.id,runtime.progression),'전리품을 회수했습니다.');return;}if(e?.civilization){communityTarget=e.id;ledger.open('community');return;}}
+ const anchors=nearbyAnchors();
+ if(anchors.length){const a=anchors[0];if(a.kind==='gimmick'){report(runtime.beginGimmick(a),'장치를 조작하고 있습니다.');return;}
+  if(a.kind==='puzzle'){deviceTarget=a.instanceId;ledger.open('devices');return;}
+  const result=runtime.dungeons.interact(a.instanceId,a.id,{position:runtime.player,progression:runtime.progression});
+  if(result.kind==='service'){communityTarget=a.instanceId;ledger.open('community');}
+  else if(a.kind==='reward')result.ok?notify(result.duplicate?'이미 회수한 보상입니다.':`${a.name} 회수 · ${rewardText(result)}`):notify(result.reason);
+  else if(result.kind==='inspect')notify(`관찰 ${result.observed.length}/2${result.solved?' · 연구 기록 보관함을 열 수 있습니다.':''}`);
+  else report(result,'살펴보았습니다.');return;
+ }
+ const n=runtime.terrainResource(hit)??nearestNode();if(n&&(n.distance??distance(runtime.player,n))<5)report(runtime.beginHarvest(n),'채집하고 있습니다.');else notify('대상 가까이에서 상호작용하세요.');
+}
+// What the interact button would do right now; empty when nothing is in reach.
+function interactLabel(hit){
+ if(runtime.drivingMachineId)return '내리기';if(physical?.objectPhysics.held)return '놓기';
+ if(hit?.kind==='machine')return '기계 패널';if(hit?.kind==='fixture'&&hit.distance<5)return '설비 패널';
+ if(hit?.kind==='object'&&hit.distance<4)return '잡기';if(hit?.kind==='resource')return '채집';
+ if(hit?.kind==='creature'&&hit.distance<4){const e=runtime.creatures.get(hit.id);if(e?.dead)return '전리품';if(e?.civilization)return '대화';}
+ const a=nearbyAnchors()[0];if(a)return a.kind==='reward'?(a.claimed?'살펴보기':'보상 회수'):a.kind==='gimmick'?'장치 작동':a.kind==='puzzle'?'장치 패널':a.kind==='inspect'?'관찰':'이용';
+ const n=runtime.terrainResource(hit)??nearestNode();return n&&(n.distance??distance(runtime.player,n))<5?'채집':'';
+}
+
+// ---- Ledger window pages ----
+function row(title,detail,label,callback,disabled=false,extra=[]){const el=document.createElement('article');el.className='row';const copy=document.createElement('div');copy.className='copy';const b=document.createElement('b');b.textContent=title;const p=document.createElement('p');p.textContent=detail??'';copy.append(b,p);el.append(copy);
+ const buttons=[...(label?[[label,callback,disabled]]:[]),...extra].map(([text,onclick,off=false])=>{const button=document.createElement('button');button.textContent=text;button.disabled=off;button.onclick=onclick;return button;});
+ if(buttons.length>1){const group=document.createElement('div');group.className='actions';group.append(...buttons);el.append(group);}else if(buttons.length)el.append(buttons[0]);return el;}
+function bar(card,percent){const track=document.createElement('div'),fill=document.createElement('span');track.className='progress-bar';fill.style.width=`${Math.max(0,Math.min(100,percent)).toFixed(1)}%`;track.append(fill);card.querySelector('.copy').append(track);}
+function renderLedger(tab,list){
+ if(!ready)return;const p=runtime.progression,scrollTop=list.scrollTop;list.replaceChildren();
+ const append=(title,detail,label,action,disabled,extra)=>list.append(row(title,detail,label,action,disabled,extra));
+ if(tab==='journey')renderJourney(list,append);
+ else if(tab==='status')renderStatus(list,append);
+ else if(tab==='research'){
+  const search=document.createElement('label');search.className='ledgerSearch';const field=document.createElement('input');field.id='researchSearch';field.placeholder='연구 이름으로 찾기';field.setAttribute('aria-label','연구 검색');field.value=researchQuery;field.oninput=()=>{researchQuery=field.value;renderLedger('research',list);document.getElementById('researchSearch')?.focus();};search.append(field);list.append(search);
+  const job=p.researchJob,current=job&&p.catalog.get(job.id);
+  if(current){const progress=p.researchProgress[current.id]??{work:0},waiting=!p._station(current.station),card=row(`연구 중 · ${current.name}`,`${progress.work.toFixed(1)}/${current.work} 연구량${waiting?' · '+reasonText('research_station_required'):''}${p.workCredits>0?` · 작업권 ${p.workCredits.toFixed(1)}`:''} · 멈춰도 진행도는 보존됩니다.`,'멈추기',()=>report(p.pauseResearch(),'연구를 멈췄습니다. 진행도는 보존됩니다.'));bar(card,progress.work/current.work*100);list.append(card);}
+  else if(p.workCredits>0)append('발견 작업권',`${p.workCredits.toFixed(1)} 연구량 · 다음 자체 연구에 먼저 사용됩니다.`);
+  const term=researchQuery.trim().toLowerCase();
+  for(const r of p.list('research')){if(term&&!r.name.toLowerCase().includes(term))continue;const known=p.research.has(r.id),status=p.researchStatus(r.id),progress=p.researchProgress[r.id],running=job?.id===r.id,paid=!!progress?.paid;
+   const label=known?'완료':running?'진행 중':paid?(job?'전환해 이어서':'이어서 연구'):(job?'전환해 연구':'연구');
+   append(r.name,`표본: ${paid?'지불 완료':quantities(r.samples)} · ${r.work} 연구량${paid&&!known?` · 진행 ${(progress.work/r.work*100).toFixed(0)}%`:''}${r.station?' · 설비: '+name(r.station):''}${r.prerequisites.length?' · 선행: '+r.prerequisites.map(name).join(', '):''}${!known&&!status.ok?' · '+reasonText(status.reason):''}`,label,()=>{if(job&&job.id!==r.id)p.pauseResearch();report(p.startResearch(r.id),paid?'연구를 이어서 진행합니다.':'표본을 사용해 연구를 시작했습니다.');},known||running||!status.ok);}
+ }else if(tab==='weapons'){
+  const controls=document.createElement('div');controls.className='machine-card';
+  for(const [labelText,options,current,change]of [['무기 형태',runtime.armaments.patterns(),weaponPattern,value=>weaponPattern=value],['무기 재질',p.list('material'),weaponMaterial,value=>weaponMaterial=value]]){
+   const label=document.createElement('label');label.className='machine-field';const span=document.createElement('span');span.textContent=labelText;const select=document.createElement('select');select.setAttribute('aria-label',labelText);
+   for(const option of options){const el=document.createElement('option');el.value=option.id;el.textContent=option.name;select.append(el);}
+   select.value=current;select.onchange=()=>{change(select.value);renderLedger('weapons',list);};label.append(span,select);controls.append(label);
+  }list.append(controls);
+  const q=runtime.armaments.quote(weaponPattern,weaponMaterial);
+  append(q.name??'무기 제작',q.inputs?`${quantities(q.inputs)} · ${name(q.station)} · ${q.seconds}초\n피해 ${q.hitDamage.toFixed(1)} · 사거리 ${q.range}m · ${q.attackPeriod}초 간격${q.ok?'':' · '+reasonText(q.reason)}`:reasonText(q.reason),'제작',()=>report(runtime.armaments.craft(weaponPattern,weaponMaterial),'무기를 제작하고 있습니다.'),!q.ok);
+  for(const w of runtime.armaments.weapons)append(w.name,`${name(w.materialId)} · 내구 ${w.durability}/${w.maxDurability} · 피해 ${w.hitDamage.toFixed(1)} · ${attackStyles[w.attackMode]}`,runtime.armaments.equippedId===w.id?'해제':'장착',()=>{report(runtime.armaments.equip(runtime.armaments.equippedId===w.id?null:w.id),'무기 장착을 변경했습니다.');updateToolLabel();});
+  for(const job of runtime.armaments.jobs??[])append('무기 제작 중',`${job.name??name(job.materialId)} · 작업대에서 제작을 진행합니다.`);
+ }else if(tab==='energy'){
+  append('열에너지 연료',`원목 1개를 태워 열을 모읍니다. 남은 연료 ${runtime.materialEffects.thermal.fuelEU.toFixed(0)} EU`,'원목 1개 넣기',()=>report(runtime.materialEffects.loadThermalFuel(1,{claimId:runtime.id('thermal-fuel')}),'연료를 넣었습니다.'),p.count('raw_timber')<1);
+  fixtureEnergyPanel.render(list);
+  for(const s of p.list('station'))append(s.name,`설치 ${p.stations[s.id]||0} · ${name(s.origin.recipe)}`,'설비 제작',()=>report(p.queueCraft(s.origin.recipe),'완성된 설비를 핫바에 놓고 사용해서 설치하세요.'),!p.recipeStatus(s.origin.recipe).ok);
+  for(const a of p.assemblies)append(name(a.componentId),`상태 ${Math.round(a.health*100)}% · ${a.scale}배 크기 · ${a.materialId??'기본 재질'}`);
+  for(const fixture of runtime.placements.descriptors().filter(f=>distance(runtime.player,f.position)<=5)){
+   const quote=runtime.placements.repairQuote(fixture.id);
+   append(name(fixture.assetId),`HP ${Math.ceil(fixture.hp)}/${fixture.maxHp} · 수리 재료 ${quantities(quote.items)}`,'수리',()=>report(runtime.placements.repair(fixture.id,{actorPosition:runtime.player}),'설비를 수리했습니다.'),fixture.hp>=fixture.maxHp);
+   append(`${name(fixture.assetId)} 회수`,'손상된 만큼 회수할 수 있는 재료가 줄어듭니다.','철거',()=>report(runtime.placements.dismantle(fixture.id,{actorPosition:runtime.player}),'설비를 회수했습니다.'));
+  }
+ }else if(tab==='machine')machinePanel.render(list);
+ else if(tab==='community'){
+  if(communityTarget&&runtime.community){for(const option of runtime.community.optionsFor(communityTarget))append(option.label,option.detail,option.label,()=>report(runtime.community.interact(option.id,{targetId:communityTarget,requestId:runtime.id('community')})),option.disabled);}
+  if(!list.childNodes.length)list.append(row('공동체와 만나기','문명 생명체나 공동체 시설에 다가가서 상호작용하세요.'));
+ }else if(tab==='devices')renderDevices(list,append);
+ else if(tab==='faith'){
+  for(const shrine of runtime.faith.nearbyShrines(3)){
+   append(shrine.name,'이곳에서 신앙 활동과 제단 시련을 진행할 수 있습니다.');
+   for(const option of runtime.faith.optionsFor(shrine.instanceId))append(option.label,option.detail,'선택',()=>report(runtime.faith.interact(option.id,{instanceId:shrine.instanceId}),'제단에 뜻을 전했습니다.'),option.disabled);
+  }
+  if(!list.childNodes.length)list.append(row('유적의 제단','기록 보관소의 기록대나 잊힌 수도원의 전달 장치 3m 안에서 신앙 활동과 시련을 시작할 수 있습니다.'));
+ }
+ list.scrollTop=scrollTop;
+ const work=p.researchJob?`연구: ${name(p.researchJob.researchId??p.researchJob.id)} · `:'',energy=Object.entries(p.energy).filter(([,v])=>v>0).map(([k,v])=>`${energyNames[k]} ${v.toFixed(1)} EU`).join(' · ');
+ ledger.feedback(`${work}제작 대기 ${p.jobs.length}${energy?' · '+energy:''}`);
+}
+function objective(){
+ const g=runtime.progression;
+ return g.research.has('joinery')?['장비와 운반 구조물을 준비하고 동쪽의 저택을 탐험하세요.','던전에서 보상과 연구 기록을 찾으세요.']:g.research.has('observation')?['식물 섬유와 나뭇가지를 모아 구조와 접합을 연구하세요.','연구 탭에서 구조와 접합을 시작하세요.']:['주변의 나뭇가지와 돌을 모아 관찰과 기록을 연구하세요.','채집한 표본으로 연구 탭에서 관찰을 시작하세요.'];
+}
+function renderJourney(list,append){
+ const [goal,hint]=objective();append(goal,`${hint}\n연구 ${runtime.progression.research.size}/${runtime.progression.list('research').length}`);
+ if(destination)append(`목적지 · ${destination.name}`,`${Math.round(distance(runtime.player,destination))}m ${runtime.directionTo(destination)}`,'표시 해제',()=>{destination=null;renderLedger('journey',list);});
+ for(const d of runtime.nearbyStructures){const def=CONTENT.structures.entries.find(e=>e.id===d.templateId),rewards=runtime.dungeons.anchors(d.id).filter(a=>a.kind==='reward'),origin={x:d.origin[0],y:d.origin[1],z:d.origin[2]};
+  append(def.name,`장소 ${d.tier}티어 · 지역 ${d.regionTier}티어 · 출발지로부터 ${Math.round(Math.hypot(d.origin[0],d.origin[2]))}m · 지금 ${Math.round(distance(runtime.player,origin))}m ${runtime.directionTo(origin)} · 탐색한 방 ${d.visitedRooms.length}/${def.rooms.length}${def.puzzle?` · ${def.puzzle.name} ${d.deviceState?.solved||d.puzzle?.phase==='open'?'해결':'미해결'}`:''}${d.boss?` · 수호자 ${d.boss.defeated?'격파':'생존'}`:''}${rewards.length?' · '+rewards.map(a=>`${a.name} ${a.claimed?'회수함':'남음'}`).join(', '):''}`,'목적지',()=>{destination={name:def.name,...origin};pause(false);});}
+ for(const d of runtime.deaths.filter(d=>!d.recovered))append('요정이 지키는 소지품',`${Math.round(distance(runtime.player,d.position))}m ${runtime.directionTo(d.position)} · ${quantities(d.items)}${d.weapons?.length?' · 무기 '+d.weapons.length+'개':''} · 10m 안에 가면 돌려받습니다.`,'목적지',()=>{destination={name:'요정이 지키는 소지품',...d.position};pause(false);});
+}
+function renderStatus(list,append){
+ const p=runtime.player,g=runtime.progression,loadout=g.evaluateLoadout(),weapon=runtime.armaments.loadout();
+ const hp=row('체력',`${Math.ceil(p.hp)} / ${p.maxHp}${p.resting?' · 휴식 중':''}`);bar(hp,p.hp/p.maxHp*100);list.append(hp);
+ const food=row('식량',`${Math.ceil(p.calories)} / ${p.maxCalories} CP`,'먹기',()=>report(runtime.eat(),'음식을 먹었습니다.'),g.count('food')<1);bar(food,p.calories/p.maxCalories*100);list.append(food);
+ append('장구',`${g.equipped?name(g.equipped):'기본 의복'} · 피해 감소 ${Math.round((loadout.damageReduction??0)*100)}% · 공격 ${(weapon?.hitDamage??loadout.hitDamage).toFixed(1)} · ${weapon?.attackPeriod??loadout.attackPeriod}초 간격`);
+ append('공격 방식',weapon?`${weapon.name}의 방식: ${attackStyles[weapon.attackMode]}`:attackStyles[p.attackStyle??'strike'],'바꾸기',cycleAttackStyle,!!weapon);
+ append('일반 공격','장착한 무기와 도구로 공격합니다.',p.attackEnergy?'선택':'선택 중',()=>{p.attackEnergy=null;renderLedger('status',list);});
+ for(const [type,label]of Object.entries(energyNames))append(`${label} 에너지 공격`,`공격 한 번에 25 EU를 소비합니다. 현재 ${type==='thermal'?runtime.materialEffects.thermal.storedEU.toFixed(1):g.energyAvailable(type).toFixed(1)} EU`,p.attackEnergy===type?'선택 중':'선택',()=>{p.attackEnergy=type;p.magicAttribute=null;renderLedger('status',list);});
+ append('마법 속성',`현재 ${p.magicAttribute==='water'?'물':p.magicAttribute==='wind'?'바람':'기본'}`,'속성 바꾸기',()=>{const a=[null,'water','wind'];p.magicAttribute=a[(a.indexOf(p.magicAttribute??null)+1)%a.length];p.attackEnergy='magic';renderLedger('status',list);});
+ append('휴식','이동하거나 공격하면 휴식을 끝냅니다. 휴식 중에는 체력이 더 빨리 회복됩니다.','휴식하기',rest);
+}
+function rest(){runtime.player.resting=true;pause(false);notify('휴식 중입니다. 이동하거나 공격하면 휴식을 끝냅니다.');}
+function renderDevices(list,append){
+ const devices=runtime.dungeons.devices,p=runtime.progression;
+ const nearby=runtime.dungeons.nearbyAnchors(runtime.player,3).filter(a=>a.kind==='puzzle');
+ const instances=[...new Set(nearby.map(a=>a.instanceId))];
+ if(!instances.includes(deviceTarget))deviceTarget=instances[0]??null;
+ if(!deviceTarget){append('던전의 장치','문 근처의 조작점 3m 안으로 다가가세요.');return;}
+ for(const id of instances){const inst=runtime.dungeons.get(id),title=CONTENT.structures.entries.find(d=>d.id===inst.templateId).name;append(title,'조작할 장치',id===deviceTarget?'선택 중':'선택',()=>{deviceTarget=id;renderLedger('devices',list);});}
+ const status=devices.status(deviceTarget,{progression:p}),inst=runtime.dungeons.get(deviceTarget);
+ append('장치 상태',status.summary??(status.solved?'통로를 확보했습니다.':'장치를 수리하고 필요한 동력을 공급하세요.'));
+ const details=[];
+ if(status.work&&(status.work.progressM>0||status.work.progressEU>0))details.push(`작업 진행 ${status.work.progressM.toFixed(2)} m · ${status.work.progressEU.toFixed(1)} EU`);
+ if(status.altar)details.push(`제단 ${status.altar.aligned?'정렬됨':'정렬 필요'}${Number.isFinite(status.altar.healthHp)?` · 내구 ${Math.ceil(status.altar.healthHp)}/${status.altar.maxHealthHp}`:''}`);
+ if(status.fluid)details.push(`${name(status.fluid.type)} 원천 ${status.fluid.sourceLiters.toFixed(1)} L · 수신 ${status.fluid.receiverLiters.toFixed(1)} L${status.fluid.spilledLiters>0?` · 유출 ${status.fluid.spilledLiters.toFixed(1)} L`:''} · ${status.fluid.route==='receiver'?'수신조로 흐름':'기본 경로'}`);
+ if(status.heat)details.push(`통로 ${Math.round(status.heat.temperatureC)}°C · 냉각수 ${status.heat.coolantLiters.toFixed(1)} L · 밸브 ${status.heat.valveOpen?'열림':'닫힘'}`);
+ if(status.wind)details.push(`풍향판 ${status.wind.locked?'고정됨':'고정 안 됨'}`);
+ if(status.motion)details.push(`운반대 목표 ${Number(status.motion.targetM??4).toFixed(1)} m`);
+ for(const part of status.parts??[])details.push(`${name(part.componentId)} ${part.installed?`내구 ${Math.ceil(part.healthHp)}/${part.maxHealthHp}`:'미설치'}`);
+ if(details.length)append('장치 세부',details.join('\n'));
+ if(status.wind){
+  const control=document.createElement('label');control.className='row';control.textContent=`풍향판 ${Math.round(status.wind.angleRad*180/Math.PI)}° · 횡풍 ${status.wind.forceN.toFixed(1)}N `;
+  const select=document.createElement('select');select.setAttribute('aria-label','풍향판 설정 각도');for(const degrees of [0,45,90,135,180]){const option=document.createElement('option');option.value=degrees*Math.PI/180;option.textContent=degrees+'°';select.append(option);}
+  select.value=deviceAngleRad;select.onchange=()=>deviceAngleRad=Number(select.value);control.append(select);list.append(control);
+ }
+ for(const a of status.actions??[]){
+  if(a.hold){
+   const card=row(a.label,typeof a.detail==='string'?a.detail:quantities(a.items),'누르고 조작',()=>{},a.disabled),button=card.querySelector('button');
+   button.onpointerdown=e=>{e.preventDefault();button.setPointerCapture(e.pointerId);const r=devices.act(deviceTarget,a.id,{position:runtime.player,progression:p,claimId:runtime.id('device')});if(r.ok){manualDeviceId=deviceTarget;actionHeld=false;}else report(r);};
+   button.onpointerup=button.onpointercancel=()=>{manualDeviceId=null;renderLedger('devices',list);};list.append(card);
+  }else append(typeof a.detail==='string'&&p.catalog.has(a.detail)?a.label.replace(a.detail,name(a.detail)):a.label,a.id==='set_vane'?'위의 풍향판 설정 각도로 맞춥니다.':typeof a.detail==='string'&&!p.catalog.has(a.detail)?a.detail:quantities(a.items),'조작',()=>report(devices.act(deviceTarget,a.id,{position:runtime.player,progression:p,claimId:runtime.id('device'),angleRad:deviceAngleRad}),'장치를 조작했습니다.'),a.disabled);
+ }
+ const anchor=nearby.find(a=>a.instanceId===deviceTarget);
+ for(const node of p.fixtureEnergy.nodes.values()){
+  const pos=Array.isArray(node.position)?{x:node.position[0],y:node.position[1],z:node.position[2]}:node.position;
+  if(!pos||distance(pos,anchor.position)>8)continue;
+  const ports=p.fixtureEnergy.ports(node.ownerId);
+  for(const type of ports.outputs.filter(t=>ports.stores.includes(t)))append(`${energyNames[type]} 공급 연결`,`${name(node.assetId??node.definitionId??node.ownerId)} · 케이블 재료를 사용합니다.`,'연결',()=>report(devices.connectSupply(inst.id,node.ownerId,type,{progression:p,claimId:runtime.id('device-link')}),'장치에 공급선을 연결했습니다.'));
+ }
+ for(const supply of status.supplies??[])append(`${energyNames[supply.type]} 공급`,`${supply.valid?'연결됨':'연결 끊김 · 분리한 뒤 다시 연결하세요.'} · 공급기 ${Number(supply.storedEU??0).toFixed(1)} EU · 장치 ${Number(supply.deviceEU??0).toFixed(1)} EU`,'25 EU 전달',()=>report(devices.charge(inst.id,supply.type,25,{progression:p,claimId:runtime.id('device-charge')}),'저장된 에너지를 전달했습니다.'),!supply.valid||supply.storedEU<25,[['공급선 분리',()=>report(devices.disconnectSupply(inst.id,supply.type,{progression:p}),'공급선을 분리했습니다. 케이블 재료는 돌아오지 않습니다.')]]);
+}
+// Craft queue inside the shared bag: progress, cancel for item refunds, and reordering.
+function renderQueue(container){
+ const p=runtime.progression;if(!p.jobs.length)return;
+ const head=document.createElement('h4');head.textContent=`작업 대기열 ${p.jobs.length}`;const hint=document.createElement('p');hint.textContent='맨 앞의 작업만 진행됩니다. 취소하면 재료를 돌려받지만 이미 쓴 에너지는 돌아오지 않습니다.';container.append(head,hint);
+ p.jobs.forEach((job,index)=>{
+  const s=p.jobStatus(job),label=job.type==='craft'?`${name(job.recipeId)}${job.count>1?' × '+job.count:''}`:name(job.activityId),percent=s.total?s.progress/s.total*100:0;
+  const energy=Object.entries(s.energy).map(([t,n])=>`${energyNames[t]} ${n.toFixed(1)} EU/s`).join(' · '),fixture=p.worldFixtures.find(f=>f.ownerId===s.fixtureId);
+  const stalled=index===0&&!s.blocked&&jobWatch.id===job.id&&performance.now()-jobWatch.since>2000;
+  const state=index>0?'대기 중':s.blocked?`멈춤 · ${reasonText(s.blocked)}`:stalled?`멈춤 · ${reasonText(energy?'energy_waiting':'insufficient_resources')}`:'진행 중';
+  const el=document.createElement('div');el.className='queueJob';const title=document.createElement('b');title.textContent=label;const text=document.createElement('p');text.textContent=`${state} · ${percent.toFixed(0)}% (${s.progress.toFixed(1)}/${s.total}초)${energy?' · 필요 '+energy:''}${fixture?' · 설비 '+name(fixture.assetId):''}`;
+  const track=document.createElement('div'),fill=document.createElement('span');track.className='progress-bar';fill.style.width=`${percent.toFixed(1)}%`;track.append(fill);el.append(title,text,track);
+  if(job.type==='craft'){const b=document.createElement('button');b.textContent='취소';b.onclick=()=>report(p.cancelJob(job.id,{claimId:runtime.id('cancel-job')}),'작업을 취소하고 재료를 돌려받았습니다.');el.append(b);}
+  if(index>0){const b=document.createElement('button');b.textContent='먼저 진행';b.onclick=()=>report(p.prioritizeJob(job.id),'이 작업을 먼저 진행합니다.');el.append(b);}
+  container.append(el);
+ });
+}
+function itemActions(id){
+ const p=runtime.progression,d=p.catalog.get(id);if(!d)return [];
+ if(id==='food')return [{label:'먹기',run:()=>{const r=runtime.eat();return r.ok?'음식을 먹었습니다.':reasonText(r.reason);}}];
+ if(d.kind==='gear_baseline')return [{label:p.equipped===id?'장착 중':'장착',disabled:p.equipped===id,run:()=>{const r=p.equip(id);return r.ok?'장구를 장착했습니다.':reasonText(r.reason);}}];
+ if(d.kind==='station'||d.kind==='component')return [{label:d.kind==='station'?'앞에 설치':'거점에 설치',run:()=>{pause(false);placeEquipment(id).catch(e=>notify(e.message));return '';}}];
+ return [];
+}
+
+// ---- HUD ----
+function bossPartLabel(entity,partId){
+ const def=runtime.bosses.definitionFor(entity),part=def.parts.find(x=>x.id===partId)??def.parts.find(x=>partId&&String(partId).includes(x.id)),state=part&&entity.parts?.[part.id];
+ const shell=Object.values(entity.shell??{}).reduce((n,v)=>n+Math.max(0,v),0);
+ return [part?`${part.name} ${state?.broken?'파손':`${Math.min(100,(state?.damage??0)/part.breakThresholdHp*100).toFixed(0)}%`}`:'',shell>0?`외피 ${shell.toFixed(0)} EU`:'',entity.staggerS>0?'비틀거림':''].filter(Boolean).join(' · ');
+}
+function anchorCard(){
+ const a=runtime.dungeons.nearbyAnchors(runtime.player,3).find(a=>['reward','gimmick','puzzle','inspect','service'].includes(a.kind));if(!a)return null;
+ const at=anchorPoint(a),position={x:at.x,y:at.y+1.4,z:at.z};
+ if(a.kind==='reward')return {title:a.name,detail:a.claimed?'회수함':'보상',hint:a.claimed?'':'상호작용: 회수',color:'#ebce8a',position};
+ if(a.kind==='gimmick'){const b=runtime.bosses.get(a.bossInstanceId),g=b?.gimmicks?.[a.gimmickId];if(!b||b.defeated||!g)return null;return {title:'전장 장치',detail:g.broken||g.uses<=0?'이미 사용함':`내구 ${Math.ceil(g.hp)}`,hint:g.broken||g.uses<=0?'':'상호작용: 작동 · 공격: 파괴',color:'#f1b08f',position};}
+ if(a.kind==='inspect')return {title:a.name,detail:a.observed?'관찰함':'관찰 대상',hint:a.observed?'':'상호작용: 관찰',position};
+ if(a.kind==='puzzle')return {title:a.name,detail:'던전 장치',hint:'상호작용: 장치 패널',position};
+ return {title:'공동체 시설',detail:'',hint:'상호작용: 이용',color:'#c9db9f',position};
+}
+function focusCard(hit,node){
+ const flash=hitFlash&&performance.now()<hitFlash.until?hitFlash.text:'';
+ if(hit?.kind==='creature'||hit?.kind==='boss'){
+  const e=hit.kind==='boss'?runtime.bosses.get(hit.id):runtime.creatures.get(hit.id);
+  if(e){const boss=hit.kind==='boss',def=boss?runtime.bosses.definitionFor(e):null,pos=boss?e.position:e;
+   return {title:boss?`${def.name} · ${e.encounterTier}티어`:name(e.speciesId),detail:boss?`${runtime.bosses.phase(e).name}${bossPartLabel(e,hit.partId)?' · '+bossPartLabel(e,hit.partId):''}`:`HP ${Math.ceil(e.hp)}/${e.maxHp}${e.dead?' · 쓰러짐':''}`,hint:flash||(e.dead?'상호작용: 전리품':`공격: ${attackStyles[runtime.armaments.loadout()?.attackMode??runtime.player.attackStyle??'strike']}`),value:Math.ceil(e.hp),max:e.maxHp,color:boss||e.attack?.targetId==='player'?'#efb484':'#b4ddbe',maxDistance:boss?28:10,follow:()=>e.dead&&!boss?{x:pos.x,y:pos.y+.8,z:pos.z}:{x:pos.x,y:(pos.y??0)+(boss?3.2:1.6),z:pos.z}};}
+ }
+ if(hit&&hit.distance<=6){
+  if(hit.kind==='fixture'){const f=runtime.placements.records.get(hit.id);if(f)return {title:name(f.assetId),detail:`HP ${Math.ceil(f.hp)}/${f.maxHp}`,hint:flash||'상호작용: 설비 패널',value:f.hp,max:f.maxHp,position:hit.point,maxDistance:8};}
+  if(hit.kind==='machine'){const m=runtime.machines.machines.get(hit.id);if(m)return {title:m.name,detail:'기계',hint:flash||'상호작용: 기계 패널',position:hit.point,maxDistance:8};}
+  if(hit.kind==='object'&&hit.distance<4)return {title:'떨어진 물체',detail:flash||'',hint:'상호작용: 잡기 · 공격: 깎기',position:hit.point,maxDistance:6};
+  const terrain=runtime.terrainResource(hit);
+  if(terrain)return {title:name(terrain.sourceId),detail:'지형 자원',hint:'상호작용·공격: 채집',position:{x:terrain.x,y:terrain.y+.6,z:terrain.z},maxDistance:7,color:'#e5d6a1'};
+  if(hit.kind==='terrain'||hit.kind==='structure'){const dmg=flash;if(dmg)return {title:hit.kind==='terrain'?'지형':'구조물',detail:dmg,hint:'',position:hit.point,maxDistance:7,color:'#e5d6a1'};}
+ }
+ if(node&&node.distance<5)return {title:name(node.sourceId),detail:'채집물',hint:'상호작용·공격: 채집',position:{x:node.x,y:(node.y??runtime.atlas.heightAt(node.x,node.z))+.9,z:node.z},maxDistance:7,color:'#c9db9f'};
+ return anchorCard();
+}
+function contextCard(){
+ const g=runtime.progression,a=runtime.harvestAction,b=runtime.interactionAction,m=manualDeviceId?runtime.dungeons.devices.status(manualDeviceId,{progression:g}):null;
+ if(a){const seconds=g.catalog.get(a.sourceId).seconds;return {title:`${name(a.sourceId)} 채집`,detail:`${a.elapsed.toFixed(1)}/${seconds}초`,hint:'5m 안에 머무르세요',value:a.elapsed,max:seconds,color:'#c9db9f',position:{x:a.position.x,y:(a.position.y??runtime.atlas.heightAt(a.position.x,a.position.z))+1.4,z:a.position.z},maxDistance:9,side:-1};}
+ if(b){const at=b.position;return {title:'장치 조작',detail:`${b.elapsed.toFixed(1)}/${b.seconds}초`,hint:'3m 안에 머무르세요',value:b.elapsed,max:b.seconds,color:'#f1b08f',position:{x:at.x??at[0],y:(at.y??at[1])+1.6,z:at.z??at[2]},maxDistance:9,side:-1};}
+ if(m)return {title:'장치 작업',detail:m.summary??'',hint:m.work?.progressM>0?`진행 ${m.work.progressM.toFixed(2)} m`:'',position:{x:runtime.player.x-Math.sin(runtime.player.yaw)*1.5,y:runtime.player.y+1.8,z:runtime.player.z-Math.cos(runtime.player.yaw)*1.5},maxDistance:9,side:-1};
+ return null;
+}
+function hud(){
+ const p=runtime.player,g=runtime.progression,e=CONTENT.environments.entries.find(e=>e.id===runtime.region.environmentId);
+ $('biome').textContent=`${e?.name??''} · ${runtime.region.tier}티어`;
+ $('population').textContent=`생명체 ${runtime.creatures.visibleEntities(p).length}`;
+ $('coords').textContent=`${Math.round(p.x)} / ${Math.round(p.z)}`;
+ const job=g.researchJob,current=job&&g.catalog.get(job.id),progress=current?g.researchProgress[current.id]?.work??0:0;
+ setVitals({hp:p.hp,maxHp:p.maxHp,food:p.calories/p.maxCalories*100,level:g.research.size,xp:progress,xpMax:current?.work??1,
+  healthText:`체력 ${Math.ceil(p.hp)} / ${p.maxHp} · 연구 ${g.research.size}`,foodText:`식량 ${Math.ceil(p.calories/p.maxCalories*100)}% · ${p.resting?'휴식 중':runtime.drivingMachineId?'조종 중':'도보'}`,hurt:runtime.time-p.lastDamageAt<1});
+ const [goal]=objective();setJourney(journey,goal,current?`연구 중 · ${current.name} ${(progress/current.work*100).toFixed(0)}%`:`연구 ${g.research.size}/${g.list('research').length} · 눌러서 여정 보기`);
+ const target=destination??nearestUnexplored();$('waypoint').textContent=target?waypointText(p,target):'';
+ const driving=!!runtime.drivingMachineId,hit=view.aim(),node=nearestNode(),interaction=interactLabel(hit);
+ $('interactBtn').firstChild.textContent=(interaction||'상호작용')+' ';$('interactBtn').hidden=!interaction;
+ buttonLabels();
+ movementHud();
+ view.worldUI.set('focus',focusCard(hit,node));view.worldUI.set('context',contextCard());
+ const warning=runtime.activeWarning(),hazards=runtime.dungeons.devices?.sampleAt?.(p)?.hazards??[];
+ $('warning').textContent=warning?.text??(hazards.length?`위험 구역: ${hazards.map(h=>HAZARDS[h]??h).join(' · ')}`:'');
+ const firstJob=g.jobs[0];if(firstJob?.id!==jobWatch.id||firstJob.progress!==jobWatch.progress)jobWatch={id:firstJob?.id??null,progress:firstJob?.progress??0,since:performance.now()};
+ for(const message of runtime.messages.splice(0))notify(message,{queue:true});
+ discover();
+ const h=8+runtime.time/60;$('worldTime').textContent=`DAY ${String(1+Math.floor(h/24)).padStart(2,'0')} · ${String(Math.floor(h)%24).padStart(2,'0')}:${String(Math.floor((h%1)*60)).padStart(2,'0')}`;
+ updateToolLabel();
+}
+// Attack and use labels follow the held item and what the player is doing.
+function buttonLabels(){
+ const p=runtime.player,driving=!!runtime.drivingMachineId,heldItem=slots.held,d=heldItem&&runtime.progression.catalog.get(heldItem);
+ $('actBtn').querySelector('small').textContent=physical?.objectPhysics.held?'던지기':driving?'무장 발사':p.attackEnergy?`${energyNames[p.attackEnergy]} 공격`:'공격·채집';
+ $('useBtn').querySelector('small').textContent=driving?'내리기':physical?.objectPhysics.held?'놓기':heldItem==='food'?'먹기':d?.kind==='station'||d?.kind==='component'?'설치':'상호작용';
+}
+// First entry into a structure shows the same discovery banner as the island's landmarks.
+function discover(){
+ for(const d of runtime.nearbyStructures)if(d.discovered&&!discovered.has(d.id)){
+  discovered.add(d.id);const def=CONTENT.structures.entries.find(e=>e.id===d.templateId);
+  if(def){showDiscovery(discovered.size,def.name);notify(`새 장소 발견 · ${def.name}`,{queue:true});}
+ }
+}
+function nearestUnexplored(){
+ let best=null;
+ for(const d of runtime.nearbyStructures){const def=CONTENT.structures.entries.find(e=>e.id===d.templateId);if(!def||d.visitedRooms.length>=def.rooms.length)continue;const pos={x:d.origin[0],y:d.origin[1],z:d.origin[2]},dist=distance(runtime.player,pos);if(!best||dist<best.dist)best={name:def.name,...pos,dist};}
+ const death=runtime.deaths.find(d=>!d.recovered);if(death)return {name:'요정이 지키는 소지품',...death.position};
+ return best;
+}
+
+// ---- Loop ----
+function step(){
+ const keys=input.keys,axes=input.axes(),p=runtime.player;
+ const control=paused?{}:{forward:axes.forward,side:axes.side,jump:keys.has('Space'),sprint:keys.has('ShiftLeft')||keys.has('ShiftRight')||sprintLatched,speedScale:runtime.bosses.targetEffects(p).speedMultiplier};
+ const before={...p};if(control.forward||control.side||actionHeld)p.resting=false;
+ const driving=runtime.machines.machines.get(runtime.drivingMachineId);
+ if(driving)runtime.machines.control(driving.id,{throttle:control.forward||0,steer:-(control.side||0),pitch:Number(!!control.jump)-Number(keys.has('ShiftLeft')||keys.has('KeyQ')||held.descend),brake:keys.has('ControlLeft')||held.brake});
+ else{runtime.drivingMachineId=null;controller.step(FIXED_DT,control);physical?.movePlayer(before,p);}
+ if(actionHeld&&!paused&&!manual)attack();
+ runtime.tick(FIXED_DT,{manual,manualDeviceId,moving:!!(control.forward||control.side)});physical?.step(FIXED_DT);
+ if(driving&&runtime.drivingMachineId===driving.id&&runtime.machines.machines.has(driving.id)&&driving.voxels.length){
+  const c=driving.components.find(c=>c.componentId==='controller'),voxel=driving.voxels.find(v=>v.id===c?.voxelId);
+  const offset=voxel?new T.Vector3((voxel.cell[0]+.5)*driving.gridM,(voxel.cell[1]+1)*driving.gridM+.08,(voxel.cell[2]+.5)*driving.gridM):new T.Vector3(0,Math.max(...driving.voxels.map(v=>(v.cell[1]+1)*driving.gridM))+.08,0);
+  const q=driving.rotation;offset.applyQuaternion(new T.Quaternion(q.x,q.y,q.z,q.w));
+  Object.assign(p,{x:driving.position.x+offset.x,y:driving.position.y+offset.y,z:driving.position.z+offset.z,vy:0});
+ }
+}
+function frame(now){
+ requestAnimationFrame(frame);
+ const realDt=Math.max(.001,(now-(last||now))/1000||.016),dt=Math.min(.1,realDt);last=now;
+ if(!ready||document.hidden)return;
+ fpsFrames++;fpsTime+=realDt;if(fpsTime>1){fps=fpsFrames/fpsTime;fpsFrames=fpsTime=0;$('fps').textContent=`${fps.toFixed(0)} FPS`;}
+ if(!frozen()){
+  accum=Math.min(.5,accum+dt);while(accum>=FIXED_DT){step();accum-=FIXED_DT;}
+  saveClock+=dt;if(saveClock>30){saveClock=0;autosave.schedule(snapshot());}
+ }
+ runtime.atlas.loadAround(runtime.player.x,runtime.player.z,{radiusChunks:view.loadRadiusChunks??3,verticalRadius:1,y:runtime.player.y,chunkBudget:1});
+ view.syncTerrain();view.syncModels(runtime.descriptors(),runtime.time,dt);fragments.sync(view.models);physical?.synchronize(view.models,runtime.player);bossView.sync(runtime.bosses);environmentView.sync(runtime.player,runtime.time);equipmentView.sync(runtime,dt);feedbackView.sync(runtime,dt);anchorMarkers.sync(runtime,dt);
+ view.draw(runtime.player,controller.eye);
+ hudClock+=dt;tabClock+=dt;
+ if(hudClock>.2){hudClock=0;hud();}
+ if(tabClock>1){tabClock=0;
+  if(ledger.isOpen&&!manual&&!manualDeviceId&&!ledgerPointers.size&&!document.activeElement?.matches('#frontierContent input, #frontierContent select, #frontierContent textarea'))ledger.render();
+  const signature=JSON.stringify([runtime.progression.inventory,runtime.progression.jobs.map(j=>[j.id,Math.round(j.progress)]),slots.revision]);
+  if(signature!==bagSignature){bagSignature=signature;if(paused&&$('pauseScreen').classList.contains('inventoryMode')&&!document.activeElement?.matches('#recipeSearch'))bag.render();else renderHotbar();$('bagCount').textContent=slots.slots.filter(Boolean).length;}
+ }
+ updates.frame(true,now);
+}
+
+// ---- Screen wiring ----
+function bind(){
+ document.body.classList.add('field','expedition');
+ $('flyBtn').hidden=true;$('rangeBtn').classList.remove('hidden');
+ document.querySelector('[data-tab="life"]').hidden=true;
+ document.querySelector('[data-panel="world"] > p').textContent='끝없이 이어지는 세계입니다. 출발지에서 멀어질수록 위험해집니다. 던전·공동체·유적을 찾고, 채집한 표본으로 연구해 제작과 설비를 넓혀 가세요.';
+ $('homeBtn').textContent='휴식하기';$('homeBtn').onclick=rest;
+ $('hint').textContent='1–9 핫바 · I 가방 · R 상호작용 · J 여정';
+ $('inventoryBtn').onclick=openBag;
+ $('menuBtn').onclick=()=>{pause(true);selectTab('world',updatePanels);};
+ $('resumeBtn').onclick=$('backToGame').onclick=$('resumeWorld').onclick=()=>pause(false);
+ $('worldListBtn').onclick=e=>{if(!save())e.preventDefault();};
+ $('saveBtn').onclick=()=>{if(save())notify('탐험을 저장했습니다.');};
+ $('newBtn').onclick=()=>$('resetConfirm').classList.remove('hidden');$('cancelReset').onclick=()=>$('resetConfirm').classList.add('hidden');
+ $('confirmReset').onclick=()=>{ready=false;for(const suffix of ['','.a','.b'])localStorage.removeItem(saveKey(world)+suffix);location.reload();};
+ $('rangeBtn').onclick=cycleAttackStyle;
+ $('sprintBtn').onclick=()=>{if(!ready||paused||runtime.drivingMachineId)return;sprintLatched=changeSprint(controller,runtime.player,sprintLatched,notify);movementHud();};
+ $('crouchBtn').onclick=()=>toggleStance('crouch');$('crawlBtn').onclick=()=>toggleStance('crawl');
+ input.holdButton($('actBtn'),()=>{actionHeld=true;attack();},()=>actionHeld=false);
+ input.holdButton($('useBtn'),secondary,()=>{});
+ input.holdButton($('jumpBtn'),()=>{const p=runtime.player;if(p.stance!=='stand'&&!runtime.drivingMachineId)toggleStance(p.stance);else input.keys.add('Space');},()=>input.keys.delete('Space'));
+ input.holdButton($('descendBtn'),()=>held.descend=true,()=>held.descend=false);
+ input.holdButton($('brakeBtn'),()=>held.brake=true,()=>held.brake=false);
+ input.bindStick($('stick'),$('knob'));
+ input.bindCanvas($('world'),{primary:pressed=>{actionHeld=pressed;if(pressed)attack();},secondary,wheel:direction=>selectHotbar((slots.selectedSlot+(direction>0?1:8))%9),lockFailed:()=>notify('클릭 후 마우스 시점을 사용할 수 있습니다.')});
+ input.bindKeyboard({isRunning:()=>ready,toggleBag:()=>paused?pause(false):openBag(),togglePause:()=>pause(),onKey:e=>{
+  if(!e.repeat&&(e.code==='KeyC'||e.code==='KeyZ')){toggleStance(e.code==='KeyC'?'crouch':'crawl');return;}
+  if(!e.repeat&&e.code==='Space'&&runtime.player.stance!=='stand'&&!runtime.drivingMachineId){toggleStance(runtime.player.stance);return;}
+  if(!e.repeat&&(e.code==='KeyE'||e.code==='KeyR')){interact();return;}
+  if(!e.repeat&&e.code==='KeyJ'){ledger.open('journey');return;}
+  input.keys.add(e.code);
+  if(/^Digit[1-9]$/.test(e.code))selectHotbar(+e.code.slice(-1)-1);
+ }});
+ document.getElementById('frontierContent').addEventListener('pointerdown',e=>ledgerPointers.add(e.pointerId));
+ for(const type of ['pointerup','pointercancel'])window.addEventListener(type,e=>ledgerPointers.delete(e.pointerId));
+ bindMenuTabs(updatePanels);
+ bindBackground({onHide:()=>{if(ready){save();if(!paused)pause(true,{quiet:true});}},onUnload:()=>{if(ready)save();},onBlur:stopInput});
+ window.addEventListener('resize',()=>view.resize());
+}
+function toggleStance(stance){
+ if(!ready||paused||runtime.drivingMachineId)return;sprintLatched=false;changeStance(controller,runtime.player,stance,notify);movementHud();
+}
+function movementHud(){
+ const p=runtime.player,driving=!!runtime.drivingMachineId;
+ showMovementState({riding:driving,flying:driving,brake:driving,stance:p.stance,stanceBlocked:p.stanceBlocked,sprinting:!!p.sprinting,sprintLatched});
+}
+
+const paint=()=>new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));
+async function stage(text,percent){loading.set(text,percent);await paint();}
+const LOAD_STEPS={world:['세계와 생태계를 구성하는 중',55],placements:['설치한 설비를 불러오는 중',65]};
+async function boot(){
+ $('startBtn').hidden=true;$('continueBtn').hidden=true;
+ await stage('저장을 확인하는 중',6);
+ world=currentWorld(localStorage,'expedition',location.search);saveStore=new ExpeditionSave(localStorage,saveKey(world));const saved=saveStore.load();
+ await stage('건축물 모델을 불러오는 중',10);
+ runtime=await ExpeditionRuntime.create(world.seed,saved,{pause:paint,onProgress:(step,done,total)=>step==='assets'?loading.step(`건축물 모델을 불러오는 중 ${done}/${total}`,10+40*done/total):loading.set(...LOAD_STEPS[step])});
+ await stage('장면을 준비하는 중',72);
+ view=new ExpeditionScene($('world'),runtime.atlas);controller=new CharacterController(runtime.terrain,runtime.player);
+ settings=initSettings({view,onLeftHand:()=>hudEditor?.apply()});view.camera.fov=+$('fov').value;view.camera.updateProjectionMatrix();if(!view.loadRadiusChunks)view.qualitySet($('quality').value);
+ autosave=new Autosave(saveStore,{onSaved:()=>{$('saveState').textContent='SAVED '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});},onError:error=>{$('saveState').textContent='SAVE FAILED';console.warn(error);notify('자동 저장하지 못했습니다. 이전 정상 저장은 보존됩니다.');}});
+ bossView=new BossView(view);equipmentView=new EquipmentView(view);feedbackView=new FeedbackView(view);anchorMarkers=new AnchorMarkers(view);
+ environmentView=new EnvironmentView(view,runtime.atlas);machinePanel=new MachinePanel(runtime,{report,drive:driveMachine});fixtureEnergyPanel=new FixtureEnergyPanel(runtime,{report,onManual:value=>{manual=value;if(value)actionHeld=false;}});
+ slots=new ItemSlots(runtime.progression,saved?.itemSlots);
+ catalog=designCatalog(runtime,{name,actions:itemActions,queue:renderQueue});
+ bag=new InventoryUI({get inventory(){return slots;},frontier:false,catalog,craft:id=>report(runtime.progression.queueCraft(id),'제작을 시작했습니다. 진행은 가방의 작업 대기열에서 확인하세요.'),toast:notify,changed:()=>{renderHotbar();updateToolLabel();},renderHotbar});
+ mountFieldHUD({journalLabel:'여정과 발견',onJournal:()=>ledger.open('journey'),onStatus:()=>ledger.open('status'),onInteract:interact});
+ journey=mountJourney(()=>ledger.open('journey'));
+ ledger=new GameWindow({tabs:TABS,titles:TITLES,label:'탐험 장부',canOpen:()=>ready,onOpen:()=>pause(true,{quiet:true}),onClose:()=>pause(false),render:renderLedger});
+ installHUDArt();
+ hudEditor=new HudEditor({open:()=>{pause(true);ledger.close();$('pauseScreen').classList.add('hidden');},close:()=>{stopInput();pause(true);selectTab('settings',updatePanels);}});
+ $('editHudBtn').onclick=()=>hudEditor.open();$('editHudShortcut').onclick=()=>hudEditor.open();
+ window.FeralUpdates=updates=initUpdates({beforeApply:save});
+ await stage('물리 엔진을 준비하는 중',82);
+ const {RuntimePhysics}=await import('./physics.js');physical=await RuntimePhysics.create(runtime,view);
+ await stage('탐험을 시작하는 중',95);
+ runtime.physics=physical;runtime.terrain.hasAttackLineOfSight=(a,b,options)=>runtime.lineOfSight(a,b)&&(physical.hasAttackLineOfSight?.(a,b,options)??true);
+ fragments=new CreatureFragments(CONTENT,runtime.creatures,runtime.objects,{getModelRecord:id=>view.models.get(id),getPartPhysics:(owner,part)=>physical.getPartPhysics?.(owner,part)});
+ for(const d of runtime.dungeons.instances.values())if(d.discovered)discovered.add(d.id);
+ ready=true;bind();renderHotbar();updateToolLabel();
+ loading.finish();$('titleScreen').classList.add('hidden');$('hud').classList.remove('hidden');hudEditor.apply();
+ installErrorScreen();
+ window.FERAL={ready:true,map:'expedition',bootTimings:loading.timings,runtime,view,controller,physics:physical,slots,bag,ledger,save,pause,interact,openBag,selectHotbar,stats:()=>({running:ready&&!paused,paused,rewardMarkers:anchorMarkers.markers.size,warning:$('warning').textContent,toast:$('toast').textContent,version:VERSION.version,versionCode:VERSION.versionCode,player:{...runtime.player},regions:runtime.seenRegions.size,models:view.models.size,chunks:runtime.atlas.activeChunks.size,held:slots.held})};
+ window.FeralNative={save,pause:()=>{save();if(!paused)pause(true,{quiet:true});},back:()=>{if(hudEditor.editing)hudEditor.cancel();else if(ledger.isOpen)pause(false);else pause();}};
+ requestAnimationFrame(frame);
+}
+boot().catch(e=>{console.error(e);loading.fail(`세계 준비를 완료하지 못했습니다: ${e.message}`);});

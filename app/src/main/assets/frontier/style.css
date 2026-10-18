@@ -5,13 +5,13 @@ body.frontier #hotbar .slot:nth-child(7),
 body.frontier #hotbar .slot:nth-child(9) {
   display: none;
 }
-body.frontier #hud .telemetry {
+body.field #hud .telemetry {
   max-width: 50%;
 }
-body.frontier #discovery {
+body.field #discovery {
   top: 31%;
 }
-body.frontier #events {
+body.field #events {
   display: none;
 }
 #frontierHUD {
@@ -257,7 +257,7 @@ body.frontier #events {
   #bossHUD {
     width: 230px;
   }
-  body.frontier #discovery {
+  body.field #discovery {
     top: 45%;
   }
 }
@@ -283,7 +283,7 @@ body.frontier #events {
     left: 16px;
     right: auto;
   }
-  body.frontier #discovery {
+  body.field #discovery {
     display: none;
   }
   #frontierPanel {

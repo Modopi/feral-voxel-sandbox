@@ -1,3 +1,4 @@
+import { mountJourney, setJourney } from "../shell.js";
 import { T } from "../render.js";
 import { ITEMS } from "../inventory.js";
 import { sourceHints } from "../acquisition.js";
@@ -30,16 +31,10 @@ export class CampaignView {
     this.c = parent.c;
     this.track = true;
     this.page = "journey";
-    const button = document.createElement("button");
-    button.id = "journeyHUD";
-    button.setAttribute("aria-label", "여정과 현재 목표");
-    button.innerHTML = "<b></b><small></small>";
-    button.onclick = () => {
+    this.button = mountJourney(() => {
       this.page = "journey";
       parent.open("journey");
-    };
-    document.getElementById("frontierHUD").append(button);
-    this.button = button;
+    });
   }
   reset() {
     const v = this.v,
@@ -159,11 +154,7 @@ export class CampaignView {
       : m.done
         ? "달성 · 눌러서 보상 수령"
         : "눌러서 목표와 준비물 확인";
-    if (this.button.firstChild.textContent !== title)
-      this.button.firstChild.textContent = title;
-    if (this.button.lastChild.textContent !== detail)
-      this.button.lastChild.textContent = detail;
-    this.button.classList.toggle("ready", m.done || !!run?.done);
+    setJourney(this.button, title, detail, m.done || !!run?.done);
     if (this.track) {
       let target = objectiveDestination(s);
       if (run)
