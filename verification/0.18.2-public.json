@@ -1,0 +1,18 @@
+{
+  "version": "0.18.2",
+  "commit": "4c1bb18b24bd92c3ad1feb80128603dc94b23609",
+  "catalogEntries": 35,
+  "previousEntriesPreserved": 34,
+  "unauthenticatedDownloads": {
+    "catalog": "https://raw.githubusercontent.com/Modopi/feral-voxel-sandbox/updates/catalog.json",
+    "stable": "https://raw.githubusercontent.com/Modopi/feral-voxel-sandbox/updates/stable.feral",
+    "version": "https://raw.githubusercontent.com/Modopi/feral-voxel-sandbox/updates/versions/0.18.2.feral",
+    "release": "https://github.com/Modopi/feral-voxel-sandbox/releases/download/v0.18.2/Feral-0.18.2-update.feral",
+    "apk": "https://github.com/Modopi/feral-voxel-sandbox/releases/download/v0.18.2/Feral-0.3.3-android.apk"
+  },
+  "packageSha256": "ccc9ae039534289c1d776e6c3c396ea0359c57ebad5da48382e10467c4880356",
+  "archiveSha256": "9164d9d16fb12b1dff08bad1d3f5ca7ab6d85f9be8302ffcdc305d096328fadb",
+  "apkSha256": "08ca142e832b31b7b54f235205b3faff3b9179be7a5ddcaf0dcd116d14c57345",
+  "localAndPublicPackagesIdentical": true,
+  "releaseApkAssetsIdenticalToUpdate": true
+}

@@ -63,6 +63,8 @@
 
 ### 0.18.2 — 콘텐츠 탐험의 낙하 파편 렉 수정
 
+2026-11-07 18:43 UTC [v0.18.2 Release](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.18.2) 게시. [PR #51](https://github.com/Modopi/feral-voxel-sandbox/pull/51), 병합 커밋 `4c1bb18`의 [배포 Actions](https://github.com/Modopi/feral-voxel-sandbox/actions/runs/42402615473)와 복셀 제작 검사가 성공했다.
+
 게임 1820 / 앱·최소 앱 303 / 저장 스키마 4. 비충돌 잎 파편을 따라 지하 충돌체를 계속 생성하던 경로를 막고, 비고체 파편의 물리 활성 범위를 3차원 64 m로 정했다. 고체 물체의 활성 범위는 기존대로다. 물체와 저장은 유지한다. 앱 0.3.3에서는 런처의 **업데이트 → 지금 확인 → 저장 후 적용**으로 받는다. 네이티브 코드 변경이 없는 게임 전용 패치다. 게시 결과와 검증은 [0.18.2 검증](../verification/0.18.2.md).
 
 ### 0.18.1 — 쓰러진 나무를 깎을 때의 렉 수정 (P2a 보충)
