@@ -120,3 +120,50 @@ test('in Rapier a piece\'s body is rebuilt only when its cells change, not when 
     assert.ok(Math.abs(next.body.mass() - objects.get(piece.id).massKg) < 1e-6);
   } finally { p.dispose(); }
 });
+
+test('a leaf split by impact leaves active physics vertically, survives saves, and reactivates nearby', async () => {
+  const atlas = world([['0,1,0', 'log'], ['0,2,0', 'leaves']]);
+  Object.assign(atlas, { revision: 0, isSolidCell: (_x, y) => y < 0, heightAt: () => 0 });
+  const objects = new WorldObjects(CONTENT, atlas), tree = objects.detachAround([0, 0, 0]).objects[0];
+  objects.damageAt(tree.id, { x: .25, y: 1.25, z: .25 }, 1e9, { knockLoose: true });
+  const leaf = [...objects.objects.values()].find(o => o.cells.every(c => c.blockId === 'leaves'));
+  assert.ok(leaf && leaf.cells.length === 1);
+  const rt = { atlas, player: { x: 0, y: 0, z: 0 }, nearbyStructures: [], objects };
+  const p = await RuntimePhysics.create(rt, null, { terrainRadius: 2 });
+  try {
+    p.synchronize(new Map(), rt.player);
+    assert.ok(p.objectPhysics.bodies.get(leaf.id).entry.colliders.every(c => c.isSensor()));
+    for (let i = 0; i < 300; i++) p.step(1 / 60);
+    assert.ok(leaf.position.y < -64);
+    assert.equal(p.objectPhysics.bodies.has(leaf.id), false, 'vertical distance retires the active body');
+    assert.ok(p.objectPhysics.bodies.has(tree.id), 'solid trunk remains active');
+    const resting = structuredClone(leaf.position);
+    for (let i = 0; i < 60; i++) p.step(1 / 60);
+    assert.deepEqual(leaf.position, resting, 'inactive debris stops falling');
+    const restored = new WorldObjects(CONTENT, atlas, objects.serialize());
+    assert.deepEqual(restored.get(leaf.id).cells, leaf.cells, 'no deletion of saved material');
+    assert.deepEqual(restored.get(leaf.id).position, resting);
+    rt.objects = restored; p.objectPhysics.sync();
+    assert.equal(p.objectPhysics.bodies.has(leaf.id), false, 'an old underground save does not activate far debris');
+    rt.player.y = resting.y; p.objectPhysics.sync();
+    const entry = p.objectPhysics.bodies.get(leaf.id).entry;
+    assert.ok(entry.colliders.every(c => c.isSensor()));
+    assert.ok(Math.abs(entry.body.mass() - leaf.massKg) < 1e-6);
+    assert.ok(Math.abs(entry.body.linvel().y - leaf.velocity.y) < 1e-4, 'motion is retained for reactivation');
+  } finally { p.dispose(); }
+});
+
+test('a tall solid piece keeps nearby collision when its origin is more than 64 m below the player', async () => {
+  const atlas = world(Array.from({ length: 142 }, (_, i) => [`0,${i - 140},0`, 'log']));
+  Object.assign(atlas, { revision: 0, isSolidCell: () => false, heightAt: () => 0 });
+  const objects = new WorldObjects(CONTENT, atlas), piece = objects.detachAround([0, -141, 0]).objects[0];
+  assert.equal(piece.position.y, -70);
+  const rt = { atlas, player: { x: 0, y: 0, z: 0 }, nearbyStructures: [], objects };
+  const p = await RuntimePhysics.create(rt, null, { terrainRadius: 2 });
+  try {
+    p.objectPhysics.sync();
+    const entry = p.objectPhysics.bodies.get(piece.id)?.entry;
+    assert.ok(entry, 'solid range stays horizontal despite its distant origin');
+    assert.ok(entry.colliders.some(c => !c.isSensor() && c.translation().y + c.shape.halfExtents.y >= 1), 'the upper solid collider remains beside the player');
+  } finally { p.dispose(); }
+});

@@ -1,0 +1,2315 @@
+[
+  {
+    "label": "baseline",
+    "seconds": 7.966666666666644,
+    "frames": 105,
+    "interval": {
+      "mean": 47.406666666666446,
+      "p95": 66.70000000000073,
+      "max": 100
+    },
+    "perf": {
+      "frames": 105,
+      "stepsPerFrame": 2.638095238095238,
+      "frameMs": {
+        "mean": 16.13904761904518,
+        "p95": 32.5,
+        "max": 37.70000000006985
+      },
+      "phases": {
+        "simulate": {
+          "msPerFrame": 5.081904761906758,
+          "callsPerFrame": 1,
+          "maxMs": 26.599999999976717
+        },
+        "view.models": {
+          "msPerFrame": 4.132380952387827,
+          "callsPerFrame": 1,
+          "maxMs": 17
+        },
+        "view.draw": {
+          "msPerFrame": 3.9076190476161647,
+          "callsPerFrame": 1,
+          "maxMs": 24.899999999906868
+        },
+        "step.physics": {
+          "msPerFrame": 3.2257142857138423,
+          "callsPerFrame": 2.638095238095238,
+          "maxMs": 23.900000000023283
+        },
+        "physics.sync": {
+          "msPerFrame": 2.305714285712955,
+          "callsPerFrame": 1,
+          "maxMs": 24.399999999906868
+        },
+        "step.world": {
+          "msPerFrame": 1.2028571428631298,
+          "callsPerFrame": 2.638095238095238,
+          "maxMs": 20.800000000046566
+        },
+        "step.move": {
+          "msPerFrame": 0.5695238095187094,
+          "callsPerFrame": 2.638095238095238,
+          "maxMs": 5.199999999953434
+        },
+        "ui": {
+          "msPerFrame": 0.3619047619058706,
+          "callsPerFrame": 1,
+          "maxMs": 2.800000000046566
+        },
+        "view.effects": {
+          "msPerFrame": 0.2076190476194911,
+          "callsPerFrame": 1,
+          "maxMs": 4.099999999976717
+        },
+        "terrain.mesh": {
+          "msPerFrame": 0.08476190475990907,
+          "callsPerFrame": 1,
+          "maxMs": 3.599999999976717
+        },
+        "terrain.stream": {
+          "msPerFrame": 0.03904761904296244,
+          "callsPerFrame": 1,
+          "maxMs": 0.19999999995343387
+        }
+      }
+    },
+    "methods": {
+      "view.draw": {
+        "calls": 105,
+        "msPerFrame": 3.905714285710738,
+        "max": 24.79999999993015
+      },
+      "view.syncModels": {
+        "calls": 105,
+        "msPerFrame": 3.400952380953268,
+        "max": 16.400000000023283
+      },
+      "physics.step": {
+        "calls": 277,
+        "msPerFrame": 3.2190476190487276,
+        "max": 23.900000000023283
+      },
+      "physics.worldStep": {
+        "calls": 277,
+        "msPerFrame": 3.1371428571486226,
+        "max": 23.79999999993015
+      },
+      "physics.synchronize": {
+        "calls": 105,
+        "msPerFrame": 2.3009523809521593,
+        "max": 24.399999999906868
+      },
+      "physics.sweepPart": {
+        "calls": 4620,
+        "msPerFrame": 1.7276190476225954,
+        "max": 14.199999999953434
+      },
+      "runtime.tick": {
+        "calls": 277,
+        "msPerFrame": 1.1990476190522756,
+        "max": 20.800000000046566
+      },
+      "physics.movePlayer": {
+        "calls": 277,
+        "msPerFrame": 0.34285714284938185,
+        "max": 5.199999999953434
+      },
+      "physics.structureModelBoxes": {
+        "calls": 5040,
+        "msPerFrame": 0.15238095237984367,
+        "max": 2.199999999953434
+      },
+      "view.aim": {
+        "calls": 22,
+        "msPerFrame": 0.09333333333599425,
+        "max": 0.8000000000465661
+      },
+      "view.syncTerrain": {
+        "calls": 105,
+        "msPerFrame": 0.08476190475990907,
+        "max": 3.599999999976717
+      },
+      "physics.terrainAt": {
+        "calls": 659,
+        "msPerFrame": 0.02761904762037808,
+        "max": 0.10000000009313226
+      },
+      "physics.syncStructures": {
+        "calls": 105,
+        "msPerFrame": 0.020952380957481052,
+        "max": 0.10000000009313226
+      },
+      "physics.playerImpacts": {
+        "calls": 277,
+        "msPerFrame": 0.016190476190032704,
+        "max": 1
+      },
+      "physics.matterImpacts": {
+        "calls": 277,
+        "msPerFrame": 0.005714285712955253,
+        "max": 0.09999999997671694
+      },
+      "objectPhysics.sync": {
+        "calls": 382,
+        "msPerFrame": 0.00476190476301348,
+        "max": 0.10000000009313226
+      },
+      "objectPhysics.capture": {
+        "calls": 277,
+        "msPerFrame": 0.004761904761904762,
+        "max": 0.10000000009313226
+      },
+      "objects.sceneModels": {
+        "calls": 105,
+        "msPerFrame": 0.0009523809521592089,
+        "max": 0.09999999997671694
+      },
+      "view.makeModel": {
+        "calls": 1,
+        "msPerFrame": 0.0009523809521592089,
+        "max": 0.09999999997671694
+      }
+    },
+    "hooks": 172868,
+    "refreshes": 0,
+    "objects": [],
+    "colliders": 1129,
+    "sections": 75,
+    "pendingDetach": 0,
+    "drawCalls": 519,
+    "triangles": 77732
+  },
+  {
+    "label": "1 trees immediate",
+    "seconds": 13.150000000000233,
+    "frames": 115,
+    "interval": {
+      "mean": 52.227826086956526,
+      "p95": 83.39999999999964,
+      "max": 183.3000000000011
+    },
+    "perf": {
+      "frames": 115,
+      "stepsPerFrame": 2.6782608695652175,
+      "frameMs": {
+        "mean": 17.618260869567038,
+        "p95": 32.40000000002328,
+        "max": 173.30000000004657
+      },
+      "phases": {
+        "view.draw": {
+          "msPerFrame": 5.081739130437009,
+          "callsPerFrame": 1,
+          "maxMs": 135.69999999995343
+        },
+        "view.models": {
+          "msPerFrame": 4.046086956527206,
+          "callsPerFrame": 1,
+          "maxMs": 22.300000000046566
+        },
+        "simulate": {
+          "msPerFrame": 3.995652173914056,
+          "callsPerFrame": 1,
+          "maxMs": 26.100000000093132
+        },
+        "physics.sync": {
+          "msPerFrame": 2.931304347820823,
+          "callsPerFrame": 1,
+          "maxMs": 24.5
+        },
+        "step.physics": {
+          "msPerFrame": 2.5069565217486462,
+          "callsPerFrame": 2.6782608695652175,
+          "maxMs": 24
+        },
+        "step.world": {
+          "msPerFrame": 0.98956521738766,
+          "callsPerFrame": 2.6782608695652175,
+          "maxMs": 7.599999999976717
+        },
+        "ui": {
+          "msPerFrame": 0.6365217391290175,
+          "callsPerFrame": 1,
+          "maxMs": 17.400000000023283
+        },
+        "terrain.mesh": {
+          "msPerFrame": 0.5486956521706736,
+          "callsPerFrame": 1,
+          "maxMs": 20.099999999976717
+        },
+        "step.move": {
+          "msPerFrame": 0.45913043477795207,
+          "callsPerFrame": 2.6782608695652175,
+          "maxMs": 10.099999999976717
+        },
+        "view.effects": {
+          "msPerFrame": 0.22782608695915374,
+          "callsPerFrame": 1,
+          "maxMs": 4.699999999953434
+        },
+        "terrain.stream": {
+          "msPerFrame": 0.13478260869362757,
+          "callsPerFrame": 1,
+          "maxMs": 2.900000000023283
+        }
+      }
+    },
+    "methods": {
+      "view.draw": {
+        "calls": 115,
+        "msPerFrame": 5.08000000000162,
+        "max": 135.69999999995343
+      },
+      "view.syncModels": {
+        "calls": 115,
+        "msPerFrame": 3.2252173913085995,
+        "max": 21.599999999976717
+      },
+      "physics.synchronize": {
+        "calls": 115,
+        "msPerFrame": 2.9286956521692566,
+        "max": 24.5
+      },
+      "physics.step": {
+        "calls": 308,
+        "msPerFrame": 2.503478260879891,
+        "max": 24
+      },
+      "physics.worldStep": {
+        "calls": 311,
+        "msPerFrame": 2.414782608702333,
+        "max": 23.899999999906868
+      },
+      "physics.sweepPart": {
+        "calls": 5060,
+        "msPerFrame": 1.7356521739118287,
+        "max": 17.699999999953434
+      },
+      "runtime.tick": {
+        "calls": 308,
+        "msPerFrame": 0.9852173913007035,
+        "max": 7.599999999976717
+      },
+      "view.syncTerrain": {
+        "calls": 115,
+        "msPerFrame": 0.5478260869534848,
+        "max": 20.099999999976717
+      },
+      "physics.structureModelBoxes": {
+        "calls": 5520,
+        "msPerFrame": 0.3226086956519715,
+        "max": 4.099999999976717
+      },
+      "physics.movePlayer": {
+        "calls": 308,
+        "msPerFrame": 0.2800000000006074,
+        "max": 3.300000000046566
+      },
+      "objects.detachAround": {
+        "calls": 1,
+        "msPerFrame": 0.1747826086954497,
+        "max": 20.099999999976717
+      },
+      "view.aim": {
+        "calls": 25,
+        "msPerFrame": 0.15478260869808172,
+        "max": 4.5
+      },
+      "physics.terrainAt": {
+        "calls": 731,
+        "msPerFrame": 0.13043478260565874,
+        "max": 2.5
+      },
+      "adapter.addBody": {
+        "calls": 48,
+        "msPerFrame": 0.06608695652356128,
+        "max": 2.200000000069849
+      },
+      "objects._build": {
+        "calls": 1,
+        "msPerFrame": 0.06000000000020246,
+        "max": 6.900000000023283
+      },
+      "objectPhysics.sync": {
+        "calls": 423,
+        "msPerFrame": 0.05043478261011288,
+        "max": 4.300000000046566
+      },
+      "view.makeModel": {
+        "calls": 19,
+        "msPerFrame": 0.049565217391911734,
+        "max": 5.300000000046566
+      },
+      "view.updatePiece": {
+        "calls": 1,
+        "msPerFrame": 0.04521739130495521,
+        "max": 5.200000000069849
+      },
+      "physics.syncStructures": {
+        "calls": 115,
+        "msPerFrame": 0.03652173913002986,
+        "max": 1.7999999999301508
+      },
+      "objectPhysics.capture": {
+        "calls": 308,
+        "msPerFrame": 0.024347826091410674,
+        "max": 0.30000000004656613
+      },
+      "adapter.removeOwner": {
+        "calls": 39,
+        "msPerFrame": 0.02000000000141723,
+        "max": 0.40000000002328306
+      },
+      "physics.matterImpacts": {
+        "calls": 308,
+        "msPerFrame": 0.017391304347826087,
+        "max": 1
+      },
+      "physics._terrainSectionBoxes": {
+        "calls": 55,
+        "msPerFrame": 0.015652173912436094,
+        "max": 0.19999999995343387
+      },
+      "physics.playerImpacts": {
+        "calls": 308,
+        "msPerFrame": 0.010434782610315343,
+        "max": 0.10000000009313226
+      },
+      "objects.sceneModels": {
+        "calls": 115,
+        "msPerFrame": 0.008695652173913044,
+        "max": 0.10000000009313226
+      },
+      "physics.impactPair": {
+        "calls": 2,
+        "msPerFrame": 0.00695652173852305,
+        "max": 0.7999999999301508
+      },
+      "objects.setPhysicsPose": {
+        "calls": 101,
+        "msPerFrame": 0.005217391304145364,
+        "max": 0.19999999995343387
+      }
+    },
+    "hooks": 205634,
+    "refreshes": 3,
+    "objects": [
+      {
+        "id": "object:1",
+        "cells": 260,
+        "position": {
+          "x": -5.502920627593994,
+          "y": 4.000011444091797,
+          "z": 11.004644393920898
+        },
+        "velocity": {
+          "x": 0.0000042346327973064035,
+          "y": 5.517625822903938e-7,
+          "z": -0.000003535332098181243
+        },
+        "mass": 3840,
+        "colliders": 8,
+        "sleeping": true
+      }
+    ],
+    "colliders": 1205,
+    "sections": 75,
+    "pendingDetach": 0,
+    "drawCalls": 481,
+    "triangles": 69808
+  },
+  {
+    "label": "1 trees settled",
+    "seconds": 18.566666666666894,
+    "frames": 124,
+    "interval": {
+      "mean": 47.973387096773436,
+      "p95": 83.29999999999927,
+      "max": 100
+    },
+    "perf": {
+      "frames": 124,
+      "stepsPerFrame": 2.620967741935484,
+      "frameMs": {
+        "mean": 15.133870967730482,
+        "p95": 30.900000000023283,
+        "max": 40
+      },
+      "phases": {
+        "view.draw": {
+          "msPerFrame": 4.73548387097206,
+          "callsPerFrame": 1,
+          "maxMs": 24.900000000023283
+        },
+        "view.models": {
+          "msPerFrame": 4.188709677414848,
+          "callsPerFrame": 1,
+          "maxMs": 28.199999999953434
+        },
+        "simulate": {
+          "msPerFrame": 3.5274193548342034,
+          "callsPerFrame": 1,
+          "maxMs": 22.5
+        },
+        "step.physics": {
+          "msPerFrame": 2.1379032258147133,
+          "callsPerFrame": 2.620967741935484,
+          "maxMs": 19.699999999953434
+        },
+        "physics.sync": {
+          "msPerFrame": 1.8387096774259266,
+          "callsPerFrame": 1,
+          "maxMs": 18
+        },
+        "step.world": {
+          "msPerFrame": 1.04274193548143,
+          "callsPerFrame": 2.620967741935484,
+          "maxMs": 19.79999999993015
+        },
+        "ui": {
+          "msPerFrame": 0.49435483870723645,
+          "callsPerFrame": 1,
+          "maxMs": 11.900000000023283
+        },
+        "step.move": {
+          "msPerFrame": 0.299193548381276,
+          "callsPerFrame": 2.620967741935484,
+          "maxMs": 3.5
+        },
+        "view.effects": {
+          "msPerFrame": 0.21532258063727508,
+          "callsPerFrame": 1,
+          "maxMs": 3.099999999976717
+        },
+        "terrain.mesh": {
+          "msPerFrame": 0.07419354838484357,
+          "callsPerFrame": 1,
+          "maxMs": 3.199999999953434
+        },
+        "terrain.stream": {
+          "msPerFrame": 0.040322580647038954,
+          "callsPerFrame": 1,
+          "maxMs": 0.10000000009313226
+        }
+      }
+    },
+    "methods": {
+      "view.draw": {
+        "calls": 124,
+        "msPerFrame": 4.732258064519321,
+        "max": 24.900000000023283
+      },
+      "view.syncModels": {
+        "calls": 124,
+        "msPerFrame": 3.4548387096747906,
+        "max": 27.600000000093132
+      },
+      "physics.step": {
+        "calls": 325,
+        "msPerFrame": 2.1379032258147133,
+        "max": 19.699999999953434
+      },
+      "physics.worldStep": {
+        "calls": 325,
+        "msPerFrame": 2.0685483871024073,
+        "max": 19.699999999953434
+      },
+      "physics.synchronize": {
+        "calls": 124,
+        "msPerFrame": 1.8379032258132113,
+        "max": 18
+      },
+      "physics.sweepPart": {
+        "calls": 5456,
+        "msPerFrame": 1.2790322580586955,
+        "max": 2.900000000023283
+      },
+      "runtime.tick": {
+        "calls": 325,
+        "msPerFrame": 1.0395161290286905,
+        "max": 19.79999999993015
+      },
+      "view.aim": {
+        "calls": 26,
+        "msPerFrame": 0.2129032258047617,
+        "max": 10.800000000046566
+      },
+      "physics.movePlayer": {
+        "calls": 325,
+        "msPerFrame": 0.20887096773555142,
+        "max": 3.400000000023283
+      },
+      "physics.structureModelBoxes": {
+        "calls": 5952,
+        "msPerFrame": 0.13951612903169477,
+        "max": 1.900000000023283
+      },
+      "physics.terrainAt": {
+        "calls": 774,
+        "msPerFrame": 0.10483870967835819,
+        "max": 4
+      },
+      "view.syncTerrain": {
+        "calls": 124,
+        "msPerFrame": 0.0717741935466972,
+        "max": 3.199999999953434
+      },
+      "physics.syncStructures": {
+        "calls": 124,
+        "msPerFrame": 0.05483870967310072,
+        "max": 4.199999999953434
+      },
+      "physics.playerImpacts": {
+        "calls": 325,
+        "msPerFrame": 0.00967741935540201,
+        "max": 0.10000000009313226
+      },
+      "objectPhysics.sync": {
+        "calls": 449,
+        "msPerFrame": 0.008870967740808883,
+        "max": 0.10000000009313226
+      },
+      "physics.matterImpacts": {
+        "calls": 325,
+        "msPerFrame": 0.006451612903601339,
+        "max": 0.10000000009313226
+      },
+      "objectPhysics.capture": {
+        "calls": 325,
+        "msPerFrame": 0.005645161289008214,
+        "max": 0.09999999997671694
+      },
+      "objects.sceneModels": {
+        "calls": 124,
+        "msPerFrame": 0.004838709678170422,
+        "max": 0.10000000009313226
+      },
+      "view.makeModel": {
+        "calls": 1,
+        "msPerFrame": 0,
+        "max": 0
+      }
+    },
+    "hooks": 208307,
+    "refreshes": 0,
+    "objects": [
+      {
+        "id": "object:1",
+        "cells": 260,
+        "position": {
+          "x": -5.502920627593994,
+          "y": 4.000011444091797,
+          "z": 11.004644393920898
+        },
+        "velocity": {
+          "x": 0.0000042346327973064035,
+          "y": 5.517625822903938e-7,
+          "z": -0.000003535332098181243
+        },
+        "mass": 3840,
+        "colliders": 8,
+        "sleeping": true
+      }
+    ],
+    "colliders": 1205,
+    "sections": 75,
+    "pendingDetach": 0,
+    "drawCalls": 492,
+    "triangles": 70270
+  },
+  {
+    "label": "3 trees immediate",
+    "seconds": 23.94999999999992,
+    "frames": 121,
+    "interval": {
+      "mean": 49.60413223140438,
+      "p95": 83.29999999999927,
+      "max": 116.79999999999927
+    },
+    "perf": {
+      "frames": 121,
+      "stepsPerFrame": 2.669421487603306,
+      "frameMs": {
+        "mean": 15.191735537189698,
+        "p95": 30.800000000046566,
+        "max": 37.699999999953434
+      },
+      "phases": {
+        "view.draw": {
+          "msPerFrame": 4.491735537187196,
+          "callsPerFrame": 1,
+          "maxMs": 23.699999999953434
+        },
+        "view.models": {
+          "msPerFrame": 4.227272727268879,
+          "callsPerFrame": 1,
+          "maxMs": 27.099999999976717
+        },
+        "simulate": {
+          "msPerFrame": 3.849586776860851,
+          "callsPerFrame": 1,
+          "maxMs": 29.5
+        },
+        "step.physics": {
+          "msPerFrame": 2.552066115693243,
+          "callsPerFrame": 2.669421487603306,
+          "maxMs": 23.5
+        },
+        "physics.sync": {
+          "msPerFrame": 1.8388429752143085,
+          "callsPerFrame": 1,
+          "maxMs": 12.900000000023283
+        },
+        "step.world": {
+          "msPerFrame": 0.919834710748997,
+          "callsPerFrame": 2.669421487603306,
+          "maxMs": 19.20000000006985
+        },
+        "ui": {
+          "msPerFrame": 0.4884297520688096,
+          "callsPerFrame": 1,
+          "maxMs": 11.599999999976717
+        },
+        "step.move": {
+          "msPerFrame": 0.3280991735581447,
+          "callsPerFrame": 2.669421487603306,
+          "maxMs": 11.400000000023283
+        },
+        "view.effects": {
+          "msPerFrame": 0.18099173553160985,
+          "callsPerFrame": 1,
+          "maxMs": 2
+        },
+        "terrain.mesh": {
+          "msPerFrame": 0.07024793388333542,
+          "callsPerFrame": 1,
+          "maxMs": 1.900000000023283
+        },
+        "terrain.stream": {
+          "msPerFrame": 0.028925619834710745,
+          "callsPerFrame": 1,
+          "maxMs": 0.19999999995343387
+        }
+      }
+    },
+    "methods": {
+      "view.draw": {
+        "calls": 121,
+        "msPerFrame": 4.486776859502401,
+        "max": 23.599999999976717
+      },
+      "view.syncModels": {
+        "calls": 121,
+        "msPerFrame": 3.4628099173601825,
+        "max": 22.100000000093132
+      },
+      "physics.step": {
+        "calls": 323,
+        "msPerFrame": 2.550413223130682,
+        "max": 23.5
+      },
+      "physics.worldStep": {
+        "calls": 324,
+        "msPerFrame": 2.244628099160854,
+        "max": 8.800000000046566
+      },
+      "physics.synchronize": {
+        "calls": 121,
+        "msPerFrame": 1.838016528932547,
+        "max": 12.900000000023283
+      },
+      "physics.sweepPart": {
+        "calls": 5324,
+        "msPerFrame": 1.3380165289344712,
+        "max": 4.099999999976717
+      },
+      "runtime.tick": {
+        "calls": 323,
+        "msPerFrame": 0.9165289256248377,
+        "max": 19.20000000006985
+      },
+      "physics.movePlayer": {
+        "calls": 323,
+        "msPerFrame": 0.26528925620296523,
+        "max": 11.400000000023283
+      },
+      "objectPhysics.capture": {
+        "calls": 323,
+        "msPerFrame": 0.23471074380376952,
+        "max": 22.5
+      },
+      "objects.detachAround": {
+        "calls": 2,
+        "msPerFrame": 0.18842975206553844,
+        "max": 13.29999999993015
+      },
+      "view.aim": {
+        "calls": 26,
+        "msPerFrame": 0.13801652892812133,
+        "max": 1.3999999999068677
+      },
+      "physics.structureModelBoxes": {
+        "calls": 5808,
+        "msPerFrame": 0.12314049587084734,
+        "max": 0.8000000000465661
+      },
+      "physics.terrainAt": {
+        "calls": 767,
+        "msPerFrame": 0.07768595041149134,
+        "max": 1.2000000000698492
+      },
+      "view.syncTerrain": {
+        "calls": 121,
+        "msPerFrame": 0.07024793388333542,
+        "max": 1.900000000023283
+      },
+      "view.makeModel": {
+        "calls": 3,
+        "msPerFrame": 0.055371900826061436,
+        "max": 3.799999999930151
+      },
+      "view.updatePiece": {
+        "calls": 2,
+        "msPerFrame": 0.05371900826446281,
+        "max": 3.699999999953434
+      },
+      "objects._build": {
+        "calls": 2,
+        "msPerFrame": 0.03966942148798815,
+        "max": 3.200000000069849
+      },
+      "physics.syncStructures": {
+        "calls": 121,
+        "msPerFrame": 0.03719008264943865,
+        "max": 2
+      },
+      "objects.setPhysicsPose": {
+        "calls": 414,
+        "msPerFrame": 0.031404958679995015,
+        "max": 0.10000000009313226
+      },
+      "objectPhysics.sync": {
+        "calls": 444,
+        "msPerFrame": 0.02314049586815344,
+        "max": 1
+      },
+      "physics.matterImpacts": {
+        "calls": 323,
+        "msPerFrame": 0.009090909088792449,
+        "max": 0.09999999997671694
+      },
+      "physics._terrainSectionBoxes": {
+        "calls": 75,
+        "msPerFrame": 0.007438016528155932,
+        "max": 0.10000000009313226
+      },
+      "objects.sceneModels": {
+        "calls": 121,
+        "msPerFrame": 0.006611570248318728,
+        "max": 0.10000000009313226
+      },
+      "physics.playerImpacts": {
+        "calls": 323,
+        "msPerFrame": 0.0041322314059207875,
+        "max": 0.10000000009313226
+      },
+      "adapter.addBody": {
+        "calls": 25,
+        "msPerFrame": 0.0024793388423979407,
+        "max": 0.09999999997671694
+      },
+      "physics.impactPair": {
+        "calls": 2,
+        "msPerFrame": 0.001652892561598627,
+        "max": 0.09999999997671694
+      }
+    },
+    "hooks": 210856,
+    "refreshes": 1,
+    "objects": [
+      {
+        "id": "object:1",
+        "cells": 260,
+        "position": {
+          "x": -5.502920627593994,
+          "y": 4.000011444091797,
+          "z": 11.004644393920898
+        },
+        "velocity": {
+          "x": 0.0000042346327973064035,
+          "y": 5.517625822903938e-7,
+          "z": -0.000003535332098181243
+        },
+        "mass": 3840,
+        "colliders": 8,
+        "sleeping": true
+      },
+      {
+        "id": "object:2",
+        "cells": 284,
+        "position": {
+          "x": 11.449747085571289,
+          "y": 3.781010627746582,
+          "z": 11.137345314025879
+        },
+        "velocity": {
+          "x": 0.2989698350429535,
+          "y": -0.3621361255645752,
+          "z": -1.3891732692718506
+        },
+        "mass": 5640,
+        "colliders": 8,
+        "sleeping": false
+      },
+      {
+        "id": "object:3",
+        "cells": 260,
+        "position": {
+          "x": -15.00366497039795,
+          "y": 3.9999747276306152,
+          "z": -15.50373649597168
+        },
+        "velocity": {
+          "x": 0.00001239275934494799,
+          "y": 0.0000037195297863945598,
+          "z": 0.0000027515793590282556
+        },
+        "mass": 3840,
+        "colliders": 8,
+        "sleeping": true
+      }
+    ],
+    "colliders": 1244,
+    "sections": 150,
+    "pendingDetach": 0,
+    "drawCalls": 503,
+    "triangles": 70682
+  },
+  {
+    "label": "3 trees settled",
+    "seconds": 29.233333333332954,
+    "frames": 118,
+    "interval": {
+      "mean": 50.552542372881334,
+      "p95": 83.30000000000291,
+      "max": 100
+    },
+    "perf": {
+      "frames": 118,
+      "stepsPerFrame": 2.6864406779661016,
+      "frameMs": {
+        "mean": 18.513559322040607,
+        "p95": 40,
+        "max": 46.60000000009313
+      },
+      "phases": {
+        "simulate": {
+          "msPerFrame": 6.63389830508218,
+          "callsPerFrame": 1,
+          "maxMs": 32.5
+        },
+        "view.models": {
+          "msPerFrame": 4.211864406777688,
+          "callsPerFrame": 1,
+          "maxMs": 28.29999999993015
+        },
+        "view.draw": {
+          "msPerFrame": 3.8135593220358714,
+          "callsPerFrame": 1,
+          "maxMs": 19.800000000046566
+        },
+        "step.physics": {
+          "msPerFrame": 3.0559322033847005,
+          "callsPerFrame": 2.6864406779661016,
+          "maxMs": 19.099999999976717
+        },
+        "physics.sync": {
+          "msPerFrame": 2.966949152543162,
+          "callsPerFrame": 1,
+          "maxMs": 22.599999999976717
+        },
+        "step.move": {
+          "msPerFrame": 2.275423728814546,
+          "callsPerFrame": 2.6864406779661016,
+          "maxMs": 29.300000000046566
+        },
+        "step.world": {
+          "msPerFrame": 1.2381355932181686,
+          "callsPerFrame": 2.6864406779661016,
+          "maxMs": 21.5
+        },
+        "ui": {
+          "msPerFrame": 0.35932203389948897,
+          "callsPerFrame": 1,
+          "maxMs": 2.5
+        },
+        "view.effects": {
+          "msPerFrame": 0.21271186440756892,
+          "callsPerFrame": 1,
+          "maxMs": 3.699999999953434
+        },
+        "terrain.mesh": {
+          "msPerFrame": 0.1262711864408753,
+          "callsPerFrame": 1,
+          "maxMs": 5.199999999953434
+        },
+        "terrain.stream": {
+          "msPerFrame": 0.042372881360865054,
+          "callsPerFrame": 1,
+          "maxMs": 0.30000000004656613
+        }
+      }
+    },
+    "methods": {
+      "view.draw": {
+        "calls": 118,
+        "msPerFrame": 3.81271186440895,
+        "max": 19.800000000046566
+      },
+      "view.syncModels": {
+        "calls": 118,
+        "msPerFrame": 3.5864406779706397,
+        "max": 27.79999999993015
+      },
+      "physics.worldStep": {
+        "calls": 361,
+        "msPerFrame": 3.2635593220327146,
+        "max": 19
+      },
+      "physics.step": {
+        "calls": 317,
+        "msPerFrame": 3.0542372881308575,
+        "max": 19.099999999976717
+      },
+      "physics.synchronize": {
+        "calls": 118,
+        "msPerFrame": 2.9500000000017756,
+        "max": 22.599999999976717
+      },
+      "physics.movePlayer": {
+        "calls": 317,
+        "msPerFrame": 2.1923728813604706,
+        "max": 29.300000000046566
+      },
+      "physics.terrainAt": {
+        "calls": 752,
+        "msPerFrame": 2.115254237283992,
+        "max": 28.300000000046566
+      },
+      "physics._terrainSectionBoxes": {
+        "calls": 295,
+        "msPerFrame": 1.7872881355914445,
+        "max": 18.699999999953434
+      },
+      "physics.sweepPart": {
+        "calls": 5192,
+        "msPerFrame": 1.4932203389885756,
+        "max": 4.699999999953434
+      },
+      "runtime.tick": {
+        "calls": 317,
+        "msPerFrame": 1.2372881355912473,
+        "max": 21.5
+      },
+      "physics.syncStructures": {
+        "calls": 118,
+        "msPerFrame": 0.45847457627000254,
+        "max": 3
+      },
+      "physics.structureModelBoxes": {
+        "calls": 5664,
+        "msPerFrame": 0.1915254237335491,
+        "max": 4
+      },
+      "view.syncTerrain": {
+        "calls": 118,
+        "msPerFrame": 0.12542372881296737,
+        "max": 5.199999999953434
+      },
+      "view.aim": {
+        "calls": 26,
+        "msPerFrame": 0.11949152541859864,
+        "max": 1.099999999976717
+      },
+      "physics.matterImpacts": {
+        "calls": 317,
+        "msPerFrame": 0.11694915254178094,
+        "max": 10.599999999976717
+      },
+      "physics.impactPair": {
+        "calls": 35,
+        "msPerFrame": 0.10338983050807994,
+        "max": 10.599999999976717
+      },
+      "runtime.serialize": {
+        "calls": 1,
+        "msPerFrame": 0.10254237288115862,
+        "max": 12.099999999976717
+      },
+      "adapter.addBody": {
+        "calls": 288,
+        "msPerFrame": 0.09745762711963064,
+        "max": 2.599999999976717
+      },
+      "runtime.impactObject": {
+        "calls": 1,
+        "msPerFrame": 0.08389830508494307,
+        "max": 9.900000000023283
+      },
+      "objects.damageAt": {
+        "calls": 1,
+        "msPerFrame": 0.07966101694934985,
+        "max": 9.400000000023283
+      },
+      "objectPhysics.capture": {
+        "calls": 317,
+        "msPerFrame": 0.0525423728809613,
+        "max": 1.6999999999534339
+      },
+      "objects._build": {
+        "calls": 3,
+        "msPerFrame": 0.05084745762810521,
+        "max": 5.800000000046566
+      },
+      "physics.playerImpacts": {
+        "calls": 317,
+        "msPerFrame": 0.025423728815532464,
+        "max": 0.5
+      },
+      "objects.detachAround": {
+        "calls": 1,
+        "msPerFrame": 0.02203389830488743,
+        "max": 2.599999999976717
+      },
+      "objects.setPhysicsPose": {
+        "calls": 777,
+        "msPerFrame": 0.01779661016929421,
+        "max": 0.2000000000698492
+      },
+      "view.updatePiece": {
+        "calls": 3,
+        "msPerFrame": 0.015254237288530221,
+        "max": 1.400000000023283
+      },
+      "objectPhysics.sync": {
+        "calls": 435,
+        "msPerFrame": 0.01525423728754365,
+        "max": 0.5999999999767169
+      },
+      "runtime.impactTerrain": {
+        "calls": 1,
+        "msPerFrame": 0.0050847457625145505,
+        "max": 0.5999999999767169
+      },
+      "view.makeModel": {
+        "calls": 5,
+        "msPerFrame": 0.00423728813559322,
+        "max": 0.30000000004656613
+      },
+      "objects.nearestCell": {
+        "calls": 2,
+        "msPerFrame": 0.0033898305086718906,
+        "max": 0.2000000000698492
+      },
+      "objects.sceneModels": {
+        "calls": 118,
+        "msPerFrame": 0.00084745762692133,
+        "max": 0.09999999997671694
+      },
+      "adapter.removeOwner": {
+        "calls": 1,
+        "msPerFrame": 0.00084745762692133,
+        "max": 0.09999999997671694
+      }
+    },
+    "hooks": 245875,
+    "refreshes": 44,
+    "objects": [
+      {
+        "id": "object:1",
+        "cells": 260,
+        "position": {
+          "x": -5.502920627593994,
+          "y": 4.000011444091797,
+          "z": 11.004644393920898
+        },
+        "velocity": {
+          "x": 0.0000042346327973064035,
+          "y": 5.517625822903938e-7,
+          "z": -0.000003535332098181243
+        },
+        "mass": 3840,
+        "colliders": 8,
+        "sleeping": true
+      },
+      {
+        "id": "object:3",
+        "cells": 260,
+        "position": {
+          "x": -15.00366497039795,
+          "y": 3.9999747276306152,
+          "z": -15.50373649597168
+        },
+        "velocity": {
+          "x": 0.00001239275934494799,
+          "y": 0.0000037195297863945598,
+          "z": 0.0000027515793590282556
+        },
+        "mass": 3840,
+        "colliders": 8,
+        "sleeping": true
+      },
+      {
+        "id": "object:2",
+        "cells": 283,
+        "position": {
+          "x": 11.792369842529297,
+          "y": 4.99159049987793,
+          "z": 12.840736389160156
+        },
+        "velocity": {
+          "x": -0.00031122530344873667,
+          "y": -0.00011944174184463918,
+          "z": -0.00006064229819457978
+        },
+        "mass": 5632.5,
+        "colliders": 12,
+        "sleeping": false
+      },
+      {
+        "id": "object:4",
+        "cells": 1,
+        "position": {
+          "x": 8.394856452941895,
+          "y": -88.79132080078125,
+          "z": -3.5386061668395996
+        },
+        "velocity": {
+          "x": -0.11344041675329208,
+          "y": -42.487464904785156,
+          "z": -1.3912663459777832
+        },
+        "mass": 7.5,
+        "colliders": 1,
+        "sleeping": false
+      },
+      {
+        "id": "object:5",
+        "cells": 1,
+        "position": {
+          "x": 13.500001907348633,
+          "y": 3.4999282360076904,
+          "z": 5.999994277954102
+        },
+        "velocity": {
+          "x": 0.000007921446012915112,
+          "y": 0.000004729095053335186,
+          "z": 0.000003716943410836393
+        },
+        "mass": 175,
+        "colliders": 1,
+        "sleeping": false
+      }
+    ],
+    "colliders": 1318,
+    "sections": 202,
+    "pendingDetach": 0,
+    "drawCalls": 511,
+    "triangles": 71346
+  },
+  {
+    "label": "falling leaf left active",
+    "seconds": 37.9166666666658,
+    "frames": 193,
+    "interval": {
+      "mean": 51.78134715025893,
+      "p95": 83.30000000000291,
+      "max": 100
+    },
+    "perf": {
+      "frames": 193,
+      "stepsPerFrame": 2.699481865284974,
+      "frameMs": {
+        "mean": 33.56062176166201,
+        "p95": 57.699999999953434,
+        "max": 83.40000000002328
+      },
+      "phases": {
+        "simulate": {
+          "msPerFrame": 16.937305699484398,
+          "callsPerFrame": 1,
+          "maxMs": 60.699999999953434
+        },
+        "step.move": {
+          "msPerFrame": 12.598963730569224,
+          "callsPerFrame": 2.699481865284974,
+          "maxMs": 55.10000000009313
+        },
+        "physics.sync": {
+          "msPerFrame": 8.41347150258428,
+          "callsPerFrame": 1,
+          "maxMs": 50
+        },
+        "view.draw": {
+          "msPerFrame": 3.9430051813477536,
+          "callsPerFrame": 1,
+          "maxMs": 24.300000000046566
+        },
+        "view.models": {
+          "msPerFrame": 3.22953367876275,
+          "callsPerFrame": 1,
+          "maxMs": 23.699999999953434
+        },
+        "step.physics": {
+          "msPerFrame": 3.1031088082824345,
+          "callsPerFrame": 2.699481865284974,
+          "maxMs": 18.599999999976717
+        },
+        "step.world": {
+          "msPerFrame": 1.2010362694405472,
+          "callsPerFrame": 2.699481865284974,
+          "maxMs": 23.900000000023283
+        },
+        "ui": {
+          "msPerFrame": 0.6207253886006744,
+          "callsPerFrame": 1,
+          "maxMs": 23.599999999976717
+        },
+        "view.effects": {
+          "msPerFrame": 0.28393782383504135,
+          "callsPerFrame": 1,
+          "maxMs": 13.79999999993015
+        },
+        "terrain.mesh": {
+          "msPerFrame": 0.08341968911965353,
+          "callsPerFrame": 1,
+          "maxMs": 4.599999999976717
+        },
+        "terrain.stream": {
+          "msPerFrame": 0.03419689119339877,
+          "callsPerFrame": 1,
+          "maxMs": 0.40000000002328306
+        }
+      }
+    },
+    "methods": {
+      "physics.terrainAt": {
+        "calls": 1235,
+        "msPerFrame": 15.806735751298715,
+        "max": 53.800000000046566
+      },
+      "physics._terrainSectionBoxes": {
+        "calls": 3706,
+        "msPerFrame": 13.782901554399801,
+        "max": 38.90000000002328
+      },
+      "physics.movePlayer": {
+        "calls": 521,
+        "msPerFrame": 12.530569948189665,
+        "max": 55.10000000009313
+      },
+      "physics.synchronize": {
+        "calls": 193,
+        "msPerFrame": 8.411917098439565,
+        "max": 50
+      },
+      "physics.worldStep": {
+        "calls": 883,
+        "msPerFrame": 5.31502590672031,
+        "max": 20.79999999993015
+      },
+      "view.draw": {
+        "calls": 193,
+        "msPerFrame": 3.940932642487529,
+        "max": 24.300000000046566
+      },
+      "physics.step": {
+        "calls": 521,
+        "msPerFrame": 3.1015544041371155,
+        "max": 18.599999999976717
+      },
+      "view.syncModels": {
+        "calls": 193,
+        "msPerFrame": 2.6569948186536942,
+        "max": 23.300000000046566
+      },
+      "runtime.tick": {
+        "calls": 521,
+        "msPerFrame": 1.1984455958654177,
+        "max": 23.900000000023283
+      },
+      "physics.sweepPart": {
+        "calls": 8492,
+        "msPerFrame": 1.0725388601048333,
+        "max": 17.800000000046566
+      },
+      "physics.syncStructures": {
+        "calls": 193,
+        "msPerFrame": 1.0699481865266878,
+        "max": 5.299999999930151
+      },
+      "adapter.addBody": {
+        "calls": 3706,
+        "msPerFrame": 0.44870466321412417,
+        "max": 17.800000000046566
+      },
+      "physics.structureModelBoxes": {
+        "calls": 9264,
+        "msPerFrame": 0.21658031088649898,
+        "max": 9.699999999953434
+      },
+      "view.aim": {
+        "calls": 43,
+        "msPerFrame": 0.12072538860188073,
+        "max": 1.599999999976717
+      },
+      "view.syncTerrain": {
+        "calls": 193,
+        "msPerFrame": 0.08134715025942928,
+        "max": 4.599999999976717
+      },
+      "objectPhysics.capture": {
+        "calls": 521,
+        "msPerFrame": 0.04507772020942536,
+        "max": 0.10000000009313226
+      },
+      "physics.playerImpacts": {
+        "calls": 521,
+        "msPerFrame": 0.024352331607785906,
+        "max": 0.8000000000465661
+      },
+      "objects.setPhysicsPose": {
+        "calls": 1563,
+        "msPerFrame": 0.021761658032656374,
+        "max": 0.10000000009313226
+      },
+      "objectPhysics.sync": {
+        "calls": 714,
+        "msPerFrame": 0.010880829017232968,
+        "max": 0.10000000009313226
+      },
+      "physics.matterImpacts": {
+        "calls": 521,
+        "msPerFrame": 0.005699481865164336,
+        "max": 0.10000000009313226
+      },
+      "objects.sceneModels": {
+        "calls": 193,
+        "msPerFrame": 0.004663212435353798,
+        "max": 0.10000000009313226
+      },
+      "view.makeModel": {
+        "calls": 1,
+        "msPerFrame": 0,
+        "max": 0
+      }
+    },
+    "hooks": 558411,
+    "refreshes": 362,
+    "objects": [
+      {
+        "id": "object:1",
+        "cells": 260,
+        "position": {
+          "x": -5.502920627593994,
+          "y": 4.000011444091797,
+          "z": 11.004644393920898
+        },
+        "velocity": {
+          "x": 0.0000042346327973064035,
+          "y": 5.517625822903938e-7,
+          "z": -0.000003535332098181243
+        },
+        "mass": 3840,
+        "colliders": 8,
+        "sleeping": true
+      },
+      {
+        "id": "object:3",
+        "cells": 260,
+        "position": {
+          "x": -15.00366497039795,
+          "y": 3.9999747276306152,
+          "z": -15.50373649597168
+        },
+        "velocity": {
+          "x": 0.00001239275934494799,
+          "y": 0.0000037195297863945598,
+          "z": 0.0000027515793590282556
+        },
+        "mass": 3840,
+        "colliders": 8,
+        "sleeping": true
+      },
+      {
+        "id": "object:2",
+        "cells": 283,
+        "position": {
+          "x": 11.79251480102539,
+          "y": 4.983757972717285,
+          "z": 12.829229354858398
+        },
+        "velocity": {
+          "x": -0.0006968753878027201,
+          "y": -0.000236352309002541,
+          "z": -0.00014803759404458106
+        },
+        "mass": 5632.5,
+        "colliders": 12,
+        "sleeping": false
+      },
+      {
+        "id": "object:4",
+        "cells": 1,
+        "position": {
+          "x": 10.114702224731445,
+          "y": -824.6734008789062,
+          "z": -4.753003120422363
+        },
+        "velocity": {
+          "x": -0.11344041675329208,
+          "y": -127.67672729492188,
+          "z": -1.3912663459777832
+        },
+        "mass": 7.5,
+        "colliders": 1,
+        "sleeping": false
+      },
+      {
+        "id": "object:5",
+        "cells": 1,
+        "position": {
+          "x": 13.5,
+          "y": 3.49992036819458,
+          "z": 5.999995708465576
+        },
+        "velocity": {
+          "x": 0.00000100434624528134,
+          "y": 0.0000019871122276526876,
+          "z": -1.530714826003532e-7
+        },
+        "mass": 175,
+        "colliders": 1,
+        "sleeping": false
+      }
+    ],
+    "colliders": 1334,
+    "sections": 218,
+    "pendingDetach": 0,
+    "drawCalls": 492,
+    "triangles": 70228
+  },
+  {
+    "label": "only sensor leaves removed, three trees retained",
+    "seconds": 43.449999999998816,
+    "frames": 119,
+    "interval": {
+      "mean": 50.42352941176392,
+      "p95": 83.20000000000437,
+      "max": 100
+    },
+    "perf": {
+      "frames": 119,
+      "stepsPerFrame": 2.7899159663865545,
+      "frameMs": {
+        "mean": 13.898319327732267,
+        "p95": 30.5,
+        "max": 39.40000000002328
+      },
+      "phases": {
+        "view.models": {
+          "msPerFrame": 3.8932773109237826,
+          "callsPerFrame": 1,
+          "maxMs": 20.800000000046566
+        },
+        "view.draw": {
+          "msPerFrame": 3.7621848739521235,
+          "callsPerFrame": 1,
+          "maxMs": 20.099999999976717
+        },
+        "simulate": {
+          "msPerFrame": 3.1563025210072295,
+          "callsPerFrame": 1,
+          "maxMs": 13.20000000006985
+        },
+        "physics.sync": {
+          "msPerFrame": 2.22436974789779,
+          "callsPerFrame": 1,
+          "maxMs": 25.300000000046566
+        },
+        "step.physics": {
+          "msPerFrame": 2.058823529415678,
+          "callsPerFrame": 2.7899159663865545,
+          "maxMs": 4.799999999930151
+        },
+        "step.world": {
+          "msPerFrame": 0.8512605042040285,
+          "callsPerFrame": 2.7899159663865545,
+          "maxMs": 7.100000000093132
+        },
+        "ui": {
+          "msPerFrame": 0.5008403361352364,
+          "callsPerFrame": 1,
+          "maxMs": 21.900000000023283
+        },
+        "view.effects": {
+          "msPerFrame": 0.226890756302521,
+          "callsPerFrame": 1,
+          "maxMs": 4.699999999953434
+        },
+        "step.move": {
+          "msPerFrame": 0.2218487394852329,
+          "callsPerFrame": 2.7899159663865545,
+          "maxMs": 1.8000000000465661
+        },
+        "terrain.mesh": {
+          "msPerFrame": 0.07394957983036753,
+          "callsPerFrame": 1,
+          "maxMs": 1.8000000000465661
+        },
+        "terrain.stream": {
+          "msPerFrame": 0.04201680672366736,
+          "callsPerFrame": 1,
+          "maxMs": 1.900000000023283
+        }
+      }
+    },
+    "methods": {
+      "view.draw": {
+        "calls": 119,
+        "msPerFrame": 3.7579831932808325,
+        "max": 20.099999999976717
+      },
+      "view.syncModels": {
+        "calls": 119,
+        "msPerFrame": 3.3747899159681474,
+        "max": 20.400000000023283
+      },
+      "physics.synchronize": {
+        "calls": 119,
+        "msPerFrame": 2.223529411763532,
+        "max": 25.300000000046566
+      },
+      "physics.step": {
+        "calls": 332,
+        "msPerFrame": 2.057142857145205,
+        "max": 4.799999999930151
+      },
+      "physics.worldStep": {
+        "calls": 332,
+        "msPerFrame": 1.924369747900138,
+        "max": 4.699999999953434
+      },
+      "physics.sweepPart": {
+        "calls": 5236,
+        "msPerFrame": 1.6596638655413272,
+        "max": 23.800000000046566
+      },
+      "runtime.tick": {
+        "calls": 332,
+        "msPerFrame": 0.8487394958012542,
+        "max": 7.100000000093132
+      },
+      "physics.structureModelBoxes": {
+        "calls": 5712,
+        "msPerFrame": 0.31512605042016806,
+        "max": 13.699999999953434
+      },
+      "physics.movePlayer": {
+        "calls": 332,
+        "msPerFrame": 0.14117647058080038,
+        "max": 0.2000000000698492
+      },
+      "view.aim": {
+        "calls": 25,
+        "msPerFrame": 0.1058823529419591,
+        "max": 1.1999999999534339
+      },
+      "view.syncTerrain": {
+        "calls": 119,
+        "msPerFrame": 0.0731092436961094,
+        "max": 1.8000000000465661
+      },
+      "physics.terrainAt": {
+        "calls": 783,
+        "msPerFrame": 0.06470588235157158,
+        "max": 2.599999999976717
+      },
+      "physics.syncStructures": {
+        "calls": 119,
+        "msPerFrame": 0.04117647058745267,
+        "max": 0.7999999999301508
+      },
+      "objectPhysics.capture": {
+        "calls": 332,
+        "msPerFrame": 0.03025210084209704,
+        "max": 1.8000000000465661
+      },
+      "objectPhysics.sync": {
+        "calls": 451,
+        "msPerFrame": 0.012605042017785003,
+        "max": 0.10000000009313226
+      },
+      "physics.playerImpacts": {
+        "calls": 332,
+        "msPerFrame": 0.011764705881570317,
+        "max": 0.10000000009313226
+      },
+      "physics.matterImpacts": {
+        "calls": 332,
+        "msPerFrame": 0.0067226890760215645,
+        "max": 0.10000000009313226
+      },
+      "view.makeModel": {
+        "calls": 1,
+        "msPerFrame": 0.0008403361352364055,
+        "max": 0.10000000009313226
+      },
+      "adapter.removeOwner": {
+        "calls": 1,
+        "msPerFrame": 0.0008403361342581255,
+        "max": 0.09999999997671694
+      },
+      "objects.setPhysicsPose": {
+        "calls": 58,
+        "msPerFrame": 0.0008403361342581255,
+        "max": 0.09999999997671694
+      },
+      "objects.sceneModels": {
+        "calls": 119,
+        "msPerFrame": 0.0008403361342581255,
+        "max": 0.09999999997671694
+      }
+    },
+    "hooks": 219201,
+    "refreshes": 0,
+    "objects": [
+      {
+        "id": "object:1",
+        "cells": 260,
+        "position": {
+          "x": -5.502920627593994,
+          "y": 4.000011444091797,
+          "z": 11.004644393920898
+        },
+        "velocity": {
+          "x": 0.0000042346327973064035,
+          "y": 5.517625822903938e-7,
+          "z": -0.000003535332098181243
+        },
+        "mass": 3840,
+        "colliders": 8,
+        "sleeping": true
+      },
+      {
+        "id": "object:3",
+        "cells": 260,
+        "position": {
+          "x": -15.00366497039795,
+          "y": 3.9999747276306152,
+          "z": -15.50373649597168
+        },
+        "velocity": {
+          "x": 0.00001239275934494799,
+          "y": 0.0000037195297863945598,
+          "z": 0.0000027515793590282556
+        },
+        "mass": 3840,
+        "colliders": 8,
+        "sleeping": true
+      },
+      {
+        "id": "object:2",
+        "cells": 283,
+        "position": {
+          "x": 11.792558670043945,
+          "y": 4.983598709106445,
+          "z": 12.829221725463867
+        },
+        "velocity": {
+          "x": 0.0000010961202860926278,
+          "y": 0.000003790095888689393,
+          "z": -9.184562941300101e-7
+        },
+        "mass": 5632.5,
+        "colliders": 12,
+        "sleeping": true
+      },
+      {
+        "id": "object:5",
+        "cells": 1,
+        "position": {
+          "x": 13.49999713897705,
+          "y": 3.499931573867798,
+          "z": 5.999997138977051
+        },
+        "velocity": {
+          "x": 2.5372321488248417e-7,
+          "y": -2.4933166287155473e-7,
+          "z": 6.712676281495078e-8
+        },
+        "mass": 175,
+        "colliders": 1,
+        "sleeping": true
+      }
+    ],
+    "colliders": 1253,
+    "sections": 138,
+    "pendingDetach": 0,
+    "drawCalls": 481,
+    "triangles": 69766
+  },
+  {
+    "label": "same falling leaves restored",
+    "seconds": 48.48333333333186,
+    "frames": 108,
+    "interval": {
+      "mean": 55.32129629629546,
+      "p95": 83.40000000000146,
+      "max": 116.70000000000437
+    },
+    "perf": {
+      "frames": 108,
+      "stepsPerFrame": 2.7962962962962963,
+      "frameMs": {
+        "mean": 40.12500000000215,
+        "p95": 62.09999999997672,
+        "max": 92.29999999993015
+      },
+      "phases": {
+        "simulate": {
+          "msPerFrame": 21.595370370371878,
+          "callsPerFrame": 1,
+          "maxMs": 70.40000000002328
+        },
+        "step.move": {
+          "msPerFrame": 17.30555555556957,
+          "callsPerFrame": 2.7962962962962963,
+          "maxMs": 44.199999999953434
+        },
+        "physics.sync": {
+          "msPerFrame": 12.182407407402664,
+          "callsPerFrame": 1,
+          "maxMs": 61.60000000009313
+        },
+        "step.physics": {
+          "msPerFrame": 3.4333333333337643,
+          "callsPerFrame": 2.7962962962962963,
+          "maxMs": 66.79999999993015
+        },
+        "view.draw": {
+          "msPerFrame": 3.150925925928513,
+          "callsPerFrame": 1,
+          "maxMs": 20.400000000023283
+        },
+        "view.models": {
+          "msPerFrame": 2.5972222222189885,
+          "callsPerFrame": 1,
+          "maxMs": 16.400000000023283
+        },
+        "step.world": {
+          "msPerFrame": 0.8212962962850859,
+          "callsPerFrame": 2.7962962962962963,
+          "maxMs": 4.099999999976717
+        },
+        "ui": {
+          "msPerFrame": 0.39074074073923165,
+          "callsPerFrame": 1,
+          "maxMs": 4
+        },
+        "view.effects": {
+          "msPerFrame": 0.13333333333570477,
+          "callsPerFrame": 1,
+          "maxMs": 0.5999999999767169
+        },
+        "terrain.mesh": {
+          "msPerFrame": 0.031481481486008746,
+          "callsPerFrame": 1,
+          "maxMs": 0.19999999995343387
+        },
+        "terrain.stream": {
+          "msPerFrame": 0.025925925926357094,
+          "callsPerFrame": 1,
+          "maxMs": 0.2999999999301508
+        }
+      }
+    },
+    "methods": {
+      "physics.terrainAt": {
+        "calls": 712,
+        "msPerFrame": 23.91851851852132,
+        "max": 65.19999999995343
+      },
+      "physics._terrainSectionBoxes": {
+        "calls": 3504,
+        "msPerFrame": 21.274999999987713,
+        "max": 29.5
+      },
+      "physics.movePlayer": {
+        "calls": 302,
+        "msPerFrame": 17.2407407407526,
+        "max": 44.199999999953434
+      },
+      "physics.synchronize": {
+        "calls": 108,
+        "msPerFrame": 12.179629629625534,
+        "max": 61.60000000009313
+      },
+      "physics.worldStep": {
+        "calls": 603,
+        "msPerFrame": 5.493518518521106,
+        "max": 18.70000000006985
+      },
+      "physics.step": {
+        "calls": 302,
+        "msPerFrame": 3.427777777777347,
+        "max": 66.79999999993015
+      },
+      "view.draw": {
+        "calls": 108,
+        "msPerFrame": 3.1500000000028026,
+        "max": 20.400000000023283
+      },
+      "view.syncModels": {
+        "calls": 108,
+        "msPerFrame": 2.005555555553184,
+        "max": 5.5
+      },
+      "physics.sweepPart": {
+        "calls": 4752,
+        "msPerFrame": 1.5203703703656275,
+        "max": 13.800000000046566
+      },
+      "physics.syncStructures": {
+        "calls": 108,
+        "msPerFrame": 1.2490740740753676,
+        "max": 18.599999999976717
+      },
+      "runtime.tick": {
+        "calls": 302,
+        "msPerFrame": 0.818518518506877,
+        "max": 4.099999999976717
+      },
+      "adapter.addBody": {
+        "calls": 3505,
+        "msPerFrame": 0.5722222222258871,
+        "max": 1.5
+      },
+      "physics.structureModelBoxes": {
+        "calls": 5184,
+        "msPerFrame": 0.159259259259906,
+        "max": 0.5999999999767169
+      },
+      "view.aim": {
+        "calls": 26,
+        "msPerFrame": 0.11851851852002761,
+        "max": 1.5
+      },
+      "objectPhysics.capture": {
+        "calls": 302,
+        "msPerFrame": 0.04351851852455487,
+        "max": 0.40000000002328306
+      },
+      "objectPhysics.sync": {
+        "calls": 410,
+        "msPerFrame": 0.03888888889061356,
+        "max": 2.599999999976717
+      },
+      "view.syncTerrain": {
+        "calls": 108,
+        "msPerFrame": 0.02962962963458806,
+        "max": 0.19999999995343387
+      },
+      "objects.setPhysicsPose": {
+        "calls": 302,
+        "msPerFrame": 0.021296296295649546,
+        "max": 0.40000000002328306
+      },
+      "physics.playerImpacts": {
+        "calls": 302,
+        "msPerFrame": 0.012037037035312366,
+        "max": 0.10000000009313226
+      },
+      "physics.matterImpacts": {
+        "calls": 302,
+        "msPerFrame": 0.004629629630707549,
+        "max": 0.10000000009313226
+      },
+      "objects.sceneModels": {
+        "calls": 108,
+        "msPerFrame": 0.0037037037039192875,
+        "max": 0.10000000009313226
+      }
+    },
+    "hooks": 414742,
+    "refreshes": 301,
+    "objects": [
+      {
+        "id": "object:1",
+        "cells": 260,
+        "position": {
+          "x": -5.502920627593994,
+          "y": 4.000011444091797,
+          "z": 11.004644393920898
+        },
+        "velocity": {
+          "x": 0.0000042346327973064035,
+          "y": 5.517625822903938e-7,
+          "z": -0.000003535332098181243
+        },
+        "mass": 3840,
+        "colliders": 8,
+        "sleeping": true
+      },
+      {
+        "id": "object:3",
+        "cells": 260,
+        "position": {
+          "x": -15.00366497039795,
+          "y": 3.9999747276306152,
+          "z": -15.50373649597168
+        },
+        "velocity": {
+          "x": 0.00001239275934494799,
+          "y": 0.0000037195297863945598,
+          "z": 0.0000027515793590282556
+        },
+        "mass": 3840,
+        "colliders": 8,
+        "sleeping": true
+      },
+      {
+        "id": "object:2",
+        "cells": 283,
+        "position": {
+          "x": 11.792558670043945,
+          "y": 4.983598709106445,
+          "z": 12.829221725463867
+        },
+        "velocity": {
+          "x": 0.0000010961202860926278,
+          "y": 0.000003790095888689393,
+          "z": -9.184562941300101e-7
+        },
+        "mass": 5632.5,
+        "colliders": 12,
+        "sleeping": true
+      },
+      {
+        "id": "object:5",
+        "cells": 1,
+        "position": {
+          "x": 13.49999713897705,
+          "y": 3.499931573867798,
+          "z": 5.999997138977051
+        },
+        "velocity": {
+          "x": 2.5372321488248417e-7,
+          "y": -2.4933166287155473e-7,
+          "z": 6.712676281495078e-8
+        },
+        "mass": 175,
+        "colliders": 1,
+        "sleeping": true
+      },
+      {
+        "id": "object:4",
+        "cells": 1,
+        "position": {
+          "x": 9.56006145477295,
+          "y": -1591.1514892578125,
+          "z": -11.905986785888672
+        },
+        "velocity": {
+          "x": -0.11344041675329208,
+          "y": -177.05770874023438,
+          "z": -1.3912663459777832
+        },
+        "mass": 7.5,
+        "colliders": 1,
+        "sleeping": false
+      }
+    ],
+    "colliders": 1354,
+    "sections": 238,
+    "pendingDetach": 0,
+    "drawCalls": 481,
+    "triangles": 69766
+  },
+  {
+    "label": "sensor leaves removed again",
+    "seconds": 53.88333333333156,
+    "frames": 120,
+    "interval": {
+      "mean": 49.819166666666085,
+      "p95": 83.39999999999418,
+      "max": 99.89999999999418
+    },
+    "perf": {
+      "frames": 120,
+      "stepsPerFrame": 2.7,
+      "frameMs": {
+        "mean": 16.12499999999806,
+        "p95": 32.300000000046566,
+        "max": 52.40000000002328
+      },
+      "phases": {
+        "simulate": {
+          "msPerFrame": 4.165000000003299,
+          "callsPerFrame": 1,
+          "maxMs": 26.900000000023283
+        },
+        "view.draw": {
+          "msPerFrame": 4.124166666662981,
+          "callsPerFrame": 1,
+          "maxMs": 24.100000000093132
+        },
+        "view.models": {
+          "msPerFrame": 3.4175000000027165,
+          "callsPerFrame": 1,
+          "maxMs": 17.900000000023283
+        },
+        "physics.sync": {
+          "msPerFrame": 3.1699999999943733,
+          "callsPerFrame": 1,
+          "maxMs": 19.5
+        },
+        "step.physics": {
+          "msPerFrame": 2.759166666660652,
+          "callsPerFrame": 2.7,
+          "maxMs": 18.5
+        },
+        "step.world": {
+          "msPerFrame": 0.8791666666763679,
+          "callsPerFrame": 2.7,
+          "maxMs": 21.20000000006985
+        },
+        "ui": {
+          "msPerFrame": 0.702500000000388,
+          "callsPerFrame": 1,
+          "maxMs": 20.5
+        },
+        "step.move": {
+          "msPerFrame": 0.4866666666610399,
+          "callsPerFrame": 2.7,
+          "maxMs": 19.800000000046566
+        },
+        "view.effects": {
+          "msPerFrame": 0.12250000000640285,
+          "callsPerFrame": 1,
+          "maxMs": 0.5999999999767169
+        },
+        "terrain.mesh": {
+          "msPerFrame": 0.04916666666589056,
+          "callsPerFrame": 1,
+          "maxMs": 1.599999999976717
+        },
+        "terrain.stream": {
+          "msPerFrame": 0.04416666666317421,
+          "callsPerFrame": 1,
+          "maxMs": 2.199999999953434
+        }
+      }
+    },
+    "methods": {
+      "view.draw": {
+        "calls": 120,
+        "msPerFrame": 4.119999999995343,
+        "max": 24.100000000093132
+      },
+      "physics.synchronize": {
+        "calls": 120,
+        "msPerFrame": 3.1699999999943733,
+        "max": 19.5
+      },
+      "physics.step": {
+        "calls": 324,
+        "msPerFrame": 2.7583333333275126,
+        "max": 18.5
+      },
+      "physics.worldStep": {
+        "calls": 327,
+        "msPerFrame": 2.6899999999974775,
+        "max": 18.400000000023283
+      },
+      "view.syncModels": {
+        "calls": 120,
+        "msPerFrame": 2.652499999999418,
+        "max": 16.400000000023283
+      },
+      "physics.sweepPart": {
+        "calls": 5280,
+        "msPerFrame": 2.449999999992239,
+        "max": 17.900000000023283
+      },
+      "runtime.tick": {
+        "calls": 324,
+        "msPerFrame": 0.8791666666763679,
+        "max": 21.20000000006985
+      },
+      "physics.movePlayer": {
+        "calls": 324,
+        "msPerFrame": 0.4083333333333333,
+        "max": 19.800000000046566
+      },
+      "physics.terrainAt": {
+        "calls": 768,
+        "msPerFrame": 0.3483333333317811,
+        "max": 18.400000000023283
+      },
+      "physics.structureModelBoxes": {
+        "calls": 5760,
+        "msPerFrame": 0.31916666666705473,
+        "max": 15
+      },
+      "physics._terrainSectionBoxes": {
+        "calls": 40,
+        "msPerFrame": 0.24666666666744277,
+        "max": 4.599999999976717
+      },
+      "view.aim": {
+        "calls": 26,
+        "msPerFrame": 0.1349999999976717,
+        "max": 2.699999999953434
+      },
+      "runtime.serialize": {
+        "calls": 1,
+        "msPerFrame": 0.12250000000058207,
+        "max": 14.70000000006985
+      },
+      "physics.syncStructures": {
+        "calls": 120,
+        "msPerFrame": 0.04916666666880095,
+        "max": 1.1999999999534339
+      },
+      "view.syncTerrain": {
+        "calls": 120,
+        "msPerFrame": 0.04749999999961195,
+        "max": 1.599999999976717
+      },
+      "adapter.addBody": {
+        "calls": 40,
+        "msPerFrame": 0.010833333332751256,
+        "max": 0.40000000002328306
+      },
+      "objectPhysics.sync": {
+        "calls": 444,
+        "msPerFrame": 0.01083333333178113,
+        "max": 0.10000000009313226
+      },
+      "physics.playerImpacts": {
+        "calls": 324,
+        "msPerFrame": 0.008333333332363206,
+        "max": 0.10000000009313226
+      },
+      "physics.matterImpacts": {
+        "calls": 324,
+        "msPerFrame": 0.006666666667054718,
+        "max": 0.10000000009313226
+      },
+      "objectPhysics.capture": {
+        "calls": 324,
+        "msPerFrame": 0.004166666666666667,
+        "max": 0.10000000009313226
+      },
+      "objects.sceneModels": {
+        "calls": 120,
+        "msPerFrame": 0.0008333333331393078,
+        "max": 0.09999999997671694
+      },
+      "view.makeModel": {
+        "calls": 1,
+        "msPerFrame": 0.0008333333331393078,
+        "max": 0.09999999997671694
+      },
+      "objects.setPhysicsPose": {
+        "calls": 3,
+        "msPerFrame": 0,
+        "max": 0
+      },
+      "adapter.removeOwner": {
+        "calls": 1,
+        "msPerFrame": 0,
+        "max": 0
+      }
+    },
+    "hooks": 231218,
+    "refreshes": 3,
+    "objects": [
+      {
+        "id": "object:1",
+        "cells": 260,
+        "position": {
+          "x": -5.502920627593994,
+          "y": 4.000011444091797,
+          "z": 11.004644393920898
+        },
+        "velocity": {
+          "x": 0.0000042346327973064035,
+          "y": 5.517625822903938e-7,
+          "z": -0.000003535332098181243
+        },
+        "mass": 3840,
+        "colliders": 8,
+        "sleeping": true
+      },
+      {
+        "id": "object:3",
+        "cells": 260,
+        "position": {
+          "x": -15.00366497039795,
+          "y": 3.9999747276306152,
+          "z": -15.50373649597168
+        },
+        "velocity": {
+          "x": 0.00001239275934494799,
+          "y": 0.0000037195297863945598,
+          "z": 0.0000027515793590282556
+        },
+        "mass": 3840,
+        "colliders": 8,
+        "sleeping": true
+      },
+      {
+        "id": "object:2",
+        "cells": 283,
+        "position": {
+          "x": 11.792558670043945,
+          "y": 4.983598709106445,
+          "z": 12.829221725463867
+        },
+        "velocity": {
+          "x": 0.0000010961202860926278,
+          "y": 0.000003790095888689393,
+          "z": -9.184562941300101e-7
+        },
+        "mass": 5632.5,
+        "colliders": 12,
+        "sleeping": true
+      },
+      {
+        "id": "object:5",
+        "cells": 1,
+        "position": {
+          "x": 13.49999713897705,
+          "y": 3.499931573867798,
+          "z": 5.999997138977051
+        },
+        "velocity": {
+          "x": 2.5372321488248417e-7,
+          "y": -2.4933166287155473e-7,
+          "z": 6.712676281495078e-8
+        },
+        "mass": 175,
+        "colliders": 1,
+        "sleeping": true
+      }
+    ],
+    "colliders": 1253,
+    "sections": 138,
+    "pendingDetach": 0,
+    "drawCalls": 492,
+    "triangles": 70228
+  }
+]

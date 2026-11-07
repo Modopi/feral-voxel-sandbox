@@ -104,6 +104,37 @@ test('part shapes ignore matrix decomposition jitter in scale', async () => {
   } finally { p.dispose(); }
 });
 
+test('falling sensors never expand terrain or structure collision ranges; mixed bodies use only solid bounds', async () => {
+  let structureReads = 0, sectionBuilds = 0;
+  const atlas = { revision: 0, isSolidCell: (_x, y) => y < 0, heightAt: () => 0 };
+  const rt = { atlas, player: { x: 0, y: 0, z: 0 }, nearbyStructures: [{ id: 'ruin' }],
+    dungeons: { get: () => ({ revision: 0 }), renderBoxes: () => { structureReads++; return []; } } };
+  const p = await RuntimePhysics.create(rt, null, { terrainRadius: 2 });
+  try {
+    const sensor = p.adapter.addBody({ ownerId: 'leaf', boxes: [{ center: [0, 0, 0], size: [.5, .5, .5] }], position: [20, 5, 0] });
+    sensor.colliders[0].setSensor(true);
+    p.objectPhysics.bodies.set('leaf', { entry: sensor });
+    p.terrainAt(rt.player); p.syncStructures(new Map(), rt.player);
+    const sections = new Map(p.terrainSections), reads = structureReads;
+    const build = p._terrainSectionBoxes.bind(p);
+    p._terrainSectionBoxes = (...args) => { sectionBuilds++; return build(...args); };
+    for (let i = 0; i < 360; i++) {
+      p.worldStep(1 / 60);
+      assert.equal(p.terrainAt(rt.player), false);
+      p.syncStructures(new Map(), rt.player);
+    }
+    assert.ok(sensor.body.translation().y < -100, 'real gravity makes the sensor fall through terrain');
+    assert.equal(sectionBuilds, 0, 'no new terrain generated to follow a sensor');
+    assert.equal(structureReads, reads, 'sensor movement does not invalidate structure scope');
+    assert.deepEqual(p.terrainSections, sections);
+    const mixed = p.adapter.addBody({ ownerId: 'tree', boxes: [
+      { center: [0, 0, 0], size: [1, 2, 1] }, { center: [0, 50, 0], size: [10, 10, 10] },
+    ] });
+    mixed.colliders[1].setSensor(true);
+    assert.deepEqual(p.bodyBounds(mixed), { center: [0, 0, 0], half: [.5, 1, .5] });
+  } finally { p.dispose(); }
+});
+
 test('liquid meshes are cached per section: distant edits and walking reuse them, a change rebuilds only its section', () => {
   const a = new WorldAtlas(content, { seed: 'liquid-sections' });
   a.pour(.25, 5.25, .25, .0625); a.pour(20.25, 5.25, .25, .0625);
