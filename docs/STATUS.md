@@ -1,6 +1,6 @@
 # FERAL 현황
 
-> 기준: 2026-10-18 · 게임 **0.18.1 / 1810**(공개) · Android 앱 **0.3.3 / 303** · 저장 스키마 4
+> 기준: 2026-11-07 · 게임 **0.18.2 / 1820**(공개) · Android 앱 **0.3.3 / 303** · 저장 스키마 4
 >
 > 구조는 [소프트웨어 구조](ARCHITECTURE.md), 앞으로의 단계는 [로드맵](ROADMAP.md), 플레이 규칙은 [게임 규칙](GAME-RULES.md)을 본다. 버전별 변경은 [CHANGELOG](../CHANGELOG.md).
 
@@ -9,7 +9,7 @@
 | 항목 | 값 |
 | --- | --- |
 | 공개 저장소 | [Modopi/feral-voxel-sandbox](https://github.com/Modopi/feral-voxel-sandbox) |
-| 최신 공개 게임 | [v0.18.1](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.18.1) · 2026-10-18 16:43 UTC · 병합 커밋 `9ead705` ([PR #49](https://github.com/Modopi/feral-voxel-sandbox/pull/49)) · 쓰러진 나무를 깎을 때의 렉 수정(P2a 보충) |
+| 최신 공개 게임 | [v0.18.2](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.18.2) · 2026-11-07 18:43 UTC · 병합 커밋 `4c1bb18` ([PR #51](https://github.com/Modopi/feral-voxel-sandbox/pull/51)) · 콘텐츠 탐험 낙하 파편 렉 수정 |
 | 앱이 읽는 경로 | `updates` 브랜치의 [버전 목록](https://raw.githubusercontent.com/Modopi/feral-voxel-sandbox/updates/catalog.json)과 [최신 패키지](https://raw.githubusercontent.com/Modopi/feral-voxel-sandbox/updates/stable.feral). 로그인·토큰 없음 |
 | 서명 | 공유 시험 키(정식 운영 키 아님) |
 
@@ -17,7 +17,7 @@
 
 ## 지금의 구조 (요약)
 
-0.15.0부터 앱을 켜면 게임 밖 **런처**가 나온다. 런처에서 월드를 고르거나(이어하기 포함) 새로 만들고, 월드마다 설정(생존·샌드박스·시작 건축물·시작 소지품·사망 시 소지품 남김 중 그 맵이 지원하는 것)을 만들거나 고치고, 전역 설정과 업데이트를 본다. 월드에 들어가면 게임 세션이 그 월드 설정대로 시작되고, 메뉴의 "저장 후 런처로"로 돌아온다. 게임 버전을 바꿔도 저장 보관함이 최신 월드와 저장을 되살린다(0.14.1 이하에서 0.15.0으로 올 때는 "지금 확인 → 저장 후 적용"으로 받아야 한다). 게임 세션 안에는 아직 엔진이 세 개 있으며 세션 라우터 한 곳이 고른다. 남은 구조 문제는 [구조 문서](ARCHITECTURE.md#알려진-구조-문제-현재), 고치는 순서는 [로드맵](ROADMAP.md)에 있다.
+0.15.0부터 앱을 켜면 게임 밖 **런처**가 나온다. 런처에서 월드를 고르거나(이어하기 포함) 새로 만들고, 월드마다 설정(생존·샌드박스·시작 건축물·시작 소지품·사망 시 소지품 남김 중 그 맵이 지원하는 것)을 만들거나 고치고, 전역 설정과 업데이트를 본다. 월드에 들어가면 게임 세션이 그 월드 설정대로 시작되고, 메뉴의 "저장 후 런처로"로 돌아온다. 게임 버전을 바꿔도 저장 보관함이 최신 월드와 저장을 되살린다(0.14.1 이하에서 0.15.0으로 올 때는 "지금 확인 → 저장 후 적용"으로 받아야 한다). 0.17.0부터 네 프리셋 모두 하나의 통합 런타임에서 실행한다. 남은 구조 문제는 [구조 문서](ARCHITECTURE.md#알려진-구조-문제-현재), 고치는 순서는 [로드맵](ROADMAP.md)에 있다.
 
 | 프리셋 | 엔진 | 되는 것 |
 | --- | --- | --- |
