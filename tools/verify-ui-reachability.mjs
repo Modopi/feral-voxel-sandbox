@@ -28,14 +28,9 @@ async function open(context,url){
 // An original island save (0.13.0 and earlier format) made by the original island game: placed stone, a plank
 // half-cell, poured water, berries, crystals, arrows and 12 animals (tests/fixtures/island-save-v2.json).
 const legacyIslandSave=()=>fs.readFile(new URL('../tests/fixtures/island-save-v2.json',import.meta.url),'utf8');
-// Tap the first match with a touch. The shared ledger re-renders after each report, so a button found a moment
-// earlier can be replaced before the tap: then find it again (at most three more times).
-const retryTap=page=>async selector=>{
- for(let i=0;;i++){
-  try{const target=page.locator(selector).first();await target.scrollIntoViewIfNeeded();const box=await target.boundingBox();assert(box,selector);await page.touchscreen.tap(box.x+box.width/2,box.y+box.height/2);return;}
-  catch(e){if(i>=3||!/not attached|detached/.test(e.message))throw e;await page.waitForTimeout(200);}
- }
-};
+// Use a real touch with locator actionability/retry: the ledger replaces buttons on refresh, including
+// between a separate scroll and boundingBox read (which can return null without a detached-node error).
+const retryTap=page=>selector=>page.locator(selector).first().tap();
 const present=(page,ids)=>page.evaluate(ids=>ids.filter(id=>!document.getElementById(id)),ids);
 try{
  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:1});

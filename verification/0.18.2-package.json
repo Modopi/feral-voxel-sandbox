@@ -1,0 +1,15 @@
+{
+  "version": "0.18.2",
+  "versionCode": 1820,
+  "minNativeCode": 303,
+  "saveSchema": 4,
+  "archiveBytes": 2793220,
+  "expandedBytes": 11471696,
+  "archiveSha256": "9164d9d16fb12b1dff08bad1d3f5ca7ab6d85f9be8302ffcdc305d096328fadb",
+  "files": 104,
+  "packageSha256": "ccc9ae039534289c1d776e6c3c396ea0359c57ebad5da48382e10467c4880356",
+  "apkSha256": "0847cec5f40466436441463b9618aa07a817b059ae2ad10adb47e98fadc3b5b7",
+  "apkAssetsIdenticalToUpdate": true,
+  "withinLimits": true,
+  "note": "Local build with the shared test signing key. Android hardware not tested; CI rebuilds APK after merge."
+}

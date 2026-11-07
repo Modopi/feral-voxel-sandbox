@@ -1,0 +1,23 @@
+
+> feral-voxel-sandbox@0.18.2 check:assets
+> node tools/check-visual-assets.mjs
+
+{
+  "valid": true,
+  "assets": 121,
+  "authoredOverrides": 0,
+  "counts": {
+    "creature": 34,
+    "boss": 8,
+    "structure": 12,
+    "environment": 8,
+    "equipment": 59
+  },
+  "checks": [
+    "tool provenance",
+    "exclusive occupancy per part",
+    "collision contract",
+    "content and hierarchy",
+    "model/GLB/manifest exact bytes"
+  ]
+}

@@ -112,8 +112,9 @@ export class RuntimePhysics {
     if (changed) this.terrainVersion++;
     return changed;
   }
-  /** Body-space bounds of an entry's cuboid colliders, measured once from their
-   * poses (colliders never move within their body). */
+  /** Body-space bounds of solid cuboids only, measured once from their poses.
+   * Sensors never need supporting terrain: following an all-leaf fragment underground
+   * would continuously build collision sections it cannot touch. */
   bodyBounds(entry) {
     if (this.entryBounds.has(entry)) return this.entryBounds.get(entry);
     let bounds = null;
@@ -121,12 +122,13 @@ export class RuntimePhysics {
       const t = entry.body.translation(), q0 = entry.body.rotation(), inverse = { x: -q0.x, y: -q0.y, z: -q0.z, w: q0.w }, e = [0, 0, 0], p = [0, 0, 0];
       const min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity];
       for (const collider of entry.colliders) {
+        if (collider.isSensor()) continue;
         const c = collider.translation(), cq = collider.rotation(), h = collider.shape.halfExtents;
         rotate(inverse, c.x - t.x, c.y - t.y, c.z - t.z, p);
         rotatedExtents(multiply(inverse, cq), h.x, h.y, h.z, e);
         for (let i = 0; i < 3; i++) { min[i] = Math.min(min[i], p[i] - e[i]); max[i] = Math.max(max[i], p[i] + e[i]); }
       }
-      bounds = { center: min.map((v, i) => (v + max[i]) / 2), half: min.map((v, i) => (max[i] - v) / 2) };
+      if (Number.isFinite(min[0])) bounds = { center: min.map((v, i) => (v + max[i]) / 2), half: min.map((v, i) => (max[i] - v) / 2) };
     }
     this.entryBounds.set(entry, bounds); return bounds;
   }
@@ -162,6 +164,7 @@ export class RuntimePhysics {
     const bounds = { min: [p.x - r, p.y - 5, p.z - r], max: [p.x + r, p.y + 8, p.z + r] };
     for (const { entry } of [...this.machinePhysics.bodies.values(), ...this.objectPhysics.bodies.values(), ...this.fixturePhysics.bodies.values()]) {
       for (const collider of entry.colliders) {
+        if (collider.isSensor()) continue;
         const center = collider.translation(), h = collider.shape.halfExtents, reach = Math.hypot(h.x, h.y, h.z) + 2;
         ['x', 'y', 'z'].forEach((k, i) => { bounds.min[i] = Math.min(bounds.min[i], center[k] - reach); bounds.max[i] = Math.max(bounds.max[i], center[k] + reach); });
       }

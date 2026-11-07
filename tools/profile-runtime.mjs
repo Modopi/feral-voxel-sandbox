@@ -6,7 +6,7 @@
 // Each map starts with its first fill (terrain streaming until every wanted chunk is generated and meshed).
 // Scenarios use real input (held keys, the real attack button) except the loose-object setup,
 // which removes one trunk cell the way a felled tree does and is recorded as prepared state.
-//   node tools/profile-runtime.mjs [island,expedition,frontier,machine]
+//   node tools/profile-runtime.mjs [island,expedition,frontier,machine,debris]
 //   FERAL_CHROME=chrome path, FERAL_ASSETS=served assets URL (e.g. an older build), FERAL_PERF_OUT=report path
 import fs from 'node:fs/promises';
 import {createRequire} from 'node:module';
@@ -37,7 +37,7 @@ async function open(world,type){
   const wrap=(target,key,label)=>{if(typeof target?.[key]!=='function')return;const original=target[key];target[key]=function(...args){const start=performance.now();try{return original.apply(this,args);}finally{const row=timing[label]??={ms:0,calls:0,maxMs:0},ms=performance.now()-start;row.ms+=ms;row.calls++;if(ms>row.maxMs)row.maxMs=ms;}};};
   const {EnvironmentView}=await import('./content-runtime/environment-view.js');
   for(const [target,key,label]of [[r,'tick','runtime.tick'],[r.creatures,'tick','creatures.tick'],[f.physics,'step','physics.step'],[f.physics,'movePlayer','physics.movePlayer'],[f.physics,'synchronize','physics.synchronize'],[f.physics,'terrainAt','physics.terrainAt'],
-   [f.view,'syncTerrain','view.syncTerrain'],[f.view,'syncModels','view.syncModels'],[f.view,'draw','view.draw'],[r.atlas,'loadAround','atlas.loadAround'],[EnvironmentView.prototype,'sync','environment.sync']])wrap(target,key,label);
+   [f.physics,'_terrainSectionBoxes','physics.terrainSectionBoxes'],[f.view,'syncTerrain','view.syncTerrain'],[f.view,'syncModels','view.syncModels'],[f.view,'draw','view.draw'],[r.atlas,'loadAround','atlas.loadAround'],[EnvironmentView.prototype,'sync','environment.sync']])wrap(target,key,label);
  });
  const cdp=await context.newCDPSession(page);await cdp.send('Profiler.enable');await cdp.send('Profiler.setSamplingInterval',{interval:500});
  return {context,page,cdp,errors,world,type,readyAt};
@@ -57,10 +57,12 @@ async function measure(s,name,ms,{action,prepared}={}){
   const methods=Object.fromEntries(Object.entries(window.__methods).sort((a,b)=>b[1].ms-a[1].ms).map(([k,v])=>[k,{msPerFrame:v.ms/f.length,callsPerFrame:v.calls/f.length,maxMs:v.maxMs}]));
   return {servedVersion:`${FERAL.stats().version} / ${FERAL.stats().versionCode}`,perf,methods,interval:{mean:f.reduce((a,b)=>a+b,0)/f.length,p95:sorted[Math.floor(f.length*.95)],max:sorted.at(-1)},
    world:{objects:r.objects.objects.size,colliders:ph.world.colliders.len(),bodies:ph.world.bodies.len(),terrainSections:ph.terrainSections?.size??null,models:FERAL.view.models.size,
+    terrainSectionBuilds:window.__methods['physics.terrainSectionBoxes']?.calls??0,
+    activeSensorObjects:[...(ph.objectPhysics?.bodies.values()??[])].filter(c=>c.entry.colliders.every(x=>x.isSensor())).length,
     liquidSections:FERAL.environment?.sections?.size,inventoryItems:Object.values(r.progression.inventory).reduce((a,b)=>a+b,0)}};
  });
  const row={map:s.type,scenario:name,prepared:prepared??null,...result,cpuTop:cpuTop(profile)};report.scenarios.push(row);
- const p=row.perf,m=row.methods,sum=Object.entries(m).filter(([k])=>!['physics.terrainAt','creatures.tick'].includes(k)).reduce((a,[,v])=>a+v.msPerFrame,0);
+ const p=row.perf,m=row.methods,sum=Object.entries(m).filter(([k])=>!['physics.terrainAt','physics.terrainSectionBoxes','creatures.tick'].includes(k)).reduce((a,[,v])=>a+v.msPerFrame,0);
  console.log(`${s.type} ${name}: frame ${row.interval.mean.toFixed(1)}ms (p95 ${row.interval.p95.toFixed(1)}), timed methods ${sum.toFixed(1)}ms/frame${p?`, loop work ${p.frameMs.mean.toFixed(1)}ms, steps/frame ${p.stepsPerFrame.toFixed(2)}`:''}, objects ${row.world.objects}, colliders ${row.world.colliders}`);
  for(const [k,v]of Object.entries(m).slice(0,7))console.log(`   ${k.padEnd(20)} ${v.msPerFrame.toFixed(2)}ms/frame  calls ${v.callsPerFrame.toFixed(1)}  max ${v.maxMs.toFixed(1)}`);
  return row;
@@ -99,6 +101,39 @@ async function aimAt(s,[bx,by,bz]){
 }
 const releaseAim=s=>s.page.evaluate(()=>{const v=FERAL.view;if(v.__aim)v.aim=v.__aim;});
 const scenarios={
+ // The expedition regression: a leaf knocked off a felled tree is a dynamic sensor. Older builds follow it
+ // underground, streaming collision sections forever. Break one leaf through the real impact damage path so
+ // this test does not depend on whether a particular tree lands upright or tips over on a given frame schedule.
+ async debris(){
+  const s=await open('profile-debris','expedition');await fill(s);await measure(s,'before felling trees',5000);
+  const found=await trees(s);
+  const prepared=await s.page.evaluate(found=>{
+   const r=FERAL.runtime,pieces=[];
+   for(const [x,y,z]of found){
+    if(pieces.length>=3)break;
+    const cut=[];for(let dx=-3;dx<=3;dx++)for(let dz=-3;dz<=3;dz++)if(r.atlas.getCell(x+dx,y,z+dz)==='log'){r.atlas.setCell(x+dx,y,z+dz,null);cut.push([x+dx,y,z+dz]);}
+    if(!cut.length)continue;
+    const result=r.objects.detachAround(cut[0]);
+    if(result.objects.length)pieces.push(...result.objects);else for(const c of cut)r.atlas.setCell(...c,'log');
+   }
+   if(pieces.length!==3)throw Error(`Expected three expedition trees, got ${pieces.length}`);
+   const tree=pieces[0],cell=tree.cells.find(c=>c.blockId==='leaves');if(!cell)throw Error('Expected a leaf to split');
+   const point={x:tree.position.x+(cell.cell[0]+.5)*.5,y:tree.position.y+(cell.cell[1]+.5)*.5,z:tree.position.z+(cell.cell[2]+.5)*.5};
+   const hit=r.objects.damageAt(tree.id,point,1e9,{knockLoose:true});if(!hit.removed)throw Error('Leaf impact did not split');
+   const leaf=hit.objectIds.map(id=>r.objects.get(id)).find(o=>o.cells.length===1&&o.cells[0].blockId==='leaves');if(!leaf)throw Error('Expected separate leaf debris');
+   Object.assign(r.player,{x:point.x+5,z:point.z,y:r.atlas.heightAt(point.x+5,point.z)+.1,vx:0,vz:0,yaw:Math.PI/2});
+   r.player.pitch=Math.atan2(point.y-r.player.y-1.58,5);
+   window.__debrisIds={trees:pieces.map(o=>o.id),leaf:leaf.id};
+   return `three expedition trees (${pieces.map(o=>o.cells.length).join(', ')} cells), bottom trunk layer removed via atlas + detachAround; one leaf split via damageAt(knockLoose); camera faces it, no input afterwards`;
+  },found);
+  await measure(s,'three trees and leaf, first 10 s',10000,{prepared});
+  await measure(s,'three trees and leaf, next 10 s',10000,{prepared});
+  const row=await measure(s,'three trees and leaf, final 10 s',10000,{prepared});
+  row.debris=await s.page.evaluate(()=>{const r=FERAL.runtime,ph=FERAL.physics,ids=window.__debrisIds,leaf=r.objects.get(ids.leaf);return {
+   treesRetained:ids.trees.every(id=>r.objects.get(id)),leafRetained:!!leaf,leafPosition:leaf?.position,leafActive:ph.objectPhysics.bodies.has(ids.leaf),
+   otherSensorObjects:[...r.objects.objects.values()].filter(o=>o.boxes.every(b=>b.collision===false)).map(o=>({id:o.id,position:o.position,active:ph.objectPhysics.bodies.has(o.id)}))};});
+  report.errors=[...(report.errors??[]),...s.errors];await s.context.close();
+ },
  async island(){
   const s=await open('profile-island','island');await fill(s);
   await measure(s,'idle',5000);

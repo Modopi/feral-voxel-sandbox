@@ -36,7 +36,12 @@ export function matterShapes(boxes) {
  * Holding, throwing and carry weight follow the frontier hand grip (impact.js gripLimits); the carrying
  * grapple is the frontier's powered grip. A wrench-pinned object is a fixed body that cannot be moved. */
 export class ObjectPhysicsBridge {
-  constructor(physics) { this.physics = physics; this.bodies = new Map(); this.held=null; this.pass = 0; }
+  constructor(physics) { this.physics = physics; this.bodies = new Map(); this.boxSolidity = new WeakMap(); this.held=null; this.pass = 0; }
+  hasSolid(boxes) {
+    let solid = this.boxSolidity.get(boxes);
+    if (solid === undefined) { solid = boxes.some(b => b.collision !== false); this.boxSolidity.set(boxes, solid); }
+    return solid;
+  }
   grab(id,point,{powered=false}={}){
     const p=this.physics.runtime.player,o=this.physics.runtime.objects.get(id),cache=this.bodies.get(id);
     if(!o||!cache||!point||!['x','y','z'].every(k=>Number.isFinite(point[k]))||Math.hypot(point.x-p.x,point.y-p.y,point.z-p.z)>(powered?6.5:4))return {ok:false,reason:'물체에 가까이 다가가세요.'};
@@ -84,8 +89,12 @@ export class ObjectPhysicsBridge {
   sync() {
     const player = this.physics.runtime.player, pass = ++this.pass;
     for (const object of this.physics.runtime.objects?.physicsBodies?.() ?? []) {
-      const dx = object.position.x - player.x, dz = object.position.z - player.z;
-      if (!object.boxes?.length || dx * dx + dz * dz > 64 * 64) continue;
+      // Sensor-only debris can fall through the world. Bound its simulation vertically too, preserving
+      // the saved pose/velocity. Solids retain their horizontal range: a tall piece can reach the player
+      // even when its minimum-cell origin is far below them. Solidity is cached until the cells change.
+      const dx = object.position.x - player.x, dy = object.position.y - player.y, dz = object.position.z - player.z;
+      if (!object.boxes?.length || dx * dx + dz * dz > 64 * 64 ||
+        (dx * dx + dy * dy + dz * dz > 64 * 64 && !this.hasSolid(object.boxes))) continue;
       let cache = this.bodies.get(object.id);
       // The colliders change only with the object's cells (WorldObjects._build makes a new boxes array) or its pin:
       // nothing is compared or rebuilt while a piece only moves or a cell only loses health.
