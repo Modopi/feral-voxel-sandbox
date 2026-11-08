@@ -2,6 +2,11 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 node tools/version.mjs --check
+if [[ "$(node -p 'JSON.parse(require("fs").readFileSync("version.json","utf8")).nativeCode || 0')" -ge 400 ]]; then
+  node tools/native/export-content.mjs --check
+  bash tools/native/bootstrap.sh
+  exec bash tools/native/export-apk.sh
+fi
 FERAL_VERSION="$(node -p 'JSON.parse(require("fs").readFileSync("version.json","utf8")).nativeVersion || JSON.parse(require("fs").readFileSync("version.json","utf8")).version')"
 FERAL_APK="build/Feral-$FERAL_VERSION-android.apk"
 FERAL_SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-../toolchain/sdk}}"

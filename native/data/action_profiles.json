@@ -1,0 +1,175 @@
+{
+  "schema": 1,
+  "fixedHz": 60,
+  "limits": {
+    "maxSweepSubdivisions": 8,
+    "maxAngularStepDegrees": 12
+  },
+  "profiles": {
+    "pick": {
+      "label": "Pick",
+      "durationFrames": 11,
+      "cooldownFrames": 11,
+      "reach": 6.5,
+      "aimConeDegrees": 24,
+      "damage": 20,
+      "miningReferenceDamage": 20,
+      "energyBudget": 80,
+      "damageShape": "point",
+      "hitboxes": [
+        { "kind": "point", "hitFrame": 6, "radius": 0.28, "maxContacts": 4 }
+      ],
+      "visual": [
+        { "frame": 0, "position": [0, 0, 0], "rotationDegrees": [0, 0, 0] },
+        { "frame": 3, "position": [0.02, 0.12, 0.08], "rotationDegrees": [-66, 2, -6] },
+        { "frame": 6, "position": [0, -0.04, -0.12], "rotationDegrees": [18, -4, 7] },
+        { "frame": 8, "position": [0, -0.02, -0.08], "rotationDegrees": [8, -2, 2] },
+        { "frame": 11, "position": [0, 0, 0], "rotationDegrees": [0, 0, 0] }
+      ]
+    },
+    "knife": {
+      "label": "Knife",
+      "durationFrames": 20,
+      "cooldownFrames": 18,
+      "reach": 2.5,
+      "aimConeDegrees": 28,
+      "damage": 10,
+      "miningReferenceDamage": 10,
+      "energyBudget": 10,
+      "damageShape": "point",
+      "hitboxes": [
+        { "kind": "point", "hitFrame": 9, "radius": 0.18, "maxContacts": 2 }
+      ],
+      "visual": [
+        { "frame": 0, "position": [0, 0, 0], "rotationDegrees": [0, 0, 0] },
+        { "frame": 5, "position": [0.04, 0.02, 0.08], "rotationDegrees": [-24, 10, -28] },
+        { "frame": 9, "position": [0, 0, -0.12], "rotationDegrees": [10, -2, 34] },
+        { "frame": 14, "position": [0, 0, -0.04], "rotationDegrees": [4, 0, 12] },
+        { "frame": 20, "position": [0, 0, 0], "rotationDegrees": [0, 0, 0] }
+      ]
+    },
+    "axe": {
+      "label": "Axe",
+      "durationFrames": 34,
+      "cooldownFrames": 34,
+      "reach": 3.3,
+      "aimConeDegrees": 78,
+      "damage": 22,
+      "miningReferenceDamage": 22,
+      "energyBudget": 32,
+      "damageShape": "slash",
+      "hitboxes": [
+        {
+          "kind": "sweep",
+          "activeStartFrame": 11,
+          "activeEndFrame": 20,
+          "radius": 0.24,
+          "maxContacts": 8,
+          "keyframes": [
+            { "frame": 8, "position": [-0.66, 0.28, -1.04] },
+            { "frame": 11, "position": [-0.55, 0.18, -1.30] },
+            { "frame": 15, "position": [0.02, 0.08, -1.48] },
+            { "frame": 20, "position": [0.65, -0.03, -1.15] },
+            { "frame": 24, "position": [0.72, -0.10, -0.95] }
+          ]
+        }
+      ],
+      "visual": [
+        { "frame": 0, "position": [0, 0, 0], "rotationDegrees": [0, 0, 0] },
+        { "frame": 8, "position": [0.04, 0.15, 0.08], "rotationDegrees": [-82, -8, -12] },
+        { "frame": 14, "position": [0.02, -0.02, -0.10], "rotationDegrees": [28, 4, 36] },
+        { "frame": 20, "position": [-0.03, -0.08, -0.06], "rotationDegrees": [14, 2, 30] },
+        { "frame": 34, "position": [0, 0, 0], "rotationDegrees": [0, 0, 0] }
+      ]
+    },
+    "sword": {
+      "label": "Sword",
+      "durationFrames": 28,
+      "cooldownFrames": 26,
+      "reach": 3.2,
+      "aimConeDegrees": 82,
+      "damage": 28,
+      "miningReferenceDamage": 28,
+      "energyBudget": 56,
+      "damageShape": "slash",
+      "hitboxes": [
+        {
+          "kind": "sweep",
+          "activeStartFrame": 8,
+          "activeEndFrame": 17,
+          "radius": 0.22,
+          "maxContacts": 8,
+          "keyframes": [
+            { "frame": 5, "position": [-0.80, 0.02, -1.18] },
+            { "frame": 8, "position": [-0.74, -0.01, -1.40] },
+            { "frame": 12, "position": [0.00, 0.02, -1.56] },
+            { "frame": 17, "position": [0.76, 0.04, -1.34] },
+            { "frame": 21, "position": [0.82, 0.02, -1.10] }
+          ]
+        }
+      ],
+      "visual": [
+        { "frame": 0, "position": [0, 0, 0], "rotationDegrees": [0, 0, 0] },
+        { "frame": 5, "position": [0.03, 0.08, 0.06], "rotationDegrees": [-50, -4, -24] },
+        { "frame": 10, "position": [0.01, 0, -0.08], "rotationDegrees": [6, 4, 36] },
+        { "frame": 17, "position": [-0.02, -0.02, -0.04], "rotationDegrees": [8, 1, 46] },
+        { "frame": 28, "position": [0, 0, 0], "rotationDegrees": [0, 0, 0] }
+      ]
+    },
+    "spear": {
+      "label": "Spear",
+      "durationFrames": 30,
+      "cooldownFrames": 30,
+      "reach": 4.8,
+      "aimConeDegrees": 18,
+      "damage": 16,
+      "miningReferenceDamage": 16,
+      "energyBudget": 22,
+      "damageShape": "pierce",
+      "hitboxes": [
+        { "kind": "point", "hitFrame": 13, "radius": 0.18, "maxContacts": 3 }
+      ],
+      "visual": [
+        { "frame": 0, "position": [0, 0, 0], "rotationDegrees": [0, 0, 0] },
+        { "frame": 6, "position": [-0.02, 0.03, 0.08], "rotationDegrees": [-12, 3, -8] },
+        { "frame": 13, "position": [0, 0, -0.18], "rotationDegrees": [2, 0, 2] },
+        { "frame": 19, "position": [0, 0, -0.07], "rotationDegrees": [2, 0, 2] },
+        { "frame": 30, "position": [0, 0, 0], "rotationDegrees": [0, 0, 0] }
+      ]
+    },
+    "hammer": {
+      "label": "Hammer",
+      "durationFrames": 36,
+      "cooldownFrames": 36,
+      "reach": 3.0,
+      "aimConeDegrees": 70,
+      "damage": 24,
+      "miningReferenceDamage": 24,
+      "energyBudget": 36,
+      "damageShape": "impact",
+      "hitboxes": [
+        {
+          "kind": "sweep",
+          "activeStartFrame": 13,
+          "activeEndFrame": 19,
+          "radius": 0.28,
+          "maxContacts": 6,
+          "keyframes": [
+            { "frame": 9, "position": [-0.18, 0.32, -1.08] },
+            { "frame": 13, "position": [-0.12, 0.16, -1.26] },
+            { "frame": 16, "position": [0.03, -0.32, -1.42] },
+            { "frame": 19, "position": [0.12, -0.52, -1.34] },
+            { "frame": 23, "position": [0.14, -0.34, -1.18] }
+          ]
+        }
+      ],
+      "visual": [
+        { "frame": 0, "position": [0, 0, 0], "rotationDegrees": [0, 0, 0] },
+        { "frame": 9, "position": [0.02, 0.18, 0.08], "rotationDegrees": [-78, 3, -8] },
+        { "frame": 16, "position": [0, -0.10, -0.12], "rotationDegrees": [42, -2, 8] },
+        { "frame": 22, "position": [0, -0.08, -0.06], "rotationDegrees": [18, -2, 6] },
+        { "frame": 36, "position": [0, 0, 0], "rotationDegrees": [0, 0, 0] }
+      ]
+    }
+  }
+}

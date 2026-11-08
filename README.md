@@ -2,37 +2,36 @@
 
 Android에서 오프라인으로 탐험·채굴·제작·생태·전투를 하는 1인칭 복셀 샌드박스 RPG.
 
-- **현재 공개 버전:** 게임 0.18.2 / 1820 · Android 앱 0.3.3 / 303 · [릴리스](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.18.2)
-- **지금 되는 것과 한계:** [현황](docs/STATUS.md)
-- **구조와 앞으로의 단계:** [소프트웨어 구조](docs/ARCHITECTURE.md) · [로드맵](docs/ROADMAP.md). 0.15.0부터 앱의 첫 화면은 게임 밖 런처이고, 월드 선택·월드 설정·환경 설정·업데이트를 여기서 한다. 0.17.0부터 모든 월드(섬·개척 원정·기계 시험장·콘텐츠 탐험)가 하나의 통합 런타임에서 돈다(엔진 통합 완료). 0.18.0에서 지형 생성을 웹 워커로 옮기고 생물 AI를 거리별로 갱신했다(성능 P2a). 남은 성능 작업은 실기기 수치가 필요한 P2b다.
-- **모든 문서와 신뢰 등급:** [문서 안내](docs/README.md)
+현재 작업 버전은 **게임 0.19.0 / 앱 0.4.0**이다. 게임 계산은 C++17, 렌더·입력·화면은 Godot 4.6.3, 물리는 하나의 Jolt 공간에서 실행한다. 네 가지 월드는 같은 세션의 설정과 모듈로 구성한다. 실제 타격 궤적과 화면의 도구 애니메이션은 독립된 두 트랙이며 같은 60Hz 시간축을 사용한다.
+
+[검증 기록](verification/0.19.0.md) · [현황](docs/STATUS.md) · [구조](docs/ARCHITECTURE.md) · [로드맵](docs/ROADMAP.md) · [공개 배포](https://github.com/Modopi/feral-voxel-sandbox/releases) · [문서 안내](docs/README.md)
 
 ## 설치와 업데이트
 
-- **앱 0.3.3 사용 중:** 런처의 **업데이트**(0.14.1 이하는 게임 안 **메뉴 → 업데이트**)에서 **지금 확인 → 저장 후 적용**으로 최신 게임을 받는다. 게임 업데이트는 서명·파일 해시를 검증한 뒤 다음 실행에 전체 버전으로 적용한다. 시작에 실패하면 이전 게임과 저장으로 되돌린다.
-- **특정 게임 버전 실행:** 앱 상단 **게임 버전**에서 고른다. 0.15.0부터는 어느 버전으로 바꿔도 저장 보관함이 최신 월드와 저장을 되살린다. 단, 0.14.1 이하에서 0.15.0으로 올 때는 목록에서 고르면 빈 저장으로 시작하므로 **지금 확인 → 저장 후 적용**으로 받는다(이미 빈 저장이 됐다면 목록에서 이전 버전을 다시 골라 저장을 되찾은 뒤 지금 확인으로 올린다).
-- **처음 설치하거나 앱 0.3.2 이하:** 최신 Release의 `Feral-0.3.3-android.apk`를 기존 앱 위에 설치한다. 앱을 지우거나 데이터를 지울 필요가 없다. Android 8.0 이상, WebGL 2를 지원하는 최신 Android System WebView가 필요하다.
-- 공개 업데이트는 같은 저장소의 `updates` 브랜치에서 로그인·토큰 없이 읽는다. 이미 게시한 버전은 바꾸지 않는다. 절차와 복구 범위는 [배포](docs/RELEASING.md).
+Android 8.0 이상 arm64 기기용 `Feral-0.4.0-android.apk`를 **기존 앱 위에 업데이트 설치**한다. 같은 패키지와 서명을 유지하며, 기존 WebView 월드와 저장 보관함은 원본을 남기고 변환한다. 앱 삭제나 데이터 초기화는 필요하지 않다. Android 실기기 검증 범위는 검증 기록에 별도로 표시한다.
+
+새 앱에서는 런처의 업데이트 화면에서 서명된 메타데이터를 확인하고 APK를 내려받는다. 코드 변경에는 새 APK가 필요하며, 이전 JS 게임의 버전 선택기로 C++ 코드를 교체하지 않는다. 저장·설치·복구 범위와 이전 버전 안내는 [배포 문서](docs/RELEASING.md)를 따른다.
 
 ## 개발
 
-필요한 것: Node.js, Python 3, Java 17 JDK, Android SDK Platform 35와 Build Tools 35.0.0. 브라우저 검증에는 Playwright와 Chromium.
+Node.js, Python 3, C++17 컴파일러, Java 21, Android SDK Platform 35 / Build Tools 35.0.0을 사용한다. 고정된 Godot·godot-cpp·NDK·SCons·Gradle 도구는 `tools/native/bootstrap.sh`가 준비한다.
 
 ```bash
-npm test                                   # 필수 회귀, 약 20초 (tests/*.test.js)
-npm run test:long                          # 장기 검사: 10티어 경로 약 7분, 에셋 재생성 (바꾼 영역만)
-node tools/verify-ui-reachability.mjs      # 앱과 같은 MIME·CSP 서버에서 실제 터치 경로 검증 (FERAL_CHROME=크롬 경로)
-node tools/profile-runtime.mjs             # 장면별 프레임 비용(FERAL.perf). FERAL_ASSETS로 이전 빌드도 같은 기준으로 잰다
+node tools/native/export-content.mjs --check
+npm test                                  # 기존 규칙·데이터 필수 회귀
+npm run check:assets                       # 정식 복셀 에셋 검사
+bash tools/native/test.sh                  # C++ 규칙 + 실제 Godot/Jolt 통합 검사
 export ANDROID_HOME=/absolute/path/to/Android/sdk
-bash build-apk.sh                          # build/Feral-<앱 버전>-android.apk
-python3 tools/build-update.py              # build/release/Feral-<게임 버전>-update.feral
+bash build-apk.sh                          # build/Feral-0.4.0-android.apk
+python3 tools/build-update.py              # 서명 메타데이터와 콘텐츠 스냅샷
 ```
 
-- 버전은 `version.json`만 고친 뒤 `node tools/version.mjs`를 실행한다. 게임 버전과 앱(네이티브) 버전은 따로 관리한다.
-- 브라우저 검증은 일반 개발 서버(`npm run serve`) 대신 `tools/android-asset-server.mjs`를 쓴다. 일반 서버는 Android에서만 생기는 모듈 형식 오류를 숨긴다.
-- 콘텐츠 데이터는 `design/content/*.json`이다. 바꾸면 `npm run build:runtime`으로 런타임 카탈로그를 만들고 `npm run check:runtime`·`npm run audit:design`으로 확인한다.
-- 복셀 에셋은 제작 SDK와 편집기(`npm run author:assets` → `http://localhost:8081/design/assets/author.html`)로만 만든다. `npm run build:assets` → `npm run render:assets` → `npm run check:assets`. 규칙은 [복셀 에셋 규칙](docs/VOXEL-ASSET-RULES.md).
-- main 반영과 배포 규칙은 [AGENTS.md](AGENTS.md)와 [배포](docs/RELEASING.md). main의 버전 증가를 GitHub Actions가 Release와 공개 업데이트로 게시한다.
-- `signing/prototype.keystore`는 재빌드용 공유 시험 키이며 정식 운영 키가 아니다.
+Linux에서 빌드 후 `godot --path native`로 네이티브 앱을 실행한다. 게임 코드는 `native/src`, 데이터는 `native/data`에 있다. `app/src/main/assets`의 이전 JS 코드는 기준 데이터와 이전 저장·회귀 비교에 남겨 두며 새 APK의 게임 루프에서 실행하지 않는다.
 
-Three.js r170을 포함한다. MIT 라이선스는 `app/src/main/assets/vendor/THREE-LICENSE.txt`.
+- 버전의 기준은 `version.json`이다. 변경 후 `node tools/version.mjs`로 메타데이터를 맞춘다.
+- 콘텐츠의 기준은 `design/content/*.json`이다. `npm run build:runtime`과 `node tools/native/export-content.mjs`로 런타임 데이터를 내보낸다.
+- 복셀 에셋은 제작 SDK와 편집기를 사용한다. [복셀 에셋 규칙](docs/VOXEL-ASSET-RULES.md)을 따른다.
+- 영향받은 장기 검사와 이전 UI 검사는 [AGENTS.md](AGENTS.md)의 기준으로 실행한다. 기존 JS 측정과 네이티브 측정은 구분한다.
+- main 병합·배포 절차는 [배포 문서](docs/RELEASING.md)를 따른다. `signing/prototype.keystore`는 공유 시험 키이며 정식 운영 키가 아니다.
+
+네이티브 실행의 라이선스는 [제3자 고지](native/THIRD_PARTY_NOTICES.md)에 있다. 이전 브라우저 런타임에 포함된 Three.js r170의 MIT 라이선스는 `app/src/main/assets/vendor/THREE-LICENSE.txt`에 있다.

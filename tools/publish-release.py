@@ -53,6 +53,12 @@ def publish():
     packed = bundle.read_bytes()
     branch = os.environ.get("GITHUB_REF_NAME", "main")
     experiment = branch.startswith("V_")
+    local_manifest = json.loads(base64.b64decode(json.loads(packed)["manifest"]))
+    if local_manifest.get("runtime") == "godot-cpp" and not experiment:
+        apk = ROOT / "build" / f"Feral-{version['nativeVersion']}-android.apk"
+        metadata = local_manifest.get("nativeApk", {})
+        if not apk.is_file() or metadata.get("sha256") != hashlib.sha256(apk.read_bytes()).hexdigest() or metadata.get("bytes") != apk.stat().st_size:
+            raise RuntimeError("Native release requires a built APK with matching signed metadata")
     current = None if experiment else optional(prefix + "/contents/stable.feral?ref=updates")
     if current:
         content = current if current.get("encoding") == "base64" else request(prefix + "/git/blobs/" + current["sha"])
@@ -70,7 +76,9 @@ def publish():
     tag = ("game-" + str(version["versionCode"])) if experiment else "v" + version["version"]
     release = optional(prefix + "/releases/tags/" + tag)
     notes = (ROOT / "CHANGELOG.md").read_text().split("\n# ")[0].strip()
-    notes += "\n\n공개 배포 · 앱 0.3.2부터 로그인이나 토큰 없이 메뉴 → 업데이트에서 확인·게임 버전 선택."
+    notes += "\n\n공개 배포 · 로그인이나 토큰 없이 메뉴 → 업데이트에서 확인."
+    if local_manifest.get("runtime") == "godot-cpp":
+        notes += " C++ 코드 변경은 새 APK로 설치합니다. .feral 파일은 서명된 배포 정보와 콘텐츠 기록이며 JavaScript 게임을 실행하지 않습니다."
     if not experiment:
         notes += " 기존 앱을 삭제하지 말고 APK를 업데이트 설치하세요."
     notes += "\n운영 절차: docs/RELEASING.md"

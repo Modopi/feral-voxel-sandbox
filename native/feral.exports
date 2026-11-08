@@ -1,0 +1,6 @@
+{
+  global:
+    feral_library_init;
+  local:
+    *;
+};

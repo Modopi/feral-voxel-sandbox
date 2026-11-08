@@ -1,0 +1,3 @@
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <cache-path name="feral_verified_apks" path="feral-updates/" />
+</paths>

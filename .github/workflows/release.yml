@@ -9,7 +9,43 @@ concurrency:
   group: feral-stable-release
   cancel-in-progress: false
 jobs:
+  release-gate:
+    runs-on: ubuntu-latest
+    outputs:
+      run_release: ${{ steps.gate.outputs.run_release }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Skip docs-only pushes to main
+        id: gate
+        shell: bash
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" || "$GITHUB_REF_NAME" != "main" ]]; then
+            echo 'run_release=true' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          BEFORE="${{ github.event.before }}"
+          if [[ -z "$BEFORE" || "$BEFORE" =~ ^0+$ ]] || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            echo 'run_release=true' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          mapfile -t CHANGED_FILES < <(git diff --name-only "$BEFORE" "$GITHUB_SHA")
+          if [[ ${#CHANGED_FILES[@]} -eq 0 ]]; then
+            echo 'run_release=true' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          for CHANGED_FILE in "${CHANGED_FILES[@]}"; do
+            case "$CHANGED_FILE" in
+              docs/*|*.md) ;;
+              *) echo 'run_release=true' >> "$GITHUB_OUTPUT"; exit 0 ;;
+            esac
+          done
+          echo 'run_release=false' >> "$GITHUB_OUTPUT"
+
   release:
+    needs: release-gate
+    if: needs.release-gate.outputs.run_release == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,7 +55,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: "21"
       - name: Prepare branch game version
         run: |
           python3 tools/prepare-branch.py
@@ -30,13 +66,15 @@ jobs:
           node --test tests/*.test.js
       - name: Install Android build tools
         run: |
-          if [[ ! -f "$ANDROID_HOME/platforms/android-35/android.jar" || ! -x "$ANDROID_HOME/build-tools/35.0.0/aapt2" ]]; then
-            "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-35' 'build-tools;35.0.0'
+          if [[ ! -f "$ANDROID_HOME/platforms/android-35/android.jar" || ! -x "$ANDROID_HOME/build-tools/35.0.0/aapt2" || ! -x "$ANDROID_HOME/platform-tools/adb" ]]; then
+            "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" 'platforms;android-35' 'build-tools;35.0.0' 'platform-tools'
           fi
       - name: Build APK and signed game update
         run: |
           if [[ "$GITHUB_REF_NAME" == "main" ]]; then bash build-apk.sh; fi
           python3 tools/build-update.py
+      - name: Build and test native runtime
+        run: bash tools/native/test.sh
       - uses: actions/upload-artifact@v4
         with:
           name: feral-release

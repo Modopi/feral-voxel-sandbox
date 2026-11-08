@@ -1,0 +1,5004 @@
+{
+ "version": "0.19.0",
+ "versionCode": 1900,
+ "generatedAt": "2026-11-08T06:56:43.179Z",
+ "environment": "Chromium SwiftShader, 900×412 touch viewport, Android MIME/CSP asset server",
+ "note": "frameMs is the frame loop's own JS work (FERAL.perf), not GPU time. Phases are per frame; step.* run stepsPerFrame times.",
+ "scenarios": [
+  {
+   "map": "expedition",
+   "scenario": "first fill",
+   "prepared": null,
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 65,
+    "stepsPerFrame": 2.9076923076923076,
+    "frameMs": {
+     "mean": 27.2892307693282,
+     "p95": 49.700000000186265,
+     "max": 64.79999999981374
+    },
+    "phases": {
+     "view.draw": {
+      "msPerFrame": 7.9461538461825025,
+      "callsPerFrame": 1,
+      "maxMs": 32.200000000186265
+     },
+     "view.models": {
+      "msPerFrame": 6.004615384655503,
+      "callsPerFrame": 1,
+      "maxMs": 27.200000000186265
+     },
+     "simulate": {
+      "msPerFrame": 5.595384615430465,
+      "callsPerFrame": 1,
+      "maxMs": 27.800000000745058
+     },
+     "physics.sync": {
+      "msPerFrame": 3.7030769229938203,
+      "callsPerFrame": 1,
+      "maxMs": 21
+     },
+     "step.physics": {
+      "msPerFrame": 3.359999999905435,
+      "callsPerFrame": 2.9076923076923076,
+      "maxMs": 24.700000000186265
+     },
+     "terrain.mesh": {
+      "msPerFrame": 2.155384615393212,
+      "callsPerFrame": 1,
+      "maxMs": 9.599999999627471
+     },
+     "step.world": {
+      "msPerFrame": 1.5846153846870248,
+      "callsPerFrame": 2.9076923076923076,
+      "maxMs": 23.40000000037253
+     },
+     "ui": {
+      "msPerFrame": 1.3538461538318258,
+      "callsPerFrame": 1,
+      "maxMs": 9.699999999254942
+     },
+     "step.move": {
+      "msPerFrame": 0.5661538461653086,
+      "callsPerFrame": 2.9076923076923076,
+      "maxMs": 2.1000000005587935
+     },
+     "view.effects": {
+      "msPerFrame": 0.34307692321733785,
+      "callsPerFrame": 1,
+      "maxMs": 4.2999999998137355
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.16307692301387972,
+      "callsPerFrame": 1,
+      "maxMs": 4.099999999627471
+     }
+    }
+   },
+   "methods": {
+    "view.draw": {
+     "msPerFrame": 7.9461538461825025,
+     "callsPerFrame": 1,
+     "maxMs": 32.200000000186265
+    },
+    "view.syncModels": {
+     "msPerFrame": 4.675384615347363,
+     "callsPerFrame": 1,
+     "maxMs": 26.40000000037253
+    },
+    "physics.synchronize": {
+     "msPerFrame": 3.70153846146109,
+     "callsPerFrame": 1,
+     "maxMs": 21
+    },
+    "physics.step": {
+     "msPerFrame": 3.3569230768399745,
+     "callsPerFrame": 2.9076923076923076,
+     "maxMs": 24.700000000186265
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 2.153846153860482,
+     "callsPerFrame": 1,
+     "maxMs": 9.599999999627471
+    },
+    "runtime.tick": {
+     "msPerFrame": 1.580000000088834,
+     "callsPerFrame": 2.9076923076923076,
+     "maxMs": 23.40000000037253
+    },
+    "creatures.tick": {
+     "msPerFrame": 1.2846153846726969,
+     "callsPerFrame": 2.9076923076923076,
+     "maxMs": 23.200000000186265
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 0.30923076913906977,
+     "callsPerFrame": 2.9076923076923076,
+     "maxMs": 0.5
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.1538461537888417,
+     "callsPerFrame": 1,
+     "maxMs": 4.099999999627471
+    },
+    "environment.sync": {
+     "msPerFrame": 0.1523076923707357,
+     "callsPerFrame": 1,
+     "maxMs": 4.2999999998137355
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.035384615439061934,
+     "callsPerFrame": 6.815384615384615,
+     "maxMs": 0.10000000055879354
+    }
+   },
+   "interval": {
+    "mean": 73.07384615384616,
+    "p95": 100.09999999999991,
+    "max": 366.6999999999998
+   },
+   "world": {
+    "objects": 0,
+    "colliders": 1129,
+    "bodies": 95,
+    "terrainSections": 75,
+    "models": 98,
+    "terrainSectionBuilds": 0,
+    "activeSensorObjects": 0,
+    "liquidSections": 0,
+    "inventoryItems": 0
+   },
+   "cpuTop": [
+    {
+     "fn": "compose three.module.js:6648",
+     "percent": 2.4
+    },
+    {
+     "fn": "chunkGeometry scene.js:31",
+     "percent": 2
+    },
+    {
+     "fn": "syncModels scene.js:205",
+     "percent": 1.8
+    },
+    {
+     "fn": "multiplyMatrices three.module.js:6301",
+     "percent": 1.6
+    },
+    {
+     "fn": "(garbage collector) :0",
+     "percent": 1.1
+    },
+    {
+     "fn": "setup three.module.js:15263",
+     "percent": 1
+    },
+    {
+     "fn": "updateMatrixWorld three.module.js:7811",
+     "percent": 0.8
+    },
+    {
+     "fn": "set three.module.js:6935",
+     "percent": 0.8
+    },
+    {
+     "fn": "drawElements :0",
+     "percent": 0.8
+    },
+    {
+     "fn": "needsUpdate three.module.js:15387",
+     "percent": 0.8
+    },
+    {
+     "fn": "uniformMatrix4fv :0",
+     "percent": 0.7
+    },
+    {
+     "fn": "free rapier.js:1",
+     "percent": 0.6
+    }
+   ],
+   "fill": {
+    "generatedMs": 6175,
+    "meshedMs": 6187,
+    "chunks": 96,
+    "generator": "worker"
+   }
+  },
+  {
+   "map": "expedition",
+   "scenario": "before felling trees",
+   "prepared": null,
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 94,
+    "stepsPerFrame": 2.734042553191489,
+    "frameMs": {
+     "mean": 16.097872340496867,
+     "p95": 34.200000000186265,
+     "max": 38.90000000037253
+    },
+    "phases": {
+     "view.draw": {
+      "msPerFrame": 4.6723404255537115,
+      "callsPerFrame": 1,
+      "maxMs": 26.600000000558794
+     },
+     "view.models": {
+      "msPerFrame": 4.223404255348872,
+      "callsPerFrame": 1,
+      "maxMs": 21.799999999813735
+     },
+     "simulate": {
+      "msPerFrame": 3.800000000021797,
+      "callsPerFrame": 1,
+      "maxMs": 15.100000000558794
+     },
+     "physics.sync": {
+      "msPerFrame": 2.572340425539841,
+      "callsPerFrame": 1,
+      "maxMs": 27.800000000745058
+     },
+     "step.physics": {
+      "msPerFrame": 2.2861702127104744,
+      "callsPerFrame": 2.734042553191489,
+      "maxMs": 11.300000000745058
+     },
+     "step.world": {
+      "msPerFrame": 1.006382978699626,
+      "callsPerFrame": 2.734042553191489,
+      "maxMs": 5.599999999627471
+     },
+     "ui": {
+      "msPerFrame": 0.4797872340584055,
+      "callsPerFrame": 1,
+      "maxMs": 5.7000000001862645
+     },
+     "step.move": {
+      "msPerFrame": 0.4361702128650343,
+      "callsPerFrame": 2.734042553191489,
+      "maxMs": 1.099999999627471
+     },
+     "view.effects": {
+      "msPerFrame": 0.1904255319188567,
+      "callsPerFrame": 1,
+      "maxMs": 0.900000000372529
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.07659574465310955,
+      "callsPerFrame": 1,
+      "maxMs": 3.2999999998137355
+     },
+     "terrain.mesh": {
+      "msPerFrame": 0.06808510639684949,
+      "callsPerFrame": 1,
+      "maxMs": 0.7999999998137355
+     }
+    }
+   },
+   "methods": {
+    "view.draw": {
+     "msPerFrame": 4.669148936203899,
+     "callsPerFrame": 1,
+     "maxMs": 26.600000000558794
+    },
+    "view.syncModels": {
+     "msPerFrame": 3.4404255319882107,
+     "callsPerFrame": 1,
+     "maxMs": 21.399999999441206
+    },
+    "physics.synchronize": {
+     "msPerFrame": 2.5702127659633915,
+     "callsPerFrame": 1,
+     "maxMs": 27.700000000186265
+    },
+    "physics.step": {
+     "msPerFrame": 2.281914893557575,
+     "callsPerFrame": 2.734042553191489,
+     "maxMs": 11.300000000745058
+    },
+    "runtime.tick": {
+     "msPerFrame": 1.0010638297733634,
+     "callsPerFrame": 2.734042553191489,
+     "maxMs": 5.599999999627471
+    },
+    "creatures.tick": {
+     "msPerFrame": 0.7382978722849425,
+     "callsPerFrame": 2.734042553191489,
+     "maxMs": 5.400000000372529
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 0.2712765958536654,
+     "callsPerFrame": 2.734042553191489,
+     "maxMs": 1
+    },
+    "environment.sync": {
+     "msPerFrame": 0.08723404252544996,
+     "callsPerFrame": 1,
+     "maxMs": 0.7999999998137355
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.07659574465310955,
+     "callsPerFrame": 1,
+     "maxMs": 3.2999999998137355
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 0.06170212768731599,
+     "callsPerFrame": 1,
+     "maxMs": 0.7999999998137355
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.013829787241968703,
+     "callsPerFrame": 6.468085106382978,
+     "maxMs": 0.20000000018626451
+    }
+   },
+   "interval": {
+    "mean": 55.317021276595746,
+    "p95": 83.39999999999964,
+    "max": 100
+   },
+   "world": {
+    "objects": 0,
+    "colliders": 1129,
+    "bodies": 95,
+    "terrainSections": 75,
+    "models": 98,
+    "terrainSectionBuilds": 0,
+    "activeSensorObjects": 0,
+    "liquidSections": 0,
+    "inventoryItems": 0
+   },
+   "cpuTop": [
+    {
+     "fn": "compose three.module.js:6648",
+     "percent": 1.6
+    },
+    {
+     "fn": "setFromEuler three.module.js:3489",
+     "percent": 1.6
+    },
+    {
+     "fn": "syncModels scene.js:205",
+     "percent": 1.1
+    },
+    {
+     "fn": "wasm-function[356] 00bc1dde:1",
+     "percent": 1
+    },
+    {
+     "fn": "creatureBodyPart creature-animation.js:21",
+     "percent": 0.9
+    },
+    {
+     "fn": "needsUpdate three.module.js:15387",
+     "percent": 0.8
+    },
+    {
+     "fn": "setProgram three.module.js:30647",
+     "percent": 0.8
+    },
+    {
+     "fn": "projectObject three.module.js:30184",
+     "percent": 0.7
+    },
+    {
+     "fn": "wasm-to-js :1",
+     "percent": 0.7
+    },
+    {
+     "fn": "updateMatrixWorld three.module.js:7811",
+     "percent": 0.6
+    },
+    {
+     "fn": "multiplyMatrices three.module.js:6301",
+     "percent": 0.6
+    },
+    {
+     "fn": "sweepPart physics.js:329",
+     "percent": 0.6
+    }
+   ]
+  },
+  {
+   "map": "expedition",
+   "scenario": "three trees and leaf, first 10 s",
+   "prepared": "three expedition trees (260, 284, 260 cells), bottom trunk layer removed via atlas + detachAround; one leaf split via damageAt(knockLoose); camera faces it, no input afterwards",
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 198,
+    "stepsPerFrame": 2.712121212121212,
+    "frameMs": {
+     "mean": 16.681313131352642,
+     "p95": 36.299999999813735,
+     "max": 163.6000000005588
+    },
+    "phases": {
+     "simulate": {
+      "msPerFrame": 5.015151515175034,
+      "callsPerFrame": 1,
+      "maxMs": 26.299999999813735
+     },
+     "view.draw": {
+      "msPerFrame": 4.450000000049859,
+      "callsPerFrame": 1,
+      "maxMs": 156.20000000018626
+     },
+     "view.models": {
+      "msPerFrame": 3.5676767676645382,
+      "callsPerFrame": 1,
+      "maxMs": 23.5
+     },
+     "step.physics": {
+      "msPerFrame": 3.262626262659188,
+      "callsPerFrame": 2.712121212121212,
+      "maxMs": 20.799999999813735
+     },
+     "physics.sync": {
+      "msPerFrame": 2.3444444444642,
+      "callsPerFrame": 1,
+      "maxMs": 38
+     },
+     "step.world": {
+      "msPerFrame": 1.2000000000592659,
+      "callsPerFrame": 2.712121212121212,
+      "maxMs": 22.09999999962747
+     },
+     "ui": {
+      "msPerFrame": 0.8136363636297785,
+      "callsPerFrame": 1,
+      "maxMs": 74.1000000005588
+     },
+     "step.move": {
+      "msPerFrame": 0.4696969696499332,
+      "callsPerFrame": 2.712121212121212,
+      "maxMs": 19.59999999962747
+     },
+     "terrain.mesh": {
+      "msPerFrame": 0.22171717172375682,
+      "callsPerFrame": 1,
+      "maxMs": 21.09999999962747
+     },
+     "view.effects": {
+      "msPerFrame": 0.21767676763255336,
+      "callsPerFrame": 1,
+      "maxMs": 2.099999999627471
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.03737373738502613,
+      "callsPerFrame": 1,
+      "maxMs": 0.7999999998137355
+     }
+    }
+   },
+   "methods": {
+    "view.draw": {
+     "msPerFrame": 4.447979798023072,
+     "callsPerFrame": 1,
+     "maxMs": 156.20000000018626
+    },
+    "physics.step": {
+     "msPerFrame": 3.25909090911819,
+     "callsPerFrame": 2.712121212121212,
+     "maxMs": 20.799999999813735
+    },
+    "view.syncModels": {
+     "msPerFrame": 2.682323232316647,
+     "callsPerFrame": 1,
+     "maxMs": 17.899999999441206
+    },
+    "physics.synchronize": {
+     "msPerFrame": 2.342424242432709,
+     "callsPerFrame": 1,
+     "maxMs": 37.89999999944121
+    },
+    "runtime.tick": {
+     "msPerFrame": 1.1954545455166337,
+     "callsPerFrame": 2.712121212121212,
+     "maxMs": 22.09999999962747
+    },
+    "creatures.tick": {
+     "msPerFrame": 0.9060606060577838,
+     "callsPerFrame": 2.712121212121212,
+     "maxMs": 22
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 0.35656565654496053,
+     "callsPerFrame": 2.712121212121212,
+     "maxMs": 19.59999999962747
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 0.22121212122058778,
+     "callsPerFrame": 1,
+     "maxMs": 21.09999999962747
+    },
+    "environment.sync": {
+     "msPerFrame": 0.11010101010947666,
+     "callsPerFrame": 1,
+     "maxMs": 2.099999999627471
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.10101010101480466,
+     "callsPerFrame": 6.424242424242424,
+     "maxMs": 0.8000000007450581
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.03434343436130821,
+     "callsPerFrame": 1,
+     "maxMs": 0.7999999998137355
+    },
+    "physics.terrainSectionBoxes": {
+     "msPerFrame": 0.0030303030284215705,
+     "callsPerFrame": 0.11616161616161616,
+     "maxMs": 0.10000000055879354
+    }
+   },
+   "interval": {
+    "mean": 51.68131313131313,
+    "p95": 83.39999999999782,
+    "max": 183.39999999999964
+   },
+   "world": {
+    "objects": 7,
+    "colliders": 1268,
+    "bodies": 115,
+    "terrainSections": 99,
+    "models": 105,
+    "terrainSectionBuilds": 23,
+    "activeSensorObjects": 2,
+    "liquidSections": 0,
+    "inventoryItems": 0
+   },
+   "cpuTop": [
+    {
+     "fn": "getProgramInfoLog :0",
+     "percent": 1.5
+    },
+    {
+     "fn": "syncModels scene.js:205",
+     "percent": 1.5
+    },
+    {
+     "fn": "compose three.module.js:6648",
+     "percent": 1.3
+    },
+    {
+     "fn": "wasm-to-js :1",
+     "percent": 1
+    },
+    {
+     "fn": "wasm-function[356] 00bc1dde:1",
+     "percent": 0.8
+    },
+    {
+     "fn": "computeBoundingSphere three.module.js:10982",
+     "percent": 0.8
+    },
+    {
+     "fn": "(garbage collector) :0",
+     "percent": 0.7
+    },
+    {
+     "fn": "setup three.module.js:15263",
+     "percent": 0.7
+    },
+    {
+     "fn": "animateCreatureModel creature-animation.js:140",
+     "percent": 0.7
+    },
+    {
+     "fn": "multiplyMatrices three.module.js:6301",
+     "percent": 0.7
+    },
+    {
+     "fn": "set world-ui.js:43",
+     "percent": 0.7
+    },
+    {
+     "fn": "setFromEuler three.module.js:3489",
+     "percent": 0.6
+    }
+   ]
+  },
+  {
+   "map": "expedition",
+   "scenario": "three trees and leaf, next 10 s",
+   "prepared": "three expedition trees (260, 284, 260 cells), bottom trunk layer removed via atlas + detachAround; one leaf split via damageAt(knockLoose); camera faces it, no input afterwards",
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 207,
+    "stepsPerFrame": 2.652173913043478,
+    "frameMs": {
+     "mean": 14.362801932378847,
+     "p95": 32.200000000186265,
+     "max": 40.09999999962747
+    },
+    "phases": {
+     "simulate": {
+      "msPerFrame": 4.422705314000663,
+      "callsPerFrame": 1,
+      "maxMs": 27.799999999813735
+     },
+     "view.models": {
+      "msPerFrame": 3.7739130434521657,
+      "callsPerFrame": 1,
+      "maxMs": 21.799999999813735
+     },
+     "view.draw": {
+      "msPerFrame": 3.0772946860533263,
+      "callsPerFrame": 1,
+      "maxMs": 22.799999999813735
+     },
+     "step.physics": {
+      "msPerFrame": 2.9685990338344217,
+      "callsPerFrame": 2.652173913043478,
+      "maxMs": 25.200000000186265
+     },
+     "physics.sync": {
+      "msPerFrame": 2.1415458937549,
+      "callsPerFrame": 1,
+      "maxMs": 22.700000000186265
+     },
+     "step.world": {
+      "msPerFrame": 1.135748792304725,
+      "callsPerFrame": 2.652173913043478,
+      "maxMs": 22.700000000186265
+     },
+     "ui": {
+      "msPerFrame": 0.5280193236705978,
+      "callsPerFrame": 1,
+      "maxMs": 16.59999999962747
+     },
+     "step.move": {
+      "msPerFrame": 0.27632850236236906,
+      "callsPerFrame": 2.652173913043478,
+      "maxMs": 1.2999999998137355
+     },
+     "view.effects": {
+      "msPerFrame": 0.22705314005612606,
+      "callsPerFrame": 1,
+      "maxMs": 1.7999999998137355
+     },
+     "terrain.mesh": {
+      "msPerFrame": 0.06473429951870786,
+      "callsPerFrame": 1,
+      "maxMs": 1.2000000001862645
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.05217391305157672,
+      "callsPerFrame": 1,
+      "maxMs": 2.2000000001862645
+     }
+    }
+   },
+   "methods": {
+    "view.syncModels": {
+     "msPerFrame": 3.157487922699015,
+     "callsPerFrame": 1,
+     "maxMs": 21.40000000037253
+    },
+    "view.draw": {
+     "msPerFrame": 3.0719806763977893,
+     "callsPerFrame": 1,
+     "maxMs": 22.799999999813735
+    },
+    "physics.step": {
+     "msPerFrame": 2.9642512077411665,
+     "callsPerFrame": 2.652173913043478,
+     "maxMs": 25.200000000186265
+    },
+    "physics.synchronize": {
+     "msPerFrame": 2.140096618388982,
+     "callsPerFrame": 1,
+     "maxMs": 22.700000000186265
+    },
+    "runtime.tick": {
+     "msPerFrame": 1.1333333333630278,
+     "callsPerFrame": 2.652173913043478,
+     "maxMs": 22.700000000186265
+    },
+    "creatures.tick": {
+     "msPerFrame": 0.8188405797101449,
+     "callsPerFrame": 2.652173913043478,
+     "maxMs": 22.200000000186265
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 0.20628019322861652,
+     "callsPerFrame": 2.652173913043478,
+     "maxMs": 1.2999999998137355
+    },
+    "environment.sync": {
+     "msPerFrame": 0.10289855071024043,
+     "callsPerFrame": 1,
+     "maxMs": 1.2000000001862645
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.07149758458065526,
+     "callsPerFrame": 6.304347826086956,
+     "maxMs": 0.20000000018626451
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 0.06280193236265061,
+     "callsPerFrame": 1,
+     "maxMs": 1.2000000001862645
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.048309178757458784,
+     "callsPerFrame": 1,
+     "maxMs": 2.2000000001862645
+    }
+   },
+   "interval": {
+    "mean": 49.59516908212562,
+    "p95": 83.39999999999782,
+    "max": 166.79999999999927
+   },
+   "world": {
+    "objects": 7,
+    "colliders": 1266,
+    "bodies": 113,
+    "terrainSections": 99,
+    "models": 105,
+    "terrainSectionBuilds": 0,
+    "activeSensorObjects": 0,
+    "liquidSections": 0,
+    "inventoryItems": 0
+   },
+   "cpuTop": [
+    {
+     "fn": "syncModels scene.js:205",
+     "percent": 1.7
+    },
+    {
+     "fn": "compose three.module.js:6648",
+     "percent": 1.6
+    },
+    {
+     "fn": "wasm-to-js :1",
+     "percent": 1.1
+    },
+    {
+     "fn": "animateCreatureModel creature-animation.js:140",
+     "percent": 1
+    },
+    {
+     "fn": "__wbindgen_object_drop_ref rapier.js:1",
+     "percent": 0.8
+    },
+    {
+     "fn": "update world-ui.js:73",
+     "percent": 0.8
+    },
+    {
+     "fn": "creatureBodyPart creature-animation.js:21",
+     "percent": 0.8
+    },
+    {
+     "fn": "memo atlas.js:29",
+     "percent": 0.7
+    },
+    {
+     "fn": "setFromEuler three.module.js:3489",
+     "percent": 0.7
+    },
+    {
+     "fn": "onRotationChange three.module.js:7281",
+     "percent": 0.6
+    },
+    {
+     "fn": "wasm-function[356] 00bc1dde:1",
+     "percent": 0.6
+    },
+    {
+     "fn": "multiplyMatrices three.module.js:6301",
+     "percent": 0.6
+    }
+   ]
+  },
+  {
+   "map": "expedition",
+   "scenario": "three trees and leaf, final 10 s",
+   "prepared": "three expedition trees (260, 284, 260 cells), bottom trunk layer removed via atlas + detachAround; one leaf split via damageAt(knockLoose); camera faces it, no input afterwards",
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 211,
+    "stepsPerFrame": 2.6350710900473935,
+    "frameMs": {
+     "mean": 13.114218009476907,
+     "p95": 30.09999999962747,
+     "max": 38
+    },
+    "phases": {
+     "simulate": {
+      "msPerFrame": 3.5099526066333055,
+      "callsPerFrame": 1,
+      "maxMs": 23.200000000186265
+     },
+     "view.models": {
+      "msPerFrame": 3.417535545004276,
+      "callsPerFrame": 1,
+      "maxMs": 23.600000000558794
+     },
+     "view.draw": {
+      "msPerFrame": 3.2545023696867847,
+      "callsPerFrame": 1,
+      "maxMs": 23.200000000186265
+     },
+     "step.physics": {
+      "msPerFrame": 2.375829383827993,
+      "callsPerFrame": 2.6350710900473935,
+      "maxMs": 20.59999999962747
+     },
+     "physics.sync": {
+      "msPerFrame": 2.097630331778272,
+      "callsPerFrame": 1,
+      "maxMs": 20.40000000037253
+     },
+     "step.world": {
+      "msPerFrame": 0.8213270142524375,
+      "callsPerFrame": 2.6350710900473935,
+      "maxMs": 4
+     },
+     "ui": {
+      "msPerFrame": 0.4085308056925004,
+      "callsPerFrame": 1,
+      "maxMs": 3.7999999998137355
+     },
+     "step.move": {
+      "msPerFrame": 0.2701421800992006,
+      "callsPerFrame": 2.6350710900473935,
+      "maxMs": 4.2000000001862645
+     },
+     "view.effects": {
+      "msPerFrame": 0.20473933645846296,
+      "callsPerFrame": 1,
+      "maxMs": 2.599999999627471
+     },
+     "terrain.mesh": {
+      "msPerFrame": 0.16255924170086453,
+      "callsPerFrame": 1,
+      "maxMs": 20.40000000037253
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.036966824656908544,
+      "callsPerFrame": 1,
+      "maxMs": 1
+     }
+    }
+   },
+   "methods": {
+    "view.draw": {
+     "msPerFrame": 3.252606635087863,
+     "callsPerFrame": 1,
+     "maxMs": 23.200000000186265
+    },
+    "view.syncModels": {
+     "msPerFrame": 2.833175355453768,
+     "callsPerFrame": 1,
+     "maxMs": 23.199999999254942
+    },
+    "physics.step": {
+     "msPerFrame": 2.3725118482865004,
+     "callsPerFrame": 2.6350710900473935,
+     "maxMs": 20.59999999962747
+    },
+    "physics.synchronize": {
+     "msPerFrame": 2.095734597183764,
+     "callsPerFrame": 1,
+     "maxMs": 20.40000000037253
+    },
+    "runtime.tick": {
+     "msPerFrame": 0.8170616114114839,
+     "callsPerFrame": 2.6350710900473935,
+     "maxMs": 4
+    },
+    "creatures.tick": {
+     "msPerFrame": 0.6208530805775481,
+     "callsPerFrame": 2.6350710900473935,
+     "maxMs": 4
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 0.20853080570927304,
+     "callsPerFrame": 2.6350710900473935,
+     "maxMs": 4.2000000001862645
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 0.15924170616378575,
+     "callsPerFrame": 1,
+     "maxMs": 20.40000000037253
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.0962085308357014,
+     "callsPerFrame": 6.270142180094787,
+     "maxMs": 4.2000000001862645
+    },
+    "environment.sync": {
+     "msPerFrame": 0.09620853081804599,
+     "callsPerFrame": 1,
+     "maxMs": 2.599999999627471
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.03222748816401755,
+     "callsPerFrame": 1,
+     "maxMs": 1
+    }
+   },
+   "interval": {
+    "mean": 48.73412322274882,
+    "p95": 83.29999999999563,
+    "max": 150
+   },
+   "world": {
+    "objects": 7,
+    "colliders": 1266,
+    "bodies": 113,
+    "terrainSections": 99,
+    "models": 105,
+    "terrainSectionBuilds": 0,
+    "activeSensorObjects": 0,
+    "liquidSections": 0,
+    "inventoryItems": 0
+   },
+   "cpuTop": [
+    {
+     "fn": "compose three.module.js:6648",
+     "percent": 1.7
+    },
+    {
+     "fn": "syncModels scene.js:205",
+     "percent": 1.2
+    },
+    {
+     "fn": "wasm-to-js :1",
+     "percent": 0.9
+    },
+    {
+     "fn": "wasm-function[356] 00bc1dde:1",
+     "percent": 0.9
+    },
+    {
+     "fn": "multiplyMatrices three.module.js:6301",
+     "percent": 0.8
+    },
+    {
+     "fn": "setFromEuler three.module.js:3489",
+     "percent": 0.7
+    },
+    {
+     "fn": "creatureBodyPart creature-animation.js:21",
+     "percent": 0.7
+    },
+    {
+     "fn": "setup three.module.js:15263",
+     "percent": 0.7
+    },
+    {
+     "fn": "needsUpdate three.module.js:15387",
+     "percent": 0.5
+    },
+    {
+     "fn": "lA rapier.js:1",
+     "percent": 0.5
+    },
+    {
+     "fn": "updateMatrixWorld three.module.js:7811",
+     "percent": 0.5
+    },
+    {
+     "fn": "animateCreatureModel creature-animation.js:140",
+     "percent": 0.5
+    }
+   ],
+   "debris": {
+    "treesRetained": true,
+    "leafRetained": true,
+    "leafPosition": {
+     "x": -5.5,
+     "y": -59.732669830322266,
+     "z": 11
+    },
+    "leafActive": false,
+    "otherSensorObjects": [
+     {
+      "id": "object:4",
+      "position": {
+       "x": -5.5,
+       "y": -59.732669830322266,
+       "z": 11
+      },
+      "active": false
+     },
+     {
+      "id": "object:6",
+      "position": {
+       "x": 15.421746253967285,
+       "y": -57.38825607299805,
+       "z": 0.29125547409057617
+      },
+      "active": false
+     },
+     {
+      "id": "object:7",
+      "position": {
+       "x": 15.5,
+       "y": -58.469879150390625,
+       "z": 6.5
+      },
+      "active": false
+     }
+    ]
+   }
+  },
+  {
+   "map": "island",
+   "scenario": "first fill",
+   "prepared": null,
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 45,
+    "stepsPerFrame": 2.8,
+    "frameMs": {
+     "mean": 23.462222222197386,
+     "p95": 45.700000000186265,
+     "max": 61.80000000074506
+    },
+    "phases": {
+     "physics.sync": {
+      "msPerFrame": 6.848888888872332,
+      "callsPerFrame": 1,
+      "maxMs": 29
+     },
+     "simulate": {
+      "msPerFrame": 6.084444444398913,
+      "callsPerFrame": 1,
+      "maxMs": 29.5
+     },
+     "terrain.mesh": {
+      "msPerFrame": 3.451111111251844,
+      "callsPerFrame": 1,
+      "maxMs": 21.09999999962747
+     },
+     "step.physics": {
+      "msPerFrame": 3.286666666716337,
+      "callsPerFrame": 2.8,
+      "maxMs": 6.3999999994412065
+     },
+     "view.draw": {
+      "msPerFrame": 2.7711111110945543,
+      "callsPerFrame": 1,
+      "maxMs": 21.799999999813735
+     },
+     "view.models": {
+      "msPerFrame": 2.2977777778481445,
+      "callsPerFrame": 1,
+      "maxMs": 8.200000000186265
+     },
+     "step.world": {
+      "msPerFrame": 1.8888888888681927,
+      "callsPerFrame": 2.8,
+      "maxMs": 23.40000000037253
+     },
+     "view.effects": {
+      "msPerFrame": 1.4133333332422706,
+      "callsPerFrame": 1,
+      "maxMs": 34.89999999944121
+     },
+     "step.move": {
+      "msPerFrame": 0.8199999999047981,
+      "callsPerFrame": 2.8,
+      "maxMs": 9
+     },
+     "ui": {
+      "msPerFrame": 0.45111111112766794,
+      "callsPerFrame": 1,
+      "maxMs": 3
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.08666666661285692,
+      "callsPerFrame": 1,
+      "maxMs": 0.2999999998137355
+     }
+    }
+   },
+   "methods": {
+    "physics.synchronize": {
+     "msPerFrame": 6.488888888868193,
+     "callsPerFrame": 1,
+     "maxMs": 29
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 3.4488888890172045,
+     "callsPerFrame": 1,
+     "maxMs": 21.09999999962747
+    },
+    "physics.step": {
+     "msPerFrame": 3.286666666716337,
+     "callsPerFrame": 2.8,
+     "maxMs": 6.3999999994412065
+    },
+    "view.draw": {
+     "msPerFrame": 2.7688888888806105,
+     "callsPerFrame": 1,
+     "maxMs": 21.799999999813735
+    },
+    "runtime.tick": {
+     "msPerFrame": 1.8844444444196091,
+     "callsPerFrame": 2.8,
+     "maxMs": 23.40000000037253
+    },
+    "view.syncModels": {
+     "msPerFrame": 1.6777777776742975,
+     "callsPerFrame": 1,
+     "maxMs": 7.2000000001862645
+    },
+    "creatures.tick": {
+     "msPerFrame": 1.4311111110986934,
+     "callsPerFrame": 2.8,
+     "maxMs": 23.40000000037253
+    },
+    "environment.sync": {
+     "msPerFrame": 1.2622222221559949,
+     "callsPerFrame": 1,
+     "maxMs": 34.69999999925494
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 0.4133333332422707,
+     "callsPerFrame": 2.8,
+     "maxMs": 7.199999999254942
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.08222222218496932,
+     "callsPerFrame": 1,
+     "maxMs": 0.2999999998137355
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.0511111111069719,
+     "callsPerFrame": 6.6,
+     "maxMs": 0.20000000018626451
+    }
+   },
+   "interval": {
+    "mean": 58.515555555555565,
+    "p95": 83.40000000000009,
+    "max": 216.70000000000005
+   },
+   "world": {
+    "objects": 0,
+    "colliders": 1480,
+    "bodies": 125,
+    "terrainSections": 75,
+    "models": 77,
+    "terrainSectionBuilds": 0,
+    "activeSensorObjects": 0,
+    "liquidSections": 85,
+    "inventoryItems": 13
+   },
+   "cpuTop": [
+    {
+     "fn": "chunkGeometry scene.js:31",
+     "percent": 5
+    },
+    {
+     "fn": "(garbage collector) :0",
+     "percent": 1.6
+    },
+    {
+     "fn": "compose three.module.js:6648",
+     "percent": 1.3
+    },
+    {
+     "fn": "wasm-to-js :1",
+     "percent": 1.3
+    },
+    {
+     "fn": "bindVertexArray :0",
+     "percent": 1.2
+    },
+    {
+     "fn": "wasm-function[1893] 00bc1dde:1",
+     "percent": 1.2
+    },
+    {
+     "fn": "wasm-function[356] 00bc1dde:1",
+     "percent": 1.2
+    },
+    {
+     "fn": "wasm-function[635] 00bc1dde:1",
+     "percent": 1
+    },
+    {
+     "fn": "_foodTarget creatures.js:595",
+     "percent": 1
+    },
+    {
+     "fn": "target.<computed> :4",
+     "percent": 1
+    },
+    {
+     "fn": "wasm-function[370] 00bc1dde:1",
+     "percent": 0.9
+    },
+    {
+     "fn": "wasm-function[1064] 00bc1dde:1",
+     "percent": 0.8
+    }
+   ],
+   "fill": {
+    "generatedMs": 3292,
+    "meshedMs": 3720,
+    "chunks": 96,
+    "generator": "worker"
+   }
+  },
+  {
+   "map": "island",
+   "scenario": "idle",
+   "prepared": null,
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 116,
+    "stepsPerFrame": 2.5086206896551726,
+    "frameMs": {
+     "mean": 16.767241379310345,
+     "p95": 33.40000000037253,
+     "max": 41.10000000055879
+    },
+    "phases": {
+     "simulate": {
+      "msPerFrame": 4.9284482758636745,
+      "callsPerFrame": 1,
+      "maxMs": 25.399999999441206
+     },
+     "physics.sync": {
+      "msPerFrame": 4.521551724153988,
+      "callsPerFrame": 1,
+      "maxMs": 26.700000000186265
+     },
+     "step.physics": {
+      "msPerFrame": 3.579310344764963,
+      "callsPerFrame": 2.5086206896551726,
+      "maxMs": 21
+     },
+     "view.models": {
+      "msPerFrame": 3.46206896551403,
+      "callsPerFrame": 1,
+      "maxMs": 26
+     },
+     "view.draw": {
+      "msPerFrame": 3.0448275862486454,
+      "callsPerFrame": 1,
+      "maxMs": 26.59999999962747
+     },
+     "step.world": {
+      "msPerFrame": 0.7758620689414313,
+      "callsPerFrame": 2.5086206896551726,
+      "maxMs": 6.7999999998137355
+     },
+     "step.move": {
+      "msPerFrame": 0.5043103449078726,
+      "callsPerFrame": 2.5086206896551726,
+      "maxMs": 19.699999999254942
+     },
+     "ui": {
+      "msPerFrame": 0.3362068965356669,
+      "callsPerFrame": 1,
+      "maxMs": 4.099999999627471
+     },
+     "view.effects": {
+      "msPerFrame": 0.2534482758251372,
+      "callsPerFrame": 1,
+      "maxMs": 1.7000000001862645
+     },
+     "terrain.mesh": {
+      "msPerFrame": 0.17931034480189456,
+      "callsPerFrame": 1,
+      "maxMs": 14.399999999441206
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.032758620720164014,
+      "callsPerFrame": 1,
+      "maxMs": 0.20000000018626451
+     }
+    }
+   },
+   "methods": {
+    "physics.synchronize": {
+     "msPerFrame": 4.518965517267071,
+     "callsPerFrame": 1,
+     "maxMs": 26.700000000186265
+    },
+    "physics.step": {
+     "msPerFrame": 3.5775862068403512,
+     "callsPerFrame": 2.5086206896551726,
+     "maxMs": 21
+    },
+    "view.draw": {
+     "msPerFrame": 3.043103448316005,
+     "callsPerFrame": 1,
+     "maxMs": 26.59999999962747
+    },
+    "view.syncModels": {
+     "msPerFrame": 2.553448275871703,
+     "callsPerFrame": 1,
+     "maxMs": 25.5
+    },
+    "runtime.tick": {
+     "msPerFrame": 0.7724137930922081,
+     "callsPerFrame": 2.5086206896551726,
+     "maxMs": 6.7999999998137355
+    },
+    "creatures.tick": {
+     "msPerFrame": 0.4637931034787847,
+     "callsPerFrame": 2.5086206896551726,
+     "maxMs": 6.7000000001862645
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 0.37586206892216256,
+     "callsPerFrame": 2.5086206896551726,
+     "maxMs": 19.699999999254942
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 0.17672413789891991,
+     "callsPerFrame": 1,
+     "maxMs": 14.399999999441206
+    },
+    "environment.sync": {
+     "msPerFrame": 0.1448275861812049,
+     "callsPerFrame": 1,
+     "maxMs": 1.699999999254942
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.031034482787523805,
+     "callsPerFrame": 1,
+     "maxMs": 0.20000000018626451
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.013793103469150334,
+     "callsPerFrame": 6.017241379310345,
+     "maxMs": 0.20000000018626451
+    }
+   },
+   "interval": {
+    "mean": 43.9646551724138,
+    "p95": 66.80000000000018,
+    "max": 83.39999999999964
+   },
+   "world": {
+    "objects": 0,
+    "colliders": 1480,
+    "bodies": 125,
+    "terrainSections": 75,
+    "models": 77,
+    "terrainSectionBuilds": 0,
+    "activeSensorObjects": 0,
+    "liquidSections": 85,
+    "inventoryItems": 13
+   },
+   "cpuTop": [
+    {
+     "fn": "compose three.module.js:6648",
+     "percent": 2.2
+    },
+    {
+     "fn": "wasm-function[356] 00bc1dde:1",
+     "percent": 1.9
+    },
+    {
+     "fn": "__wbg_call_187d372bd5fdd4aa rapier.js:1",
+     "percent": 1.6
+    },
+    {
+     "fn": "wasm-to-js :1",
+     "percent": 1.6
+    },
+    {
+     "fn": "wasm-function[635] 00bc1dde:1",
+     "percent": 1.2
+    },
+    {
+     "fn": "multiplyMatrices three.module.js:6301",
+     "percent": 1.1
+    },
+    {
+     "fn": "updateMatrixWorld three.module.js:7811",
+     "percent": 1.1
+    },
+    {
+     "fn": "H rapier.js:1",
+     "percent": 0.9
+    },
+    {
+     "fn": "wasm-function[193] 00bc1dde:1",
+     "percent": 0.8
+    },
+    {
+     "fn": "syncModels scene.js:205",
+     "percent": 0.8
+    },
+    {
+     "fn": "needsUpdate three.module.js:15387",
+     "percent": 0.7
+    },
+    {
+     "fn": "creatureBodyPart creature-animation.js:21",
+     "percent": 0.7
+    }
+   ]
+  },
+  {
+   "map": "island",
+   "scenario": "walk",
+   "prepared": null,
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 136,
+    "stepsPerFrame": 2.4779411764705883,
+    "frameMs": {
+     "mean": 19.90808823528042,
+     "p95": 43,
+     "max": 133.40000000037253
+    },
+    "phases": {
+     "physics.sync": {
+      "msPerFrame": 5.827205882414573,
+      "callsPerFrame": 1,
+      "maxMs": 25.90000000037253
+     },
+     "simulate": {
+      "msPerFrame": 4.899264705894679,
+      "callsPerFrame": 1,
+      "maxMs": 26.40000000037253
+     },
+     "view.draw": {
+      "msPerFrame": 3.943382352912415,
+      "callsPerFrame": 1,
+      "maxMs": 117.70000000018626
+     },
+     "step.physics": {
+      "msPerFrame": 3.7455882353447927,
+      "callsPerFrame": 2.4779411764705883,
+      "maxMs": 23.200000000186265
+     },
+     "view.models": {
+      "msPerFrame": 3.349999999942477,
+      "callsPerFrame": 1,
+      "maxMs": 25.40000000037253
+     },
+     "view.effects": {
+      "msPerFrame": 0.8691176470396492,
+      "callsPerFrame": 1,
+      "maxMs": 28.40000000037253
+     },
+     "step.world": {
+      "msPerFrame": 0.5566176471423686,
+      "callsPerFrame": 2.4779411764705883,
+      "maxMs": 4.599999999627471
+     },
+     "ui": {
+      "msPerFrame": 0.4485294117647059,
+      "callsPerFrame": 1,
+      "maxMs": 17.299999999813735
+     },
+     "terrain.mesh": {
+      "msPerFrame": 0.4360294117770322,
+      "callsPerFrame": 1,
+      "maxMs": 19.399999999441206
+     },
+     "step.move": {
+      "msPerFrame": 0.43529411748407737,
+      "callsPerFrame": 2.4779411764705883,
+      "maxMs": 5.099999999627471
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.11911764706019312,
+      "callsPerFrame": 1,
+      "maxMs": 8.200000000186265
+     }
+    }
+   },
+   "methods": {
+    "physics.synchronize": {
+     "msPerFrame": 5.825000000063001,
+     "callsPerFrame": 1,
+     "maxMs": 25.90000000037253
+    },
+    "view.draw": {
+     "msPerFrame": 3.938970588209272,
+     "callsPerFrame": 1,
+     "maxMs": 117.59999999962747
+    },
+    "physics.step": {
+     "msPerFrame": 3.7404411765198935,
+     "callsPerFrame": 2.4779411764705883,
+     "maxMs": 23.200000000186265
+    },
+    "view.syncModels": {
+     "msPerFrame": 2.7566176470547146,
+     "callsPerFrame": 1,
+     "maxMs": 25
+    },
+    "environment.sync": {
+     "msPerFrame": 0.7742647058467436,
+     "callsPerFrame": 1,
+     "maxMs": 28.200000000186265
+    },
+    "runtime.tick": {
+     "msPerFrame": 0.5551470589125529,
+     "callsPerFrame": 2.4779411764705883,
+     "maxMs": 4.599999999627471
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 0.4360294117770322,
+     "callsPerFrame": 1,
+     "maxMs": 19.399999999441206
+    },
+    "creatures.tick": {
+     "msPerFrame": 0.3411764706046704,
+     "callsPerFrame": 2.4779411764705883,
+     "maxMs": 2.7999999998137355
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 0.25367647047181996,
+     "callsPerFrame": 2.4779411764705883,
+     "maxMs": 4.199999999254942
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.11544117645826191,
+     "callsPerFrame": 1,
+     "maxMs": 8.200000000186265
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.09338235292885014,
+     "callsPerFrame": 5.955882352941177,
+     "maxMs": 4.699999999254942
+    },
+    "physics.terrainSectionBoxes": {
+     "msPerFrame": 0.011764705872765797,
+     "callsPerFrame": 0.7720588235294118,
+     "maxMs": 0.10000000055879354
+    }
+   },
+   "interval": {
+    "mean": 45.463235294117645,
+    "p95": 83.30000000000109,
+    "max": 133.3000000000011
+   },
+   "world": {
+    "objects": 0,
+    "colliders": 1501,
+    "bodies": 128,
+    "terrainSections": 50,
+    "models": 77,
+    "terrainSectionBuilds": 105,
+    "activeSensorObjects": 0,
+    "liquidSections": 88,
+    "inventoryItems": 13
+   },
+   "cpuTop": [
+    {
+     "fn": "wasm-to-js :1",
+     "percent": 2.1
+    },
+    {
+     "fn": "syncModels scene.js:205",
+     "percent": 1.9
+    },
+    {
+     "fn": "compose three.module.js:6648",
+     "percent": 1.7
+    },
+    {
+     "fn": "wasm-function[635] 00bc1dde:1",
+     "percent": 1.4
+    },
+    {
+     "fn": "wasm-function[356] 00bc1dde:1",
+     "percent": 1.1
+    },
+    {
+     "fn": "getShaderInfoLog :0",
+     "percent": 1.1
+    },
+    {
+     "fn": "collisionEnabledBetween physics.js:63",
+     "percent": 1
+    },
+    {
+     "fn": "(garbage collector) :0",
+     "percent": 1
+    },
+    {
+     "fn": "__wbindgen_generic_0000000000000001 rapier.js:1",
+     "percent": 1
+    },
+    {
+     "fn": "wasm-function[193] 00bc1dde:1",
+     "percent": 0.9
+    },
+    {
+     "fn": "multiplyMatrices three.module.js:6301",
+     "percent": 0.8
+    },
+    {
+     "fn": "creatureBodyPart creature-animation.js:21",
+     "percent": 0.8
+    }
+   ]
+  },
+  {
+   "map": "island",
+   "scenario": "mine tree 1",
+   "prepared": null,
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 48,
+    "stepsPerFrame": 2.9375,
+    "frameMs": {
+     "mean": 24.670833333279006,
+     "p95": 43.69999999925494,
+     "max": 73.80000000074506
+    },
+    "phases": {
+     "simulate": {
+      "msPerFrame": 9.624999999941792,
+      "callsPerFrame": 1,
+      "maxMs": 46.200000000186265
+     },
+     "physics.sync": {
+      "msPerFrame": 4.03541666668995,
+      "callsPerFrame": 1,
+      "maxMs": 14.899999999441206
+     },
+     "step.physics": {
+      "msPerFrame": 3.7770833333294527,
+      "callsPerFrame": 2.9375,
+      "maxMs": 24.600000000558794
+     },
+     "view.models": {
+      "msPerFrame": 3.662499999976717,
+      "callsPerFrame": 1,
+      "maxMs": 21.899999999441206
+     },
+     "view.draw": {
+      "msPerFrame": 3.5604166666938304,
+      "callsPerFrame": 1,
+      "maxMs": 23.90000000037253
+     },
+     "step.move": {
+      "msPerFrame": 3.1250000000582077,
+      "callsPerFrame": 2.9375,
+      "maxMs": 10.099999999627471
+     },
+     "terrain.mesh": {
+      "msPerFrame": 1.508333333399302,
+      "callsPerFrame": 1,
+      "maxMs": 20.899999999441206
+     },
+     "step.attack": {
+      "msPerFrame": 1.4187499999534339,
+      "callsPerFrame": 2.6458333333333335,
+      "maxMs": 39.89999999944121
+     },
+     "step.world": {
+      "msPerFrame": 1.2520833333061698,
+      "callsPerFrame": 2.9375,
+      "maxMs": 18
+     },
+     "ui": {
+      "msPerFrame": 1.1166666666201006,
+      "callsPerFrame": 1,
+      "maxMs": 16.59999999962747
+     },
+     "view.effects": {
+      "msPerFrame": 1.0354166666511446,
+      "callsPerFrame": 1,
+      "maxMs": 22.799999999813735
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.11666666665890564,
+      "callsPerFrame": 1,
+      "maxMs": 2.7000000001862645
+     }
+    }
+   },
+   "methods": {
+    "physics.synchronize": {
+     "msPerFrame": 4.02916666669383,
+     "callsPerFrame": 1,
+     "maxMs": 14.899999999441206
+    },
+    "physics.step": {
+     "msPerFrame": 3.772916666658906,
+     "callsPerFrame": 2.9375,
+     "maxMs": 24.600000000558794
+    },
+    "view.draw": {
+     "msPerFrame": 3.556250000023283,
+     "callsPerFrame": 1,
+     "maxMs": 23.90000000037253
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 2.937500000038805,
+     "callsPerFrame": 2.9375,
+     "maxMs": 10.099999999627471
+    },
+    "view.syncModels": {
+     "msPerFrame": 2.8583333332402012,
+     "callsPerFrame": 1,
+     "maxMs": 21.5
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 1.4812500000504467,
+     "callsPerFrame": 1,
+     "maxMs": 20.899999999441206
+    },
+    "runtime.tick": {
+     "msPerFrame": 1.2395833332945283,
+     "callsPerFrame": 2.9375,
+     "maxMs": 17.90000000037253
+    },
+    "environment.sync": {
+     "msPerFrame": 0.916666666608459,
+     "callsPerFrame": 1,
+     "maxMs": 22.699999999254942
+    },
+    "creatures.tick": {
+     "msPerFrame": 0.5875000000426857,
+     "callsPerFrame": 2.9375,
+     "maxMs": 5
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.14999999994567284,
+     "callsPerFrame": 6.875,
+     "maxMs": 1.900000000372529
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.10624999999223898,
+     "callsPerFrame": 1,
+     "maxMs": 2.7000000001862645
+    },
+    "physics.terrainSectionBoxes": {
+     "msPerFrame": 0.02083333337213844,
+     "callsPerFrame": 1.2291666666666667,
+     "maxMs": 0.19999999925494194
+    }
+   },
+   "interval": {
+    "mean": 97.56666666666668,
+    "p95": 166.6999999999989,
+    "max": 266.59999999999854
+   },
+   "world": {
+    "objects": 0,
+    "colliders": 1359,
+    "bodies": 149,
+    "terrainSections": 75,
+    "models": 78,
+    "terrainSectionBuilds": 59,
+    "activeSensorObjects": 0,
+    "liquidSections": 88,
+    "inventoryItems": 17
+   },
+   "cpuTop": [
+    {
+     "fn": "target.<computed> :4",
+     "percent": 1.3
+    },
+    {
+     "fn": "wasm-function[635] 00bc1dde:1",
+     "percent": 1.1
+    },
+    {
+     "fn": "compose three.module.js:6648",
+     "percent": 1.1
+    },
+    {
+     "fn": "syncModels scene.js:205",
+     "percent": 0.9
+    },
+    {
+     "fn": "chunkGeometry scene.js:31",
+     "percent": 0.9
+    },
+    {
+     "fn": "wasm-function[356] 00bc1dde:1",
+     "percent": 0.9
+    },
+    {
+     "fn": "creatureBodyPart creature-animation.js:21",
+     "percent": 0.9
+    },
+    {
+     "fn": "wasm-function[193] 00bc1dde:1",
+     "percent": 0.7
+    },
+    {
+     "fn": "bindVertexArray :0",
+     "percent": 0.7
+    },
+    {
+     "fn": "add environment-view.js:102",
+     "percent": 0.6
+    },
+    {
+     "fn": "_slot objects.js:24",
+     "percent": 0.6
+    },
+    {
+     "fn": "(garbage collector) :0",
+     "percent": 0.6
+    }
+   ]
+  },
+  {
+   "map": "island",
+   "scenario": "mine tree 2",
+   "prepared": null,
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 41,
+    "stepsPerFrame": 2.951219512195122,
+    "frameMs": {
+     "mean": 25.12682926836537,
+     "p95": 43.299999999813735,
+     "max": 85.40000000037253
+    },
+    "phases": {
+     "simulate": {
+      "msPerFrame": 8.985365853735768,
+      "callsPerFrame": 1,
+      "maxMs": 30.299999999813735
+     },
+     "physics.sync": {
+      "msPerFrame": 5.39512195120134,
+      "callsPerFrame": 1,
+      "maxMs": 26.59999999962747
+     },
+     "view.draw": {
+      "msPerFrame": 4.9341463415270175,
+      "callsPerFrame": 1,
+      "maxMs": 27.09999999962747
+     },
+     "step.physics": {
+      "msPerFrame": 4.273170731780006,
+      "callsPerFrame": 2.951219512195122,
+      "maxMs": 11.299999999813735
+     },
+     "view.models": {
+      "msPerFrame": 3.741463414688663,
+      "callsPerFrame": 1,
+      "maxMs": 21.700000000186265
+     },
+     "step.move": {
+      "msPerFrame": 3.1000000000363443,
+      "callsPerFrame": 2.951219512195122,
+      "maxMs": 24.200000000186265
+     },
+     "ui": {
+      "msPerFrame": 1.0195121951174082,
+      "callsPerFrame": 1,
+      "maxMs": 8.5
+     },
+     "step.world": {
+      "msPerFrame": 0.8073170731389304,
+      "callsPerFrame": 2.951219512195122,
+      "maxMs": 3.5
+     },
+     "view.effects": {
+      "msPerFrame": 0.79024390240268,
+      "callsPerFrame": 1,
+      "maxMs": 13.099999999627471
+     },
+     "step.attack": {
+      "msPerFrame": 0.7487804878321362,
+      "callsPerFrame": 2.658536585365854,
+      "maxMs": 12.799999999813735
+     },
+     "terrain.mesh": {
+      "msPerFrame": 0.19512195126494256,
+      "callsPerFrame": 1,
+      "maxMs": 1.5
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.043902438928986466,
+      "callsPerFrame": 1,
+      "maxMs": 0.10000000055879354
+     }
+    }
+   },
+   "methods": {
+    "physics.synchronize": {
+     "msPerFrame": 5.392682926820182,
+     "callsPerFrame": 1,
+     "maxMs": 26.59999999962747
+    },
+    "view.draw": {
+     "msPerFrame": 4.9268292683835435,
+     "callsPerFrame": 1,
+     "maxMs": 27.09999999962747
+    },
+    "physics.step": {
+     "msPerFrame": 4.268292682994975,
+     "callsPerFrame": 2.951219512195122,
+     "maxMs": 11.299999999813735
+    },
+    "view.syncModels": {
+     "msPerFrame": 3.2439024390471056,
+     "callsPerFrame": 1,
+     "maxMs": 21.399999999441206
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 3.024390243879724,
+     "callsPerFrame": 2.951219512195122,
+     "maxMs": 24.200000000186265
+    },
+    "runtime.tick": {
+     "msPerFrame": 0.7951219511649957,
+     "callsPerFrame": 2.951219512195122,
+     "maxMs": 3.5
+    },
+    "environment.sync": {
+     "msPerFrame": 0.6609756097924419,
+     "callsPerFrame": 1,
+     "maxMs": 12.900000000372529
+    },
+    "creatures.tick": {
+     "msPerFrame": 0.47804878056957956,
+     "callsPerFrame": 2.951219512195122,
+     "maxMs": 3.400000000372529
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 0.19024390247991171,
+     "callsPerFrame": 1,
+     "maxMs": 1.5
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.15853658534313847,
+     "callsPerFrame": 6.902439024390244,
+     "maxMs": 2.8999999994412065
+    },
+    "physics.terrainSectionBoxes": {
+     "msPerFrame": 0.0853658536358214,
+     "callsPerFrame": 0.5609756097560976,
+     "maxMs": 2.5
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.04146341452511346,
+     "callsPerFrame": 1,
+     "maxMs": 0.10000000055879354
+    }
+   },
+   "interval": {
+    "mean": 117.06829268292681,
+    "p95": 250,
+    "max": 399.90000000000146
+   },
+   "world": {
+    "objects": 0,
+    "colliders": 1326,
+    "bodies": 153,
+    "terrainSections": 75,
+    "models": 78,
+    "terrainSectionBuilds": 23,
+    "activeSensorObjects": 0,
+    "liquidSections": 88,
+    "inventoryItems": 21
+   },
+   "cpuTop": [
+    {
+     "fn": "compose three.module.js:6648",
+     "percent": 1.2
+    },
+    {
+     "fn": "(garbage collector) :0",
+     "percent": 0.9
+    },
+    {
+     "fn": "bindVertexArray :0",
+     "percent": 0.8
+    },
+    {
+     "fn": "projectObject three.module.js:30184",
+     "percent": 0.8
+    },
+    {
+     "fn": "Z rapier.js:1",
+     "percent": 0.7
+    },
+    {
+     "fn": "updateMatrixWorld three.module.js:7811",
+     "percent": 0.7
+    },
+    {
+     "fn": "wasm-function[193] 00bc1dde:1",
+     "percent": 0.7
+    },
+    {
+     "fn": "collisionEnabledBetween physics.js:63",
+     "percent": 0.7
+    },
+    {
+     "fn": "syncModels scene.js:205",
+     "percent": 0.7
+    },
+    {
+     "fn": "wasm-to-js :1",
+     "percent": 0.7
+    },
+    {
+     "fn": "wasm-function[356] 00bc1dde:1",
+     "percent": 0.5
+    },
+    {
+     "fn": "__wrap rapier.js:1",
+     "percent": 0.5
+    }
+   ]
+  },
+  {
+   "map": "island",
+   "scenario": "mine tree 3",
+   "prepared": null,
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 18,
+    "stepsPerFrame": 3,
+    "frameMs": {
+     "mean": 23.816666666677015,
+     "p95": 55.69999999925494,
+     "max": 55.69999999925494
+    },
+    "phases": {
+     "simulate": {
+      "msPerFrame": 9.650000000010348,
+      "callsPerFrame": 1,
+      "maxMs": 18.699999999254942
+     },
+     "step.physics": {
+      "msPerFrame": 5.444444444651405,
+      "callsPerFrame": 3,
+      "maxMs": 9.299999999813735
+     },
+     "physics.sync": {
+      "msPerFrame": 4.822222222263615,
+      "callsPerFrame": 1,
+      "maxMs": 16
+     },
+     "view.draw": {
+      "msPerFrame": 4.238888888930281,
+      "callsPerFrame": 1,
+      "maxMs": 7.5
+     },
+     "step.move": {
+      "msPerFrame": 2.4277777776329055,
+      "callsPerFrame": 3,
+      "maxMs": 3.3999999994412065
+     },
+     "view.models": {
+      "msPerFrame": 2.111111111162851,
+      "callsPerFrame": 1,
+      "maxMs": 9.799999999813735
+     },
+     "view.effects": {
+      "msPerFrame": 1.511111111069719,
+      "callsPerFrame": 1,
+      "maxMs": 11.800000000745058
+     },
+     "step.attack": {
+      "msPerFrame": 1.0833333333850734,
+      "callsPerFrame": 2.5,
+      "maxMs": 11.200000000186265
+     },
+     "ui": {
+      "msPerFrame": 0.8944444444237484,
+      "callsPerFrame": 1,
+      "maxMs": 6.900000000372529
+     },
+     "step.world": {
+      "msPerFrame": 0.6166666665942304,
+      "callsPerFrame": 3,
+      "maxMs": 1.599999999627471
+     },
+     "terrain.mesh": {
+      "msPerFrame": 0.5333333333126373,
+      "callsPerFrame": 1,
+      "maxMs": 6.800000000745058
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.03333333331263728,
+      "callsPerFrame": 1,
+      "maxMs": 0.10000000055879354
+     }
+    }
+   },
+   "methods": {
+    "physics.step": {
+     "msPerFrame": 5.438888889116545,
+     "callsPerFrame": 3,
+     "maxMs": 9.299999999813735
+    },
+    "physics.synchronize": {
+     "msPerFrame": 4.8166666667287545,
+     "callsPerFrame": 1,
+     "maxMs": 16
+    },
+    "view.draw": {
+     "msPerFrame": 4.238888888930281,
+     "callsPerFrame": 1,
+     "maxMs": 7.5
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 2.305555555400335,
+     "callsPerFrame": 3,
+     "maxMs": 3.2999999998137355
+    },
+    "view.syncModels": {
+     "msPerFrame": 1.700000000031044,
+     "callsPerFrame": 1,
+     "maxMs": 9.400000000372529
+    },
+    "environment.sync": {
+     "msPerFrame": 0.7888888887957566,
+     "callsPerFrame": 1,
+     "maxMs": 11.5
+    },
+    "runtime.tick": {
+     "msPerFrame": 0.6166666665942304,
+     "callsPerFrame": 3,
+     "maxMs": 1.599999999627471
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 0.5333333333126373,
+     "callsPerFrame": 1,
+     "maxMs": 6.800000000745058
+    },
+    "creatures.tick": {
+     "msPerFrame": 0.3444444444547925,
+     "callsPerFrame": 3,
+     "maxMs": 0.7000000001862645
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.04444444448583656,
+     "callsPerFrame": 7,
+     "maxMs": 0.40000000037252903
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.03333333331263728,
+     "callsPerFrame": 1,
+     "maxMs": 0.10000000055879354
+    },
+    "physics.terrainSectionBoxes": {
+     "msPerFrame": 0,
+     "callsPerFrame": 0.05555555555555555,
+     "maxMs": 0
+    }
+   },
+   "interval": {
+    "mean": 255.54999999999987,
+    "p95": 883.2999999999993,
+    "max": 883.2999999999993
+   },
+   "world": {
+    "objects": 0,
+    "colliders": 1326,
+    "bodies": 153,
+    "terrainSections": 75,
+    "models": 78,
+    "terrainSectionBuilds": 1,
+    "activeSensorObjects": 0,
+    "liquidSections": 88,
+    "inventoryItems": 23
+   },
+   "cpuTop": [
+    {
+     "fn": "(garbage collector) :0",
+     "percent": 0.7
+    },
+    {
+     "fn": "updateMatrixWorld three.module.js:7811",
+     "percent": 0.4
+    },
+    {
+     "fn": "ownershipForCollider physics.js:58",
+     "percent": 0.4
+    },
+    {
+     "fn": "wasm-to-js :1",
+     "percent": 0.3
+    },
+    {
+     "fn": "sync feedback-view.js:94",
+     "percent": 0.3
+    },
+    {
+     "fn": "Z rapier.js:1",
+     "percent": 0.3
+    },
+    {
+     "fn": "drawHotbar inventory-ui.js:4",
+     "percent": 0.3
+    },
+    {
+     "fn": "wasm-function[1064] 00bc1dde:1",
+     "percent": 0.3
+    },
+    {
+     "fn": "add environment-view.js:102",
+     "percent": 0.3
+    },
+    {
+     "fn": "bindVertexArray :0",
+     "percent": 0.2
+    },
+    {
+     "fn": "sweepPart physics.js:329",
+     "percent": 0.2
+    },
+    {
+     "fn": "compose three.module.js:6648",
+     "percent": 0.2
+    }
+   ]
+  },
+  {
+   "map": "island",
+   "scenario": "loose tree nearby",
+   "prepared": "3 tree(s) skipped (component_limit); cut 4 trunk cell(s) at 180,24,111: 1 loose object of 564 cells; player placed 2 m away",
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 78,
+    "stepsPerFrame": 2.91025641025641,
+    "frameMs": {
+     "mean": 12.99999999996418,
+     "p95": 33,
+     "max": 36.200000000186265
+    },
+    "phases": {
+     "view.draw": {
+      "msPerFrame": 4.767948717941554,
+      "callsPerFrame": 1,
+      "maxMs": 29.299999999813735
+     },
+     "simulate": {
+      "msPerFrame": 3.7153846153941674,
+      "callsPerFrame": 1,
+      "maxMs": 27.799999999813735
+     },
+     "view.models": {
+      "msPerFrame": 2.564102564042864,
+      "callsPerFrame": 1,
+      "maxMs": 22.199999999254942
+     },
+     "step.world": {
+      "msPerFrame": 1.253846153891526,
+      "callsPerFrame": 2.91025641025641,
+      "maxMs": 21.09999999962747
+     },
+     "step.move": {
+      "msPerFrame": 1.1846153845246403,
+      "callsPerFrame": 2.91025641025641,
+      "maxMs": 23.5
+     },
+     "step.physics": {
+      "msPerFrame": 1.1730769232082634,
+      "callsPerFrame": 2.91025641025641,
+      "maxMs": 11.799999999813735
+     },
+     "ui": {
+      "msPerFrame": 0.7282051282146802,
+      "callsPerFrame": 1,
+      "maxMs": 5.7999999998137355
+     },
+     "physics.sync": {
+      "msPerFrame": 0.6820512821014302,
+      "callsPerFrame": 1,
+      "maxMs": 22.40000000037253
+     },
+     "view.effects": {
+      "msPerFrame": 0.23205128204650605,
+      "callsPerFrame": 1,
+      "maxMs": 1.7999999998137355
+     },
+     "terrain.mesh": {
+      "msPerFrame": 0.22820512825050032,
+      "callsPerFrame": 1,
+      "maxMs": 4.8999999994412065
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.05897435892182283,
+      "callsPerFrame": 1,
+      "maxMs": 1.2999999998137355
+     }
+    }
+   },
+   "methods": {
+    "view.draw": {
+     "msPerFrame": 4.529487179472851,
+     "callsPerFrame": 1,
+     "maxMs": 29.299999999813735
+    },
+    "view.syncModels": {
+     "msPerFrame": 1.767948717965434,
+     "callsPerFrame": 1,
+     "maxMs": 10.600000000558794
+    },
+    "runtime.tick": {
+     "msPerFrame": 1.25000000003582,
+     "callsPerFrame": 2.91025641025641,
+     "maxMs": 21.09999999962747
+    },
+    "physics.step": {
+     "msPerFrame": 1.1692307693644977,
+     "callsPerFrame": 2.91025641025641,
+     "maxMs": 11.799999999813735
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 1.0910256409253447,
+     "callsPerFrame": 2.91025641025641,
+     "maxMs": 23.40000000037253
+    },
+    "creatures.tick": {
+     "msPerFrame": 1.0397435896910536,
+     "callsPerFrame": 2.91025641025641,
+     "maxMs": 21
+    },
+    "physics.synchronize": {
+     "msPerFrame": 0.6807692308122149,
+     "callsPerFrame": 1,
+     "maxMs": 22.299999999813735
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 0.22820512825050032,
+     "callsPerFrame": 1,
+     "maxMs": 4.8999999994412065
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.1858974358616158,
+     "callsPerFrame": 6.82051282051282,
+     "maxMs": 7.5
+    },
+    "environment.sync": {
+     "msPerFrame": 0.09230769231008032,
+     "callsPerFrame": 1,
+     "maxMs": 1.2000000001862645
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.056410256355332256,
+     "callsPerFrame": 1,
+     "maxMs": 1.2999999998137355
+    }
+   },
+   "interval": {
+    "mean": 79.91153846153844,
+    "p95": 133.3000000000029,
+    "max": 250
+   },
+   "world": {
+    "objects": 1,
+    "colliders": 1183,
+    "bodies": 98,
+    "terrainSections": 79,
+    "models": 79,
+    "terrainSectionBuilds": 0,
+    "activeSensorObjects": 0,
+    "liquidSections": 91,
+    "inventoryItems": 23
+   },
+   "cpuTop": [
+    {
+     "fn": "compose three.module.js:6648",
+     "percent": 1.1
+    },
+    {
+     "fn": "needsUpdate three.module.js:15387",
+     "percent": 1
+    },
+    {
+     "fn": "(garbage collector) :0",
+     "percent": 1
+    },
+    {
+     "fn": "WebGLRenderer.renderBufferDirect three.module.js:29609",
+     "percent": 0.8
+    },
+    {
+     "fn": "syncModels scene.js:205",
+     "percent": 0.5
+    },
+    {
+     "fn": "drawElements :0",
+     "percent": 0.5
+    },
+    {
+     "fn": "setValueV1f three.module.js:18398",
+     "percent": 0.5
+    },
+    {
+     "fn": "updateMatrixWorld three.module.js:7811",
+     "percent": 0.5
+    },
+    {
+     "fn": "frame game.js:588",
+     "percent": 0.4
+    },
+    {
+     "fn": "animateCreatureModel creature-animation.js:140",
+     "percent": 0.4
+    },
+    {
+     "fn": "synchronize physics.js:360",
+     "percent": 0.4
+    },
+    {
+     "fn": "add frame-profiler.js:29",
+     "percent": 0.4
+    }
+   ]
+  },
+  {
+   "map": "island",
+   "scenario": "loose tree, walking",
+   "prepared": "3 tree(s) skipped (component_limit); cut 4 trunk cell(s) at 180,24,111: 1 loose object of 564 cells; player placed 2 m away",
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 144,
+    "stepsPerFrame": 2.3333333333333335,
+    "frameMs": {
+     "mean": 12.709027777736386,
+     "p95": 27.399999999441206,
+     "max": 42.59999999962747
+    },
+    "phases": {
+     "physics.sync": {
+      "msPerFrame": 3.3493055555995346,
+      "callsPerFrame": 1,
+      "maxMs": 22.700000000186265
+     },
+     "view.draw": {
+      "msPerFrame": 3.1569444444289223,
+      "callsPerFrame": 1,
+      "maxMs": 30.299999999813735
+     },
+     "view.models": {
+      "msPerFrame": 2.695138888847497,
+      "callsPerFrame": 1,
+      "maxMs": 22
+     },
+     "simulate": {
+      "msPerFrame": 2.5402777777376793,
+      "callsPerFrame": 1,
+      "maxMs": 30.90000000037253
+     },
+     "step.physics": {
+      "msPerFrame": 1.5958333333191048,
+      "callsPerFrame": 2.3333333333333335,
+      "maxMs": 27.90000000037253
+     },
+     "step.world": {
+      "msPerFrame": 0.48194444442116136,
+      "callsPerFrame": 2.3333333333333335,
+      "maxMs": 2.599999999627471
+     },
+     "ui": {
+      "msPerFrame": 0.45763888888500837,
+      "callsPerFrame": 1,
+      "maxMs": 20.40000000037253
+     },
+     "step.move": {
+      "msPerFrame": 0.4229166666757212,
+      "callsPerFrame": 2.3333333333333335,
+      "maxMs": 4.7999999998137355
+     },
+     "view.effects": {
+      "msPerFrame": 0.29930555553356597,
+      "callsPerFrame": 1,
+      "maxMs": 7
+     },
+     "terrain.mesh": {
+      "msPerFrame": 0.05486111115250322,
+      "callsPerFrame": 1,
+      "maxMs": 0.30000000074505806
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.03402777777389727,
+      "callsPerFrame": 1,
+      "maxMs": 0.10000000055879354
+     }
+    }
+   },
+   "methods": {
+    "physics.synchronize": {
+     "msPerFrame": 3.3354166666977108,
+     "callsPerFrame": 1,
+     "maxMs": 22.700000000186265
+    },
+    "view.draw": {
+     "msPerFrame": 3.1562499999805973,
+     "callsPerFrame": 1,
+     "maxMs": 30.299999999813735
+    },
+    "view.syncModels": {
+     "msPerFrame": 2.1236111111098177,
+     "callsPerFrame": 1,
+     "maxMs": 21.800000000745058
+    },
+    "physics.step": {
+     "msPerFrame": 1.4027777777583752,
+     "callsPerFrame": 2.3333333333333335,
+     "maxMs": 24.299999999813735
+    },
+    "runtime.tick": {
+     "msPerFrame": 0.48055555552451146,
+     "callsPerFrame": 2.3333333333333335,
+     "maxMs": 2.599999999627471
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 0.28333333340965006,
+     "callsPerFrame": 2.3333333333333335,
+     "maxMs": 4.7000000001862645
+    },
+    "creatures.tick": {
+     "msPerFrame": 0.28055555558401263,
+     "callsPerFrame": 2.3333333333333335,
+     "maxMs": 1.800000000745058
+    },
+    "environment.sync": {
+     "msPerFrame": 0.1527777777907128,
+     "callsPerFrame": 1,
+     "maxMs": 4.599999999627471
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.08819444443927044,
+     "callsPerFrame": 5.666666666666667,
+     "maxMs": 4.7000000001862645
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 0.05347222226232083,
+     "callsPerFrame": 1,
+     "maxMs": 0.30000000074505806
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.03333333333203983,
+     "callsPerFrame": 1,
+     "maxMs": 0.10000000055879354
+    }
+   },
+   "interval": {
+    "mean": 43.053472222222254,
+    "p95": 83.30000000000291,
+    "max": 166.60000000000582
+   },
+   "world": {
+    "objects": 1,
+    "colliders": 1309,
+    "bodies": 110,
+    "terrainSections": 79,
+    "models": 79,
+    "terrainSectionBuilds": 0,
+    "activeSensorObjects": 0,
+    "liquidSections": 91,
+    "inventoryItems": 23
+   },
+   "cpuTop": [
+    {
+     "fn": "compose three.module.js:6648",
+     "percent": 1.8
+    },
+    {
+     "fn": "syncModels scene.js:205",
+     "percent": 1.5
+    },
+    {
+     "fn": "wasm-function[193] 00bc1dde:1",
+     "percent": 1.2
+    },
+    {
+     "fn": "multiplyMatrices three.module.js:6301",
+     "percent": 1.1
+    },
+    {
+     "fn": "setFromEuler three.module.js:3489",
+     "percent": 0.9
+    },
+    {
+     "fn": "wasm-to-js :1",
+     "percent": 0.8
+    },
+    {
+     "fn": "target.<computed> :4",
+     "percent": 0.8
+    },
+    {
+     "fn": "setup three.module.js:15263",
+     "percent": 0.8
+    },
+    {
+     "fn": "wasm-function[635] 00bc1dde:1",
+     "percent": 0.8
+    },
+    {
+     "fn": "updateMatrixWorld three.module.js:7811",
+     "percent": 0.7
+    },
+    {
+     "fn": "bindVertexArray :0",
+     "percent": 0.7
+    },
+    {
+     "fn": "wasm-function[356] 00bc1dde:1",
+     "percent": 0.6
+    }
+   ]
+  },
+  {
+   "map": "island",
+   "scenario": "three felled trees",
+   "prepared": "3 felled trees (564, 548, 564 cells); this step cut 548 cells at 133,28,150; 564 cells at 169,24,99",
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 153,
+    "stepsPerFrame": 2.281045751633987,
+    "frameMs": {
+     "mean": 11.148366013103548,
+     "p95": 26.5,
+     "max": 32.60000000055879
+    },
+    "phases": {
+     "view.draw": {
+      "msPerFrame": 2.968627451005958,
+      "callsPerFrame": 1,
+      "maxMs": 24.40000000037253
+     },
+     "physics.sync": {
+      "msPerFrame": 2.786928104565424,
+      "callsPerFrame": 1,
+      "maxMs": 22.300000000745058
+     },
+     "view.models": {
+      "msPerFrame": 2.62287581704703,
+      "callsPerFrame": 1,
+      "maxMs": 25.600000000558794
+     },
+     "simulate": {
+      "msPerFrame": 2.0653594771667927,
+      "callsPerFrame": 1,
+      "maxMs": 9.200000000186265
+     },
+     "step.physics": {
+      "msPerFrame": 1.2673202614342562,
+      "callsPerFrame": 2.281045751633987,
+      "maxMs": 8.400000000372529
+     },
+     "step.world": {
+      "msPerFrame": 0.4398692810749696,
+      "callsPerFrame": 2.281045751633987,
+      "maxMs": 4.8999999994412065
+     },
+     "ui": {
+      "msPerFrame": 0.36078431371453346,
+      "callsPerFrame": 1,
+      "maxMs": 18.799999999813735
+     },
+     "step.move": {
+      "msPerFrame": 0.3169934640462005,
+      "callsPerFrame": 2.281045751633987,
+      "maxMs": 4.7999999998137355
+     },
+     "view.effects": {
+      "msPerFrame": 0.20522875815410824,
+      "callsPerFrame": 1,
+      "maxMs": 2.599999999627471
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.06601307186255463,
+      "callsPerFrame": 1,
+      "maxMs": 4.2999999998137355
+     },
+     "terrain.mesh": {
+      "msPerFrame": 0.058169934600348173,
+      "callsPerFrame": 1,
+      "maxMs": 0.20000000018626451
+     }
+    }
+   },
+   "methods": {
+    "view.draw": {
+     "msPerFrame": 2.9673202614622567,
+     "callsPerFrame": 1,
+     "maxMs": 24.40000000037253
+    },
+    "physics.synchronize": {
+     "msPerFrame": 2.78627450979053,
+     "callsPerFrame": 1,
+     "maxMs": 22.300000000745058
+    },
+    "view.syncModels": {
+     "msPerFrame": 2.0124183006560297,
+     "callsPerFrame": 1,
+     "maxMs": 21.5
+    },
+    "physics.step": {
+     "msPerFrame": 1.2660130718966423,
+     "callsPerFrame": 2.281045751633987,
+     "maxMs": 8.400000000372529
+    },
+    "runtime.tick": {
+     "msPerFrame": 0.4392156863000755,
+     "callsPerFrame": 2.281045751633987,
+     "maxMs": 4.8999999994412065
+    },
+    "creatures.tick": {
+     "msPerFrame": 0.31241830065846443,
+     "callsPerFrame": 2.281045751633987,
+     "maxMs": 4.7999999998137355
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 0.2529411764596315,
+     "callsPerFrame": 2.281045751633987,
+     "maxMs": 4.699999999254942
+    },
+    "environment.sync": {
+     "msPerFrame": 0.07385620911258693,
+     "callsPerFrame": 1,
+     "maxMs": 0.39999999944120646
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.06339869276297833,
+     "callsPerFrame": 1,
+     "maxMs": 4.2999999998137355
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.05816993463687063,
+     "callsPerFrame": 5.562091503267974,
+     "maxMs": 0.20000000018626451
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 0.055555555525120176,
+     "callsPerFrame": 1,
+     "maxMs": 0.20000000018626451
+    }
+   },
+   "interval": {
+    "mean": 40.41307189542482,
+    "p95": 66.70000000000437,
+    "max": 116.69999999999709
+   },
+   "world": {
+    "objects": 3,
+    "colliders": 1342,
+    "bodies": 117,
+    "terrainSections": 95,
+    "models": 81,
+    "terrainSectionBuilds": 0,
+    "activeSensorObjects": 0,
+    "liquidSections": 91,
+    "inventoryItems": 23
+   },
+   "cpuTop": [
+    {
+     "fn": "compose three.module.js:6648",
+     "percent": 2.5
+    },
+    {
+     "fn": "setup three.module.js:15263",
+     "percent": 1.1
+    },
+    {
+     "fn": "syncModels scene.js:205",
+     "percent": 0.9
+    },
+    {
+     "fn": "multiplyMatrices three.module.js:6301",
+     "percent": 0.9
+    },
+    {
+     "fn": "memo atlas.js:29",
+     "percent": 0.9
+    },
+    {
+     "fn": "wasm-function[635] 00bc1dde:1",
+     "percent": 0.8
+    },
+    {
+     "fn": "setFromEuler three.module.js:3489",
+     "percent": 0.7
+    },
+    {
+     "fn": "wasm-to-js :1",
+     "percent": 0.6
+    },
+    {
+     "fn": "creatureBodyPart creature-animation.js:21",
+     "percent": 0.6
+    },
+    {
+     "fn": "animateCreatureModel creature-animation.js:140",
+     "percent": 0.6
+    },
+    {
+     "fn": "updateMatrixWorld three.module.js:7811",
+     "percent": 0.5
+    },
+    {
+     "fn": "copy progression.js:5",
+     "percent": 0.5
+    }
+   ]
+  },
+  {
+   "map": "island",
+   "scenario": "chopping a felled tree",
+   "prepared": "aim held on a cell of the largest felled tree (then its largest piece nearby), player beside it, attack held 7.8 s",
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 208,
+    "stepsPerFrame": 2.2163461538461537,
+    "frameMs": {
+     "mean": 10.259615384597474,
+     "p95": 28.300000000745058,
+     "max": 40
+    },
+    "phases": {
+     "view.draw": {
+      "msPerFrame": 3.314423076942778,
+      "callsPerFrame": 1,
+      "maxMs": 25.59999999962747
+     },
+     "simulate": {
+      "msPerFrame": 2.592788461528611,
+      "callsPerFrame": 1,
+      "maxMs": 34.5
+     },
+     "view.models": {
+      "msPerFrame": 2.4831730769365095,
+      "callsPerFrame": 1,
+      "maxMs": 21.299999999813735
+     },
+     "physics.sync": {
+      "msPerFrame": 0.9980769230840871,
+      "callsPerFrame": 1,
+      "maxMs": 20.200000000186265
+     },
+     "step.physics": {
+      "msPerFrame": 0.8706730768854658,
+      "callsPerFrame": 2.2163461538461537,
+      "maxMs": 4.900000000372529
+     },
+     "step.attack": {
+      "msPerFrame": 0.8336538461556372,
+      "callsPerFrame": 2.1538461538461537,
+      "maxMs": 31.200000000186265
+     },
+     "ui": {
+      "msPerFrame": 0.4658653846037431,
+      "callsPerFrame": 1,
+      "maxMs": 22.59999999962747
+     },
+     "step.world": {
+      "msPerFrame": 0.42740384620936733,
+      "callsPerFrame": 2.2163461538461537,
+      "maxMs": 4.7999999998137355
+     },
+     "step.move": {
+      "msPerFrame": 0.42403846149905944,
+      "callsPerFrame": 2.2163461538461537,
+      "maxMs": 22.90000000037253
+     },
+     "view.effects": {
+      "msPerFrame": 0.23846153841944984,
+      "callsPerFrame": 1,
+      "maxMs": 4.099999999627471
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.07548076924509727,
+      "callsPerFrame": 1,
+      "maxMs": 4.1000000005587935
+     },
+     "terrain.mesh": {
+      "msPerFrame": 0.06971153847049348,
+      "callsPerFrame": 1,
+      "maxMs": 1.7000000001862645
+     }
+    }
+   },
+   "methods": {
+    "view.draw": {
+     "msPerFrame": 3.312500000026865,
+     "callsPerFrame": 1,
+     "maxMs": 25.59999999962747
+    },
+    "view.syncModels": {
+     "msPerFrame": 1.9956730769347184,
+     "callsPerFrame": 1,
+     "maxMs": 20.90000000037253
+    },
+    "physics.synchronize": {
+     "msPerFrame": 0.9942307692388288,
+     "callsPerFrame": 1,
+     "maxMs": 20.200000000186265
+    },
+    "physics.step": {
+     "msPerFrame": 0.8692307691895761,
+     "callsPerFrame": 2.2163461538461537,
+     "maxMs": 4.900000000372529
+    },
+    "runtime.tick": {
+     "msPerFrame": 0.42307692313513073,
+     "callsPerFrame": 2.2163461538461537,
+     "maxMs": 4.7999999998137355
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 0.3706730768854658,
+     "callsPerFrame": 2.2163461538461537,
+     "maxMs": 22.799999999813735
+    },
+    "creatures.tick": {
+     "msPerFrame": 0.2639423076985762,
+     "callsPerFrame": 2.2163461538461537,
+     "maxMs": 1.7999999998137355
+    },
+    "environment.sync": {
+     "msPerFrame": 0.14230769227903622,
+     "callsPerFrame": 1,
+     "maxMs": 4
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.07403846154920757,
+     "callsPerFrame": 1,
+     "maxMs": 4.1000000005587935
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 0.06538461539177941,
+     "callsPerFrame": 1,
+     "maxMs": 1.599999999627471
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.060576923039311975,
+     "callsPerFrame": 5.4326923076923075,
+     "maxMs": 0.7999999998137355
+    },
+    "physics.terrainSectionBoxes": {
+     "msPerFrame": 0.00048076923345573817,
+     "callsPerFrame": 0.052884615384615384,
+     "maxMs": 0.10000000055879354
+    }
+   },
+   "interval": {
+    "mean": 39.581250000000004,
+    "p95": 66.70000000000437,
+    "max": 183.3000000000029
+   },
+   "world": {
+    "objects": 3,
+    "colliders": 1213,
+    "bodies": 109,
+    "terrainSections": 91,
+    "models": 81,
+    "terrainSectionBuilds": 11,
+    "activeSensorObjects": 0,
+    "liquidSections": 92,
+    "inventoryItems": 36
+   },
+   "cpuTop": [
+    {
+     "fn": "syncModels scene.js:205",
+     "percent": 1.5
+    },
+    {
+     "fn": "needsUpdate three.module.js:15387",
+     "percent": 1.4
+    },
+    {
+     "fn": "compose three.module.js:6648",
+     "percent": 1.2
+    },
+    {
+     "fn": "multiplyMatrices three.module.js:6301",
+     "percent": 0.9
+    },
+    {
+     "fn": "bindVertexArray :0",
+     "percent": 0.8
+    },
+    {
+     "fn": "setup three.module.js:15263",
+     "percent": 0.6
+    },
+    {
+     "fn": "setFromEuler three.module.js:3489",
+     "percent": 0.6
+    },
+    {
+     "fn": "WebGLRenderer.renderBufferDirect three.module.js:29609",
+     "percent": 0.6
+    },
+    {
+     "fn": "toJSON authoring.js:35",
+     "percent": 0.6
+    },
+    {
+     "fn": "updateMatrixWorld three.module.js:7811",
+     "percent": 0.6
+    },
+    {
+     "fn": "placeBoxes authoring.js:18",
+     "percent": 0.5
+    },
+    {
+     "fn": "(anonymous) rapier.js:1",
+     "percent": 0.5
+    }
+   ]
+  },
+  {
+   "map": "expedition",
+   "scenario": "first fill",
+   "prepared": null,
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 63,
+    "stepsPerFrame": 2.9047619047619047,
+    "frameMs": {
+     "mean": 22.290476190517584,
+     "p95": 43,
+     "max": 64.40000000037253
+    },
+    "phases": {
+     "simulate": {
+      "msPerFrame": 5.434920635000463,
+      "callsPerFrame": 1,
+      "maxMs": 28.700000000186265
+     },
+     "view.draw": {
+      "msPerFrame": 4.882539682474638,
+      "callsPerFrame": 1,
+      "maxMs": 32.60000000055879
+     },
+     "view.models": {
+      "msPerFrame": 4.39047619048506,
+      "callsPerFrame": 1,
+      "maxMs": 26.299999999813735
+     },
+     "physics.sync": {
+      "msPerFrame": 3.714285714344846,
+      "callsPerFrame": 1,
+      "maxMs": 24.59999999962747
+     },
+     "step.physics": {
+      "msPerFrame": 3.382539682711164,
+      "callsPerFrame": 2.9047619047619047,
+      "maxMs": 24.200000000186265
+     },
+     "terrain.mesh": {
+      "msPerFrame": 2.534920634894026,
+      "callsPerFrame": 1,
+      "maxMs": 17.5
+     },
+     "step.world": {
+      "msPerFrame": 1.373015873015873,
+      "callsPerFrame": 2.9047619047619047,
+      "maxMs": 16.90000000037253
+     },
+     "ui": {
+      "msPerFrame": 0.8111111111643295,
+      "callsPerFrame": 1,
+      "maxMs": 7.400000000372529
+     },
+     "step.move": {
+      "msPerFrame": 0.5952380951789636,
+      "callsPerFrame": 2.9047619047619047,
+      "maxMs": 4.2000000001862645
+     },
+     "view.effects": {
+      "msPerFrame": 0.3777777777156896,
+      "callsPerFrame": 1,
+      "maxMs": 4.5
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.11746031743666482,
+      "callsPerFrame": 1,
+      "maxMs": 1.3999999994412065
+     }
+    }
+   },
+   "methods": {
+    "view.draw": {
+     "msPerFrame": 4.880952380893249,
+     "callsPerFrame": 1,
+     "maxMs": 32.60000000055879
+    },
+    "physics.synchronize": {
+     "msPerFrame": 3.714285714344846,
+     "callsPerFrame": 1,
+     "maxMs": 24.59999999962747
+    },
+    "view.syncModels": {
+     "msPerFrame": 3.4507936507256494,
+     "callsPerFrame": 1,
+     "maxMs": 25.600000000558794
+    },
+    "physics.step": {
+     "msPerFrame": 3.3761904763856103,
+     "callsPerFrame": 2.9047619047619047,
+     "maxMs": 24.200000000186265
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 2.531746031716466,
+     "callsPerFrame": 1,
+     "maxMs": 17.5
+    },
+    "runtime.tick": {
+     "msPerFrame": 1.3682539682569248,
+     "callsPerFrame": 2.9047619047619047,
+     "maxMs": 16.90000000037253
+    },
+    "creatures.tick": {
+     "msPerFrame": 1.0857142856610673,
+     "callsPerFrame": 2.9047619047619047,
+     "maxMs": 16.799999999813735
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 0.29841269836539314,
+     "callsPerFrame": 2.9047619047619047,
+     "maxMs": 0.6000000005587935
+    },
+    "environment.sync": {
+     "msPerFrame": 0.21111111106380584,
+     "callsPerFrame": 1,
+     "maxMs": 4.400000000372529
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.11428571425910507,
+     "callsPerFrame": 1,
+     "maxMs": 1.3999999994412065
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.025396825405695135,
+     "callsPerFrame": 6.809523809523809,
+     "maxMs": 0.10000000055879354
+    }
+   },
+   "interval": {
+    "mean": 73.54126984126985,
+    "p95": 133.39999999999964,
+    "max": 233.29999999999995
+   },
+   "world": {
+    "objects": 0,
+    "colliders": 1129,
+    "bodies": 95,
+    "terrainSections": 75,
+    "models": 98,
+    "terrainSectionBuilds": 0,
+    "activeSensorObjects": 0,
+    "liquidSections": 0,
+    "inventoryItems": 0
+   },
+   "cpuTop": [
+    {
+     "fn": "chunkGeometry scene.js:31",
+     "percent": 2.7
+    },
+    {
+     "fn": "(garbage collector) :0",
+     "percent": 1.3
+    },
+    {
+     "fn": "compose three.module.js:6648",
+     "percent": 1.1
+    },
+    {
+     "fn": "wasm-to-js :1",
+     "percent": 1.1
+    },
+    {
+     "fn": "setFromEuler three.module.js:3489",
+     "percent": 1
+    },
+    {
+     "fn": "needsUpdate three.module.js:15387",
+     "percent": 0.9
+    },
+    {
+     "fn": "syncModels scene.js:205",
+     "percent": 0.8
+    },
+    {
+     "fn": "setup three.module.js:15263",
+     "percent": 0.8
+    },
+    {
+     "fn": "sweepPart physics.js:329",
+     "percent": 0.7
+    },
+    {
+     "fn": "creatureBodyPart creature-animation.js:21",
+     "percent": 0.6
+    },
+    {
+     "fn": "wasm-function[1064] 00bc1dde:1",
+     "percent": 0.6
+    },
+    {
+     "fn": "WebGLRenderer.renderBufferDirect three.module.js:29609",
+     "percent": 0.6
+    }
+   ],
+   "fill": {
+    "generatedMs": 5483,
+    "meshedMs": 5486,
+    "chunks": 96,
+    "generator": "worker"
+   }
+  },
+  {
+   "map": "expedition",
+   "scenario": "idle",
+   "prepared": null,
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 98,
+    "stepsPerFrame": 2.7346938775510203,
+    "frameMs": {
+     "mean": 15.223469387701883,
+     "p95": 33.59999999962747,
+     "max": 42.89999999944121
+    },
+    "phases": {
+     "view.draw": {
+      "msPerFrame": 4.54795918364686,
+      "callsPerFrame": 1,
+      "maxMs": 25.700000000186265
+     },
+     "view.models": {
+      "msPerFrame": 3.8428571427868183,
+      "callsPerFrame": 1,
+      "maxMs": 23.09999999962747
+     },
+     "simulate": {
+      "msPerFrame": 3.4510204081461593,
+      "callsPerFrame": 1,
+      "maxMs": 27.100000000558794
+     },
+     "physics.sync": {
+      "msPerFrame": 2.3765306122867123,
+      "callsPerFrame": 1,
+      "maxMs": 33.299999999813735
+     },
+     "step.physics": {
+      "msPerFrame": 1.9295918368259255,
+      "callsPerFrame": 2.7346938775510203,
+      "maxMs": 5.7999999998137355
+     },
+     "step.world": {
+      "msPerFrame": 1.0744897958689503,
+      "callsPerFrame": 2.7346938775510203,
+      "maxMs": 21.90000000037253
+     },
+     "ui": {
+      "msPerFrame": 0.5183673469748881,
+      "callsPerFrame": 1,
+      "maxMs": 4.6000000005587935
+     },
+     "step.move": {
+      "msPerFrame": 0.37244897955382356,
+      "callsPerFrame": 2.7346938775510203,
+      "maxMs": 0.6000000005587935
+     },
+     "view.effects": {
+      "msPerFrame": 0.36938775509443816,
+      "callsPerFrame": 1,
+      "maxMs": 12.200000000186265
+     },
+     "terrain.mesh": {
+      "msPerFrame": 0.055102040801121265,
+      "callsPerFrame": 1,
+      "maxMs": 0.7999999998137355
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.042857142868546805,
+      "callsPerFrame": 1,
+      "maxMs": 0.20000000018626451
+     }
+    }
+   },
+   "methods": {
+    "view.draw": {
+     "msPerFrame": 4.54183673464256,
+     "callsPerFrame": 1,
+     "maxMs": 25.700000000186265
+    },
+    "view.syncModels": {
+     "msPerFrame": 2.863265306137654,
+     "callsPerFrame": 1,
+     "maxMs": 19.299999999813735
+    },
+    "physics.synchronize": {
+     "msPerFrame": 2.3704081633014185,
+     "callsPerFrame": 1,
+     "maxMs": 33.200000000186265
+    },
+    "physics.step": {
+     "msPerFrame": 1.9255102041595595,
+     "callsPerFrame": 2.7346938775510203,
+     "maxMs": 5.7999999998137355
+    },
+    "runtime.tick": {
+     "msPerFrame": 1.070408163221591,
+     "callsPerFrame": 2.7346938775510203,
+     "maxMs": 21.90000000037253
+    },
+    "creatures.tick": {
+     "msPerFrame": 0.8010204081917752,
+     "callsPerFrame": 2.7346938775510203,
+     "maxMs": 21.799999999813735
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 0.230612244865648,
+     "callsPerFrame": 2.7346938775510203,
+     "maxMs": 0.40000000037252903
+    },
+    "environment.sync": {
+     "msPerFrame": 0.21938775503551777,
+     "callsPerFrame": 1,
+     "maxMs": 12
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 0.055102040801121265,
+     "callsPerFrame": 1,
+     "maxMs": 0.7999999998137355
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.04081632654961883,
+     "callsPerFrame": 1,
+     "maxMs": 0.20000000018626451
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.008163265304221791,
+     "callsPerFrame": 6.469387755102041,
+     "maxMs": 0.10000000055879354
+    }
+   },
+   "interval": {
+    "mean": 52.039795918367346,
+    "p95": 83.29999999999927,
+    "max": 100.09999999999945
+   },
+   "world": {
+    "objects": 0,
+    "colliders": 1129,
+    "bodies": 95,
+    "terrainSections": 75,
+    "models": 98,
+    "terrainSectionBuilds": 0,
+    "activeSensorObjects": 0,
+    "liquidSections": 0,
+    "inventoryItems": 0
+   },
+   "cpuTop": [
+    {
+     "fn": "compose three.module.js:6648",
+     "percent": 1.9
+    },
+    {
+     "fn": "setup three.module.js:15263",
+     "percent": 1.5
+    },
+    {
+     "fn": "syncModels scene.js:205",
+     "percent": 1.4
+    },
+    {
+     "fn": "multiplyMatrices three.module.js:6301",
+     "percent": 1.2
+    },
+    {
+     "fn": "setFromEuler three.module.js:3489",
+     "percent": 1
+    },
+    {
+     "fn": "frame game.js:588",
+     "percent": 1
+    },
+    {
+     "fn": "wasm-to-js :1",
+     "percent": 0.9
+    },
+    {
+     "fn": "creatureBodyPart creature-animation.js:21",
+     "percent": 0.8
+    },
+    {
+     "fn": "needsUpdate three.module.js:15387",
+     "percent": 0.8
+    },
+    {
+     "fn": "(garbage collector) :0",
+     "percent": 0.7
+    },
+    {
+     "fn": "wasm-function[635] 00bc1dde:1",
+     "percent": 0.7
+    },
+    {
+     "fn": "updateMatrixWorld three.module.js:7811",
+     "percent": 0.7
+    }
+   ]
+  },
+  {
+   "map": "expedition",
+   "scenario": "walk",
+   "prepared": null,
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 87,
+    "stepsPerFrame": 2.896551724137931,
+    "frameMs": {
+     "mean": 19.33908045978082,
+     "p95": 35.799999999813735,
+     "max": 116.20000000018626
+    },
+    "phases": {
+     "view.draw": {
+      "msPerFrame": 4.829885057430586,
+      "callsPerFrame": 1,
+      "maxMs": 95.5
+     },
+     "view.models": {
+      "msPerFrame": 4.550574712637255,
+      "callsPerFrame": 1,
+      "maxMs": 23.700000000186265
+     },
+     "simulate": {
+      "msPerFrame": 4.240229885083163,
+      "callsPerFrame": 1,
+      "maxMs": 26.799999999813735
+     },
+     "physics.sync": {
+      "msPerFrame": 3.4390804597508464,
+      "callsPerFrame": 1,
+      "maxMs": 32
+     },
+     "step.physics": {
+      "msPerFrame": 2.724137930959549,
+      "callsPerFrame": 2.896551724137931,
+      "maxMs": 24.200000000186265
+     },
+     "ui": {
+      "msPerFrame": 1.4172413793189087,
+      "callsPerFrame": 1,
+      "maxMs": 66.20000000018626
+     },
+     "step.world": {
+      "msPerFrame": 0.9482758622402432,
+      "callsPerFrame": 2.896551724137931,
+      "maxMs": 3.5
+     },
+     "step.move": {
+      "msPerFrame": 0.5160919539309268,
+      "callsPerFrame": 2.896551724137931,
+      "maxMs": 8.700000000186265
+     },
+     "terrain.mesh": {
+      "msPerFrame": 0.47586206894838945,
+      "callsPerFrame": 1,
+      "maxMs": 5.8999999994412065
+     },
+     "view.effects": {
+      "msPerFrame": 0.22758620692652531,
+      "callsPerFrame": 1,
+      "maxMs": 3.099999999627471
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.1436781609516548,
+      "callsPerFrame": 1,
+      "maxMs": 3.599999999627471
+     }
+    }
+   },
+   "methods": {
+    "view.draw": {
+     "msPerFrame": 4.829885057430586,
+     "callsPerFrame": 1,
+     "maxMs": 95.5
+    },
+    "view.syncModels": {
+     "msPerFrame": 3.968965517164304,
+     "callsPerFrame": 1,
+     "maxMs": 23.299999999813735
+    },
+    "physics.synchronize": {
+     "msPerFrame": 3.437931034457067,
+     "callsPerFrame": 1,
+     "maxMs": 32
+    },
+    "physics.step": {
+     "msPerFrame": 2.717241379218283,
+     "callsPerFrame": 2.896551724137931,
+     "maxMs": 24.200000000186265
+    },
+    "runtime.tick": {
+     "msPerFrame": 0.9402298852159031,
+     "callsPerFrame": 2.896551724137931,
+     "maxMs": 3.5
+    },
+    "creatures.tick": {
+     "msPerFrame": 0.6954022989148039,
+     "callsPerFrame": 2.896551724137931,
+     "maxMs": 3.5
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 0.47586206894838945,
+     "callsPerFrame": 1,
+     "maxMs": 5.8999999994412065
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 0.22528735628544255,
+     "callsPerFrame": 2.896551724137931,
+     "maxMs": 0.30000000074505806
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.1390804597872427,
+     "callsPerFrame": 6.793103448275862,
+     "maxMs": 3.7999999998137355
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.13448275863353548,
+     "callsPerFrame": 1,
+     "maxMs": 3.599999999627471
+    },
+    "environment.sync": {
+     "msPerFrame": 0.09425287358676908,
+     "callsPerFrame": 1,
+     "maxMs": 0.599999999627471
+    },
+    "physics.terrainSectionBoxes": {
+     "msPerFrame": 0.022988505747126436,
+     "callsPerFrame": 1.206896551724138,
+     "maxMs": 0.20000000018626451
+    }
+   },
+   "interval": {
+    "mean": 70.68620689655174,
+    "p95": 116.70000000000073,
+    "max": 150
+   },
+   "world": {
+    "objects": 0,
+    "colliders": 1218,
+    "bodies": 100,
+    "terrainSections": 75,
+    "models": 98,
+    "terrainSectionBuilds": 105,
+    "activeSensorObjects": 0,
+    "liquidSections": 0,
+    "inventoryItems": 0
+   },
+   "cpuTop": [
+    {
+     "fn": "syncModels scene.js:205",
+     "percent": 1.7
+    },
+    {
+     "fn": "compose three.module.js:6648",
+     "percent": 1.5
+    },
+    {
+     "fn": "getProgramInfoLog :0",
+     "percent": 1.3
+    },
+    {
+     "fn": "set world-ui.js:43",
+     "percent": 1
+    },
+    {
+     "fn": "wasm-function[356] 00bc1dde:1",
+     "percent": 0.8
+    },
+    {
+     "fn": "updateMatrixWorld three.module.js:7811",
+     "percent": 0.8
+    },
+    {
+     "fn": "multiplyMatrices three.module.js:6301",
+     "percent": 0.7
+    },
+    {
+     "fn": "needsUpdate three.module.js:15387",
+     "percent": 0.7
+    },
+    {
+     "fn": "wasm-to-js :1",
+     "percent": 0.7
+    },
+    {
+     "fn": "projectObject three.module.js:30184",
+     "percent": 0.6
+    },
+    {
+     "fn": "(garbage collector) :0",
+     "percent": 0.6
+    },
+    {
+     "fn": "animateCreatureModel creature-animation.js:140",
+     "percent": 0.6
+    }
+   ]
+  },
+  {
+   "map": "frontier",
+   "scenario": "first fill",
+   "prepared": null,
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 64,
+    "stepsPerFrame": 2.828125,
+    "frameMs": {
+     "mean": 27.492187500014552,
+     "p95": 51.5,
+     "max": 66.80000000074506
+    },
+    "phases": {
+     "physics.sync": {
+      "msPerFrame": 7.032812500052387,
+      "callsPerFrame": 1,
+      "maxMs": 28.700000000186265
+     },
+     "simulate": {
+      "msPerFrame": 5.873437500020373,
+      "callsPerFrame": 1,
+      "maxMs": 37.09999999962747
+     },
+     "view.draw": {
+      "msPerFrame": 4.412499999991269,
+      "callsPerFrame": 1,
+      "maxMs": 29.899999999441206
+     },
+     "step.physics": {
+      "msPerFrame": 4.251562499979627,
+      "callsPerFrame": 2.828125,
+      "maxMs": 28.700000000186265
+     },
+     "terrain.mesh": {
+      "msPerFrame": 3.8109375000058208,
+      "callsPerFrame": 1,
+      "maxMs": 26.299999999813735
+     },
+     "view.models": {
+      "msPerFrame": 3.5812499999447027,
+      "callsPerFrame": 1,
+      "maxMs": 24.90000000037253
+     },
+     "view.effects": {
+      "msPerFrame": 2.0312499999563443,
+      "callsPerFrame": 1,
+      "maxMs": 38
+     },
+     "step.world": {
+      "msPerFrame": 0.9921875000291038,
+      "callsPerFrame": 2.828125,
+      "maxMs": 7.2000000001862645
+     },
+     "step.move": {
+      "msPerFrame": 0.5609374999912689,
+      "callsPerFrame": 2.828125,
+      "maxMs": 1.7999999998137355
+     },
+     "ui": {
+      "msPerFrame": 0.5140624999912689,
+      "callsPerFrame": 1,
+      "maxMs": 3.5
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.21093750005820766,
+      "callsPerFrame": 1,
+      "maxMs": 5.2999999998137355
+     }
+    }
+   },
+   "methods": {
+    "physics.synchronize": {
+     "msPerFrame": 7.023437500058208,
+     "callsPerFrame": 1,
+     "maxMs": 28.600000000558794
+    },
+    "view.draw": {
+     "msPerFrame": 4.404687499976717,
+     "callsPerFrame": 1,
+     "maxMs": 29.899999999441206
+    },
+    "physics.step": {
+     "msPerFrame": 4.246874999982538,
+     "callsPerFrame": 2.828125,
+     "maxMs": 28.700000000186265
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 3.8078124999883585,
+     "callsPerFrame": 1,
+     "maxMs": 26.299999999813735
+    },
+    "view.syncModels": {
+     "msPerFrame": 2.7234375000116415,
+     "callsPerFrame": 1,
+     "maxMs": 24.59999999962747
+    },
+    "environment.sync": {
+     "msPerFrame": 1.607812499947613,
+     "callsPerFrame": 1,
+     "maxMs": 37.69999999925494
+    },
+    "runtime.tick": {
+     "msPerFrame": 0.9890625000407454,
+     "callsPerFrame": 2.828125,
+     "maxMs": 7.2000000001862645
+    },
+    "creatures.tick": {
+     "msPerFrame": 0.5,
+     "callsPerFrame": 2.828125,
+     "maxMs": 5.1000000005587935
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 0.37499999994179234,
+     "callsPerFrame": 2.828125,
+     "maxMs": 1.7000000001862645
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.21093750005820766,
+     "callsPerFrame": 1,
+     "maxMs": 5.2999999998137355
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.0421875000174623,
+     "callsPerFrame": 6.65625,
+     "maxMs": 0.7000000001862645
+    }
+   },
+   "interval": {
+    "mean": 70.83124999999998,
+    "p95": 116.59999999999991,
+    "max": 316.70000000000005
+   },
+   "world": {
+    "objects": 0,
+    "colliders": 1427,
+    "bodies": 158,
+    "terrainSections": 75,
+    "models": 105,
+    "terrainSectionBuilds": 0,
+    "activeSensorObjects": 0,
+    "liquidSections": 93,
+    "inventoryItems": 34
+   },
+   "cpuTop": [
+    {
+     "fn": "chunkGeometry scene.js:31",
+     "percent": 4.5
+    },
+    {
+     "fn": "syncModels scene.js:205",
+     "percent": 1.6
+    },
+    {
+     "fn": "liquidArrays environment-view.js:13",
+     "percent": 1.1
+    },
+    {
+     "fn": "(garbage collector) :0",
+     "percent": 1.1
+    },
+    {
+     "fn": "compose three.module.js:6648",
+     "percent": 0.9
+    },
+    {
+     "fn": "wasm-function[635] 00bc1dde:1",
+     "percent": 0.9
+    },
+    {
+     "fn": "wasm-to-js :1",
+     "percent": 0.8
+    },
+    {
+     "fn": "wasm-function[350] 00bc1dde:1",
+     "percent": 0.8
+    },
+    {
+     "fn": "wasm-function[193] 00bc1dde:1",
+     "percent": 0.7
+    },
+    {
+     "fn": "sample atlas.js:208",
+     "percent": 0.7
+    },
+    {
+     "fn": "wasm-function[1174] 00bc1dde:1",
+     "percent": 0.7
+    },
+    {
+     "fn": "wasm-function[316] 00bc1dde:1",
+     "percent": 0.6
+    }
+   ],
+   "fill": {
+    "generatedMs": 5434,
+    "meshedMs": 5539,
+    "chunks": 96,
+    "generator": "worker"
+   }
+  },
+  {
+   "map": "frontier",
+   "scenario": "camp",
+   "prepared": null,
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 77,
+    "stepsPerFrame": 2.909090909090909,
+    "frameMs": {
+     "mean": 20.868831168763435,
+     "p95": 43.5,
+     "max": 50.40000000037253
+    },
+    "phases": {
+     "physics.sync": {
+      "msPerFrame": 6.392207792282782,
+      "callsPerFrame": 1,
+      "maxMs": 33.09999999962747
+     },
+     "simulate": {
+      "msPerFrame": 5.644155844102626,
+      "callsPerFrame": 1,
+      "maxMs": 26.300000000745058
+     },
+     "view.draw": {
+      "msPerFrame": 4.572727272795006,
+      "callsPerFrame": 1,
+      "maxMs": 27.59999999962747
+     },
+     "step.physics": {
+      "msPerFrame": 4.1116883118286145,
+      "callsPerFrame": 2.909090909090909,
+      "maxMs": 24
+     },
+     "view.models": {
+      "msPerFrame": 3.50389610390578,
+      "callsPerFrame": 1,
+      "maxMs": 28.90000000037253
+     },
+     "step.world": {
+      "msPerFrame": 0.916883116781518,
+      "callsPerFrame": 2.909090909090909,
+      "maxMs": 7.300000000745058
+     },
+     "step.move": {
+      "msPerFrame": 0.5012987012817681,
+      "callsPerFrame": 2.909090909090909,
+      "maxMs": 4.099999999627471
+     },
+     "ui": {
+      "msPerFrame": 0.37272727265712113,
+      "callsPerFrame": 1,
+      "maxMs": 5.599999999627471
+     },
+     "view.effects": {
+      "msPerFrame": 0.25064935053807574,
+      "callsPerFrame": 1,
+      "maxMs": 1.599999999627471
+     },
+     "terrain.mesh": {
+      "msPerFrame": 0.05194805199643234,
+      "callsPerFrame": 1,
+      "maxMs": 0.2000000011175871
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.03376623374930063,
+      "callsPerFrame": 1,
+      "maxMs": 0.2000000011175871
+     }
+    }
+   },
+   "methods": {
+    "physics.synchronize": {
+     "msPerFrame": 6.380519480589632,
+     "callsPerFrame": 1,
+     "maxMs": 33.09999999962747
+    },
+    "view.draw": {
+     "msPerFrame": 4.568831168889226,
+     "callsPerFrame": 1,
+     "maxMs": 27.59999999962747
+    },
+    "physics.step": {
+     "msPerFrame": 4.105194805335108,
+     "callsPerFrame": 2.909090909090909,
+     "maxMs": 24
+    },
+    "view.syncModels": {
+     "msPerFrame": 2.7181818183124453,
+     "callsPerFrame": 1,
+     "maxMs": 28.40000000037253
+    },
+    "runtime.tick": {
+     "msPerFrame": 0.9116883115939699,
+     "callsPerFrame": 2.909090909090909,
+     "maxMs": 7.300000000745058
+    },
+    "creatures.tick": {
+     "msPerFrame": 0.42207792212630246,
+     "callsPerFrame": 2.909090909090909,
+     "maxMs": 6.300000000745058
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 0.36623376619989995,
+     "callsPerFrame": 2.909090909090909,
+     "maxMs": 4.099999999627471
+    },
+    "environment.sync": {
+     "msPerFrame": 0.09999999990565824,
+     "callsPerFrame": 1,
+     "maxMs": 1.599999999627471
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 0.046753246772598914,
+     "callsPerFrame": 1,
+     "maxMs": 0.20000000018626451
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.03246753245543737,
+     "callsPerFrame": 1,
+     "maxMs": 0.2000000011175871
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.014285714353446836,
+     "callsPerFrame": 6.818181818181818,
+     "maxMs": 0.10000000149011612
+    }
+   },
+   "interval": {
+    "mean": 68.17792207792209,
+    "p95": 100.09999999999854,
+    "max": 150
+   },
+   "world": {
+    "objects": 0,
+    "colliders": 1427,
+    "bodies": 158,
+    "terrainSections": 75,
+    "models": 105,
+    "terrainSectionBuilds": 0,
+    "activeSensorObjects": 0,
+    "liquidSections": 93,
+    "inventoryItems": 34
+   },
+   "cpuTop": [
+    {
+     "fn": "compose three.module.js:6648",
+     "percent": 2.3
+    },
+    {
+     "fn": "(garbage collector) :0",
+     "percent": 1.7
+    },
+    {
+     "fn": "wasm-function[356] 00bc1dde:1",
+     "percent": 1.4
+    },
+    {
+     "fn": "__wrap rapier.js:1",
+     "percent": 1.3
+    },
+    {
+     "fn": "wasm-function[635] 00bc1dde:1",
+     "percent": 1
+    },
+    {
+     "fn": "wasm-to-js :1",
+     "percent": 1
+    },
+    {
+     "fn": "animateCreatureModel creature-animation.js:140",
+     "percent": 0.9
+    },
+    {
+     "fn": "syncModels scene.js:205",
+     "percent": 0.9
+    },
+    {
+     "fn": "collisionEnabledBetween physics.js:63",
+     "percent": 0.8
+    },
+    {
+     "fn": "wasm-function[350] 00bc1dde:1",
+     "percent": 0.6
+    },
+    {
+     "fn": "WebGLRenderer.renderBufferDirect three.module.js:29609",
+     "percent": 0.6
+    },
+    {
+     "fn": "wasm-function[1064] 00bc1dde:1",
+     "percent": 0.6
+    }
+   ]
+  },
+  {
+   "map": "frontier",
+   "scenario": "camp, walking",
+   "prepared": null,
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 91,
+    "stepsPerFrame": 2.89010989010989,
+    "frameMs": {
+     "mean": 21.278021977907354,
+     "p95": 36.80000000074506,
+     "max": 58.19999999925494
+    },
+    "phases": {
+     "physics.sync": {
+      "msPerFrame": 7.439560439519503,
+      "callsPerFrame": 1,
+      "maxMs": 28.299999998882413
+     },
+     "simulate": {
+      "msPerFrame": 6.113186813092658,
+      "callsPerFrame": 1,
+      "maxMs": 33.90000000037253
+     },
+     "step.physics": {
+      "msPerFrame": 3.7967032968670456,
+      "callsPerFrame": 2.89010989010989,
+      "maxMs": 23.899999998509884
+     },
+     "view.draw": {
+      "msPerFrame": 3.784615384680884,
+      "callsPerFrame": 1,
+      "maxMs": 30.40000000037253
+     },
+     "view.models": {
+      "msPerFrame": 3.095604395657614,
+      "callsPerFrame": 1,
+      "maxMs": 21.5
+     },
+     "step.move": {
+      "msPerFrame": 1.3824175824053013,
+      "callsPerFrame": 2.89010989010989,
+      "maxMs": 29.09999999962747
+     },
+     "step.world": {
+      "msPerFrame": 0.868131867865776,
+      "callsPerFrame": 2.89010989010989,
+      "maxMs": 8.199999999254942
+     },
+     "ui": {
+      "msPerFrame": 0.36263736259642537,
+      "callsPerFrame": 1,
+      "maxMs": 3.199999999254942
+     },
+     "view.effects": {
+      "msPerFrame": 0.3582417582786018,
+      "callsPerFrame": 1,
+      "maxMs": 5.099999999627471
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.0538461538707162,
+      "callsPerFrame": 1,
+      "maxMs": 1.199999999254942
+     },
+     "terrain.mesh": {
+      "msPerFrame": 0.04945054934820631,
+      "callsPerFrame": 1,
+      "maxMs": 0.19999999925494194
+     }
+    }
+   },
+   "methods": {
+    "physics.synchronize": {
+     "msPerFrame": 7.435164835119804,
+     "callsPerFrame": 1,
+     "maxMs": 28.299999998882413
+    },
+    "physics.step": {
+     "msPerFrame": 3.7956043957722385,
+     "callsPerFrame": 2.89010989010989,
+     "maxMs": 23.899999998509884
+    },
+    "view.draw": {
+     "msPerFrame": 3.784615384680884,
+     "callsPerFrame": 1,
+     "maxMs": 30.40000000037253
+    },
+    "view.syncModels": {
+     "msPerFrame": 2.6076923076390894,
+     "callsPerFrame": 1,
+     "maxMs": 21.300000000745058
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 1.2230769231669851,
+     "callsPerFrame": 2.89010989010989,
+     "maxMs": 29
+    },
+    "runtime.tick": {
+     "msPerFrame": 0.8659340656761613,
+     "callsPerFrame": 2.89010989010989,
+     "maxMs": 8.199999999254942
+    },
+    "creatures.tick": {
+     "msPerFrame": 0.36373626373217,
+     "callsPerFrame": 2.89010989010989,
+     "maxMs": 3
+    },
+    "environment.sync": {
+     "msPerFrame": 0.19450549443590118,
+     "callsPerFrame": 1,
+     "maxMs": 5
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.051648351681101455,
+     "callsPerFrame": 1,
+     "maxMs": 1.099999999627471
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 0.04835164825339894,
+     "callsPerFrame": 1,
+     "maxMs": 0.19999999925494194
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.006593406609781496,
+     "callsPerFrame": 6.78021978021978,
+     "maxMs": 0.10000000149011612
+    }
+   },
+   "interval": {
+    "mean": 67.21318681318681,
+    "p95": 100.10000000000036,
+    "max": 150
+   },
+   "world": {
+    "objects": 0,
+    "colliders": 1427,
+    "bodies": 158,
+    "terrainSections": 75,
+    "models": 105,
+    "terrainSectionBuilds": 0,
+    "activeSensorObjects": 0,
+    "liquidSections": 93,
+    "inventoryItems": 34
+   },
+   "cpuTop": [
+    {
+     "fn": "wasm-function[635] 00bc1dde:1",
+     "percent": 1.8
+    },
+    {
+     "fn": "wasm-to-js :1",
+     "percent": 1.5
+    },
+    {
+     "fn": "wasm-function[193] 00bc1dde:1",
+     "percent": 1.4
+    },
+    {
+     "fn": "compose three.module.js:6648",
+     "percent": 1.3
+    },
+    {
+     "fn": "syncModels scene.js:205",
+     "percent": 1.2
+    },
+    {
+     "fn": "wasm-function[356] 00bc1dde:1",
+     "percent": 0.8
+    },
+    {
+     "fn": "(garbage collector) :0",
+     "percent": 0.8
+    },
+    {
+     "fn": "(anonymous) rapier.js:1",
+     "percent": 0.6
+    },
+    {
+     "fn": "synchronize physics.js:360",
+     "percent": 0.6
+    },
+    {
+     "fn": "bindVertexArray :0",
+     "percent": 0.6
+    },
+    {
+     "fn": "__wbindgen_object_drop_ref rapier.js:1",
+     "percent": 0.6
+    },
+    {
+     "fn": "__destroy_into_raw rapier.js:1",
+     "percent": 0.6
+    }
+   ]
+  },
+  {
+   "map": "frontier",
+   "scenario": "guardian fight",
+   "prepared": "player 7 m from the guardian (damage to the player switched off so the scene keeps running)",
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 96,
+    "stepsPerFrame": 2.6666666666666665,
+    "frameMs": {
+     "mean": 12.868749999945672,
+     "p95": 33.09999999962747,
+     "max": 124.40000000037253
+    },
+    "phases": {
+     "view.draw": {
+      "msPerFrame": 6.76979166668995,
+      "callsPerFrame": 1,
+      "maxMs": 121.5
+     },
+     "simulate": {
+      "msPerFrame": 2.371874999953434,
+      "callsPerFrame": 1,
+      "maxMs": 25.59999999962747
+     },
+     "view.models": {
+      "msPerFrame": 1.5802083332867671,
+      "callsPerFrame": 1,
+      "maxMs": 7
+     },
+     "step.physics": {
+      "msPerFrame": 1.1072916668102455,
+      "callsPerFrame": 2.6666666666666665,
+      "maxMs": 19.800000000745058
+     },
+     "ui": {
+      "msPerFrame": 0.8479166666511446,
+      "callsPerFrame": 1,
+      "maxMs": 24.90000000037253
+     },
+     "step.world": {
+      "msPerFrame": 0.6864583332790062,
+      "callsPerFrame": 2.6666666666666665,
+      "maxMs": 19.799999998882413
+     },
+     "physics.sync": {
+      "msPerFrame": 0.5510416666705472,
+      "callsPerFrame": 1,
+      "maxMs": 4.800000000745058
+     },
+     "step.move": {
+      "msPerFrame": 0.4322916665696539,
+      "callsPerFrame": 2.6666666666666665,
+      "maxMs": 9.200000001117587
+     },
+     "view.effects": {
+      "msPerFrame": 0.42708333329452824,
+      "callsPerFrame": 1,
+      "maxMs": 8.300000000745058
+     },
+     "terrain.mesh": {
+      "msPerFrame": 0.26875000008537125,
+      "callsPerFrame": 1,
+      "maxMs": 19.90000000037253
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.031249999980597448,
+      "callsPerFrame": 1,
+      "maxMs": 0.2000000011175871
+     }
+    }
+   },
+   "methods": {
+    "view.draw": {
+     "msPerFrame": 6.768750000027164,
+     "callsPerFrame": 1,
+     "maxMs": 121.5
+    },
+    "view.syncModels": {
+     "msPerFrame": 1.160416666670547,
+     "callsPerFrame": 1,
+     "maxMs": 6.400000000372529
+    },
+    "physics.step": {
+     "msPerFrame": 1.104166666783082,
+     "callsPerFrame": 2.6666666666666665,
+     "maxMs": 19.800000000745058
+    },
+    "runtime.tick": {
+     "msPerFrame": 0.6812499999262703,
+     "callsPerFrame": 2.6666666666666665,
+     "maxMs": 19.799999998882413
+    },
+    "physics.synchronize": {
+     "msPerFrame": 0.5489583333255723,
+     "callsPerFrame": 1,
+     "maxMs": 4.800000000745058
+    },
+    "creatures.tick": {
+     "msPerFrame": 0.45937499999611947,
+     "callsPerFrame": 2.6666666666666665,
+     "maxMs": 19.699999999254942
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 0.3437499998835847,
+     "callsPerFrame": 2.6666666666666665,
+     "maxMs": 9.100000001490116
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 0.26666666674039635,
+     "callsPerFrame": 1,
+     "maxMs": 19.90000000037253
+    },
+    "environment.sync": {
+     "msPerFrame": 0.1177083333216918,
+     "callsPerFrame": 1,
+     "maxMs": 4.099999999627471
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.02812499999223898,
+     "callsPerFrame": 1,
+     "maxMs": 0.2000000011175871
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.015625000019402552,
+     "callsPerFrame": 6.333333333333333,
+     "maxMs": 0.10000000149011612
+    }
+   },
+   "interval": {
+    "mean": 58.50624999999999,
+    "p95": 100.09999999999854,
+    "max": 166.79999999999927
+   },
+   "world": {
+    "objects": 0,
+    "colliders": 1018,
+    "bodies": 91,
+    "terrainSections": 75,
+    "models": 94,
+    "terrainSectionBuilds": 0,
+    "activeSensorObjects": 0,
+    "liquidSections": 103,
+    "inventoryItems": 34
+   },
+   "cpuTop": [
+    {
+     "fn": "getProgramInfoLog :0",
+     "percent": 1.9
+    },
+    {
+     "fn": "getShaderInfoLog :0",
+     "percent": 1.5
+    },
+    {
+     "fn": "compose three.module.js:6648",
+     "percent": 1.1
+    },
+    {
+     "fn": "setup three.module.js:15263",
+     "percent": 0.8
+    },
+    {
+     "fn": "syncModels scene.js:205",
+     "percent": 0.6
+    },
+    {
+     "fn": "projectObject three.module.js:30184",
+     "percent": 0.6
+    },
+    {
+     "fn": "hud game.js:511",
+     "percent": 0.5
+    },
+    {
+     "fn": "arraysEqual three.module.js:18344",
+     "percent": 0.5
+    },
+    {
+     "fn": "(garbage collector) :0",
+     "percent": 0.4
+    },
+    {
+     "fn": "getParameters three.module.js:20650",
+     "percent": 0.4
+    },
+    {
+     "fn": "syncTerrain scene.js:127",
+     "percent": 0.4
+    },
+    {
+     "fn": "setProgram three.module.js:30647",
+     "percent": 0.4
+    }
+   ]
+  },
+  {
+   "map": "machine",
+   "scenario": "first fill",
+   "prepared": null,
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 33,
+    "stepsPerFrame": 2.8484848484848486,
+    "frameMs": {
+     "mean": 39.209090908932865,
+     "p95": 60.69999999925494,
+     "max": 765.5
+    },
+    "phases": {
+     "view.draw": {
+      "msPerFrame": 25.896969697014853,
+      "callsPerFrame": 1,
+      "maxMs": 749
+     },
+     "terrain.mesh": {
+      "msPerFrame": 6.936363636431369,
+      "callsPerFrame": 1,
+      "maxMs": 31.300000000745058
+     },
+     "simulate": {
+      "msPerFrame": 4.015151515038627,
+      "callsPerFrame": 1,
+      "maxMs": 41
+     },
+     "step.physics": {
+      "msPerFrame": 2.8000000000677328,
+      "callsPerFrame": 2.8484848484848486,
+      "maxMs": 37
+     },
+     "terrain.stream": {
+      "msPerFrame": 1.233333333254312,
+      "callsPerFrame": 1,
+      "maxMs": 31.40000000037253
+     },
+     "ui": {
+      "msPerFrame": 0.6666666666102229,
+      "callsPerFrame": 1,
+      "maxMs": 7.300000000745058
+     },
+     "step.move": {
+      "msPerFrame": 0.5909090905704282,
+      "callsPerFrame": 2.8484848484848486,
+      "maxMs": 0.7999999988824129
+     },
+     "step.world": {
+      "msPerFrame": 0.5212121211330999,
+      "callsPerFrame": 2.8484848484848486,
+      "maxMs": 5.900000000372529
+     },
+     "view.effects": {
+      "msPerFrame": 0.2151515151402264,
+      "callsPerFrame": 1,
+      "maxMs": 0.5
+     },
+     "view.models": {
+      "msPerFrame": 0.11515151528698025,
+      "callsPerFrame": 1,
+      "maxMs": 0.40000000037252903
+     },
+     "physics.sync": {
+      "msPerFrame": 0.10606060583483089,
+      "callsPerFrame": 1,
+      "maxMs": 0.30000000074505806
+     }
+    }
+   },
+   "methods": {
+    "view.draw": {
+     "msPerFrame": 25.896969697014853,
+     "callsPerFrame": 1,
+     "maxMs": 749
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 6.921212121336297,
+     "callsPerFrame": 1,
+     "maxMs": 31.300000000745058
+    },
+    "physics.step": {
+     "msPerFrame": 2.7909090910106897,
+     "callsPerFrame": 2.8484848484848486,
+     "maxMs": 37
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 1.2272727271598396,
+     "callsPerFrame": 1,
+     "maxMs": 31.299999998882413
+    },
+    "runtime.tick": {
+     "msPerFrame": 0.5090909090005991,
+     "callsPerFrame": 2.8484848484848486,
+     "maxMs": 5.900000000372529
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 0.378787878449216,
+     "callsPerFrame": 2.8484848484848486,
+     "maxMs": 0.6000000014901161
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.16666666661022286,
+     "callsPerFrame": 6.696969696969697,
+     "maxMs": 0.2000000011175871
+    },
+    "physics.synchronize": {
+     "msPerFrame": 0.10606060583483089,
+     "callsPerFrame": 1,
+     "maxMs": 0.30000000074505806
+    },
+    "environment.sync": {
+     "msPerFrame": 0.1000000001919089,
+     "callsPerFrame": 1,
+     "maxMs": 0.40000000037252903
+    },
+    "view.syncModels": {
+     "msPerFrame": 0.05454545456803206,
+     "callsPerFrame": 1,
+     "maxMs": 0.30000000074505806
+    },
+    "creatures.tick": {
+     "msPerFrame": 0.021212121133099903,
+     "callsPerFrame": 2.8484848484848486,
+     "maxMs": 0.09999999962747097
+    }
+   },
+   "interval": {
+    "mean": 206.05151515151513,
+    "p95": 1000,
+    "max": 1166.6000000000004
+   },
+   "world": {
+    "objects": 0,
+    "colliders": 44,
+    "bodies": 31,
+    "terrainSections": 75,
+    "models": 1,
+    "terrainSectionBuilds": 0,
+    "activeSensorObjects": 0,
+    "liquidSections": 0,
+    "inventoryItems": 966
+   },
+   "cpuTop": [
+    {
+     "fn": "getProgramInfoLog :0",
+     "percent": 8.5
+    },
+    {
+     "fn": "chunkGeometry scene.js:31",
+     "percent": 3.3
+    },
+    {
+     "fn": "getShaderInfoLog :0",
+     "percent": 2.6
+    },
+    {
+     "fn": "loadAround atlas.js:487",
+     "percent": 0.5
+    },
+    {
+     "fn": "createBuffer :0",
+     "percent": 0.4
+    },
+    {
+     "fn": "zero machines.js:8",
+     "percent": 0.3
+    },
+    {
+     "fn": "WebGLRenderer.renderBufferDirect three.module.js:29609",
+     "percent": 0.2
+    },
+    {
+     "fn": "(garbage collector) :0",
+     "percent": 0.2
+    },
+    {
+     "fn": "syncTerrain scene.js:127",
+     "percent": 0.2
+    },
+    {
+     "fn": "BufferGeometry three.module.js:10608",
+     "percent": 0.1
+    },
+    {
+     "fn": "LinearToSRGB three.module.js:1751",
+     "percent": 0.1
+    },
+    {
+     "fn": "setValue three.module.js:19350",
+     "percent": 0.1
+    }
+   ],
+   "fill": {
+    "generatedMs": 8210,
+    "meshedMs": 8312,
+    "chunks": 96,
+    "generator": "worker"
+   }
+  },
+  {
+   "map": "machine",
+   "scenario": "field",
+   "prepared": null,
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 139,
+    "stepsPerFrame": 2.064748201438849,
+    "frameMs": {
+     "mean": 3.297841726581184,
+     "p95": 6.800000000745058,
+     "max": 25.700000001117587
+    },
+    "phases": {
+     "view.draw": {
+      "msPerFrame": 1.5575539567541303,
+      "callsPerFrame": 1,
+      "maxMs": 24.5
+     },
+     "simulate": {
+      "msPerFrame": 1.270503597159823,
+      "callsPerFrame": 1,
+      "maxMs": 20.40000000037253
+     },
+     "step.physics": {
+      "msPerFrame": 0.6546762590732077,
+      "callsPerFrame": 2.064748201438849,
+      "maxMs": 19.200000001117587
+     },
+     "step.move": {
+      "msPerFrame": 0.37194244611820726,
+      "callsPerFrame": 2.064748201438849,
+      "maxMs": 4.599999999627471
+     },
+     "step.world": {
+      "msPerFrame": 0.19424460422274448,
+      "callsPerFrame": 2.064748201438849,
+      "maxMs": 0.5
+     },
+     "view.effects": {
+      "msPerFrame": 0.13812949637071692,
+      "callsPerFrame": 1,
+      "maxMs": 0.8000000007450581
+     },
+     "physics.sync": {
+      "msPerFrame": 0.08848920867865463,
+      "callsPerFrame": 1,
+      "maxMs": 4.5
+     },
+     "ui": {
+      "msPerFrame": 0.08273381298984127,
+      "callsPerFrame": 1,
+      "maxMs": 1.1000000014901161
+     },
+     "view.models": {
+      "msPerFrame": 0.0683453237410072,
+      "callsPerFrame": 1,
+      "maxMs": 1.300000000745058
+     },
+     "terrain.mesh": {
+      "msPerFrame": 0.0453237410259547,
+      "callsPerFrame": 1,
+      "maxMs": 0.2000000011175871
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.032374100652422834,
+      "callsPerFrame": 1,
+      "maxMs": 0.2000000011175871
+     }
+    }
+   },
+   "methods": {
+    "view.draw": {
+     "msPerFrame": 1.5525179855498692,
+     "callsPerFrame": 1,
+     "maxMs": 24.5
+    },
+    "physics.step": {
+     "msPerFrame": 0.6539568346154561,
+     "callsPerFrame": 2.064748201438849,
+     "maxMs": 19.200000001117587
+    },
+    "physics.movePlayer": {
+     "msPerFrame": 0.2597122302801489,
+     "callsPerFrame": 2.064748201438849,
+     "maxMs": 4.5
+    },
+    "runtime.tick": {
+     "msPerFrame": 0.19208633084948973,
+     "callsPerFrame": 2.064748201438849,
+     "maxMs": 0.5
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.058992805817037176,
+     "callsPerFrame": 5.129496402877698,
+     "maxMs": 2.400000000372529
+    },
+    "physics.synchronize": {
+     "msPerFrame": 0.05539568348807825,
+     "callsPerFrame": 1,
+     "maxMs": 0.2000000011175871
+    },
+    "environment.sync": {
+     "msPerFrame": 0.05179856115911933,
+     "callsPerFrame": 1,
+     "maxMs": 0.2999999988824129
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 0.04460431656820311,
+     "callsPerFrame": 1,
+     "maxMs": 0.2000000011175871
+    },
+    "view.syncModels": {
+     "msPerFrame": 0.032374100759625435,
+     "callsPerFrame": 1,
+     "maxMs": 1.300000000745058
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.028057553905913298,
+     "callsPerFrame": 1,
+     "maxMs": 0.2000000011175871
+    },
+    "creatures.tick": {
+     "msPerFrame": 0.012949640266329264,
+     "callsPerFrame": 2.064748201438849,
+     "maxMs": 0.10000000149011612
+    }
+   },
+   "interval": {
+    "mean": 36.32877697841726,
+    "p95": 66.70000000000073,
+    "max": 133.29999999999927
+   },
+   "world": {
+    "objects": 0,
+    "colliders": 44,
+    "bodies": 31,
+    "terrainSections": 75,
+    "models": 1,
+    "terrainSectionBuilds": 0,
+    "activeSensorObjects": 0,
+    "liquidSections": 0,
+    "inventoryItems": 966
+   },
+   "cpuTop": [
+    {
+     "fn": "frame game.js:588",
+     "percent": 0.9
+    },
+    {
+     "fn": "setup three.module.js:15263",
+     "percent": 0.9
+    },
+    {
+     "fn": "(garbage collector) :0",
+     "percent": 0.8
+    },
+    {
+     "fn": "WebGLRenderer.renderBufferDirect three.module.js:29609",
+     "percent": 0.7
+    },
+    {
+     "fn": "needsUpdate three.module.js:15387",
+     "percent": 0.5
+    },
+    {
+     "fn": "wasm-to-js :1",
+     "percent": 0.4
+    },
+    {
+     "fn": "bindVertexArray :0",
+     "percent": 0.4
+    },
+    {
+     "fn": "target.<computed> :4",
+     "percent": 0.3
+    },
+    {
+     "fn": "multiplyMatrices three.module.js:6301",
+     "percent": 0.2
+    },
+    {
+     "fn": "setProgram three.module.js:30647",
+     "percent": 0.2
+    },
+    {
+     "fn": "requestAnimationFrame :0",
+     "percent": 0.1
+    },
+    {
+     "fn": "step physics.js:440",
+     "percent": 0.1
+    }
+   ]
+  },
+  {
+   "map": "machine",
+   "scenario": "driving the example",
+   "prepared": "player put in the light example's seat (drivingMachineId), then W held",
+   "servedVersion": "0.19.0 / 1900",
+   "perf": {
+    "frames": 175,
+    "stepsPerFrame": 1.96,
+    "frameMs": {
+     "mean": 2.815428571392383,
+     "p95": 6.699999999254942,
+     "max": 21.699999999254942
+    },
+    "phases": {
+     "simulate": {
+      "msPerFrame": 0.9931428571151836,
+      "callsPerFrame": 1,
+      "maxMs": 8.099999999627471
+     },
+     "view.draw": {
+      "msPerFrame": 0.8708571428166968,
+      "callsPerFrame": 1,
+      "maxMs": 5.299999998882413
+     },
+     "step.physics": {
+      "msPerFrame": 0.7440000000489609,
+      "callsPerFrame": 1.96,
+      "maxMs": 7.300000000745058
+     },
+     "terrain.mesh": {
+      "msPerFrame": 0.2965714284671204,
+      "callsPerFrame": 1,
+      "maxMs": 20.299999998882413
+     },
+     "physics.sync": {
+      "msPerFrame": 0.2302857144283397,
+      "callsPerFrame": 1,
+      "maxMs": 4.299999998882413
+     },
+     "view.effects": {
+      "msPerFrame": 0.1851428571343422,
+      "callsPerFrame": 1,
+      "maxMs": 4.199999999254942
+     },
+     "step.world": {
+      "msPerFrame": 0.18228571420269354,
+      "callsPerFrame": 1.96,
+      "maxMs": 1.099999999627471
+     },
+     "ui": {
+      "msPerFrame": 0.09657142857355731,
+      "callsPerFrame": 1,
+      "maxMs": 3.200000001117587
+     },
+     "terrain.stream": {
+      "msPerFrame": 0.07999999998935631,
+      "callsPerFrame": 1,
+      "maxMs": 4.199999999254942
+     },
+     "view.models": {
+      "msPerFrame": 0.05142857146050249,
+      "callsPerFrame": 1,
+      "maxMs": 0.2000000011175871
+     }
+    }
+   },
+   "methods": {
+    "view.draw": {
+     "msPerFrame": 0.8697142856780972,
+     "callsPerFrame": 1,
+     "maxMs": 5.299999998882413
+    },
+    "physics.step": {
+     "msPerFrame": 0.7428571429103613,
+     "callsPerFrame": 1.96,
+     "maxMs": 7.300000000745058
+    },
+    "view.syncTerrain": {
+     "msPerFrame": 0.2948571427592209,
+     "callsPerFrame": 1,
+     "maxMs": 20.299999998882413
+    },
+    "physics.synchronize": {
+     "msPerFrame": 0.22971428585903986,
+     "callsPerFrame": 1,
+     "maxMs": 4.299999998882413
+    },
+    "runtime.tick": {
+     "msPerFrame": 0.17885714277625084,
+     "callsPerFrame": 1.96,
+     "maxMs": 1.099999999627471
+    },
+    "environment.sync": {
+     "msPerFrame": 0.08800000000212874,
+     "callsPerFrame": 1,
+     "maxMs": 4.199999999254942
+    },
+    "atlas.loadAround": {
+     "msPerFrame": 0.07828571428145681,
+     "callsPerFrame": 1,
+     "maxMs": 4.199999999254942
+    },
+    "physics.terrainAt": {
+     "msPerFrame": 0.0742857142750706,
+     "callsPerFrame": 2.96,
+     "maxMs": 6.400000000372529
+    },
+    "view.syncModels": {
+     "msPerFrame": 0.025142857123698507,
+     "callsPerFrame": 1,
+     "maxMs": 0.19999999925494194
+    },
+    "creatures.tick": {
+     "msPerFrame": 0.018285714270813123,
+     "callsPerFrame": 1.96,
+     "maxMs": 1
+    },
+    "physics.terrainSectionBoxes": {
+     "msPerFrame": 0.005714285703642028,
+     "callsPerFrame": 0.42857142857142855,
+     "maxMs": 0.10000000149011612
+    }
+   },
+   "interval": {
+    "mean": 35.046285714285716,
+    "p95": 66.70000000000073,
+    "max": 100
+   },
+   "world": {
+    "objects": 0,
+    "colliders": 47,
+    "bodies": 30,
+    "terrainSections": 75,
+    "models": 1,
+    "terrainSectionBuilds": 75,
+    "activeSensorObjects": 0,
+    "liquidSections": 0,
+    "inventoryItems": 966
+   },
+   "cpuTop": [
+    {
+     "fn": "frame game.js:588",
+     "percent": 0.4
+    },
+    {
+     "fn": "BufferGeometry three.module.js:10608",
+     "percent": 0.3
+    },
+    {
+     "fn": "chunkGeometry scene.js:31",
+     "percent": 0.3
+    },
+    {
+     "fn": "bindVertexArray :0",
+     "percent": 0.3
+    },
+    {
+     "fn": "drawArrays :0",
+     "percent": 0.3
+    },
+    {
+     "fn": "needsUpdate three.module.js:15387",
+     "percent": 0.2
+    },
+    {
+     "fn": "_scanNatural environment-view.js:57",
+     "percent": 0.2
+    },
+    {
+     "fn": "target.<computed> :4",
+     "percent": 0.2
+    },
+    {
+     "fn": "wasm-function[2664] 00bc1dde:1",
+     "percent": 0.2
+    },
+    {
+     "fn": "sync feedback-view.js:94",
+     "percent": 0.2
+    },
+    {
+     "fn": "synchronize physics.js:360",
+     "percent": 0.1
+    },
+    {
+     "fn": "loadAround atlas.js:487",
+     "percent": 0.1
+    }
+   ]
+  }
+ ],
+ "errors": []
+}
