@@ -1,0 +1,357 @@
+{
+  "passed": true,
+  "renderer": "X11",
+  "scope": "Normal C++ scene boot, real GUI/Input events and Jolt; migration bridge simulated, Android exporter checked separately; not a physical phone",
+  "steps": [
+    {
+      "actionActive": false,
+      "actionSequence": 0.0,
+      "attackCount": 0.0,
+      "attackHeld": false,
+      "driving": "",
+      "hitCount": 0.0,
+      "jumpQueued": false,
+      "move": [
+        0.0,
+        0.0
+      ],
+      "panel": "launcher",
+      "paused": false,
+      "pitch": 0.0,
+      "playing": false,
+      "pointerCount": 0.0,
+      "pointerOwners": [],
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "stance": "stand",
+      "step": "migration-ready",
+      "tickClock": 0.0,
+      "touchMove": [
+        0.0,
+        0.0
+      ],
+      "worldId": "",
+      "yaw": 0.0
+    },
+    {
+      "actionActive": false,
+      "actionSequence": 0.0,
+      "attackCount": 0.0,
+      "attackHeld": false,
+      "driving": "",
+      "hitCount": 0.0,
+      "jumpQueued": false,
+      "move": [
+        0.0,
+        0.0
+      ],
+      "panel": "create",
+      "paused": false,
+      "pitch": 0.0,
+      "playing": false,
+      "pointerCount": 0.0,
+      "pointerOwners": [],
+      "position": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "stance": "stand",
+      "step": "create",
+      "tickClock": 0.0,
+      "touchMove": [
+        0.0,
+        0.0
+      ],
+      "worldId": "",
+      "yaw": 0.0
+    },
+    {
+      "actionActive": false,
+      "actionSequence": 0.0,
+      "attackCount": 0.0,
+      "attackHeld": false,
+      "driving": "",
+      "hitCount": 0.0,
+      "jumpQueued": false,
+      "move": [
+        0.0,
+        0.0
+      ],
+      "panel": "",
+      "paused": false,
+      "pitch": 0.0,
+      "playing": true,
+      "pointerCount": 0.0,
+      "pointerOwners": [],
+      "position": [
+        0.0,
+        3.99882793426514,
+        0.0
+      ],
+      "stance": "stand",
+      "step": "playing",
+      "tickClock": 1.8,
+      "touchMove": [
+        0.0,
+        0.0
+      ],
+      "worldId": "world-1794160278162",
+      "yaw": 0.0
+    },
+    {
+      "actionActive": false,
+      "actionSequence": 1.0,
+      "attackCount": 1.0,
+      "attackHeld": true,
+      "driving": "",
+      "hitCount": 0.0,
+      "jumpQueued": false,
+      "move": [
+        0.0,
+        -1.0
+      ],
+      "panel": "",
+      "paused": false,
+      "pitch": -0.0800000457763672,
+      "playing": true,
+      "pointerCount": 3.0,
+      "pointerOwners": [
+        {
+          "control": "",
+          "id": 0.0,
+          "owner": "move"
+        },
+        {
+          "control": "",
+          "id": 1.0,
+          "owner": "look"
+        },
+        {
+          "control": "attack",
+          "id": 2.0,
+          "owner": "button"
+        }
+      ],
+      "position": [
+        1.19801497459412,
+        4.00020599365234,
+        -7.41551733016968
+      ],
+      "stance": "stand",
+      "step": "three-finger-play",
+      "tickClock": 3.69999999999999,
+      "touchMove": [
+        0.0,
+        -1.0
+      ],
+      "worldId": "world-1794160278162",
+      "yaw": -0.239999893188477
+    },
+    {
+      "actionActive": false,
+      "actionSequence": 7.0,
+      "attackCount": 2.0,
+      "attackHeld": false,
+      "driving": "",
+      "hitCount": 24.0,
+      "jumpQueued": false,
+      "move": [
+        0.0,
+        0.0
+      ],
+      "panel": "",
+      "paused": false,
+      "pitch": -1.48000004577637,
+      "playing": true,
+      "pointerCount": 0.0,
+      "pointerOwners": [],
+      "position": [
+        1.29784965515137,
+        2.72555661201477,
+        -7.82347917556763
+      ],
+      "stance": "stand",
+      "step": "physical-hit",
+      "tickClock": 5.54999999999999,
+      "touchMove": [
+        0.0,
+        0.0
+      ],
+      "worldId": "world-1794160278162",
+      "yaw": -0.239999893188477
+    },
+    {
+      "actionActive": false,
+      "actionSequence": 7.0,
+      "attackCount": 2.0,
+      "attackHeld": false,
+      "driving": "",
+      "hitCount": 24.0,
+      "jumpQueued": false,
+      "move": [
+        0.0,
+        0.0
+      ],
+      "panel": "",
+      "paused": false,
+      "pitch": -1.48000004577637,
+      "playing": true,
+      "pointerCount": 0.0,
+      "pointerOwners": [],
+      "position": [
+        1.29784965515137,
+        3.89596223831177,
+        -7.82347917556763
+      ],
+      "stance": "stand",
+      "step": "jumped",
+      "tickClock": 7.59999999999998,
+      "touchMove": [
+        0.0,
+        0.0
+      ],
+      "worldId": "world-1794160278162",
+      "yaw": -0.239999893188477
+    },
+    {
+      "actionActive": false,
+      "actionSequence": 8.0,
+      "attackCount": 3.0,
+      "attackHeld": false,
+      "driving": "",
+      "hitCount": 28.0,
+      "jumpQueued": false,
+      "move": [
+        0.0,
+        0.0
+      ],
+      "panel": "",
+      "paused": false,
+      "pitch": -1.48000004577637,
+      "playing": true,
+      "pointerCount": 0.0,
+      "pointerOwners": [],
+      "position": [
+        1.71866035461426,
+        2.50098490715027,
+        -8.21774482727051
+      ],
+      "stance": "stand",
+      "step": "input-released",
+      "tickClock": 11.0000000000001,
+      "touchMove": [
+        0.0,
+        0.0
+      ],
+      "worldId": "world-1794160278162",
+      "yaw": -0.239999893188477
+    },
+    {
+      "actionActive": false,
+      "actionSequence": 0.0,
+      "attackCount": 3.0,
+      "attackHeld": false,
+      "driving": "",
+      "hitCount": 28.0,
+      "jumpQueued": false,
+      "move": [
+        0.0,
+        0.0
+      ],
+      "panel": "launcher",
+      "paused": false,
+      "pitch": -1.48000004577637,
+      "playing": false,
+      "pointerCount": 0.0,
+      "pointerOwners": [],
+      "position": [
+        1.71866035461426,
+        2.50098490715027,
+        -8.21774482727051
+      ],
+      "stance": "stand",
+      "step": "saved-launcher",
+      "tickClock": 11.1000000000001,
+      "touchMove": [
+        0.0,
+        0.0
+      ],
+      "worldId": "world-1794160278162",
+      "yaw": -0.239999893188477
+    },
+    {
+      "actionActive": false,
+      "actionSequence": 0.0,
+      "attackCount": 3.0,
+      "attackHeld": false,
+      "driving": "",
+      "hitCount": 28.0,
+      "jumpQueued": false,
+      "move": [
+        0.0,
+        0.0
+      ],
+      "panel": "",
+      "paused": false,
+      "pitch": -1.48000004577637,
+      "playing": true,
+      "pointerCount": 0.0,
+      "pointerOwners": [],
+      "position": [
+        1.71866035461426,
+        2.50098490715027,
+        -8.21774482727051
+      ],
+      "stance": "stand",
+      "step": "continued",
+      "tickClock": 0.5,
+      "touchMove": [
+        0.0,
+        0.0
+      ],
+      "worldId": "world-1794160278162",
+      "yaw": -0.239999893188477
+    },
+    {
+      "actionActive": false,
+      "actionSequence": 0.0,
+      "attackCount": 3.0,
+      "attackHeld": false,
+      "driving": "",
+      "hitCount": 28.0,
+      "jumpQueued": false,
+      "move": [
+        0.0,
+        0.0
+      ],
+      "panel": "launcher",
+      "paused": false,
+      "pitch": -1.48000004577637,
+      "playing": false,
+      "pointerCount": 0.0,
+      "pointerOwners": [],
+      "position": [
+        1.71866035461426,
+        2.50098490715027,
+        -8.21774482727051
+      ],
+      "stance": "stand",
+      "step": "saved-launcher",
+      "tickClock": 0.6,
+      "touchMove": [
+        0.0,
+        0.0
+      ],
+      "worldId": "world-1794160278162",
+      "yaw": -0.239999893188477
+    }
+  ],
+  "windowSize": [
+    844,
+    390
+  ]
+}

@@ -36,6 +36,10 @@ C++ 코드 변경에는 새 APK가 필요하다. `.feral`의 `runtime: godot-cpp
 
 ## 릴리스 기록
 
+### 0.19.1 — 런처와 터치 입력
+
+게임 1901 / 앱 0.4.1·401 / 최소 앱 401 / 저장 스키마 5. Android 저장 확인 스크립트 실행 오류와 런처 오류 표시, 동시 터치 입력을 고친다. `Feral-0.4.1-android.apk`를 기존 앱 위에 설치한다. 공개 게시 상태와 실행 검사는 [0.19.1 검증](../verification/0.19.1.md)에 기록한다.
+
 ### 0.19.0 — C++ 네이티브 실행과 두 행동 트랙
 
 2026-11-08 09:52 UTC [v0.19.0 Release](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.19.0) 게시. [PR #54](https://github.com/Modopi/feral-voxel-sandbox/pull/54)의 전체 전환과 [PR #55](https://github.com/Modopi/feral-voxel-sandbox/pull/55)의 새 환경 다운로드 보완을 반영한 커밋 `2d711bc`의 [배포 Actions](https://github.com/Modopi/feral-voxel-sandbox/actions/runs/42467427202)가 성공했다.

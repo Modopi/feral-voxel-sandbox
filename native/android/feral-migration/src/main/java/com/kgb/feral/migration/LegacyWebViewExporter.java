@@ -64,7 +64,7 @@ final class LegacyWebViewExporter {
         + "  request.onerror=()=>reject(request.error||new Error('vault_read_failed'));\n"
         + "  request.onsuccess=()=>{const cursor=request.result;if(!cursor)return;try{if(!first)write(',');first=false;write(q(cursor.value));cursor.continue();}catch(e){reject(e);}};\n"
         + "  tx.oncomplete=resolve;tx.onerror=tx.onabort=()=>reject(tx.error||new Error('vault_read_failed'));\n"
-        + " });db.close();write(']}}');}\n"
+        + " });db.close();write(']}}');}}\n"
         + " if(pending.length)sink.append(chunk++,pending);sink.complete(chunk);\n"
         + "}\n"
         + "run().catch(fail);\n"

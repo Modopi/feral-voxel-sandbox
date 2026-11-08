@@ -128,8 +128,7 @@ Json FeralGame::enter_machine(const std::string& id) {
 
     driving_ = id;
     gripped_.clear();
-    attack_down_ = false;
-    jump_ = false;
+    clear_input_state();
     actions_.cancel();
     // The seated player is a camera/interaction anchor. Excluding its layer keeps the Jolt body
     // from colliding with the very machine that carries it while preserving terrain/entity queries.
@@ -219,7 +218,7 @@ void FeralGame::exit_machine() {
     }
     if (body) yaw_ = yaw_from_quat(vehicle_camera_rotation(body_rotation));
     fall_speed_ = std::max(0.0, -inherited_velocity.y);
-    jump_ = false;
+    input_state_.jump_queued = false;
 }
 
 void FeralGame::sync_driving(double dt, Vector2 move) {
@@ -241,7 +240,7 @@ void FeralGame::sync_driving(double dt, Vector2 move) {
     }
 
     const auto input = Input::get_singleton();
-    const bool up = jump_ || input->is_physical_key_pressed(KEY_SPACE);
+    const bool up = input_state_.jump_queued || input->is_physical_key_pressed(KEY_SPACE);
     const bool down = input->is_physical_key_pressed(KEY_SHIFT) || input->is_physical_key_pressed(KEY_Q);
     const bool brake = input->is_physical_key_pressed(KEY_CTRL);
     const double throttle = std::clamp(-double(move.y), -1.0, 1.0);
@@ -257,7 +256,7 @@ void FeralGame::sync_driving(double dt, Vector2 move) {
         simulation_->command("machine.control", {{"id", driving_}, {"throttle", throttle}, {"steer", steer},
             {"pitch", pitch}, {"push", 0}, {"brake", brake}}, *world_, *gameplay_);
     }
-    jump_ = false;
+    input_state_.jump_queued = false;
     (void)dt;
 
     const Json cell = [&]() {

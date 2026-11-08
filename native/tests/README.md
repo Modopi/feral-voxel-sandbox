@@ -32,3 +32,11 @@ The storage migration integration check builds a real snapshot through the shipp
 g++ -std=c++17 -Inative/src -Inative/third_party native/src/storage.cpp native/src/world.cpp native/src/gameplay.cpp native/src/simulation.cpp native/tests/migration_integration_test.cpp -o /tmp/feral-migration-integration-test
 /tmp/feral-migration-integration-test
 ```
+
+## Launcher and touch integration
+
+`tools/native/test.sh` also runs `tools/native/checks/launcher-play.gd` against the normal C++ main scene, with no smoke-mode auto-start. It sends actual `InputEventScreenTouch`, `ScreenDrag`, and keyboard events through Godot, clicks the launcher/create/continue controls and starting-kit option, scrolls the form, runs pickaxe gameplay and saves, then starts a second Godot process against the same isolated test save. `interaction_state()` is a read-only observation endpoint; the driver never calls `start_world` or `ui_command`. Reports are copied to `verification/<version>-native-launcher-play*.json`.
+
+The test registers a migration bridge double to cover pending import, visible failure, retry, successful empty export, and the persisted completion marker. It separately extracts and executes the exact Java-embedded Android export script with `node --test native/tests/legacy_webview_exporter_test.mjs`. This tests integration contracts, not Android WebView lifecycle or physical-phone touch delivery. A graphical run can use the same driver without `--headless`, with `XDG_DATA_HOME` containing `launcher-check`; it additionally saves screenshots.
+
+The desktop driver enables Godot's touchscreen-availability hint (`Input.emulate_touch_from_mouse`) to exercise touch scrolling; gameplay events remain raw touch/drag events. `--phone` runs the same graphical scenario in an 844×390 window. This is a simulated touch display, not an Android device.
