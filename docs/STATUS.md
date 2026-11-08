@@ -1,10 +1,11 @@
 # FERAL 현황
 
-현재 공개 버전은 [**게임 0.19.0 / 앱 0.4.0**](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.19.0)이다. C++ 네이티브 실행·통합 검사·APK 빌드와 공개 Release/updates 게시 확인을 마쳤다. [구조](ARCHITECTURE.md)와 [0.19.0 검증](../verification/0.19.0.md)을 함께 본다. Android 실기기 검증은 별도다.
+현재 공개 버전은 [**게임 0.19.1 / 앱 0.4.1**](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.19.1)이다. Android 첫 저장 확인 스크립트와 실제 지형 타격의 오류를 수정하고, 정상 런처에서 생성·멀티터치 플레이·저장·재시작 이어가기를 확인했다. APK 빌드와 공개 Release/updates 게시 확인을 마쳤다. [구조](ARCHITECTURE.md)와 [0.19.1 검증](../verification/0.19.1.md)을 함께 본다. Android 실기기 검증은 별도다.
 
 | 새 네이티브 실행 | 확인한 범위 |
 | --- | --- |
 | C++ + Godot/Jolt | Linux/Android 실제 컴파일, Jolt 1,000단계 물리 검사. 최종 네 대상 빌드·세 나무 600단계 통합 검사 통과 |
+| 런처/입력 | 정상 GUI 입력으로 생성·곡괭이 타격·저장·재시작 통과. 동시 터치와 취소 처리. 달리기·차량 일부 터치 조작은 미완료 |
 | 행동 트랙 | 화면 유무와 무관한 판정, 시점/반경/궤적 편집, 점/쓸기 검사의 C++ 회귀 |
 | 진행·설비 | 제작/연구/에너지/무기·생존, 41개 설치물의 실제 동적 질량·형상, ASan/UBSan 검사 |
 | 저장 | 실제 JS 런타임의 네 프리셋 저장을 native 상태로 복원하고 원본 아카이브 보존 확인 |
