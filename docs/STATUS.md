@@ -1,6 +1,6 @@
 # FERAL 현황
 
-공개 버전은 현재 0.18.2 / 앱 0.3.3이다. **0.19.0 / 앱 0.4.0 네이티브 전환은 로컬 검사·APK 빌드 완료, 공개 게시 대기**이며 아직 공개 배포 완료로 표시하지 않는다. [구조](ARCHITECTURE.md)와 [0.19.0 검증](../verification/0.19.0.md)을 함께 본다.
+현재 공개 버전은 [**게임 0.19.0 / 앱 0.4.0**](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.19.0)이다. C++ 네이티브 실행·통합 검사·APK 빌드와 공개 Release/updates 게시 확인을 마쳤다. [구조](ARCHITECTURE.md)와 [0.19.0 검증](../verification/0.19.0.md)을 함께 본다. Android 실기기 검증은 별도다.
 
 | 새 네이티브 실행 | 확인한 범위 |
 | --- | --- |
@@ -13,18 +13,18 @@
 
 아래는 공개된 WebView 런타임의 이전 이력이다. 새 C++ 실행에서 미검증인 기능을 이 기록만으로 완료했다고 판단하지 않는다.
 
-## 공개 배포
+## 이전 공개 배포
 
 | 항목 | 값 |
 | --- | --- |
 | 공개 저장소 | [Modopi/feral-voxel-sandbox](https://github.com/Modopi/feral-voxel-sandbox) |
-| 최신 공개 게임 | [v0.18.2](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.18.2) · 2026-11-07 18:43 UTC · 병합 커밋 `4c1bb18` ([PR #51](https://github.com/Modopi/feral-voxel-sandbox/pull/51)) · 콘텐츠 탐험 낙하 파편 렉 수정 |
+| 이전 공개 게임 | [v0.18.2](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.18.2) · 2026-11-07 18:43 UTC · 병합 커밋 `4c1bb18` ([PR #51](https://github.com/Modopi/feral-voxel-sandbox/pull/51)) · 콘텐츠 탐험 낙하 파편 렉 수정 |
 | 앱이 읽는 경로 | `updates` 브랜치의 [버전 목록](https://raw.githubusercontent.com/Modopi/feral-voxel-sandbox/updates/catalog.json)과 [최신 패키지](https://raw.githubusercontent.com/Modopi/feral-voxel-sandbox/updates/stable.feral). 로그인·토큰 없음 |
 | 서명 | 공유 시험 키(정식 운영 키 아님) |
 
 앱 0.3.3 사용자는 **메뉴 → 업데이트 → 지금 확인 → 저장 후 적용**으로 받는다(0.15.0부터는 런처의 **업데이트**에도 있다). 0.14.1 이하에서 0.15.0으로 올 때 게임 버전 목록에서 고르면 빈 저장으로 시작하므로 지금 확인으로 받는다. 처음 설치하거나 앱 0.3.2 이하면 Release의 `Feral-0.3.3-android.apk`를 기존 앱 위에 설치한다. 절차와 복구 범위는 [배포](RELEASING.md).
 
-## 지금의 구조 (요약)
+## 이전 WebView 구조 (요약)
 
 0.15.0부터 앱을 켜면 게임 밖 **런처**가 나온다. 런처에서 월드를 고르거나(이어하기 포함) 새로 만들고, 월드마다 설정(생존·샌드박스·시작 건축물·시작 소지품·사망 시 소지품 남김 중 그 맵이 지원하는 것)을 만들거나 고치고, 전역 설정과 업데이트를 본다. 월드에 들어가면 게임 세션이 그 월드 설정대로 시작되고, 메뉴의 "저장 후 런처로"로 돌아온다. 게임 버전을 바꿔도 저장 보관함이 최신 월드와 저장을 되살린다(0.14.1 이하에서 0.15.0으로 올 때는 "지금 확인 → 저장 후 적용"으로 받아야 한다). 0.17.0부터 네 프리셋 모두 하나의 통합 런타임에서 실행한다. 남은 구조 문제는 [구조 문서](ARCHITECTURE.md#알려진-구조-문제-현재), 고치는 순서는 [로드맵](ROADMAP.md)에 있다.
 

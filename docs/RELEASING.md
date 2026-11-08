@@ -1,6 +1,6 @@
 # FERAL 배포
 
-공개 배포 저장소는 `Modopi/feral-voxel-sandbox`다. 0.19.0 작업 트리는 게임 1900 / 앱 0.4.0·400 / 최소 앱 400 / 저장 스키마 5다. 공개 게시 여부는 [검증 기록](../verification/0.19.0.md)을 확인한다. 기존 공개 0.18.2의 설치 정보는 아래 이력에 남긴다.
+공개 배포 저장소는 `Modopi/feral-voxel-sandbox`다. 0.19.0 공개본은 게임 1900 / 앱 0.4.0·400 / 최소 앱 400 / 저장 스키마 5다. 공개 게시 여부는 [검증 기록](../verification/0.19.0.md)을 확인한다. 기존 공개 0.18.2의 설치 정보는 아래 이력에 남긴다.
 
 ## 네이티브 앱 설치와 업데이트
 
@@ -35,6 +35,12 @@ C++ 코드 변경에는 새 APK가 필요하다. `.feral`의 `runtime: godot-cpp
 네이티브 저장은 체크섬을 가진 두 세대로 보호한다. 과거 WebView의 JS 코드 시작 실패 롤백과 Android APK 설치는 서로 다른 메커니즘이다. Android 앱 자동 다운그레이드나 네이티브 저장의 JS 역변환을 제공한다고 표현하지 않는다. 실기기 설치·터치·프로세스 종료 복귀·발열/FPS 검증 여부는 배포마다 구분해 기록한다.
 
 ## 릴리스 기록
+
+### 0.19.0 — C++ 네이티브 실행과 두 행동 트랙
+
+2026-11-08 09:52 UTC [v0.19.0 Release](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.19.0) 게시. [PR #54](https://github.com/Modopi/feral-voxel-sandbox/pull/54)의 전체 전환과 [PR #55](https://github.com/Modopi/feral-voxel-sandbox/pull/55)의 새 환경 다운로드 보완을 반영한 커밋 `2d711bc`의 [배포 Actions](https://github.com/Modopi/feral-voxel-sandbox/actions/runs/42467427202)가 성공했다.
+
+게임 1900 / 앱·최소 앱 400 / 저장 스키마 5. [Feral-0.4.0-android.apk](https://github.com/Modopi/feral-voxel-sandbox/releases/download/v0.19.0/Feral-0.4.0-android.apk)를 기존 앱 위에 설치한다. 공개 APK는 87,013,485바이트, SHA256 `22e7abfd8edfed25bb0ce7d29cfc97b108c96e14d6ffd3e8a5552452e2a7489a`이며 이전 공유 시험 키의 인증서와 일치한다. 공개 `.feral`·stable·버전별 패키지는 바이트 단위로 같고 메타데이터 서명·APK 해시·카탈로그를 확인했다. 실기기 설치·FPS·발열은 아직 확인하지 않았다. 상세 결과는 [검증 기록](../verification/0.19.0.md)에 있다.
 
 ### 0.18.2 — 콘텐츠 탐험의 낙하 파편 렉 수정
 

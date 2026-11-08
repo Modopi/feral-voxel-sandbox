@@ -2,13 +2,13 @@
 
 Android에서 오프라인으로 탐험·채굴·제작·생태·전투를 하는 1인칭 복셀 샌드박스 RPG.
 
-현재 작업 버전은 **게임 0.19.0 / 앱 0.4.0**이다. 게임 계산은 C++17, 렌더·입력·화면은 Godot 4.6.3, 물리는 하나의 Jolt 공간에서 실행한다. 네 가지 월드는 같은 세션의 설정과 모듈로 구성한다. 실제 타격 궤적과 화면의 도구 애니메이션은 독립된 두 트랙이며 같은 60Hz 시간축을 사용한다.
+현재 공개 버전은 [**게임 0.19.0 / 앱 0.4.0**](https://github.com/Modopi/feral-voxel-sandbox/releases/tag/v0.19.0)이다. 게임 계산은 C++17, 렌더·입력·화면은 Godot 4.6.3, 물리는 하나의 Jolt 공간에서 실행한다. 네 가지 월드는 같은 세션의 설정과 모듈로 구성한다. 실제 타격 궤적과 화면의 도구 애니메이션은 독립된 두 트랙이며 같은 60Hz 시간축을 사용한다.
 
 [검증 기록](verification/0.19.0.md) · [현황](docs/STATUS.md) · [구조](docs/ARCHITECTURE.md) · [로드맵](docs/ROADMAP.md) · [공개 배포](https://github.com/Modopi/feral-voxel-sandbox/releases) · [문서 안내](docs/README.md)
 
 ## 설치와 업데이트
 
-Android 8.0 이상 arm64 기기용 `Feral-0.4.0-android.apk`를 **기존 앱 위에 업데이트 설치**한다. 같은 패키지와 서명을 유지하며, 기존 WebView 월드와 저장 보관함은 원본을 남기고 변환한다. 앱 삭제나 데이터 초기화는 필요하지 않다. Android 실기기 검증 범위는 검증 기록에 별도로 표시한다.
+Android 8.0 이상 arm64 기기용 [Feral-0.4.0-android.apk](https://github.com/Modopi/feral-voxel-sandbox/releases/download/v0.19.0/Feral-0.4.0-android.apk)를 **기존 앱 위에 업데이트 설치**한다. 같은 패키지와 서명을 유지하며, 기존 WebView 월드와 저장 보관함은 원본을 남기고 변환한다. 앱 삭제나 데이터 초기화는 필요하지 않다. Android 실기기 검증 범위는 검증 기록에 별도로 표시한다.
 
 새 앱에서는 런처의 업데이트 화면에서 서명된 메타데이터를 확인하고 APK를 내려받는다. 코드 변경에는 새 APK가 필요하며, 이전 JS 게임의 버전 선택기로 C++ 코드를 교체하지 않는다. 저장·설치·복구 범위와 이전 버전 안내는 [배포 문서](docs/RELEASING.md)를 따른다.
 
