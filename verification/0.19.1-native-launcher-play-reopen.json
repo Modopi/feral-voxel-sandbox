@@ -1,0 +1,77 @@
+{
+  "passed": true,
+  "renderer": "headless",
+  "scope": "Normal C++ scene boot, real GUI/Input events and Jolt; migration bridge simulated, Android exporter checked separately; not a physical phone",
+  "steps": [
+    {
+      "actionActive": false,
+      "actionSequence": 0.0,
+      "attackCount": 0.0,
+      "attackHeld": false,
+      "driving": "",
+      "hitCount": 0.0,
+      "jumpQueued": false,
+      "move": [
+        0.0,
+        0.0
+      ],
+      "panel": "",
+      "paused": false,
+      "pitch": -1.47999987030029,
+      "playing": true,
+      "pointerCount": 0.0,
+      "pointerOwners": [],
+      "position": [
+        1.21899998188019,
+        2.88096618652344,
+        -5.7800121307373
+      ],
+      "stance": "stand",
+      "step": "cold-continued",
+      "tickClock": 0.616666666666667,
+      "touchMove": [
+        0.0,
+        0.0
+      ],
+      "worldId": "world-1794160845056",
+      "yaw": -0.239999969482422
+    },
+    {
+      "actionActive": false,
+      "actionSequence": 0.0,
+      "attackCount": 0.0,
+      "attackHeld": false,
+      "driving": "",
+      "hitCount": 0.0,
+      "jumpQueued": false,
+      "move": [
+        0.0,
+        0.0
+      ],
+      "panel": "launcher",
+      "paused": false,
+      "pitch": -1.47999987030029,
+      "playing": false,
+      "pointerCount": 0.0,
+      "pointerOwners": [],
+      "position": [
+        1.21899998188019,
+        2.88118314743042,
+        -5.78010034561157
+      ],
+      "stance": "stand",
+      "step": "saved-launcher",
+      "tickClock": 0.633333333333334,
+      "touchMove": [
+        0.0,
+        0.0
+      ],
+      "worldId": "world-1794160845056",
+      "yaw": -0.239999969482422
+    }
+  ],
+  "windowSize": [
+    1280,
+    720
+  ]
+}
