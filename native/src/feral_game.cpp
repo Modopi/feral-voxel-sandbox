@@ -34,6 +34,7 @@ FeralGame::FeralGame()=default;
 FeralGame::~FeralGame()=default;
 void FeralGame::_bind_methods(){
     ClassDB::bind_method(D_METHOD("ui_command","command","payload"),&FeralGame::ui_command);
+    ClassDB::bind_method(D_METHOD("interaction_state"),&FeralGame::interaction_state);
     ClassDB::bind_method(D_METHOD("form_target_changed","index"),&FeralGame::form_target_changed);
     ClassDB::bind_method(D_METHOD("preset_changed","index"),&FeralGame::preset_changed);
     ClassDB::bind_method(D_METHOD("profile_changed","value","path","id"),&FeralGame::profile_changed);
@@ -45,10 +46,16 @@ void FeralGame::_bind_methods(){
     ClassDB::bind_method(D_METHOD("installer_result","status","error"),&FeralGame::installer_result);
 }
 void FeralGame::_notification(int what){
-    if(what==NOTIFICATION_APPLICATION_PAUSED||what==NOTIFICATION_WM_CLOSE_REQUEST){
-        attack_down_=false;jump_=false;movement_={};move_touch_=look_touch_=-1;
+    if(what==NOTIFICATION_WM_WINDOW_FOCUS_OUT||what==NOTIFICATION_APPLICATION_FOCUS_OUT){
+        clear_input_state(true);
+        Input::get_singleton()->set_mouse_mode(Input::MOUSE_MODE_VISIBLE);
+    }else if(what==NOTIFICATION_WM_WINDOW_FOCUS_IN||what==NOTIFICATION_APPLICATION_FOCUS_IN){
+        if(playing_&&panel_.empty()&&!smoke_&&!OS::get_singleton()->has_feature("mobile"))
+            Input::get_singleton()->set_mouse_mode(Input::MOUSE_MODE_CAPTURED);
+    }else if(what==NOTIFICATION_APPLICATION_PAUSED||what==NOTIFICATION_WM_CLOSE_REQUEST){
+        clear_input_state(true);
         if(playing_)try{save_world();if(what==NOTIFICATION_APPLICATION_PAUSED)show_panel("pause");}catch(const std::exception& e){UtilityFunctions::push_error(gs(std::string("저장 실패: ")+e.what()));}
-    }else if(what==NOTIFICATION_APPLICATION_RESUMED){attack_down_=false;jump_=false;movement_={};move_touch_=look_touch_=-1;space_down_=crouch_key_down_=crawl_key_down_=false;
+    }else if(what==NOTIFICATION_APPLICATION_RESUMED){clear_input_state(true);
     }else if(what==NOTIFICATION_WM_GO_BACK_REQUEST){
         if(playing_){if(panel_.empty())show_panel("pause");else build_hud();}else get_tree()->quit();
     }
@@ -72,7 +79,7 @@ void FeralGame::load_global_settings(){
 void FeralGame::_ready(){
     try{
         if(OS::get_singleton()->get_cmdline_user_args().has("--feral-physics-check")){add_child(memnew(NativePhysicsHarness));return;}
-        set_process_mode(Node::PROCESS_MODE_ALWAYS);
+        set_process_mode(Node::PROCESS_MODE_ALWAYS);set_process_input(true);
         ui_check_=OS::get_singleton()->get_cmdline_user_args().has("--feral-ui-check");
         runtime_check_=OS::get_singleton()->get_cmdline_user_args().has("--feral-runtime-check");
         smoke_=runtime_check_||ui_check_||OS::get_singleton()->get_cmdline_user_args().has("--feral-smoke");
@@ -104,7 +111,7 @@ void FeralGame::_ready(){
 }
 void FeralGame::start_world(const std::string& id){
     if(legacy_import_pending_||storage_->legacy_import_status().value("exportFailed",false))throw std::runtime_error("기존 저장 가져오기가 끝나야 월드를 열 수 있습니다. 저장 가져오기에서 다시 시도하세요.");
-    auto row=storage_->find_world(id);if(!row)throw std::runtime_error("세계를 찾을 수 없습니다");if(row->value("legacyImportBlocked",false))throw std::runtime_error("기존 저장을 확인해야 합니다: "+row->value("legacyImportWarning",std::string{}));Json next_config=storage_->world_config(id);if(playing_)close_world();config_=std::move(next_config);world_id_=id;session_id_=id+":"+std::to_string(int64_t(Time::get_singleton()->get_unix_time_from_system()*1000000));next_action_time_=0;
+    auto row=storage_->find_world(id);if(!row)throw std::runtime_error("세계를 찾을 수 없습니다");if(row->value("legacyImportBlocked",false))throw std::runtime_error("기존 저장을 확인해야 합니다: "+row->value("legacyImportWarning",std::string{}));Json next_config=storage_->world_config(id);if(playing_)close_world();clear_input_state(true);config_=std::move(next_config);world_id_=id;session_id_=id+":"+std::to_string(int64_t(Time::get_singleton()->get_unix_time_from_system()*1000000));next_action_time_=0;
     world_=std::make_unique<World>(content_);gameplay_=std::make_unique<Gameplay>(content_);simulation_=std::make_unique<Simulation>(content_);
     world_->configure(config_);gameplay_->configure(config_);simulation_->configure(config_);world_tools_=std::make_unique<WorldTools>(content_,*world_,*gameplay_,*simulation_,[this](Vec3 p){return occupied_cell(p);});
     stance_="stand";stance_blocked_=false;space_down_=crouch_key_down_=crawl_key_down_=false;
@@ -136,7 +143,7 @@ void FeralGame::save_world(){
     storage_->save_world(world_id_,state);save_clock_=0;
 }
 void FeralGame::close_world(){
-    if(!playing_)return;exit_machine();save_world();playing_=false;paused_=false;actions_.reset();
+    if(!playing_)return;clear_input_state(true);exit_machine();save_world();playing_=false;paused_=false;actions_.reset();
     for(auto& [k,n]:terrain_)n.body->queue_free();terrain_.clear();mesh_queue_.clear();mesh_pending_.clear();loaded_sections_.clear();stream_revision_=UINT64_MAX;
     for(auto& [k,n]:dynamics_)n.body->queue_free();dynamics_.clear();fixture_geometry_=Json::array();fixture_geometry_revision_=UINT64_MAX;fixture_support_queue_.clear();next_support_scan_=0;for(auto& [k,n]:entities_)n.body->queue_free();entities_.clear();
     for(auto& mark:feedback_marks_)mark.mesh->queue_free();feedback_marks_.clear();world_tools_.reset();world_.reset();gameplay_.reset();simulation_.reset();gripped_.clear();driving_.clear();
@@ -151,10 +158,10 @@ void FeralGame::_physics_process(double dt){
     try{
         clock_+=dt;save_clock_+=dt;physics_feedback();resolve_impacts();sync_player(dt);stage("feedback_impacts_player");
         Vec3 position=fv(player_->get_global_position());
-        gameplay_->set_player_state({{"position",position},{"x",position.x},{"y",position.y},{"z",position.z},{"yaw",yaw_},{"moving",movement_.length()>0.1}});
+        gameplay_->set_player_state({{"position",position},{"x",position.x},{"y",position.y},{"z",position.z},{"yaw",yaw_},{"moving",input_state_.resolved_move.length()>0.1}});
         refresh_access();simulation_->set_player_state(gameplay_->player_state());
         stage("access");world_->tick(dt);stage("world");gameplay_->tick(dt);stage("gameplay");simulation_->tick(dt,position,*world_,*gameplay_);stage("simulation");consume_feedback();
-        if(attack_down_&&!actions_.active()&&clock_>=next_action_time_){
+        if(input_state_.attack_held()&&!actions_.active()&&clock_>=next_action_time_){
             auto held_attack=gameplay_->held_attack();
             std::string profile="pick";
             if(held_.find("knife")!=std::string::npos)profile="knife";else if(held_.find("axe")!=std::string::npos)profile="axe";
@@ -187,10 +194,10 @@ void FeralGame::_process(double dt){
     if(toast_remaining_>0){toast_remaining_-=dt;if(toast_remaining_<=0&&toast_)toast_->set_text("");}
 }
 void FeralGame::sync_player(double dt){
-    auto input=Input::get_singleton();Vector2 move=movement_;
+    auto input=Input::get_singleton();Vector2 move=input_state_.touch_move;
     if(panel_.empty()&&input->is_physical_key_pressed(KEY_W))move.y-=1;if(panel_.empty()&&input->is_physical_key_pressed(KEY_S))move.y+=1;
     if(panel_.empty()&&input->is_physical_key_pressed(KEY_A))move.x-=1;if(panel_.empty()&&input->is_physical_key_pressed(KEY_D))move.x+=1;
-    if(move.length()>1)move=move.normalized();
+    if(move.length()>1)move=move.normalized();input_state_.resolved_move=move;
     const bool c_down=input->is_physical_key_pressed(KEY_C),z_down=input->is_physical_key_pressed(KEY_Z);
     const bool space_down=input->is_physical_key_pressed(KEY_SPACE);
     const bool space_pressed=space_down&&!space_down_;
@@ -201,7 +208,7 @@ void FeralGame::sync_player(double dt){
     crouch_key_down_=c_down;crawl_key_down_=z_down;space_down_=space_down;
     if(!driving_.empty()){sync_driving(dt,move);camera_->set_rotation(Vector3(real_t(pitch_),0,0));return;}
     player_->set_rotation(Vector3(0,real_t(yaw_),0));
-    bool should_jump=jump_||space_pressed;
+    bool should_jump=input_state_.jump_queued||space_pressed;
     if(should_jump&&stance_!="stand"){request_stance("stand");should_jump=false;}
     Vector3 direction=player_->get_basis().xform(Vector3(move.x,0,move.y));
     Vector3 velocity=player_->get_velocity();double speed=stance_=="crawl"?1.15:stance_=="crouch"?2.4:(input->is_physical_key_pressed(KEY_SHIFT)?6.5:4.2);
@@ -209,7 +216,7 @@ void FeralGame::sync_player(double dt){
     if(!gripped_.empty()){auto it=dynamics_.find(gripped_);if(it!=dynamics_.end())speed*=std::max(.45,1.0/(1+it->second.body->get_mass()/(held_=="gripper"?12000:1600)));}
     velocity.x=direction.x*speed;velocity.z=direction.z*speed;
     if(player_->is_on_floor()){if(fall_speed_>8)gameplay_->record_event({{"type","player_damage"},{"amount",std::min(100.0,40*(fall_speed_*fall_speed_-64)/140)}});fall_speed_=0;velocity.y=0;if(panel_.empty()&&should_jump)velocity.y=7;}
-    else{velocity.y-=18*dt;fall_speed_=std::max(fall_speed_,double(-velocity.y));}jump_=false;
+    else{velocity.y-=18*dt;fall_speed_=std::max(fall_speed_,double(-velocity.y));}input_state_.jump_queued=false;
     player_->set_velocity(velocity);player_->move_and_slide();camera_->set_rotation(Vector3(real_t(pitch_),0,0));
 }
 void FeralGame::_unhandled_input(const Ref<InputEvent>& event){
@@ -222,20 +229,14 @@ void FeralGame::_unhandled_input(const Ref<InputEvent>& event){
     if(!panel_.empty())return;
     if(auto motion=Ref<InputEventMouseMotion>(event);motion.is_valid()&&Input::get_singleton()->get_mouse_mode()==Input::MOUSE_MODE_CAPTURED){yaw_-=motion->get_relative().x*settings_.value("sensitivity",.0025);pitch_=std::clamp(pitch_-motion->get_relative().y*settings_.value("sensitivity",.0025),-1.5,1.5);}
     if(auto button=Ref<InputEventMouseButton>(event);button.is_valid()){
-        if(button->get_button_index()==MOUSE_BUTTON_LEFT)attack_down_=button->is_pressed();
-        if(button->get_button_index()==MOUSE_BUTTON_RIGHT&&button->is_pressed())interact();
-    }
-    if(auto touch=Ref<InputEventScreenTouch>(event);touch.is_valid()){
-        if(!touch->is_pressed()){if(touch->get_index()==move_touch_){move_touch_=-1;movement_={};}if(touch->get_index()==look_touch_)look_touch_=-1;}
-        else if((settings_.value("leftHand",false)?touch->get_position().x>get_viewport()->get_visible_rect().size.x*.62:touch->get_position().x<get_viewport()->get_visible_rect().size.x*.38)){move_touch_=touch->get_index();touch_origin_=touch->get_position();}
-        else look_touch_=touch->get_index();
-    }
-    if(auto drag=Ref<InputEventScreenDrag>(event);drag.is_valid()){
-        if(drag->get_index()==move_touch_){movement_=(drag->get_position()-touch_origin_)/90;if(movement_.length()>1)movement_=movement_.normalized();}
-        else if(drag->get_index()==look_touch_){yaw_-=drag->get_relative().x*settings_.value("sensitivity",.0025)*1.6;pitch_=std::clamp(pitch_-drag->get_relative().y*settings_.value("sensitivity",.0025)*1.6,-1.5,1.5);}
+        if(button->get_device()!=InputEvent::DEVICE_ID_EMULATION){
+            if(button->get_button_index()==MOUSE_BUTTON_LEFT)input_state_.set_attack_source("mouse",button->is_pressed()&&!button->is_canceled());
+            if(button->get_button_index()==MOUSE_BUTTON_RIGHT&&button->is_pressed()&&!button->is_canceled())interact();
+        }
     }
 }
 void FeralGame::migration_finished(String path,String error){
+    if(path.is_empty()&&error.is_empty())error=gs("저장 가져오기 결과 파일이 없습니다. 다시 시도하세요.");
     if(!error.is_empty()){legacy_import_pending_=true;migration_error_=fs(error);storage_->record_legacy_export_failure(migration_error_);if(!playing_)show_launcher();notice("기존 저장 읽기 실패: "+migration_error_);return;}
     if(path.is_empty())return;
     try{auto report=storage_->import_legacy_export(read_json(fs(path)));bool blocked=!report.blocked_worlds.empty();
@@ -251,8 +252,8 @@ void FeralGame::migration_finished(String path,String error){
     catch(const std::exception&e){legacy_import_pending_=true;migration_error_=e.what();if(!playing_)show_launcher();notice(std::string("저장 가져오기 실패: ")+e.what());}
 }
 void FeralGame::smoke_step(){
-    ++smoke_frame_;if(smoke_frame_==2){attack_down_=true;visual_enabled_=false;}
-    if(smoke_frame_==65){attack_down_=false;save_world();show_panel("inventory");}
+    ++smoke_frame_;if(smoke_frame_==2){input_state_.set_attack_source("smoke",true);visual_enabled_=false;}
+    if(smoke_frame_==65){input_state_.set_attack_source("smoke",false);save_world();show_panel("inventory");}
     if(smoke_frame_==66){build_hud();}
     if(smoke_frame_==90){
         Json evidence={{"native",true},{"engine",fs(Engine::get_singleton()->get_version_info()["string"])},{"frames",smoke_frame_},{"sections",terrain_.size()},{"rebuiltSections",rebuilt_sections_},{"entities",entities_.size()},{"bodies",dynamics_.size()},{"hitEvents",hit_count_},{"visualsDisabled",!visual_enabled_},{"saved",storage_->load_world(world_id_).has_value()}};

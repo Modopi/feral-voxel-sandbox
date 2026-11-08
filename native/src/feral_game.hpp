@@ -7,6 +7,7 @@
 #include "native_geometry.hpp"
 #include "native_body.hpp"
 #include "action_timeline.hpp"
+#include "input_state.hpp"
 #include <memory>
 #include <deque>
 #include <godot_cpp/classes/node3d.hpp>
@@ -100,9 +101,10 @@ class FeralGame : public godot::Node3D {
     uint64_t access_last_update_msec_=0,access_placement_revision_=UINT64_MAX;
     bool access_initialized_=false;
     double grip_distance_=2.4,fall_speed_=0;
-    godot::Vector2 movement_,touch_origin_;
-    int move_touch_=-1,look_touch_=-1;
-    bool playing_=false,paused_=false,attack_down_=false,jump_=false,smoke_=false,visual_enabled_=true;
+    InputState input_state_;
+    std::vector<HudTouchBinding> hud_touch_bindings_;
+    bool collect_hud_touch_bindings_=false;
+    bool playing_=false,paused_=false,smoke_=false,visual_enabled_=true;
     bool stance_blocked_=false,space_down_=false,crouch_key_down_=false,crawl_key_down_=false;
     bool runtime_check_=false;
     int runtime_check_frame_=0;
@@ -139,6 +141,13 @@ class FeralGame : public godot::Node3D {
     void render_result(godot::Node* parent,const Json& data,int depth=0);
     void add_label(godot::Node* parent,const std::string& text,int size=20);
     void add_button(godot::Node* parent,const std::string& text,const std::string& command,Json args=Json::object());
+    void register_hud_touch_button(godot::BaseButton* button,const std::string& command,Json payload,bool held_action=false);
+    void clear_input_state(bool reset_key_edges=false);
+    void update_touch_movement();
+    void handle_screen_touch(const godot::Ref<godot::InputEvent>& event);
+    bool touch_button_at(const godot::Vector2& position,HudTouchBinding& binding) const;
+    bool button_contains(godot::BaseButton* button,const godot::Vector2& position) const;
+    godot::String interaction_state() const;
     void ui_command(godot::String command,godot::String payload);
     void form_target_changed(int64_t index);
     void preset_changed(int64_t index);
@@ -195,6 +204,7 @@ public:
     void _ready() override;
     void _process(double dt) override;
     void _physics_process(double dt) override;
+    void _input(const godot::Ref<godot::InputEvent>& event) override;
     void _unhandled_input(const godot::Ref<godot::InputEvent>& event) override;
 };
 }

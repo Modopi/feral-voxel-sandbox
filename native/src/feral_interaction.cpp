@@ -24,7 +24,8 @@ Cell local_wound_cell(Vec3 local){
 
 bool mining_rule(const Content& content,const std::string& block_id,MiningRule& out){
     const Json& block=content.find("blocks",block_id);if(block.empty())return false;
-    const std::string material=block.value("materialId",std::string{});
+    const Json material_value=block.value("materialId",Json());
+    const std::string material=material_value.is_string()?material_value.get<std::string>():std::string{};
     const bool ore=block_id.size()>=4&&block_id.compare(block_id.size()-4,4,"_ore")==0||block_id=="sulfur_deposit";
     if(ore)out.kind="ore";
     else if(material=="wood"||material=="mana_wood")out.kind="wood";
@@ -179,7 +180,7 @@ bool FeralGame::occupied_cell(Vec3 center){
     return !space->intersect_shape(query,1).is_empty();
 }
 void FeralGame::apply_contact(const ContactEvent& event){
-    ++hit_count_;const auto& hit=event.contact;Json result;
+    const auto& hit=event.contact;Json result;
     if(!active_weapon_.value("instanceId",Json()).is_null()){
         if(paid_attack_id_!=event.attack_id){paid_attack_id_=event.attack_id;paid_attack_=gameplay_->command("weapon.attack",{{"distanceM",(hit.point-actor_pose().origin).length()},{"claim","hit:"+std::to_string(Time::get_singleton()->get_ticks_usec())+":"+std::to_string(event.attack_id)}});}
         if(!paid_attack_.value("ok",false))return;
@@ -248,8 +249,8 @@ void FeralGame::apply_contact(const ContactEvent& event){
         if(hit.kind=="fixture")result=gameplay_->command("placement.damage",args);
         else result=simulation_->command(hit.kind=="machine"?"machine.damage":hit.kind=="boss"?"boss.damage":"creature.damage",args,*world_,*gameplay_);
     }
-    if(result.value("ok",false))play_impact();
-    else if(result.contains("reason"))notice(result["reason"].get<std::string>());
+    if(result.value("ok",false)){++hit_count_;play_impact();}
+    else if(result.contains("reason")&&result["reason"].is_string())notice(result["reason"].get<std::string>());
 }
 void FeralGame::interact(){
     if(!driving_.empty()){exit_machine();notice("조종을 마쳤습니다.");return;}

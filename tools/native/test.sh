@@ -46,6 +46,9 @@ run_godot_check() {
 echo '[native-test] importing Godot project resources'
 run_godot_check import --headless --editor --path "$NATIVE_DIR" --import --quit
 
+echo '[native-test] checking the exact Android WebView migration script'
+node --test native/tests/legacy_webview_exporter_test.mjs
+
 run_test() {
   local name="$1"
   local source="$2"
@@ -92,6 +95,15 @@ echo '[native-test] running native startup/world smoke check'
 run_godot_check smoke --headless --path "$NATIVE_DIR" -- --feral-smoke
 echo '[native-test] running native UI reachability check'
 run_godot_check ui --headless --path "$NATIVE_DIR" -- --feral-ui-check
+echo '[native-test] running real launcher -> touch gameplay -> save -> cold continue'
+LAUNCHER_DATA="$TEST_BUILD_DIR/xdg-data-launcher-check"
+LAUNCHER_CONFIG="$TEST_BUILD_DIR/xdg-config-launcher-check"
+rm -rf "$LAUNCHER_DATA" "$LAUNCHER_CONFIG"
+mkdir -p "$LAUNCHER_DATA" "$LAUNCHER_CONFIG"
+for mode in create reopen; do
+  timeout "${FERAL_GODOT_TEST_TIMEOUT:-300}" env XDG_DATA_HOME="$LAUNCHER_DATA" XDG_CONFIG_HOME="$LAUNCHER_CONFIG" \
+    "$GODOT_BIN" --headless --path "$NATIVE_DIR" --script "$REPO_ROOT/tools/native/checks/launcher-play.gd" -- "--$mode"
+done
 echo '[native-test] running full native runtime/Jolt check (600 ticks, three compound trees)'
 run_godot_check runtime --headless --path "$NATIVE_DIR" -- --feral-runtime-check
 RUNTIME_REPORT="$(find "$TEST_BUILD_DIR/xdg-data-runtime" -type f -name native-runtime-check.json -print -quit)"
@@ -103,4 +115,10 @@ GAME_VERSION="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))[
 mkdir -p "$REPO_ROOT/verification" "$REPO_ROOT/build/release"
 cp "$RUNTIME_REPORT" "$REPO_ROOT/verification/${GAME_VERSION}-native-runtime.json"
 cp "$RUNTIME_REPORT" "$REPO_ROOT/build/release/native-runtime-check.json"
+for report in launcher-play.json launcher-play-reopen.json; do
+  source="$(find "$LAUNCHER_DATA" -type f -name "$report" -print -quit)"
+  if [[ -z "$source" ]]; then echo "Missing launcher check report: $report" >&2; exit 1; fi
+  cp "$source" "$REPO_ROOT/verification/${GAME_VERSION}-native-$report"
+  cp "$source" "$REPO_ROOT/build/release/native-$report"
+done
 echo 'Native focused tests and Godot integration checks passed.'

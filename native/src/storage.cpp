@@ -771,6 +771,7 @@ ImportReport Storage::import_legacy_export(const Json& export_data) {
         blocked[id] = warning;
         report.warnings.push_back("world " + id + " is blocked: " + warning);
     };
+    bool found_legacy_world_save = false;
     for (Json row : rows) {
         std::string id;
         try { id = row["id"].get<std::string>(); validate_world_id(id); }
@@ -801,6 +802,7 @@ ImportReport Storage::import_legacy_export(const Json& export_data) {
                 report.warnings.push_back("ignored invalid legacy generation " + key + ": " + e.what());
             }
         }
+        if (!generations.empty() || found_invalid_generation) found_legacy_world_save = true;
         if (!generations.empty()) {
             const auto best = std::max_element(generations.begin(), generations.end(), [](const auto& a, const auto& b) {
                 return a.second.sequence < b.second.sequence;
@@ -828,6 +830,7 @@ ImportReport Storage::import_legacy_export(const Json& export_data) {
             if (found_invalid_generation) block_world(id, "invalid_save_envelope: " + invalid_generation_reason);
             continue;
         }
+        found_legacy_world_save = true;
         try {
             const std::string raw = direct_it->get<std::string>();
             const Json state = Json::parse(raw);
@@ -883,7 +886,12 @@ ImportReport Storage::import_legacy_export(const Json& export_data) {
         return changed;
     };
 
-    if (catalog_valid || !blocked.empty() || !rows.empty()) {
+    // Defaults above are only a lookup aid for old implicit save keys. Do not
+    // materialize them on a fresh install where the export contains no saved
+    // world data. If we did import or block a real legacy save, persist the
+    // fallback rows so that the imported world remains reachable.
+    const bool have_legacy_world_data = found_legacy_world_save || !blocked.empty() || !report.imported_worlds.empty();
+    if (catalog_valid || have_legacy_world_data) {
         Json current_catalog = load_catalog();
         if (current_catalog.is_null()) {
             Json to_save = catalog_valid ? catalog : Json::array();

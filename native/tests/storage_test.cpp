@@ -189,6 +189,34 @@ void missing_catalog_defaults_are_persisted() {
     std::filesystem::remove_all(root);
 }
 
+void empty_export_does_not_create_synthetic_catalogue() {
+    const auto root = temporary_root();
+    try {
+        Storage storage(root);
+        const Json empty_export = {
+            {"localStorage", Json::object()},
+            {"vault", {{"available", false}, {"rows", Json::array()}}}
+        };
+        const ImportReport imported = storage.import_legacy_export(empty_export);
+        require(imported.archived, "even an empty WebView export must be archived before migration completes");
+        require(imported.imported_worlds.empty() && imported.blocked_worlds.empty(),
+                "an empty export should not invent saved worlds or block migration");
+        require(storage.load_catalog().is_null(),
+                "lookup-only fallback presets must not be persisted for a fresh install");
+        require(storage.list_worlds().empty(), "a fresh install must show zero worlds after empty import");
+
+        storage.mark_legacy_import_done();
+        require(storage.legacy_import_status().value("complete", false),
+                "an archived empty export should be allowed to complete migration");
+        require(storage.list_worlds().empty(), "completing empty migration must not create a synthetic catalogue");
+    } catch (...) {
+        std::error_code ignored;
+        std::filesystem::remove_all(root, ignored);
+        throw;
+    }
+    std::filesystem::remove_all(root);
+}
+
 void world_removal_keeps_backup_and_does_not_resurrect() {
     const Json fixture = read_fixture("legacy-island-direct.json");
     const auto root = temporary_root();
@@ -385,6 +413,7 @@ int main() {
         legacy_decode_and_import();
         direct_legacy_source_and_generation_recovery();
         missing_catalog_defaults_are_persisted();
+        empty_export_does_not_create_synthetic_catalogue();
         world_removal_keeps_backup_and_does_not_resurrect();
         failed_catalogue_removal_commit_stays_hidden();
         catalogue_unknown_fields_and_corruption();

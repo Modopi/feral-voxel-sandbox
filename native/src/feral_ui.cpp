@@ -78,11 +78,12 @@ void FeralGame::build_theme(){
     for(auto side:{SIDE_LEFT,SIDE_RIGHT,SIDE_TOP,SIDE_BOTTOM})panel->set_content_margin(side,24);theme_->set_stylebox("panel","PanelContainer",panel);
 }
 void FeralGame::clear_screen(){
+    const bool collecting_hud_bindings=collect_hud_touch_bindings_;clear_input_state();hud_touch_bindings_.clear();collect_hud_touch_bindings_=collecting_hud_bindings;
     if(screen_){screen_->queue_free();screen_=nullptr;}hud_=nullptr;hud_status_=toast_=target_label_=nullptr;panel_body_=nullptr;name_input_=nullptr;preset_input_=nullptr;timeline_=nullptr;preview_running_=false;form_inputs_.clear();
     if(!canvas_){canvas_=memnew(CanvasLayer);add_child(canvas_);}screen_=memnew(Control);screen_->set_theme(theme_);canvas_->add_child(screen_);screen_->set_anchors_and_offsets_preset(Control::PRESET_FULL_RECT);screen_->set_mouse_filter(Control::MOUSE_FILTER_IGNORE);
 }
 void FeralGame::add_label(Node* parent,const std::string& text,int size){auto label=memnew(Label);label->set_text(gs(text));label->add_theme_font_size_override("font_size",size);if(Object::cast_to<HBoxContainer>(parent)){label->set_autowrap_mode(TextServer::AUTOWRAP_OFF);label->set_custom_minimum_size({145,0});label->set_h_size_flags(Control::SIZE_SHRINK_BEGIN);}else label->set_autowrap_mode(TextServer::AUTOWRAP_WORD_SMART);parent->add_child(label);}
-void FeralGame::add_button(Node* parent,const std::string& label,const std::string& command,Json args){auto button=memnew(Button);button->set_text(gs(label));button->set_custom_minimum_size({0,52});button->connect("pressed",Callable(this,"ui_command").bind(gs(command),gs(args.dump())));parent->add_child(button);}
+void FeralGame::add_button(Node* parent,const std::string& label,const std::string& command,Json args){auto button=memnew(Button);button->set_text(gs(label));button->set_custom_minimum_size({0,52});button->connect("pressed",Callable(this,"ui_command").bind(gs(command),gs(args.dump())));parent->add_child(button);if(collect_hud_touch_bindings_)register_hud_touch_button(button,command,args);}
 VBoxContainer* FeralGame::make_panel(const std::string& title,bool wide){
     auto shade=memnew(ColorRect);shade->set_color(Color(.015,.025,.02,.56));screen_->add_child(shade);shade->set_anchors_and_offsets_preset(Control::PRESET_FULL_RECT);
     auto panel=memnew(PanelContainer);screen_->add_child(panel);panel->set_anchor(SIDE_LEFT,wide?.06:.24,true);panel->set_anchor(SIDE_RIGHT,wide?.94:.76,true);panel->set_anchor(SIDE_TOP,.07,true);panel->set_anchor(SIDE_BOTTOM,.93,true);
@@ -91,18 +92,19 @@ VBoxContainer* FeralGame::make_panel(const std::string& title,bool wide){
     auto body=memnew(VBoxContainer);body->set_h_size_flags(Control::SIZE_EXPAND_FILL);scroll->add_child(body);return body;
 }
 void FeralGame::show_launcher(){
-    clear_screen();panel_="launcher";Input::get_singleton()->set_mouse_mode(Input::MOUSE_MODE_VISIBLE);
+    clear_screen();panel_="launcher";if(!playing_){paused_=false;get_tree()->set_pause(false);}Input::get_singleton()->set_mouse_mode(Input::MOUSE_MODE_VISIBLE);
     auto background=memnew(ColorRect);background->set_color(Color(.035,.07,.06));screen_->add_child(background);background->set_anchors_and_offsets_preset(Control::PRESET_FULL_RECT);
     auto left=memnew(VBoxContainer);screen_->add_child(left);left->set_anchor(SIDE_LEFT,.08,true);left->set_anchor(SIDE_RIGHT,.39,true);left->set_anchor(SIDE_TOP,.18,true);left->set_anchor(SIDE_BOTTOM,.88,true);
     add_label(left,"F E R A L",64);add_label(left,"깎고, 만들고, 살아가는 세계",23);add_label(left,"EXPLORE · SHAPE · SURVIVE",14);
     auto spacer=memnew(Control);spacer->set_custom_minimum_size({0,50});left->add_child(spacer);add_button(left,"새로운 세계","new_world");add_button(left,"환경 설정","panel",{{"name","settings"}});add_button(left,"행동 타임라인","panel",{{"name","actions"}});add_button(left,"업데이트","panel",{{"name","updates"}});add_button(left,"저장 가져오기","panel",{{"name","import"}});
+    toast_=memnew(Label);toast_->set_autowrap_mode(TextServer::AUTOWRAP_WORD_SMART);left->add_child(toast_);
     auto list=memnew(VBoxContainer);screen_->add_child(list);list->set_anchor(SIDE_LEFT,.48,true);list->set_anchor(SIDE_RIGHT,.91,true);list->set_anchor(SIDE_TOP,.18,true);list->set_anchor(SIDE_BOTTOM,.87,true);add_label(list,"이어가기",28);
     if(legacy_import_pending_){add_label(list,migration_error_.empty()?"기존 저장을 확인하고 있습니다.":"기존 저장을 가져오지 못했습니다. 원본은 보존되어 있습니다.",20);if(!migration_error_.empty())add_button(list,"저장 가져오기 다시 시도","retry_migration");}
     catalog_=storage_?storage_->list_worlds():Json::array();if(catalog_.is_array())for(const auto& w:catalog_){auto row=memnew(HBoxContainer);list->add_child(row);auto button=memnew(Button);button->set_text(gs(w.value("name",std::string("세계"))));button->set_custom_minimum_size({0,70});button->set_h_size_flags(Control::SIZE_EXPAND_FILL);button->connect("pressed",Callable(this,"ui_command").bind("play",gs(Json{{"id",w["id"]}}.dump())));row->add_child(button);add_button(row,"설정","panel",{{"name","world_settings"},{"id",w["id"]}});}
     if(!catalog_.is_array()||catalog_.empty())add_label(list,"아직 만든 세계가 없습니다.\n새로운 세계를 만들어 탐험을 시작하세요.",20);
 }
 void FeralGame::show_create_world(){
-    clear_screen();panel_="create";auto body=make_panel("새로운 세계");add_label(body,"세계 이름");name_input_=memnew(LineEdit);name_input_->set_text(gs("나의 세계"));body->add_child(name_input_);
+    clear_screen();panel_="create";auto body=make_panel("새로운 세계");panel_body_=body;add_label(body,"세계 이름");name_input_=memnew(LineEdit);name_input_->set_text(gs("나의 세계"));body->add_child(name_input_);
     add_label(body,"시작 환경");preset_input_=memnew(OptionButton);for(const auto& id:{"expedition","island","frontier","machine"}){preset_input_->add_item(gs(presets_["presets"][id]["name"].get<std::string>()));preset_input_->set_item_metadata(preset_input_->get_item_count()-1,gs(id));}body->add_child(preset_input_);
     add_label(body,"세계 씨앗");auto seed=memnew(SpinBox);seed->set_min(0);seed->set_max(2147483647);seed->set_step(1);seed->set_value(63026);body->add_child(seed);form_inputs_["seed"]=seed;
     for(auto it=presets_["rules"].begin();it!=presets_["rules"].end();++it){auto check=memnew(CheckButton);check->set_text(gs(it.value().value("label",it.key())));body->add_child(check);form_inputs_[it.key()]=check;add_label(body,it.value().value("help",std::string{}),16);}
@@ -113,7 +115,7 @@ void FeralGame::preset_changed(int64_t index){
     for(auto [key,input]:form_inputs_)if(auto check=Object::cast_to<CheckButton>(input))check->set_pressed(rules.value(key,false));
 }
 void FeralGame::build_hud(){
-    clear_screen();panel_.clear();paused_=false;get_tree()->set_pause(false);hud_=screen_;attack_down_=false;
+    clear_input_state();collect_hud_touch_bindings_=true;clear_screen();panel_.clear();paused_=false;get_tree()->set_pause(false);hud_=screen_;
     auto top=memnew(HBoxContainer);screen_->add_child(top);top->set_anchor(SIDE_LEFT,.025,true);top->set_anchor(SIDE_RIGHT,.975,true);top->set_anchor(SIDE_TOP,.025,true);top->set_offset(SIDE_BOTTOM,82);
     hud_status_=memnew(Label);hud_status_->set_h_size_flags(Control::SIZE_EXPAND_FILL);top->add_child(hud_status_);add_button(top,"장부","panel",{{"name","journal"}});add_button(top,"메뉴","panel",{{"name","pause"}});
     auto cross=memnew(Label);cross->set_text(gs("·"));cross->add_theme_font_size_override("font_size",36);screen_->add_child(cross);cross->set_anchor(SIDE_LEFT,.5,true);cross->set_anchor(SIDE_TOP,.5,true);cross->set_position(cross->get_position()+Vector2(-5,-25));cross->set_mouse_filter(Control::MOUSE_FILTER_IGNORE);
@@ -121,7 +123,7 @@ void FeralGame::build_hud(){
     toast_=memnew(Label);screen_->add_child(toast_);toast_->set_anchor(SIDE_LEFT,.2,true);toast_->set_anchor(SIDE_RIGHT,.8,true);toast_->set_anchor(SIDE_TOP,.78,true);toast_->set_horizontal_alignment(HORIZONTAL_ALIGNMENT_CENTER);toast_->add_theme_color_override("font_color",Color(.94,.82,.48));
     auto bottom=memnew(HBoxContainer);screen_->add_child(bottom);bottom->set_anchor(SIDE_LEFT,settings_.value("leftHand",false)?.06:.34,true);bottom->set_anchor(SIDE_RIGHT,settings_.value("leftHand",false)?.66:.94,true);bottom->set_anchor(SIDE_TOP,.87,true);bottom->set_anchor(SIDE_BOTTOM,.97,true);
     add_button(bottom,"가방","panel",{{"name","inventory"}});add_button(bottom,"사용","interact");add_button(bottom,"잡기 / 던지기","grip");add_button(bottom,"점프","jump");add_button(bottom,"자세","stance");
-    auto attack=memnew(Button);attack->set_text(gs("타격"));attack->set_custom_minimum_size({110,64});attack->connect("button_down",Callable(this,"ui_command").bind("attack.on","{}"));attack->connect("button_up",Callable(this,"ui_command").bind("attack.off","{}"));bottom->add_child(attack);
+    auto attack=memnew(Button);attack->set_text(gs("타격"));attack->set_custom_minimum_size({110,64});attack->connect("button_down",Callable(this,"ui_command").bind("attack.on","{}"));attack->connect("button_up",Callable(this,"ui_command").bind("attack.off","{}"));bottom->add_child(attack);register_hud_touch_button(attack,"attack",Json::object(),true);collect_hud_touch_bindings_=false;
     if(!smoke_&&!OS::get_singleton()->has_feature("mobile"))Input::get_singleton()->set_mouse_mode(Input::MOUSE_MODE_CAPTURED);refresh_hud();
 }
 void FeralGame::refresh_hud(){
@@ -131,7 +133,7 @@ void FeralGame::refresh_hud(){
 void FeralGame::notice(const std::string& text){toast_remaining_=4;if(toast_)toast_->set_text(gs(text));}
 void FeralGame::show_panel(const std::string& name,Json args){
     if(playing_&&!paused_)physics_feedback();
-    clear_screen();panel_=name;panel_args_=args;const std::set<std::string> pause_panels={"pause","settings","world_settings","actions","action_detail","updates","import","death"};paused_=playing_&&pause_panels.count(name);get_tree()->set_pause(paused_);attack_down_=false;movement_={};move_touch_=look_touch_=-1;Input::get_singleton()->set_mouse_mode(Input::MOUSE_MODE_VISIBLE);
+    clear_input_state();hud_touch_bindings_.clear();collect_hud_touch_bindings_=false;clear_screen();panel_=name;panel_args_=args;const std::set<std::string> pause_panels={"pause","settings","world_settings","actions","action_detail","updates","import","death"};paused_=playing_&&pause_panels.count(name);get_tree()->set_pause(paused_);Input::get_singleton()->set_mouse_mode(Input::MOUSE_MODE_VISIBLE);
     static const std::map<std::string,std::string> titles={{"pause","탐험 메뉴"},{"journal","탐험 장부"},{"inventory","가방"},{"craft","제작"},{"research","연구"},{"build","시설 설치"},{"machines","기계"},{"community","공동체"},{"faith","신앙"},{"campaign","여정"},{"map","지도"},{"actions","행동 타임라인"},{"settings","환경 설정"},{"inspect","대상 살펴보기"},{"world_settings","세계 설정"},{"import","저장 가져오기"},{"updates","업데이트"},{"action_detail","행동 궤적 편집"},{"form","행동 선택"},{"energy","에너지"},{"equipment","장비"},{"explore","탐사"},{"catalog","도감"},{"progression","진행 현황"},{"survival","생존"},{"death","회복"},{"result","기록"},{"sandbox","세계 도구"},{"delete_world","세계 삭제"}};
     auto it=titles.find(name);panel_body_=make_panel(it==titles.end()?name:it->second,true);refresh_panel();
 }
@@ -385,10 +387,10 @@ void FeralGame::form_target_changed(int64_t index){
 void FeralGame::ui_command(String command,String payload){
     try{
         std::string name=fs(command);Json args=Json::parse(fs(payload));
-        if(name=="launcher"){show_launcher();return;}if(name=="new_world"){show_create_world();return;}
+        if(name=="launcher"){show_launcher();return;}if(name=="new_world"){if(legacy_import_pending_)throw std::runtime_error(migration_error_.empty()?"기존 저장을 확인하고 있습니다. 잠시 후 다시 시작하세요.":"기존 저장 확인에 실패했습니다. 저장 가져오기를 다시 시도하세요.");show_create_world();return;}
         if(name=="retry_migration"){if(Engine::get_singleton()->has_singleton("FeralMigration")){legacy_import_pending_=true;migration_error_.clear();Engine::get_singleton()->get_singleton("FeralMigration")->call("start_import");show_launcher();}return;}
         if(name=="create_world"){
-            if(legacy_import_pending_)throw std::runtime_error("기존 저장 가져오기를 먼저 완료하세요.");
+            if(legacy_import_pending_||storage_->legacy_import_status().value("exportFailed",false))throw std::runtime_error("기존 저장 가져오기를 먼저 완료하세요.");
             std::string preset=fs(preset_input_->get_item_metadata(preset_input_->get_selected()));std::string id="world-"+std::to_string(int64_t(Time::get_singleton()->get_unix_time_from_system()*1000));const auto& p=presets_["presets"][preset];
             int seed=int(Object::cast_to<SpinBox>(form_inputs_["seed"])->get_value());Json rules=p["rules"];for(auto [key,input]:form_inputs_)if(auto check=Object::cast_to<CheckButton>(input))rules[key]=check->is_pressed();std::string title=fs(name_input_->get_text().strip_edges());if(title.empty())title="새로운 세계";Json row={{"id",id},{"name",title},{"type",preset},{"seed",seed}};row["config"]={{"configVersion",1},{"preset",preset},{"seed",seed},{"terrain",{{"generator",p["terrain"]}}},{"rules",rules},{"modules",p.value("modules",Json::array())}};storage_->upsert_world(row);start_world(id);return;
         }
@@ -398,7 +400,7 @@ void FeralGame::ui_command(String command,String payload){
             auto result=gameplay_->command("player.respawn",{{"position",spawn}});if(result.value("ok",false)){player_->set_position(gv(spawn));player_->set_velocity({});fall_speed_=0;build_hud();}return;
         }
         if(name=="panel"){std::string panel=args["name"];show_panel(panel,args);return;}if(name=="save"){save_world();build_hud();notice("저장했습니다");return;}
-        if(name=="attack.on"){attack_down_=true;return;}if(name=="attack.off"){attack_down_=false;return;}if(name=="jump"){jump_=true;return;}if(name=="stance"){cycle_stance();return;}if(name=="interact"){interact();return;}
+        if(name=="attack.on"){input_state_.set_attack_source("ui",true);return;}if(name=="attack.off"){input_state_.set_attack_source("ui",false);return;}if(name=="jump"){input_state_.jump_queued=true;return;}if(name=="stance"){cycle_stance();return;}if(name=="interact"){interact();return;}
         if(name=="equip"){std::string id=args["id"];if(gameplay_->count(id)<1){notice("소지하지 않은 도구입니다");return;}held_=id;gameplay_->command("weapon.equip",{{"id",nullptr}});gameplay_->command("equipment.equip",{{"id",id}});sync_hand();build_hud();return;}
         if(name=="empty_hand"){held_.clear();gameplay_->command("weapon.equip",{{"id",nullptr}});sync_hand();build_hud();return;}
         if(name=="grip"){
