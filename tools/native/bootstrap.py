@@ -8,12 +8,14 @@ import hashlib
 import json
 import os
 import pathlib
+import re
 import shutil
 import stat
 import subprocess
 import sys
 import tempfile
 import urllib.request
+import urllib.parse
 import xml.etree.ElementTree as ET
 import zipfile
 
@@ -82,12 +84,40 @@ def hash_file(path: pathlib.Path, algorithm: str) -> str:
     return digest.hexdigest()
 
 
+def download_request(url: str) -> urllib.request.Request:
+    """Resolve official release assets through their GitHub API endpoints."""
+    headers = {"User-Agent": "FERAL-native-bootstrap/1"}
+    parsed = urllib.parse.urlsplit(url)
+    parts = parsed.path.strip("/").split("/")
+    release = None
+    if parsed.scheme == "https" and parsed.netloc == "github.com" and len(parts) == 6 and parts[2:4] == ["releases", "download"]:
+        release = (parts[0], parts[1], urllib.parse.unquote(parts[4]), urllib.parse.unquote(parts[5]))
+    elif parsed.scheme == "https" and parsed.netloc == "services.gradle.org":
+        match = re.fullmatch(r"/distributions/(gradle-(\d+\.\d+(?:\.\d+)?)-(?:bin|all)\.zip)", parsed.path)
+        if match:
+            version = match.group(2)
+            tag = "v" + version + (".0" if version.count(".") == 1 else "")
+            release = ("gradle", "gradle-distributions", tag, match.group(1))
+    if release:
+        owner, repository, tag, asset_name = release
+        api = f"https://api.github.com/repos/{owner}/{repository}/releases"
+        metadata = urllib.request.Request(api + "/tags/" + urllib.parse.quote(tag, safe=""), headers=headers)
+        with urllib.request.urlopen(metadata, timeout=60) as response:
+            assets = json.load(response)["assets"]
+        asset = next((item for item in assets if item["name"] == asset_name), None)
+        if asset is None or not asset["url"].startswith(api + "/assets/"):
+            raise RuntimeError(f"Official release asset not found: {url}")
+        url = asset["url"]
+        headers["Accept"] = "application/octet-stream"
+    return urllib.request.Request(url, headers=headers)
+
+
 def download(url: str, destination: pathlib.Path) -> None:
     destination.parent.mkdir(parents=True, exist_ok=True)
     partial = destination.with_suffix(destination.suffix + ".partial")
     partial.unlink(missing_ok=True)
     print(f"Downloading {url} -> {destination}", flush=True)
-    request = urllib.request.Request(url, headers={"User-Agent": "FERAL-native-bootstrap/1"})
+    request = download_request(url)
     with urllib.request.urlopen(request, timeout=120) as response, partial.open("wb") as output:
         shutil.copyfileobj(response, output, length=1024 * 1024)
     partial.replace(destination)
