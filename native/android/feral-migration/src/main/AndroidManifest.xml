@@ -1,0 +1,26 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:mimeType="application/vnd.android.package-archive" />
+        </intent>
+    </queries>
+    <application>
+        <meta-data
+            android:name="org.godotengine.plugin.v2.FeralMigration"
+            android:value="com.kgb.feral.migration.FeralMigrationPlugin" />
+        <meta-data
+            android:name="org.godotengine.plugin.v2.FeralUpdates"
+            android:value="com.kgb.feral.migration.FeralUpdatesPlugin" />
+        <provider
+            android:name="com.kgb.feral.migration.FeralUpdatesFileProvider"
+            android:authorities="${applicationId}.feralupdates.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/feral_update_file_paths" />
+        </provider>
+    </application>
+</manifest>

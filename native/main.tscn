@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="GDExtension" path="res://feral.gdextension" id="1_extension"]
+
+[node name="FeralGame" type="FeralGame"]

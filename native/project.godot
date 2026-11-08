@@ -1,0 +1,36 @@
+; FERAL native Godot project. Gameplay and the root scene are implemented in C++.
+config_version=5
+
+[application]
+
+config/name="FERAL"
+config/features=PackedStringArray("4.6", "GL Compatibility")
+run/main_scene="res://main.tscn"
+config/use_custom_user_dir=true
+config/custom_user_dir_name="Feral"
+
+[display]
+
+window/size/viewport_width=1600
+window/size/viewport_height=900
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/stretch/mode="canvas_items"
+
+[physics]
+
+common/physics_ticks_per_second=60
+common/max_physics_steps_per_frame=3
+3d/physics_engine="Jolt Physics"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/default_filters/use_nearest_mipmap_filter=false
+textures/vram_compression/import_s3tc=true
+textures/vram_compression/import_etc2_astc=true
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/FeralMigration/plugin.cfg")

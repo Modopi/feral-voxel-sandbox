@@ -1,0 +1,23 @@
+{
+  "godotVersion": "4.6.3.stable",
+  "godotUrl": "https://github.com/godotengine/godot/releases/download/4.6.3-stable/Godot_v4.6.3-stable_linux.x86_64.zip",
+  "godotExecutable": "Godot_v4.6.3-stable_linux.x86_64",
+  "godotSha256": "d0bc2113065e481c9c2c2b2c37daa4e8be3fe9e27f0ab9ab0b6096e9a37907f3",
+  "godotCppUrl": "https://github.com/godotengine/godot-cpp.git",
+  "godotCppRevision": "27d9dd23c83871e0619fca5dc2cddfbfd69e926a",
+  "sconsVersion": "4.9.1",
+  "androidNdkPackage": "ndk;28.2.13676358",
+  "androidNdkVersion": "28.2.13676358",
+  "androidPlatformToolsVersion": "37.0.2",
+  "androidPlatformToolsUrl": "https://dl.google.com/android/repository/platform-tools_r37.0.2-linux.zip",
+  "androidPlatformToolsSha256": "dfc80a84a6710e5674415d4b55ae599c01aa4961822f53097d747472f410f157",
+  "androidPlatformToolsBytes": 9541228,
+  "androidApiLevel": "26",
+  "androidSdkPlatform": "35",
+  "androidBuildToolsVersion": "35.0.0",
+  "gradleVersion": "8.9",
+  "gradleUrl": "https://services.gradle.org/distributions/gradle-8.9-bin.zip",
+  "gradleSha256": "d725d707bfabd4dfdc958c624003b3c80accc03f7037b5122c4b1d0ef15cecab",
+  "exportTemplatesUrl": "https://github.com/godotengine/godot/releases/download/4.6.3-stable/Godot_v4.6.3-stable_export_templates.tpz",
+  "exportTemplatesSha256": "3fbe2c0e2dec9d537ab9ec97bcf8da91dcf23357fc51f67092dd068d839290a8"
+}

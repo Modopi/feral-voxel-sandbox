@@ -1,0 +1,148 @@
+{
+  "actionBeginFailed": false,
+  "actionProfilesLoaded": true,
+  "actualPhysicsStepsVerified": true,
+  "allPassed": true,
+  "directChildrenStable": true,
+  "displayServer": "headless",
+  "enginePhysicsFramesElapsed": 1000,
+  "enginePhysicsFramesEnd": 1000,
+  "enginePhysicsFramesStart": 0,
+  "fixedDeltaIs60Hz": true,
+  "fixedDeltaSecondsMax": 0.016666666666666666,
+  "fixedDeltaSecondsMin": 0.016666666666666666,
+  "harness": "native_physics",
+  "harnessCallbackAverageUs": 22.570925,
+  "harnessCallbackMaximumUs": 170.698,
+  "hiddenActionEvents": 34,
+  "hiddenVisualActionsMatchVisibleActions": true,
+  "hollowCompound": {
+    "finalPosition": {
+      "x": 0.0,
+      "y": -3.5199999809265137,
+      "z": 0.0
+    },
+    "lowerFloorContact": true,
+    "minimumCenterY": -3.5199999809265137,
+    "passedThroughHole": true,
+    "shapeOwners": 5,
+    "sleeping": true,
+    "validExactCompound": true
+  },
+  "nativeBodyContactCoordinatesValid": true,
+  "otherEntityCollisionObserved": true,
+  "physicsCallbackIntervalAverageUs": 16673.74479079079,
+  "physicsCallbackIntervalMaximumUs": 27651.41,
+  "physicsEngine": "Jolt Physics",
+  "physicsEngineConfigured": true,
+  "registeredDirectChildren": 12,
+  "registeredSceneNodes": 16,
+  "renderFpsAtFinish": 145.0,
+  "rendererAdapter": "",
+  "rendererVendor": "",
+  "renderingMode": "headless",
+  "scenarioFixedSteps": 1000,
+  "scenarioTargetSteps": 1000,
+  "sceneNodeCountStable": true,
+  "sensorAreaGroundOverlapObservations": 231,
+  "sensorLeaves": [
+    {
+      "areaGroundOverlapObserved": true,
+      "collisionLayer": 0,
+      "collisionMask": 0,
+      "collisionShapeDisabled": true,
+      "currentOverlaps": 0,
+      "id": "harness:sensor-leaf:0",
+      "position": {
+        "x": 80.0,
+        "y": -14.194417953491211,
+        "z": 0.0
+      },
+      "underground": true,
+      "undergroundObservedDuringRun": true
+    },
+    {
+      "areaGroundOverlapObserved": true,
+      "collisionLayer": 0,
+      "collisionMask": 0,
+      "collisionShapeDisabled": true,
+      "currentOverlaps": 0,
+      "id": "harness:sensor-leaf:1",
+      "position": {
+        "x": 84.0,
+        "y": -14.194417953491211,
+        "z": 0.0
+      },
+      "underground": true,
+      "undergroundObservedDuringRun": true
+    },
+    {
+      "areaGroundOverlapObserved": true,
+      "collisionLayer": 0,
+      "collisionMask": 0,
+      "collisionShapeDisabled": true,
+      "currentOverlaps": 0,
+      "id": "harness:sensor-leaf:2",
+      "position": {
+        "x": 88.0,
+        "y": -14.194417953491211,
+        "z": 0.0
+      },
+      "underground": true,
+      "undergroundObservedDuringRun": true
+    }
+  ],
+  "sensorLeavesCollisionDisabled": true,
+  "sensorLeavesObservedUndergroundDuringRun": 3,
+  "sensorLeavesUnderground": 3,
+  "sensorLeavesWithAreaObservation": 3,
+  "setupError": "",
+  "softwareRenderPerformanceClaim": false,
+  "softwareRenderer": false,
+  "treeBodies": [
+    {
+      "externalGroundContact": true,
+      "id": "harness:tree:0",
+      "position": {
+        "x": 14.001327514648438,
+        "y": -0.005357861518859863,
+        "z": -0.0030684806406497955
+      },
+      "selfContact": false,
+      "shapeOwners": 5,
+      "sleeping": true
+    },
+    {
+      "externalGroundContact": true,
+      "id": "harness:tree:1",
+      "position": {
+        "x": 18.001323699951172,
+        "y": -0.005357623100280762,
+        "z": -0.0030686091631650925
+      },
+      "selfContact": false,
+      "shapeOwners": 5,
+      "sleeping": true
+    },
+    {
+      "externalGroundContact": true,
+      "id": "harness:tree:2",
+      "position": {
+        "x": 22.00132179260254,
+        "y": -0.005357861518859863,
+        "z": -0.003068244084715843
+      },
+      "selfContact": false,
+      "shapeOwners": 5,
+      "sleeping": true
+    }
+  ],
+  "treeBodiesSleeping": 3,
+  "treeCompoundCount": 3,
+  "treeCompoundNoSelfCollision": true,
+  "treeCompoundShapeOwners": 15,
+  "treeExternalGroundContacts": 3,
+  "treeSelfContacts": 0,
+  "visibleActionEvents": 34,
+  "wallElapsedSeconds": 16.665985277
+}

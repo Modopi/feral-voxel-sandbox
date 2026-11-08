@@ -16,7 +16,8 @@ ROOT = Path(__file__).resolve().parents[1]
 def build():
     subprocess.run(["node", "tools/version.mjs", "--check"], cwd=ROOT, check=True)
     v = json.loads((ROOT / "version.json").read_text())
-    assets = ROOT / "app/src/main/assets"
+    native_runtime = v.get("nativeCode", 0) >= 400
+    assets = ROOT / ("native/data" if native_runtime else "app/src/main/assets")
     output = ROOT / "build/release"
     output.mkdir(parents=True, exist_ok=True)
     files = {}
@@ -34,7 +35,25 @@ def build():
             z.writestr(info, contents)
     data = archive.getvalue()
     native_hash = hashlib.sha256()
-    native_files = sorted((ROOT / "app/src/main/java").rglob("*.java")) + [ROOT / "app/src/main/AndroidManifest.xml", assets / "update-public.der"]
+    if native_runtime:
+        native_roots = ["native/src", "native/third_party", "native/data", "native/fonts", "native/icons",
+                        "native/addons", "native/android/feral-migration/src"]
+        native_suffixes = {".cpp", ".h", ".hpp", ".json", ".otf", ".ttf", ".png",
+                           ".gd", ".cfg", ".import", ".uid", ".java", ".xml", ".der"}
+        native_files = sorted(p for base in native_roots for p in (ROOT / base).rglob("*")
+                              if p.is_file() and p.suffix in native_suffixes)
+        native_files += [ROOT / path for path in (
+            "native/project.godot", "native/feral.gdextension", "native/main.tscn",
+            "native/SConstruct", "native/feral.exports", "native/export_presets.cfg",
+            "native/android/feral-migration/build.gradle",
+            "native/android/feral-migration/settings.gradle",
+            "native/android/feral-migration/gradle.properties",
+            "build-apk.sh", "tools/native/toolchain.lock", "tools/native/build.sh",
+            "tools/native/bootstrap.py", "tools/native/build-profile.py",
+            "tools/native/snapshot-sources.py",
+            "tools/native/build-migration-plugin.sh", "tools/native/export-apk.sh")]
+    else:
+        native_files = sorted((ROOT / "app/src/main/java").rglob("*.java")) + [ROOT / "app/src/main/AndroidManifest.xml", assets / "update-public.der"]
     for path in native_files:
         contents = path.read_bytes()
         if path.suffix == ".xml":
@@ -42,6 +61,17 @@ def build():
         native_hash.update(path.relative_to(ROOT).as_posix().encode() + b"\0" + contents)
     manifest = {"format": 1, **v, "nativeSha256": native_hash.hexdigest(), "archiveBytes": len(data), "expandedBytes": expanded,
                 "archiveSha256": hashlib.sha256(data).hexdigest(), "files": files}
+    apk = ROOT / "build" / f"Feral-{v.get('nativeVersion', v['version'])}-android.apk"
+    if native_runtime:
+        manifest["runtime"] = "godot-cpp"
+        manifest["archivePurpose"] = "native-content-snapshot"
+        if apk.is_file() and not os.environ.get("GITHUB_REF_NAME", "").startswith("V_"):
+            manifest["nativeApk"] = {
+                "url": f"https://github.com/Modopi/feral-voxel-sandbox/releases/download/v{v['version']}/{apk.name}",
+                "sha256": hashlib.sha256(apk.read_bytes()).hexdigest(), "bytes": apk.stat().st_size,
+                "packageName": "com.kgb.feral",
+                "signerSha256": "80ec9e5082918a64397ecea43ed75fc2fd48c63ac26401dc7d946259b9ee35ed"
+            }
     if os.environ.get("GITHUB_REF_NAME", "").startswith("V_"):
         manifest["sourceBranch"] = os.environ["GITHUB_REF_NAME"]
         manifest["sourceCommit"] = os.environ["GITHUB_SHA"]
@@ -57,7 +87,6 @@ def build():
     (output / filename).write_bytes(packed)
     (output / "stable.feral").write_bytes(packed)
     sums = f"{hashlib.sha256(packed).hexdigest()}  {filename}\n"
-    apk = ROOT / "build" / f"Feral-{v.get('nativeVersion', v['version'])}-android.apk"
     if not os.environ.get("GITHUB_REF_NAME", "").startswith("V_") and apk.is_file():
         sums += f"{hashlib.sha256(apk.read_bytes()).hexdigest()}  {apk.name}\n"
     (output / "SHA256SUMS.txt").write_text(sums)

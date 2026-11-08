@@ -1,0 +1,10 @@
+{
+  "localStorage": {
+    "feral.worlds.v1": "[{\"id\":\"default\",\"name\":\"기본 탐험 맵\",\"type\":\"island\",\"seed\":707}]",
+    "feral.world.v1": "{\"version\":2,\"seed\":707,\"playTime\":88,\"player\":{\"x\":12.5,\"y\":18,\"z\":13.5,\"hp\":56,\"yaw\":1},\"inventory\":{\"slots\":[{\"id\":\"wood\",\"count\":3}],\"overflow\":[],\"unlocks\":[\"old-study\"]},\"world\":{\"seed\":707,\"edits\":[[4,2,7,3]],\"subcells\":[],\"miningDamage\":[],\"fluids\":[],\"burning\":[],\"loose\":{\"bodies\":[]}},\"eco\":{\"entities\":[{\"species\":0,\"x\":12,\"z\":13}]},\"untouchedLegacyField\":{\"important\":true}}"
+  },
+  "vault": {
+    "available": false,
+    "rows": []
+  }
+}

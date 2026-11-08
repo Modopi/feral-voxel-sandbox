@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+
+import os
+from pathlib import Path
+
+project_root = Path(Dir("#").abspath)
+source_root = Path(os.environ.get("FERAL_NATIVE_SOURCE_DIR", project_root)).resolve()
+godot_cpp_dir = Path(os.environ.get("FERAL_GODOT_CPP_DIR", project_root.parent / "toolchain/native/godot-cpp")).resolve()
+if not (godot_cpp_dir / "SConstruct").is_file():
+    raise RuntimeError(f"Pinned godot-cpp checkout is missing: {godot_cpp_dir}. Run tools/native/bootstrap.sh.")
+
+# godot-cpp owns compiler setup, API bindings, and the static ABI library.
+env = SConscript(str(godot_cpp_dir / "SConstruct"))
+
+src_dir = source_root / "src"
+third_party_dir = source_root / "third_party"
+sources = sorted(src_dir.glob("*.cpp"))
+if not sources:
+    raise RuntimeError(f"No native extension sources found in {src_dir}; the root FeralGame adapter is required.")
+
+env.AppendUnique(CPPPATH=[str(src_dir), str(third_party_dir)])
+env.AppendUnique(CXXFLAGS=["-std=c++17"])
+exports_file = source_root / "feral.exports"
+if not exports_file.is_file():
+    raise RuntimeError(f"GDExtension export map is missing: {exports_file}")
+# The extension is loaded into Godot's process, so exporting our bundled libstdc++ template
+# instantiations can interpose on Godot's own std::locale/codecvt objects. Keep one C ABI symbol.
+env.AppendUnique(CCFLAGS=["-fvisibility=hidden"])
+env.AppendUnique(CXXFLAGS=["-fvisibility=hidden"])
+env.AppendUnique(LINKFLAGS=[
+    f"-Wl,--version-script={exports_file}",
+    "-Wl,--exclude-libs,ALL",
+    "-Wl,--no-undefined",
+])
+
+target = project_root / "bin" / f"libferal{env['suffix']}{env['SHLIBSUFFIX']}"
+extension = env.SharedLibrary(str(target), source=[str(source) for source in sources])
+env.NoCache(extension)
+Default(extension)
