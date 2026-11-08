@@ -209,7 +209,7 @@ def install_templates() -> None:
     version = LOCK["godotVersion"]
     data_home = pathlib.Path(os.environ.get("XDG_DATA_HOME", pathlib.Path.home() / ".local/share"))
     target = data_home / "godot/export_templates" / version
-    expected_files = [target / "android_debug.apk", target / "android_release.apk"]
+    expected_files = [target / "android_debug.apk", target / "android_release.apk", target / "android_source.zip"]
     if all(path.is_file() for path in expected_files):
         print(f"Godot export templates {version} already installed at {target}")
         return
@@ -271,9 +271,6 @@ def install_gradle() -> pathlib.Path:
     version = LOCK["gradleVersion"]
     target = TOOLCHAIN / f"native/gradle-{version}"
     executable = target / "bin/gradle"
-    if executable.is_file():
-        return executable
-
     archive = TOOLCHAIN / "downloads" / pathlib.Path(LOCK["gradleUrl"]).name
     if not archive.exists() or hash_file(archive, "sha256") != LOCK["gradleSha256"]:
         archive.unlink(missing_ok=True)
@@ -281,6 +278,8 @@ def install_gradle() -> pathlib.Path:
     if hash_file(archive, "sha256") != LOCK["gradleSha256"]:
         archive.unlink(missing_ok=True)
         raise RuntimeError("Gradle distribution failed SHA-256 verification")
+    if executable.is_file():
+        return executable
 
     temporary = target.with_name(target.name + ".installing")
     shutil.rmtree(temporary, ignore_errors=True)

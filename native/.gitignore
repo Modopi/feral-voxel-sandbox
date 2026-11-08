@@ -6,6 +6,7 @@
 /addons/FeralMigration/bin/
 /android/feral-migration/build/
 /android/build/
+/android/build.installing/
 /android/.build_version
 /src/*.o
 /src/*.os

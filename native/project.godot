@@ -28,6 +28,8 @@ common/max_physics_steps_per_frame=3
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/default_filters/use_nearest_mipmap_filter=false
+textures/vram_compression/import_s3tc=true
+textures/vram_compression/import_etc2_astc=true
 
 [editor_plugins]
 

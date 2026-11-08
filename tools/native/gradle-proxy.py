@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import os
 import re
+import shlex
 import sys
 import urllib.parse
 import urllib.request
@@ -37,7 +38,9 @@ def main() -> None:
     if hosts:
         values = "|".join(hosts)
         properties.extend((f"-Dhttp.nonProxyHosts={values}", f"-Dhttps.nonProxyHosts={values}"))
-    print(" ".join(properties))
+    # Godot's Android template still uses a wrapper that evals GRADLE_OPTS.
+    # Quote each argument so the Java bypass separator `|` stays inside its value.
+    print(shlex.join(properties))
 
 
 if __name__ == "__main__":

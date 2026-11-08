@@ -25,7 +25,7 @@ C++ 코드 변경에는 새 APK가 필요하다. `.feral`의 `runtime: godot-cpp
 
 1. `node tools/native/export-content.mjs --check`, `node tools/version.mjs --check`로 원본 데이터와 버전을 확인한다.
 2. `npm test`, `npm run check:assets`, 영향받는 장기 검사와 이전 화면 회귀를 수행한다. 이 검사는 네이티브 실행 검사를 대신하지 않는다.
-3. `bash build-apk.sh`: 고정한 Godot 4.6.3·godot-cpp·NDK 28.2·Gradle 8.9·Java 21 환경을 준비하고 Linux x86_64/Android arm64 C++ 라이브러리 및 Android 플러그인을 컴파일한 뒤 APK를 만든다. `FERAL_BUILD_JOBS`는 1~8, 기본 4다.
+3. `bash build-apk.sh`: 고정한 Godot 4.6.3·godot-cpp·NDK 28.2·Gradle 8.9·전체 JDK 21 환경을 준비하고 Linux x86_64/Android arm64 C++ 라이브러리 및 Android 플러그인을 컴파일한 뒤 APK를 만든다. `FERAL_BUILD_JOBS`는 1~8, 기본 4다.
 4. `bash tools/native/test.sh`: C++ 기능 검사, 동적 심볼 노출 검사, 실제 Jolt·전체 게임 시작/타격/저장·화면 진입·나무 세 개 런타임 검사를 수행한다. 실패하면 게시하지 않는다.
 5. `python3 tools/build-update.py`로 서명 메타데이터와 콘텐츠 스냅샷을 만든다. stable 메타데이터에는 실제 APK의 해시·크기·인증서가 포함되어야 한다.
 6. PR 검사/리뷰/충돌 해결 후 main에 병합한다. Actions가 같은 필수 검사를 통과한 후 Release와 `updates/stable.feral`, 불변 버전 파일 및 카탈로그를 게시한다. 공개 바이트·해시와 Actions 결과까지 확인한다.

@@ -14,7 +14,7 @@ Android 8.0 이상 arm64 기기용 `Feral-0.4.0-android.apk`를 **기존 앱 위
 
 ## 개발
 
-Node.js, Python 3, C++17 컴파일러, Java 21, Android SDK Platform 35 / Build Tools 35.0.0을 사용한다. 고정된 Godot·godot-cpp·NDK·SCons·Gradle 도구는 `tools/native/bootstrap.sh`가 준비한다.
+Node.js, Python 3, C++17 컴파일러, 전체 JDK 21(`javac`·`jlink` 포함), Android SDK Platform 35 / Build Tools 35.0.0을 사용한다. 고정된 Godot·godot-cpp·NDK·SCons·Gradle 도구는 `tools/native/bootstrap.sh`가 준비한다.
 
 ```bash
 node tools/native/export-content.mjs --check
@@ -22,6 +22,7 @@ npm test                                  # 기존 규칙·데이터 필수 회�
 npm run check:assets                       # 정식 복셀 에셋 검사
 bash tools/native/test.sh                  # C++ 규칙 + 실제 Godot/Jolt 통합 검사
 export ANDROID_HOME=/absolute/path/to/Android/sdk
+export JAVA_HOME=/absolute/path/to/jdk-21
 bash build-apk.sh                          # build/Feral-0.4.0-android.apk
 python3 tools/build-update.py              # 서명 메타데이터와 콘텐츠 스냅샷
 ```

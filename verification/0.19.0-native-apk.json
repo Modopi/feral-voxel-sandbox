@@ -1,0 +1,60 @@
+{
+  "apk": "build/Feral-0.4.0-android.apk",
+  "bytes": 87011941,
+  "sha256": "ffe75940eda6c526c736200fb2d48e059431de379f1c36886aa6850dd3cc5c5e",
+  "packageName": "com.kgb.feral",
+  "versionCode": 400,
+  "versionName": "0.4.0",
+  "minSdk": 26,
+  "targetSdk": 35,
+  "compileSdk": 35,
+  "signerSha256": "80ec9e5082918a64397ecea43ed75fc2fd48c63ac26401dc7d946259b9ee35ed",
+  "signature": {
+    "v2": true,
+    "signers": 1
+  },
+  "zipAligned": true,
+  "phoneTested": false,
+  "nativeLibraries": [
+    "lib/arm64-v8a/libc++_shared.so",
+    "lib/arm64-v8a/libferal.android.template_release.arm64.so",
+    "lib/arm64-v8a/libgodot_android.so"
+  ],
+  "plugins": [
+    {
+      "singleton": "FeralMigration",
+      "class": "com.kgb.feral.migration.FeralMigrationPlugin"
+    },
+    {
+      "singleton": "FeralUpdates",
+      "class": "com.kgb.feral.migration.FeralUpdatesPlugin"
+    }
+  ],
+  "providers": [
+    {
+      "class": "com.kgb.feral.migration.FeralUpdatesFileProvider",
+      "authority": "com.kgb.feral.feralupdates.provider",
+      "pathsResource": "@xml/feral_update_file_paths"
+    },
+    {
+      "class": "androidx.core.content.FileProvider",
+      "authority": "com.kgb.feral.fileprovider"
+    }
+  ],
+  "permissions": [
+    "android.permission.ACCESS_NETWORK_STATE",
+    "android.permission.INTERNET",
+    "android.permission.REQUEST_INSTALL_PACKAGES"
+  ],
+  "bundledAssets": [
+    "assets/data/action_profiles.json",
+    "assets/data/assets.json",
+    "assets/data/content.json",
+    "assets/data/modules.json",
+    "assets/data/presets.json",
+    "assets/.godot/imported/FeralKorean.otf-00e8bfc1daf99b14caee85790e1e2dc9.fontdata",
+    "assets/THIRD_PARTY_NOTICES.md",
+    "assets/licenses/"
+  ],
+  "sourceSnapshot": "4ffd17085c5f97c126aeefc7b43ba1325b5bb0204c17c949063a6409324ab8ce"
+}

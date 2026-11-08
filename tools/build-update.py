@@ -39,7 +39,7 @@ def build():
         native_roots = ["native/src", "native/third_party", "native/data", "native/fonts", "native/icons",
                         "native/addons", "native/android/feral-migration/src"]
         native_suffixes = {".cpp", ".h", ".hpp", ".json", ".otf", ".ttf", ".png",
-                           ".gd", ".cfg", ".java", ".xml", ".der"}
+                           ".gd", ".cfg", ".import", ".uid", ".java", ".xml", ".der"}
         native_files = sorted(p for base in native_roots for p in (ROOT / base).rglob("*")
                               if p.is_file() and p.suffix in native_suffixes)
         native_files += [ROOT / path for path in (
@@ -48,7 +48,9 @@ def build():
             "native/android/feral-migration/build.gradle",
             "native/android/feral-migration/settings.gradle",
             "native/android/feral-migration/gradle.properties",
-            "tools/native/toolchain.lock", "tools/native/build.sh",
+            "build-apk.sh", "tools/native/toolchain.lock", "tools/native/build.sh",
+            "tools/native/bootstrap.py", "tools/native/build-profile.py",
+            "tools/native/snapshot-sources.py",
             "tools/native/build-migration-plugin.sh", "tools/native/export-apk.sh")]
     else:
         native_files = sorted((ROOT / "app/src/main/java").rglob("*.java")) + [ROOT / "app/src/main/AndroidManifest.xml", assets / "update-public.der"]
